@@ -35,6 +35,12 @@ internal class DefaultSettingsGradleKtsExtension : BeforeTestExecutionCallback {
                 }
                 
                 repositories {
+                    mavenLocal {
+                        mavenContent {
+                             includeGroupByRegex("org.jetbrains.kotlin.*")
+                        }
+                    }
+                    
                     maven(file("${localTestRepoDirectory.absolutePath.replace("\\", "\\\\")}"))
                     mavenCentral()
                     maven("https://packages.jetbrains.team/maven/p/firework/dev")
@@ -44,6 +50,12 @@ internal class DefaultSettingsGradleKtsExtension : BeforeTestExecutionCallback {
 
             dependencyResolutionManagement {
                 repositories {
+                    mavenLocal {
+                        mavenContent {
+                             includeGroupByRegex("org.jetbrains.kotlin.*")
+                        }
+                    }
+                    
                     maven(file("${localTestRepoDirectory.absolutePath.replace("\\", "\\\\")}"))
                     mavenCentral()
                     maven("https://packages.jetbrains.team/maven/p/firework/dev")

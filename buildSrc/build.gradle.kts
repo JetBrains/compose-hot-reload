@@ -3,6 +3,13 @@ plugins {
 }
 
 repositories {
+    mavenLocal {
+        mavenContent {
+            includeGroupByRegex("org.jetbrains.kotlin.*")
+        }
+    }
+
+
     google {
         mavenContent {
             includeGroupByRegex(".*google.*")
