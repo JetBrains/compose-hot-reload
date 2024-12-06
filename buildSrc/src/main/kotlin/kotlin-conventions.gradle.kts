@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 plugins.withType<KotlinPluginWrapper> {
     extensions.configure<KotlinProjectExtension> {
         jvmToolchain {
-            this.languageVersion = JavaLanguageVersion.of(21)
+            this.languageVersion = JavaLanguageVersion.of(17)
             this.vendor = JvmVendorSpec.JETBRAINS
         }
     }
@@ -16,19 +16,8 @@ plugins.withType<KotlinPluginWrapper> {
 plugins.withType<KotlinMultiplatformPluginWrapper> {
     extensions.configure<KotlinProjectExtension> {
         jvmToolchain {
-            this.languageVersion = JavaLanguageVersion.of(21)
+            this.languageVersion = JavaLanguageVersion.of(17)
             this.vendor = JvmVendorSpec.JETBRAINS
         }
     }
-}
-
-tasks.withType<KotlinJvmCompile>().configureEach {
-    compilerOptions {
-        this.jvmTarget.set(JvmTarget.JVM_11)
-    }
-}
-
-tasks.withType<JavaCompile>().configureEach {
-    sourceCompatibility = "11"
-    targetCompatibility = "11"
 }

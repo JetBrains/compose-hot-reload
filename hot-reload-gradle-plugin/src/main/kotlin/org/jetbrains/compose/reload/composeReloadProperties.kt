@@ -11,3 +11,6 @@ val Project.isHeadless: Provider<Boolean>
 
 val Project.isIdeaSync: Provider<Boolean>
     get() = providers.systemProperty("idea.sync.active").map { raw -> raw.toBoolean() }
+
+val Project.showDebugUi: Provider<Boolean>
+    get() = providers.gradleProperty("compose.reload.debugUi").map { raw -> raw.toBoolean() }

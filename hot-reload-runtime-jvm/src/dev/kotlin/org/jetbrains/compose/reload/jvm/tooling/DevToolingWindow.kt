@@ -22,10 +22,10 @@ private val logger = createLogger()
 
 internal class DevToolingWindow : ComposeReloadPremainExtension {
     override fun premain() {
-        /*
-        On headless mode: Don't show a window
-        */
-        if (HotReloadEnvironment.isHeadless) {
+        if (
+            !HotReloadEnvironment.showDebugUi ||
+            HotReloadEnvironment.isHeadless // On headless mode: Don't show a window
+        ) {
             return
         }
 

@@ -1,0 +1,16 @@
+<idea-plugin>
+    <depends>com.intellij.gradle</depends>
+    <depends>org.jetbrains.kotlin</depends>
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <codeInsight.lineMarkerProvider
+                language="kotlin"
+                implementationClass="org.jetbrains.compose.hotreload.HotReloadLineMarkerProvider"/>
+        <toolWindow
+                id="Hot Reload"
+                icon="AllIcons.Actions.GroupBy"
+                anchor="bottom"
+                factoryClass="org.jetbrains.compose.hotreload.HotReloadToolWindowFactory"/>
+    </extensions>
+</idea-plugin>

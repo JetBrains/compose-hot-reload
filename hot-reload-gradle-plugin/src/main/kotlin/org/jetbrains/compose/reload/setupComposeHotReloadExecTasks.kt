@@ -70,6 +70,12 @@ internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<Ko
         }
     }
 
+    /* Configure debug window */
+    run {
+        if (project.showDebugUi.orNull == true) {
+            systemProperty("compose.reload.debugUi", true)
+        }
+    }
 
     /* Generic JVM args for hot reload*/
     run {

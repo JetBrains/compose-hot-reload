@@ -10,6 +10,7 @@ junit = "5.10.1"
 javassist = "3.30.2-GA"
 logback = "1.5.9"
 asm = "9.7.1"
+jewel = "0.27.0"
 
 [libraries]
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -17,6 +18,7 @@ coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", 
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+jewel-ide = { module = "org.jetbrains.jewel:jewel-ide-laf-bridge-243", version.ref = "jewel" }
 
 ktorClientCore = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktorClientCio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }

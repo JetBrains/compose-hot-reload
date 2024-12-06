@@ -72,9 +72,4 @@ tasks.withType<Test>().configureEach {
 android {
     compileSdk = 34
     namespace = "org.jetbrains.compose.reload"
-
-    compileOptions {
-        this.sourceCompatibility = JavaVersion.VERSION_11
-        this.targetCompatibility = JavaVersion.VERSION_11
-    }
 }
