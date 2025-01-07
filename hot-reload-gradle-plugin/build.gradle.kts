@@ -25,6 +25,7 @@ dependencies {
     compileOnly(gradleKotlinDsl())
     compileOnly(kotlin("gradle-plugin"))
     compileOnly(deps.compose.gradlePlugin)
+    compileOnly(deps.compose.compiler.gradlePlugin)
 
     implementation(project(":hot-reload-core"))
     implementation(project(":hot-reload-orchestration"))

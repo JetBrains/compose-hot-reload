@@ -94,8 +94,7 @@ class FooKt {
             JumpInsNode(L4)) [GOTO])
         LabelToken(L3)
             LabelNode(L3)
-        BlockToken(4)
-            LineNumberNode [-1]
+        BlockToken(3)
             FrameNode [-1]
             VarInsnNode [25]
             MethodInsnNode(androidx/compose/runtime/Composer.skipToGroupEnd ()V) [185]
@@ -123,7 +122,8 @@ class FooKt {
             InsnNode [87]
         LabelToken(L6)
             LabelNode(L6)
-        BlockToken(1)
+        BlockToken(2)
+            LineNumberNode [-1]
             FrameNode [-1]
         ReturnToken(returnInsn=177)
             InsnNode [177]

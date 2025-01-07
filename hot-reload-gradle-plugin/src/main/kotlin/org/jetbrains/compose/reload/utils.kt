@@ -21,3 +21,9 @@ internal fun Project.withComposePlugin(block: () -> Unit) {
         block()
     }
 }
+
+internal fun Project.withComposeCompilerPlugin(block: () -> Unit) {
+    pluginManager.withPlugin("org.jetbrains.kotlin.plugin.compose") {
+        block()
+    }
+}

@@ -29,6 +29,7 @@ evas = { module = "io.sellmair:evas", version.ref = "evas" }
 evas-compose = { module = "io.sellmair:evas-compose", version.ref = "evas" }
 
 compose-gradlePlugin = { module = "org.jetbrains.compose:org.jetbrains.compose.gradle.plugin", version.ref = "compose" }
+compose-compiler-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
