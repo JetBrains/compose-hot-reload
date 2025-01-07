@@ -51,6 +51,11 @@ fun createDefaultSettingsGradleKtsContent(
         
         repositories {
             maven(file("${localTestRepoDirectory.absolutePathString().replace("\\", "\\\\")}"))
+            mavenLocal {
+                mavenContent {
+                     includeGroupByRegex("org.jetbrains.kotlin.*")
+                }
+            }
             mavenCentral()
             maven("https://packages.jetbrains.team/maven/p/firework/dev")
             google()
@@ -65,6 +70,11 @@ fun createDefaultSettingsGradleKtsContent(
     dependencyResolutionManagement {
         repositories {
             maven(file("${localTestRepoDirectory.absolutePathString().replace("\\", "\\\\")}"))
+            mavenLocal {
+                mavenContent {
+                     includeGroupByRegex("org.jetbrains.kotlin.*")
+                }
+            }
             mavenCentral()
             maven("https://packages.jetbrains.team/maven/p/firework/dev")
             google()

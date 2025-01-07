@@ -3,6 +3,12 @@ plugins {
 }
 
 repositories {
+    mavenLocal {
+        mavenContent {
+            includeGroupByRegex("org.jetbrains.kotlin.*")
+        }
+    }
+
     gradlePluginPortal {
         content {
             includeModuleByRegex("org.jetbrains.kotlinx", "kotlinx-benchmark-plugin")

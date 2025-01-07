@@ -14,10 +14,7 @@ enum class TestedGradleVersion(val version: String) {
 }
 
 enum class TestedKotlinVersion(val version: KotlinToolingVersion) {
-    KT_2_1_FIREWORK(
-        KotlinToolingVersion(TestEnvironment.fireworkVersion ?: error("Missing 'firework.version'"))
-    ),
-    ;
+    KT_2_1_SNAPSHOT(KotlinToolingVersion("2.1.255-SNAPSHOT")),;
 
     override fun toString(): String {
         return version.toString()

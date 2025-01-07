@@ -15,6 +15,11 @@ val Project.localTestRepoDirectory: File
     get() = repositoryRoot.resolve("build/repo").toFile()
 
 fun Project.withRepositories() {
+    repositories.mavenLocal { repo ->
+        repo.mavenContent { content ->
+            content.includeGroupByRegex("org\\.jetbrains.*")
+        }
+    }
     repositories.mavenCentral()
     repositories.maven(localTestRepoDirectory)
     repositories.google()

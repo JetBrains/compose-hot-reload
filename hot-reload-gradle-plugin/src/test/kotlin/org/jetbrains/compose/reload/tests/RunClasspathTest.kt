@@ -1,9 +1,14 @@
 package org.jetbrains.compose.reload.tests
 
 import org.gradle.testfixtures.ProjectBuilder
-import org.jetbrains.compose.reload.*
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.utils.*
+import org.jetbrains.compose.reload.*
+import org.jetbrains.compose.reload.utils.PathRegex
+import org.jetbrains.compose.reload.utils.assertMatches
+import org.jetbrains.compose.reload.utils.evaluate
+import org.jetbrains.compose.reload.utils.main
+import org.jetbrains.compose.reload.utils.withRepositories
 import org.junit.jupiter.api.Test
 
 class RunClasspathTest {
@@ -51,7 +56,8 @@ class RunClasspathTest {
             classpath.assertMatches(
                 PathRegex(".*/consumer/build/run/jvmMain/classes"),
                 *hotReloadDependencies,
-                PathRegex(".*/userHome/.*") // Transitive maven dependencies
+                PathRegex(".*/userHome/.*"), // Transitive maven dependencies
+                PathRegex(".*/\\.m2/.*") // Transitive maven dependencies
             )
         }
     }
@@ -100,7 +106,8 @@ class RunClasspathTest {
             classpath.assertMatches(
                 PathRegex(".*/consumer/build/run/jvmMain/classes"),
                 *hotReloadDependencies,
-                PathRegex(".*/userHome/.*") // Transitive maven dependencies
+                PathRegex(".*/userHome/.*"), // Transitive maven dependencies
+                PathRegex(".*/\\.m2/.*"), // Transitive maven dependencies
             )
         }
     }
@@ -127,4 +134,5 @@ private val hotReloadDependencies: Array<FileMatcher> = arrayOf(
     PathRegex(".*/hot-reload-orchestration-$HOT_RELOAD_VERSION.jar"),
     PathRegex(".*/hot-reload-runtime-api-jvm-$HOT_RELOAD_VERSION.jar"),
     PathRegex(".*/hot-reload-runtime-jvm-$HOT_RELOAD_VERSION-dev.jar"),
+    PathRegex(".*/\\.m2/.*"), // Transitive maven dependencies
 )

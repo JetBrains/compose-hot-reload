@@ -5,6 +5,11 @@ pluginManagement {
 
     repositories {
         maven(file("../..//build/repo"))
+        mavenLocal {
+            mavenContent {
+                includeGroupByRegex("org.jetbrains.kotlin.*")
+            }
+        }
         maven("https://packages.jetbrains.team/maven/p/firework/dev")
         mavenCentral()
         gradlePluginPortal()
@@ -24,6 +29,11 @@ plugins {
 dependencyResolutionManagement {
     repositories {
         maven(file("../..//build/repo"))
+        mavenLocal {
+            mavenContent {
+                includeGroupByRegex("org.jetbrains.kotlin.*")
+            }
+        }
         maven("https://packages.jetbrains.team/maven/p/firework/dev")
         mavenCentral()
         google()

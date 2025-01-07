@@ -18,6 +18,10 @@ val publishLocally by tasks.registering {
     dependsOn(updateVersions)
 }
 
+tasks.named { name -> name == "commonizeNativeDistribution" }.configureEach {
+    enabled = false
+}
+
 subprojects {
     publishLocally.configure {
         this.dependsOn(tasks.named { name -> name == "publishAllPublicationsToLocalRepository" })

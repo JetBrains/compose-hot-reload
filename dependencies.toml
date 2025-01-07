@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.1.0"
+kotlin = "2.1.255-SNAPSHOT"
 firework = "2.1.0-firework.32"
 compose = "1.7.3"
 coroutines = "1.10.1"
