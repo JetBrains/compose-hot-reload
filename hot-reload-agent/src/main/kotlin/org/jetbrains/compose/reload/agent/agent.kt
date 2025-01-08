@@ -1,19 +1,24 @@
 package org.jetbrains.compose.reload.agent
 
+import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.Disposable
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
+import java.lang.instrument.ClassDefinition
 import java.lang.instrument.Instrumentation
 import java.util.*
+import java.util.concurrent.atomic.AtomicReference
 
 
 object ComposeHotReloadAgent {
 
     internal val logger = createLogger()
 
-    private val beforeReloadListeners = mutableListOf<(reloadRequestId: UUID) -> Unit>()
-    private val afterReloadListeners = mutableListOf<(reloadRequestId: UUID, error: Throwable?) -> Unit>()
+    private val beforeReloadListeners =
+        mutableListOf<(reloadRequestId: UUID) -> Unit>()
 
+    private val afterReloadListeners =
+        mutableListOf<(reloadRequestId: UUID, result: Try<Reload>) -> Unit>()
 
     @Volatile
     private var instrumentation: Instrumentation? = null
@@ -29,7 +34,7 @@ object ComposeHotReloadAgent {
         }
     }
 
-    fun invokeAfterReload(block: (reloadRequestId: UUID, error: Throwable?) -> Unit): Disposable =
+    fun invokeAfterReload(block: (reloadRequestId: UUID, result: Try<Reload>) -> Unit): Disposable =
         synchronized(afterReloadListeners) {
             afterReloadListeners.add(block)
             Disposable {
@@ -44,9 +49,9 @@ object ComposeHotReloadAgent {
         listeners.forEach { listener -> listener(reloadRequestId) }
     }
 
-    internal fun executeAfterReloadListeners(reloadRequestId: UUID, error: Throwable?) {
+    internal fun executeAfterReloadListeners(reloadRequestId: UUID, result: Try<Reload>) {
         val listeners = synchronized(afterReloadListeners) { afterReloadListeners.toList() }
-        listeners.forEach { listener -> listener(reloadRequestId, error) }
+        listeners.forEach { listener -> listener(reloadRequestId, result) }
     }
 
     fun retryPendingChanges() {

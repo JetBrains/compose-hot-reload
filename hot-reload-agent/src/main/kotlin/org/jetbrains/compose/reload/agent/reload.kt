@@ -2,6 +2,7 @@ package org.jetbrains.compose.reload.agent
 
 import javassist.ClassPool
 import javassist.LoaderClassPath
+import org.jetbrains.compose.reload.analysis.RuntimeInfo
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import java.io.ByteArrayOutputStream
@@ -9,6 +10,7 @@ import java.io.DataOutputStream
 import java.io.File
 import java.lang.instrument.ClassDefinition
 import java.lang.instrument.Instrumentation
+import java.util.UUID
 
 private val logger = createLogger()
 
@@ -16,9 +18,18 @@ private val pool = ClassPool().apply {
     appendClassPath(LoaderClassPath(ClassLoader.getSystemClassLoader()))
 }
 
+data class Reload(
+    val reloadRequestId: UUID,
+    val classes: List<ClassDefinition>,
+    val previousRuntime: RuntimeInfo,
+    val newRuntime: RuntimeInfo,
+)
+
 internal fun reload(
-    instrumentation: Instrumentation, pendingChanges: Map<File, OrchestrationMessage.ReloadClassesRequest.ChangeType>
-) {
+    instrumentation: Instrumentation,
+    reloadRequestId: UUID,
+    pendingChanges: Map<File, OrchestrationMessage.ReloadClassesRequest.ChangeType>
+): Reload {
     val definitions = pendingChanges.mapNotNull { (file, change) ->
         if (change == OrchestrationMessage.ReloadClassesRequest.ChangeType.Removed) {
             return@mapNotNull null
@@ -73,8 +84,9 @@ internal fun reload(
     }
 
     instrumentation.redefineClasses(*definitions.toTypedArray())
+    val (previousRuntime, newRuntime) = redefineRuntimeInfo().get()
 
-    definitions.forEach { definition ->
-        definition.reinitializeStaticsIfNecessary()
-    }
+    reinitializeStaticsIfNecessary(definitions, previousRuntime, newRuntime)
+
+    return Reload(reloadRequestId, definitions, previousRuntime, newRuntime)
 }

@@ -2,6 +2,8 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.resolveInvalidationKey
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.isFailure
+import org.jetbrains.compose.reload.core.isSuccess
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.security.ProtectionDomain
@@ -13,13 +15,11 @@ internal fun startComposeGroupInvalidationTransformation(instrumentation: Instru
     /*
     Instruct Compose to invalidate groups that have changed, after successful reload.
      */
-    ComposeHotReloadAgent.invokeAfterReload { reloadRequestId, error ->
-        if (error != null) return@invokeAfterReload
+    ComposeHotReloadAgent.invokeAfterReload { reloadRequestId, result ->
+        if (result.isFailure()) return@invokeAfterReload
 
-        /*
-        Capture and update global runtime info state
-         */
-        val (previousRuntime, newRuntime) = redefineRuntimeInfo().get()
+        val previousRuntime = result.value.previousRuntime
+        val newRuntime = result.value.newRuntime
 
         val invalidations = newRuntime.groups.filter { (group, _) ->
             if (group == null) return@filter false

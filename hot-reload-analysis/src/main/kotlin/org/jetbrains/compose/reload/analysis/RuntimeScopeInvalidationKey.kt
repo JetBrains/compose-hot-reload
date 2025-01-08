@@ -40,3 +40,23 @@ fun RuntimeInfo.resolveInvalidationKey(groupKey: ComposeGroupKey): RuntimeScopeI
 
     return RuntimeScopeInvalidationKey(crc.value)
 }
+
+/**
+ * Resolve an invalidation key for a method (not a Compose group).
+ * This shall not be used on @Composable functions as those functions shall resolve the groups invalidation keys.
+ * This might be useful for static methods
+ */
+fun RuntimeInfo.resolveInvalidationKey(methodId: MethodId): RuntimeScopeInvalidationKey? {
+    val crc = CRC32()
+    val scopes = methods[methodId] ?: return null
+
+    val scopeWithTransitiveDependencies = scopes.withClosure<RuntimeScopeInfo> { scope ->
+        scope.dependencies.flatMap { methodId -> methods[methodId] ?: emptyList() }
+    }
+
+    scopeWithTransitiveDependencies.forEach { scope ->
+        crc.updateLong(scope.hash.value)
+    }
+
+    return RuntimeScopeInvalidationKey(crc.value)
+}

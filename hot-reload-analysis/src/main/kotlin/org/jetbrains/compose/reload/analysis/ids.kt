@@ -54,6 +54,5 @@ internal object MethodIds {
             methodName = sourceInformationMarkerEndMethodName,
             methodDescriptor = "()V"
         )
-
     }
 }

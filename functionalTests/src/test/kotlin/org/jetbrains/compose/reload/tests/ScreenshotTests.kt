@@ -610,4 +610,49 @@ class ScreenshotTests {
         )
         fixture.checkScreenshot("4-false-0")
     }
+
+    @HotReloadTest
+    @DefaultSettingsGradleKts
+    @DefaultBuildGradleKts
+    @TestOnlyLatestVersions
+    @TestOnlyDefaultCompilerOptions
+    fun `test - add enum case`(fixture: HotReloadTestFixture) = fixture.runTest {
+        fixture initialSourceCode """
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.runtime.*
+            import org.jetbrains.compose.reload.underTest.*
+            
+            enum class Tab {
+                A, 
+                B,
+                // add C entry
+            }
+              
+            fun main() = underTestApplication {
+                var tab by remember { mutableStateOf(Tab.A) }
+                onTestEvent { value -> 
+                    tab = Tab.valueOf(value.toString())
+                }
+                
+                when(tab) {
+                    Tab.A -> TestText("A")
+                    Tab.B -> TestText("B")
+                    // add C case
+                }                
+            }
+           
+         """.trimIndent().replace("%", "$")
+
+        fixture.checkScreenshot("0-before")
+
+        fixture.runTransaction {
+            replaceSourceCode("// add C entry", "C,")
+            replaceSourceCode("// add C case", "Tab.C -> TestText(\"C\")")
+            awaitReload()
+        }
+        fixture.checkScreenshot("1-after-c-added")
+
+        fixture.sendTestEvent("C")
+        fixture.checkScreenshot("2-after-c-selected")
+    }
 }

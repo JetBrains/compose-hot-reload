@@ -1,5 +1,7 @@
 package org.jetbrains.compose.reload.core
 
+import kotlin.coroutines.cancellation.CancellationException
+
 
 public sealed class Either<out L, out R> {
     public fun leftOrNull(): L? = if (this is Left) value else null
