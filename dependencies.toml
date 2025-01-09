@@ -4,6 +4,7 @@ firework = "2.1.0-firework.32"
 compose = "1.7.3"
 coroutines = "1.10.1"
 kotlinxDatetime = "0.6.1"
+kotlinxBenchmark = "0.4.13"
 slf4j = "2.0.16"
 androidGradlePlugin = "8.7.1"
 junit = "5.11.3"
@@ -16,6 +17,10 @@ evas = "1.2.0"
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+
+benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmark" }
+benchmark-gradlePlugin = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-plugin", version.ref = "kotlinxBenchmark" }
+
 kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }

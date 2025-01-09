@@ -3,6 +3,7 @@ plugins {
     `maven-publish`
     `publishing-conventions`
     `java-test-fixtures`
+    org.jetbrains.kotlinx.benchmark
 }
 
 kotlin {
@@ -25,6 +26,20 @@ publishing {
     }
 }
 
+kotlin {
+    target.compilations.create("benchmark") {
+        associateWith(target.compilations.getByName("main"))
+        defaultSourceSet {
+            dependencies {
+                implementation(deps.benchmark.runtime)
+            }
+        }
+    }
+}
+
+benchmark {
+    targets.register("benchmark")
+}
 
 
 /* Make the current 'Hot Reload Version (aka version of this project) available */
