@@ -11,7 +11,7 @@ import kotlin.random.Random
 @BenchmarkMode(Mode.AverageTime)
 open class TopologicalSortBenchmark {
 
-    @Param("10", "1000", "10000")
+    @Param("10", "1000", "10000", "100000")
     var nodesCount: Int = 0
 
     lateinit var nodes: List<Node>
@@ -28,6 +28,7 @@ open class TopologicalSortBenchmark {
         }
 
         override fun equals(other: Any?): Boolean {
+            if (other === this) return true
             return other is Node && other.name == name
         }
     }
@@ -45,7 +46,7 @@ open class TopologicalSortBenchmark {
 
     @Benchmark
     fun topologicalSort(): List<Node> {
-        return nodes.topologicalSort { it.dependencies }
+        return nodes.sortedByTopology { it.dependencies }
     }
 
     @Benchmark

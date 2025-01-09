@@ -7,7 +7,7 @@ import org.jetbrains.compose.reload.analysis.classId
 import org.jetbrains.compose.reload.analysis.classInitializerMethodId
 import org.jetbrains.compose.reload.analysis.resolveInvalidationKey
 import org.jetbrains.compose.reload.core.createLogger
-import org.jetbrains.compose.reload.core.topologicalSort
+import org.jetbrains.compose.reload.core.sortedByTopology
 import java.lang.instrument.ClassDefinition
 import java.lang.reflect.Modifier
 
@@ -81,9 +81,9 @@ internal fun reinitializeStaticsIfNecessary(
     Step 2: Let us ensure we're executing the initializers in a reasonable order:
     if class 'A' depends on 'B'
      */
-    val topologicallySortedDirtyClasses = dirtyClasses.topologicalSort(
+    val topologicallySortedDirtyClasses = dirtyClasses.sortedByTopology(
         onCycle = { logger.warn("<clinit> cycle detected: ${it.joinToString(", ") { it.simpleName }}") },
-        follows = { clazz -> classInitializerDependencies[clazz].orEmpty() }
+        edges = { clazz -> classInitializerDependencies[clazz].orEmpty() }
     )
 
     /**
