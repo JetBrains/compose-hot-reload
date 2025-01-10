@@ -26,7 +26,7 @@ class TestKt {
             LabelToken(L5)
             BlockToken(2)
             LabelToken(L6)
-            BlockToken(2)
+            BlockToken(1)
             ReturnToken(returnInsn=177)
     
             RestartGroup (group=ComposeGroupKey(key=-607362160)) [3:20] {
@@ -45,7 +45,7 @@ class TestKt {
                 BlockToken(1)
                 JumpToken(L4, opocde=167)
                 LabelToken(L3)
-                BlockToken(3)
+                BlockToken(4)
                 LabelToken(L4)
                 BlockToken(2)
                 EndRestartGroup()
