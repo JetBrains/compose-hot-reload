@@ -191,6 +191,7 @@ public sealed class OrchestrationMessage : Serializable {
     public class CriticalException(
         public val clientRole: OrchestrationClientRole,
         public val message: String?,
+        public val exceptionClassName: String?,
         public val stacktrace: List<StackTraceElement>
     ): OrchestrationMessage()
 

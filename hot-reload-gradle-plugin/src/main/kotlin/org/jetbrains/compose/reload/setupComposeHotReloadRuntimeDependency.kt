@@ -2,6 +2,8 @@ package org.jetbrains.compose.reload
 
 import org.gradle.api.Project
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
+import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
+import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
 
 internal fun Project.setupComposeHotReloadRuntimeDependency() {
     /*

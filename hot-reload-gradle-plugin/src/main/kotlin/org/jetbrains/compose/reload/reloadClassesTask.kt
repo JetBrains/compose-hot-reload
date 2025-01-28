@@ -13,6 +13,9 @@ import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.withType
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
+import org.jetbrains.compose.reload.gradle.capitalized
+import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
+import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Compiler
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest

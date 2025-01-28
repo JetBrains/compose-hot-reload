@@ -2,20 +2,14 @@ package org.jetbrains.compose.reload
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.jetbrains.compose.reload.gradle.withKotlinPlugin
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 
 @Suppress("unused")
 class ComposeHotReloadPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.extensions.create(composeHotReloadExtensionName, ComposeHotReloadExtension::class.java, target)
-
-        target.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
-            target.onKotlinPluginApplied()
-        }
-
-        target.pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
-            target.onKotlinPluginApplied()
-        }
+        target.withKotlinPlugin(target::onKotlinPluginApplied)
     }
 }
 

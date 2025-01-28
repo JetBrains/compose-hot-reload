@@ -3,6 +3,9 @@ package org.jetbrains.compose.reload
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.compose.ComposePlugin
+import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
+import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
+import org.jetbrains.compose.reload.gradle.withComposePlugin
 import org.jetbrains.kotlin.gradle.ExternalKotlinTargetApi
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget

@@ -4,8 +4,8 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.compose.reload.ComposeHotReloadPlugin
 import org.jetbrains.compose.reload.applicationClasspath
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
-import org.jetbrains.compose.reload.kotlinJvmOrNull
-import org.jetbrains.compose.reload.kotlinMultiplatformOrNull
+import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
+import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
 import org.jetbrains.compose.reload.utils.FileMatcher
 import org.jetbrains.compose.reload.utils.PathRegex
 import org.jetbrains.compose.reload.utils.assertMatches

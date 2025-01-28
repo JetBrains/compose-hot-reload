@@ -1,0 +1,22 @@
+public final class org/jetbrains/compose/reload/test/HotReloadTestExecutionSpec : org/gradle/api/internal/tasks/testing/TestExecutionSpec {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getClassName ()Ljava/lang/String;
+	public final fun getMethodName ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/test/HotReloadTestPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public class org/jetbrains/compose/reload/test/HotReloadTestTask : org/gradle/api/tasks/testing/AbstractTestTask {
+	public fun <init> ()V
+	public final fun compilation (Lorg/jetbrains/kotlin/gradle/plugin/KotlinCompilation;)V
+	protected fun createTestExecuter ()Lorg/gradle/api/internal/tasks/testing/TestExecuter;
+	public synthetic fun createTestExecutionSpec ()Lorg/gradle/api/internal/tasks/testing/TestExecutionSpec;
+	protected fun createTestExecutionSpec ()Lorg/jetbrains/compose/reload/test/HotReloadTestExecutionSpec;
+}
+

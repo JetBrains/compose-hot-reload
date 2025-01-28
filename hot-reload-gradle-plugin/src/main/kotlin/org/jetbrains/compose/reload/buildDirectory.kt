@@ -3,6 +3,7 @@ package org.jetbrains.compose.reload
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
+import org.jetbrains.compose.reload.gradle.capitalized
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 
 internal val KotlinCompilation<*>.runBuildDirectory: Provider<Directory>

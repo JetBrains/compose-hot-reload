@@ -5,15 +5,16 @@ package org.jetbrains.compose.reload
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.JavaExec
-import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.gradle.jvm.toolchain.JavaToolchainService
-import org.gradle.jvm.toolchain.JvmVendorSpec
 import org.gradle.kotlin.dsl.register
-import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.HotReloadProperty.DevToolsClasspath
+import org.jetbrains.compose.reload.gradle.composeHotReloadAgentConfiguration
+import org.jetbrains.compose.reload.gradle.composeHotReloadAgentJar
+import org.jetbrains.compose.reload.gradle.jetbrainsRuntimeLauncher
+import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
+import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
 import org.jetbrains.kotlin.gradle.InternalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
@@ -42,11 +43,7 @@ private fun KotlinTarget.createComposeHotReloadExecTask() {
 
 internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<KotlinCompilation<*>>) {
     if (project.composeHotReloadExtension.useJetBrainsRuntime.get()) {
-        javaLauncher.set(project.serviceOf<JavaToolchainService>().launcherFor { spec ->
-            @Suppress("UnstableApiUsage")
-            spec.vendor.set(JvmVendorSpec.JETBRAINS)
-            spec.languageVersion.set(JavaLanguageVersion.of(21))
-        })
+        javaLauncher.set(project.jetbrainsRuntimeLauncher())
     }
 
     classpath = project.files(compilation.map { it.applicationClasspath })

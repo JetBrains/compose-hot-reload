@@ -16,6 +16,7 @@ plugins.withType<KotlinBasePluginWrapper> {
         if (this is HasConfigurableKotlinCompilerOptions<*>) {
             this.compilerOptions {
                 optIn.add("org.jetbrains.compose.reload.InternalHotReloadApi")
+                optIn.add("org.jetbrains.compose.reload.gradle.InternalHotReloadGradleApi")
             }
         }
     }

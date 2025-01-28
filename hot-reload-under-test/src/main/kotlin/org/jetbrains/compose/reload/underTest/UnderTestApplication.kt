@@ -158,7 +158,10 @@ fun underTestApplication(
         logger.error("Uncaught exception in thread: $thread", throwable)
 
         OrchestrationMessage.CriticalException(
-            OrchestrationClientRole.Application, throwable.message, thread.stackTrace.toList()
+            clientRole = OrchestrationClientRole.Application,
+            message = throwable.message,
+            exceptionClassName = throwable.javaClass.name,
+            stacktrace = thread.stackTrace.toList()
         ).send()
     }
 

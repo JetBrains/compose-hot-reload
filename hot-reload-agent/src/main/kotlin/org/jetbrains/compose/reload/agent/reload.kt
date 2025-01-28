@@ -56,7 +56,7 @@ internal fun reload(
         }.getOrNull()
 
         logger.orchestration(buildString {
-            appendLine("Reloading class:'${clazz.name}'")
+            appendLine("Reloading class: '${clazz.name}' (${change.name})")
 
             if (originalClass?.superclass?.name != clazz.superclass.name) {
                 appendLine("⚠️ Superclass: '${originalClass?.superclass?.name}' -> '${clazz.superclass?.name}'")

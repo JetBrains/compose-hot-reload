@@ -8,6 +8,7 @@ import org.gradle.api.attributes.Usage.USAGE_ATTRIBUTE
 import org.gradle.api.attributes.java.TargetJvmEnvironment
 import org.jetbrains.compose.ComposePlugin
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
+import org.jetbrains.compose.reload.gradle.withComposePlugin
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 

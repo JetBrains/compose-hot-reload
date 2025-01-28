@@ -2,6 +2,7 @@ package org.jetbrains.compose.reload
 
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.withType
+import org.jetbrains.compose.reload.gradle.withComposeCompilerPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 internal fun Project.setupComposeCompilations() {

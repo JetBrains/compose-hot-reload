@@ -1,0 +1,11 @@
+public abstract interface annotation class org/jetbrains/compose/reload/test/HotReloadUnitTest : java/lang/annotation/Annotation {
+}
+
+public final class org/jetbrains/compose/reload/test/Main {
+	public static final fun main ([Ljava/lang/String;)V
+}
+
+public final class org/jetbrains/compose/reload/test/ReloadKt {
+	public static final fun compileAndReload (Ljava/lang/String;)V
+}
+

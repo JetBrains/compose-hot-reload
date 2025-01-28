@@ -7,6 +7,8 @@ import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Sync
 import org.gradle.internal.component.local.model.OpaqueComponentArtifactIdentifier
+import org.jetbrains.compose.reload.gradle.capitalized
+import org.jetbrains.compose.reload.gradle.composeHotReloadAgentRuntimeClasspath
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 
 /**

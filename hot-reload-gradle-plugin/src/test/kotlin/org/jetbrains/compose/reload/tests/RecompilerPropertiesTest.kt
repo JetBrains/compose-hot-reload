@@ -7,7 +7,7 @@ import org.jetbrains.compose.reload.core.HotReloadProperty.GradleBuildProject
 import org.jetbrains.compose.reload.core.HotReloadProperty.GradleBuildRoot
 import org.jetbrains.compose.reload.core.HotReloadProperty.GradleBuildTask
 import org.jetbrains.compose.reload.core.HotReloadProperty.GradleJavaHome
-import org.jetbrains.compose.reload.kotlinMultiplatformOrNull
+import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
 import org.jetbrains.compose.reload.utils.withRepositories
 import kotlin.test.Test
 import kotlin.test.assertEquals

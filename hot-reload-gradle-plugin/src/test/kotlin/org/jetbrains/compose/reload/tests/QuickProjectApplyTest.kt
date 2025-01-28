@@ -6,7 +6,7 @@ import org.gradle.kotlin.dsl.findByType
 import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.compose.reload.ComposeHotReloadExtension
 import org.jetbrains.compose.reload.ComposeHotReloadPlugin
-import org.jetbrains.compose.reload.kotlinMultiplatformOrNull
+import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
 import org.jetbrains.compose.reload.utils.evaluate
 import org.jetbrains.kotlin.gradle.plugin.KotlinMultiplatformPluginWrapper
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper

@@ -60,4 +60,6 @@ internal fun launchReloadRequestHandler(instrumentation: Instrumentation) {
         logger.info("Application Orchestration closed")
         exitProcess(0)
     }
+
+    logger.debug("ReloadRequestHandler launched")
 }
