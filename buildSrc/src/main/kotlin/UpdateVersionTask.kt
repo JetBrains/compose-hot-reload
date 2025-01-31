@@ -19,21 +19,15 @@ open class UpdateVersionTask : DefaultTask() {
         logger.info("Updating kotlin firework versions to '${kotlinFireworkVersion.get()}'")
 
         val projectVersionRegex = Regex("""hot-reload.*(?<version>\d+\.\d+\.\d+-\w+\.\d+.\d+)""")
-        val kotlinFireworkRegex = Regex(""""\d+\.\d+\.\d+.*-(firework\.|Beta2-)\d+"""")
+        val kotlinVersionRegex = Regex("""((kotlin\("jvm"\))|(kotlin\("multiplatform"\))|(kotlin\("plugin\..*)\)).*(?<version>\d+\.\d+\.\d+(-\w+)?)""")
+
         sources.forEach { sourceFile ->
             logger.info("Processing ${sourceFile.toURI()}")
 
             val sourceFileText = sourceFile.readText()
             val processedText = sourceFileText
-                .replaceAll(kotlinFireworkRegex) { "\"${kotlinFireworkVersion.get()}\"" }
-                .replaceAll(projectVersionRegex) { match ->
-                    val versionGroup = match.groups["version"] ?: error("Missing 'version' group in $match")
-                    val range = IntRange(
-                        start = versionGroup.range.start - match.range.start,
-                        endInclusive = versionGroup.range.endInclusive - match.range.start
-                    )
-                    match.value.replaceRange(range, projectVersion.get())
-                }
+                .replaceAllVersions(kotlinVersionRegex, kotlinFireworkVersion.get())
+                .replaceAllVersions(projectVersionRegex, projectVersion.get())
 
             if (sourceFileText != processedText) {
                 logger.info("Updating ${sourceFile.toURI()}")
@@ -61,5 +55,16 @@ internal fun String.replaceAll(regex: Regex, transform: (MatchResult) -> CharSeq
         if (nextIndex < source.length) {
             appendRange(source, nextIndex, source.length)
         }
+    }
+}
+
+internal fun String.replaceAllVersions(regex: Regex, version: String) : String {
+    return replaceAll(regex) { match ->
+        val versionGroup = match.groups["version"] ?: error("Missing 'version' group in $match")
+        val range = IntRange(
+            start = versionGroup.range.start - match.range.start,
+            endInclusive = versionGroup.range.endInclusive - match.range.start
+        )
+        match.value.replaceRange(range, version)
     }
 }
