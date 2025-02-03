@@ -71,7 +71,6 @@ include(":hot-reload-runtime-jvm")
 include(":hot-reload-devtools")
 include(":hot-reload-test")
 include(":hot-reload-test:gradle-plugin")
-include(":hot-reload-under-test")
 include(":tests:functionalTests")
 include(":tests:unitTests")
 

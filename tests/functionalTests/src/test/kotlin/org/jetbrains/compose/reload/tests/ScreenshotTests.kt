@@ -31,10 +31,10 @@ class ScreenshotTests {
             import androidx.compose.foundation.layout.*
             import androidx.compose.ui.unit.sp
             import androidx.compose.ui.window.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             fun main() {
-                underTestApplication {
+                screenshotTestApplication {
                     TestText("Hello")
                 }
             }
@@ -61,10 +61,10 @@ class ScreenshotTests {
             import androidx.compose.ui.unit.*
             import androidx.compose.ui.window.*
             import androidx.compose.runtime.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             fun main() {
-                underTestApplication {
+                screenshotTestApplication {
                     var state by remember { mutableStateOf(0) }
                     onTestEvent {
                         state++
@@ -96,10 +96,10 @@ class ScreenshotTests {
             import androidx.compose.foundation.layout.*
             import androidx.compose.ui.unit.sp
             import androidx.compose.ui.window.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             fun main() {
-                underTestApplication {
+                screenshotTestApplication {
                     TestText("Hello")
                 }
             }
@@ -121,10 +121,10 @@ class ScreenshotTests {
             import androidx.compose.ui.unit.*
             import androidx.compose.ui.window.*
             import androidx.compose.runtime.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             fun main() {
-                underTestApplication {
+                screenshotTestApplication {
                     Column {
                         TestText("Initial")
                         // Add button
@@ -156,10 +156,10 @@ class ScreenshotTests {
             import androidx.compose.ui.unit.*
             import androidx.compose.ui.window.*
             import androidx.compose.runtime.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             fun main() {
-                underTestApplication {
+                screenshotTestApplication {
                     // add state
                     
                     // add effect
@@ -199,10 +199,10 @@ class ScreenshotTests {
             import androidx.compose.ui.unit.*
             import androidx.compose.ui.window.*
             import androidx.compose.runtime.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             fun main() {
-                underTestApplication {
+                screenshotTestApplication {
                     var state by remember { mutableStateOf(0) }
                     onTestEvent { state++ }
                     Group {
@@ -234,10 +234,10 @@ class ScreenshotTests {
             import androidx.compose.ui.unit.*
             import androidx.compose.ui.window.*
             import androidx.compose.runtime.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             fun main() {
-                underTestApplication {
+                screenshotTestApplication {
                     var state by remember { mutableStateOf(0) }
                    
                     val myLambda = {
@@ -281,7 +281,7 @@ class ScreenshotTests {
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.*
             import androidx.compose.runtime.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             @Composable fun Wrapper(child: @Composable () -> Unit) {
                 child()
@@ -295,7 +295,7 @@ class ScreenshotTests {
                 child()
             }
             
-            fun main() = underTestApplication {
+            fun main() = screenshotTestApplication {
                 var state by remember { mutableStateOf(0) }
                 Wrapper {
                     Actor(onEvent = { /* lambda body */ }) {
@@ -325,13 +325,13 @@ class ScreenshotTests {
         fixture initialSourceCode """
             import androidx.compose.material3.*
             import androidx.compose.ui.unit.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             val foo = 42
             // add field
             
             fun main() {
-                underTestApplication {
+                screenshotTestApplication {
                    TestText("%foo")
                 }
             }
@@ -360,11 +360,11 @@ class ScreenshotTests {
             import androidx.compose.runtime.Composable
             import androidx.compose.ui.Modifier
             import androidx.compose.ui.unit.dp
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
 
 
             fun main() {
-                underTestApplication {
+                screenshotTestApplication {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(6.dp) ,
@@ -401,9 +401,9 @@ class ScreenshotTests {
             import androidx.compose.ui.geometry.Offset
             import androidx.compose.ui.graphics.Color
             import androidx.compose.ui.unit.dp
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
               
-            fun main() = underTestApplication {
+            fun main() = screenshotTestApplication {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                     Canvas(
                        Modifier
@@ -435,9 +435,9 @@ class ScreenshotTests {
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.*
             import androidx.compose.runtime.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
               
-            fun main() = underTestApplication {
+            fun main() = screenshotTestApplication {
                 Column {
                     Foo()
                 }
@@ -491,9 +491,9 @@ class ScreenshotTests {
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.*
             import androidx.compose.runtime.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
               
-            fun main() = underTestApplication {
+            fun main() = screenshotTestApplication {
                 Column {
                     Foo()
                 }
@@ -531,9 +531,9 @@ class ScreenshotTests {
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.*
             import androidx.compose.runtime.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
               
-            fun main() = underTestApplication {
+            fun main() = screenshotTestApplication {
                 Column {
                     Foo()
                 }
@@ -578,9 +578,9 @@ class ScreenshotTests {
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.*
             import androidx.compose.runtime.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
               
-            fun main() = underTestApplication {
+            fun main() = screenshotTestApplication {
                 Column {
                     Foo(true)
                 }
@@ -634,7 +634,7 @@ class ScreenshotTests {
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.*
             import androidx.compose.runtime.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             enum class Tab {
                 A, 
@@ -642,7 +642,7 @@ class ScreenshotTests {
                 // add C entry
             }
               
-            fun main() = underTestApplication {
+            fun main() = screenshotTestApplication {
                 var tab by remember { mutableStateOf(Tab.A) }
                 onTestEvent { value -> 
                     tab = Tab.valueOf(value.toString())
@@ -679,11 +679,11 @@ class ScreenshotTests {
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.*
             import androidx.compose.runtime.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             val foo = 42
           
-            fun main() = underTestApplication {
+            fun main() = screenshotTestApplication {
                 val state by remember { mutableStateOf(foo) }
                 TestText("state: %state")
             }

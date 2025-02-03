@@ -41,7 +41,7 @@ internal fun main(args: Array<String>) {
     val annotation = method.getDeclaredAnnotation(DevelopmentEntryPoint::class.java)
 
     if (HotReloadEnvironment.isHeadless) {
-        runDevApplicationHeadless(
+        runHeadlessApplicationBlocking(
             width = annotation.windowWidth,
             height = annotation.windowWidth,
             timeout = 5.minutes

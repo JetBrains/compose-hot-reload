@@ -37,4 +37,10 @@ dependencyResolutionManagement {
         mavenCentral()
         google()
     }
+
+    versionCatalogs {
+        create("deps") {
+            from(files("../../dependencies.toml"))
+        }
+    }
 }

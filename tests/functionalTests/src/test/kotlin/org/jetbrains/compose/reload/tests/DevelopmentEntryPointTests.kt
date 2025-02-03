@@ -33,7 +33,7 @@ class DevelopmentEntryPointTests {
 
         mainKt.writeText(
             """
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             import androidx.compose.runtime.Composable
             import androidx.compose.ui.unit.sp
             

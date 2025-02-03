@@ -23,10 +23,10 @@ class ErrorRecoveryTests {
     fun `good - bad - good`(fixture: HotReloadTestFixture) = fixture.runTest {
         val code = fixture.initialSourceCode(
             """
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             fun main() {
-                underTestApplication {
+                screenshotTestApplication {
                     TestText("Hello")
                 }
             }
@@ -59,7 +59,7 @@ class ErrorRecoveryTests {
             import androidx.compose.ui.unit.*
             import androidx.compose.ui.window.*
             import androidx.compose.runtime.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             abstract class A
             abstract class B
@@ -68,7 +68,7 @@ class ErrorRecoveryTests {
             
             fun main() {
                 Foo() // <- Use Foo here to ensure the class is loaded!
-                underTestApplication(width = 512, height = 512) {
+                screenshotTestApplication(width = 512, height = 512) {
                     var state by remember { mutableStateOf(0) }
                     onTestEvent {
                         state++

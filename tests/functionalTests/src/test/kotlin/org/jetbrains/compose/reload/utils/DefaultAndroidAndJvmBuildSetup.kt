@@ -39,7 +39,7 @@ private class DefaultAndroidBuildExtension() : BeforeTestExecutionCallback {
                 
                 sourceSets.jvmMain.dependencies {
                     implementation(compose.desktop.currentOs)
-                    implementation("org.jetbrains.compose:hot-reload-under-test:$HOT_RELOAD_VERSION")
+                    implementation("org.jetbrains.compose:hot-reload-test:$HOT_RELOAD_VERSION")
                 }     
             }
             

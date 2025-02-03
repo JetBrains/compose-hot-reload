@@ -99,8 +99,8 @@ public fun compileAndReload(sourceCode: String) {
                 Added
             } else Modified
         }
-    val request = OrchestrationMessage.ReloadClassesRequest(classes)
 
+    val request = OrchestrationMessage.ReloadClassesRequest(classes)
     val future = CompletableFuture<Unit>()
 
     val listener = invokeAfterHotReload { uuid, result ->

@@ -31,10 +31,10 @@ class NonContinuousRecompileTest {
             import androidx.compose.foundation.layout.*
             import androidx.compose.ui.unit.sp
             import androidx.compose.ui.window.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             fun main() {
-                underTestApplication {
+                screenshotTestApplication {
                     TestText("Before")
                 }
             }

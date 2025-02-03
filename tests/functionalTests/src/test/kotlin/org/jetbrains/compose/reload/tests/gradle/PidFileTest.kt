@@ -30,10 +30,10 @@ class PidFileTest {
 
         fixture.runTransaction {
             fixture initialSourceCode """
-                import org.jetbrains.compose.reload.underTest.*
+                import org.jetbrains.compose.reload.test.*
                 
                 fun main() {
-                    underTestApplication {
+                    screenshotTestApplication {
                     }
                 }
             """.trimIndent()

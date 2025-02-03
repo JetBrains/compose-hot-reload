@@ -26,10 +26,10 @@ class ClientDisconnectedMessageTest {
         testFixture.projectDir.writeText(
             "src/jvmMain/kotlin/Main.kt", """
             import androidx.compose.material3.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             import androidx.compose.ui.unit.sp
             fun main() {
-                underTestApplication {
+                screenshotTestApplication {
                     TestText("Hello", fontSize = 48.sp)
                 }
             }

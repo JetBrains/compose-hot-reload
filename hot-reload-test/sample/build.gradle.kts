@@ -3,6 +3,8 @@ import org.jetbrains.compose.reload.test.HotReloadTestTask
 
 plugins {
     kotlin("multiplatform")
+    kotlin("plugin.compose")
+    id("org.jetbrains.compose")
     id("org.jetbrains.compose-hot-reload")
     id("org.jetbrains.compose-hot-reload-test")
 }
@@ -12,10 +14,12 @@ kotlin {
 
     sourceSets.jvmMain.dependencies {
         implementation("org.jetbrains.compose:hot-reload-runtime-api:1.0.0-dev.34.5")
+        implementation(compose.runtime)
     }
 
     sourceSets.getByName("jvmReloadTest").dependencies {
         implementation(kotlin("test"))
+        implementation(deps.coroutines.test)
         implementation("ch.qos.logback:logback-classic:1.5.16")
     }
 }
@@ -31,4 +35,5 @@ tasks.withType<HotReloadTestTask>().configureEach {
             TestLogEvent.STANDARD_ERROR,
         )
     }
+    outputs.upToDateWhen { false }
 }

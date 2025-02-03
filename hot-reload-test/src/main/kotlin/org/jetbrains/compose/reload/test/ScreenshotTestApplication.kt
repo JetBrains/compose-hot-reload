@@ -1,15 +1,9 @@
-@file:OptIn(ExperimentalTestApi::class)
-@file:Suppress("unused") // Used by tests in test data
-
-package org.jetbrains.compose.reload.underTest
+package org.jetbrains.compose.reload.test
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.FontHinting
 import androidx.compose.ui.text.FontRasterizationSettings
@@ -22,23 +16,16 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.hot_reload_under_test.generated.resources.Res
-import org.jetbrains.compose.hot_reload_under_test.generated.resources.Roboto_Medium
-import org.jetbrains.compose.reload.DevelopmentEntryPoint
-import org.jetbrains.compose.reload.InternalHotReloadApi
+import org.jetbrains.compose.hot_reload_test.generated.resources.Res
+import org.jetbrains.compose.hot_reload_test.generated.resources.Roboto_Medium
 import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.send
-import org.jetbrains.compose.reload.jvm.runDevApplicationHeadless
+import org.jetbrains.compose.reload.jvm.runHeadlessApplicationBlocking
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asChannel
-import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
 import org.jetbrains.compose.resources.Font
 import org.slf4j.LoggerFactory
 import java.lang.invoke.MethodHandles
@@ -46,13 +33,12 @@ import kotlin.time.Duration.Companion.minutes
 
 internal val logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass())
 
-
 /**
  * Handle for code written 'under test'
  * Example:
  *
  * ```kotlin
- * underTestApplication {
+ * screenshotTestApplication {
  *     var state by remember { mutableStateOf(0) }
  *     onTestEvent { // <- can nicely call into such APIs without additional imports.
  *         state++
@@ -61,12 +47,10 @@ internal val logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass
  * }
  * ```
  */
-class UnderTestApplication(
-    val applicationScope: CoroutineScope
-) {
+public class ScreenshotTestApplication {
 
     @Composable
-    fun onTestEvent(handler: suspend (payload: Any?) -> Unit) {
+    public fun onTestEvent(handler: suspend (payload: Any?) -> Unit) {
         val channel = remember { orchestration.asChannel() }
 
         LaunchedEffect(Unit) {
@@ -77,49 +61,30 @@ class UnderTestApplication(
         }
     }
 
+    public fun sendTestEvent(any: Any? = null) {
+        orchestration.sendMessage(OrchestrationMessage.TestEvent(any))
+    }
+
+    public fun sendLog(any: Any?) {
+        orchestration.sendMessage(OrchestrationMessage.LogMessage("test", any.toString()))
+    }
+
     /**
      * Intended to forcefully create a new Group/Scope.
      */
     @Composable
-    fun Group(child: @Composable () -> Unit) {
+    public fun Group(child: @Composable () -> Unit) {
         child()
     }
-
-    fun sendTestEvent(any: Any? = null) {
-        orchestration.sendMessage(OrchestrationMessage.TestEvent(any))
-    }
-
-    fun sendLog(any: Any?) {
-        orchestration.sendMessage(OrchestrationMessage.LogMessage("test", any.toString()))
-    }
 }
 
-@Composable
-fun onTestEvent(handler: suspend (payload: Any?) -> Unit) {
-    underTestApplicationLocal.current!!.onTestEvent(handler)
-}
-
-private val underTestApplicationLocal = staticCompositionLocalOf<UnderTestApplication?> { null }
-
-fun invokeOnTestEvent(handler: suspend (payload: Any?) -> Unit) {
-    orchestration.invokeWhenReceived<OrchestrationMessage.TestEvent> { value ->
-        CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
-            handler.invoke(value.payload)
-        }
-    }
-}
-
-/*
-Text component which is set up to render as consistent as possible on different platforms.
+/**
+ * Text component which is set up to render as consistent as possible on different platforms.
  */
 @OptIn(ExperimentalTextApi::class)
 @Composable
-fun TestText(value: String, fontSize: TextUnit = 96.sp) {
-    val fontFamily = FontFamily(
-        Font(
-            Res.font.Roboto_Medium, weight = FontWeight.Medium, style = FontStyle.Normal
-        )
-    )
+public fun TestText(value: String, fontSize: TextUnit = 96.sp) {
+    val fontFamily = FontFamily(Font(Res.font.Roboto_Medium, weight = FontWeight.Medium, style = FontStyle.Normal))
 
     Text(
         text = value,
@@ -143,16 +108,16 @@ fun TestText(value: String, fontSize: TextUnit = 96.sp) {
     )
 }
 
+
 /**
  * Entry points for "Applications under test"
  */
-@OptIn(InternalHotReloadApi::class)
 @Suppress("unused") // Used by integration tests
-fun underTestApplication(
+public fun screenshotTestApplication(
     timeout: Int = 5,
     width: Int = 512,
     height: Int = 512,
-    content: @Composable UnderTestApplication.() -> Unit
+    content: @Composable () -> Unit
 ) {
     Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
         logger.error("Uncaught exception in thread: $thread", throwable)
@@ -165,14 +130,7 @@ fun underTestApplication(
         ).send()
     }
 
-    runDevApplicationHeadless(
-        timeout.minutes, width = width, height = height,
-    ) { applicationScope ->
-        val underTestApplication = UnderTestApplication(applicationScope)
-        CompositionLocalProvider(underTestApplicationLocal provides underTestApplication) {
-            DevelopmentEntryPoint {
-                UnderTestApplication(applicationScope).content()
-            }
-        }
-    }
+    runHeadlessApplicationBlocking(
+        timeout.minutes, width = width, height = height, content = content
+    )
 }

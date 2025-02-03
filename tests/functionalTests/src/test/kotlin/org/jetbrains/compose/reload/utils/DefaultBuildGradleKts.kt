@@ -132,7 +132,7 @@ private fun ProjectDir.setupKmpProject(
             
             sourceSets.jvmMain.dependencies {
                 implementation(compose.desktop.currentOs)
-                implementation("org.jetbrains.compose:hot-reload-under-test:$HOT_RELOAD_VERSION")
+                implementation("org.jetbrains.compose:hot-reload-test:$HOT_RELOAD_VERSION")
             }
         }
        
@@ -158,7 +158,7 @@ fun ProjectDir.setupJvmProject() {
             implementation(compose.desktop.currentOs)
             implementation(compose.foundation)
             implementation(compose.material3)
-            implementation("org.jetbrains.compose:hot-reload-under-test:$HOT_RELOAD_VERSION")
+            implementation("org.jetbrains.compose:hot-reload-test:$HOT_RELOAD_VERSION")
         }
         tasks.create<ComposeHotRun>("run") {
             mainClass.set("MainKt")

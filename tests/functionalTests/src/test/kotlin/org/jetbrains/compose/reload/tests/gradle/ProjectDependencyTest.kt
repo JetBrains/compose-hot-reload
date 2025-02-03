@@ -94,7 +94,7 @@ class ProjectDependencyTest {
                             jvm()
                             sourceSets.commonMain.dependencies {
                                 implementation(compose.desktop.currentOs)
-                                implementation("org.jetbrains.compose:hot-reload-under-test:$HOT_RELOAD_VERSION")
+                                implementation("org.jetbrains.compose:hot-reload-test:$HOT_RELOAD_VERSION")
                             }
                         }
                     """
@@ -102,7 +102,7 @@ class ProjectDependencyTest {
                     ProjectMode.Jvm -> """
                         dependencies {
                             implementation(compose.desktop.currentOs)
-                            implementation("org.jetbrains.compose:hot-reload-under-test:$HOT_RELOAD_VERSION")
+                            implementation("org.jetbrains.compose:hot-reload-test:$HOT_RELOAD_VERSION")
                         }
                     """
                 }
@@ -114,7 +114,7 @@ class ProjectDependencyTest {
             "widgets/src/${fixture.projectMode.fold("commonMain", "main")}/kotlin/Widget.kt", """
             import androidx.compose.runtime.Composable
             import androidx.compose.ui.unit.sp
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             @Composable
             fun Widget(text: String) {
@@ -128,10 +128,10 @@ class ProjectDependencyTest {
             import androidx.compose.foundation.layout.*
             import androidx.compose.ui.unit.sp
             import androidx.compose.ui.window.*
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             fun main() {
-                underTestApplication {
+                screenshotTestApplication {
                     Widget("Hello") // <- calls into other module
                 }
             }

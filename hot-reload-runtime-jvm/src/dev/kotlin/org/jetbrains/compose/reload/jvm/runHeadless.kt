@@ -11,54 +11,56 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.future.asCompletableFuture
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.agent.orchestration
+import org.jetbrains.compose.reload.agent.send
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import org.jetbrains.compose.reload.orchestration.asChannel
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
-import kotlin.system.exitProcess
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-/**
- * Runs a 'headless' compose application which will participate in the orchestration.
- * This method will block until the application is finished.
- */
+
 @InternalHotReloadApi
-fun runDevApplicationHeadless(
-    timeout: Duration,
-    width: Int, height: Int,
-    content: @Composable (applicationScope: CoroutineScope) -> Unit
-) {
+suspend fun runHeadlessApplication(
+    timeout: Duration, width: Int, height: Int,
+    content: @Composable () -> Unit
+): Unit = coroutineScope {
+    val applicationScope = this
     val logger = createLogger()
-    val applicationScope = CoroutineScope(Dispatchers.Main + Job())
     val messages = orchestration.asChannel()
 
     val scene = ImageComposeScene(width, height, coroutineContext = applicationScope.coroutineContext)
     scene.setContent {
         Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
-            content(applicationScope)
+            DevelopmentEntryPoint {
+                content()
+            }
         }
     }
 
     applicationScope.launch {
         delay(timeout)
         logger.error("Application timed out...")
-        exitProcess(-1)
+        applicationScope.cancel("Application timed out...")
     }
 
     /* Main loop */
@@ -97,5 +99,29 @@ fun runDevApplicationHeadless(
             delay(delay)
             time += delay.inWholeNanoseconds
         }
-    }.asCompletableFuture().join()
+    }
+}
+
+/**
+ * Runs a 'headless' compose application which will participate in the orchestration.
+ * This method will block until the application is finished.
+ */
+@InternalHotReloadApi
+fun runHeadlessApplicationBlocking(
+    timeout: Duration,
+    width: Int, height: Int,
+    content: @Composable () -> Unit
+) {
+    runBlocking(
+        Dispatchers.Main + Job() + CoroutineName("HeadlessApplication") +
+            CoroutineExceptionHandler { context, throwable ->
+                OrchestrationMessage.CriticalException(
+                    clientRole = OrchestrationClientRole.Application,
+                    message = throwable.message,
+                    exceptionClassName = throwable::class.qualifiedName,
+                    stacktrace = throwable.stackTrace.toList()
+                ).send()
+            }) {
+        runHeadlessApplication(timeout, width, height, content)
+    }
 }

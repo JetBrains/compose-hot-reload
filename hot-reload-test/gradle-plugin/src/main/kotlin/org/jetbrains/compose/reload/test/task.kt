@@ -10,10 +10,11 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.testing.AbstractTestTask
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 import org.gradle.language.base.plugins.LifecycleBasePlugin.VERIFICATION_GROUP
-import org.gradle.process.ExecOperations
+import org.jetbrains.compose.ComposeExtension
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.gradle.composeHotReloadAgentConfiguration
 import org.jetbrains.compose.reload.gradle.composeHotReloadAgentJar
@@ -21,11 +22,12 @@ import org.jetbrains.compose.reload.gradle.files
 import org.jetbrains.compose.reload.gradle.jetbrainsRuntimeLauncher
 import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
 import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
+import org.jetbrains.compose.reload.gradle.withComposePlugin
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
-import javax.inject.Inject
+import org.jetbrains.kotlin.gradle.tasks.BaseKotlinCompile
 
 open class HotReloadTestTask : AbstractTestTask() {
     @get:Classpath
@@ -68,6 +70,12 @@ open class HotReloadTestTask : AbstractTestTask() {
         classpath.from(project.files { compilation.runtimeDependencyFiles ?: emptyList<Any>() })
         classpath.from(project.files { compilation.output.allOutputs })
         moduleName.set(compilation.compileTaskProvider.flatMap { (it.compilerOptions as KotlinJvmCompilerOptions).moduleName })
+        compilePluginClasspath.from(
+            compilation.compileTaskProvider.map { compileTask ->
+                (compileTask as? BaseKotlinCompile) ?: return@map emptyList()
+                compileTask.pluginClasspath
+            }
+        )
     }
 
     override fun createTestExecuter(): TestExecuter<out HotReloadTestExecutionSpec?>? {
@@ -119,6 +127,9 @@ private fun KotlinTarget.configureDefaultHotReloadTestTask() {
     compilation.defaultSourceSet.dependencies {
         implementation("org.jetbrains.compose:hot-reload-test:${HOT_RELOAD_VERSION}")
         implementation("org.jetbrains.compose:hot-reload-runtime-jvm:${HOT_RELOAD_VERSION}:dev")
+        project.withComposePlugin {
+            implementation(project.extensions.getByType<ComposeExtension>().dependencies.desktop.currentOs)
+        }
     }
 
     val hotReloadTest = project.tasks.register<HotReloadTestTask>(lowerCamelCase(name, "reloadTest"))

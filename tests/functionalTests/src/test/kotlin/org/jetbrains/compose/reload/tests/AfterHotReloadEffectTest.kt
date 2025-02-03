@@ -30,12 +30,12 @@ class AfterHotReloadEffectTest {
             import androidx.compose.ui.unit.*
             import androidx.compose.ui.window.*
             import org.jetbrains.compose.reload.AfterHotReloadEffect
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
             fun main() {
                 val decoy = 0
             
-                underTestApplication {
+                screenshotTestApplication {
                     var invocations by remember { mutableStateOf(0) }
                     var engaged by remember { mutableStateOf(true) }
                     
@@ -102,9 +102,9 @@ class AfterHotReloadEffectTest {
         fixture initialSourceCode """
             import androidx.compose.runtime.*
             import org.jetbrains.compose.reload.AfterHotReloadEffect
-            import org.jetbrains.compose.reload.underTest.*
+            import org.jetbrains.compose.reload.test.*
             
-            fun main() = underTestApplication {
+            fun main() = screenshotTestApplication {
                 AfterHotReloadEffect { sendTestEvent("Servus") }
                 TestText("A")
             }
