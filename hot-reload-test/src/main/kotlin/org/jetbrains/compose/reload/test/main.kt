@@ -60,6 +60,4 @@ private fun executeTest(args: ListIterator<String>) {
     } catch (t: Throwable) {
         exitProcess(if (t is AssertionError) ExitCode.AssertionError.value else ExitCode.ExecutionError.value)
     }
-
-    exitProcess(ExitCode.Success.value)
 }

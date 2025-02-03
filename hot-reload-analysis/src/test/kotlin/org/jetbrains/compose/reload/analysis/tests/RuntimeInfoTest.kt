@@ -8,12 +8,12 @@ import org.jetbrains.compose.reload.analysis.javap
 import org.jetbrains.compose.reload.analysis.render
 import org.jetbrains.compose.reload.core.asFileName
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
-import org.jetbrains.compose.reload.core.testFixtures.CompilerOption
-import org.jetbrains.compose.reload.core.testFixtures.TestEnvironment
 import org.jetbrains.compose.reload.core.testFixtures.WithCompiler
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
 import org.jetbrains.compose.reload.core.testFixtures.withOptions
 import org.jetbrains.compose.reload.core.withClosure
+import org.jetbrains.compose.reload.test.core.CompilerOption
+import org.jetbrains.compose.reload.test.core.TestEnvironment
 import org.jetbrains.kotlin.util.prefixIfNot
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInfo

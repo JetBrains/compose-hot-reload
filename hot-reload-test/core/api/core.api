@@ -1,0 +1,24 @@
+public final class org/jetbrains/compose/reload/test/core/CompilerOption : java/lang/Enum {
+	public static final field GenerateFunctionKeyMetaAnnotations Lorg/jetbrains/compose/reload/test/core/CompilerOption;
+	public static final field OptimizeNonSkippingGroups Lorg/jetbrains/compose/reload/test/core/CompilerOption;
+	public static final field SourceInformation Lorg/jetbrains/compose/reload/test/core/CompilerOption;
+	public final fun getDefault ()Z
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/test/core/CompilerOption;
+	public static fun values ()[Lorg/jetbrains/compose/reload/test/core/CompilerOption;
+}
+
+public final class org/jetbrains/compose/reload/test/core/CompilerOptions {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/test/core/CompilerOptions;
+	public final fun getDefault ()Ljava/util/Map;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/core/InternalHotReloadTestApi : java/lang/annotation/Annotation {
+}
+
+public final class org/jetbrains/compose/reload/test/core/TestEnvironment {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/test/core/TestEnvironment;
+	public final fun getTestOnlyLatestVersions ()Z
+	public final fun getUpdateTestData ()Z
+}
+

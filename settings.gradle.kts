@@ -70,9 +70,10 @@ include(":hot-reload-runtime-api")
 include(":hot-reload-runtime-jvm")
 include(":hot-reload-devtools")
 include(":hot-reload-test")
+include(":hot-reload-test:core")
 include(":hot-reload-test:gradle-plugin")
-include(":tests:functionalTests")
-include(":tests:unitTests")
+include(":hot-reload-test:gradle-testFixtures")
+include(":tests")
 
 
 gradle.beforeProject {

@@ -1,0 +1,243 @@
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/AndroidHotReloadTest : java/lang/annotation/Annotation {
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/CheckScreenshotKt {
+	public static final fun checkScreenshot (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/CopyProjectRecursivelyKt {
+	public static final fun copyProjectRecursively (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/nio/file/Path;)V
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/DefaultAndroidAndJvmBuildSetup : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/DefaultBuildGradleKts : java/lang/annotation/Annotation {
+	public abstract fun paths ()[Ljava/lang/String;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/DefaultSettingsGradleKts : java/lang/annotation/Annotation {
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/DefaultSettingsGradleKtsKt {
+	public static final fun createDefaultSettingsGradleKtsContent (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static synthetic fun createDefaultSettingsGradleKtsContent$default (Lorg/junit/jupiter/api/extension/ExtensionContext;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/FileUtilsKt {
+	public static final fun replaceText (Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/GradleRunner {
+	public fun <init> (Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;)V
+	public synthetic fun <init> (Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/nio/file/Path;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/nio/file/Path;
+	public final fun copy (Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;)Lorg/jetbrains/compose/reload/test/gradle/GradleRunner;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/test/gradle/GradleRunner;Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/test/gradle/GradleRunner;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArguments ()Ljava/util/List;
+	public final fun getGradleHome ()Ljava/nio/file/Path;
+	public final fun getGradleVersion ()Ljava/lang/String;
+	public final fun getProjectRoot ()Ljava/nio/file/Path;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/GradleRunner$ExitCode {
+	public static final field Companion Lorg/jetbrains/compose/reload/test/gradle/GradleRunner$ExitCode$Companion;
+	public static final synthetic fun box-impl (I)Lorg/jetbrains/compose/reload/test/gradle/GradleRunner$ExitCode;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (ILjava/lang/Object;)Z
+	public static final fun equals-impl0 (II)Z
+	public final fun getValue ()I
+	public fun hashCode ()I
+	public static fun hashCode-impl (I)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (I)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()I
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/GradleRunner$ExitCode$Companion {
+	public final fun getSuccess-SnSzujM ()I
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/GradleRunnerKt {
+	public static final fun assertSuccess-44VadP4 (Lorg/jetbrains/compose/reload/test/gradle/GradleRunner$ExitCode;)V
+	public static final fun build (Lorg/jetbrains/compose/reload/test/gradle/GradleRunner;[Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/HotReloadTest : java/lang/annotation/Annotation {
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/HotReloadTestFixture : java/lang/AutoCloseable {
+	public field daemonTestScope Lkotlinx/coroutines/CoroutineScope;
+	public fun close ()V
+	public final fun createReceiveChannel (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getDaemonTestScope ()Lkotlinx/coroutines/CoroutineScope;
+	public final fun getGradleRunner ()Lorg/jetbrains/compose/reload/test/gradle/GradleRunner;
+	public final fun getOrchestration ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationServer;
+	public final fun getProjectDir ()Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;
+	public final fun getProjectMode ()Lorg/jetbrains/compose/reload/test/gradle/ProjectMode;
+	public final fun getTestClassName ()Ljava/lang/String;
+	public final fun getTestMethodName ()Ljava/lang/String;
+	public final fun isDebug ()Z
+	public final fun runTest-VtjQ1oo (JLkotlin/jvm/functions/Function2;)V
+	public static synthetic fun runTest-VtjQ1oo$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;JLkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public final fun runTransaction (Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun sendMessage (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun setDaemonTestScope (Lkotlinx/coroutines/CoroutineScope;)V
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/HotReloadTestFixtureExtensionsKt {
+	public static final fun getDefaultMainKtSourceFile (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;)Ljava/lang/String;
+	public static final fun initialSourceCode (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun launchApplicationAndWait (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun launchApplicationAndWait$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun replaceSourceCode (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun replaceSourceCodeAndReload (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun replaceSourceCodeAndReload (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun replaceSourceCodeAndReload$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun sendTestEvent (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/io/Serializable;Lkotlin/jvm/functions/Function3;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun sendTestEvent$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/io/Serializable;Lkotlin/jvm/functions/Function3;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/LaunchApplicationKt {
+	public static final fun launchApplication (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun launchApplication$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/LaunchDevApplicationKt {
+	public static final fun launchDevApplication (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun launchDevApplication$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public static final fun launchDevApplicationAndWait (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun launchDevApplicationAndWait$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class org/jetbrains/compose/reload/test/gradle/MavenRepositoriesExtension {
+	public static final field Companion Lorg/jetbrains/compose/reload/test/gradle/MavenRepositoriesExtension$Companion;
+	public abstract fun additionalMavenRepositoryDeclarations (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/util/List;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/MavenRepositoriesExtension$Companion {
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/MaxKotlinVersion : java/lang/annotation/Annotation {
+	public abstract fun version ()Ljava/lang/String;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/MinKotlinVersion : java/lang/annotation/Annotation {
+	public abstract fun version ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/ProjectDir {
+	public fun <init> (Ljava/nio/file/Path;Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;)V
+	public synthetic fun <init> (Ljava/nio/file/Path;Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/nio/file/Path;
+	public final fun component2 ()Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;
+	public final fun copy (Ljava/nio/file/Path;Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;)Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;Ljava/nio/file/Path;Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBuildGradleKts ()Ljava/nio/file/Path;
+	public final fun getGradleProperties ()Ljava/nio/file/Path;
+	public final fun getParent ()Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;
+	public final fun getPath ()Ljava/nio/file/Path;
+	public final fun getSettingsGradleKts ()Ljava/nio/file/Path;
+	public fun hashCode ()I
+	public final fun resolve (Ljava/lang/String;)Ljava/nio/file/Path;
+	public final fun subproject (Ljava/lang/String;)Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/ProjectDirKt {
+	public static final fun replaceText (Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun writeText (Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/ProjectMode : java/lang/Enum {
+	public static final field Jvm Lorg/jetbrains/compose/reload/test/gradle/ProjectMode;
+	public static final field Kmp Lorg/jetbrains/compose/reload/test/gradle/ProjectMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/test/gradle/ProjectMode;
+	public static fun values ()[Lorg/jetbrains/compose/reload/test/gradle/ProjectMode;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/ProjectModeKt {
+	public static final fun fold (Lorg/jetbrains/compose/reload/test/gradle/ProjectMode;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+	public static final fun getProjectMode (Lorg/junit/jupiter/api/extension/ExtensionContext;)Lorg/jetbrains/compose/reload/test/gradle/ProjectMode;
+	public static final fun setProjectMode (Lorg/junit/jupiter/api/extension/ExtensionContext;Lorg/jetbrains/compose/reload/test/gradle/ProjectMode;)V
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/RegexAssertionKt {
+	public static final fun assertMatchesRegex (Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun assertMatchesRegex (Ljava/lang/String;Lkotlin/text/Regex;)V
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/TestOnlyDefaultCompilerOptions : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/TestOnlyJvm : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/TestOnlyKmp : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/TestOnlyLatestVersions : java/lang/annotation/Annotation {
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/TestedComposeVersion : java/lang/Enum {
+	public static final field C_1_7 Lorg/jetbrains/compose/reload/test/gradle/TestedComposeVersion;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/test/gradle/TestedComposeVersion;
+	public static fun values ()[Lorg/jetbrains/compose/reload/test/gradle/TestedComposeVersion;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/TestedGradleVersion : java/lang/Enum {
+	public static final field G_8_11 Lorg/jetbrains/compose/reload/test/gradle/TestedGradleVersion;
+	public static final field G_8_7 Lorg/jetbrains/compose/reload/test/gradle/TestedGradleVersion;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/test/gradle/TestedGradleVersion;
+	public static fun values ()[Lorg/jetbrains/compose/reload/test/gradle/TestedGradleVersion;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/TestedKotlinVersion : java/lang/Enum {
+	public static final field KT_2_1_20 Lorg/jetbrains/compose/reload/test/gradle/TestedKotlinVersion;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getVersion ()Lorg/jetbrains/kotlin/tooling/core/KotlinToolingVersion;
+	public fun toString ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/test/gradle/TestedKotlinVersion;
+	public static fun values ()[Lorg/jetbrains/compose/reload/test/gradle/TestedKotlinVersion;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/TransactionDslMarker : java/lang/annotation/Annotation {
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/TransactionScope : kotlinx/coroutines/CoroutineScope {
+	public final fun awaitAck (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun awaitReload (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getCoroutineContext ()Lkotlin/coroutines/CoroutineContext;
+	public final fun getFixture ()Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;
+	public final fun getIncomingMessages ()Lkotlinx/coroutines/channels/ReceiveChannel;
+	public final fun getLogger ()Lorg/slf4j/Logger;
+	public final fun initialSourceCode (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun launchApplicationAndWait (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun launchApplicationAndWait$default (Lorg/jetbrains/compose/reload/test/gradle/TransactionScope;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun launchChildTransaction (Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun launchDevApplicationAndWait (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun launchDevApplicationAndWait$default (Lorg/jetbrains/compose/reload/test/gradle/TransactionScope;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun replaceSourceCode (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun replaceSourceCode (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun replaceSourceCodeAndReload (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun replaceSourceCodeAndReload$default (Lorg/jetbrains/compose/reload/test/gradle/TransactionScope;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun send (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage;)V
+	public final fun sync (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun writeCode (Ljava/lang/String;Ljava/lang/String;)Ljava/nio/file/Path;
+	public static synthetic fun writeCode$default (Lorg/jetbrains/compose/reload/test/gradle/TransactionScope;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/nio/file/Path;
+}
+

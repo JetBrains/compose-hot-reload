@@ -1,5 +1,7 @@
 package org.jetbrains.compose.reload.core.testFixtures
 
+import org.jetbrains.compose.reload.test.core.CompilerOption
+import org.jetbrains.compose.reload.test.core.CompilerOptions
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector

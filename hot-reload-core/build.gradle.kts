@@ -9,6 +9,9 @@ plugins {
 kotlin {
     compilerOptions {
         explicitApi()
+        compilerOptions {
+            optIn.add("org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi")
+        }
     }
 }
 
@@ -16,6 +19,7 @@ dependencies {
     api(deps.slf4j.api)
     compileOnly(deps.coroutines.core)
 
+    testFixturesApi(project(":hot-reload-test:core"))
     testFixturesImplementation(kotlin("tooling-core"))
     testFixturesImplementation(deps.junit.jupiter)
     testFixturesCompileOnly(kotlin("compiler-embeddable"))

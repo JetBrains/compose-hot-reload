@@ -1,3 +1,12 @@
+public final class org/jetbrains/compose/reload/test/CompileAndReloadKt {
+	public static final fun compileAndReload (Ljava/lang/String;)V
+}
+
+public final class org/jetbrains/compose/reload/test/ComposeUtilsKt {
+	public static final fun Group (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+	public static final fun TestText-KmRG4DE (Ljava/lang/String;JLandroidx/compose/runtime/Composer;II)V
+}
+
 public abstract interface annotation class org/jetbrains/compose/reload/test/HotReloadUnitTest : java/lang/annotation/Annotation {
 }
 
@@ -5,7 +14,15 @@ public final class org/jetbrains/compose/reload/test/Main {
 	public static final fun main ([Ljava/lang/String;)V
 }
 
-public final class org/jetbrains/compose/reload/test/ReloadKt {
-	public static final fun compileAndReload (Ljava/lang/String;)V
+public final class org/jetbrains/compose/reload/test/OrchestrationUtilsKt {
+	public static final fun onTestEvent (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+	public static final fun sendLog (Ljava/lang/Object;)V
+	public static final fun sendTestEvent (Ljava/lang/Object;)V
+	public static synthetic fun sendTestEvent$default (Ljava/lang/Object;ILjava/lang/Object;)V
+}
+
+public final class org/jetbrains/compose/reload/test/ScreenshotTestApplicationKt {
+	public static final fun screenshotTestApplication (IIILkotlin/jvm/functions/Function2;)V
+	public static synthetic fun screenshotTestApplication$default (IIILkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 }
 

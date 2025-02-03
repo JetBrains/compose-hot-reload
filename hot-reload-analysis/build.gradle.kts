@@ -6,6 +6,10 @@ plugins {
     `java-test-fixtures`
 }
 
+kotlin.compilerOptions {
+    optIn.add("org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi")
+}
+
 dependencies {
     implementation(project(":hot-reload-core"))
 

@@ -1,5 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.compose.reload.test.HotReloadTestTask
+import org.jetbrains.compose.reload.test.HotReloadUnitTestTask
 
 plugins {
     kotlin("multiplatform")
@@ -17,14 +17,14 @@ kotlin {
         implementation(compose.runtime)
     }
 
-    sourceSets.getByName("jvmReloadTest").dependencies {
+    sourceSets.getByName("jvmReloadUnitTest").dependencies {
         implementation(kotlin("test"))
         implementation(deps.coroutines.test)
         implementation("ch.qos.logback:logback-classic:1.5.16")
     }
 }
 
-tasks.withType<HotReloadTestTask>().configureEach {
+tasks.withType<HotReloadUnitTestTask>().configureEach {
     testLogging {
         events = setOf(
             TestLogEvent.STARTED,

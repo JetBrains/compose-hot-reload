@@ -4,7 +4,7 @@ import org.jetbrains.compose.reload.analysis.plusAssign
 import org.jetbrains.compose.reload.analysis.renderRuntimeInstructionTree
 import org.jetbrains.compose.reload.core.asFileName
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
-import org.jetbrains.compose.reload.core.testFixtures.TestEnvironment
+import org.jetbrains.compose.reload.test.core.TestEnvironment
 import org.jetbrains.compose.reload.core.testFixtures.WithCompiler
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
 import org.junit.jupiter.api.Test

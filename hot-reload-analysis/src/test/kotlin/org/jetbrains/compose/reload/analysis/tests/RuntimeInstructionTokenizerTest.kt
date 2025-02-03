@@ -7,9 +7,9 @@ import org.jetbrains.compose.reload.analysis.withIndent
 import org.jetbrains.compose.reload.core.asFileName
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
-import org.jetbrains.compose.reload.core.testFixtures.TestEnvironment
 import org.jetbrains.compose.reload.core.testFixtures.WithCompiler
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
+import org.jetbrains.compose.reload.test.core.TestEnvironment
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInfo
 import kotlin.io.path.Path

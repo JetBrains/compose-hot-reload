@@ -1,3 +1,17 @@
+public final class org/jetbrains/compose/reload/test/FunctionalTestTaskKt$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public final synthetic fun execute (Ljava/lang/Object;)V
+}
+
+public abstract class org/jetbrains/compose/reload/test/HotReloadFunctionalTestTask : org/gradle/api/tasks/testing/Test {
+	public fun <init> ()V
+	public final fun getCompilation ()Lorg/gradle/api/provider/Property;
+	public final fun getGradlewWrapperBatFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public final fun getGradlewWrapperFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public final fun getGradlewWrapperJarFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public final fun getScreenshotsDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+}
+
 public final class org/jetbrains/compose/reload/test/HotReloadTestExecutionSpec : org/gradle/api/internal/tasks/testing/TestExecutionSpec {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
@@ -12,7 +26,7 @@ public final class org/jetbrains/compose/reload/test/HotReloadTestPlugin : org/g
 	public fun apply (Lorg/gradle/api/Project;)V
 }
 
-public class org/jetbrains/compose/reload/test/HotReloadTestTask : org/gradle/api/tasks/testing/AbstractTestTask {
+public class org/jetbrains/compose/reload/test/HotReloadUnitTestTask : org/gradle/api/tasks/testing/AbstractTestTask {
 	public fun <init> ()V
 	public final fun compilation (Lorg/jetbrains/kotlin/gradle/plugin/KotlinCompilation;)V
 	protected fun createTestExecuter ()Lorg/gradle/api/internal/tasks/testing/TestExecuter;

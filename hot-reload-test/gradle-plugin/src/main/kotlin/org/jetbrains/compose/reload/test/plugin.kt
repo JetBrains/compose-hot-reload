@@ -8,7 +8,8 @@ import org.jetbrains.compose.reload.gradle.withKotlinPlugin
 class HotReloadTestPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.withKotlinPlugin {
-            target.configureHotReloadTestTasks()
+            target.configureHotReloadUnitTestTasks()
+            target.configureGradleTestTasks()
         }
     }
 }
