@@ -12,6 +12,7 @@ import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.HotReloadProperty.DevToolsClasspath
 import org.jetbrains.compose.reload.gradle.composeHotReloadAgentConfiguration
 import org.jetbrains.compose.reload.gradle.composeHotReloadAgentJar
+import org.jetbrains.compose.reload.gradle.createDebuggerJvmArguments
 import org.jetbrains.compose.reload.gradle.jetbrainsRuntimeLauncher
 import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
 import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
@@ -126,9 +127,21 @@ internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<Ko
             .orElse(project.providers.systemProperty("mainClass"))
     )
 
+    val intellijDebuggerDispatchPort = project.providers
+        .environmentVariable(HotReloadProperty.IntelliJDebuggerDispatchPort.key)
+        .orNull?.toIntOrNull()
+
     doFirst {
         if (!mainClass.isPresent) {
             throw IllegalArgumentException(ErrorMessages.missingMainClassProperty())
+        }
+
+        if (intellijDebuggerDispatchPort != null) {
+            /*
+            Provisioning a new debug session. This will return jvm args for the debug agent.
+            Since we would like to debug our hot reload agent, we ensure that the debug agent is listed first.
+             */
+            jvmArgs = createDebuggerJvmArguments(intellijDebuggerDispatchPort).toList() + jvmArgs.orEmpty()
         }
 
         logger.info("Running ${mainClass.get()}...")

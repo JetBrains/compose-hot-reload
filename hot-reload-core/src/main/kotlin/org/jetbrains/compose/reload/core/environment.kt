@@ -24,6 +24,29 @@ public enum class HotReloadProperty(public val key: String) {
 
     DevToolsEnabled("compose.reload.devToolsEnabled"),
     DevToolsClasspath("compose.reload.devToolsClasspath"),
+
+    /**
+     * Note: Expected as an environment variable, as this is expected to be transitively available
+     * to all child processes.
+     *
+     * Currently, launching applications with hot reload might be done through a couple of
+     * intermediate processes. For example, launching a test will go through a chain like
+     *
+     * ```
+     * intellij --launches--> Gradle --launches--> JVM(Junit) --launches--> Gradle
+     * --launches--> JVM (Application)
+     * ```
+     *
+     * When a run configuration is started in 'debug mode' intellij will set the system property
+     * 'idea.debugger.dispatch.port'. This will indicate that a server is listening at this port, which can
+     * be used to provision debugging servers.
+     *
+     * This debug port will then be made available as an environment variable using this key.
+     * Launching the final application will respect this port, if present and provision a debugging session.
+     *
+     * This will allow a test to be deeply debuggable by just pressing 'Debug'
+     */
+    IntelliJDebuggerDispatchPort("compose.reload.idea.debugger.dispatch.port"),
     ;
 
     override fun toString(): String {
@@ -54,6 +77,11 @@ public object HotReloadEnvironment {
 
     public val devToolsEnabled: Boolean = systemBoolean(HotReloadProperty.DevToolsEnabled, true)
     public val devToolsClasspath: List<Path>? = systemFiles(HotReloadProperty.DevToolsClasspath)
+
+    /**
+     * @see HotReloadProperty.IntelliJDebuggerDispatchPort
+     */
+    public val intellijDebuggerDispatchPort: Int? = environmentInt(HotReloadProperty.IntelliJDebuggerDispatchPort)
 }
 
 public fun system(property: HotReloadProperty): String? = getProperty(property.key)
@@ -72,3 +100,9 @@ public inline fun <reified T : Enum<T>> systemEnum(property: HotReloadProperty):
 
 public inline fun <reified T : Enum<T>> systemEnum(property: HotReloadProperty, defaultValue: T): T =
     systemEnum<T>(property) ?: defaultValue
+
+public fun environment(property: HotReloadProperty): String? = System.getenv(property.key)
+
+public fun environment(property: HotReloadProperty, default: String): String = environment(property) ?: default
+
+public fun environmentInt(property: HotReloadProperty): Int? = environment(property)?.toInt()

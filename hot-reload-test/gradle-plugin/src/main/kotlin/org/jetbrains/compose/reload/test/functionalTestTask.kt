@@ -5,16 +5,14 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaBasePlugin.VERIFICATION_GROUP
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.IgnoreEmptyDirectories
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
+import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.gradle.files
 import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
 import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
@@ -51,6 +49,13 @@ internal fun Project.configureGradleTestTasks() {
             task.screenshotsDirectory.map { it.asFile.absolutePath }.string()
         )
 
+        intellijDebuggerDispatchPort.orNull?.let { port ->
+            task.environment(HotReloadProperty.IntelliJDebuggerDispatchPort.key, port.toString())
+            task.doFirst {
+                task.systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "1")
+            }
+        }
+
         task.classpath = project.files {
             listOf(task.compilation.get().output.allOutputs, task.compilation.get().runtimeDependencyFiles)
         }
@@ -61,7 +66,9 @@ internal fun Project.configureGradleTestTasks() {
 
         task.screenshotsDirectory.convention(
             task.compilation.map { compilation ->
-                project.layout.projectDirectory.dir("src/${lowerCamelCase(compilation.target.name, compilation.name)}/resources/screenshots")
+                project.layout.projectDirectory.dir(
+                    "src/${lowerCamelCase(compilation.target.name, compilation.name)}/resources/screenshots"
+                )
             }
         )
     }

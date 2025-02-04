@@ -62,8 +62,7 @@ open class HotReloadUnitTestTask : AbstractTestTask() {
     internal val launcher = project.jetbrainsRuntimeLauncher()
 
     @get:Internal
-    internal val intellijDebuggerDispatchPort = project.providers.systemProperty("idea.debugger.dispatch.port")
-        .map { it.toInt() }
+    internal val intellijDebuggerDispatchPort = project.intellijDebuggerDispatchPort
 
     fun compilation(compilation: KotlinCompilation<*>) {
         compileClasspath.from(project.files { compilation.compileDependencyFiles })

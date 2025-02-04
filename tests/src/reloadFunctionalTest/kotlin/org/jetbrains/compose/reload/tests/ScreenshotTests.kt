@@ -2,7 +2,6 @@
 
 package org.jetbrains.compose.reload.tests
 
-import org.jetbrains.annotations.Debug
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.AndroidHotReloadTest
@@ -13,13 +12,11 @@ import org.jetbrains.compose.reload.test.gradle.TestOnlyDefaultCompilerOptions
 import org.jetbrains.compose.reload.test.gradle.TestOnlyKmp
 import org.jetbrains.compose.reload.test.gradle.TestOnlyLatestVersions
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
-import org.jetbrains.compose.reload.test.gradle.copyProjectRecursively
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCodeAndReload
 import org.jetbrains.compose.reload.test.gradle.sendTestEvent
 import org.jetbrains.compose.reload.utils.HostIntegrationTest
-import kotlin.io.path.Path
 
 class ScreenshotTests {
     private val logger = createLogger()

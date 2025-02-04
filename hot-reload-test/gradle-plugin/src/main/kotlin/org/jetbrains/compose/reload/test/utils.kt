@@ -1,5 +1,6 @@
 package org.jetbrains.compose.reload.test
 
+import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import java.io.Serializable
 
@@ -28,3 +29,6 @@ internal fun lowerCamelCase(vararg parts: String?): String {
         }
     }
 }
+
+internal val Project.intellijDebuggerDispatchPort
+    get() = providers.systemProperty("idea.debugger.dispatch.port").map { it.toInt() }
