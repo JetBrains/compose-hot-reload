@@ -1,6 +1,40 @@
 public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/AndroidHotReloadTest : java/lang/annotation/Annotation {
 }
 
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/BuildGradleKts : java/lang/annotation/Annotation {
+	public abstract fun path ()Ljava/lang/String;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/BuildGradleKts$Container : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lorg/jetbrains/compose/reload/test/gradle/BuildGradleKts;
+}
+
+public abstract interface class org/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension {
+	public abstract fun commonDependencies (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun composeCompiler (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun footer (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun header (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun javaExecConfigure (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun jvmMainDependencies (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun kotlin (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun plugins (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension$DefaultImpls {
+	public static fun commonDependencies (Lorg/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static fun composeCompiler (Lorg/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static fun footer (Lorg/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static fun header (Lorg/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static fun javaExecConfigure (Lorg/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static fun jvmMainDependencies (Lorg/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static fun kotlin (Lorg/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static fun plugins (Lorg/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtensionKt {
+	public static final fun renderBuildGradleKts (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+}
+
 public final class org/jetbrains/compose/reload/test/gradle/CheckScreenshotKt {
 	public static final fun checkScreenshot (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -10,10 +44,6 @@ public final class org/jetbrains/compose/reload/test/gradle/CopyProjectRecursive
 }
 
 public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/DefaultAndroidAndJvmBuildSetup : java/lang/annotation/Annotation {
-}
-
-public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/DefaultBuildGradleKts : java/lang/annotation/Annotation {
-	public abstract fun paths ()[Ljava/lang/String;
 }
 
 public final class org/jetbrains/compose/reload/test/gradle/FileUtilsKt {

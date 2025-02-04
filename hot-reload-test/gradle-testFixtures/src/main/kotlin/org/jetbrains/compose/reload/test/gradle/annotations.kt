@@ -24,3 +24,6 @@ public annotation class TestOnlyLatestVersions
 public annotation class MinKotlinVersion(val version: String)
 
 public annotation class MaxKotlinVersion(val version: String)
+
+@Repeatable
+public annotation class BuildGradleKts(val path: String)

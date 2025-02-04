@@ -1,8 +1,7 @@
 package org.jetbrains.compose.reload.tests.gradle
 
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
-import org.jetbrains.compose.reload.test.gradle.DefaultBuildGradleKts
-import org.jetbrains.compose.reload.utils.HostIntegrationTest
+import org.jetbrains.compose.reload.test.gradle.BuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.ProjectMode
@@ -13,6 +12,7 @@ import org.jetbrains.compose.reload.test.gradle.fold
 import org.jetbrains.compose.reload.test.gradle.launchApplicationAndWait
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCodeAndReload
 import org.jetbrains.compose.reload.test.gradle.writeText
+import org.jetbrains.compose.reload.utils.HostIntegrationTest
 import kotlin.io.path.appendLines
 import kotlin.io.path.appendText
 import kotlin.io.path.createParentDirectories
@@ -21,7 +21,7 @@ import kotlin.io.path.writeText
 class ProjectDependencyTest {
     @HotReloadTest
     @HostIntegrationTest
-    @DefaultBuildGradleKts("app")
+    @BuildGradleKts("app")
     @TestOnlyDefaultCompilerOptions
     @TestOnlyLatestVersions
     fun `test - change in dependency project`(
@@ -31,7 +31,7 @@ class ProjectDependencyTest {
 
     @HotReloadTest
     @HostIntegrationTest
-    @DefaultBuildGradleKts("app")
+    @BuildGradleKts("app")
     @TestOnlyDefaultCompilerOptions
     @TestOnlyLatestVersions
     fun `test - change in dependency project - missing plugin in dependency project`(

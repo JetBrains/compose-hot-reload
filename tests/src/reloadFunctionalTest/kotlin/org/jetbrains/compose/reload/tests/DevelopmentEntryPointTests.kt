@@ -1,6 +1,5 @@
 package org.jetbrains.compose.reload.tests
 
-import org.jetbrains.compose.reload.test.gradle.DefaultBuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.TestOnlyLatestVersions
@@ -14,7 +13,6 @@ import kotlin.io.path.writeText
 class DevelopmentEntryPointTests {
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     fun `test - simple jvm project`(fixture: HotReloadTestFixture) = fixture.runTest {
         val mainKt = fixture.projectDir

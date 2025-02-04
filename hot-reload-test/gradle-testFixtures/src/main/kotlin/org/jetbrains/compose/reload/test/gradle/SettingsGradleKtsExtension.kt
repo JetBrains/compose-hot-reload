@@ -25,34 +25,22 @@ public interface SettingsGradleKtsRepositoriesExtension {
 }
 
 @InternalHotReloadTestApi
-public fun renderSettingsGradleKts(context: ExtensionContext): String {
-    val values = mutableMapOf<String, MutableList<String>>()
-    fun push(key: String, value: String?) {
-        if (value == null) return
-        values.getOrPut(key) { mutableListOf() }.add(value)
-    }
-
+public fun renderSettingsGradleKts(context: ExtensionContext): String = settingsGradleKtsTemplate.renderOrThrow {
     ServiceLoader.load(SettingsGradleKtsRepositoriesExtension::class.java).toList().forEach { extension ->
-        push(pluginManagementRepositoriesKey, extension.repositories(context))
-        push(dependencyResolutionManagementRepositoriesKey, extension.repositories(context))
+        pluginManagementRepositoriesKey(extension.repositories(context))
+        dependencyResolutionManagementRepositoriesKey(extension.repositories(context))
     }
 
     ServiceLoader.load(SettingsGradleKtsExtension::class.java).toList().forEach { extension ->
-        push(headerKey, extension.header(context))
-        push(pluginManagementKey, extension.pluginManagement(context))
-        push(pluginManagementPluginsKey, extension.pluginManagementPlugins(context))
-        push(pluginManagementRepositoriesKey, extension.pluginManagementRepositories(context))
-        push(pluginsKey, extension.plugins(context))
-        push(dependencyResolutionManagementKey, extension.dependencyResolutionManagement(context))
-        push(
-            dependencyResolutionManagementRepositoriesKey,
-            extension.dependencyResolutionManagementRepositories(context)
-        )
-
-        push(footerKey, extension.footer(context))
+        headerKey(extension.header(context))
+        pluginManagementKey(extension.pluginManagement(context))
+        pluginManagementPluginsKey(extension.pluginManagementPlugins(context))
+        pluginManagementRepositoriesKey(extension.pluginManagementRepositories(context))
+        pluginsKey(extension.plugins(context))
+        dependencyResolutionManagementKey(extension.dependencyResolutionManagement(context))
+        dependencyResolutionManagementRepositoriesKey(extension.dependencyResolutionManagementRepositories(context))
+        footerKey(extension.footer(context))
     }
-
-    return settingsGradleKtsTemplate.render(values).getOrThrow()
 }
 
 private const val headerKey = "header"

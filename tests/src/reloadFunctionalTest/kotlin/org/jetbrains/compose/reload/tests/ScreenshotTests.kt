@@ -2,28 +2,29 @@
 
 package org.jetbrains.compose.reload.tests
 
+import org.jetbrains.annotations.Debug
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.AndroidHotReloadTest
 import org.jetbrains.compose.reload.test.gradle.DefaultAndroidAndJvmBuildSetup
-import org.jetbrains.compose.reload.test.gradle.DefaultBuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.TestOnlyDefaultCompilerOptions
 import org.jetbrains.compose.reload.test.gradle.TestOnlyKmp
 import org.jetbrains.compose.reload.test.gradle.TestOnlyLatestVersions
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
+import org.jetbrains.compose.reload.test.gradle.copyProjectRecursively
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCodeAndReload
 import org.jetbrains.compose.reload.test.gradle.sendTestEvent
 import org.jetbrains.compose.reload.utils.HostIntegrationTest
+import kotlin.io.path.Path
 
 class ScreenshotTests {
     private val logger = createLogger()
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     fun `test - simple change`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.*
@@ -49,7 +50,6 @@ class ScreenshotTests {
 
     @HostIntegrationTest
     @HotReloadTest
-    @DefaultBuildGradleKts
     fun `test - retained state`(fixture: HotReloadTestFixture) = fixture.runTest {
         val d = "\$"
         fixture initialSourceCode """
@@ -107,7 +107,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     fun `test - add button`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
@@ -141,7 +140,6 @@ class ScreenshotTests {
 
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     fun `test - add remembered state`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
@@ -182,7 +180,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     @TestOnlyKmp
     fun `test - update remembered value`(fixture: HotReloadTestFixture) = fixture.runTest {
@@ -217,7 +214,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     fun `test - change lambda from non-capturing to capturing`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
@@ -264,7 +260,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     fun `test - change lambda from non-capturing to capturing - wrapper`(
         fixture: HotReloadTestFixture
@@ -309,7 +304,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     fun `test - add top level value`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
@@ -340,7 +334,6 @@ class ScreenshotTests {
     @HotReloadTest
     @TestOnlyKmp
     @TestOnlyLatestVersions
-    @DefaultBuildGradleKts
     fun `test - changing spacedBy`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.Arrangement
@@ -373,7 +366,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     @TestOnlyKmp
     fun `test - change in canvas draw coordinates`(fixture: HotReloadTestFixture) = fixture.runTest {
@@ -416,7 +408,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     fun `test - remember in two composables`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
@@ -470,7 +461,6 @@ class ScreenshotTests {
 
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     @TestOnlyDefaultCompilerOptions
     fun `test - change line numbers - by adding whitespace`(fixture: HotReloadTestFixture) = fixture.runTest {
@@ -509,7 +499,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     @TestOnlyDefaultCompilerOptions
     fun `test - change line numbers - by adding whitespace and code`(fixture: HotReloadTestFixture) = fixture.runTest {
@@ -555,7 +544,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     @TestOnlyDefaultCompilerOptions
     fun `test - if branch`(fixture: HotReloadTestFixture) = fixture.runTest {
@@ -610,7 +598,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     @TestOnlyDefaultCompilerOptions
     fun `test - add enum case`(fixture: HotReloadTestFixture) = fixture.runTest {
@@ -654,7 +641,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     @TestOnlyDefaultCompilerOptions
     fun `test - change in static field`(fixture: HotReloadTestFixture) = fixture.runTest {

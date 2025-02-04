@@ -7,6 +7,30 @@ public interface Template {
     public class RenderFailure(message: String) : IllegalArgumentException(message)
 }
 
+public interface TemplateBuilder {
+    public fun push(key: String, value: Any?)
+    public fun set(key: String, value: Any?)
+    public operator fun String.invoke(value: Any?) = push(this, value)
+}
+
+public inline fun Template.render(values: TemplateBuilder.() -> Unit): Try<String> {
+    val values = mutableMapOf<String, MutableList<Any?>>()
+    object : TemplateBuilder {
+        override fun push(key: String, value: Any?) {
+            values.getOrPut(key) { mutableListOf() }.add(value)
+        }
+
+        override fun set(key: String, value: Any?) {
+            values.set(key, mutableListOf(value))
+        }
+    }.values()
+    return render(values)
+}
+
+public inline fun Template.renderOrThrow(values: TemplateBuilder.() -> Unit): String {
+    return render(values).getOrThrow()
+}
+
 public fun Template.render(vararg values: Pair<String, Any?>): Try<String> {
     val map = mutableMapOf<String, MutableList<Any?>>()
     values.forEach { (key, value) ->
