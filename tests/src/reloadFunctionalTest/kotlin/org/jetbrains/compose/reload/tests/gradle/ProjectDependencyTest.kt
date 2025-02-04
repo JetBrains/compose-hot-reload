@@ -2,7 +2,6 @@ package org.jetbrains.compose.reload.tests.gradle
 
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.test.gradle.DefaultBuildGradleKts
-import org.jetbrains.compose.reload.test.gradle.DefaultSettingsGradleKts
 import org.jetbrains.compose.reload.utils.HostIntegrationTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
@@ -22,7 +21,6 @@ import kotlin.io.path.writeText
 class ProjectDependencyTest {
     @HotReloadTest
     @HostIntegrationTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts("app")
     @TestOnlyDefaultCompilerOptions
     @TestOnlyLatestVersions
@@ -33,7 +31,6 @@ class ProjectDependencyTest {
 
     @HotReloadTest
     @HostIntegrationTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts("app")
     @TestOnlyDefaultCompilerOptions
     @TestOnlyLatestVersions

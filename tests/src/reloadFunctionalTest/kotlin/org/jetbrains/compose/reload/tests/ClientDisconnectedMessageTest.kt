@@ -4,7 +4,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
 import org.jetbrains.compose.reload.test.gradle.DefaultBuildGradleKts
-import org.jetbrains.compose.reload.test.gradle.DefaultSettingsGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.TestOnlyKmp
@@ -18,7 +17,6 @@ class ClientDisconnectedMessageTest {
     @HotReloadTest
     @TestOnlyLatestVersions
     @TestOnlyKmp
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     fun `send shutdown request - receive ClientDisconnected`(
         testFixture: HotReloadTestFixture

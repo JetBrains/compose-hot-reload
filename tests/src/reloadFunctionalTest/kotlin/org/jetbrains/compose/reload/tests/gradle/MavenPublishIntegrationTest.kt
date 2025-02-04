@@ -5,8 +5,12 @@ import org.jetbrains.compose.reload.test.gradle.GradleRunner
 import org.jetbrains.compose.reload.test.gradle.TestedGradleVersion
 import org.jetbrains.compose.reload.test.gradle.assertSuccess
 import org.jetbrains.compose.reload.test.gradle.build
-import org.jetbrains.compose.reload.test.gradle.createDefaultSettingsGradleKtsContent
+import org.jetbrains.compose.reload.test.gradle.renderSettingsGradleKts
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.api.extension.ParameterContext
+import org.junit.jupiter.api.extension.ParameterResolver
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import kotlin.io.path.createParentDirectories
@@ -19,7 +23,9 @@ class MavenPublishIntegrationTest {
     }
 
     @Test
-    fun `test - publish with compose hot reload plugin applied - jvm`(@TempDir dir: Path) = runTest(timeout = timeout) {
+    fun `test - publish with compose hot reload plugin applied - jvm`(
+        @TempDir dir: Path, @DefaultSettingsGradleKts settingsGradleKts: String
+    ) = runTest(timeout = timeout) {
         dir.resolve("build.gradle.kts").writeText(
             """
             plugins {
@@ -53,7 +59,7 @@ class MavenPublishIntegrationTest {
             """.trimIndent()
         )
 
-        dir.resolve("settings.gradle.kts").writeText(createDefaultSettingsGradleKtsContent())
+        dir.resolve("settings.gradle.kts").writeText(settingsGradleKts)
         dir.resolve("src/main/kotlin/Main.kt").createParentDirectories().writeText("fun main() {}")
 
         GradleRunner(
@@ -63,7 +69,9 @@ class MavenPublishIntegrationTest {
     }
 
     @Test
-    fun `test - publish with compose hot reload plugin applied - kmp`(@TempDir dir: Path) = runTest(timeout = timeout) {
+    fun `test - publish with compose hot reload plugin applied - kmp`(
+        @TempDir dir: Path, @DefaultSettingsGradleKts settingsGradleKts: String
+    ) = runTest(timeout = timeout) {
         dir.resolve("build.gradle.kts").writeText(
             """
             plugins {
@@ -93,12 +101,32 @@ class MavenPublishIntegrationTest {
             """.trimIndent()
         )
 
-        dir.resolve("settings.gradle.kts").writeText(createDefaultSettingsGradleKtsContent())
+        dir.resolve("settings.gradle.kts").writeText(settingsGradleKts)
         dir.resolve("src/main/kotlin/Main.kt").createParentDirectories().writeText("fun main() {}")
 
         GradleRunner(
             projectRoot = dir,
             gradleVersion = TestedGradleVersion.entries.last().version
         ).build(":publishAllPublicationsToLocalRepository").assertSuccess()
+    }
+}
+
+@ExtendWith(DefaultSettingsGradleKtsExtension::class)
+private annotation class DefaultSettingsGradleKts
+
+private class DefaultSettingsGradleKtsExtension : ParameterResolver {
+    override fun supportsParameter(
+        parameterContext: ParameterContext,
+        extensionContext: ExtensionContext
+    ): Boolean {
+        return parameterContext.parameter.type == String::class.java &&
+            parameterContext.parameter.isAnnotationPresent(DefaultSettingsGradleKts::class.java)
+    }
+
+    override fun resolveParameter(
+        parameterContext: ParameterContext,
+        extensionContext: ExtensionContext
+    ): Any? {
+        return renderSettingsGradleKts(extensionContext)
     }
 }

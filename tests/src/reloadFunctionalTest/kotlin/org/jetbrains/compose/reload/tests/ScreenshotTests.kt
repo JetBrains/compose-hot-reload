@@ -7,8 +7,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.AndroidHotReloadTest
 import org.jetbrains.compose.reload.test.gradle.DefaultAndroidAndJvmBuildSetup
 import org.jetbrains.compose.reload.test.gradle.DefaultBuildGradleKts
-import org.jetbrains.compose.reload.test.gradle.DefaultSettingsGradleKts
-import org.jetbrains.compose.reload.utils.HostIntegrationTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.TestOnlyDefaultCompilerOptions
@@ -19,12 +17,12 @@ import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCodeAndReload
 import org.jetbrains.compose.reload.test.gradle.sendTestEvent
+import org.jetbrains.compose.reload.utils.HostIntegrationTest
 
 class ScreenshotTests {
     private val logger = createLogger()
 
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     fun `test - simple change`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
@@ -51,7 +49,6 @@ class ScreenshotTests {
 
     @HostIntegrationTest
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     fun `test - retained state`(fixture: HotReloadTestFixture) = fixture.runTest {
         val d = "\$"
@@ -89,7 +86,6 @@ class ScreenshotTests {
     }
 
     @AndroidHotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultAndroidAndJvmBuildSetup
     fun `test - kmp with android and jvm`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
@@ -111,7 +107,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     fun `test - add button`(fixture: HotReloadTestFixture) = fixture.runTest {
@@ -146,7 +141,6 @@ class ScreenshotTests {
 
 
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     fun `test - add remembered state`(fixture: HotReloadTestFixture) = fixture.runTest {
@@ -188,7 +182,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     @TestOnlyKmp
@@ -224,7 +217,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     fun `test - change lambda from non-capturing to capturing`(fixture: HotReloadTestFixture) = fixture.runTest {
@@ -272,7 +264,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     fun `test - change lambda from non-capturing to capturing - wrapper`(
@@ -318,7 +309,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     fun `test - add top level value`(fixture: HotReloadTestFixture) = fixture.runTest {
@@ -350,7 +340,6 @@ class ScreenshotTests {
     @HotReloadTest
     @TestOnlyKmp
     @TestOnlyLatestVersions
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     fun `test - changing spacedBy`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
@@ -384,7 +373,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     @TestOnlyKmp
@@ -428,7 +416,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     fun `test - remember in two composables`(fixture: HotReloadTestFixture) = fixture.runTest {
@@ -483,7 +470,6 @@ class ScreenshotTests {
 
 
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     @TestOnlyDefaultCompilerOptions
@@ -523,7 +509,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     @TestOnlyDefaultCompilerOptions
@@ -570,7 +555,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     @TestOnlyDefaultCompilerOptions
@@ -626,7 +610,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     @TestOnlyDefaultCompilerOptions
@@ -671,7 +654,6 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     @TestOnlyLatestVersions
     @TestOnlyDefaultCompilerOptions

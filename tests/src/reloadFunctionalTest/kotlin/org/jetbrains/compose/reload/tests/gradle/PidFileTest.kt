@@ -4,7 +4,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIRendered
 import org.jetbrains.compose.reload.test.gradle.DefaultBuildGradleKts
-import org.jetbrains.compose.reload.test.gradle.DefaultSettingsGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.TestOnlyDefaultCompilerOptions
@@ -24,7 +23,6 @@ class PidFileTest {
     @TestOnlyDefaultCompilerOptions
     @TestOnlyLatestVersions
     @DefaultBuildGradleKts
-    @DefaultSettingsGradleKts
     fun `test - pid file`(fixture: HotReloadTestFixture) = fixture.runTest {
         val pidFile = fixture.projectDir.resolve("build/run/jvmMain/jvmRun.pid")
 

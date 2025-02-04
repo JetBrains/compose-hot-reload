@@ -2,7 +2,6 @@ package org.jetbrains.compose.reload.tests
 
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.DefaultBuildGradleKts
-import org.jetbrains.compose.reload.test.gradle.DefaultSettingsGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.TestOnlyLatestVersions
@@ -19,7 +18,6 @@ class ErrorRecoveryTests {
     @HotReloadTest
     @TestOnlyLatestVersions
     @DefaultBuildGradleKts
-    @DefaultSettingsGradleKts
     fun `good - bad - good`(fixture: HotReloadTestFixture) = fixture.runTest {
         val code = fixture.initialSourceCode(
             """
@@ -49,7 +47,6 @@ class ErrorRecoveryTests {
     @HotReloadTest
     @TestOnlyLatestVersions
     @DefaultBuildGradleKts
-    @DefaultSettingsGradleKts
     fun `illegal code change - with recovery`(fixture: HotReloadTestFixture) = fixture.runTest {
         val d = "\$"
         val code = fixture.initialSourceCode(

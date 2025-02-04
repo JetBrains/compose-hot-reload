@@ -16,14 +16,6 @@ public abstract interface annotation class org/jetbrains/compose/reload/test/gra
 	public abstract fun paths ()[Ljava/lang/String;
 }
 
-public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/DefaultSettingsGradleKts : java/lang/annotation/Annotation {
-}
-
-public final class org/jetbrains/compose/reload/test/gradle/DefaultSettingsGradleKtsKt {
-	public static final fun createDefaultSettingsGradleKtsContent (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public static synthetic fun createDefaultSettingsGradleKtsContent$default (Lorg/junit/jupiter/api/extension/ExtensionContext;ILjava/lang/Object;)Ljava/lang/String;
-}
-
 public final class org/jetbrains/compose/reload/test/gradle/FileUtilsKt {
 	public static final fun replaceText (Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;)V
 }
@@ -116,14 +108,6 @@ public final class org/jetbrains/compose/reload/test/gradle/LaunchDevApplication
 	public static synthetic fun launchDevApplicationAndWait$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
-public abstract interface class org/jetbrains/compose/reload/test/gradle/MavenRepositoriesExtension {
-	public static final field Companion Lorg/jetbrains/compose/reload/test/gradle/MavenRepositoriesExtension$Companion;
-	public abstract fun additionalMavenRepositoryDeclarations (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/util/List;
-}
-
-public final class org/jetbrains/compose/reload/test/gradle/MavenRepositoriesExtension$Companion {
-}
-
 public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/MaxKotlinVersion : java/lang/annotation/Annotation {
 	public abstract fun version ()Ljava/lang/String;
 }
@@ -170,9 +154,55 @@ public final class org/jetbrains/compose/reload/test/gradle/ProjectModeKt {
 	public static final fun setProjectMode (Lorg/junit/jupiter/api/extension/ExtensionContext;Lorg/jetbrains/compose/reload/test/gradle/ProjectMode;)V
 }
 
+public abstract interface class org/jetbrains/compose/reload/test/gradle/ProjectSetupExtension {
+	public abstract fun setupProject (Lorg/junit/jupiter/api/extension/ExtensionContext;)Lorg/jetbrains/compose/reload/test/gradle/ProjectSetupExtension$Result;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/ProjectSetupExtension$Result : java/lang/Enum {
+	public static final field Break Lorg/jetbrains/compose/reload/test/gradle/ProjectSetupExtension$Result;
+	public static final field Continue Lorg/jetbrains/compose/reload/test/gradle/ProjectSetupExtension$Result;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/test/gradle/ProjectSetupExtension$Result;
+	public static fun values ()[Lorg/jetbrains/compose/reload/test/gradle/ProjectSetupExtension$Result;
+}
+
 public final class org/jetbrains/compose/reload/test/gradle/RegexAssertionKt {
 	public static final fun assertMatchesRegex (Ljava/lang/String;Ljava/lang/String;)V
 	public static final fun assertMatchesRegex (Ljava/lang/String;Lkotlin/text/Regex;)V
+}
+
+public abstract interface class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension {
+	public abstract fun dependencyResolutionManagement (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun dependencyResolutionManagementRepositories (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun footer (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun header (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun pluginManagement (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun pluginManagementPlugins (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun pluginManagementRepositories (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun plugins (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension$DefaultImpls {
+	public static fun dependencyResolutionManagement (Lorg/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static fun dependencyResolutionManagementRepositories (Lorg/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static fun footer (Lorg/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static fun header (Lorg/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static fun pluginManagement (Lorg/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static fun pluginManagementPlugins (Lorg/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static fun pluginManagementRepositories (Lorg/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public static fun plugins (Lorg/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtensionKt {
+	public static final fun renderSettingsGradleKts (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+}
+
+public abstract interface class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsRepositoriesExtension {
+	public abstract fun repositories (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsRepositoriesExtension$DefaultImpls {
+	public static fun repositories (Lorg/jetbrains/compose/reload/test/gradle/SettingsGradleKtsRepositoriesExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 }
 
 public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/TestOnlyDefaultCompilerOptions : java/lang/annotation/Annotation {

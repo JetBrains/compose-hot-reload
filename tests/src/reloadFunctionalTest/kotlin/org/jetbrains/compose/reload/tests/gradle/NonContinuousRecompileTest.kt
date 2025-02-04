@@ -3,7 +3,6 @@ package org.jetbrains.compose.reload.tests.gradle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
 import org.jetbrains.compose.reload.test.gradle.DefaultBuildGradleKts
-import org.jetbrains.compose.reload.test.gradle.DefaultSettingsGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.TestOnlyDefaultCompilerOptions
@@ -19,7 +18,6 @@ class NonContinuousRecompileTest {
     @HotReloadTest
     @TestOnlyLatestVersions
     @TestOnlyDefaultCompilerOptions
-    @DefaultSettingsGradleKts
     @DefaultBuildGradleKts
     fun `test - non continuous build`(fixture: HotReloadTestFixture) = fixture.runTest {
         projectDir.resolve("gradle.properties")

@@ -12,7 +12,6 @@ import kotlin.streams.asStream
 
 @TestTemplate
 @ExtendWith(AndroidScreenshotTestInvocationContextProvider::class)
-@DefaultSettingsGradleKts
 public annotation class AndroidHotReloadTest
 
 internal class AndroidScreenshotTestInvocationContextProvider : TestTemplateInvocationContextProvider {
