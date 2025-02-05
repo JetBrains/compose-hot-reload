@@ -1,5 +1,8 @@
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.core.ParsedTemplate.Block
+import org.jetbrains.compose.reload.core.Template.ParseFailure
+
 public interface Template {
     public fun render(values: Map<String, Any?>): Try<String>
 
@@ -61,7 +64,7 @@ private fun createTemplateTokens(text: String): Try<List<TemplateToken>> {
 
     while (index < text.length) {
         val nextToken = tokenizer.consume(index, text)
-        if (nextToken == null) return Template.ParseFailure("Cannot build tokens for template (index: $index").toRight()
+        if (nextToken == null) return ParseFailure("Cannot build tokens for template (index: $index").toRight()
         result.add(nextToken)
         index += nextToken.value.length
     }
@@ -74,7 +77,9 @@ private fun parseTemplateTokens(template: String, tokens: List<TemplateToken>): 
     var context = ParsingContext(0, tokens)
     val parts = mutableListOf<ParsedTemplate.Part>()
     while (context.hasNext()) {
-        val consumed = parsePart(context) ?: return Template.ParseFailure("Failed parsing template part").toRight()
+        val consumed = parsePart(context).leftOr { return it }
+            ?: return ParseFailure("Failed parsing template part").toRight()
+
         parts.add(consumed.part)
         context = context.copy(index = context.index + consumed.tokens.size)
     }
@@ -113,6 +118,8 @@ private sealed class TemplateToken {
     data class Whitespace(override val value: String) : TemplateToken()
     data class DollarInterpolation(override val value: String) : TemplateToken()
     data class Variable(val key: String, override val value: String) : TemplateToken()
+    data class IfToken(val requiredKey: String, override val value: String) : TemplateToken()
+    data class EndifToken(override val value: String) : TemplateToken()
 }
 
 private val variableTokenizer = RegexTemplateTokenizer(
@@ -120,6 +127,20 @@ private val variableTokenizer = RegexTemplateTokenizer(
 ) { result ->
     val key = result.groups["key"]?.value ?: return@RegexTemplateTokenizer null
     TemplateToken.Variable(key = key, value = result.value)
+}
+
+private val ifTokenizer = RegexTemplateTokenizer(
+    Regex("""\h*\{\h*\{\h*if\h+(?<key>(\w|\.)+)\h*\}\h*\}\h*\v""")
+
+) { result ->
+    val key = result.groups["key"]?.value ?: return@RegexTemplateTokenizer null
+    TemplateToken.IfToken(key, result.value)
+}
+
+private val endifTokenizer = RegexTemplateTokenizer(
+    Regex("""\v\h*\{\h*\{/if\}\h*\}\h*""")
+) { result ->
+    TemplateToken.EndifToken(result.value)
 }
 
 private val linebreakTokenizer = RegexTemplateTokenizer(Regex("""\v+""")) { result ->
@@ -135,14 +156,12 @@ private val dollarInterpolationTokenizer = RegexTemplateTokenizer(Regex.fromLite
 }
 
 private val wordTokenizer = RegexTemplateTokenizer(Regex("""\S+""")) token@{ result ->
-    /* Yield for variableTokenizer tokenizers */
-    variableTokenizer.regex.find(result.value)?.let { variableResult ->
-        return@token TemplateToken.Word(result.value.substring(0, variableResult.range.first))
-    }
+    /* Ensure to yield for higher priority tokenizers */
+    val priorityMatch = listOf(variableTokenizer.regex, ifTokenizer.regex, endifTokenizer.regex)
+        .firstNotNullOfOrNull { regex -> regex.find(result.value) }
 
-    /* Yield for dollarInterpolationTokenizer tokenizers */
-    dollarInterpolationTokenizer.regex.find(result.value)?.let { variableResult ->
-        return@token TemplateToken.Word(result.value.substring(0, variableResult.range.first))
+    if (priorityMatch != null) {
+        return@token TemplateToken.Word(result.value.substring(0, priorityMatch.range.first))
     }
 
     TemplateToken.Word(result.value)
@@ -151,6 +170,8 @@ private val wordTokenizer = RegexTemplateTokenizer(Regex("""\S+""")) token@{ res
 
 private val tokenizer = ComposedTemplateTokenizer(
     variableTokenizer,
+    ifTokenizer,
+    endifTokenizer,
     dollarInterpolationTokenizer,
     linebreakTokenizer,
     whitespaceTokenizer,
@@ -160,61 +181,167 @@ private val tokenizer = ComposedTemplateTokenizer(
 private data class ParsingContext(
     val index: Int,
     val tokens: List<TemplateToken>,
+    val endIndexExclusive: Int = tokens.size,
 ) : Iterable<TemplateToken> {
-    fun hasNext(): Boolean = index < tokens.size
+
+    init {
+        require(endIndexExclusive <= tokens.size)
+    }
+
+    operator fun inc(): ParsingContext = skip(1)
+    operator fun plus(tokens: Int): ParsingContext = skip(tokens)
+
+    fun skip(tokens: Int): ParsingContext {
+        return copy(index = index + tokens)
+    }
+
+    fun withEndIndexExclusive(endIndexExclusive: Int): ParsingContext {
+        return copy(endIndexExclusive = index + endIndexExclusive)
+    }
+
+    fun hasNext(): Boolean {
+        return index < endIndexExclusive
+    }
 
     inline fun forEach(block: (TemplateToken) -> Unit) {
-        for (i in index until tokens.size) {
+        for (i in index until endIndexExclusive) {
             block(tokens[i])
         }
     }
 
     override fun iterator(): Iterator<TemplateToken> {
-        return tokens.listIterator(index)
+        return tokens.subList(index, endIndexExclusive).iterator()
     }
 
     operator fun get(index: Int): TemplateToken? {
-        return tokens.getOrNull(this.index + index)
+        if (this.index + index >= endIndexExclusive) return null
+        return tokens[this.index + index]
     }
 
     data class Consumed(
         val tokens: List<TemplateToken>,
         val part: ParsedTemplate.Part,
-    ) : RuntimeException()
+    )
+
+    override fun toString(): String {
+        return toList().toString()
+    }
 }
 
-private fun parsePart(context: ParsingContext): ParsingContext.Consumed? {
-    /* Prioritize variable parsing */
-    parseVariableLine(context)?.let { return it }
+private fun parsePart(context: ParsingContext): Try<ParsingContext.Consumed?> {
+    /* Prioritize conditional part parsing */
+    val conditionalPart = parseConditionalPart(context).leftOr { return it }
+    if (conditionalPart != null) return conditionalPart.toLeft()
 
+    /* Prioritize variable parsing */
+    val variableLine = parseVariableLine(context).leftOr { return it }
+    if (variableLine != null) return variableLine.toLeft()
+
+    return parseBlock(context)
+}
+
+private fun parseBlock(context: ParsingContext): Try<ParsingContext.Consumed?> {
     var currentContext = context
     val block = mutableListOf<TemplateToken>()
 
-    fun TemplateToken.render(): String = when (this) {
-        is TemplateToken.DollarInterpolation -> "$"
-        else -> value
-    }
-
-    fun build(): ParsingContext.Consumed {
-        return ParsingContext.Consumed(block, ParsedTemplate.Block(block.joinToString("") { it.render() }))
-    }
-
     while (currentContext.hasNext()) {
-        if (parseVariableLine(currentContext) != null) {
-            return build()
+        if (currentContext[0] is TemplateToken.IfToken) {
+            val header = Block(block)
+            val body = parseConditionalPart(currentContext).leftOr { return it }
+            if (body == null) return ParseFailure("Failed parsing conditional part").toRight()
+            val footerContext = currentContext.skip(body.tokens.size)
+            val footer = parsePart(footerContext).leftOr { return it }
+            if (footer == null) return ParseFailure("Failed parsing conditional part").toRight()
+            return ParsingContext.Consumed(
+                block + body.tokens + footer.tokens, ParsedTemplate.NestedPart(header, body.part, footer.part)
+            ).toLeft()
         }
-        block.add(currentContext[0] ?: return null)
-        currentContext = currentContext.copy(currentContext.index + 1)
+
+
+        val variableLine = parseVariableLine(currentContext).leftOr { return it }
+        if (variableLine != null) {
+            val header = Block(block)
+            val footerContext = currentContext.skip(variableLine.tokens.size)
+            val footer = parseBlock(footerContext).leftOr { return it }
+            return ParsingContext.Consumed(
+                block + variableLine.tokens + footer?.tokens.orEmpty(),
+                ParsedTemplate.NestedPart(
+                    header, variableLine.part, footer?.part
+                ),
+            ).toLeft()
+        }
+
+        if (currentContext[0] is TemplateToken.EndifToken)
+            break
+
+        block.add(currentContext[0] ?: return null.toLeft())
+        currentContext = currentContext.skip(1)
     }
 
-    return build()
+    return ParsingContext.Consumed(
+        block, Block(block)
+    ).toLeft()
 }
 
-private fun parseVariableLine(context: ParsingContext): ParsingContext.Consumed? {
+private fun parseConditionalPart(context: ParsingContext): Try<ParsingContext.Consumed?> {
+    val tokens = mutableListOf<TemplateToken>()
+    var currentContext = context
+
+    while (currentContext.hasNext()) {
+        val token = currentContext[0] ?: return null.toLeft()
+        when (token) {
+            is TemplateToken.Whitespace -> {
+                tokens.add(token)
+                currentContext++
+            }
+            is TemplateToken.IfToken -> {
+                tokens.add(token)
+                currentContext++
+
+                // search index of corresponding 'endIf'
+                val endIfTokenIndex = run index@{
+                    var parity = 1
+                    currentContext.forEachIndexed { currentIndex, token ->
+                        if (token is TemplateToken.IfToken) parity++
+                        if (token is TemplateToken.EndifToken) parity--
+                        if (parity == 0) return@index currentIndex
+                    }
+
+                    return ParseFailure("Missing '{{/if}}' for '${token.value.trim()}'").toRight()
+                }
+
+                /* Parse underlying part */
+                val partParsingContext = currentContext.withEndIndexExclusive(endIfTokenIndex)
+                val parsedBlock = parseBlock(partParsingContext).leftOr { return it }
+                if (parsedBlock == null) return ParseFailure("Failed parsing conditional part").toRight()
+                tokens.addAll(parsedBlock.tokens)
+                currentContext += parsedBlock.tokens.size
+
+                /* Check 'endif */
+                val endif = currentContext[0] ?: return ParseFailure("Missing 'endif'").toRight()
+                if (endif !is TemplateToken.EndifToken) return ParseFailure("'endif' expected, found $endif").toRight()
+                tokens.add(endif)
+
+                /* Build the conditional part */
+                return ParsingContext.Consumed(
+                    tokens, ParsedTemplate.ConditionalPart(token.requiredKey, parsedBlock.part)
+                ).toLeft()
+            }
+            else -> return null.toLeft()
+        }
+    }
+
+    return null.toLeft()
+}
+
+
+private fun parseVariableLine(context: ParsingContext): Try<ParsingContext.Consumed?> {
     val line = mutableListOf<ParsedTemplate.VariableLine.Content>()
     val tokens = mutableListOf<TemplateToken>()
 
     for (token in context) {
+        if (token is TemplateToken.IfToken) return null.toLeft()
+        if (token is TemplateToken.EndifToken) return null.toLeft()
         tokens.add(token)
         line.add(
             if (token is TemplateToken.Variable) ParsedTemplate.VariableLine.Variable(token.key)
@@ -224,8 +351,8 @@ private fun parseVariableLine(context: ParsingContext): ParsingContext.Consumed?
     }
 
     return if (line.any { content -> content is ParsedTemplate.VariableLine.Variable }) {
-        ParsingContext.Consumed(tokens, ParsedTemplate.VariableLine(line))
-    } else null
+        ParsingContext.Consumed(tokens, ParsedTemplate.VariableLine(line)).toLeft()
+    } else null.toLeft()
 }
 
 private class ParsedTemplate(
@@ -233,7 +360,16 @@ private class ParsedTemplate(
     private val parts: List<Part>
 ) : Template {
     sealed class Part
-    data class Block(val value: String) : Part()
+    data class Block(val tokens: List<TemplateToken>) : Part() {
+        fun TemplateToken.render(): String = when (this) {
+            is TemplateToken.DollarInterpolation -> "$"
+            else -> value
+        }
+
+        override fun toString() = tokens.joinToString("") { token -> token.render() }
+        fun render() = toString()
+    }
+
     data class VariableLine(val content: List<Content>) : Part() {
         sealed class Content
 
@@ -248,14 +384,34 @@ private class ParsedTemplate(
         data class Variable(val key: String) : Content()
     }
 
+    data class NestedPart(val header: Part, val body: Part, val footer: Part?) : Part()
+
+    data class ConditionalPart(val requiresKey: String, val part: Part) : Part()
+
     override fun render(values: Map<String, Any?>): Try<String> = buildString {
-        parts.forEachIndexed forEach@{ index, part ->
-            when (part) {
-                is Block -> append(part.value)
-                is VariableLine -> {
-                    val resolved = resolve(part, values).leftOr { return it } ?: return@forEach
-                    append(resolved)
+        parts.forEach forEach@{ part ->
+            append(render(part, values))
+        }
+    }.toLeft()
+
+    private fun render(part: Part, values: Map<String, Any?>): Try<String> = buildString {
+        when (part) {
+            is Block -> append(part.render())
+            is VariableLine -> run {
+                val resolved = resolve(part, values).leftOr { return it } ?: return@run
+                append(resolved)
+            }
+            is ConditionalPart -> run {
+                if (values[part.requiresKey] != null && values[part.requiresKey] != false) {
+                    append(render(part.part, values))
                 }
+            }
+            is NestedPart -> {
+                append(render(part.header, values))
+                append(render(part.body, values))
+                if (part.footer != null) append(
+                    render(part.footer, values)
+                )
             }
         }
     }.toLeft()

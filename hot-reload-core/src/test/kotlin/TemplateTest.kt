@@ -2,6 +2,7 @@ import org.jetbrains.compose.reload.core.Template
 import org.jetbrains.compose.reload.core.asTemplate
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.render
+import org.jetbrains.compose.reload.core.renderOrThrow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -130,6 +131,94 @@ class TemplateTest {
             ).getOrThrow()
         )
     }
+
+    @Test
+    fun `test - if expression`() {
+        val template = """
+            Hello, {{name}}!
+            {{if value}}
+                Foo {{value}}
+            {{/if}}
+        """.trimIndent().asTemplate().getOrThrow()
+
+        assertEquals(
+            """
+            Hello, World!
+                Foo 123
+        """.trimIndent(),
+            template.renderOrThrow {
+                "name"("World")
+                "value"(123)
+            }
+        )
+    }
+
+    @Test
+    fun `test - if expression - missing value`() {
+        val template = """
+            Hello, {{name}}!
+            {{if value}}
+                Foo {{value}}
+            {{/if}}
+        """.trimIndent().asTemplate().getOrThrow()
+
+        assertEquals(
+            """
+            Hello, World!
+            
+        """.trimIndent(),
+            template.renderOrThrow {
+                "name"("World")
+            }
+        )
+    }
+
+    @Test
+    fun `test - if expression - nested`() {
+        val template = """
+            Hello, {{name}}!
+            {{if foo}}
+                foo: {{foo}}
+                {{if bar}}
+                bar: {{bar}}
+                {{/if}}
+            {{/if}}
+        """.trimIndent().asTemplate().getOrThrow()
+
+        assertEquals(
+            """
+            Hello, World!
+            """.trimIndent(),
+            template.renderOrThrow {
+                "name"("World")
+            }.trim()
+        )
+
+        assertEquals(
+            """
+            Hello, World!
+                foo: 1602
+        """.trimIndent(),
+            template.renderOrThrow {
+                "name"("World")
+                "foo"("1602")
+            }.trim()
+        )
+
+        assertEquals(
+            """
+            Hello, World!
+                foo: 1602
+                bar: 123
+        """.trimIndent(),
+            template.renderOrThrow {
+                "name"("World")
+                "foo"("1602")
+                "bar"(123)
+            }.trim()
+        )
+    }
+
 
     @Test
     fun `test - unused line`() {
