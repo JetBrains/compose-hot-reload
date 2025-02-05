@@ -1,6 +1,12 @@
 public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/AndroidHotReloadTest : java/lang/annotation/Annotation {
 }
 
+public abstract interface class org/jetbrains/compose/reload/test/gradle/AndroidManifestExtension {
+	public abstract fun buildTemplate (Lorg/jetbrains/compose/reload/core/TemplateBuilder;Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public abstract fun manifestBody (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun manifestTag (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+}
+
 public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/BuildGradleKts : java/lang/annotation/Annotation {
 	public abstract fun path ()Ljava/lang/String;
 }
@@ -10,6 +16,7 @@ public abstract interface annotation class org/jetbrains/compose/reload/test/gra
 }
 
 public abstract interface class org/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension {
+	public abstract fun buildTemplate (Lorg/jetbrains/compose/reload/core/TemplateBuilder;Lorg/junit/jupiter/api/extension/ExtensionContext;)V
 	public abstract fun commonDependencies (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 	public abstract fun composeCompiler (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 	public abstract fun footer (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
@@ -21,6 +28,7 @@ public abstract interface class org/jetbrains/compose/reload/test/gradle/BuildGr
 }
 
 public final class org/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension$DefaultImpls {
+	public static fun buildTemplate (Lorg/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension;Lorg/jetbrains/compose/reload/core/TemplateBuilder;Lorg/junit/jupiter/api/extension/ExtensionContext;)V
 	public static fun commonDependencies (Lorg/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 	public static fun composeCompiler (Lorg/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 	public static fun footer (Lorg/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
@@ -47,11 +55,12 @@ public abstract interface annotation class org/jetbrains/compose/reload/test/gra
 	public abstract fun target ()Ljava/lang/String;
 }
 
-public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/DefaultAndroidAndJvmBuildSetup : java/lang/annotation/Annotation {
-}
-
 public final class org/jetbrains/compose/reload/test/gradle/FileUtilsKt {
 	public static final fun replaceText (Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public abstract interface class org/jetbrains/compose/reload/test/gradle/GradlePropertiesExtension {
+	public abstract fun properties (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/util/List;
 }
 
 public final class org/jetbrains/compose/reload/test/gradle/GradleRunner {

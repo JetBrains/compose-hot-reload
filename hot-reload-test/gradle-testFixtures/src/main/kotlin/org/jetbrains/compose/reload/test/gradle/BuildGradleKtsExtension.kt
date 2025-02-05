@@ -2,6 +2,8 @@ package org.jetbrains.compose.reload.test.gradle
 
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.core.Template
+import org.jetbrains.compose.reload.core.TemplateBuilder
+import org.jetbrains.compose.reload.core.asTemplateOrThrow
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.renderOrThrow
 import org.jetbrains.compose.reload.test.core.CompilerOption
@@ -19,6 +21,8 @@ public interface BuildGradleKtsExtension {
     public fun javaExecConfigure(context: ExtensionContext): String? = null
     public fun composeCompiler(context: ExtensionContext): String? = null
     public fun footer(context: ExtensionContext): String? = null
+
+    public fun TemplateBuilder.buildTemplate(context: ExtensionContext) = Unit
 }
 
 @InternalHotReloadTestApi
@@ -35,6 +39,7 @@ public fun renderBuildGradleKts(context: ExtensionContext): String {
             jvmMainDependenciesKey(extension.jvmMainDependencies(context))
             javaExecConfigureKey(extension.javaExecConfigure(context))
             composeCompilerKey(extension.composeCompiler(context))
+            with(extension) { buildTemplate(context) }
         }
     }
 }
@@ -47,6 +52,8 @@ private const val jvmMainDependenciesKey = "jvmMain.dependencies"
 private const val javaExecConfigureKey = "javaExec.configure"
 private const val composeCompilerKey = "composeCompiler"
 private const val footerKey = "footer"
+private const val androidEnabledKey = "android.enabled"
+private const val androidKey = "android"
 
 private val kmpBuildGradleKtsTemplate = Template(
     """
@@ -58,6 +65,11 @@ private val kmpBuildGradleKtsTemplate = Template(
     }
    
     kotlin {
+        {{if $androidEnabledKey}}
+        jvmToolchain(17)
+        androidTarget()
+        {{/if}}
+        
         {{$kotlinKey}}
         jvm()
         
@@ -77,6 +89,14 @@ private val kmpBuildGradleKtsTemplate = Template(
     composeCompiler {
         {{$composeCompilerKey}}
     }
+    
+    {{if $androidEnabledKey}}
+    android {
+        {{$androidKey}}
+        compileSdk = 34
+        namespace = "org.jetbrains.compose.test"
+    }
+    {{/if}}
     
     {{$footerKey}}
     """.trimIndent()
@@ -116,13 +136,23 @@ private val jvmBuildGradleKtsTemplate = Template(
 
 
 internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
+    override fun TemplateBuilder.buildTemplate(context: ExtensionContext) {
+        androidEnabledKey(context.testedAndroidVersion != null)
+    }
+
     override fun plugins(context: ExtensionContext): String? {
         return """
-            kotlin("${if (context.projectMode == ProjectMode.Jvm) "jvm" else "multiplatform"}")
+            kotlin("{{kotlin.plugin}}")
             kotlin("plugin.compose")
             id("org.jetbrains.compose")
             id("org.jetbrains.compose-hot-reload")
-        """.trimIndent()
+            {{if $androidEnabledKey}}
+            id("com.android.application")
+            {{/if}}
+        """.trimIndent().asTemplateOrThrow().renderOrThrow {
+            "kotlin.plugin"(if (context.projectMode == ProjectMode.Jvm) "jvm" else "multiplatform")
+            buildTemplate(context)
+        }
     }
 
     override fun commonDependencies(context: ExtensionContext): String? = """

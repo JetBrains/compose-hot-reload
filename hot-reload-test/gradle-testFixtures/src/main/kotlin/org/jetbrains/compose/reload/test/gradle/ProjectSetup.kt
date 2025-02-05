@@ -4,6 +4,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.platform.commons.util.AnnotationUtils.findRepeatableAnnotations
 import java.util.ServiceLoader
 import kotlin.io.path.createDirectories
+import kotlin.io.path.createParentDirectories
 import kotlin.io.path.writeText
 
 public interface ProjectSetupExtension {
@@ -30,4 +31,15 @@ internal fun HotReloadTestFixture.setupProject(context: ExtensionContext) {
         .onEach { project -> project.path.createDirectories() }
         .map { project -> project.buildGradleKts }
         .forEach { buildGradleKtsPath -> buildGradleKtsPath.writeText(buildGradleKts) }
+
+    renderGradleProperties(context).let { properties ->
+        if(properties.isBlank()) return@let
+        projectDir.resolve("gradle.properties").writeText(properties)
+    }
+
+    context.testedAndroidVersion?.let { androidVersion ->
+        projectDir.resolve("src/androidMain/AndroidManifest.xml")
+            .createParentDirectories()
+            .writeText(renderAndroidManifest(context))
+    }
 }

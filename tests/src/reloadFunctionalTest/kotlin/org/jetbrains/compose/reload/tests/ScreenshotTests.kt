@@ -5,16 +5,18 @@ package org.jetbrains.compose.reload.tests
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.AndroidHotReloadTest
-import org.jetbrains.compose.reload.test.gradle.DefaultAndroidAndJvmBuildSetup
+import org.jetbrains.compose.reload.test.gradle.Debug
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
+import org.jetbrains.compose.reload.test.gradle.copyProjectRecursively
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCodeAndReload
 import org.jetbrains.compose.reload.test.gradle.sendTestEvent
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
 import org.jetbrains.compose.reload.utils.HostIntegrationTest
+import kotlin.io.path.Path
 
 class ScreenshotTests {
     private val logger = createLogger()
@@ -81,8 +83,8 @@ class ScreenshotTests {
         fixture.checkScreenshot("after-2")
     }
 
+    @Debug(".*Android.*")
     @AndroidHotReloadTest
-    @DefaultAndroidAndJvmBuildSetup
     fun `test - kmp with android and jvm`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.*

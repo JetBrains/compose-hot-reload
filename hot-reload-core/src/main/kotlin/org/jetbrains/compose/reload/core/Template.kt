@@ -402,9 +402,15 @@ private class ParsedTemplate(
                 append(resolved)
             }
             is ConditionalPart -> run {
-                if (values[part.requiresKey] != null && values[part.requiresKey] != false) {
-                    append(render(part.part, values))
+                val resolvedValue = values[part.requiresKey] ?: return@run
+                if (resolvedValue == false) return@run
+                if (resolvedValue is Iterable<*>) {
+                    val resolvedValues = resolvedValue.toList()
+                    if (resolvedValues.isEmpty()) return@run
+                    if (resolvedValues.any { it == false }) return@run
                 }
+
+                append(render(part.part, values))
             }
             is NestedPart -> {
                 append(render(part.header, values))
