@@ -1,3 +1,8 @@
+/*
+ * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ */
+
 import org.gradle.api.attributes.java.TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
