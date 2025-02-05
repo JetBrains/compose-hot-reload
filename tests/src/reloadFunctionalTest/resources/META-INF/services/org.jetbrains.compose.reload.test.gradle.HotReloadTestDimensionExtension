@@ -1,0 +1,2 @@
+org.jetbrains.compose.reload.utils.GradleHotReloadTestDimensionExtension
+org.jetbrains.compose.reload.utils.CompilerOptionsHotReloadTestDimensionExtension

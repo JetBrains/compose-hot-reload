@@ -5,17 +5,15 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.TestOnlyKmp
-import org.jetbrains.compose.reload.test.gradle.TestOnlyLatestVersions
 import org.jetbrains.compose.reload.test.gradle.launchApplication
 import org.jetbrains.compose.reload.test.gradle.writeText
+import org.jetbrains.compose.reload.utils.QuickTest
 import kotlin.time.Duration.Companion.minutes
 
 class ClientDisconnectedMessageTest {
 
     @HotReloadTest
-    @TestOnlyLatestVersions
-    @TestOnlyKmp
+    @QuickTest
     fun `send shutdown request - receive ClientDisconnected`(
         testFixture: HotReloadTestFixture
     ) = testFixture.runTest(timeout = 5.minutes) {

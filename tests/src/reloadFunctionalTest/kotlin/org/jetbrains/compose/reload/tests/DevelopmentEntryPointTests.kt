@@ -2,18 +2,18 @@ package org.jetbrains.compose.reload.tests
 
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.TestOnlyLatestVersions
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.fold
 import org.jetbrains.compose.reload.test.gradle.launchDevApplicationAndWait
 import org.jetbrains.compose.reload.test.gradle.replaceText
+import org.jetbrains.compose.reload.utils.QuickTest
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.writeText
 
 class DevelopmentEntryPointTests {
 
     @HotReloadTest
-    @TestOnlyLatestVersions
+    @QuickTest
     fun `test - simple jvm project`(fixture: HotReloadTestFixture) = fixture.runTest {
         val mainKt = fixture.projectDir
             .resolve("src")

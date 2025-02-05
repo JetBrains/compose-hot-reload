@@ -1,0 +1,2 @@
+org.jetbrains.compose.reload.test.gradle.AndroidHotReloadTestDimensionExtension
+org.jetbrains.compose.reload.test.gradle.ProjectModeHotReloadTestDimensionExtension

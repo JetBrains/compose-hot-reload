@@ -57,8 +57,17 @@ run {
         val versionProperty = project.providers.gradleProperty("version").get()
         inputs.property("version", versionProperty)
 
-        println(versionProperty)
+        val kotlinVersion = deps.versions.kotlin.get()
+        inputs.property("kotlinVersion", kotlinVersion)
 
+        val gradleVersion = gradle.gradleVersion
+        inputs.property("gradleVersion", gradleVersion)
+
+        val composeVersion = deps.versions.compose.get()
+        inputs.property("composeVersion", composeVersion)
+
+        val androidVersion = deps.versions.androidGradlePlugin.get()
+        inputs.property("androidVersion", androidVersion)
 
         outputs.file(file)
 
@@ -66,6 +75,10 @@ run {
             package org.jetbrains.compose.reload.core
             
             public const val HOT_RELOAD_VERSION: String = "$versionProperty"
+            public const val HOT_RELOAD_KOTLIN_VERSION: String = "$kotlinVersion"
+            public const val HOT_RELOAD_GRADLE_VERSION: String = "$gradleVersion"
+            public const val HOT_RELOAD_COMPOSE_VERSION: String = "$composeVersion"
+            public const val HOT_RELOAD_ANDROID_VERSION: String = "$androidVersion"
             """
             .trimIndent()
 

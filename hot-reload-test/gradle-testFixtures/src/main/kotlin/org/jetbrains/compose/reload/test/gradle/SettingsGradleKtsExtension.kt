@@ -84,9 +84,9 @@ private val settingsGradleKtsTemplate = Template(
 
 internal class DefaultSettingsGradleKts : SettingsGradleKtsExtension {
     override fun pluginManagementPlugins(context: ExtensionContext): String? {
-        val kotlinVersion = context.kotlinVersion ?: TestedKotlinVersion.entries.last()
-        val composeVersion = context.composeVersion ?: TestedComposeVersion.entries.last()
-        val androidVersion = context.androidVersion
+        val kotlinVersion = context.hotReloadTestInvocationContext?.kotlinVersion ?: TestedKotlinVersion.default
+        val composeVersion = context.hotReloadTestInvocationContext?.composeVersion ?: TestedComposeVersion.default
+        val androidVersion = context.hotReloadTestInvocationContext?.androidVersion
         return """
             kotlin("multiplatform") version "$kotlinVersion"
             kotlin("jvm") version "$kotlinVersion"

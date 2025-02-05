@@ -3,9 +3,7 @@ package org.jetbrains.compose.reload.tests
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.TestOnlyDefaultCompilerOptions
-import org.jetbrains.compose.reload.test.gradle.TestOnlyKmp
-import org.jetbrains.compose.reload.test.gradle.TestOnlyLatestVersions
+
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCodeAndReload
@@ -15,9 +13,6 @@ import kotlin.test.fail
 
 class AfterHotReloadEffectTest {
     @HotReloadTest
-    @TestOnlyDefaultCompilerOptions
-    @TestOnlyLatestVersions
-    @TestOnlyKmp
     fun `test - invokeAfterHotReload`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.*
@@ -89,9 +84,6 @@ class AfterHotReloadEffectTest {
     }
 
     @HotReloadTest
-    @TestOnlyDefaultCompilerOptions
-    @TestOnlyLatestVersions
-    @TestOnlyKmp
     fun `test - remove AfterHotReloadEffect code`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
             import androidx.compose.runtime.*

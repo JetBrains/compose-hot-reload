@@ -10,16 +10,11 @@ import org.junit.jupiter.api.parallel.ExecutionMode
 @ExtendWith(HotReloadTestInvocationContextProvider::class)
 public annotation class HotReloadTest
 
+@HotReloadTest
+public annotation class AndroidHotReloadTest
+
 @Execution(ExecutionMode.SAME_THREAD)
-internal annotation class Debug(@Language("RegExp") val target: String = ".*")
-
-public annotation class TestOnlyJvm
-
-public annotation class TestOnlyKmp
-
-public annotation class TestOnlyDefaultCompilerOptions
-
-public annotation class TestOnlyLatestVersions
+public annotation class Debug(@Language("RegExp") val target: String = ".*")
 
 public annotation class MinKotlinVersion(val version: String)
 
@@ -27,3 +22,6 @@ public annotation class MaxKotlinVersion(val version: String)
 
 @Repeatable
 public annotation class BuildGradleKts(val path: String)
+
+@Repeatable
+public annotation class TestedProjectMode(val mode: ProjectMode)

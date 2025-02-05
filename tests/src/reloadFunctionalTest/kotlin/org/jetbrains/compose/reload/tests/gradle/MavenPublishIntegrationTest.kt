@@ -64,7 +64,7 @@ class MavenPublishIntegrationTest {
 
         GradleRunner(
             projectRoot = dir,
-            gradleVersion = TestedGradleVersion.entries.last().version
+            gradleVersion = TestedGradleVersion.default.version
         ).build(":publishAllPublicationsToLocalRepository").assertSuccess()
     }
 
@@ -106,7 +106,7 @@ class MavenPublishIntegrationTest {
 
         GradleRunner(
             projectRoot = dir,
-            gradleVersion = TestedGradleVersion.entries.last().version
+            gradleVersion = TestedGradleVersion.default.version
         ).build(":publishAllPublicationsToLocalRepository").assertSuccess()
     }
 }

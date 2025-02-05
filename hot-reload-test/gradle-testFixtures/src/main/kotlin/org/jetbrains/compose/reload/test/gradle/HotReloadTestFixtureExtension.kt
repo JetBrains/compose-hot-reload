@@ -20,11 +20,7 @@ internal class HotReloadTestFixtureExtension(
     }
 
     override fun beforeEach(context: ExtensionContext) {
-        context.projectMode = this.context.projectMode
-        context.kotlinVersion = this.context.kotlinVersion
-        context.gradleVersion = this.context.gradleVersion
-        context.composeVersion = this.context.composeVersion
-        context.androidVersion = this.context.androidVersion
+        context.hotReloadTestInvocationContext = this.context
         context.getOrCreateTestFixture()
     }
 
@@ -59,7 +55,7 @@ internal class HotReloadTestFixtureExtension(
     }
 
     private fun ExtensionContext.createTestFixture(): HotReloadTestFixture {
-        val debug = AnnotationUtils.findAnnotation(testMethod, Debug::class.java).isPresent
+        val debugAnnotation = AnnotationUtils.findAnnotation(testMethod, Debug::class.java).isPresent
         val projectDir = ProjectDir(Files.createTempDirectory("hot-reload-test"))
         val orchestrationServer = startOrchestrationServer()
 
@@ -80,8 +76,7 @@ internal class HotReloadTestFixtureExtension(
             gradleRunner = gradleRunner,
             orchestration = orchestrationServer,
             projectMode = context.projectMode,
-            compilerOptions = context.compilerOptions,
-            isDebug = debug
+            isDebug = debugAnnotation
         )
     }
 }

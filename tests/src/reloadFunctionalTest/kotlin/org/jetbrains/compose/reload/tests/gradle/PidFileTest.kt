@@ -5,9 +5,9 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIRendered
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.TestOnlyDefaultCompilerOptions
-import org.jetbrains.compose.reload.test.gradle.TestOnlyLatestVersions
+
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
+import org.jetbrains.compose.reload.utils.QuickTest
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.exists
@@ -18,9 +18,9 @@ import kotlin.test.assertTrue
 import kotlin.test.fail
 
 class PidFileTest {
+
     @HotReloadTest
-    @TestOnlyDefaultCompilerOptions
-    @TestOnlyLatestVersions
+    @QuickTest
     fun `test - pid file`(fixture: HotReloadTestFixture) = fixture.runTest {
         val pidFile = fixture.projectDir.resolve("build/run/jvmMain/jvmRun.pid")
 

@@ -4,10 +4,9 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.TestOnlyDefaultCompilerOptions
-import org.jetbrains.compose.reload.test.gradle.TestOnlyLatestVersions
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
+import org.jetbrains.compose.reload.utils.GradleIntegrationTest
 import kotlin.io.path.appendLines
 import kotlin.io.path.createFile
 import kotlin.io.path.createParentDirectories
@@ -15,8 +14,7 @@ import kotlin.test.assertEquals
 
 class NonContinuousRecompileTest {
     @HotReloadTest
-    @TestOnlyLatestVersions
-    @TestOnlyDefaultCompilerOptions
+    @GradleIntegrationTest
     fun `test - non continuous build`(fixture: HotReloadTestFixture) = fixture.runTest {
         projectDir.resolve("gradle.properties")
             .createParentDirectories().createFile()

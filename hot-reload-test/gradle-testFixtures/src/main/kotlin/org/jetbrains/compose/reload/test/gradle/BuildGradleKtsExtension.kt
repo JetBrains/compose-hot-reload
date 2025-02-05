@@ -137,7 +137,7 @@ internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
 
 
     override fun composeCompiler(context: ExtensionContext): String? {
-        val options = context.getHotReloadTestFixtureOrThrow().compilerOptions
+        val options = context.compilerOptions
         return listOfNotNull(
             "featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups)".takeIf {
                 options.getValue(CompilerOption.OptimizeNonSkippingGroups)

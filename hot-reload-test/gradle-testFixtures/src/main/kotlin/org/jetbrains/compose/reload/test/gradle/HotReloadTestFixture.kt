@@ -18,7 +18,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.asFlow
-import org.jetbrains.compose.reload.test.core.CompilerOption
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.coroutines.cancellation.CancellationException
@@ -39,7 +38,6 @@ internal constructor(
     public val gradleRunner: GradleRunner,
     public val orchestration: OrchestrationServer,
     public val projectMode: ProjectMode,
-    internal val compilerOptions: Map<CompilerOption, Boolean>,
     @PublishedApi
     internal val isDebug: Boolean
 ) : AutoCloseable {
