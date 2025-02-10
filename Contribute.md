@@ -58,7 +58,7 @@ dependencyResolutionManagement {
 5. In your local project, update the version of `compose-hot-reload` to whatever you set in step 1:
 
 ```
-id("org.jetbrains.compose-hot-reload") version "1.0.0-DEBUG"
+id("org.jetbrains.compose.hot-reload") version "1.0.0-DEBUG"
 ```
 
 6. Run project as usual.

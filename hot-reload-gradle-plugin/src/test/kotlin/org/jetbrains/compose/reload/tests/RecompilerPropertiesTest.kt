@@ -25,7 +25,7 @@ class RecompilerPropertiesTest {
 
 
         project.plugins.apply("org.jetbrains.kotlin.multiplatform")
-        project.plugins.apply("org.jetbrains.compose-hot-reload")
+        project.plugins.apply("org.jetbrains.compose.hot-reload")
         project.kotlinMultiplatformOrNull?.jvm()
 
         val hotRun = project.tasks.create<ComposeHotRun>("runHot")
@@ -44,7 +44,7 @@ class RecompilerPropertiesTest {
 
 
         subproject.plugins.apply("org.jetbrains.kotlin.multiplatform")
-        subproject.plugins.apply("org.jetbrains.compose-hot-reload")
+        subproject.plugins.apply("org.jetbrains.compose.hot-reload")
         subproject.kotlinMultiplatformOrNull?.jvm()
 
         val hotRun = subproject.tasks.create<ComposeHotRun>("runHot")

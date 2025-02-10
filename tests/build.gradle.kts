@@ -8,7 +8,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 plugins {
     kotlin("jvm")
     `test-conventions`
-    id("org.jetbrains.compose-hot-reload-test")
+    id("org.jetbrains.compose.hot-reload.test")
 }
 
 kotlin {

@@ -97,7 +97,7 @@ internal class DefaultSettingsGradleKts : SettingsGradleKtsExtension {
             kotlin("jvm") version "$kotlinVersion"
             kotlin("plugin.compose") version "$kotlinVersion"
             id("org.jetbrains.compose") version "$composeVersion"
-            id("org.jetbrains.compose-hot-reload") version "$HOT_RELOAD_VERSION"
+            id("org.jetbrains.compose.hot-reload") version "$HOT_RELOAD_VERSION"
             id("com.android.application") version "{{androidVersion}}"
         """.trimIndent().asTemplateOrThrow().renderOrThrow("androidVersion" to androidVersion)
     }

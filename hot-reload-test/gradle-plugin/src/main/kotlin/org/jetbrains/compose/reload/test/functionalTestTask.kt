@@ -103,7 +103,7 @@ internal fun Project.configureGradleTestTasks() {
 
 private fun registerHotReloadFunctionalTestTask(compilation: KotlinCompilation<*>): TaskProvider<HotReloadFunctionalTestTask> {
     compilation.defaultSourceSet.dependencies {
-        implementation("org.jetbrains.compose:hot-reload-test-gradle:${HOT_RELOAD_VERSION}")
+        implementation("org.jetbrains.compose.hot-reload:test-gradle:${HOT_RELOAD_VERSION}")
     }
 
     val task = compilation.project.tasks.register<HotReloadFunctionalTestTask>(

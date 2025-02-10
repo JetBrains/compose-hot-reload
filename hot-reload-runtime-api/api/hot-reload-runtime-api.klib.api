@@ -5,7 +5,7 @@
 // - Show manifest properties: true
 // - Show declarations: true
 
-// Library unique name: <org.jetbrains.compose:hot-reload-runtime-api>
+// Library unique name: <org.jetbrains.compose.hot-reload:hot-reload-runtime-api>
 open annotation class org.jetbrains.compose.reload/DelicateHotReloadApi : kotlin/Annotation { // org.jetbrains.compose.reload/DelicateHotReloadApi|null[0]
     constructor <init>() // org.jetbrains.compose.reload/DelicateHotReloadApi.<init>|<init>(){}[0]
 }

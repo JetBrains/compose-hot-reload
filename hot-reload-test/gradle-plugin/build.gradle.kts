@@ -12,13 +12,13 @@ plugins {
 
 publishing {
     publications.withType<MavenPublication>().configureEach {
-        this.artifactId = "hot-reload-test-gradle-plugin"
+        this.artifactId = "test-gradle-plugin"
     }
 }
 
 gradlePlugin {
     plugins.create("hot-reload-test") {
-        id = "org.jetbrains.compose-hot-reload-test"
+        id = "org.jetbrains.compose.hot-reload.test"
         implementationClass = "org.jetbrains.compose.reload.test.HotReloadTestPlugin"
     }
 }

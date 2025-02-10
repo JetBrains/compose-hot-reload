@@ -57,7 +57,7 @@ The 'apiCheck' task will be configured to fail if this api dump does not match t
  */
 val devApiBuild = tasks.register<KotlinApiBuildTask>("devApiBuild") {
     inputClassesDirs = kotlin.target.compilations["dev"].output.classesDirs
-    outputApiFile = layout.buildDirectory.file("api/hot-reload-runtime-jvm-dev.api")
+    outputApiFile = layout.buildDirectory.file("api/runtime-jvm-dev.api")
     runtimeClasspath = project.files({ tasks.apiBuild.get().runtimeClasspath })
     nonPublicMarkers.add("org.jetbrains.compose.reload.InternalHotReloadApi")
 }

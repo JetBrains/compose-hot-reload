@@ -31,6 +31,6 @@ dependencies {
 
 publishing {
     publications.withType<MavenPublication>().configureEach {
-        artifactId = "hot-reload-test-gradle"
+        artifactId = "test-gradle"
     }
 }

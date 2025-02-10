@@ -4,7 +4,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("plugin.compose")
     id("org.jetbrains.compose")
-    id("org.jetbrains.compose-hot-reload")
+    id("org.jetbrains.compose.hot-reload")
 }
 
 composeCompiler {

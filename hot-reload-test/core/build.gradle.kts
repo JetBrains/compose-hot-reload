@@ -19,6 +19,6 @@ dependencies {
 
 publishing {
     publications.withType<MavenPublication>().configureEach {
-        artifactId = "hot-reload-test-core"
+        artifactId = "test-core"
     }
 }

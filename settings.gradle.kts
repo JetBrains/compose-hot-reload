@@ -10,8 +10,7 @@ pluginManagement {
         maven(file("build/repo"))
         maven("https://packages.jetbrains.team/maven/p/firework/dev") {
             mavenContent {
-                includeModuleByRegex("org.jetbrains.compose", "hot-reload.*")
-                includeModuleByRegex("org.jetbrains.compose-hot-reload.*", ".*")
+                includeGroupAndSubgroups("org.jetbrains.compose.hot-reload")
             }
         }
 
@@ -25,7 +24,7 @@ pluginManagement {
     }
 
     plugins {
-        id("org.jetbrains.compose-hot-reload-test") version providers.gradleProperty("bootstrap.version").get()
+        id("org.jetbrains.compose.hot-reload.test") version providers.gradleProperty("bootstrap.version").get()
     }
 }
 
@@ -82,7 +81,7 @@ include(":tests")
 
 
 gradle.beforeProject {
-    group = "org.jetbrains.compose"
+    group = "org.jetbrains.compose.hot-reload"
     version = project.providers.gradleProperty("version").get()
 
     plugins.apply("test-conventions")

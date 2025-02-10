@@ -5,15 +5,15 @@ plugins {
     kotlin("multiplatform")
     kotlin("plugin.compose")
     id("org.jetbrains.compose")
-    id("org.jetbrains.compose-hot-reload")
-    id("org.jetbrains.compose-hot-reload-test")
+    id("org.jetbrains.compose.hot-reload")
+    id("org.jetbrains.compose.hot-reload.test")
 }
 
 kotlin {
     jvm()
 
     sourceSets.jvmMain.dependencies {
-        implementation("org.jetbrains.compose:hot-reload-runtime-api:1.0.0-dev-39"
+        implementation("org.jetbrains.compose.hot-reload:runtime-api:1.0.0-dev-40")
         implementation(compose.runtime)
     }
 

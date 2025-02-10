@@ -83,7 +83,7 @@ class ProjectDependencyTest {
             }
                 kotlin("plugin.compose")
                 id("org.jetbrains.compose")
-                ${if (dependencyProjectHasPluginApplied) """id("org.jetbrains.compose-hot-reload")""" else ""}
+                ${if (dependencyProjectHasPluginApplied) """id("org.jetbrains.compose.hot-reload")""" else ""}
             }
             
             ${
@@ -93,7 +93,7 @@ class ProjectDependencyTest {
                             jvm()
                             sourceSets.commonMain.dependencies {
                                 implementation(compose.desktop.currentOs)
-                                implementation("org.jetbrains.compose:hot-reload-test:$HOT_RELOAD_VERSION")
+                                implementation("org.jetbrains.compose.hot-reload:test:$HOT_RELOAD_VERSION")
                             }
                         }
                     """
@@ -101,7 +101,7 @@ class ProjectDependencyTest {
                     ProjectMode.Jvm -> """
                         dependencies {
                             implementation(compose.desktop.currentOs)
-                            implementation("org.jetbrains.compose:hot-reload-test:$HOT_RELOAD_VERSION")
+                            implementation("org.jetbrains.compose.hot-reload:test:$HOT_RELOAD_VERSION")
                         }
                     """
                 }

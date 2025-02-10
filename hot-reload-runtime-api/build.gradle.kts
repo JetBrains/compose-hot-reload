@@ -85,3 +85,11 @@ android {
         this.targetCompatibility = JavaVersion.VERSION_11
     }
 }
+
+publishing {
+    publications.withType<MavenPublication>().configureEach {
+        afterEvaluate {
+            artifactId = artifactId.removePrefix("hot-reload-")
+        }
+    }
+}

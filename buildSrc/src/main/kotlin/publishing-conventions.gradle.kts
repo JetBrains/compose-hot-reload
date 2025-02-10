@@ -1,3 +1,5 @@
+import gradle.kotlin.dsl.accessors._285dcef16d8875fee0ec91e18e07daf9.kotlin
+
 /*
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
@@ -46,7 +48,10 @@ plugins.withType<MavenPublishPlugin>().all {
         }
 
         publications.withType<MavenPublication>().configureEach {
-            this.signPublicationIfKeyPresent()
+            signPublicationIfKeyPresent()
+
+            artifactId = project.name.removePrefix("hot-reload-")
+
             pom {
                 name = project.name
                 description = "Compose Hot Reload implementation"

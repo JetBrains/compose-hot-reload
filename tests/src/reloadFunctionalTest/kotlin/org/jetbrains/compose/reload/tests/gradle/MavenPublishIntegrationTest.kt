@@ -37,7 +37,7 @@ class MavenPublishIntegrationTest {
                 kotlin("jvm")
                 kotlin("plugin.compose")
                 id("org.jetbrains.compose")
-                id("org.jetbrains.compose-hot-reload")
+                id("org.jetbrains.compose.hot-reload")
                 `maven-publish`
             }
             
@@ -83,7 +83,7 @@ class MavenPublishIntegrationTest {
                 kotlin("multiplatform")
                 kotlin("plugin.compose")
                 id("org.jetbrains.compose")
-                id("org.jetbrains.compose-hot-reload")
+                id("org.jetbrains.compose.hot-reload")
                 `maven-publish`
             }
             

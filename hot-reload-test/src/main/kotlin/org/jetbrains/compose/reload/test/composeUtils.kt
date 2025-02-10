@@ -19,8 +19,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import org.jetbrains.compose.hot_reload_test.generated.resources.Res
-import org.jetbrains.compose.hot_reload_test.generated.resources.Roboto_Medium
+import org.jetbrains.compose.hot_reload.hot_reload_test.generated.resources.Res
+import org.jetbrains.compose.hot_reload.hot_reload_test.generated.resources.Roboto_Medium
 import org.jetbrains.compose.resources.Font
 
 /**

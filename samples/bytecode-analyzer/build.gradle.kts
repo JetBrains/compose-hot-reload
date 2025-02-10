@@ -4,7 +4,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("plugin.compose")
     id("org.jetbrains.compose")
-    id("org.jetbrains.compose-hot-reload")
+    id("org.jetbrains.compose.hot-reload")
 }
 
 kotlin {
@@ -16,8 +16,8 @@ kotlin {
     }
 
     sourceSets.commonMain.dependencies {
-        implementation("org.jetbrains.compose:hot-reload-core:1.0.0-dev-39")
-        implementation("org.jetbrains.compose:hot-reload-analysis:1.0.0-dev-39")
+        implementation("org.jetbrains.compose.hot-reload:core:1.0.0-dev-40")
+        implementation("org.jetbrains.compose.hot-reload:analysis:1.0.0-dev-40")
 
         implementation("io.sellmair:evas:1.2.0")
         implementation("io.sellmair:evas-compose:1.2.0")

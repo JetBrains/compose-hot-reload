@@ -20,7 +20,7 @@ tasks.withType<Test>().configureEach {
 
 gradlePlugin {
     plugins.create("hot-reload") {
-        id = "org.jetbrains.compose-hot-reload"
+        id = "org.jetbrains.compose.hot-reload"
         implementationClass = "org.jetbrains.compose.reload.ComposeHotReloadPlugin"
     }
 }

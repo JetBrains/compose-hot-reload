@@ -150,7 +150,7 @@ internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
             kotlin("{{kotlin.plugin}}")
             kotlin("plugin.compose")
             id("org.jetbrains.compose")
-            id("org.jetbrains.compose-hot-reload")
+            id("org.jetbrains.compose.hot-reload")
             {{if $androidEnabledKey}}
             id("com.android.application")
             {{/if}}
@@ -167,7 +167,7 @@ internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
 
     override fun jvmMainDependencies(context: ExtensionContext): String? = """
         implementation(compose.desktop.currentOs)
-        implementation("org.jetbrains.compose:hot-reload-test:$HOT_RELOAD_VERSION")
+        implementation("org.jetbrains.compose.hot-reload:test:$HOT_RELOAD_VERSION")
     """.trimIndent()
 
 

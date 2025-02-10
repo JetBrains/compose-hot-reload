@@ -134,10 +134,10 @@ class RunClasspathTest {
 }
 
 private val hotReloadDependencies: Array<FileMatcher> = arrayOf(
-    PathRegex(".*/hot-reload-agent-$HOT_RELOAD_VERSION.jar"),
-    PathRegex(".*/hot-reload-analysis-$HOT_RELOAD_VERSION.jar"),
-    PathRegex(".*/hot-reload-core-$HOT_RELOAD_VERSION.jar"),
-    PathRegex(".*/hot-reload-orchestration-$HOT_RELOAD_VERSION.jar"),
-    PathRegex(".*/hot-reload-runtime-api-jvm-$HOT_RELOAD_VERSION.jar"),
-    PathRegex(".*/hot-reload-runtime-jvm-$HOT_RELOAD_VERSION-dev.jar"),
+    PathRegex(".*hot-reload/.*/agent-$HOT_RELOAD_VERSION.jar"),
+    PathRegex(".*hot-reload/.*/analysis-$HOT_RELOAD_VERSION.jar"),
+    PathRegex(".*hot-reload/.*/core-$HOT_RELOAD_VERSION.jar"),
+    PathRegex(".*hot-reload/.*/orchestration-$HOT_RELOAD_VERSION.jar"),
+    PathRegex(".*hot-reload/.*runtime-api-jvm-$HOT_RELOAD_VERSION.jar"),
+    PathRegex(".*hot-reload/.*/runtime-jvm-$HOT_RELOAD_VERSION-dev.jar"),
 )

@@ -22,7 +22,7 @@ val Project.composeHotReloadAgentConfiguration: Configuration
             configuration.isCanBeResolved = true
 
             configuration.dependencies.add(
-                project.dependencies.create("org.jetbrains.compose:hot-reload-agent:$HOT_RELOAD_VERSION")
+                project.dependencies.create("org.jetbrains.compose.hot-reload:agent:$HOT_RELOAD_VERSION")
             )
         }
     }
@@ -31,7 +31,8 @@ val Project.composeHotReloadAgentConfiguration: Configuration
 fun Project.composeHotReloadAgentJar(): FileCollection {
     return composeHotReloadAgentConfiguration.incoming.artifactView { view ->
         view.componentFilter { element ->
-            element is ModuleComponentIdentifier && element.group == "org.jetbrains.compose" && element.module == "hot-reload-agent"
+            element is ModuleComponentIdentifier &&
+                element.group == "org.jetbrains.compose.hot-reload" && element.module == "agent"
         }
     }.files
 }
