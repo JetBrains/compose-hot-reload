@@ -106,7 +106,7 @@ internal class DefaultSettingsGradleKts : SettingsGradleKtsExtension {
         return """
             maven("https://packages.jetbrains.team/maven/p/firework/dev") {
                 mavenContent {
-                    includeModuleByRegex("org.jetbrains.compose", "hot-reload.*")
+                    includeGroupAndSubgroups("org.jetbrains.compose.hot-reload")
                 }
             }
             
@@ -137,7 +137,7 @@ internal class DefaultSettingsGradleKts : SettingsGradleKtsExtension {
         return """
             maven("https://packages.jetbrains.team/maven/p/firework/dev") {
                 mavenContent {
-                    includeModuleByRegex("org.jetbrains.compose", "hot-reload.*")
+                    includeGroupAndSubgroups("org.jetbrains.compose.hot-reload")
                 }
             }
             
