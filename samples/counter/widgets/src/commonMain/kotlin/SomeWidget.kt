@@ -1,21 +1,37 @@
+import Test.setGlobalObject
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+
+var global = 0
 
 @Composable
 fun SomeWidget() {
-    val transition = rememberInfiniteTransition()
-    val scale by transition.animateFloat(
-        0.95f, 1.04f, infiniteRepeatable(tween(500), RepeatMode.Reverse)
-    )
+    Canvas (modifier = Modifier.size(500.dp)) {
+        setGlobalObject()
+        println("Global: $global")
+    }
+}
 
-    Text("👋 Hello from 'widgets'!", fontSize = 24.0.sp, modifier = Modifier.scale(scale))
+
+fun setGlobalNoObject() {
+    global = 7
+}
+
+object Test {
+    fun setGlobalObject() {
+        global = 9
+    }
 }

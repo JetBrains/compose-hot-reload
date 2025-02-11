@@ -1,0 +1,127 @@
+/*
+ Original Code:
+*/
+
+// Foo.kt
+import androidx.compose.runtime.*
+
+var global = 0
+
+
+fun inc() {
+    global++
+}
+
+@Composable
+fun Foo() {
+    inc()
+}
+
+/*
+ Runtime Info:
+*/
+
+Bar {
+    val INSTANCE: LBar;
+    val $stable: I
+
+    <init> {
+        desc: ()V
+        key: null
+        codeHash: 3570755298
+        methodDependencies: []
+        fieldDependencies: []
+    }
+    
+    inc {
+        desc: ()V
+        key: null
+        codeHash: 3477393595
+        methodDependencies: [
+            FooKt.getGlobal ()I,
+            FooKt.setGlobal (I)V
+        ]
+        fieldDependencies: []
+    }
+    
+    <clinit> {
+        desc: ()V
+        key: null
+        codeHash: 3759433138
+        methodDependencies: []
+        fieldDependencies: [
+            Bar.INSTANCE LBar;
+        ]
+    }
+}
+
+FooKt {
+    val global: I
+
+    getGlobal {
+        desc: ()I
+        key: null
+        codeHash: 4024110692
+        methodDependencies: []
+        fieldDependencies: [
+            FooKt.global I
+        ]
+    }
+    
+    setGlobal {
+        desc: (I)V
+        key: null
+        codeHash: 2197796865
+        methodDependencies: []
+        fieldDependencies: [
+            FooKt.global I
+        ]
+    }
+    
+    inc {
+        desc: ()V
+        key: null
+        codeHash: 3841670125
+        methodDependencies: []
+        fieldDependencies: [
+            FooKt.global I
+        ]
+    }
+    
+    Foo {
+        desc: (Landroidx/compose/runtime/Composer;I)V
+        key: -965539098
+        codeHash: 1832052484
+        methodDependencies: [
+            FooKt.Foo$lambda$0 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+        ]
+        fieldDependencies: []
+    
+        RestartGroup {
+            key: -965539098
+            codeHash: 485619845
+            methodDependencies: [
+                FooKt.inc ()V
+            ]
+            fieldDependencies: []
+        }
+    }
+    
+    Foo$lambda$0 {
+        desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+        key: null
+        codeHash: 3190275455
+        methodDependencies: [
+            FooKt.Foo (Landroidx/compose/runtime/Composer;I)V
+        ]
+        fieldDependencies: []
+    }
+    
+    <clinit> {
+        desc: ()V
+        key: null
+        codeHash: 2636274694
+        methodDependencies: []
+        fieldDependencies: []
+    }
+}

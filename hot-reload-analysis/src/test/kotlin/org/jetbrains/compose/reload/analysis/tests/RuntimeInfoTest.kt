@@ -319,6 +319,51 @@ class RuntimeInfoTest {
         ) ?: fail("Missing 'runtimeInfo'")
 
     }
+
+    @Test
+    fun `test - #78 - dependency ob object function`(compiler: Compiler, testInfo: TestInfo) {
+        checkRuntimeInfo(
+            testInfo, compiler, name = "object", code = mapOf(
+                """Foo.kt""" to """
+                    import androidx.compose.runtime.*
+                    
+                    var global = 0
+                    
+                    object Bar {
+                        fun inc() {
+                            global++
+                        }
+                    }
+                    
+                    @Composable
+                    fun Foo() {
+                        Bar.inc()
+                    }
+                """.trimIndent()
+            )
+        )
+
+        checkRuntimeInfo(
+            testInfo, compiler, name = "topLevelFunction", code = mapOf(
+                """Foo.kt""" to """
+                    import androidx.compose.runtime.*
+                    
+                    var global = 0
+                    
+                    fun inc() {
+                        global++
+                    }
+                   
+                    @Composable
+                    fun Foo() {
+                        inc()
+                    }
+                """.trimIndent()
+            )
+        )
+    }
+
+
 }
 
 private fun checkRuntimeInfo(
