@@ -21,9 +21,6 @@ internal fun DevToolingWidget(modifier: Modifier = Modifier) {
     ) {
         DevToolingToolbar()
 
-        val consoleWeight = Modifier.weight(1f, fill = false)
-        DevToolingConsole(LogMessage.TAG_COMPILER, consoleWeight)
-        DevToolingConsole(LogMessage.TAG_AGENT, consoleWeight)
-        DevToolingConsole(LogMessage.TAG_RUNTIME, consoleWeight)
+        DevToolingConsole(LogMessage.TAG_COMPILER, Modifier.fillMaxSize())
     }
 }
