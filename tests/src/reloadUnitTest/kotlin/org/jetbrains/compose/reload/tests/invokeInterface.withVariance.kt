@@ -6,7 +6,6 @@
 package org.jetbrains.compose.reload.tests
 
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -28,27 +27,15 @@ class InvokeInterfaceWithVarianceTestClass : InvokeInterfaceWithVarianceInterfac
     }
 }
 
-
-object InvokeInterfaceWithVariance {
-    val instance: InvokeInterfaceWithVarianceInterface<String> = InvokeInterfaceWithVarianceTestClass()
-
-    /*
-    We're using a dedicated function for this test to work around
-    https://youtrack.jetbrains.com/issue/KT-75159/
-    */
-    @Composable
-    fun render() {
-        val text = remember { instance.invokeInterfaceMethod("foo") }
-        Text(text = text, modifier = Modifier.testTag("text"))
-    }
-}
-
 @OptIn(ExperimentalTestApi::class)
 @HotReloadUnitTest
 fun `test - invokeInterface method dependency - with variance`() = runComposeUiTest {
+    val instance: InvokeInterfaceWithVarianceInterface<String> = InvokeInterfaceWithVarianceTestClass()
+
     setContent {
         DevelopmentEntryPoint {
-            InvokeInterfaceWithVariance.render()
+            val text = remember { instance.invokeInterfaceMethod("foo") }
+            Text(text = text, modifier = Modifier.testTag("text"))
         }
     }
 
