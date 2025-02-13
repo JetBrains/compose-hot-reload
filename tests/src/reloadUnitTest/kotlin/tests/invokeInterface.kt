@@ -6,7 +6,6 @@
 package tests
 
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -26,26 +25,15 @@ class InvokeInterfaceTestClass : InvokeInterfaceTestInterface {
     override fun invokeInterfaceMethod(): String = "foo"
 }
 
-object InvokeInterface {
-    val instance: InvokeInterfaceTestInterface = InvokeInterfaceTestClass()
-
-    /*
-    We're using a dedicated function for this test to workaround
-    https://youtrack.jetbrains.com/issue/KT-75159/
-    */
-    @Composable
-    fun render() {
-        val text = remember { instance.invokeInterfaceMethod() }
-        Text(text = text, modifier = Modifier.testTag("text"))
-    }
-}
-
 @OptIn(ExperimentalTestApi::class)
 @HotReloadUnitTest
 fun `test - invokeInterface method dependency`() = runComposeUiTest {
+    val instance: InvokeInterfaceTestInterface = InvokeInterfaceTestClass()
+
     setContent {
         DevelopmentEntryPoint {
-            InvokeInterface.render()
+            val text = remember { instance.invokeInterfaceMethod() }
+            Text(text = text, modifier = Modifier.testTag("text"))
         }
     }
 
