@@ -17,6 +17,13 @@ value class ClassId(val value: String) : Comparable<ClassId> {
         return value
     }
 
+    companion object {
+        fun fromFqn(fqn: String): ClassId = ClassId(fqn.replace(".", "/"))
+    }
+
+
+    fun toFqn(): String = value.replace("/", ".")
+
     val descriptor: String get() = "L$value;"
 }
 

@@ -11,7 +11,8 @@ import java.lang.instrument.Instrumentation
 
 fun premain(@Suppress("unused") args: String?, instrumentation: Instrumentation) {
     createPidfile()
-    enableComposeHotReloadMode()
+    //enableComposeHotReloadMode()
+    instrumentation.addTransformer(ComposeTransformer)
     launchComposeGroupInvalidation()
     launchRuntimeTracking(instrumentation)
     launchReloadRequestHandler(instrumentation)

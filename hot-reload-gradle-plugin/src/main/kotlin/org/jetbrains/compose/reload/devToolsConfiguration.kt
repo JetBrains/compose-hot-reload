@@ -21,7 +21,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 private const val composeHotReloadDevToolsConfigurationName = "composeHotReloadDevTools"
 
-internal val Project.composeHotReloadDevToolsConfiguration: Configuration
+ val Project.composeHotReloadDevToolsConfiguration: Configuration
     get() {
         configurations.findByName(composeHotReloadDevToolsConfigurationName)?.let { return it }
         return configurations.create(composeHotReloadDevToolsConfigurationName) { configuration ->

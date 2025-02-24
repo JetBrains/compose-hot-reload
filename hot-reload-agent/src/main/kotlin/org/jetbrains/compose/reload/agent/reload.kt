@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.agent
 
 import javassist.ClassPool
 import javassist.LoaderClassPath
+import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.RuntimeInfo
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
@@ -57,8 +58,9 @@ internal fun reload(
         val clazz = pool.makeClass(code.inputStream())
 
         val originalClass = runCatching {
-            Class.forName(clazz.name)
-        }.getOrNull()
+            val loader = findClassLoader(ClassId(clazz.name.replace(".", "/")))
+            loader.get()?.loadClass(clazz.name)
+        }.getOrNull() ?: return@mapNotNull null
 
         logger.orchestration(buildString {
             appendLine("Reloading class: '${clazz.name}' (${change.name})")
@@ -86,7 +88,8 @@ internal fun reload(
         val daos = DataOutputStream(baos)
         clazz.classFile.write(daos)
 
-        ClassDefinition(originalClass ?: Class.forName(clazz.name), baos.toByteArray())
+
+        ClassDefinition(originalClass, baos.toByteArray())
     }
 
     instrumentation.redefineClasses(*definitions.toTypedArray())
