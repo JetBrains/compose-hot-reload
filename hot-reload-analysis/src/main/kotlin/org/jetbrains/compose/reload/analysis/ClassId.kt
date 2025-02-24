@@ -18,6 +18,10 @@ value class ClassId(val value: String) : Comparable<ClassId> {
     }
 
     val descriptor: String get() = "L$value;"
+
+    companion object {
+        fun fromFqn(fqn: String): ClassId = ClassId(fqn.replace(".", "/"))
+    }
 }
 
 fun ClassId(clazz: KClass<*>): ClassId {

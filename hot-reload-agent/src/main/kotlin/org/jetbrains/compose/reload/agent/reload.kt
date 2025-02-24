@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.agent
 
 import javassist.ClassPool
 import javassist.LoaderClassPath
+import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.RuntimeInfo
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
@@ -57,18 +58,24 @@ internal fun reload(
         val clazz = pool.makeClass(code.inputStream())
 
         val originalClass = runCatching {
-            Class.forName(clazz.name)
+            val loader = findClassLoader(ClassId.fromFqn(clazz.name)).get()
+            loader?.loadClass(clazz.name)
         }.getOrNull()
+
+        if (originalClass == null) {
+            logger.info("Class '${clazz.name}' was not loaded yet")
+            return@mapNotNull null
+        }
 
         logger.orchestration(buildString {
             appendLine("Reloading class: '${clazz.name}' (${change.name})")
 
-            if (originalClass?.superclass?.name != clazz.superclass.name) {
+            if (originalClass.superclass?.name != clazz.superclass.name) {
                 appendLine("⚠️ Superclass: '${originalClass?.superclass?.name}' -> '${clazz.superclass?.name}'")
             }
 
             val addedInterfaces = clazz.interfaces.map { it.name } -
-                originalClass?.interfaces?.map { it.name }.orEmpty()
+                originalClass.interfaces?.map { it.name }.orEmpty()
             addedInterfaces.forEach { addedInterface ->
                 appendLine("⚠️ +Interface: '$addedInterface'")
             }
@@ -86,7 +93,7 @@ internal fun reload(
         val daos = DataOutputStream(baos)
         clazz.classFile.write(daos)
 
-        ClassDefinition(originalClass ?: Class.forName(clazz.name), baos.toByteArray())
+        ClassDefinition(originalClass, baos.toByteArray())
     }
 
     instrumentation.redefineClasses(*definitions.toTypedArray())

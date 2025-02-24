@@ -5,12 +5,14 @@
 
 package org.jetbrains.compose.reload.agent
 
+import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.ClassInfo
 import org.jetbrains.compose.reload.analysis.RuntimeInfo
 import org.jetbrains.compose.reload.core.Update
 import org.jetbrains.compose.reload.core.createLogger
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
+import java.lang.ref.WeakReference
 import java.security.ProtectionDomain
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
@@ -24,6 +26,7 @@ private val runtimeAnalysisThread = Executors.newSingleThreadExecutor { r ->
 
 private val currentRuntime = ArrayList<ClassInfo>(16384)
 private val pendingRedefinitions = ArrayList<ClassInfo>(16384)
+private val classLoaders = hashMapOf<ClassId, WeakReference<ClassLoader>>()
 
 internal fun launchRuntimeTracking(instrumentation: Instrumentation) {
     /*
@@ -47,11 +50,16 @@ internal fun redefineRuntimeInfo(): Future<Update<RuntimeInfo>> = runtimeAnalysi
     )
 }
 
+internal fun findClassLoader(classId: ClassId): Future<ClassLoader?> = runtimeAnalysisThread.submit<ClassLoader?> {
+    classLoaders[classId]?.get()
+}
+
 internal fun enqueueRuntimeAnalysis(
-    className: String?, classBeingRedefined: Class<*>?, classfileBuffer: ByteArray
+    loader: ClassLoader, className: String?, classBeingRedefined: Class<*>?, classfileBuffer: ByteArray
 ) = runtimeAnalysisThread.submit {
     try {
         val classInfo = ClassInfo(classfileBuffer) ?: return@submit
+        classLoaders[classInfo.classId] = WeakReference(loader)
 
         if (classBeingRedefined == null) {
             if (logger.isTraceEnabled) {
@@ -80,7 +88,10 @@ internal object RuntimeTrackingTransformer : ClassFileTransformer {
         loader: ClassLoader?, className: String?, classBeingRedefined: Class<*>?,
         protectionDomain: ProtectionDomain?, classfileBuffer: ByteArray
     ): ByteArray? {
-        enqueueRuntimeAnalysis(className, classBeingRedefined, classfileBuffer)
+        enqueueRuntimeAnalysis(
+            loader ?: ClassLoader.getSystemClassLoader(),
+            className, classBeingRedefined, classfileBuffer
+        )
         return null
     }
 }
