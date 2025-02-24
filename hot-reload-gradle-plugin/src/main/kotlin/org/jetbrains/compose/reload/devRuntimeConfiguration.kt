@@ -86,34 +86,36 @@ private fun KotlinTarget.createComposeHotReloadRuntimeElements() {
     val main = compilations.getByName("main")
     val runtimeConfiguration = project.configurations.getByName(main.runtimeDependencyConfigurationName ?: return)
     val hotRuntimeConfigurationName = main.runtimeDependencyConfigurationName + "ComposeHot"
-    project.configurations.findByName(hotRuntimeConfigurationName)?.let { return }
-        ?: project.configurations.create(hotRuntimeConfigurationName) { configuration ->
-            configuration.extendsFrom(runtimeConfiguration)
+    val existingConfiguration = project.configurations.findByName(hotRuntimeConfigurationName)
+    if (existingConfiguration != null) return
 
-            configuration.attributes.attribute(KotlinPlatformType.attribute, platformType)
-            configuration.attributes.attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(COMPOSE_DEV_RUNTIME_USAGE))
-            configuration.attributes.attribute(Category.CATEGORY_ATTRIBUTE, project.objects.named(Category.LIBRARY))
-            configuration.attributes.attribute(TARGET_JVM_ENVIRONMENT_ATTRIBUTE, project.objects.named(STANDARD_JVM))
+    project.configurations.create(hotRuntimeConfigurationName) { configuration ->
+        configuration.extendsFrom(runtimeConfiguration)
 
-            configuration.isCanBeResolved = false
-            configuration.isCanBeConsumed = true
+        configuration.attributes.attribute(KotlinPlatformType.attribute, platformType)
+        configuration.attributes.attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(COMPOSE_DEV_RUNTIME_USAGE))
+        configuration.attributes.attribute(Category.CATEGORY_ATTRIBUTE, project.objects.named(Category.LIBRARY))
+        configuration.attributes.attribute(TARGET_JVM_ENVIRONMENT_ATTRIBUTE, project.objects.named(STANDARD_JVM))
 
-            project.afterEvaluate {
-                main.output.classesDirs.forEach { classesDir ->
-                    configuration.outgoing.artifact(classesDir) { artifact ->
-                        artifact.builtBy(main.output.allOutputs)
-                        artifact.builtBy(main.compileTaskProvider)
-                        artifact.type = ArtifactTypeDefinition.DIRECTORY_TYPE
-                    }
+        configuration.isCanBeResolved = false
+        configuration.isCanBeConsumed = true
+
+        project.afterEvaluate {
+            main.output.classesDirs.forEach { classesDir ->
+                configuration.outgoing.artifact(classesDir) { artifact ->
+                    artifact.builtBy(main.output.allOutputs)
+                    artifact.builtBy(main.compileTaskProvider)
+                    artifact.type = ArtifactTypeDefinition.DIRECTORY_TYPE
                 }
             }
-
-            configuration.outgoing.artifact(project.provider { main.output.resourcesDirProvider }) { artifact ->
-                artifact.builtBy(main.output.allOutputs)
-                artifact.builtBy(main.compileTaskProvider)
-                artifact.type = ArtifactTypeDefinition.DIRECTORY_TYPE
-            }
         }
+
+        configuration.outgoing.artifact(project.provider { main.output.resourcesDirProvider }) { artifact ->
+            artifact.builtBy(main.output.allOutputs)
+            artifact.builtBy(main.compileTaskProvider)
+            artifact.type = ArtifactTypeDefinition.DIRECTORY_TYPE
+        }
+    }
 }
 
 

@@ -57,7 +57,6 @@ internal val Project.composeHotReloadDevToolsConfiguration: Configuration
                         version { constraint -> constraint.strictly(HOT_RELOAD_COMPOSE_VERSION) }
                     }
                 }
-
             }
         }
     }
