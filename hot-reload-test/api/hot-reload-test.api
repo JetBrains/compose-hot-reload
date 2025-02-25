@@ -1,3 +1,7 @@
+public final class org/jetbrains/compose/reload/test/ClassLoadingKt {
+	public static final fun getTestClassLoader ()Ljava/net/URLClassLoader;
+}
+
 public final class org/jetbrains/compose/reload/test/CompileAndReloadKt {
 	public static final fun compileAndReload (Ljava/lang/String;)V
 }
