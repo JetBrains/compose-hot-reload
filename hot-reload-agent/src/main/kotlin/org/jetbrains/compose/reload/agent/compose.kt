@@ -96,9 +96,9 @@ private fun enableComposeHotReloadMode(loader: ClassLoader) {
             .singleOrNull { it.name.contains("setHotReloadEnabled") }
             ?.apply { invoke(recomposerCompanion, true) }
 
-        logger.debug("'setHotReloadEnabled' method found, enabled compose hot reload mode ($loader)")
+        logger.debug("'setHotReloadEnabled' method found, enabled compose hot reload mode (${loader.name})")
     } catch (e: ReflectiveOperationException) {
-        logger.warn("Failed to enable compose hot reload mode ($loader)", e)
+        logger.warn("Failed to enable compose hot reload mode (${loader.name})", e)
     }
 }
 
