@@ -44,8 +44,6 @@ tasks.withType<AbstractTestTask>().configureEach {
             systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
             systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", parallelism)
         }
-
-        maxParallelForks = 2
     }
 
     testLogging {
