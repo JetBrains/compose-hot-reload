@@ -70,6 +70,11 @@ public suspend fun GradleRunner.build(vararg args: String): ExitCode? {
     val exitCode = CompletableDeferred<ExitCode?>()
 
     val thread = thread(name = "Gradle Runner") {
+        Thread.currentThread().setUncaughtExceptionHandler { _, e ->
+            logger.error("Uncaught exception in Gradle runner thread", e)
+            exitCode.complete(null)
+        }
+
         logger.info("Starting Gradle runner: ${processBuilder.command().joinToString("\n")}")
         val process = processBuilder.start()
 
