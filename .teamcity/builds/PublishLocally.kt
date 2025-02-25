@@ -15,15 +15,6 @@ object PublishLocally : BuildType({
 
     features {
         buildCache {
-            use = true
-            publish = true
-            name = "konan"
-            rules = """
-                %env.HOME%/.konan
-            """.trimIndent()
-        }
-
-        buildCache {
             name = "Android SDK"
             rules = """
                 %android-sdk.location%/licenses
