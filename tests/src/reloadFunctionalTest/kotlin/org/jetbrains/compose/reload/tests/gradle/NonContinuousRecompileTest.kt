@@ -22,7 +22,7 @@ class NonContinuousRecompileTest {
     @GradleIntegrationTest
     fun `test - non continuous build`(fixture: HotReloadTestFixture) = fixture.runTest {
         projectDir.resolve("gradle.properties")
-            .createParentDirectories().createFile()
+            .createParentDirectories()
             .appendLines(listOf("compose.build.continuous=false"))
 
         runTransaction {

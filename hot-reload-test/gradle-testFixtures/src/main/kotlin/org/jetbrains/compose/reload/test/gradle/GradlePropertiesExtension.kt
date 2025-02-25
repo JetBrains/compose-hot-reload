@@ -27,6 +27,8 @@ internal fun renderGradleProperties(context: ExtensionContext): String = gradleP
 private const val androidEnabledKey = "android.enabled"
 private const val propertiesKey = "properties"
 private val gradlePropertiesTemplate = """
+    org.gradle.caching=true
+    
     {{if $androidEnabledKey}}
     android.useAndroidX=true
     {{/if}}
