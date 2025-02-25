@@ -17,12 +17,11 @@ import java.io.File
 import java.lang.instrument.ClassDefinition
 import java.lang.instrument.Instrumentation
 import java.util.UUID
+import java.util.WeakHashMap
 
 private val logger = createLogger()
 
-private val pool = ClassPool().apply {
-    appendClassPath(LoaderClassPath(ClassLoader.getSystemClassLoader()))
-}
+private val classPools = WeakHashMap<ClassLoader, ClassPool>()
 
 data class Reload(
     val reloadRequestId: UUID,
@@ -53,14 +52,25 @@ internal fun reload(
         }
 
         logger.debug("Loading: $file")
-
         val code = file.readBytes()
-        val clazz = pool.makeClass(code.inputStream())
+
+        val classId = ClassId(code)
+        if (classId == null) {
+            logger.error("Cannot infer 'ClassId' for '$file'")
+            return@mapNotNull null
+        }
+
+        val loader = findClassLoader(classId).get()
+        if (loader == null) {
+            logger.info("Class '$classId' is not loaded yet")
+            return@mapNotNull null
+        }
 
         val originalClass = runCatching {
-            val loader = findClassLoader(ClassId.fromFqn(clazz.name)).get()
-            loader?.loadClass(clazz.name)
+            loader.loadClass(classId.toFqn())
         }.getOrNull()
+
+        val clazz = getClassPool(loader).makeClass(code.inputStream())
 
         if (originalClass == null) {
             logger.info("Class '${clazz.name}' was not loaded yet")
@@ -71,7 +81,7 @@ internal fun reload(
             appendLine("Reloading class: '${clazz.name}' (${change.name})")
 
             if (originalClass.superclass?.name != clazz.superclass.name) {
-                appendLine("⚠️ Superclass: '${originalClass?.superclass?.name}' -> '${clazz.superclass?.name}'")
+                appendLine("⚠️ Superclass: '${originalClass.superclass?.name}' -> '${clazz.superclass?.name}'")
             }
 
             val addedInterfaces = clazz.interfaces.map { it.name } -
@@ -80,7 +90,7 @@ internal fun reload(
                 appendLine("⚠️ +Interface: '$addedInterface'")
             }
 
-            val removedInterfaces = originalClass?.interfaces.orEmpty().map { it.name }.toSet() -
+            val removedInterfaces = originalClass.interfaces.orEmpty().map { it.name }.toSet() -
                 clazz.interfaces.map { it.name }.toSet()
             removedInterfaces.forEach { removedInterface ->
                 appendLine("⚠️ -Interface: '$removedInterface'")
@@ -102,4 +112,12 @@ internal fun reload(
     reinitializeStaticsIfNecessary(definitions, previousRuntime, newRuntime)
 
     return Reload(reloadRequestId, definitions, previousRuntime, newRuntime)
+}
+
+private fun getClassPool(loader: ClassLoader): ClassPool {
+    return classPools.getOrPut(loader) {
+        ClassPool(true).apply {
+            appendClassPath(LoaderClassPath(loader))
+        }
+    }
 }

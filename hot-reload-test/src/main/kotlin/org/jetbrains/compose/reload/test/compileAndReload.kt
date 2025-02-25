@@ -28,6 +28,7 @@ import org.objectweb.asm.tree.ClassNode
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import javax.swing.SwingUtilities
 import kotlin.io.path.ExperimentalPathApi
@@ -126,6 +127,9 @@ public fun compileAndReload(sourceCode: String) {
 
     try {
         future.get(30, TimeUnit.SECONDS)
+    } catch (t: ExecutionException) {
+        t.cause?.let { throw it }
+        throw t
     } finally {
         listener.dispose()
     }

@@ -6,6 +6,9 @@
 package org.jetbrains.compose.reload.analysis
 
 import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassReader.SKIP_CODE
+import org.objectweb.asm.ClassReader.SKIP_FRAMES
+import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Opcodes.ASM9
@@ -48,6 +51,21 @@ internal fun ClassNode(bytecode: ByteArray): ClassNode {
     val node = ClassNode(ASM9)
     reader.accept(node, 0)
     return node
+}
+
+fun ClassId(bytecode: ByteArray): ClassId? {
+    var className: String? = null
+    val reader = ClassReader(bytecode)
+    reader.accept(object : ClassVisitor(ASM9) {
+        override fun visit(
+            version: Int, access: Int, name: String?,
+            signature: String?, superName: String?, interfaces: Array<out String?>?
+        ) {
+            className = name
+        }
+    }, SKIP_CODE and SKIP_FRAMES and ClassReader.SKIP_DEBUG)
+
+    return className?.let { name -> ClassId(name) }
 }
 
 internal fun ClassId(node: ClassNode): ClassId = ClassId(node.name)
