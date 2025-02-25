@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
+import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.util.UUID
@@ -29,7 +30,7 @@ public interface OrchestrationServer : OrchestrationHandle
 
 public fun startOrchestrationServer(): OrchestrationServer {
     val serverSocket = ServerSocket()
-    serverSocket.bind(null)
+    serverSocket.bind(InetSocketAddress("127.0.0.1", 0))
 
     val logger = LoggerFactory.getLogger("OrchestrationServer(${serverSocket.localPort})")
     logger.debug("listening on port: ${serverSocket.localPort}")
