@@ -53,6 +53,9 @@ open class HotReloadUnitTestTask : AbstractTestTask() {
     @get:Classpath
     internal val classpath: ConfigurableFileCollection = project.objects.fileCollection()
 
+    @get:Classpath
+    internal val testClasses: ConfigurableFileCollection = project.objects.fileCollection()
+
     @get:Input
     @get:Optional
     internal val className = project.objects.property(String::class.java)
@@ -73,8 +76,13 @@ open class HotReloadUnitTestTask : AbstractTestTask() {
         compileClasspath.from(project.files { compilation.compileDependencyFiles })
         compileClasspath.from(project.files { compilation.output.classesDirs })
 
-        classpath.from(project.files { compilation.runtimeDependencyFiles ?: emptyList<Any>() })
-        classpath.from(project.files { compilation.output.allOutputs })
+        classpath.from(
+            project.configurations.getByName(
+                compilation.runtimeDependencyConfigurationName ?: error("Missing 'runtimeDependencyConfigurationName'")
+            )
+        )
+
+        testClasses.from(project.files { compilation.output.allOutputs })
         moduleName.set(compilation.compileTaskProvider.flatMap { (it.compilerOptions as KotlinJvmCompilerOptions).moduleName })
         compilePluginClasspath.from(
             compilation.compileTaskProvider.map { compileTask ->
@@ -88,6 +96,7 @@ open class HotReloadUnitTestTask : AbstractTestTask() {
         return HotReloadUnitTestExecutor(
             javaExecutable = launcher.get().executablePath.asFile,
             classpath = classpath,
+            testClasses = testClasses,
             agentJar = agentJar,
             agentClasspath = agentClasspath,
             compileModuleName = moduleName.get(),

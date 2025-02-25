@@ -11,7 +11,9 @@ package org.jetbrains.compose.reload.test
 import org.jetbrains.compose.reload.agent.send
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import java.io.File
 import java.lang.reflect.InvocationTargetException
+import java.net.URLClassLoader
 import kotlin.system.exitProcess
 
 internal enum class ExitCode(val value: Int) {
@@ -46,15 +48,15 @@ private fun executeTest(args: ListIterator<String>) {
     if (className == null) error("Missing --class argument")
     if (methodName == null) error("Missing --method argument")
 
-    val classLoader = Thread.currentThread().contextClassLoader
-    val clazz = classLoader.loadClass(className)
-    val method = clazz.getMethod(methodName)
-
     try {
+        Thread.currentThread().contextClassLoader = testClassLoader
+        val clazz = testClassLoader.loadClass(className)
+        val method = clazz.getMethod(methodName)
+
         method.invoke(null)
         exitProcess(ExitCode.Success.value)
-    } catch (t: InvocationTargetException) {
-        val targetException = t.targetException
+    } catch (t: Throwable) {
+        val targetException = if (t is InvocationTargetException) t.targetException else t
         OrchestrationMessage.CriticalException(
             clientRole = OrchestrationClientRole.Application,
             message = targetException.message,
@@ -62,7 +64,5 @@ private fun executeTest(args: ListIterator<String>) {
             stacktrace = targetException.stackTrace.toList()
         ).send().get()
         exitProcess(if (targetException is AssertionError) ExitCode.AssertionError.value else ExitCode.ExecutionError.value)
-    } catch (t: Throwable) {
-        exitProcess(if (t is AssertionError) ExitCode.AssertionError.value else ExitCode.ExecutionError.value)
     }
 }

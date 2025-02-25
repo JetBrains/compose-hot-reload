@@ -41,6 +41,7 @@ import kotlin.io.path.deleteRecursively
 internal class HotReloadUnitTestExecutor(
     private val javaExecutable: File,
     private val classpath: FileCollection,
+    private val testClasses: FileCollection,
     private val agentJar: FileCollection,
     private val agentClasspath: FileCollection,
     private val compileModuleName: String,
@@ -58,7 +59,7 @@ internal class HotReloadUnitTestExecutor(
         testExecutionSpec: HotReloadTestExecutionSpec,
         testResultProcessor: TestResultProcessor
     ) {
-        val methods = classpath.files.flatMap { file -> file.toPath().findTestMethods() }
+        val methods = testClasses.files.flatMap { file -> file.toPath().findTestMethods() }
             .filter { coordinates ->
                 if (testExecutionSpec.className != null &&
                     testExecutionSpec.className != coordinates.className
@@ -122,13 +123,13 @@ internal class HotReloadUnitTestExecutor(
                 javaExecutable.absolutePath,
                 "-cp",
                 classpath.filter { it.exists() }.asPath +
-                    pathSeparator + agentClasspath.asPath +
-                    pathSeparator + applicationClassesDir,
+                    pathSeparator + agentClasspath.asPath,
                 *createDebuggerJvmArguments(intellijDebuggerDispatchPort),
                 "-javaagent:${agentJar.asPath}",
                 "-XX:+AllowEnhancedClassRedefinition",
                 "-Dapple.awt.UIElement=true",
                 "-DapplicationClassesDir=${applicationClassesDir.absolutePathString()}",
+                "-DtestClasses=${testClasses.asPath + pathSeparator + applicationClassesDir}",
                 "-D${HotReloadProperty.IsHeadless.key}=true",
                 "-D${HotReloadProperty.OrchestrationPort.key}=${orchestrationServer.port}",
                 "org.jetbrains.compose.reload.test.Main",

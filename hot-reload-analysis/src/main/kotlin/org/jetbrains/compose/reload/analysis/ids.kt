@@ -5,7 +5,7 @@
 
 package org.jetbrains.compose.reload.analysis
 
-internal object Ids {
+object Ids {
     object Composer {
         val classId = ClassId("androidx/compose/runtime/Composer")
 
@@ -60,6 +60,15 @@ internal object Ids {
             methodName = "sourceInformationMarkerEnd",
             methodDescriptor = "(Landroidx/compose/runtime/Composer;)V"
         )
+    }
+
+    object Recomposer {
+        val classId = ClassId("androidx/compose/runtime/Recomposer")
+        val companion = FieldId(classId, "Companion", "Landroidx/compose/runtime/Recomposer\$Companion;")
+
+        object Companion {
+            val classId = ClassId("androidx.compose.runtime.Recomposer\$Companion")
+        }
     }
 
     object FunctionKeyMeta {

@@ -95,7 +95,7 @@ public fun compileAndReload(sourceCode: String) {
 
             val name = node.name.replace("/", ".")
 
-            if (runCatching { ClassLoader.getSystemClassLoader().loadClass(name) }.isFailure) {
+            if (runCatching { Thread.currentThread().contextClassLoader.loadClass(name) }.isFailure) {
                 val applicationClassesDir = applicationClassesDir()
                 val targetFile = applicationClassesDir.resolve("${node.name}.class")
                 targetFile.createParentDirectories()
