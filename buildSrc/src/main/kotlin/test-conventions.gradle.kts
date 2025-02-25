@@ -37,7 +37,7 @@ tasks.withType<AbstractTestTask>().configureEach {
         /* We do not want to open actual windows */
         systemProperty("apple.awt.UIElement", true)
 
-        if (!isCI) {
+        if (!providers.gradleProperty("tests.sequential").isPresent) {
             systemProperty("junit.jupiter.execution.parallel.enabled", "true")
             systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
             systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
