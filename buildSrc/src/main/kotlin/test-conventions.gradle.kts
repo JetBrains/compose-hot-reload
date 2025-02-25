@@ -37,11 +37,12 @@ tasks.withType<AbstractTestTask>().configureEach {
         /* We do not want to open actual windows */
         systemProperty("apple.awt.UIElement", true)
 
-        if (!providers.gradleProperty("tests.sequential").isPresent) {
+        if (!providers.gradleProperty("chr.tests.sequential").isPresent) {
+            val parallelism = providers.gradleProperty("chr.tests.parallelism").getOrElse("2")
             systemProperty("junit.jupiter.execution.parallel.enabled", "true")
             systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
             systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
-            systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "4")
+            systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", parallelism)
         }
 
         maxParallelForks = 2
