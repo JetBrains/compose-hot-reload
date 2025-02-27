@@ -5,7 +5,10 @@
 
 package org.jetbrains.compose.reload.analysis
 
+import org.jetbrains.compose.reload.core.HotReloadEnvironment
+import org.jetbrains.compose.reload.core.createLogger
 import java.util.zip.CRC32
+
 
 @JvmInline
 value class RuntimeScopeInvalidationKey(val value: Long)
@@ -68,7 +71,10 @@ private fun RuntimeInfo.resolveInvalidationKey(
             scopeQueue.addLast(method.rootScope)
 
             /* If the dependency method is open or abstract, resolve and enqueue implementations */
-            if (method.modality == MethodInfo.Modality.ABSTRACT || method.modality == MethodInfo.Modality.OPEN) {
+            if (
+                HotReloadEnvironment.virtualMethodResolveEnabled &&
+                (method.modality == MethodInfo.Modality.ABSTRACT || method.modality == MethodInfo.Modality.OPEN)
+            ) {
                 val implementationClassInfos = allImplementations[method.methodId.classId].orEmpty()
 
                 implementationClassInfos.forEach { implementationClassInfo ->

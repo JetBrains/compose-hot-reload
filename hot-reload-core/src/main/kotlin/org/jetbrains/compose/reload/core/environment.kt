@@ -15,6 +15,7 @@ public enum class HotReloadProperty(public val key: String) {
     PidFile("compose.reload.pidFile"),
     IsHeadless("compose.reload.headless"),
     HotClasspath("compose.reload.hotApplicationClasspath"),
+    VirtualMethodResolveEnabled("compose.reload.virtualMethodResolveEnabled"),
 
     BuildSystem("compose.reload.buildSystem"),
 
@@ -65,6 +66,7 @@ public object HotReloadEnvironment {
     public val pidFile: Path? = system(HotReloadProperty.PidFile)?.let(::Path)
     public val isHeadless: Boolean = systemBoolean(HotReloadProperty.IsHeadless, false)
     public val hotApplicationClasspath: List<Path>? = systemFiles(HotReloadProperty.HotClasspath)
+    public val virtualMethodResolveEnabled: Boolean = systemBoolean(HotReloadProperty.VirtualMethodResolveEnabled, true)
 
     public val buildSystem: BuildSystem = systemEnum<BuildSystem>(
         property = HotReloadProperty.BuildSystem,
