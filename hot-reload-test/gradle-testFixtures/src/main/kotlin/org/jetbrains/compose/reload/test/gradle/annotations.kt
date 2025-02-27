@@ -10,6 +10,7 @@ import org.junit.jupiter.api.TestTemplate
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
+import kotlin.reflect.KClass
 
 @TestTemplate
 @ExtendWith(HotReloadTestInvocationContextProvider::class)
@@ -32,3 +33,11 @@ public annotation class BuildGradleKts(val path: String)
 public annotation class TestedProjectMode(val mode: ProjectMode)
 
 public annotation class Headless(val isHeadless: Boolean = true)
+
+@Repeatable
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+public annotation class ExtendBuildGradleKts(val extension: KClass<out BuildGradleKtsExtension>)
+
+@Repeatable
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+public annotation class ExtendHotReloadTestDimension(val extension: KClass<out HotReloadTestDimensionExtension>)
