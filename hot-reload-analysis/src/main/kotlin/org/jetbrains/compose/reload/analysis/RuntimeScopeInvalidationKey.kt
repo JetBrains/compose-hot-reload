@@ -6,9 +6,7 @@
 package org.jetbrains.compose.reload.analysis
 
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
-import org.jetbrains.compose.reload.core.createLogger
 import java.util.zip.CRC32
-
 
 @JvmInline
 value class RuntimeScopeInvalidationKey(val value: Long)

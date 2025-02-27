@@ -5,8 +5,6 @@
 
 package org.jetbrains.compose.reload.agent
 
-import javassist.ClassPool
-import javassist.LoaderClassPath
 import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.RuntimeInfo
 import org.jetbrains.compose.reload.core.createLogger
@@ -17,15 +15,12 @@ import java.io.File
 import java.lang.instrument.ClassDefinition
 import java.lang.instrument.Instrumentation
 import java.util.UUID
-import java.util.WeakHashMap
 
 private val logger = createLogger()
 
-private val classPools = WeakHashMap<ClassLoader, ClassPool>()
-
 data class Reload(
     val reloadRequestId: UUID,
-    val classes: List<ClassDefinition>,
+    val definitions: List<ClassDefinition>,
     val previousRuntime: RuntimeInfo,
     val newRuntime: RuntimeInfo,
 )
@@ -112,12 +107,4 @@ internal fun reload(
     reinitializeStaticsIfNecessary(definitions, previousRuntime, newRuntime)
 
     return Reload(reloadRequestId, definitions, previousRuntime, newRuntime)
-}
-
-private fun getClassPool(loader: ClassLoader): ClassPool {
-    return classPools.getOrPut(loader) {
-        ClassPool(true).apply {
-            appendClassPath(LoaderClassPath(loader))
-        }
-    }
 }

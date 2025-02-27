@@ -58,10 +58,13 @@ dependencies {
 
     reloadUnitTestImplementation(compose.uiTest)
 
+    reloadFunctionalTestImplementation(kotlin("test"))
     reloadFunctionalTestImplementation(deps.junit.jupiter)
     reloadFunctionalTestImplementation(deps.junit.jupiter.engine)
     reloadFunctionalTestImplementation(testFixtures(project(":hot-reload-core")))
     reloadFunctionalTestImplementation(project(":hot-reload-test:gradle-testFixtures"))
+    reloadFunctionalTestImplementation(deps.asm)
+    reloadFunctionalTestImplementation(deps.asm.tree)
 
     /*
      Required to enforce no accidental resolve to the -api-jvm, published by the runtime api project.

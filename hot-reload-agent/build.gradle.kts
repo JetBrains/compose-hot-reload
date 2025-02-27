@@ -100,6 +100,8 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies {
+    implementation(deps.slf4j.api)
+
     implementation(project(":hot-reload-core"))
     packageStandalone(project(":hot-reload-core"))
 
@@ -111,8 +113,6 @@ dependencies {
 
     implementation(deps.javassist)
     packageStandalone(deps.javassist)
-
-    implementation(deps.slf4j.api)
 
     testImplementation(testFixtures(project(":hot-reload-analysis")))
     testImplementation(deps.logback)

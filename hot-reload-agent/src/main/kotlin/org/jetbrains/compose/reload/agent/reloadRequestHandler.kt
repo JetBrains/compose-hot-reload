@@ -21,7 +21,6 @@ import kotlin.system.exitProcess
 
 private val logger = createLogger()
 
-
 internal fun launchReloadRequestHandler(instrumentation: Instrumentation) {
     var pendingChanges = mapOf<File, OrchestrationMessage.ReloadClassesRequest.ChangeType>()
 
