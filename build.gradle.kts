@@ -31,6 +31,10 @@ val publishLocally by tasks.registering {
     finalizedBy(checkPublishLocally)
 }
 
+tasks.named { name -> name == "commonizeNativeDistribution" }.configureEach {
+    enabled = false
+}
+
 val cleanDeploy by tasks.registering(Delete::class) {
     delete(layout.buildDirectory.dir("deploy"))
 }
