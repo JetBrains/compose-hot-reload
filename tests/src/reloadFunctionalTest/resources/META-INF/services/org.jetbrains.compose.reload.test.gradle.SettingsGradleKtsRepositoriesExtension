@@ -4,3 +4,4 @@
 #
 
 org.jetbrains.compose.reload.utils.LocalMavenRepositoryExtension
+org.jetbrains.compose.reload.utils.KtMasterRepositoryExtension

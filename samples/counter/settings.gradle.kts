@@ -4,6 +4,12 @@ pluginManagement {
     }
 
     repositories {
+        mavenLocal {
+            mavenContent {
+                includeGroupByRegex("org.jetbrains.kotlin.*")
+            }
+        }
+
         maven(file("../..//build/repo"))
         maven("https://packages.jetbrains.team/maven/p/firework/dev")
         mavenCentral()
@@ -11,8 +17,9 @@ pluginManagement {
     }
 
     plugins {
-        kotlin("multiplatform") version "2.1.20-RC"
-        kotlin("plugin.compose") version "2.1.20-RC"
+
+        kotlin("multiplatform") version "2.1.255-SNAPSHOT"
+        kotlin("plugin.compose") version "2.1.255-SNAPSHOT"
         id("org.jetbrains.compose") version "1.7.3"
     }
 }
@@ -23,6 +30,12 @@ plugins {
 
 dependencyResolutionManagement {
     repositories {
+        mavenLocal {
+            mavenContent {
+                includeGroupByRegex("org.jetbrains.kotlin.*")
+            }
+        }
+
         maven(file("../..//build/repo"))
         maven("https://packages.jetbrains.team/maven/p/firework/dev")
         mavenCentral()
