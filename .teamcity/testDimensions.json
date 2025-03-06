@@ -9,6 +9,10 @@
     },
     {
       "version": "2.2.20-dev-1156"
+    },
+    {
+      "version": "2.2.255-SNAPSHOT",
+      "isDefault": true
     }
   ],
   "gradle": [

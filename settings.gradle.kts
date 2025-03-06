@@ -7,6 +7,12 @@
 
 pluginManagement {
     repositories {
+        mavenLocal {
+            mavenContent {
+                includeGroupByRegex("org.jetbrains.kotlin.*")
+            }
+        }
+
         maven(file("build/bootstrap"))
         maven("https://packages.jetbrains.team/maven/p/firework/dev") {
             mavenContent {
@@ -20,6 +26,7 @@ pluginManagement {
                 includeGroupByRegex("com.gradle.*")
             }
         }
+
         mavenCentral()
     }
 }
@@ -40,6 +47,13 @@ dependencyResolutionManagement {
 
     repositories {
         repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
+
+
+        mavenLocal {
+            mavenContent {
+                includeGroupByRegex("org.jetbrains.kotlin")
+            }
+        }
 
         maven(file("build/bootstrap"))
         maven("https://packages.jetbrains.team/maven/p/firework/dev") {
@@ -84,6 +98,12 @@ gradle.beforeProject {
     plugins.apply("test-conventions")
     plugins.apply("main-conventions")
     plugins.apply("kotlin-conventions")
+}
+
+gradle.afterProject {
+    tasks.named { name -> name == "commonizeNativeDistribution" }.configureEach {
+        enabled = false
+    }
 }
 
 

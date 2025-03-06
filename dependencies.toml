@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.1.20"
+kotlin = "2.2.255-SNAPSHOT"
 compose = "1.7.3"
 coroutines = "1.10.1"
 kotlinxDatetime = "0.6.2"

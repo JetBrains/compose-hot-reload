@@ -12,6 +12,12 @@ plugins {
 }
 
 repositories {
+    mavenLocal {
+        mavenContent {
+            includeGroupByRegex("org.jetbrains.kotlin.*")
+        }
+    }
+
     maven(file("../build/bootstrap"))
 
     maven("https://packages.jetbrains.team/maven/p/firework/dev") {

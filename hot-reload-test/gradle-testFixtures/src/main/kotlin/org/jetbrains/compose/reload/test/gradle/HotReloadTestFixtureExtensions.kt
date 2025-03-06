@@ -26,14 +26,14 @@ public suspend fun <T> HotReloadTestFixture.initialSourceCode(
 public suspend fun HotReloadTestFixture.launchApplicationAndWait(
     projectPath: String = ":",
     mainClass: String = "MainKt",
-) = runTransaction {
+): Unit = runTransaction {
     launchApplicationAndWait(projectPath = projectPath, mainClass = mainClass)
 }
 
 
 public suspend fun HotReloadTestFixture.replaceSourceCodeAndReload(
     oldValue: String, newValue: String
-) = runTransaction {
+): Unit = runTransaction {
     replaceSourceCodeAndReload(
         sourceFile = this@replaceSourceCodeAndReload.getDefaultMainKtSourceFile(),
         oldValue = oldValue,
@@ -41,14 +41,14 @@ public suspend fun HotReloadTestFixture.replaceSourceCodeAndReload(
     )
 }
 
-public suspend fun HotReloadTestFixture.replaceSourceCode(oldValue: String, newValue: String) = runTransaction {
+public suspend fun HotReloadTestFixture.replaceSourceCode(oldValue: String, newValue: String): Unit = runTransaction {
     replaceSourceCode(oldValue, newValue)
 }
 
 public suspend fun HotReloadTestFixture.replaceSourceCodeAndReload(
     sourceFile: String = getDefaultMainKtSourceFile(),
     oldValue: String, newValue: String
-) = runTransaction {
+): Unit = runTransaction {
     replaceSourceCodeAndReload(sourceFile = sourceFile, oldValue = oldValue, newValue = newValue)
 }
 

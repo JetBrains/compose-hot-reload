@@ -15,7 +15,7 @@ pluginManagement {
     }
 
     plugins {
-        kotlin("jvm") version "2.1.20"
+        kotlin("jvm") version "2.2.255-SNAPSHOT"
     }
 }
 
