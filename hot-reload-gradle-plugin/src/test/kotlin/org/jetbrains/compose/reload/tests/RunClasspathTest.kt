@@ -64,7 +64,8 @@ class RunClasspathTest {
             classpath.assertMatches(
                 PathRegex(".*/consumer/build/run/jvmMain/classes"),
                 *hotReloadDependencies,
-                PathRegex(".*/userHome/.*") // Transitive maven dependencies
+                PathRegex(".*/userHome/.*"), // Transitive maven dependencies
+                PathRegex(".*/\\.m2/.*") // Transitive maven dependencies
             )
         }
     }
@@ -113,7 +114,8 @@ class RunClasspathTest {
             classpath.assertMatches(
                 PathRegex(".*/consumer/build/run/jvmMain/classes"),
                 *hotReloadDependencies,
-                PathRegex(".*/userHome/.*") // Transitive maven dependencies
+                PathRegex(".*/userHome/.*"), // Transitive maven dependencies
+                PathRegex(".*/\\.m2/.*"), // Transitive maven dependencies
             )
         }
     }
@@ -140,4 +142,5 @@ private val hotReloadDependencies: Array<FileMatcher> = arrayOf(
     PathRegex(".*hot-reload/.*/orchestration-$HOT_RELOAD_VERSION.jar"),
     PathRegex(".*hot-reload/.*runtime-api-jvm-$HOT_RELOAD_VERSION.jar"),
     PathRegex(".*hot-reload/.*/runtime-jvm-$HOT_RELOAD_VERSION-dev.jar"),
+    PathRegex(".*/\\.m2/.*"), // Transitive maven dependencies
 )
