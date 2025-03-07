@@ -12,7 +12,7 @@ javassist = "3.30.2-GA"
 logback = "1.5.16"
 asm = "9.7.1"
 evas = "1.2.0"
-ktor = "3.0.3"
+ktor = "3.1.0"
 shadow = "9.0.0-beta9"
 
 [libraries]
