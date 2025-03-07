@@ -2,6 +2,7 @@ import builds.InstallAndroidSdkWindows
 import builds.PublishDevBuild
 import builds.PublishLocally
 import builds.PublishToMavenCentralProject
+import builds.StagingDeploy
 import builds.Tests
 import builds.conventions.configureConventions
 import jetbrains.buildServer.configs.kotlin.ParameterDisplay
@@ -20,6 +21,7 @@ object ComposeHotReloadProject : Project({
     buildType(PublishDevBuild)
     buildType(PublishLocally)
     buildType(InstallAndroidSdkWindows)
+    buildType(StagingDeploy)
 
     subProject(Tests)
     subProject(PublishToMavenCentralProject)
