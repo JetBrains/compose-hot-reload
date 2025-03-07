@@ -13,31 +13,7 @@ import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 object PublishLocally : BuildType({
     name = "Publish: Locally"
 
-    features {
-        buildCache {
-            name = "Android SDK"
-            rules = """
-                %android-sdk.location%/licenses
-                %android-sdk.location%/platforms
-                %android-sdk.location%/build-tools
-            """.trimIndent()
-        }
-
-        buildCache {
-            use = true
-            publish = true
-            name = "Gradle Build Cache"
-            rules = """
-                .local/build-cache
-            """.trimIndent()
-        }
-    }
-
-
-    artifactRules = """
-        **/build/** => build.zip
-        .local/build-cache => build-cache.zip
-    """.trimIndent()
+    configurePublishLocallyBuildCache(publish = true)
 
     steps {
         gradle {
@@ -46,3 +22,42 @@ object PublishLocally : BuildType({
         }
     }
 }), HardwareCapacity.Medium
+
+
+ fun BuildType.configurePublishLocallyBuildCache(publish: Boolean = false) {
+    params {
+        param("env.GRADLE_USER_HOME", "%system.teamcity.build.checkoutDir%/.local/gradle")
+    }
+
+    features {
+        buildCache {
+            use = true
+            this.publish = publish
+            name = "Android SDK"
+            rules = """
+                %android-sdk.location%/licenses
+                %android-sdk.location%/platforms
+                %android-sdk.location%/build-tools
+            """.trimIndent()
+        }
+        buildCache {
+            use = true
+            this.publish = publish
+            name = "Gradle Build Cache"
+            rules = """
+                .local/build-cache
+            """.trimIndent()
+        }
+
+        buildCache {
+            use = true
+            this.publish = publish
+            name = "Gradle Cache"
+            rules = """
+                .local/gradle/caches/modules-2
+                .local/gradle/jdks
+                .local/gradle/wrapper
+            """.trimIndent()
+        }
+    }
+}

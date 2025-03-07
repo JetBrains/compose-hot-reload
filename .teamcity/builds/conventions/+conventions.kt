@@ -15,7 +15,6 @@ import vcs.Github
 fun BuildType.configureConventions() {
     defaultVcs()
     defaultFeatures()
-    defaultCaches()
     pushPrivilegeConventions()
     publishDevPrivilegeConventions()
     publishLocallyConventions()
@@ -33,12 +32,5 @@ private fun BuildType.defaultVcs() {
 private fun BuildType.defaultFeatures() {
     features {
         perfmon { }
-        gradleCache { }
-    }
-}
-
-private fun BuildType.defaultCaches() {
-    features {
-        gradleCache { }
     }
 }
