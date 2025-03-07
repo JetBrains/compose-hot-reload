@@ -15,6 +15,7 @@ import jetbrains.buildServer.configs.kotlin.triggers.vcs
 
 object StagingDeploy : BuildType({
     name = "Deploy Staging -> Master"
+    type = Type.DEPLOYMENT
 
     vcs {
         branchFilter = "+:staging"
