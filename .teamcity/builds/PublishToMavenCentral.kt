@@ -60,6 +60,7 @@ object BuildDeployBundle : BuildType({
 
 object DeployToMavenCentral : BuildType({
     name = "Deploy: Deploy Bundle"
+    type = Type.DEPLOYMENT
 
     vcs {
         cleanCheckout = true
