@@ -10,7 +10,7 @@ pluginManagement {
     }
 
     plugins {
-        kotlin("jvm") version "2.1.20-RC"
+        kotlin("jvm") version "2.1.20-RC2"
     }
 }
 
