@@ -21,7 +21,7 @@ object PublishLocally : BuildType({
             tasks = "publishLocally"
         }
     }
-}), HardwareCapacity.Medium
+}), HardwareCapacity.Large
 
 
  fun BuildType.configurePublishLocallyBuildCache(publish: Boolean = false) {
