@@ -5,5 +5,5 @@
 
 org.jetbrains.compose.reload.utils.GradleHotReloadTestDimensionExtension
 org.jetbrains.compose.reload.utils.CompilerOptionsHotReloadTestDimensionExtension
-org.jetbrains.compose.reload.utils.ComposeHotReloadestDimensionExtension
+org.jetbrains.compose.reload.utils.ComposeHotReloadTestDimensionExtension
 org.jetbrains.compose.reload.tests.DevtoolsIntegrationTestsExtension

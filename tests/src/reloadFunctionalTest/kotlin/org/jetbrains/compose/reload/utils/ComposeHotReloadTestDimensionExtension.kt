@@ -12,10 +12,10 @@ import org.jetbrains.compose.reload.test.gradle.copy
 import org.junit.jupiter.api.extension.ExtensionContext
 
 private enum class AdditionalTestedComposeVersion(val value: TestedComposeVersion) {
-    v1_8_0(TestedComposeVersion("1.8.0-alpha02"))
+    v1_8_0(TestedComposeVersion("1.8.0-alpha04"))
 }
 
-class ComposeHotReloadestDimensionExtension : HotReloadTestDimensionExtension {
+class ComposeHotReloadTestDimensionExtension : HotReloadTestDimensionExtension {
     override fun transform(
         context: ExtensionContext, tests: List<HotReloadTestInvocationContext>
     ): List<HotReloadTestInvocationContext> {
