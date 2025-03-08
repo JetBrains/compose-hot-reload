@@ -49,7 +49,6 @@ import org.jetbrains.compose.reload.jvm.tooling.widgets.DtReloadStatusBanner
 import org.jetbrains.compose.reload.jvm.tooling.widgets.animateReloadStatusBackground
 import org.jetbrains.compose.reload.jvm.tooling.widgets.animateReloadStatusColor
 import org.jetbrains.compose.reload.jvm.tooling.widgets.animatedReloadStatusBorder
-import org.jetbrains.compose.reload.jvm.tooling.widgets.composeLogoAwtImage
 import org.jetbrains.compose.reload.jvm.tooling.widgets.composeLogoColor
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowGainedFocus
