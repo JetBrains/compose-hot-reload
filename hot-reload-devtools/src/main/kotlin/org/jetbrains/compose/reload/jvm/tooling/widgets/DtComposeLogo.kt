@@ -32,15 +32,6 @@ private val classLoader = MethodHandles.lookup().lookupClass().classLoader
 
 private val logger = createLogger()
 
-internal val composeLogoBitmap = MainScope().async(Dispatchers.IO) {
-    classLoader.getResource("img/compose-logo.png")!!.openStream()
-        .buffered().use { input -> @Suppress("DEPRECATION") loadImageBitmap(input) }
-}
-
-internal val composeLogoAwtImage = MainScope().async(Dispatchers.IO) {
-    composeLogoBitmap.await().toAwtImage()
-}
-
 internal val composeLogoSvgBinary = MainScope().async(Dispatchers.IO) {
     classLoader.getResource("img/compose-logo.svg")!!.openStream()
         .buffered().use { input -> input.readBytes() }

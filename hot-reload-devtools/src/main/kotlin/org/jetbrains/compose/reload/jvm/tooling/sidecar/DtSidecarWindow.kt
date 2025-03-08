@@ -33,7 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.DialogState
+import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import kotlinx.coroutines.delay
@@ -48,7 +49,6 @@ import org.jetbrains.compose.reload.jvm.tooling.widgets.DtReloadStatusBanner
 import org.jetbrains.compose.reload.jvm.tooling.widgets.animateReloadStatusBackground
 import org.jetbrains.compose.reload.jvm.tooling.widgets.animateReloadStatusColor
 import org.jetbrains.compose.reload.jvm.tooling.widgets.animatedReloadStatusBorder
-import org.jetbrains.compose.reload.jvm.tooling.widgets.composeLogoAwtImage
 import org.jetbrains.compose.reload.jvm.tooling.widgets.composeLogoColor
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowGainedFocus
@@ -104,12 +104,12 @@ fun DtSidecarWindow(
         yAnimatable.snapTo(targetY.value)
     }
 
-    val sidecarWindowState = WindowState(
+    val sidecarWindowState = DialogState(
         width = sideCarWidth, height = height,
         position = WindowPosition(x = x.dp, y = y.dp)
     )
 
-    Window(
+    DialogWindow(
         onCloseRequest = {
             orchestration.sendMessage(OrchestrationMessage.ShutdownRequest()).get()
             exitProcess(0)
@@ -121,10 +121,6 @@ fun DtSidecarWindow(
         focusable = true,
         alwaysOnTop = isAlwaysOnTop
     ) {
-
-        LaunchedEffect(Unit) {
-            window.iconImage = composeLogoAwtImage.await()
-        }
 
         invokeWhenMessageReceived<ApplicationWindowGainedFocus> { event ->
             if (event.windowId == windowId) {
