@@ -51,5 +51,16 @@ fun CoroutineScope.launchWindowsState() = launchState(WindowsState.Key) {
             windows.remove(message.windowId)
             update()
         }
+
+        if (message is OrchestrationMessage.UpdateSidecarWindowStateRequest) {
+            windows[message.windowId]?.let { existing ->
+                windows[message.windowId] = WindowState(
+                    placement = WindowPlacement.Floating,
+                    position = existing.position,
+                    size = existing.size
+                )
+                update()
+            }
+        }
     }
 }

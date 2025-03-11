@@ -41,6 +41,7 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.jvm.tooling.invokeWhenMessageReceived
+import org.jetbrains.compose.reload.jvm.tooling.isLinux
 import org.jetbrains.compose.reload.jvm.tooling.orchestration
 import org.jetbrains.compose.reload.jvm.tooling.theme.DtColors
 import org.jetbrains.compose.reload.jvm.tooling.widgets.DtButton
@@ -102,6 +103,9 @@ fun DtSidecarWindow(
     LaunchedEffect(sideCarWidth) {
         xAnimatable.snapTo(targetX.value)
         yAnimatable.snapTo(targetY.value)
+        if (isLinux) {
+            orchestration.sendMessage(OrchestrationMessage.UpdateSidecarWindowStateRequest(windowId))
+        }
     }
 
     val sidecarWindowState = DialogState(

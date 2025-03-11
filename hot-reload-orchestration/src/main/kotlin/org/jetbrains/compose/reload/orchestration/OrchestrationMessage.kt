@@ -111,6 +111,13 @@ public sealed class OrchestrationMessage : Serializable {
     ) : OrchestrationMessage()
 
     /**
+     * Requests the sidecar window to recompose with a new copy of the window state
+     */
+    public data class UpdateSidecarWindowStateRequest(
+        val windowId: WindowId,
+    ) : OrchestrationMessage()
+
+    /**
      * Simple message that can be passed across the whole orchestration:
      * Can be used for very important log messages, or for testing.
      */
