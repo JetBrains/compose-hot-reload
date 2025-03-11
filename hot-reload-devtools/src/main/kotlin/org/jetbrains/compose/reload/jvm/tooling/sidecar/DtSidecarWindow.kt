@@ -7,7 +7,9 @@ package org.jetbrains.compose.reload.jvm.tooling.sidecar
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.SnapSpec
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -15,9 +17,9 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogState
 import androidx.compose.ui.window.DialogWindow
@@ -41,6 +44,7 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.jvm.tooling.invokeWhenMessageReceived
+import org.jetbrains.compose.reload.jvm.tooling.isLinux
 import org.jetbrains.compose.reload.jvm.tooling.orchestration
 import org.jetbrains.compose.reload.jvm.tooling.theme.DtColors
 import org.jetbrains.compose.reload.jvm.tooling.widgets.DtButton
@@ -58,6 +62,10 @@ import kotlin.time.Duration.Companion.milliseconds
 private val logger = createLogger()
 
 private val DevToolingSidecarShape = RoundedCornerShape(8.dp)
+private val DtButtonSize = 28.dp
+private val windowGap = 12.dp // Space between the application window and sidecar window
+private val isUsingTransparentWindow = !isLinux
+private val isSizeAnimationEnabled = isUsingTransparentWindow
 
 @Composable
 fun DtSidecarWindow(
@@ -66,21 +74,20 @@ fun DtSidecarWindow(
     isAlwaysOnTop: Boolean,
 ) {
     val animationDuration = 512
+
     var isExpanded by remember { mutableStateOf(false) }
-    var sideCarWidth by remember { mutableStateOf(if (isExpanded) 512.dp else 64.dp) }
+    var sideCarSize by remember { mutableStateOf(getSideCarWindowSize(windowState, isExpanded))}
 
     if (isExpanded) {
-        sideCarWidth = 512.dp
-    }
-
-    if (!isExpanded) {
+        sideCarSize = getSideCarWindowSize(windowState, isExpanded = true)
+    } else {
         LaunchedEffect(Unit) {
-            delay(animationDuration.milliseconds)
-            sideCarWidth = 64.dp
+            if (isSizeAnimationEnabled) delay(animationDuration.milliseconds)
+            sideCarSize = getSideCarWindowSize(windowState, isExpanded = false)
         }
     }
 
-    val targetX = windowState.position.x - sideCarWidth.value.dp
+    val targetX = windowState.position.x - sideCarSize.width - if (!isUsingTransparentWindow) windowGap else 0.dp
     val targetY = windowState.position.y
 
     val xAnimatable = remember { Animatable(targetX.value) }
@@ -88,8 +95,6 @@ fun DtSidecarWindow(
 
     val x by xAnimatable.asState()
     val y by yAnimatable.asState()
-
-    val height by animateDpAsState(targetValue = maxOf(windowState.size.height, 512.dp))
 
     LaunchedEffect(windowState.position) {
         xAnimatable.animateTo(targetX.value)
@@ -99,13 +104,13 @@ fun DtSidecarWindow(
         yAnimatable.animateTo(targetY.value)
     }
 
-    LaunchedEffect(sideCarWidth) {
+    LaunchedEffect(sideCarSize.width) {
         xAnimatable.snapTo(targetX.value)
         yAnimatable.snapTo(targetY.value)
     }
 
     val sidecarWindowState = DialogState(
-        width = sideCarWidth, height = height,
+        size = sideCarSize,
         position = WindowPosition(x = x.dp, y = y.dp)
     )
 
@@ -116,7 +121,7 @@ fun DtSidecarWindow(
         },
         state = sidecarWindowState,
         undecorated = true,
-        transparent = true,
+        transparent = isUsingTransparentWindow,
         resizable = false,
         focusable = true,
         alwaysOnTop = isAlwaysOnTop
@@ -129,13 +134,35 @@ fun DtSidecarWindow(
             }
         }
 
-        DtSidecarWindowContent(
-            isExpanded,
-            isExpandedChanged = { isExpanded = it }
-        )
+        if (isSizeAnimationEnabled) {
+            DtSidecarWindowContent(
+                isExpanded,
+                isExpandedChanged = { isExpanded = it }
+            )
+        } else {
+            DtSidecarWindowNonAnimatedContent(
+                isExpanded,
+                isExpandedChanged = { isExpanded = it }
+            )
+        }
     }
 }
 
+fun getSideCarWindowSize(windowState: WindowState, isExpanded: Boolean): DpSize {
+    return if (isUsingTransparentWindow) {
+        if (isExpanded) {
+            DpSize(512.dp, maxOf(windowState.size.height, 512.dp))
+        } else {
+            DpSize(DtButtonSize + windowGap, maxOf(windowState.size.height, 512.dp))
+        }
+    } else {
+        if (isExpanded) {
+            DpSize(512.dp, maxOf(windowState.size.height, 512.dp))
+        } else {
+            DpSize(DtButtonSize, DtButtonSize)
+        }
+    }
+}
 
 @Composable
 fun DtSidecarWindowContent(
@@ -176,7 +203,7 @@ fun DtSidecarWindowContent(
 
                 ) {
                     DtComposeLogo(
-                        Modifier.size(28.dp).padding(4.dp),
+                        Modifier.size(DtButtonSize).padding(4.dp),
                         tint = animateReloadStatusColor(
                             idleColor = composeLogoColor,
                             reloadingColor = DtColors.statusColorOrange2
@@ -196,5 +223,52 @@ fun DtSidecarWindowContent(
             modifier = Modifier
                 .padding(4.dp)
         )
+    }
+}
+
+/**
+ * Version of DtSidecarWindowContent not using size animations, for use when transparent windows are not supported
+ */
+@Composable
+fun DtSidecarWindowNonAnimatedContent(
+    isExpanded: Boolean = true,
+    isExpandedChanged: (isExpanded: Boolean) -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.End,
+    ) {
+        Box(
+            modifier = Modifier.Companion
+                .animatedReloadStatusBorder(
+                    shape = DevToolingSidecarShape,
+                    idleColor = if (isExpanded) Color.LightGray else Color.Transparent
+                )
+                .clip(DevToolingSidecarShape)
+                .background(DtColors.applicationBackground)
+                .weight(1f, fill = false),
+            contentAlignment = Alignment.TopEnd,
+        ) {
+            if (!isExpanded) {
+                DtButton(
+                    onClick = { isExpandedChanged(true) },
+                ) {
+                    DtComposeLogo(
+                        Modifier.size(DtButtonSize).padding(4.dp),
+                        tint = animateReloadStatusColor(
+                            idleColor = composeLogoColor,
+                            reloadingColor = DtColors.statusColorOrange2
+                        ).value
+                    )
+                }
+
+            } else {
+                Column {
+                    DtSidecarHeaderBar({ isExpandedChanged(false) })
+                    DtSidecarBody(Modifier.padding(8.dp).fillMaxSize())
+                }
+            }
+        }
     }
 }
