@@ -44,7 +44,7 @@ object ComposeHotReloadProject : Project({
 
     sequential {
         parallel {
-            windowsTest
+            buildType(windowsTest)
 
             sequential {
                 buildType(PublishLocally)
