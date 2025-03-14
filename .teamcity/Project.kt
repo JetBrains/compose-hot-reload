@@ -5,7 +5,6 @@
 
 import builds.AllTests
 import builds.ApiCheck
-import builds.InstallAndroidSdkWindows
 import builds.PublishDevBuild
 import builds.PublishLocally
 import builds.PublishToMavenCentralProject
@@ -60,7 +59,6 @@ object ComposeHotReloadProject : Project({
     }
 
     buildType(PublishLocally)
-    buildType(InstallAndroidSdkWindows)
 
     buildType(PublishDevBuild)
     buildType(StagingDeploy)

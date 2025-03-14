@@ -18,20 +18,33 @@ class WindowsIntegrationTest(
     name = "Tests: $requiredHost"
     id("Tests_$requiredHost")
 
+    params {
+        param("env.ANDROID_HOME", "%system.teamcity.build.workingDir%\\.local\\android-sdk")
+    }
+
     artifactRules = """
         **/*-actual*
         **/build/reports/** => reports.zip
     """.trimIndent()
 
     features {
-       buildCache {
-           name = "Windows: .konan"
-           use = true
-           publish = true
-           rules ="""
+        buildCache {
+            name = "Windows: Android SDK"
+            use = true
+            publish = true
+            rules = """
+                "%system.teamcity.build.workingDir%\\.local\\android-sdk"
+            """.trimIndent()
+        }
+
+        buildCache {
+            name = "Windows: .konan"
+            use = true
+            publish = true
+            rules = """
                .konan
            """.trimIndent()
-       }
+        }
 
         buildCache {
             name = "Windows: Gradle (Caches)"
@@ -73,6 +86,12 @@ class WindowsIntegrationTest(
     }
 
     steps {
+        gradle {
+            name = "Install Android SDK"
+            tasks = "installAndroidSdk"
+            workingDir = "repository-tools"
+        }
+
         gradle {
             name = "Build"
             tasks = "publishLocally -i"

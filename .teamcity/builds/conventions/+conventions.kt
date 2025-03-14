@@ -5,7 +5,6 @@
 
 package builds.conventions
 
-import builds.installAndroidSdkConvention
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.buildFeatures.perfmon
 
@@ -18,7 +17,6 @@ fun BuildType.configureConventions() {
     hostRequirementConventions()
     commitPublisherConventions()
     hardwareCapacity()
-    installAndroidSdkConvention()
 }
 
 
