@@ -30,6 +30,7 @@ public enum class HotReloadProperty(public val key: String) {
 
     DevToolsEnabled("compose.reload.devToolsEnabled"),
     DevToolsClasspath("compose.reload.devToolsClasspath"),
+    DevToolsTransparencyEnabled("compose.reload.devToolsTransparencyEnabled"),
 
     /**
      * Note: Expected as an environment variable, as this is expected to be transitively available
@@ -84,6 +85,7 @@ public object HotReloadEnvironment {
 
     public val devToolsEnabled: Boolean = systemBoolean(HotReloadProperty.DevToolsEnabled, true)
     public val devToolsClasspath: List<Path>? = systemFiles(HotReloadProperty.DevToolsClasspath)
+    public val devToolsTransparencyEnabled: Boolean = systemBoolean(HotReloadProperty.DevToolsTransparencyEnabled, true)
 
     /**
      * @see HotReloadProperty.IntelliJDebuggerDispatchPort

@@ -1,6 +1,6 @@
 /*
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
- * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 @file:JvmName("ComposeHotReloadArgumentsKt")
 
@@ -28,6 +28,7 @@ sealed interface ComposeHotReloadArgumentsBuilder {
     fun setPidFile(file: Provider<File>)
     fun setDevToolsEnabled(enabled: Provider<Boolean>)
     fun setDevToolsClasspath(files: FileCollection)
+    fun setDevToolsTransparencyEnabled(enabled: Provider<Boolean>)
     fun setReloadTaskName(name: Provider<String>)
     fun setReloadTaskName(name: String)
     fun isRecompileContinuous(isRecompileContinuous: Provider<Boolean>)
@@ -63,6 +64,9 @@ private class ComposeHotReloadArgumentsBuilderImpl(
     private val devToolsEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.isDevToolsEnabled)
 
+    private val devToolsTransparencyEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .value(project.isDevToolsTransparencyEnabled)
+
     private val reloadTaskName: Property<String> = project.objects.property(String::class.java)
 
     private val isRecompileContinues: Property<Boolean> = project.objects.property(Boolean::class.java)
@@ -93,6 +97,10 @@ private class ComposeHotReloadArgumentsBuilderImpl(
         devToolsClasspath = files
     }
 
+    override fun setDevToolsTransparencyEnabled(enabled: Provider<Boolean>) {
+        devToolsEnabled.set(enabled)
+    }
+
     override fun setReloadTaskName(name: Provider<String>) {
         reloadTaskName.set(name)
     }
@@ -117,6 +125,7 @@ private class ComposeHotReloadArgumentsBuilderImpl(
             pidFile = pidFile,
             devToolsClasspath = devToolsClasspath,
             devToolsEnabled = devToolsEnabled,
+            devToolsTransparencyEnabled = devToolsTransparencyEnabled,
             reloadTaskName = reloadTaskName,
             isRecompileContinues = isRecompileContinues,
             orchestrationPort = project.orchestrationPort,
@@ -135,6 +144,7 @@ private class ComposeHotReloadArgumentsImpl(
     private val pidFile: Provider<File>,
     private val devToolsClasspath: FileCollection,
     private val devToolsEnabled: Provider<Boolean>,
+    private val devToolsTransparencyEnabled: Provider<Boolean>,
     private val reloadTaskName: Provider<String>,
     private val isRecompileContinues: Provider<Boolean>,
     private val orchestrationPort: Provider<Int>
@@ -199,6 +209,7 @@ private class ComposeHotReloadArgumentsImpl(
 
         if (isDevToolsEnabled) {
             add("-D${HotReloadProperty.DevToolsClasspath.key}=${devToolsClasspath.asPath}")
+            add("-D${HotReloadProperty.DevToolsTransparencyEnabled.key}=${devToolsTransparencyEnabled.orNull ?: true}")
         }
 
         /* Provide "recompiler" properties */

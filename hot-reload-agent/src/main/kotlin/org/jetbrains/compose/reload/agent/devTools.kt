@@ -38,6 +38,7 @@ internal fun launchDevtoolsApplication() {
         java, "-cp", classpath.joinToString(File.pathSeparator),
         "-D${HotReloadProperty.OrchestrationPort.key}=${orchestration.port}",
         "-D${HotReloadProperty.GradleBuildContinuous.key}=${HotReloadEnvironment.gradleBuildContinuous}",
+        "-D${HotReloadProperty.DevToolsTransparencyEnabled.key}=${HotReloadEnvironment.devToolsTransparencyEnabled}",
         "-Dapple.awt.UIElement=true",
         "org.jetbrains.compose.reload.jvm.tooling.Main",
         "--applicationCommand=$java",

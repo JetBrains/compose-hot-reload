@@ -8,12 +8,18 @@ package org.jetbrains.compose.reload
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.jetbrains.compose.reload.core.HotReloadProperty
+import org.jetbrains.kotlin.konan.target.HostManager
 
 internal val Project.isHeadless: Provider<Boolean>
     get() = providers.gradleProperty(HotReloadProperty.IsHeadless.key).map { raw -> raw.toBoolean() }
 
 internal val Project.isDevToolsEnabled: Provider<Boolean>
     get() = providers.gradleProperty(HotReloadProperty.DevToolsEnabled.key).map { raw -> raw.toBoolean() }
+
+internal val Project.isDevToolsTransparencyEnabled: Provider<Boolean>
+    get() = providers.gradleProperty(HotReloadProperty.DevToolsTransparencyEnabled.key).map(String?::toBoolean)
+        .orElse(providers.systemProperty(HotReloadProperty.DevToolsTransparencyEnabled.key).map(String?::toBoolean))
+        .orElse(!HostManager.hostIsLinux)
 
 internal val Project.isRecompileContinuous: Provider<Boolean>
     get() = providers.gradleProperty("compose.build.continuous").map { raw -> raw.toBoolean() }
