@@ -1,15 +1,14 @@
 /*
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
- * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.jetbrains.compose.reload.jvm.tooling.sidecar
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.SnapSpec
-import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -17,7 +16,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,10 +39,10 @@ import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.jvm.tooling.invokeWhenMessageReceived
-import org.jetbrains.compose.reload.jvm.tooling.isLinux
 import org.jetbrains.compose.reload.jvm.tooling.orchestration
 import org.jetbrains.compose.reload.jvm.tooling.theme.DtColors
 import org.jetbrains.compose.reload.jvm.tooling.widgets.DtButton
@@ -64,8 +62,6 @@ private val logger = createLogger()
 private val DevToolingSidecarShape = RoundedCornerShape(8.dp)
 private val DtButtonSize = 28.dp
 private val windowGap = 12.dp // Space between the application window and sidecar window
-private val isUsingTransparentWindow = !isLinux
-private val isSizeAnimationEnabled = isUsingTransparentWindow
 
 @Composable
 fun DtSidecarWindow(
@@ -82,12 +78,12 @@ fun DtSidecarWindow(
         sideCarSize = getSideCarWindowSize(windowState, isExpanded = true)
     } else {
         LaunchedEffect(Unit) {
-            if (isSizeAnimationEnabled) delay(animationDuration.milliseconds)
+            if (devToolsTransparencyEnabled) delay(animationDuration.milliseconds)
             sideCarSize = getSideCarWindowSize(windowState, isExpanded = false)
         }
     }
 
-    val targetX = windowState.position.x - sideCarSize.width - if (!isUsingTransparentWindow) windowGap else 0.dp
+    val targetX = windowState.position.x - sideCarSize.width - if (!devToolsTransparencyEnabled) windowGap else 0.dp
     val targetY = windowState.position.y
 
     val xAnimatable = remember { Animatable(targetX.value) }
@@ -121,7 +117,7 @@ fun DtSidecarWindow(
         },
         state = sidecarWindowState,
         undecorated = true,
-        transparent = isUsingTransparentWindow,
+        transparent = devToolsTransparencyEnabled,
         resizable = false,
         focusable = true,
         alwaysOnTop = isAlwaysOnTop
@@ -134,26 +130,19 @@ fun DtSidecarWindow(
             }
         }
 
-        if (isSizeAnimationEnabled) {
-            DtSidecarWindowContent(
-                isExpanded,
-                isExpandedChanged = { isExpanded = it }
-            )
-        } else {
-            DtSidecarWindowNonAnimatedContent(
-                isExpanded,
-                isExpandedChanged = { isExpanded = it }
-            )
-        }
+        DtSidecarWindowContent(
+            isExpanded,
+            isExpandedChanged = { isExpanded = it }
+        )
     }
 }
 
 fun getSideCarWindowSize(windowState: WindowState, isExpanded: Boolean): DpSize {
-    return if (isUsingTransparentWindow) {
+    return if (devToolsTransparencyEnabled) {
         if (isExpanded) {
             DpSize(512.dp, maxOf(windowState.size.height, 512.dp))
         } else {
-            DpSize(DtButtonSize + windowGap, maxOf(windowState.size.height, 512.dp))
+            DpSize(DtButtonSize + 12.dp, maxOf(windowState.size.height, 512.dp))
         }
     } else {
         if (isExpanded) {
@@ -186,21 +175,21 @@ fun DtSidecarWindowContent(
                 .animateReloadStatusBackground(if (isExpanded) Color.LightGray else DtColors.statusColorOk)
                 .weight(1f, fill = false),
             transitionSpec = {
-                (fadeIn(animationSpec = tween(220, delayMillis = 128)) +
-                    scaleIn(initialScale = 0.92f, animationSpec = tween(220, delayMillis = 128)))
-                    .togetherWith(fadeOut(animationSpec = tween(90)))
+                if (devToolsTransparencyEnabled) {
+                    (fadeIn(animationSpec = tween(220, delayMillis = 128)) +
+                        scaleIn(initialScale = 0.92f, animationSpec = tween(220, delayMillis = 128)))
+                        .togetherWith(fadeOut(animationSpec = tween(90)))
+                } else EnterTransition.None togetherWith ExitTransition.None
             },
             contentAlignment = Alignment.TopEnd,
         ) { expandedState ->
             if (!expandedState) {
                 DtButton(
                     onClick = { isExpandedChanged(true) },
-                    modifier = Modifier
-                        .animateEnterExit(
-                            enter = fadeIn(tween(220)),
-                            exit = fadeOut(tween(50))
-                        )
-
+                    modifier = Modifier.animateEnterExit(
+                        enter = if (devToolsTransparencyEnabled) fadeIn(tween(220)) else EnterTransition.None,
+                        exit = if (devToolsTransparencyEnabled) fadeOut(tween(50)) else ExitTransition.None
+                    ),
                 ) {
                     DtComposeLogo(
                         Modifier.size(DtButtonSize).padding(4.dp),
@@ -219,56 +208,11 @@ fun DtSidecarWindowContent(
             }
         }
 
-        DtReloadStatusBanner(
-            modifier = Modifier
-                .padding(4.dp)
-        )
-    }
-}
-
-/**
- * Version of DtSidecarWindowContent not using size animations, for use when transparent windows are not supported
- */
-@Composable
-fun DtSidecarWindowNonAnimatedContent(
-    isExpanded: Boolean = true,
-    isExpandedChanged: (isExpanded: Boolean) -> Unit = {},
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.fillMaxSize(),
-        horizontalArrangement = Arrangement.End,
-    ) {
-        Box(
-            modifier = Modifier.Companion
-                .animatedReloadStatusBorder(
-                    shape = DevToolingSidecarShape,
-                    idleColor = if (isExpanded) Color.LightGray else Color.Transparent
-                )
-                .clip(DevToolingSidecarShape)
-                .background(DtColors.applicationBackground)
-                .weight(1f, fill = false),
-            contentAlignment = Alignment.TopEnd,
-        ) {
-            if (!isExpanded) {
-                DtButton(
-                    onClick = { isExpandedChanged(true) },
-                ) {
-                    DtComposeLogo(
-                        Modifier.size(DtButtonSize).padding(4.dp),
-                        tint = animateReloadStatusColor(
-                            idleColor = composeLogoColor,
-                            reloadingColor = DtColors.statusColorOrange2
-                        ).value
-                    )
-                }
-
-            } else {
-                Column {
-                    DtSidecarHeaderBar({ isExpandedChanged(false) })
-                    DtSidecarBody(Modifier.padding(8.dp).fillMaxSize())
-                }
-            }
+        if (devToolsTransparencyEnabled) {
+            DtReloadStatusBanner(
+                modifier = Modifier
+                    .padding(4.dp)
+            )
         }
     }
 }
