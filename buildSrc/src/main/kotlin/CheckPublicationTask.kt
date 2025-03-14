@@ -1,3 +1,16 @@
+/*
+ * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ */
+
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
@@ -47,6 +60,7 @@ open class CheckPublicationTask : DefaultTask() {
         root.walk().forEach { path ->
             if (path.extension == "pom") checkPomFile(path)
             if (path.extension == "jar") checkJarFile(path)
+            if (path.extension == "module") checkModuleFile(path)
         }
     }
 
@@ -68,6 +82,42 @@ open class CheckPublicationTask : DefaultTask() {
                     }
                 }
             }
+    }
+
+    private fun checkModuleFile(module: Path) {
+        logger.quiet("Checking '$module'")
+
+        fun JsonElement.checkDependency() {
+            val obj = this.jsonObject
+            if (obj["group"]?.jsonPrimitive?.contentOrNull == projectGroupId) {
+                val version = obj["version"] ?: return
+                version.jsonObject.forEach { (key, value) ->
+                    if (value.jsonPrimitive.content != projectVersion) {
+                        error("$module: Illegal version for dependency: ${key}:${value.jsonPrimitive.content}")
+                    }
+                }
+            }
+        }
+
+        fun JsonElement.check() {
+            if (this is JsonArray) {
+                forEach { child -> child.check() }
+            }
+
+            if (this !is JsonObject) return
+
+            forEach { (key, value) ->
+                if (key == "dependencies") {
+                    val dependenciesArray = value.jsonArray
+                    dependenciesArray.forEach { dependency -> dependency.checkDependency() }
+                } else {
+                    value.check()
+                }
+            }
+        }
+
+        val rootObject = Json {}.parseToJsonElement(module.toFile().readText()).jsonObject
+        rootObject.check()
     }
 
     private fun checkJarFile(jar: Path) {

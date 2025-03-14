@@ -43,6 +43,7 @@ dependencies {
     implementation(deps.benchmark.gradlePlugin)
     implementation(deps.binaryCompatibilityValidator.gradlePlugin)
     implementation(deps.shadow.gradlePlugin)
+    implementation(deps.kotlinxSerialization.json)
 
     implementation(deps.ktor.client.core)
     implementation(deps.ktor.client.cio)

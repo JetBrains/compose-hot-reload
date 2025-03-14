@@ -5,6 +5,7 @@ coroutines = "1.10.1"
 kotlinxDatetime = "0.6.2"
 kotlinxBenchmark = "0.4.13"
 kotlinxBinaryCompatibilityValidator = "0.17.0"
+kotlinxSerialization = "1.8.0"
 slf4j = "2.0.16"
 androidGradlePlugin = "8.7.1"
 junit = "5.11.4"
@@ -26,6 +27,8 @@ benchmark-gradlePlugin = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-plu
 binaryCompatibilityValidator-gradlePlugin = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "kotlinxBinaryCompatibilityValidator" }
 
 kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+kotlinxSerialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
