@@ -74,6 +74,11 @@ class WindowsIntegrationTest(
 
     steps {
         gradle {
+            name = "Build"
+            tasks = "publishLocally -i"
+        }
+
+        gradle {
             name = "Test"
             tasks = "check -i --continue -x apiCheck -x publishLocally -Pchr.tests.parallelism=2"
             tasks += " -Phost-integration-tests=true"
