@@ -31,3 +31,7 @@ internal val Project.orchestrationPort: Provider<Int>
 
 internal val Project.isIdeaSync: Provider<Boolean>
     get() = providers.systemProperty("idea.sync.active").map { raw -> raw.toBoolean() }
+
+internal val Project.autoRuntimeDependenciesEnabled: Provider<Boolean>
+    get() = providers.gradleProperty("compose.reload.autoRuntimeDependenciesEnabled").map { raw -> raw.toBoolean() }
+        .orElse(true)

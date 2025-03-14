@@ -11,6 +11,8 @@ import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
 import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
 
 internal fun Project.setupComposeHotReloadRuntimeDependency() {
+    if (!project.autoRuntimeDependenciesEnabled.get()) return
+
     /*
     Multiplatform impl
      */
