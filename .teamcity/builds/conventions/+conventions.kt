@@ -30,4 +30,8 @@ private fun BuildType.defaultConventions() {
     cleanup {
         artifacts(days = 7)
     }
+
+    params {
+        param("env.GRADLE_USER_HOME", "%system.teamcity.build.checkoutDir%/.local/gradle")
+    }
 }

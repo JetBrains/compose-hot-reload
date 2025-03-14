@@ -35,10 +35,6 @@ object PublishLocally : BuildType({
 fun BuildType.configurePublishLocallyBuildCache(publish: Boolean = false) {
     val thisBuildType = this
 
-    params {
-        param("env.GRADLE_USER_HOME", "%system.teamcity.build.checkoutDir%/.local/gradle")
-    }
-
     features {
         if (thisBuildType.requiredHost == Host.Linux) {
             buildCache {
