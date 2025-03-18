@@ -221,7 +221,7 @@ class RuntimeInfoTest {
 
         root.children.forEach { scope ->
             assertEquals(
-                SpecialComposeGroupKeys.remember, scope.tree.group,
+                SpecialComposeGroupKeys.remember, scope.group,
                 "Expected remember group key to equal ${SpecialComposeGroupKeys.remember.key}"
             )
         }
@@ -311,8 +311,8 @@ class RuntimeInfoTest {
 
         beforeScopes.forEachIndexed { index, beforeScope ->
             val afterScope = afterScopes[index]
-            assertEquals(beforeScope.tree.group, afterScope.tree.group)
-            assertEquals(beforeScope.tree.type, afterScope.tree.type)
+            assertEquals(beforeScope.group, afterScope.group)
+            assertEquals(beforeScope.type, afterScope.type)
             assertEquals(beforeScope.methodDependencies, afterScope.methodDependencies)
             assertEquals(beforeScope.hash, afterScope.hash)
         }

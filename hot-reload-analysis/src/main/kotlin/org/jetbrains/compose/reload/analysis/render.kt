@@ -41,7 +41,7 @@ fun RuntimeInfo.render(): String = buildString {
 }
 
 internal fun RuntimeScopeInfo.render(): String = buildString {
-    when (tree.type) {
+    when (type) {
         Method -> appendLine("${methodId.methodName} {")
         RestartGroup -> appendLine("RestartGroup {")
         ReplaceGroup -> appendLine("ReplaceGroup {")
@@ -49,11 +49,11 @@ internal fun RuntimeScopeInfo.render(): String = buildString {
     }
 
     withIndent {
-        if (tree.type == Method) {
+        if (type == Method) {
             appendLine("desc: ${methodId.methodDescriptor}")
         }
 
-        appendLine("key: ${tree.group?.key}")
+        appendLine("key: ${group?.key}")
         appendLine("codeHash: ${hash.value}")
         if (methodDependencies.isEmpty()) {
             appendLine("methodDependencies: []")

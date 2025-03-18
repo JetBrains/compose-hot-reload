@@ -30,7 +30,7 @@ data class RuntimeInfo(
         classes.values.flatMap { it.methods.values }
             .map { info -> info.rootScope }
             .withClosure<RuntimeScopeInfo> { info -> info.children }
-            .groupBy { info -> info.tree.group },
+            .groupBy { info -> info.group },
 
 
     /**
@@ -137,7 +137,8 @@ internal fun createRuntimeScopeInfo(
 ): RuntimeScopeInfo {
     return RuntimeScopeInfo(
         methodId = methodId,
-        tree = tree,
+        type = tree.type,
+        group = tree.group,
         methodDependencies = tree.methodDependencies(),
         fieldDependencies = tree.fieldDependencies(),
         children = tree.children.map { child -> createRuntimeScopeInfo(methodId, child) },
