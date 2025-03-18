@@ -90,6 +90,10 @@ android {
     compileSdk = 34
     namespace = "org.jetbrains.compose.reload"
 
+    defaultConfig {
+        minSdk = 21
+    }
+
     compileOptions {
         this.sourceCompatibility = JavaVersion.VERSION_11
         this.targetCompatibility = JavaVersion.VERSION_11
