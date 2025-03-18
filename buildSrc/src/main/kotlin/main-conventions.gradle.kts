@@ -40,3 +40,7 @@ tasks.register("resolveDependencies") {
         files.files
     }
 }
+
+tasks.register("compile") {
+    dependsOn(tasks.withType<AbstractCompile>())
+}
