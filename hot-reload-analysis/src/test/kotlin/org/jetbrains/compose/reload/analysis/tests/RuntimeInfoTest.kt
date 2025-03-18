@@ -9,6 +9,7 @@ import org.jetbrains.compose.reload.analysis.ClassInfo
 import org.jetbrains.compose.reload.analysis.RuntimeInfo
 import org.jetbrains.compose.reload.analysis.RuntimeScopeInfo
 import org.jetbrains.compose.reload.analysis.SpecialComposeGroupKeys
+import org.jetbrains.compose.reload.analysis.TrackingRuntimeInfo
 import org.jetbrains.compose.reload.analysis.javap
 import org.jetbrains.compose.reload.analysis.render
 import org.jetbrains.compose.reload.core.asFileName
@@ -212,7 +213,7 @@ class RuntimeInfoTest {
             )
         ) ?: fail("Missing 'runtimeInfo'")
 
-        val (_, method) = runtimeInfo.methods.entries.find { (key, _) -> key.methodName == "Foo" }
+        val (_, method) = runtimeInfo.methodIndex.entries.find { (key, _) -> key.methodName == "Foo" }
             ?: fail("Missing method 'Foo'")
 
         /* Method entry point scope */
@@ -246,23 +247,23 @@ class RuntimeInfoTest {
             )
         ) ?: fail("Missing 'runtimeInfo'")
 
-        if (SpecialComposeGroupKeys.remember !in runtimeInfo.groups) {
+        if (SpecialComposeGroupKeys.remember !in runtimeInfo.groupIndex) {
             fail("Cannot find key for 'remember'")
         }
 
-        if (SpecialComposeGroupKeys.remember1 !in runtimeInfo.groups) {
+        if (SpecialComposeGroupKeys.remember1 !in runtimeInfo.groupIndex) {
             fail("Cannot find key for 'remember1'")
         }
 
-        if (SpecialComposeGroupKeys.remember2 !in runtimeInfo.groups) {
+        if (SpecialComposeGroupKeys.remember2 !in runtimeInfo.groupIndex) {
             fail("Cannot find key for 'remember2'")
         }
 
-        if (SpecialComposeGroupKeys.remember3 !in runtimeInfo.groups) {
+        if (SpecialComposeGroupKeys.remember3 !in runtimeInfo.groupIndex) {
             fail("Cannot find key for 'remember3'")
         }
 
-        if (SpecialComposeGroupKeys.remember4 !in runtimeInfo.groups) {
+        if (SpecialComposeGroupKeys.remember4 !in runtimeInfo.groupIndex) {
             fail("Cannot find key for 'remember4'")
         }
     }
@@ -303,10 +304,10 @@ class RuntimeInfoTest {
 
         assertNotEquals(code, codeAfter)
 
-        val beforeScopes = runtimeInfoBefore.methods.values.map { it.rootScope }
+        val beforeScopes = runtimeInfoBefore.methodIndex.values.map { it.rootScope }
             .withClosure<RuntimeScopeInfo> { scope -> scope.children }.toList()
 
-        val afterScopes = runtimeInfoAfter.methods.values.map { it.rootScope }
+        val afterScopes = runtimeInfoAfter.methodIndex.values.map { it.rootScope }
             .withClosure<RuntimeScopeInfo> { scope -> scope.children }.toList()
 
         beforeScopes.forEachIndexed { index, beforeScope ->
@@ -364,10 +365,11 @@ class RuntimeInfoTest {
 private fun checkRuntimeInfo(
     testInfo: TestInfo, compiler: Compiler, code: Map<String, String>, name: String? = null
 ): RuntimeInfo? {
+    val runtimeInfo = TrackingRuntimeInfo()
     val output = compiler.compile(code)
-    val runtimeInfo = output.values
+     output.values
         .mapNotNull { bytecode -> ClassInfo(bytecode) }
-        .let { classInfos -> RuntimeInfo(classInfos.associateBy { info -> info.classId }) }
+        .forEach { classInfo -> runtimeInfo.add(classInfo) }
 
     val actualContent = buildString {
         appendLine("/*")

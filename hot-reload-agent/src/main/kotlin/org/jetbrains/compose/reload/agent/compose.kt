@@ -7,7 +7,6 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ComposeGroupKey
 import org.jetbrains.compose.reload.analysis.Ids
-import org.jetbrains.compose.reload.analysis.resolveInvalidationKey
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.isFailure
 import java.lang.instrument.ClassFileTransformer
@@ -58,25 +57,18 @@ private fun launchComposeGroupInvalidation() {
     invokeAfterHotReload { reloadRequestId, result ->
         if (result.isFailure()) return@invokeAfterHotReload
 
-        val previousRuntime = result.value.previousRuntime
-        val newRuntime = result.value.newRuntime
-
-        val invalidations = newRuntime.groups.filter { (group, _) ->
-            if (group == null) return@filter false
-            val currentInvalidationKey = previousRuntime.resolveInvalidationKey(group) ?: return@filter false
-            val newInvalidationKey = newRuntime.resolveInvalidationKey(group) ?: return@filter true // defensive.
-            currentInvalidationKey != newInvalidationKey
-        }
+        val invalidations = result.value.dirtyRuntime.dirtyScopes
+            .filter { scope -> scope.group != null }
+            .groupBy { it.group }
 
         if (invalidations.isEmpty()) {
             logger.orchestration("All groups retained")
         }
 
-        invalidations.forEach { group, _ ->
+        invalidations.forEach { group, methods ->
             if (group == null) return@forEach
 
-            val methods = newRuntime.groups[group].orEmpty()
-                .map { scope -> scope.methodId }.toSet()
+            val methods = methods.map { it.methodId }.toSet()
                 .joinToString(", ", prefix = "(", postfix = ")") { methodId ->
                     "${methodId.classId}.${methodId.methodName}"
                 }

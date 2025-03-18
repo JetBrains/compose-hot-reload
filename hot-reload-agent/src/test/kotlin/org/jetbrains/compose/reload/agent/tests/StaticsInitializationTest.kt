@@ -9,9 +9,9 @@ import javassist.ClassPool
 import javassist.Modifier
 import org.jetbrains.compose.reload.agent.transformForStaticsInitialization
 import org.jetbrains.compose.reload.analysis.ClassInfo
-import org.jetbrains.compose.reload.analysis.RuntimeInfo
+import org.jetbrains.compose.reload.analysis.TrackingRuntimeInfo
 import org.jetbrains.compose.reload.analysis.classInitializerMethodId
-import org.jetbrains.compose.reload.analysis.resolveInvalidationKey
+import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
 import org.jetbrains.compose.reload.analysis.testFixtures.checkJavap
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
 import org.jetbrains.compose.reload.core.testFixtures.WithCompiler
@@ -64,6 +64,7 @@ class StaticsInitializationTest() {
         ).getValue("TestKt.class")
 
         val beforeClassInfo = ClassInfo(beforeCode) ?: fail("Missing 'ClassInfo' for 'TestKt'")
+        val beforeClassInfoInitializer = beforeClassInfo.classId.classInitializerMethodId
 
 
         val afterBytecode = compiler.compile(
@@ -77,20 +78,21 @@ class StaticsInitializationTest() {
             ?: fail("Missing 'ClassInfo' for 'TestKt'")
 
 
-        val beforeClinit = beforeClassInfo.methods.getValue(beforeClassInfo.classId.classInitializerMethodId)
-        val afterClinit = afterClassInfo.methods.getValue(afterClassInfo.classId.classInitializerMethodId)
+        val beforeRuntimeInfo = TrackingRuntimeInfo()
+        beforeRuntimeInfo.add(beforeClassInfo)
 
-        val beforeRuntimeInfo = RuntimeInfo(mapOf(beforeClassInfo.classId to beforeClassInfo))
-        val afterRuntimeInfo = RuntimeInfo(mapOf(afterClassInfo.classId to afterClassInfo))
+        val redefineRuntimeInfo = TrackingRuntimeInfo()
+        redefineRuntimeInfo.add(afterClassInfo)
 
-        val beforeInvalidationKey = beforeRuntimeInfo.resolveInvalidationKey(beforeClinit.methodId)
-            ?: fail("Missing 'InvalidationKey' for ${beforeClinit.methodId}")
+        val redefinition = beforeRuntimeInfo.resolveDirtyRuntimeScopes(redefineRuntimeInfo)
+        if (beforeClassInfoInitializer in redefinition.dirtyMethodIds) {
+            fail("Unexpected '$beforeClassInfoInitializer' in dirtyMethodIds")
+        }
 
-        val afterInvalidationKey = afterRuntimeInfo.resolveInvalidationKey(afterClinit.methodId)
-            ?: fail("Missing 'InvalidationKey' for '${afterClinit.methodId}'")
-
-        assertEquals(
-            beforeInvalidationKey, afterInvalidationKey,
-        )
+        if (redefinition.dirtyScopes.any { scope ->
+                scope.methodId == beforeClassInfoInitializer
+            }) {
+            fail("Unexpected '$beforeClassInfoInitializer' in 'dirtyScopes'")
+        }
     }
 }

@@ -13,6 +13,12 @@ Allows using the Kotlin + Compose compiler within tests by using the
 `testCompilerClasspath` and `testComposeCompilerClasspath` System properties in the test
  */
 
+abstract class TestWithCompilerExtension(val project: Project) {
+    val tasks = project.container<JavaExec>()
+}
+
+val extension = extensions.create<TestWithCompilerExtension>("testWithCompiler", project)
+
 
 /*
 Dependencies visible to the compiler used inside the tests `Compiler.compile`
@@ -53,7 +59,8 @@ dependencies {
     )
 }
 
-tasks.withType<Test>().configureEach {
+
+fun <T> T.setupCompilerTestFixture() where T : Task, T : JavaForkOptions {
     dependsOn(testCompilerDependencies)
     dependsOn(testComposeCompiler)
     val testCompilerClasspath = testCompilerDependencies.files
@@ -67,6 +74,15 @@ tasks.withType<Test>().configureEach {
         systemProperty(
             "testComposeCompilerClasspath",
             testComposeCompilerClasspath.joinToString(File.pathSeparator) { it.absolutePath })
-
     }
+}
+
+
+tasks.withType<Test>().configureEach {
+    setupCompilerTestFixture()
+}
+
+
+extension.tasks.configureEach {
+    setupCompilerTestFixture()
 }

@@ -75,7 +75,12 @@ class CompilerProvider : ParameterResolver, BeforeEachCallback, AfterEachCallbac
     }
 }
 
-private class CompilerImpl(
+fun Compiler(
+    workingDir: Path,
+    options: Map<CompilerOption, Boolean> = CompilerOptions.default,
+): Compiler = CompilerImpl(workingDir, options)
+
+class CompilerImpl(
     private val workingDir: Path,
     private val options: Map<CompilerOption, Boolean> = CompilerOptions.default,
 ) : Compiler {

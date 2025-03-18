@@ -108,10 +108,10 @@ private fun issueExternalReloadRequest(definition: ClassDefinition) {
 
             val uuid = UUID.randomUUID()
             logger.info("'external reload': Reloaded ${aggregate.definitions.size} classes: $uuid")
-            val runtimeInfo = redefineRuntimeInfo().get()
-            val reload = Reload(uuid, definitions = aggregate.definitions, runtimeInfo.previous, runtimeInfo.updated)
+            val redefined = redefineRuntimeInfo().get()
+            val reload = Reload(uuid, definitions = aggregate.definitions, redefined)
 
-            reinitializeStaticsIfNecessary(aggregate.definitions, runtimeInfo.previous, runtimeInfo.updated)
+            reinitializeStaticsIfNecessary(reload)
             executeAfterHotReloadListeners(uuid, reload.toLeft())
             logger.info("'external reload': Finished $uuid")
         }

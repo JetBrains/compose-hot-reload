@@ -7,56 +7,48 @@
 
 package org.jetbrains.compose.reload.analysis
 
-import org.jetbrains.compose.reload.core.closure
+
 import org.jetbrains.compose.reload.core.withClosure
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
 
-data class RuntimeInfo(
-    val classes: Map<ClassId, ClassInfo>,
+sealed interface RuntimeInfo {
+    /**
+     * Index from a known classId to its ClassInfo
+     */
+    val classIndex: Map<ClassId, ClassInfo>
 
     /**
-     * Index from [MethodId] to the associated [MethodInfo]
+     * Index from a known methodId to its MethodInfo
      */
-    val methods: Map<MethodId, MethodInfo> = classes.values.flatMap { it.methods.values }
-        .associateBy { info -> info.methodId },
+    val methodIndex: Map<MethodId, MethodInfo>
 
     /**
-     * Index from [ComposeGroupKey] to *all* scopes that are associated with this group.
-     * (null as key means 'no known group')
+     * Index from a known fieldId to the FieldInfo
      */
-    val groups: Map<ComposeGroupKey?, List<RuntimeScopeInfo>> =
-        classes.values.flatMap { it.methods.values }
-            .map { info -> info.rootScope }
-            .withClosure<RuntimeScopeInfo> { info -> info.children }
-            .groupBy { info -> info.group },
-
+    val fieldIndex: Map<FieldId, FieldInfo>
 
     /**
-     * Index from a [ClassId] to its implementors (non-transitive)
+     * Index from the known compose group key to the list of associated runtime scopes
      */
-    val implementations: Map<ClassId, List<ClassInfo>> = run {
-        val result = mutableMapOf<ClassId, MutableList<ClassInfo>>()
-        classes.values.forEach { classInfo ->
-            classInfo.superInterfaces.forEach { interfaceId ->
-                result.getOrPut(interfaceId) { mutableListOf() }.add(classInfo)
-            }
+    val groupIndex: Map<ComposeGroupKey?, Collection<RuntimeScopeInfo>>
 
-            classInfo.superClass?.let { superClass ->
-                result.getOrPut(superClass) { mutableListOf() }.add(classInfo)
-            }
-        }
+    /**
+     * Index from a class to all its superclasses
+     */
+    val superIndex: Map<ClassId, Collection<ClassId>>
 
-        result
-    },
+    /**
+     * Index from a classId to all its implementations
+     */
+    val superIndexInverse: Map<ClassId, Collection<ClassId>>
 
-    val allImplementations: Map<ClassId, List<ClassInfo>> = implementations.keys.associateWith { classId ->
-        classes[classId]?.closure { currentClassInfo ->
-            implementations[currentClassInfo.classId].orEmpty()
-        }?.toList().orEmpty()
-    }
-)
+    /**
+     * Index from any member (field, method), to all depending on scopes
+     */
+    val dependencyIndex: Map<MemberId, Collection<RuntimeScopeInfo>>
+}
 
 data class ClassInfo(
     val classId: ClassId,
@@ -81,6 +73,9 @@ data class MethodInfo(
         FINAL, OPEN, ABSTRACT
     }
 }
+
+val MethodInfo.allScopes: Set<RuntimeScopeInfo>
+    get() = rootScope.withClosure { scope -> scope.children }
 
 fun ClassInfo(bytecode: ByteArray): ClassInfo? {
     return ClassInfo(ClassNode(bytecode))
@@ -117,11 +112,6 @@ internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
         superClass = classNode.superName?.let(::ClassId),
         superInterfaces = classNode.interfaces.map(::ClassId)
     )
-}
-
-internal fun RuntimeInfo(classNode: ClassNode): RuntimeInfo? {
-    val classInfo = ClassInfo(classNode) ?: return null
-    return RuntimeInfo(classes = mapOf(classInfo.classId to classInfo))
 }
 
 internal fun RuntimeScopeInfo(classNode: ClassNode, methodNode: MethodNode): RuntimeScopeInfo? {

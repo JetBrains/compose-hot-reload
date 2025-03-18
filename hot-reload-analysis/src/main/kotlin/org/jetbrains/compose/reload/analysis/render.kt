@@ -22,22 +22,26 @@ import org.objectweb.asm.tree.MethodNode
 
 
 fun RuntimeInfo.render(): String = buildString {
-    classes.toSortedMap().forEach { (classId, classInfo) ->
-        appendLine("$classId {")
-
-        if (classInfo.fields.isNotEmpty()) {
-            appendLine(classInfo.fields.values.joinToString("\n") { it.render() }.indent())
-            appendLine()
-        }
-
-        withIndent {
-            appendLine(classInfo.methods.values.joinToString("\n\n") { it.rootScope.render() })
-        }
-
-
-        appendLine("}")
+    classIndex.toSortedMap().forEach { (classId, classInfo) ->
+        append(classInfo.render())
         appendLine()
     }
+}
+
+fun ClassInfo.render(): String = buildString {
+    appendLine("$classId {")
+
+    if (fields.isNotEmpty()) {
+        appendLine(fields.values.joinToString("\n") { it.render() }.indent())
+        appendLine()
+    }
+
+    withIndent {
+        appendLine(methods.values.joinToString("\n\n") { it.rootScope.render() })
+    }
+
+
+    appendLine("}")
 }
 
 internal fun RuntimeScopeInfo.render(): String = buildString {

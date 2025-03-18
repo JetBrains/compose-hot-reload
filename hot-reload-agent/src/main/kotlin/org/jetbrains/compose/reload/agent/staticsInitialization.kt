@@ -7,13 +7,10 @@ package org.jetbrains.compose.reload.agent
 
 import javassist.CtClass
 import javassist.CtConstructor
-import org.jetbrains.compose.reload.analysis.RuntimeInfo
 import org.jetbrains.compose.reload.analysis.classId
 import org.jetbrains.compose.reload.analysis.classInitializerMethodId
-import org.jetbrains.compose.reload.analysis.resolveInvalidationKey
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.sortedByTopology
-import java.lang.instrument.ClassDefinition
 import java.lang.reflect.Modifier
 
 private val logger = createLogger()
@@ -46,18 +43,17 @@ internal fun CtClass.transformForStaticsInitialization(originalClass: Class<*>?)
  * Will use the [previousRuntime] and [newRuntime] to infer which of the re-defined classes require
  * to re-initialize the statics.
  */
-internal fun reinitializeStaticsIfNecessary(
-    classDefinition: List<ClassDefinition>, previousRuntime: RuntimeInfo, newRuntime: RuntimeInfo
-) {
+internal fun reinitializeStaticsIfNecessary(reload: Reload) {
     /* Step 1: First, let us identify which clinits actually changed and shall be re-executed */
-    val dirtyClasses = classDefinition.mapNotNull { classDefinition ->
+    val dirtyClasses = reload.definitions.mapNotNull { classDefinition ->
         val clazz = classDefinition.definitionClass
         val clinitMethodId = clazz.classId.classInitializerMethodId
 
-        val previousKey = previousRuntime.resolveInvalidationKey(clinitMethodId) ?: return@mapNotNull clazz
-        val newKey = newRuntime.resolveInvalidationKey(clinitMethodId) ?: return@mapNotNull null
-        if (previousKey == newKey) return@mapNotNull null
-        clazz
+        if (clinitMethodId in reload.dirtyRuntime.dirtyMethodIds) {
+            return@mapNotNull clazz
+        }
+
+        null
     }
 
     if (dirtyClasses.isEmpty()) {
@@ -68,7 +64,8 @@ internal fun reinitializeStaticsIfNecessary(
     val dirtyClassIds = dirtyClasses.associateBy { it.classId }
 
     val classInitializerDependencies = dirtyClasses.associateWith { clazz ->
-        newRuntime.methods[clazz.classId.classInitializerMethodId]?.rootScope?.methodDependencies.orEmpty()
+        reload.dirtyRuntime.dirtyMethodIds[clazz.classId.classInitializerMethodId].orEmpty()
+            .flatMap { scope -> scope.methodDependencies }
             .mapNotNull { dependencyMethodId -> dirtyClassIds[dependencyMethodId.classId].takeIf { it != clazz } }
     }
 

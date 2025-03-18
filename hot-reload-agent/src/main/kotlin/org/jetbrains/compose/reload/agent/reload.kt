@@ -6,7 +6,7 @@
 package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
-import org.jetbrains.compose.reload.analysis.RuntimeInfo
+import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import java.io.ByteArrayOutputStream
@@ -21,8 +21,7 @@ private val logger = createLogger()
 data class Reload(
     val reloadRequestId: UUID,
     val definitions: List<ClassDefinition>,
-    val previousRuntime: RuntimeInfo,
-    val newRuntime: RuntimeInfo,
+    val dirtyRuntime: RuntimeDirtyScopes
 )
 
 internal fun reload(
@@ -81,7 +80,7 @@ internal fun reload(
                 }
 
                 val addedInterfaces = clazz.interfaces.map { it.name } -
-                    originalClass.interfaces?.map { it.name }.orEmpty()
+                    originalClass.interfaces.map { it.name }
                 addedInterfaces.forEach { addedInterface ->
                     appendLine("⚠️ +Interface: '$addedInterface'")
                 }
@@ -108,9 +107,8 @@ internal fun reload(
     }
 
     instrumentation.redefineClasses(*definitions.toTypedArray())
-    val (previousRuntime, newRuntime) = redefineRuntimeInfo().get()
-
-    reinitializeStaticsIfNecessary(definitions, previousRuntime, newRuntime)
-
-    return Reload(reloadRequestId, definitions, previousRuntime, newRuntime)
+    val redefinition = redefineRuntimeInfo().get()
+    val reload = Reload(reloadRequestId, definitions, redefinition)
+    reinitializeStaticsIfNecessary(reload)
+    return reload
 }

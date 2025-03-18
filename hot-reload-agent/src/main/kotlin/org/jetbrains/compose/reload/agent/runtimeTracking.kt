@@ -7,9 +7,10 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.ClassInfo
-import org.jetbrains.compose.reload.analysis.RuntimeInfo
+import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
+import org.jetbrains.compose.reload.analysis.TrackingRuntimeInfo
 import org.jetbrains.compose.reload.analysis.isIgnoredClassId
-import org.jetbrains.compose.reload.core.Update
+import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
 import org.jetbrains.compose.reload.core.createLogger
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
@@ -18,6 +19,7 @@ import java.security.ProtectionDomain
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import kotlin.concurrent.thread
+import kotlin.time.measureTime
 
 private val logger = createLogger()
 
@@ -25,8 +27,8 @@ private val runtimeAnalysisThread = Executors.newSingleThreadExecutor { r ->
     thread(start = false, isDaemon = true, name = "Compose Runtime Analyzer", block = r::run)
 }
 
-private val currentRuntime = ArrayList<ClassInfo>(16384)
-private val pendingRedefinitions = ArrayList<ClassInfo>(16384)
+private val currentRuntime = TrackingRuntimeInfo()
+private val pendingRedefinitions = TrackingRuntimeInfo()
 private val classLoaders = hashMapOf<ClassId, WeakReference<ClassLoader>>()
 
 internal fun launchRuntimeTracking(instrumentation: Instrumentation) {
@@ -36,19 +38,21 @@ internal fun launchRuntimeTracking(instrumentation: Instrumentation) {
     instrumentation.addTransformer(RuntimeTrackingTransformer)
 }
 
-internal fun redefineRuntimeInfo(): Future<Update<RuntimeInfo>> = runtimeAnalysisThread.submit<Update<RuntimeInfo>> {
-    val previousRuntimeScopes = currentRuntime.toList()
+internal fun redefineRuntimeInfo(): Future<RuntimeDirtyScopes> = runtimeAnalysisThread.submit<RuntimeDirtyScopes> {
+    val redefinition = currentRuntime.resolveDirtyRuntimeScopes(pendingRedefinitions)
 
-    // Patch method ids
-    val pendingClassIds = pendingRedefinitions.mapTo(hashSetOf()) { info -> info.classId }
-    currentRuntime.removeAll { info -> info.classId in pendingClassIds }
-    currentRuntime.addAll(pendingRedefinitions)
-    pendingRedefinitions.clear()
+    /* Patch current runtime info */
+    val patchDuration = measureTime {
+        pendingRedefinitions.classIndex.forEach { (classId, classInfo) ->
+            currentRuntime.remove(classId)
+            currentRuntime.add(classInfo)
+        }
+        pendingRedefinitions.clear()
+    }
 
-    Update(
-        RuntimeInfo(previousRuntimeScopes.associateBy { classInfo -> classInfo.classId }),
-        RuntimeInfo(currentRuntime.associateBy { classInfo -> classInfo.classId }),
-    )
+    logger.debug("Applied redefined 'RuntimeInfo' in [$patchDuration]")
+
+    redefinition
 }
 
 internal fun findClassLoader(classId: ClassId): Future<ClassLoader?> = runtimeAnalysisThread.submit<ClassLoader?> {

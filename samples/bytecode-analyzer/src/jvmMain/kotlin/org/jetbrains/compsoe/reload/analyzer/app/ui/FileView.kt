@@ -1,3 +1,8 @@
+/*
+ * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ */
+
 package org.jetbrains.compsoe.reload.analyzer.app.ui
 
 import androidx.compose.foundation.background
@@ -17,6 +22,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.sellmair.evas.compose.composeValue
+import org.jetbrains.compose.reload.analysis.ClassInfo
+import org.jetbrains.compsoe.reload.analyzer.app.states.ClassInfoState
 import org.jetbrains.compsoe.reload.analyzer.app.states.JavapState
 import org.jetbrains.compsoe.reload.analyzer.app.states.OpenedFileState
 import org.jetbrains.compsoe.reload.analyzer.app.states.RuntimeInfoState
@@ -86,9 +93,9 @@ fun FileView() {
 
 @Composable
 fun RuntimeInfoView(file: Path) {
-    val state = RuntimeInfoState.Key(file).composeValue() ?: return
+    val state = ClassInfoState.Key(file).composeValue() ?: return
     when (state) {
-        is RuntimeInfoState.Error -> run {
+        is ClassInfoState.Error -> run {
             Column {
                 Text("Failed to parse RuntimeInfo")
                 if (state.message != null) {
@@ -101,8 +108,8 @@ fun RuntimeInfoView(file: Path) {
             }
         }
 
-        is RuntimeInfoState.Loading -> CircularProgressIndicator()
-        is RuntimeInfoState.Result -> Text(state.rendered)
+        is ClassInfoState.Loading -> CircularProgressIndicator()
+        is ClassInfoState.Result -> Text(state.rendered)
     }
 }
 
