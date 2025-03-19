@@ -8,6 +8,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.material.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,10 +18,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun SomeWidget() {
-    val transition = rememberInfiniteTransition()
-    val scale by transition.animateFloat(
-        0.95f, 1.04f, infiniteRepeatable(tween(500), RepeatMode.Reverse)
-    )
-
-    Text("👋 Hello from 'widgets'!", fontSize = 24.0.sp, modifier = Modifier.scale(scale))
+    Card {
+        Text("test")
+    }
 }

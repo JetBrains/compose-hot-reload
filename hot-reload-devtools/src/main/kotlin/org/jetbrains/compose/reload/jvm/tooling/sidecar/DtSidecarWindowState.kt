@@ -12,7 +12,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -49,10 +48,11 @@ fun DtSidecarWindowState(
 private fun windowSize(targetWindowState: WindowState, isExpanded: Boolean): DpSize {
     val currentIsExpanded = remember { mutableStateOf(isExpanded) }
     val currentSize = remember { mutableStateOf(getSideCarWindowSize(targetWindowState, isExpanded)) }
+    val targetSize = getSideCarWindowSize(targetWindowState, isExpanded)
 
     /* No delay when we do not have the transparency enabled */
-    if(!devToolsTransparencyEnabled) {
-        currentSize.value = getSideCarWindowSize(targetWindowState, isExpanded)
+    if (!devToolsTransparencyEnabled) {
+        currentSize.value = targetSize
     }
 
     // We're closing
@@ -65,9 +65,13 @@ private fun windowSize(targetWindowState: WindowState, isExpanded: Boolean): DpS
     }
 
     // We're opening
-    if(!currentIsExpanded.value && isExpanded) {
+    if (!currentIsExpanded.value && isExpanded) {
         currentIsExpanded.value = true
-        currentSize.value = getSideCarWindowSize(targetWindowState, isExpanded)
+        currentSize.value = targetSize
+    }
+
+    if (currentSize.value.height != targetSize.height) {
+        currentSize.value = currentSize.value.copy(height = targetSize.height)
     }
 
     return currentSize.value
@@ -83,7 +87,7 @@ private fun animateWindowPosition(
 
     /* Width has changed: Animation shall be skipped */
     val currentWidth = remember { mutableStateOf(width) }
-    if(currentWidth.value != width) {
+    if (currentWidth.value != width) {
         currentWidth.value = width
         return WindowPosition(targetX, targetY)
     }
