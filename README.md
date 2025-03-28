@@ -17,7 +17,7 @@ Make changes to your UI code in a Compose Multiplatform application, and see the
 
 ### Requirements
 - A Compose Multiplatform project with a desktop target (see [FAQ](#faq))
-- Kotlin `2.1.20-Beta2` or higher
+- Kotlin `2.1.20` or higher
 
 ### Apply the Gradle plugin to your project
 
@@ -25,8 +25,8 @@ Add the `org.jetbrains.compose.hot-reload` Gradle plugin to your build script:
 
 ```kotlin
 plugins {
-    kotlin("multiplatform") version "2.1.20-RC" // <- Use Kotlin 2.1.20-RC or higher!
-    kotlin("plugin.compose") version "2.1.20-RC" // <- Use Compose Compiler Plugin 2.1.20-RC or higher!
+    kotlin("multiplatform") version "2.1.20" // <- Use Kotlin 2.1.20 or higher!
+    kotlin("plugin.compose") version "2.1.20" // <- Use Compose Compiler Plugin 2.1.20 or higher!
     id("org.jetbrains.compose")
     id("org.jetbrains.compose.hot-reload") version "1.0.0-alpha03" // <- add this additionally
 }
