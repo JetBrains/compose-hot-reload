@@ -129,7 +129,7 @@ private class OrchestrationClientImpl(
                     }.get()
                 }
             } catch (t: Throwable) {
-                logger.debug("reader: closing client", t)
+                logger.debug("reader: closing client")
                 logger.trace("reader: closed with traces", t)
                 close()
             }
