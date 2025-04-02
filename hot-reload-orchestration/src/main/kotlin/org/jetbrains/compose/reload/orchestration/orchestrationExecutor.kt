@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.orchestration
 
+import org.jetbrains.compose.reload.core.submitSafe
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
@@ -32,5 +33,5 @@ public fun checkIsOrchestrationThread(): Unit = check(isOrchestrationThread()) {
 
 public fun <T> runInOrchestrationThreadBlocking(action: () -> T): T {
     if (isOrchestrationThread()) return action()
-    return orchestrationThread.submit(action).get()
+    return orchestrationThread.submitSafe(action).get()
 }

@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.Disposable
+import org.jetbrains.compose.reload.core.submitSafe
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -19,7 +20,6 @@ import java.util.UUID
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
-import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
@@ -71,19 +71,15 @@ private class OrchestrationServerImpl(
         }
 
         fun write(message: OrchestrationMessage): Future<Unit> {
-            try {
-                return writingThread.submit<Unit> {
-                    try {
-                        output.writeObject(message)
-                        output.flush()
-                    } catch (_: Throwable) {
-                        lock.withLock { clients.remove(this) }
-                        logger.debug("Closing client: '$this'")
-                        close()
-                    }
+            return writingThread.submitSafe {
+                try {
+                    output.writeObject(message)
+                    output.flush()
+                } catch (_: Throwable) {
+                    lock.withLock { clients.remove(this) }
+                    logger.debug("Closing client: '$this'")
+                    close()
                 }
-            } catch (t: RejectedExecutionException) {
-                return CompletableFuture.failedFuture(t)
             }
         }
 
@@ -130,7 +126,7 @@ private class OrchestrationServerImpl(
         }
     }
 
-    override fun sendMessage(message: OrchestrationMessage): Future<Unit> = orchestrationThread.submit<Unit> {
+    override fun sendMessage(message: OrchestrationMessage): Future<Unit> = orchestrationThread.submitSafe {
         /* Send the message to all, currently connected clients */
         val clients = lock.withLock { clients.toList() }
         clients.forEach { client -> client.write(message) }

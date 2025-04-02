@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.Disposable
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
+import org.jetbrains.compose.reload.core.submitSafe
 import org.slf4j.LoggerFactory
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -65,7 +66,7 @@ private class OrchestrationClientImpl(
             }
         }
 
-        fun sendMessage(any: Any): Future<Unit> = thread.submit<Unit> {
+        fun sendMessage(any: Any): Future<Unit> = thread.submitSafe {
             try {
                 output.writeObject(any)
                 output.flush()
