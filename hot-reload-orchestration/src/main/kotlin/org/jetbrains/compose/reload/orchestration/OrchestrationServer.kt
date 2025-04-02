@@ -171,6 +171,9 @@ private class OrchestrationServerImpl(
             val client = Client(socket, handshake.clientId, handshake.clientRole, input, output)
             logger.debug("Client connected: '$client'")
             lock.withLock { clients.add(client) }
+
+            /* Announce the new client to the whole orchestration */
+            sendMessage(ClientConnected(client.id, client.role, handshake.clientPid))
             client
         } catch (t: Throwable) {
             logger.debug("Client cannot be connected: '${socket.remoteSocketAddress}'")
@@ -179,8 +182,6 @@ private class OrchestrationServerImpl(
             return@thread
         }
 
-        /* Announce the new client to the whole orchestration */
-        sendMessage(ClientConnected(client.id, client.role))
 
         /* Read messages  */
         while (isActive) {

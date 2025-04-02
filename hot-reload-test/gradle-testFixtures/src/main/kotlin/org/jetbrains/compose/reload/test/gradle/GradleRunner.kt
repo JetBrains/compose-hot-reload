@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.test.gradle
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.job
+import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi
 import org.jetbrains.compose.reload.test.gradle.GradleRunner.ExitCode
 import org.slf4j.LoggerFactory
@@ -94,7 +95,7 @@ public suspend fun GradleRunner.build(vararg args: String): ExitCode? {
         }
 
         val shutdownHook = Thread {
-            process.destroy()
+            process.destroyWithDescendants()
         }
 
         Runtime.getRuntime().addShutdownHook(shutdownHook)
@@ -104,7 +105,7 @@ public suspend fun GradleRunner.build(vararg args: String): ExitCode? {
         } catch (_: InterruptedException) {
             exitCode.complete(null)
             logger.error("Gradle Runner: Interrupted by user. Killing Gradle process...")
-            process.destroy()
+            process.destroyWithDescendants()
         }
 
         runCatching { Runtime.getRuntime().removeShutdownHook(shutdownHook) }

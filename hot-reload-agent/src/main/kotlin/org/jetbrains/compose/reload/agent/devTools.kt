@@ -9,6 +9,7 @@ import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.HotReloadProperty.DevToolsClasspath
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.destroyWithDescendants
 import java.io.File
 import kotlin.jvm.optionals.getOrNull
 
@@ -46,6 +47,6 @@ internal fun launchDevtoolsApplication() {
     ).inheritIO().start()
 
     Runtime.getRuntime().addShutdownHook(Thread {
-        process.destroy()
+        process.destroyWithDescendants()
     })
 }

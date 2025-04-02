@@ -19,6 +19,7 @@ import org.gradle.api.internal.tasks.testing.TestStartEvent
 import org.gradle.api.tasks.testing.TestFailure
 import org.gradle.api.tasks.testing.TestOutputEvent
 import org.jetbrains.compose.reload.core.HotReloadProperty
+import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.gradle.createDebuggerJvmArguments
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
@@ -162,11 +163,11 @@ internal class HotReloadUnitTestExecutor(
         }
 
         Runtime.getRuntime().addShutdownHook(Thread {
-            process.destroy()
+            process.destroyWithDescendants()
         })
 
         if (!process.waitFor(5, TimeUnit.MINUTES)) {
-            process.destroy()
+            process.destroyWithDescendants()
             processor.failure(
                 testMethodDescriptor.id,
                 TestFailure.fromTestFrameworkFailure(TimeoutException("Test '${testMethodDescriptor}' timed out"))
@@ -176,7 +177,7 @@ internal class HotReloadUnitTestExecutor(
 
     override fun stopNow() {
         executionProcessLock.withLock {
-            executionProcess?.destroy()
+            executionProcess?.destroyWithDescendants()
         }
     }
 }

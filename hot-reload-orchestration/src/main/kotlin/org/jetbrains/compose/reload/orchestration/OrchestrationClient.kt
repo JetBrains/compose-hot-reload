@@ -106,7 +106,7 @@ private class OrchestrationClientImpl(
     }
 
     fun start() {
-        writer.sendMessage(OrchestrationHandshake(clientId, role))
+        writer.sendMessage(OrchestrationHandshake(clientId, role, ProcessHandle.current().pid()))
 
         thread(name = "Orchestration Client Reader") {
             logger.debug("connected")

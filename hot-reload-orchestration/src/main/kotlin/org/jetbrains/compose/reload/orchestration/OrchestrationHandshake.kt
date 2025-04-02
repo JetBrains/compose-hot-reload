@@ -13,5 +13,6 @@ import java.util.UUID
  */
 internal class OrchestrationHandshake(
     val clientId: UUID,
-    val clientRole: OrchestrationClientRole
+    val clientRole: OrchestrationClientRole,
+    val clientPid: Long? = null,
 ) : Serializable

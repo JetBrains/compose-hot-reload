@@ -23,7 +23,8 @@ public sealed class OrchestrationMessage : Serializable {
      */
     public data class ClientConnected(
         public val clientId: UUID,
-        public val clientRole: OrchestrationClientRole
+        public val clientRole: OrchestrationClientRole,
+        public val clientPid: Long? = null
     ) : OrchestrationMessage() {
         override fun toString(): String {
             return "ClientConnected($clientRole)"

@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.agent.tests
 import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
@@ -77,7 +78,7 @@ class StandaloneJarTest {
         ).inheritIO().start()
 
 
-        cleanupActions.add { testProcess.destroy() }
+        cleanupActions.add { testProcess.destroyWithDescendants() }
 
 
         if (!testProcess.waitFor(1, TimeUnit.MINUTES)) {
