@@ -9,9 +9,9 @@ import org.jetbrains.compose.reload.analysis.plusAssign
 import org.jetbrains.compose.reload.analysis.renderRuntimeInstructionTree
 import org.jetbrains.compose.reload.core.asFileName
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
-import org.jetbrains.compose.reload.test.core.TestEnvironment
 import org.jetbrains.compose.reload.core.testFixtures.WithCompiler
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
+import org.jetbrains.compose.reload.test.core.TestEnvironment
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInfo
 import kotlin.io.path.Path
@@ -55,6 +55,36 @@ class RuntimeInstructionTreeParserTest {
                     
                     Text("Hello else")
                 }
+            }
+    """.trimIndent()
+    )
+
+    @Test
+    fun `test - #123 - composable with local return`(compiler: Compiler, testInfo: TestInfo) = doTest(
+        compiler, testInfo, """
+            import androidx.compose.runtime.*
+            import androidx.compose.material3.Text
+             
+            @Composable
+            fun Foo(value: Int) {
+                Text("A")
+                if(value > -12) {
+                    Bar {
+                        Text("B")
+                        if(value > 0) return@Bar
+                        if(value > 10) return@Foo
+                        Text("C")
+                    }
+                }
+                
+                Text("D")
+            }
+            
+            @Composable
+            inline fun Bar(content: @Composable () -> Unit) {
+                Text("Bar A")
+                content()
+                Text("Bar B")
             }
     """.trimIndent()
     )

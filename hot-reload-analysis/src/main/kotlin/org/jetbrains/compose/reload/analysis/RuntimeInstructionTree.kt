@@ -6,8 +6,10 @@
 package org.jetbrains.compose.reload.analysis
 
 import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.BlockToken
+import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.CurrentMarkerToken
 import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.EndReplaceGroup
 import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.EndRestartGroup
+import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.EndToMarkerToken
 import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.JumpToken
 import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.LabelToken
 import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.ReturnToken
@@ -114,6 +116,7 @@ private fun parseRuntimeInstructionTree(
     if (tokens.isEmpty()) return Failure("empty tokens").toRight()
     val consumed = consumed.toMutableList()
     val children = children.toMutableList()
+    val marker = mutableListOf<CurrentMarkerToken>()
 
     var index = startIndex
     while (index < tokens.size) {
@@ -127,6 +130,23 @@ private fun parseRuntimeInstructionTree(
             is SourceInformation, is SourceInformationMarkerStart, is SourceInformationMarkerEnd -> {
                 consumed += currentToken
                 index++
+            }
+
+            is CurrentMarkerToken -> {
+                marker += currentToken
+                consumed += currentToken
+                index++
+            }
+
+            is EndToMarkerToken -> {
+                if (marker.any { it.variableIndex == currentToken.variableIndex }) {
+                    index++
+                } else {
+                    /* Yield the token to the parent, by only consuming it when its part of this scope */
+                    consumed += currentToken
+                    index--
+                    break
+                }
             }
 
             is ReturnToken -> {

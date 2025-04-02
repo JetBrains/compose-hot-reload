@@ -32,6 +32,18 @@ object Ids {
             methodName = "endRestartGroup",
             methodDescriptor = "()Landroidx/compose/runtime/ScopeUpdateScope;"
         )
+
+        val getCurrentMarker = MethodId(
+            classId,
+            methodName = "getCurrentMarker",
+            methodDescriptor = "()I"
+        )
+
+        val endToMarker = MethodId(
+            classId,
+            methodName = "endToMarker",
+            methodDescriptor = "(I)V"
+        )
     }
 
     object ComposerKt {

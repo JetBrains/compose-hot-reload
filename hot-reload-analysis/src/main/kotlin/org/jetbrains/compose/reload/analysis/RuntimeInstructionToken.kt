@@ -23,6 +23,7 @@ import org.objectweb.asm.tree.LabelNode
 import org.objectweb.asm.tree.LdcInsnNode
 import org.objectweb.asm.tree.LineNumberNode
 import org.objectweb.asm.tree.MethodInsnNode
+import org.objectweb.asm.tree.VarInsnNode
 
 
 sealed class RuntimeInstructionToken {
@@ -116,6 +117,24 @@ sealed class RuntimeInstructionToken {
         }
     }
 
+    data class CurrentMarkerToken(
+        val variableIndex: Int,
+        override val instructions: List<AbstractInsnNode>
+    ) : RuntimeInstructionToken() {
+        override fun toString(): String {
+            return "CurrentMarkerToken(index=$variableIndex)"
+        }
+    }
+
+    data class EndToMarkerToken(
+        var variableIndex: Int,
+        override val instructions: List<AbstractInsnNode>
+    ) : RuntimeInstructionToken() {
+        override fun toString(): String {
+            return "EndToMarkerToken(index=$variableIndex)"
+        }
+    }
+
     data class BlockToken(
         override val instructions: List<AbstractInsnNode>
     ) : RuntimeInstructionToken() {
@@ -188,6 +207,8 @@ private val priorityTokenizer by lazy {
         LabelTokenizer,
         JumpTokenizer,
         ReturnTokenizer,
+        CurrentMarkerTokenizer,
+        EndToMarkerTokenizer,
         StartRestartGroupTokenizer,
         EndRestartGroupTokenizer,
         StartReplaceGroupTokenizer,
@@ -368,9 +389,39 @@ private object SourceInformationMarkerEndTokenizer : RuntimeInstructionTokenizer
         }
         return null
     }
-
 }
 
+private object CurrentMarkerTokenizer : RuntimeInstructionTokenizer() {
+    override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
+        val expectedGetCurrentMarkerInvocation = context[0] ?: return null
+        val expectedIStoreInsn = context[1] ?: return null
+        if (expectedGetCurrentMarkerInvocation !is MethodInsnNode) return null
+        if (MethodId(expectedGetCurrentMarkerInvocation) != Ids.Composer.getCurrentMarker) return null
+        if (expectedIStoreInsn !is VarInsnNode) return null
+        if (expectedIStoreInsn.opcode != Opcodes.ISTORE) return null
+        return RuntimeInstructionToken.CurrentMarkerToken(
+            variableIndex = expectedIStoreInsn.`var`,
+            instructions = listOf(expectedGetCurrentMarkerInvocation, expectedIStoreInsn)
+        ).toLeft()
+    }
+}
+
+private object EndToMarkerTokenizer : RuntimeInstructionTokenizer() {
+    override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
+        val expectedILoadInsn = context[0] ?: return null
+        val expectedEndToMarkerInvocation = context[1] ?: return null
+
+        if (expectedILoadInsn !is VarInsnNode) return null
+        if (expectedEndToMarkerInvocation !is MethodInsnNode) return null
+        if (expectedILoadInsn.opcode != Opcodes.ILOAD) return null
+        if (MethodId(expectedEndToMarkerInvocation) != Ids.Composer.endToMarker) return null
+
+        return RuntimeInstructionToken.EndToMarkerToken(
+            variableIndex = expectedILoadInsn.`var`,
+            instructions = listOf(expectedILoadInsn, expectedEndToMarkerInvocation)
+        ).toLeft()
+    }
+}
 
 private object BlockTokenizer : RuntimeInstructionTokenizer() {
     override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
