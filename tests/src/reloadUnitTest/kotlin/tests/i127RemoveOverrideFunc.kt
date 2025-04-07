@@ -38,6 +38,6 @@ open class I127BaseClass {
     open fun foo() = "foo"
 }
 
-open class I127Class : I127BaseClass() {
+class I127Class : I127BaseClass() {
     override fun foo(): String = "bar"
 }
