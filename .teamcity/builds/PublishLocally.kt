@@ -24,7 +24,12 @@ object PublishLocally : BuildType({
     steps {
         gradle {
             name = "Publish Locally"
-            tasks = "publishLocally compile resolveDependencies testClasses testFixturesClasses " +
+            tasks = "publishLocally"
+        }
+
+        gradle {
+            name = "Compile"
+            tasks = "compile resolveDependencies testClasses testFixturesClasses " +
                 "reloadUnitTestClasses reloadFunctionalTestClasses reloadFunctionalTestWarmupClasses " +
                 "-i"
         }
@@ -80,7 +85,7 @@ fun BuildType.configurePublishLocallyBuildCache(publish: Boolean = false) {
             use = true
             this.publish = publish
             name = "Gradle Cache (8.12.1)"
-            if(publish) {
+            if (publish) {
                 rules = """
                     .local/gradle/caches/8.12.1
                 """.trimIndent()
