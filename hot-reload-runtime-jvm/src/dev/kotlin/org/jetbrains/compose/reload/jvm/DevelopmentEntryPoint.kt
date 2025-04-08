@@ -66,6 +66,13 @@ fun DevelopmentEntryPoint(child: @Composable () -> Unit) {
                 stacktrace = exception.stackTrace.toList()
             ).send()
 
+        }.onSuccess {
+            hotReloadState.update { state -> state.copy(uiError = null) }
+            UIRendered(
+                windowId = windowId,
+                reloadRequestId = currentHotReloadState.reloadRequestId,
+                currentHotReloadState.iteration
+            ).send()
         }.getOrThrow()
     }
 
@@ -73,12 +80,6 @@ fun DevelopmentEntryPoint(child: @Composable () -> Unit) {
         logger.orchestration("Composing UI: $currentHotReloadState")
         intercepted()
     }
-
-    hotReloadState.update { state -> state.copy(reloadError = null) }
-    /* Notify orchestration about the UI being rendered */
-    UIRendered(
-        windowId = windowId, reloadRequestId = currentHotReloadState.reloadRequestId, currentHotReloadState.iteration
-    ).send()
 }
 
 
