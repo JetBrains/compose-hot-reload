@@ -8,6 +8,7 @@
 package org.jetbrains.compose.reload.jvm
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,6 +34,10 @@ private val logger = createLogger()
 fun DevelopmentEntryPoint(child: @Composable () -> Unit) {
     /* Checking if we're currently in the stack of a hot reload */
     if (hotReloadStateLocal.current != null) {
+        logger.orchestration(
+            "Skipping 'DevelopmentEntryPoint': We're already in an entry point",
+            Exception("Nested 'DevelopmentEntryPoint'")
+        )
         child()
         return
     }
@@ -76,9 +81,10 @@ fun DevelopmentEntryPoint(child: @Composable () -> Unit) {
         }.getOrThrow()
     }
 
-    key(currentHotReloadState.key) {
-        logger.orchestration("Composing UI: $currentHotReloadState")
-        intercepted()
+    CompositionLocalProvider(hotReloadStateLocal provides currentHotReloadState) {
+        key(currentHotReloadState.key) {
+            intercepted()
+        }
     }
 }
 
