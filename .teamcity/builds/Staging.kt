@@ -59,6 +59,7 @@ object StagingDeploy : BuildType({
                 
                 git pull origin master --rebase
                 git push origin HEAD:refs/heads/master -v
+                git push origin HEAD:refs/heads/teamcity -v
             """.trimIndent()
         }
     }
