@@ -14,6 +14,15 @@ public suspend infix fun HotReloadTestFixture.initialSourceCode(source: String):
     initialSourceCode(source)
 }
 
+public suspend fun <T> HotReloadTestFixture.initialSourceCode(
+    source: String, transaction: suspend TransactionScope.() -> T
+): T = runTransaction {
+    launchChildTransaction {
+        initialSourceCode(source)
+    }
+    transaction()
+}
+
 public suspend fun HotReloadTestFixture.launchApplicationAndWait(
     projectPath: String = ":",
     mainClass: String = "MainKt",

@@ -157,6 +157,7 @@ public final class org/jetbrains/compose/reload/test/gradle/HotReloadTestFixture
 public final class org/jetbrains/compose/reload/test/gradle/HotReloadTestFixtureExtensionsKt {
 	public static final fun getDefaultMainKtSourceFile (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;)Ljava/lang/String;
 	public static final fun initialSourceCode (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun initialSourceCode (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun launchApplicationAndWait (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun launchApplicationAndWait$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun replaceSourceCode (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

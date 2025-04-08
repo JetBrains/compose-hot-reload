@@ -31,6 +31,7 @@ object WindowInstrumentation : ClassFileTransformer {
         classBeingRedefined: Class<*>?,
         protectionDomain: ProtectionDomain?, classfileBuffer: ByteArray?
     ): ByteArray? {
+        if (classfileBuffer == null) return null
         if (className?.startsWith(Ids.WindowDesktopKt.classId.value) == true) {
             return transformWindowKt(loader, classfileBuffer)
         }
@@ -39,8 +40,8 @@ object WindowInstrumentation : ClassFileTransformer {
     }
 }
 
-private fun transformWindowKt(loader: ClassLoader?, classfileBuffer: ByteArray?): ByteArray? {
-    val ctClass = getClassPool(loader ?: ClassLoader.getSystemClassLoader()).makeClass(classfileBuffer?.inputStream())
+private fun transformWindowKt(loader: ClassLoader?, classfileBuffer: ByteArray): ByteArray? {
+    val ctClass = getClassPool(loader ?: ClassLoader.getSystemClassLoader()).makeClass(classfileBuffer.inputStream())
     var transformed = false
 
     try {
