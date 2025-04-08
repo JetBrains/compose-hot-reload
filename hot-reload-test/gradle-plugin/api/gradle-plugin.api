@@ -32,5 +32,6 @@ public class org/jetbrains/compose/reload/test/HotReloadUnitTestTask : org/gradl
 	protected fun createTestExecuter ()Lorg/gradle/api/internal/tasks/testing/TestExecuter;
 	public synthetic fun createTestExecutionSpec ()Lorg/gradle/api/internal/tasks/testing/TestExecutionSpec;
 	protected fun createTestExecutionSpec ()Lorg/jetbrains/compose/reload/test/HotReloadTestExecutionSpec;
+	public final fun getWorkingDir ()Lorg/gradle/api/file/DirectoryProperty;
 }
 

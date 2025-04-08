@@ -41,6 +41,7 @@ import kotlin.io.path.deleteRecursively
 
 internal class HotReloadUnitTestExecutor(
     private val javaExecutable: File,
+    private val workingDir: File,
     private val classpath: FileCollection,
     private val testClasses: FileCollection,
     private val agentJar: FileCollection,
@@ -141,8 +142,11 @@ internal class HotReloadUnitTestExecutor(
                     environment()["chr.compilePath"] = compileClasspath.asPath
                     environment()["chr.compilePluginPath"] = compilePluginClasspath.asPath
                 }
+                .directory(workingDir)
                 .start().also { process -> executionProcess = process }
         }
+
+        Runtime.getRuntime().addShutdownHook(Thread { process.destroyWithDescendants() })
 
         thread {
             process.inputStream.bufferedReader().forEachLine { line ->

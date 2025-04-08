@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.test
 
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.tasks.testing.TestExecuter
 import org.gradle.api.tasks.Classpath
@@ -35,6 +36,7 @@ import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 import org.jetbrains.kotlin.gradle.tasks.BaseKotlinCompile
 
 open class HotReloadUnitTestTask : AbstractTestTask() {
+
     @get:Classpath
     internal val compileClasspath = project.objects.fileCollection()
 
@@ -72,6 +74,10 @@ open class HotReloadUnitTestTask : AbstractTestTask() {
     @get:Internal
     internal val intellijDebuggerDispatchPort = project.intellijDebuggerDispatchPort
 
+    @get:Internal
+    val workingDir: DirectoryProperty = project.objects.directoryProperty()
+        .convention(project.layout.projectDirectory)
+
     fun compilation(compilation: KotlinCompilation<*>) {
         compileClasspath.from(project.files { compilation.compileDependencyFiles })
         compileClasspath.from(project.files { compilation.output.classesDirs })
@@ -93,6 +99,7 @@ open class HotReloadUnitTestTask : AbstractTestTask() {
     override fun createTestExecuter(): TestExecuter<out HotReloadTestExecutionSpec?>? {
         return HotReloadUnitTestExecutor(
             javaExecutable = launcher.get().executablePath.asFile,
+            workingDir = workingDir.asFile.get(),
             classpath = classpath,
             testClasses = testClasses,
             agentJar = agentJar,
