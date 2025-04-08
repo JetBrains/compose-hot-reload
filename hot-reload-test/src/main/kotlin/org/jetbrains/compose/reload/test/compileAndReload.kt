@@ -63,6 +63,7 @@ public fun compileAndReload(sourceCode: String) {
     val arguments = K2JVMCompilerArguments()
 
     arguments.moduleName = compileModuleName
+    arguments.jvmTarget = "11"
     arguments.noStdlib = true
     arguments.kotlinHome = null
     arguments.destinationAsFile = tempClassesDir.toFile()

@@ -15,7 +15,6 @@ import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import io.sellmair.evas.Events
 import io.sellmair.evas.States
@@ -37,7 +36,6 @@ class SidecarUiTest {
 
     @Test
     fun `test - reload counter`() = runComposeUiTest {
-        mainClock.autoAdvance = false
         setContent {
             installEvas(events, states) {
                 DtSidecarWindowContent()
@@ -55,7 +53,6 @@ class SidecarUiTest {
 
     @Test
     fun `test - reload status`() = runComposeUiTest {
-        mainClock.autoAdvance = false
         setContent {
             installEvas(events, states) {
                 DtSidecarWindowContent()
@@ -88,7 +85,6 @@ class SidecarUiTest {
 
     @Test
     fun `test - error status`() = runComposeUiTest {
-        mainClock.autoAdvance = false
         setContent {
             installEvas(events, states) {
                 DtSidecarWindowContent()
@@ -115,5 +111,4 @@ class SidecarUiTest {
 
         onNodeWithTag(Tag.RuntimeErrorText.name).assertHasClickAction()
     }
-
 }

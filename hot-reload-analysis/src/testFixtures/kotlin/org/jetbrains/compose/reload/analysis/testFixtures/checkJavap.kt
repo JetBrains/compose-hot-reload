@@ -7,12 +7,13 @@ package org.jetbrains.compose.reload.analysis.testFixtures
 
 import org.jetbrains.compose.reload.analysis.javap
 import org.jetbrains.compose.reload.core.asFileName
+import org.jetbrains.compose.reload.test.core.TestEnvironment
 import org.junit.jupiter.api.TestInfo
 import org.junit.jupiter.api.fail
-import kotlin.collections.component1
-import kotlin.collections.component2
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.Path
 import kotlin.io.path.createParentDirectories
+import kotlin.io.path.deleteRecursively
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.nameWithoutExtension
@@ -20,6 +21,7 @@ import kotlin.io.path.pathString
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
+@OptIn(ExperimentalPathApi::class)
 fun checkJavap(testInfo: TestInfo, name: String = "", code: Map<String, ByteArray>) {
 
     val directory = Path("src/test/resources/javap")
@@ -34,6 +36,14 @@ fun checkJavap(testInfo: TestInfo, name: String = "", code: Map<String, ByteArra
                 .replace(Regex("""/.*/Bytecode.class"""), "<bytecode path>")
                 .replace(Regex("Last modified.*;"), "Last modified <Date>;")
         }
+
+    if(TestEnvironment.updateTestData) {
+        directory.deleteRecursively()
+        actualContent.forEach { file, code ->
+            file.createParentDirectories()
+            file.writeText(code)
+        }
+    }
 
     if (!directory.exists()) {
         actualContent.forEach { file, code ->

@@ -1,10 +1,10 @@
 Classfile <bytecode path>
   Last modified <Date>; size 665 bytes
-  SHA-256 checksum 3fdc50ec01766b1b46376063f2906260d5bc43b6939abf0a946cdd85aae871e8
+  SHA-256 checksum 0ec9646d4ff725cd69976d19b73704169189281936ffc7d08f019d2c9dc89e6c
   Compiled from "Test.kt"
 public final class TestKt
   minor version: 0
-  major version: 52
+  major version: 55
   flags: (0x0031) ACC_PUBLIC, ACC_FINAL, ACC_SUPER
   this_class: #2                          // TestKt
   super_class: #4                         // java/lang/Object

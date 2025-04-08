@@ -93,6 +93,7 @@ class CompilerImpl(
 
         val arguments = K2JVMCompilerArguments()
         arguments.moduleName = "testModule"
+        arguments.jvmTarget = "11"
         arguments.noStdlib = true
         arguments.kotlinHome = null
         arguments.destinationAsFile = workingDir.resolve("classes").toFile()

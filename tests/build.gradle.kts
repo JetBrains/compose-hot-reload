@@ -65,6 +65,10 @@ dependencies {
 
     reloadUnitTestImplementation(compose.uiTest)
 
+    reloadFunctionalTestImplementation("org.junit.platform:junit-platform-launcher")
+    reloadFunctionalTestWarmupImplementation(deps.junit.jupiter)
+    reloadFunctionalTestWarmupImplementation(deps.junit.jupiter.engine)
+
     reloadFunctionalTestImplementation(kotlin("test"))
     reloadFunctionalTestImplementation(deps.junit.jupiter)
     reloadFunctionalTestImplementation(deps.junit.jupiter.engine)
