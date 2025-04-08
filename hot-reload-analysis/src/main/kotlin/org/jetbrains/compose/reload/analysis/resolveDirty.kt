@@ -33,7 +33,7 @@ fun RuntimeInfo.resolveDirtyRuntimeScopes(redefined: RuntimeInfo): RuntimeDirtyS
 }
 
 private fun RuntimeInfo.resolveDirtyRuntimeScopeInfos(redefined: RuntimeInfo): List<RuntimeScopeInfo> {
-    val dirtyComposeScopes = resolveDirtyComposeScopes(redefined)
+    val dirtyComposeScopes = resolveDirtyComposeScopes(redefined) + resolveRemovedComposeScopes(redefined)
     val dirtyMethods = resolveDirtyMethods(redefined) + resolveRemovedMethods(redefined)
     val dirtyFields = resolveDirtyFields(redefined)
     val transitivelyDirty = resolveTransitivelyDirty(redefined, dirtyMethods, dirtyFields)
@@ -49,6 +49,9 @@ private fun RuntimeInfo.resolveDirtyMethods(redefined: RuntimeInfo): List<Method
     return redefined.methodIndex.mapNotNull { (methodId, redefinedMethod) ->
         val previousMethod = methodIndex[methodId] ?: return@mapNotNull redefinedMethod
         if (previousMethod.rootScope.hash != redefinedMethod.rootScope.hash) {
+            return@mapNotNull redefinedMethod
+        }
+        if (previousMethod.rootScope.children.map { it.group } != redefinedMethod.rootScope.children.map { it.group }) {
             return@mapNotNull redefinedMethod
         }
         null
@@ -87,6 +90,18 @@ private fun RuntimeInfo.resolveDirtyComposeScopes(redefined: RuntimeInfo): List<
             if (originalGroupInvalidationKey != redefinedGroupInvalidationKey) {
                 result.addAll(redefinedGroup)
             }
+        }
+    }
+    return result
+}
+
+private fun RuntimeInfo.resolveRemovedComposeScopes(redefined: RuntimeInfo): List<RuntimeScopeInfo> {
+    val result = mutableListOf<RuntimeScopeInfo>()
+    redefined.methodIndex.forEach forEachMethod@{ (methodId, redefinedMethod) ->
+        val previousMethod = methodIndex[methodId] ?: return@forEachMethod
+        val redefinedScopeGroups = redefinedMethod.allScopes.map { it.group }
+        previousMethod.allScopes.forEach { previousScope ->
+            if (previousScope.group !in redefinedScopeGroups) result.add(previousScope)
         }
     }
     return result
@@ -201,14 +216,18 @@ private fun RuntimeScopeInfo.invalidationKey(): Long {
         result = 31L * result + value
     }
 
-    /*
-    Special Case when 'OptimizeNonSkippingGroups' is not enabled:
-    In this case calls to 'remember {}' will generate a separate group with a known group key.
-    We do want to include such groups into the parent scope (as having them standalone will not make a lot of sense)
-    Therefore, we push hash of those values into the invalidation key of this parent
-     */
+
     children.forEach { child ->
-        if (child.group != null && SpecialComposeGroupKeys.isRememberGroup(child.group)) {
+        if (child.group == null) return@forEach
+        push(child.group.key.toLong())
+
+        /*
+        Special Case when 'OptimizeNonSkippingGroups' is not enabled:
+        In this case calls to 'remember {}' will generate a separate group with a known group key.
+        We do want to include such groups into the parent scope (as having them standalone will not make a lot of sense)
+        Therefore, we push hash of those values into the invalidation key of this parent
+         */
+        if (SpecialComposeGroupKeys.isRememberGroup(child.group)) {
             push(child.hash.value)
         }
     }
