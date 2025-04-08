@@ -19,13 +19,13 @@ private val logger = createLogger()
 /**
  * Transform Compose Desktop's 'Window' function to automatically setup the 'DevelopmentEntryPoint'
  */
-fun launchWindowInstrumentation(instrumentation: Instrumentation) {
+internal fun launchWindowInstrumentation(instrumentation: Instrumentation) {
     if (!HotReloadEnvironment.devToolsEnabled) return
     if (HotReloadEnvironment.isHeadless) return
     instrumentation.addTransformer(WindowInstrumentation)
 }
 
-object WindowInstrumentation : ClassFileTransformer {
+internal object WindowInstrumentation : ClassFileTransformer {
     override fun transform(
         loader: ClassLoader?, className: String?,
         classBeingRedefined: Class<*>?,
@@ -40,7 +40,9 @@ object WindowInstrumentation : ClassFileTransformer {
     }
 }
 
-private fun transformWindowKt(loader: ClassLoader?, classfileBuffer: ByteArray): ByteArray? {
+private fun transformWindowKt(
+    loader: ClassLoader?, classfileBuffer: ByteArray
+): ByteArray? {
     val ctClass = getClassPool(loader ?: ClassLoader.getSystemClassLoader()).makeClass(classfileBuffer.inputStream())
     var transformed = false
 

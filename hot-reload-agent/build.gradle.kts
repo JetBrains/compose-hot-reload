@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.compose.ComposePlugin
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 /*
@@ -13,6 +14,7 @@ plugins {
     `tests-with-compiler`
     `test-conventions`
     com.gradleup.shadow
+    `dev-runtime-jar`
 }
 
 kotlin.compilerOptions {
@@ -92,11 +94,31 @@ tasks.withType<Jar>().configureEach {
     )
 }
 
+val composeRuntime by project.configurations.creating {
+    attributes {
+        attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.LIBRARY))
+        attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.JAVA_RUNTIME))
+        attribute(KotlinPlatformType.attribute, KotlinPlatformType.jvm)
+    }
+}
+
+val hotReloadRuntime by project.configurations.creating {
+    attributes {
+        attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.LIBRARY))
+        attribute(Usage.USAGE_ATTRIBUTE, objects.named("compose-dev-java-runtime"))
+        attribute(KotlinPlatformType.attribute, KotlinPlatformType.jvm)
+    }
+}
+
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED")
     inputs.file(standaloneJar.map { it.archiveFile.get().asFile })
+    inputs.files(composeRuntime)
+    inputs.files(hotReloadRuntime)
     systemProperty("agent-standalone.jar", standaloneJar.get().archiveFile.get().asFile.absolutePath)
+    systemProperty("compose.runtime.path", composeRuntime.asPath)
+    systemProperty("hot.reload.runtime.path", hotReloadRuntime.asPath)
 }
 
 dependencies {
@@ -116,4 +138,9 @@ dependencies {
 
     testImplementation(testFixtures(project(":hot-reload-analysis")))
     testImplementation(deps.logback)
+    testImplementation(deps.asm)
+    testImplementation(deps.asm.tree)
+
+    composeRuntime(ComposePlugin.Dependencies(project).desktop.currentOs)
+    hotReloadRuntime(project(":hot-reload-runtime-jvm"))
 }

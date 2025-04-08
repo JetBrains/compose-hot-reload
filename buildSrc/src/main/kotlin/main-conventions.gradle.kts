@@ -10,11 +10,25 @@ plugins {
     `java-base` apply false
 }
 
+open class ComposeDevUsageCompatibilityRule : AttributeCompatibilityRule<Usage> {
+    override fun execute(details: CompatibilityCheckDetails<Usage>) {
+        if (details.consumerValue?.name == "compose-dev-java-runtime" &&
+            details.producerValue?.name == Usage.JAVA_RUNTIME
+        ) {
+            details.compatible()
+        }
+    }
+}
+
 plugins.withType<KotlinPluginWrapper> {
     dependencies {
         if (project.name != "hot-reload-core") {
             "testImplementation"(testFixtures(project(":hot-reload-core")))
         }
+
+        attributesSchema.attribute(Usage.USAGE_ATTRIBUTE).compatibilityRules.add(
+            ComposeDevUsageCompatibilityRule::class.java
+        )
     }
 }
 

@@ -49,7 +49,7 @@ internal fun MethodNode.readFunctionKeyMetaAnnotation(): ComposeGroupKey? {
     return null
 }
 
-internal fun ClassNode(bytecode: ByteArray): ClassNode {
+fun ClassNode(bytecode: ByteArray): ClassNode {
     val reader = ClassReader(bytecode)
     val node = ClassNode(ASM9)
     reader.accept(node, 0)
