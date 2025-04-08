@@ -19,6 +19,10 @@ import kotlin.test.fail
 
 class DevelopmentEntryPointIntegrationTest {
 
+    /**
+     * This test, annoyingly, runs non-headless. This might also lead to CI agents not being
+     * able to execute this test. A better test alternative would be nice.
+     */
     @Headless(false)
     @HostIntegrationTest
     @HotReloadTest

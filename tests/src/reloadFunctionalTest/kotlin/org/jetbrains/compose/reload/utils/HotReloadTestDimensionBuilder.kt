@@ -8,6 +8,7 @@
 package org.jetbrains.compose.reload.utils
 
 import org.jetbrains.compose.reload.test.core.CompilerOption
+import org.jetbrains.compose.reload.test.gradle.Headless
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestDimensionExtension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestInvocationContext
 import org.jetbrains.compose.reload.test.gradle.ProjectMode
@@ -18,6 +19,8 @@ import org.jetbrains.compose.reload.test.gradle.copy
 import org.jetbrains.kotlin.tooling.core.KotlinToolingVersion
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.platform.commons.util.AnnotationUtils
+import java.awt.GraphicsEnvironment
+import kotlin.jvm.optionals.getOrNull
 
 class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
     override fun transform(
@@ -103,7 +106,6 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
     }
 }
 
-
 class HotReloadTestDimensionFilter : HotReloadTestDimensionExtension {
     override fun transform(
         context: ExtensionContext,
@@ -141,7 +143,12 @@ class HotReloadTestDimensionFilter : HotReloadTestDimensionExtension {
             }
         }
 
-
+        if (GraphicsEnvironment.isHeadless()) {
+            result = result.filter { invocationContext ->
+                AnnotationUtils.findAnnotation(context.requiredTestMethod, Headless::class.java)
+                    .getOrNull()?.isHeadless ?: true
+            }
+        }
 
         return result
     }
