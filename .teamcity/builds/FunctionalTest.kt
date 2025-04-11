@@ -40,8 +40,8 @@ fun functionalTests(): List<FunctionalTest> {
             // Create buckets
             if (isDefaultKotlinVersion && isDefaultComposeVersion) {
                 return@flatMap listOf(
-                    FunctionalTest(kotlinVersionString, composeVersionString, bucket = 1, bucketsSize = 2),
-                    FunctionalTest(kotlinVersionString, composeVersionString, bucket = 2, bucketsSize = 2)
+                    FunctionalTest(kotlinVersionString, composeVersionString, bucket = 1, bucketsCount = 2),
+                    FunctionalTest(kotlinVersionString, composeVersionString, bucket = 2, bucketsCount = 2)
                 )
             }
 
@@ -56,10 +56,10 @@ class FunctionalTest(
     private val composeVersion: String?,
     private val defaultCompilerOptions: Boolean = true,
     private val bucket: Int? = null,
-    private val bucketsSize: Int? = null,
+    private val bucketsCount: Int? = null,
 ) : BuildType({
     val key = run {
-        val hash = (kotlinVersion + composeVersion + defaultCompilerOptions + bucket + bucketsSize).hashCode()
+        val hash = (kotlinVersion + composeVersion + defaultCompilerOptions + bucket + bucketsCount).hashCode()
         val buffer = ByteBuffer.allocate(Int.SIZE_BYTES)
         buffer.putInt(hash)
         Base64.getUrlEncoder().withoutPadding().encodeToString(buffer.array()).replace("-", "_")
@@ -81,8 +81,8 @@ class FunctionalTest(
                     add("Non default compiler options")
                 }
 
-                if (bucket != null && bucketsSize != null) {
-                    add("($bucket/$bucketsSize)")
+                if (bucket != null && bucketsCount != null) {
+                    add("($bucket/$bucketsCount)")
                 }
             }.joinToString(", ")
         )
@@ -106,9 +106,9 @@ class FunctionalTest(
             param("env.TESTED_COMPOSE_VERSION", composeVersion)
         }
 
-        if (bucket != null && bucketsSize != null) {
+        if (bucket != null && bucketsCount != null) {
             param("env.TESTED_BUCKET", bucket.toString())
-            param("env.TESTED_BUCKET_SIZE", bucketsSize.toString())
+            param("env.TESTED_BUCKETS_COUNT", bucketsCount.toString())
         }
 
         param("env.TESTED_DEFAULT_COMPILER_OPTIONS", defaultCompilerOptions.toString())
