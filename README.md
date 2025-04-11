@@ -59,38 +59,6 @@ plugins {
 ```
 The Compose Hot Reload Gradle plugin will then use this resolver to automatically provision a compatible JDK.
 
-### Provide an entry point for your UI to hot-reload
-
-In the `desktop` source set of your project, add the following code to a file of your choice, e.g. `DevMain.kt`
-
-```kotlin
-package my.app
-
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.singleWindowApplication
-import org.jetbrains.compose.reload.DevelopmentEntryPoint
-
-fun main() {
-    singleWindowApplication(
-        title = "My CHR App",
-        state = WindowState(width = 800.dp, height = 800.dp),
-        alwaysOnTop = true
-    ) {
-        DevelopmentEntryPoint {
-            MainPage()
-        }
-    }
-}
-
-@Composable
-fun MainPage() {
-    Text("🔥") // Write your own code, call your own composables, or load an entire app.
-    // Make changes, and see them live.
-}
-```
 
 ### Optional: Create a custom entry point to launch your hot application
 
