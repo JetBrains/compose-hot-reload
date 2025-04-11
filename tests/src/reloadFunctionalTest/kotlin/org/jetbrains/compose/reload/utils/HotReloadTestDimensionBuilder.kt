@@ -157,7 +157,9 @@ class HotReloadTestDimensionFilter : HotReloadTestDimensionExtension {
         val bucketsCount = System.getenv("TESTED_BUCKETS_COUNT")?.toInt()
         if (bucket != null && bucketsCount != null) {
             result = result.filter { invocationContext ->
-                (invocationContext.getDisplayName().hashCode().absoluteValue % bucketsCount) + 1 == bucket
+                val hash = (context.requiredTestClass.name + "." + context.requiredTestMethod.name +
+                    invocationContext.getDisplayName()).hashCode()
+                ((hash % bucketsCount).absoluteValue + 1) == bucket
             }
         }
 
