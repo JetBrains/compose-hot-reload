@@ -1,6 +1,6 @@
 Classfile <bytecode path>
-  Last modified <Date>; size 665 bytes
-  SHA-256 checksum 3fdc50ec01766b1b46376063f2906260d5bc43b6939abf0a946cdd85aae871e8
+  Last modified <Date>; size 660 bytes
+  SHA-256 checksum 2f1298667996a69eaadb88a29a5d234438a39d27a25fef49ac63668cc615a40c
   Compiled from "Test.kt"
 public final class TestKt
   minor version: 0
@@ -29,22 +29,21 @@ Constant pool:
   #17 = Utf8               Lkotlin/Metadata;
   #18 = Utf8               mv
   #19 = Integer            2
-  #20 = Integer            1
-  #21 = Integer            0
-  #22 = Utf8               k
-  #23 = Utf8               xi
-  #24 = Integer            48
-  #25 = Utf8               d1
-  #26 = Utf8               \u0000\n\n\u0000\n\u0002\u0010\b\n\u0002\b\u0005\"\u0014\u0010\u0000\u001a\u00020\u0001X\u0086D¢\u0006\b\n\u0000\u001a\u0004\b\u0002\u0010\u0003\"\u0014\u0010\u0004\u001a\u00020\u0001X\u0086D¢\u0006\b\n\u0000\u001a\u0004\b\u0005\u0010\u0003¨\u0006\u0006
-  #27 = Utf8               d2
-  #28 = Utf8
-  #29 = Utf8               testModule
-  #30 = Utf8               Test.kt
-  #31 = Utf8               Code
-  #32 = Utf8               LineNumberTable
-  #33 = Utf8               SourceFile
-  #34 = Utf8               RuntimeVisibleAnnotations
-  #35 = Utf8               $chr$clinit
+  #20 = Integer            0
+  #21 = Utf8               k
+  #22 = Utf8               xi
+  #23 = Integer            48
+  #24 = Utf8               d1
+  #25 = Utf8               \u0000\n\n\u0000\n\u0002\u0010\b\n\u0002\b\u0005\"\u0014\u0010\u0000\u001a\u00020\u0001X\u0086D¢\u0006\b\n\u0000\u001a\u0004\b\u0002\u0010\u0003\"\u0014\u0010\u0004\u001a\u00020\u0001X\u0086D¢\u0006\b\n\u0000\u001a\u0004\b\u0005\u0010\u0003¨\u0006\u0006
+  #26 = Utf8               d2
+  #27 = Utf8
+  #28 = Utf8               testModule
+  #29 = Utf8               Test.kt
+  #30 = Utf8               Code
+  #31 = Utf8               LineNumberTable
+  #32 = Utf8               SourceFile
+  #33 = Utf8               RuntimeVisibleAnnotations
+  #34 = Utf8               $chr$clinit
 {
   private static int empty;
     descriptor: I
@@ -104,9 +103,9 @@ Constant pool:
 }
 SourceFile: "Test.kt"
 RuntimeVisibleAnnotations:
-  0: #17(#18=[I#19,I#20,I#21],#22=I#19,#23=I#24,#25=[s#26],#27=[s#7,s#28,s#5,s#6,s#12,s#11,s#29])
+  0: #17(#18=[I#19,I#19,I#20],#21=I#19,#22=I#23,#24=[s#25],#26=[s#7,s#27,s#5,s#6,s#12,s#11,s#28])
     kotlin.Metadata(
-      mv=[2,1,0]
+      mv=[2,2,0]
       k=2
       xi=48
       d1=["\u0000\n\n\u0000\n\u0002\u0010\b\n\u0002\b\u0005\"\u0014\u0010\u0000\u001a\u00020\u0001X\u0086D¢\u0006\b\n\u0000\u001a\u0004\b\u0002\u0010\u0003\"\u0014\u0010\u0004\u001a\u00020\u0001X\u0086D¢\u0006\b\n\u0000\u001a\u0004\b\u0005\u0010\u0003¨\u0006\u0006"]
