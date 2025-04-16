@@ -67,6 +67,7 @@ public suspend fun GradleRunner.build(vararg args: String): ExitCode? {
         *args,
     )
 
+    val job = currentCoroutineContext().job
     val exitCode = CompletableDeferred<ExitCode?>()
 
     val thread = thread(name = "Gradle Runner") {
@@ -77,6 +78,7 @@ public suspend fun GradleRunner.build(vararg args: String): ExitCode? {
 
         logger.info("Starting Gradle runner: ${processBuilder.command().joinToString("\n")}")
         val process = processBuilder.start()
+        job.invokeOnCompletion { process.destroyWithDescendants() }
 
         thread(name = "Gradle Runner Output Reader") {
             process.inputStream.bufferedReader().use { reader ->
