@@ -30,6 +30,7 @@ import java.io.File
 
 sealed interface ComposeHotReloadArgumentsBuilder {
     val project: Project
+    fun setMainClass(mainClass: Provider<String>)
     fun setAgentJar(files: FileCollection)
     fun setHotClasspath(files: FileCollection)
     fun setIsHeadless(isHeadless: Provider<Boolean>)
@@ -71,6 +72,12 @@ fun Project.composeHotReloadArguments(builder: ComposeHotReloadArgumentsBuilder.
 private class ComposeHotReloadArgumentsBuilderImpl(
     override val project: Project,
 ) : ComposeHotReloadArgumentsBuilder {
+    private val mainClass: Property<String> = project.objects.property(String::class.java)
+        .value(
+            project.providers.gradleProperty("mainClass")
+                .orElse(project.providers.systemProperty("mainClass"))
+        )
+
     private var agentJar: FileCollection = project.composeHotReloadAgentJar()
     private var hotClasspath: FileCollection? = null
 
@@ -93,6 +100,10 @@ private class ComposeHotReloadArgumentsBuilderImpl(
 
     private val isRecompileContinues: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadGradleBuildContinuous)
+
+    override fun setMainClass(mainClass: Provider<String>) {
+        this.mainClass.set(mainClass)
+    }
 
     override fun setAgentJar(files: FileCollection) {
         agentJar = files
@@ -144,6 +155,7 @@ private class ComposeHotReloadArgumentsBuilderImpl(
             rootProjectDir = project.rootProject.projectDir,
             projectPath = project.path,
             javaHome = project.providers.systemProperty("java.home"),
+            mainClass = mainClass,
             agentJar = agentJar,
             hotClasspath = hotClasspath,
             isHeadless = isHeadless,
@@ -167,6 +179,7 @@ private class ComposeHotReloadArgumentsImpl(
     private val rootProjectDir: File,
     private val projectPath: String,
     private val javaHome: Provider<String>,
+    private val mainClass: Property<String>,
     private val agentJar: FileCollection,
     private val hotClasspath: FileCollection?,
     private val isHeadless: Provider<Boolean>,
@@ -213,6 +226,10 @@ private class ComposeHotReloadArgumentsImpl(
 
         /* Enable DCEVM enhanced hotswap capabilities */
         add("-XX:+AllowEnhancedClassRedefinition")
+
+        if (mainClass.isPresent) {
+            add("-D${HotReloadProperty.MainClass.key}=${mainClass.get()}")
+        }
 
         /* Provide agent jar */
         val agentJar = agentJar.asPath

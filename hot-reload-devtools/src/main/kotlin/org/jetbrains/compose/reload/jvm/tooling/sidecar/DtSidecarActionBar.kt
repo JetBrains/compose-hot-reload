@@ -13,14 +13,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.sellmair.evas.compose.EvasLaunching
-import io.sellmair.evas.compose.composeValue
-import io.sellmair.evas.value
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.jvm.tooling.send
-import org.jetbrains.compose.reload.jvm.tooling.states.DtArguments
 import org.jetbrains.compose.reload.jvm.tooling.widgets.DtTextButton
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.exists
 
 
 private val logger = createLogger()
@@ -43,18 +42,20 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
             OrchestrationMessage.ShutdownRequest("Requested by user through 'devtools'").send()
         })
 
-        val arguments = DtArguments.composeValue()
-        if (arguments != null &&
-            arguments.originalApplicationCommand != null &&
-            arguments.originalApplicationArguments.isNotEmpty()
+        if (
+            (HotReloadEnvironment.argFile?.exists() == true &&
+                HotReloadEnvironment.mainClass != null)
         ) {
             DtTextButton("Restart", onClick = EvasLaunching {
                 logger.info("Restarting...")
 
                 ProcessBuilder(
-                    arguments.originalApplicationCommand,
-                    *arguments.originalApplicationArguments.toTypedArray()
-                ).redirectErrorStream(true).start()
+                    System.getProperty("java.home") + "/bin/java",
+                    "@" + (HotReloadEnvironment.argFile?.absolutePathString() ?: return@EvasLaunching),
+                    HotReloadEnvironment.mainClass ?: return@EvasLaunching,
+                ).apply {
+                    logger.info("Restarting: ${this.command()}")
+                }.redirectErrorStream(true).start()
 
                 logger.info("New process started; Exiting")
                 OrchestrationMessage.ShutdownRequest("Requested by user through 'devtools'").send()
@@ -69,6 +70,5 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
         DtTextButton("Clean Composition", onClick = {
             OrchestrationMessage.CleanCompositionRequest().send()
         })
-
     }
 }

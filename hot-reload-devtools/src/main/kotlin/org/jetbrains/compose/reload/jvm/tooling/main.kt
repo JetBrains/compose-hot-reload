@@ -25,7 +25,6 @@ import org.jetbrains.compose.reload.jvm.tooling.errorOverlay.DevToolingErrorOver
 import org.jetbrains.compose.reload.jvm.tooling.sidecar.DtSidecarWindow
 import org.jetbrains.compose.reload.jvm.tooling.states.WindowsState
 import org.jetbrains.compose.reload.jvm.tooling.states.launchConsoleLogState
-import org.jetbrains.compose.reload.jvm.tooling.states.launchDtArgumentsState
 import org.jetbrains.compose.reload.jvm.tooling.states.launchReloadCountState
 import org.jetbrains.compose.reload.jvm.tooling.states.launchReloadState
 import org.jetbrains.compose.reload.jvm.tooling.states.launchUIErrorState
@@ -39,8 +38,7 @@ internal val applicationScope = CoroutineScope(Dispatchers.Main + SupervisorJob(
  */
 internal val targetApplicationWindowStateLocal = staticCompositionLocalOf<WindowState?> { null }
 
-internal fun CoroutineScope.launchApplicationStates(args: List<String> = emptyList()) {
-    launchDtArgumentsState(args)
+internal fun CoroutineScope.launchApplicationStates() {
     launchConsoleLogState()
     launchWindowsState()
     launchUIErrorState()
@@ -49,8 +47,8 @@ internal fun CoroutineScope.launchApplicationStates(args: List<String> = emptyLi
 }
 
 
-fun main(args: Array<String>) {
-    applicationScope.launchApplicationStates(args.toList())
+fun main() {
+    applicationScope.launchApplicationStates()
 
     application {
         installEvas(

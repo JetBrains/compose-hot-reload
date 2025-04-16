@@ -32,16 +32,20 @@ internal fun launchDevtoolsApplication() {
 
     logger.info("Starting Dev Tools")
 
-    val process = ProcessBuilder(
-        java, "-cp", classpath.joinToString(File.pathSeparator),
+    val properties = listOfNotNull(
+        "-Dapple.awt.UIElement=true",
         "-D${HotReloadProperty.OrchestrationPort.key}=${orchestration.port}",
         "-D${HotReloadProperty.GradleBuildContinuous.key}=${HotReloadEnvironment.gradleBuildContinuous}",
         "-D${HotReloadProperty.DevToolsTransparencyEnabled.key}=${HotReloadEnvironment.devToolsTransparencyEnabled}",
-        "-Dapple.awt.UIElement=true",
+        HotReloadEnvironment.mainClass.let { mainClass -> "-D${HotReloadProperty.MainClass.key}=$mainClass" },
+        HotReloadEnvironment.argFile?.let { path -> "-D${HotReloadProperty.ArgFile.key}=$path" }
+    )
+
+    val process = ProcessBuilder(
+        java, "-cp", classpath.joinToString(File.pathSeparator),
+        *properties.toTypedArray(),
         *issueNewDebugSessionJvmArguments(),
         "org.jetbrains.compose.reload.jvm.tooling.Main",
-        "--applicationCommand=$java",
-        *arguments.map { arg -> "--applicationArg=$arg" }.toTypedArray()
     ).inheritIO().start()
 
     Runtime.getRuntime().addShutdownHook(Thread {
