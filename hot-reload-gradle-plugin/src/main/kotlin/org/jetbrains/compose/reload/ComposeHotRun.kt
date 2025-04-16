@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload
 
 import org.gradle.api.Project
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.JavaExec
 import org.gradle.kotlin.dsl.property
@@ -67,6 +68,12 @@ sealed class AbstractComposeHotRun : JavaExec() {
     @Transient
     @get:Internal
     val compilation = project.objects.property<KotlinCompilation<*>>()
+
+    @get:InputFile
+    internal val argFile = project.objects.fileProperty()
+
+    @get:Internal
+    internal val argFileTaskName = project.objects.property<String>()
 }
 
 /**

@@ -8,7 +8,9 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.coroutineScope
@@ -26,6 +28,8 @@ import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.asFlow
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.deleteRecursively
@@ -75,6 +79,13 @@ internal constructor(
             message.send()
             transaction()
         }
+    }
+
+    public fun <T> launchTestDaemon(
+        context: CoroutineContext = EmptyCoroutineContext,
+        daemon: suspend CoroutineScope.() -> T
+    ): Deferred<T> {
+        return daemonTestScope.async(context) { daemon() }
     }
 
     internal lateinit var testScope: TestScope

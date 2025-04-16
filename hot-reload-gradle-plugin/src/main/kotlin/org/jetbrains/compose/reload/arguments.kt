@@ -34,6 +34,7 @@ sealed interface ComposeHotReloadArgumentsBuilder {
     fun setHotClasspath(files: FileCollection)
     fun setIsHeadless(isHeadless: Provider<Boolean>)
     fun setPidFile(file: Provider<File>)
+    fun setArgFile(file: Provider<File>)
     fun setDevToolsEnabled(enabled: Provider<Boolean>)
     fun setDevToolsClasspath(files: FileCollection)
     fun setDevToolsTransparencyEnabled(enabled: Provider<Boolean>)
@@ -78,6 +79,8 @@ private class ComposeHotReloadArgumentsBuilderImpl(
 
     private val pidFile: Property<File> = project.objects.property(File::class.java)
 
+    private val argFile: Property<File> = project.objects.property(File::class.java)
+
     private var devToolsClasspath: FileCollection = project.composeHotReloadDevToolsConfiguration
 
     private val devToolsEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
@@ -90,7 +93,6 @@ private class ComposeHotReloadArgumentsBuilderImpl(
 
     private val isRecompileContinues: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadGradleBuildContinuous)
-
 
     override fun setAgentJar(files: FileCollection) {
         agentJar = files
@@ -106,6 +108,10 @@ private class ComposeHotReloadArgumentsBuilderImpl(
 
     override fun setPidFile(file: Provider<File>) {
         this.pidFile.set(file)
+    }
+
+    override fun setArgFile(file: Provider<File>) {
+        this.argFile.set(file)
     }
 
     override fun setDevToolsEnabled(enabled: Provider<Boolean>) {
@@ -142,6 +148,7 @@ private class ComposeHotReloadArgumentsBuilderImpl(
             hotClasspath = hotClasspath,
             isHeadless = isHeadless,
             pidFile = pidFile,
+            argFile = argFile,
             devToolsClasspath = devToolsClasspath,
             devToolsEnabled = devToolsEnabled,
             devToolsTransparencyEnabled = devToolsTransparencyEnabled,
@@ -164,6 +171,7 @@ private class ComposeHotReloadArgumentsImpl(
     private val hotClasspath: FileCollection?,
     private val isHeadless: Provider<Boolean>,
     private val pidFile: Provider<File>,
+    private val argFile: Provider<File>,
     private val devToolsClasspath: FileCollection,
     private val devToolsEnabled: Provider<Boolean>,
     private val devToolsTransparencyEnabled: Provider<Boolean>,
@@ -228,6 +236,12 @@ private class ComposeHotReloadArgumentsImpl(
         val pidFile = pidFile.orNull
         if (pidFile != null) {
             add("-D${HotReloadProperty.PidFile.key}=${pidFile.absolutePath}")
+        }
+
+        /* Provide arg file */
+        val argFile = argFile.orNull
+        if (argFile != null) {
+            add("-D${HotReloadProperty.ArgFile.key}=${argFile.absolutePath}")
         }
 
         /* Provide dev tools */

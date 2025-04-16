@@ -155,6 +155,8 @@ public final class org/jetbrains/compose/reload/test/gradle/HotReloadTestFixture
 	public final fun getTestClassName ()Ljava/lang/String;
 	public final fun getTestMethodName ()Ljava/lang/String;
 	public final fun isDebug ()Z
+	public final fun launchTestDaemon (Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;)Lkotlinx/coroutines/Deferred;
+	public static synthetic fun launchTestDaemon$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Lkotlin/coroutines/CoroutineContext;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lkotlinx/coroutines/Deferred;
 	public final fun runTest-VtjQ1oo (JLkotlin/jvm/functions/Function2;)V
 	public static synthetic fun runTest-VtjQ1oo$default (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;JLkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public final fun runTransaction (Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

@@ -10,6 +10,7 @@ public abstract interface class org/jetbrains/compose/reload/ComposeHotReloadArg
 	public abstract fun getProject ()Lorg/gradle/api/Project;
 	public abstract fun isRecompileContinuous (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setAgentJar (Lorg/gradle/api/file/FileCollection;)V
+	public abstract fun setArgFile (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setDevToolsClasspath (Lorg/gradle/api/file/FileCollection;)V
 	public abstract fun setDevToolsEnabled (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setDevToolsTransparencyEnabled (Lorg/gradle/api/provider/Provider;)V

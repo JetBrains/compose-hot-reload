@@ -52,8 +52,12 @@ private fun KotlinTarget.createComposeHotReloadExecTask() {
 internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<KotlinCompilation<*>>) {
     classpath = project.files(compilation.map { it.applicationClasspath })
 
+    val argfile = if (this is AbstractComposeHotRun) this.argFile
+    else compilation.flatMap { compilation -> compilation.runBuildFile("$name.args") }
+
     withComposeHotReloadArguments {
         setPidFile(compilation.map { compilation -> compilation.runBuildFile("$name.pid").get().asFile })
+        setArgFile(argfile.map { it.asFile })
         setReloadTaskName(compilation.map { compilation -> composeReloadHotClasspathTaskName(compilation) })
     }
 
@@ -77,6 +81,14 @@ internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<Ko
             Since we would like to debug our hot reload agent, we ensure that the debug agent is listed first.
              */
             jvmArgs = issueNewDebugSessionJvmArguments(intellijDebuggerDispatchPort).toList() + jvmArgs.orEmpty()
+        }
+
+        /*
+        Create and write the 'argfile in case this is not a hot reload run task;
+        ComposeHotRun tasks will have a dedicated task to create this argfile
+        */
+        if (this !is AbstractComposeHotRun) {
+            argfile.orNull?.asFile?.toPath()?.createArgfile(allJvmArgs, classpath.files)
         }
 
         logger.info("Running ${mainClass.get()}...")

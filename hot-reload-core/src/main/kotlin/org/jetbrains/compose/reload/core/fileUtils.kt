@@ -10,7 +10,7 @@ import java.util.zip.CRC32
 @OptIn(ExperimentalStdlibApi::class)
 public fun String.asFileName(): String {
     var result = this
-    result = result.replace("""\\W+""", "_")
+    result = result.replace(Regex("""\\W+"""), "_")
 
     if (result.length > 200) {
         val crc = CRC32()

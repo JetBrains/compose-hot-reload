@@ -15,6 +15,14 @@ PidFile:
   documentation: |
     Path to the current applications pidfile
 
+ArgFile:
+  key: compose.reload.argfile
+  type: file
+  target: [ application, devtools, build]
+  documentation: |
+    The java 'argfile' (see: https://docs.oracle.com/en/java/javase/21/docs/specs/man/java.html#java-command-line-argument-files)
+    containing all arguments of the current run
+
 IsHeadless:
   key: compose.reload.headless
   type: boolean
