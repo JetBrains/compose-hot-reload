@@ -26,8 +26,14 @@ private fun Project.onKotlinPluginApplied() {
     setupComposeHotReloadRuntimeElements()
     setupComposeReloadHotClasspathTasks()
     setupComposeHotReloadExecTasks()
-    setupArgfileTasks()
     setupComposeHotRunConventions()
     setupComposeDevCompilation()
     setupComposeCompilations()
+
+    afterEvaluate {
+        afterEvaluate {
+            registerArgfileTasks()
+            registerComposeHotAsyncRunTasks()
+        }
+    }
 }

@@ -24,6 +24,8 @@ import org.jetbrains.compose.reload.gradle.core.composeReloadGradleBuildContinuo
 import org.jetbrains.compose.reload.gradle.core.composeReloadIsHeadless
 import org.jetbrains.compose.reload.gradle.core.composeReloadJetBrainsRuntimeBinary
 import org.jetbrains.compose.reload.gradle.core.composeReloadOrchestrationPort
+import org.jetbrains.compose.reload.gradle.core.composeReloadStderrFile
+import org.jetbrains.compose.reload.gradle.core.composeReloadStdinFile
 import org.jetbrains.compose.reload.gradle.core.composeReloadVirtualMethodResolveEnabled
 import org.jetbrains.compose.reload.gradle.jetbrainsRuntimeLauncher
 import java.io.File
@@ -169,7 +171,10 @@ private class ComposeHotReloadArgumentsBuilderImpl(
             orchestrationPort = project.provider { project.composeReloadOrchestrationPort },
             /* Non API elements */
             virtualMethodResolveEnabled = project.composeReloadVirtualMethodResolveEnabled,
-            dirtyResolveDepthLimit = project.composeReloadDirtyResolveDepthLimit
+            dirtyResolveDepthLimit = project.composeReloadDirtyResolveDepthLimit,
+            stdinFile = project.composeReloadStdinFile?.toFile(),
+            stdoutFile = project.composeReloadStdinFile?.toFile(),
+            stderrFile = project.composeReloadStderrFile?.toFile(),
         )
     }
 }
@@ -194,6 +199,9 @@ private class ComposeHotReloadArgumentsImpl(
     /* Non API elements */
     private val virtualMethodResolveEnabled: Boolean,
     private val dirtyResolveDepthLimit: Int,
+    private val stdinFile: File?,
+    private val stdoutFile: File?,
+    private val stderrFile: File?,
 ) : ComposeHotReloadArguments {
 
     override fun applyTo(java: JavaForkOptions) {
@@ -290,6 +298,19 @@ private class ComposeHotReloadArgumentsImpl(
 
         add("-D${HotReloadProperty.VirtualMethodResolveEnabled.key}=$virtualMethodResolveEnabled")
         add("-D${HotReloadProperty.DirtyResolveDepthLimit.key}=$dirtyResolveDepthLimit")
+
+        if (stdinFile != null) {
+            add("-D${HotReloadProperty.StdinFile.key}=${stdinFile.absolutePath}")
+        }
+
+        if (stdoutFile != null) {
+            add("-D${HotReloadProperty.StdoutFile.key}=${stdoutFile.absolutePath}")
+        }
+
+        if (stderrFile != null) {
+            add("-D${HotReloadProperty.StderrFile.key}=${stderrFile.absolutePath}")
+        }
+
     }.also { arguments ->
         if (logger.isInfoEnabled) {
             logger.info("Compose Hot Reload arguments:\n${arguments.joinToString("\n") { it.prependIndent("  ") }}")

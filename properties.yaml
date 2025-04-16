@@ -204,3 +204,27 @@ IdeaComposeHotReload:
     Set by IntelliJ to signal the Gradle Plugin that IDE tooling is available.
     Setting this variable will relax the Gradle Plugin to not touch existing run tasks as we expect
     the IDE to provide a convenient way of launching in hot-reload mode.
+
+StdinFile:
+  key: compose.reload.stdinFile
+  type: file
+  target: [ build, application, devtools ]
+  documentation: |
+    Used by 'async'/'non-blocking' launches of the application.
+    Will point to the stdin file (can be pipe)
+
+StdoutFile:
+  key: compose.reload.stdoutFile
+  type: file
+  target: [ build, application, devtools ]
+  documentation: |
+    Used by 'async'/'non-blocking' launches of the application.
+    Will point to a file where the stdout is supposed to be written to.
+
+StderrFile:
+  key: compose.reload.stderrFile
+  type: file
+  target: [ build, application, devtools ]
+  documentation: |
+    Used by 'async'/'non-blocking' launches of the application.
+    Will point to a file where the stderr is supposed to be written to.

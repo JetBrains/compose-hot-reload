@@ -19,39 +19,37 @@ import java.nio.file.Path
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.outputStream
 
-internal fun Project.setupArgfileTasks() {
-    afterEvaluate {
-        afterEvaluate {
-            createArgfileTasks()
-        }
-    }
-}
-
-private fun Project.createArgfileTasks() {
+internal fun Project.registerArgfileTasks() {
     val runTasks = tasks.withType<AbstractComposeHotRun>()
     runTasks.names.forEach { runTaskName ->
         val runTask = runTasks.named(runTaskName)
-        createArgfileTask(runTask)
+        registerArgfileTask(runTask)
     }
 }
 
-private fun Project.createArgfileTask(runTask: TaskProvider<AbstractComposeHotRun>) {
-    val argfileTaskName = runTask.name + "Argfile"
-    val createArgsTask = tasks.register(argfileTaskName, ComposeHotReloadArgfileTask::class.java) { task ->
+internal fun TaskProvider<AbstractComposeHotRun>.argFileTaskName(): String {
+    return "${name}Argfile"
+}
+
+private fun Project.registerArgfileTask(
+    runTask: TaskProvider<AbstractComposeHotRun>
+): TaskProvider<ComposeHotArgfileTask> {
+    val createArgsTask = tasks.register(runTask.argFileTaskName(), ComposeHotArgfileTask::class.java) { task ->
         task.runTaskName.set(runTask.name)
-        task.argFile.set(provider { runTask.get().compilation.get().runBuildFile("${runTask.name}.argfile").get() })
+        task.argFile.set(provider { runTask.get().argFile.get() })
         task.arguments.addAll(provider { runTask.get().allJvmArgs })
         task.classpath.from(project.files { runTask.get().classpath })
     }
 
     runTask.configure { task ->
         task.dependsOn(createArgsTask)
-        task.argFile.set(provider { createArgsTask.get().argFile.get() })
-        task.argFileTaskName.set(argfileTaskName)
+        task.argFileTaskName.set(runTask.argFileTaskName())
     }
+
+    return createArgsTask
 }
 
-internal open class ComposeHotReloadArgfileTask : DefaultTask() {
+internal open class ComposeHotArgfileTask : DefaultTask() {
     @get:Input
     internal val arguments = project.objects.listProperty(String::class.java)
 

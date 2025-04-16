@@ -38,7 +38,10 @@ internal fun launchDevtoolsApplication() {
         "-D${HotReloadProperty.GradleBuildContinuous.key}=${HotReloadEnvironment.gradleBuildContinuous}",
         "-D${HotReloadProperty.DevToolsTransparencyEnabled.key}=${HotReloadEnvironment.devToolsTransparencyEnabled}",
         HotReloadEnvironment.mainClass.let { mainClass -> "-D${HotReloadProperty.MainClass.key}=$mainClass" },
-        HotReloadEnvironment.argFile?.let { path -> "-D${HotReloadProperty.ArgFile.key}=$path" }
+        HotReloadEnvironment.argFile?.let { path -> "-D${HotReloadProperty.ArgFile.key}=$path" },
+        HotReloadEnvironment.stdinFile?.let { path -> "-D${HotReloadProperty.StdinFile.key}=$path" },
+        HotReloadEnvironment.stdoutFile?.let { path -> "-D${HotReloadProperty.StdoutFile.key}=$path" },
+        HotReloadEnvironment.stderrFile?.let { path -> "-D${HotReloadProperty.StderrFile.key}=$path" },
     )
 
     val process = ProcessBuilder(

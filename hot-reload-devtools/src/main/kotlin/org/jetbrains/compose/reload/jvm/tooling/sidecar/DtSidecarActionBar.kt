@@ -49,13 +49,26 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
             DtTextButton("Restart", onClick = EvasLaunching {
                 logger.info("Restarting...")
 
-                ProcessBuilder(
+                val processBuilder = ProcessBuilder(
                     System.getProperty("java.home") + "/bin/java",
                     "@" + (HotReloadEnvironment.argFile?.absolutePathString() ?: return@EvasLaunching),
                     HotReloadEnvironment.mainClass ?: return@EvasLaunching,
-                ).apply {
-                    logger.info("Restarting: ${this.command()}")
-                }.redirectErrorStream(true).start()
+                )
+
+                HotReloadEnvironment.stdinFile?.let { file ->
+                    processBuilder.redirectInput(file.toFile())
+                }
+
+                HotReloadEnvironment.stdoutFile?.let { file ->
+                    processBuilder.redirectOutput(file.toFile())
+                }
+
+                HotReloadEnvironment.stderrFile?.let { file ->
+                    processBuilder.redirectError(file.toFile())
+                }
+
+                logger.info("Restarting: ${processBuilder.command()}")
+                processBuilder.start()
 
                 logger.info("New process started; Exiting")
                 OrchestrationMessage.ShutdownRequest("Requested by user through 'devtools'").send()

@@ -9,6 +9,7 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.OutputFile
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
@@ -69,8 +70,13 @@ sealed class AbstractComposeHotRun : JavaExec() {
     @get:Internal
     val compilation = project.objects.property<KotlinCompilation<*>>()
 
+    @get:Internal
+    internal val pidFile = project.objects.fileProperty()
+        .value(compilation.flatMap { compilation -> compilation.runBuildFile("$name.pid") })
+
     @get:InputFile
     internal val argFile = project.objects.fileProperty()
+        .value(compilation.flatMap { compilation -> compilation.runBuildFile("$name.argfile") })
 
     @get:Internal
     internal val argFileTaskName = project.objects.property<String>()
