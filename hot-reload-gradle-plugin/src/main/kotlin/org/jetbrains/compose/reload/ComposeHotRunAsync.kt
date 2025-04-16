@@ -15,13 +15,14 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.withType
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.compose.reload.core.HotReloadProperty
+import org.jetbrains.compose.reload.core.PidFileInfo
 import org.jetbrains.compose.reload.core.destroyWithDescendants
+import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.gradle.core.composeReloadJetBrainsRuntimeBinary
 import org.jetbrains.compose.reload.gradle.core.composeReloadStderrFile
 import org.jetbrains.compose.reload.gradle.core.composeReloadStdinFile
 import org.jetbrains.compose.reload.gradle.core.composeReloadStdoutFile
 import org.jetbrains.compose.reload.gradle.jetbrainsRuntimeLauncher
-import java.util.Properties
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteIfExists
@@ -118,9 +119,8 @@ internal open class ComposeHotAsyncRun : DefaultTask() {
          * If the app is currently running, then we'll kill it before launching another instance.
          */
         if (pidFile.get().asFile.toPath().isRegularFile()) run pid@{
-            val properties = Properties()
-            properties.load(pidFile.get().asFile.readBytes().inputStream())
-            val pid = properties["pid"]?.toString()?.toLong() ?: return@pid
+            val pidFileInfo = PidFileInfo(pidFile.get().asFile.toPath()).leftOr { return@pid }
+            val pid = pidFileInfo.pid ?: return@pid
             val processHandle = ProcessHandle.of(pid).getOrNull() ?: return@pid
             logger.info("A previous run ($pid) still running, killing...")
             processHandle.destroyWithDescendants()
