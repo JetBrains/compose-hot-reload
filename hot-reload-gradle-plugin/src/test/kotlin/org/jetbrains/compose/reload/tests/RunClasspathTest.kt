@@ -127,7 +127,7 @@ class RunClasspathTest {
         project.plugins.apply(ComposeHotReloadPlugin::class.java)
 
         project.kotlinJvmOrNull!!.target.compilations.main.applicationClasspath.assertMatches(
-            PathRegex(".*/build/run/Main/classes"),
+            PathRegex(".*/build/run/main/classes"),
             *hotReloadDependencies,
             PathRegex(".*/userHome/.*"), // Transitive maven dependencies
         )

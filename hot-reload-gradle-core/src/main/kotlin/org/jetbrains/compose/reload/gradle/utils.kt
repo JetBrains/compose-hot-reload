@@ -15,6 +15,14 @@ val String.capitalized
     get() = this.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 
 @InternalHotReloadGradleApi
+val String.decapitalized
+    get() = this.replaceFirstChar { if (it.isUpperCase()) it.lowercase(Locale.getDefault()) else it.toString() }
+
+@InternalHotReloadGradleApi
+fun camelCase(vararg nameParts: String?): String =
+    nameParts.filterNotNull().filter { it.isNotBlank() }.joinToString("") { it.capitalized }.decapitalized
+
+@InternalHotReloadGradleApi
 val Project.kotlinMultiplatformOrNull: KotlinMultiplatformExtension?
     get() = extensions.getByName("kotlin") as? KotlinMultiplatformExtension
 
