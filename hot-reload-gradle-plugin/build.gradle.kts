@@ -34,6 +34,7 @@ dependencies {
     compileOnly(deps.compose.compiler.gradlePlugin)
 
     implementation(project(":hot-reload-gradle-core"))
+    implementation(project(":hot-reload-gradle-idea"))
     implementation(project(":hot-reload-core"))
     implementation(project(":hot-reload-orchestration"))
 
@@ -43,5 +44,6 @@ dependencies {
     testImplementation(deps.junit.jupiter.engine)
     testImplementation(kotlin("gradle-plugin"))
     testImplementation(deps.compose.gradlePlugin)
+    testImplementation(deps.kotlinxSerialization.json)
     testImplementation("com.android.tools.build:gradle:8.6.1")
 }

@@ -1,0 +1,28 @@
+{
+    "version": "<HOT_RELOAD_VERSION>",
+    "runTasks": [
+        {
+            "taskName": "runDev",
+            "taskClass": "org.jetbrains.compose.reload.ComposeDevRun",
+            "targetName": "",
+            "compilationName": "dev",
+            "sourceSets": [
+                "dev",
+                "main"
+            ],
+            "argFile": "<PROJECT_DIR>/build/run/Dev/runDev.argfile",
+            "argFileTaskName": "runDevArgfile"
+        },
+        {
+            "taskName": "runHot",
+            "taskClass": "org.jetbrains.compose.reload.ComposeHotRun",
+            "targetName": "",
+            "compilationName": "main",
+            "sourceSets": [
+                "main"
+            ],
+            "argFile": "<PROJECT_DIR>/build/run/Main/runHot.argfile",
+            "argFileTaskName": "runHotArgfile"
+        }
+    ]
+}

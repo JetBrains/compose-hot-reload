@@ -66,18 +66,24 @@ internal open class ComposeHotReloadArgfileTask : DefaultTask() {
 
     @TaskAction
     internal fun createArgfile() {
-        val argFile = this@ComposeHotReloadArgfileTask.argFile.get().asFile.toPath()
+        val argFile = this.argFile.get().asFile.toPath()
         argFile.createArgfile(arguments.get(), classpath.files)
+        logger.info("$argFile created")
     }
 }
 
 internal fun Path.createArgfile(arguments: List<String>, classpath: Collection<File>) {
     createParentDirectories()
     outputStream().bufferedWriter().use { writer ->
-        arguments.forEach { arg -> writer.appendLine(arg.replace("""\""", """\\""")) }
+        arguments.forEach { arg ->
+            val escaped = arg.replace("""\""", """\\""")
+            writer.appendLine("\"$escaped\"")
+        }
+
         val classpathFormatted = classpath.joinToString(separator = "${File.pathSeparator}\\\n") { file ->
             file.absolutePath.replace("""\""", """\\""")
         }
         writer.appendLine("-cp \"$classpathFormatted\"")
+        writer.flush()
     }
 }

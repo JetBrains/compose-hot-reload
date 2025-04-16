@@ -1,0 +1,30 @@
+{
+    "version": "<HOT_RELOAD_VERSION>",
+    "runTasks": [
+        {
+            "taskName": "jvmRunDev",
+            "taskClass": "org.jetbrains.compose.reload.ComposeDevRun",
+            "targetName": "jvm",
+            "compilationName": "dev",
+            "sourceSets": [
+                "jvmDev",
+                "jvmMain",
+                "commonMain"
+            ],
+            "argFile": "<PROJECT_DIR>/build/run/jvmDev/jvmRunDev.argfile",
+            "argFileTaskName": "jvmRunDevArgfile"
+        },
+        {
+            "taskName": "jvmRunHot",
+            "taskClass": "org.jetbrains.compose.reload.ComposeHotRun",
+            "targetName": "jvm",
+            "compilationName": "main",
+            "sourceSets": [
+                "jvmMain",
+                "commonMain"
+            ],
+            "argFile": "<PROJECT_DIR>/build/run/jvmMain/jvmRunHot.argfile",
+            "argFileTaskName": "jvmRunHotArgfile"
+        }
+    ]
+}

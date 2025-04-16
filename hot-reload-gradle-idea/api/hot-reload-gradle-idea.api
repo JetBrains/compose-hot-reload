@@ -1,0 +1,66 @@
+public final class org/jetbrains/compose/reload/gradle/idea/IdeaComposeHotReloadModel : java/io/Serializable {
+	public static final field serialVersionUID J
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotReloadModel;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotReloadModel;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotReloadModel;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRunTasks ()Ljava/util/List;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public synthetic class org/jetbrains/compose/reload/gradle/idea/IdeaComposeHotReloadModel$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotReloadModel$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotReloadModel;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotReloadModel;)V
+}
+
+public final class org/jetbrains/compose/reload/gradle/idea/IdeaComposeHotRunTask {
+	public static final field Companion Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotRunTask$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/util/List;
+	public final fun component6 ()Ljava/nio/file/Path;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;Ljava/lang/String;)Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotRunTask;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotRunTask;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotRunTask;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArgFile ()Ljava/nio/file/Path;
+	public final fun getArgFileTaskName ()Ljava/lang/String;
+	public final fun getCompilationName ()Ljava/lang/String;
+	public final fun getSourceSets ()Ljava/util/List;
+	public final fun getTargetName ()Ljava/lang/String;
+	public final fun getTaskClass ()Ljava/lang/String;
+	public final fun getTaskName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public synthetic class org/jetbrains/compose/reload/gradle/idea/IdeaComposeHotRunTask$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotRunTask$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotRunTask;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/compose/reload/gradle/idea/IdeaComposeHotRunTask;)V
+}
+
+public final class org/jetbrains/compose/reload/gradle/idea/IdeaComposeHotRunTask$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
