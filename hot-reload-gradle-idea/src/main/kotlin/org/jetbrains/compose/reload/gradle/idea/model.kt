@@ -5,7 +5,6 @@
 
 package org.jetbrains.compose.reload.gradle.idea
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -17,8 +16,6 @@ import kotlin.io.path.Path
 import kotlin.io.path.pathString
 
 private val module = SerializersModule {
-    contextual(Path::class, PathSerializer())
-
     polymorphic(
         baseClass = IdeaComposeHotRunTask::class,
         actualClass = IdeaComposeHotRunTaskImpl::class,
@@ -128,7 +125,8 @@ internal data class IdeaComposeHotRunTaskImpl(
     override val targetName: String? = null,
     override val compilationName: String? = null,
     override val sourceSets: List<String> = emptyList(),
-    override val argFile: @Contextual Path? = null,
+    @Serializable(with = PathSerializer::class)
+    override val argFile: Path? = null,
     override val argFileTaskName: String? = null,
 ) : IdeaComposeHotRunTask
 
