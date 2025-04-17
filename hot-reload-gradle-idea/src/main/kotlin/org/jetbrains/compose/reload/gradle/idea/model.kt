@@ -18,6 +18,20 @@ import kotlin.io.path.pathString
 
 private val module = SerializersModule {
     contextual(Path::class, PathSerializer())
+
+    polymorphic(
+        baseClass = IdeaComposeHotRunTask::class,
+        actualClass = IdeaComposeHotRunTaskImpl::class,
+        actualSerializer = IdeaComposeHotRunTaskImpl.serializer()
+    )
+    polymorphicDefaultDeserializer(IdeaComposeHotRunTask::class) { IdeaComposeHotRunTaskImpl.serializer() }
+
+    polymorphic(
+        baseClass = IdeaComposeHotReloadModel::class,
+        actualClass = IdeaComposeHotReloadModelImpl::class,
+        actualSerializer = IdeaComposeHotReloadModelImpl.serializer()
+    )
+    polymorphicDefaultDeserializer(IdeaComposeHotReloadModel::class) { IdeaComposeHotReloadModelImpl.serializer() }
 }
 
 private val json = Json {
@@ -35,11 +49,24 @@ private val prettyJson = Json {
     serializersModule = module
 }
 
+public interface IdeaComposeHotReloadModel : java.io.Serializable {
+    public val version: String?
+    public val runTasks: List<IdeaComposeHotRunTask>
+}
+
+public fun IdeaComposeHotReloadModel(
+    version: String? = null,
+    runTasks: List<IdeaComposeHotRunTask> = emptyList(),
+): IdeaComposeHotReloadModel = IdeaComposeHotReloadModelImpl(
+    version = version,
+    runTasks = runTasks,
+)
+
 @Serializable
-public data class IdeaComposeHotReloadModel(
-    val version: String? = null,
-    val runTasks: List<IdeaComposeHotRunTask> = emptyList(),
-) : java.io.Serializable {
+internal data class IdeaComposeHotReloadModelImpl(
+    override val version: String? = null,
+    override val runTasks: List<IdeaComposeHotRunTask> = emptyList(),
+) : IdeaComposeHotReloadModel {
     internal companion object {
         const val serialVersionUID: Long = 0L
     }
@@ -51,7 +78,8 @@ public data class IdeaComposeHotReloadModel(
 
         @Suppress("unused")
         private fun readResolve(): Any {
-            return json.decodeFromString<IdeaComposeHotReloadModel>(binary.decodeToString())
+            val string = binary.decodeToString()
+            return json.decodeFromString<IdeaComposeHotReloadModel>(string)
         }
     }
 
@@ -65,16 +93,44 @@ public data class IdeaComposeHotReloadModel(
     }
 }
 
-@Serializable
-public data class IdeaComposeHotRunTask(
-    val taskName: String? = null,
-    val taskClass: String? = null,
-    val targetName: String? = null,
-    val compilationName: String? = null,
-    val sourceSets: List<String> = emptyList(),
-    val argFile: @Contextual Path? = null,
-    val argFileTaskName: String? = null,
+public interface IdeaComposeHotRunTask : java.io.Serializable {
+    public val taskName: String?
+    public val taskClass: String?
+    public val targetName: String?
+    public val compilationName: String?
+    public val sourceSets: List<String>
+    public val argFile: Path?
+    public val argFileTaskName: String?
+}
+
+public fun IdeaComposeHotRunTask(
+    taskName: String? = null,
+    taskClass: String? = null,
+    targetName: String? = null,
+    compilationName: String? = null,
+    sourceSets: List<String> = emptyList(),
+    argFile: Path? = null,
+    argFileTaskName: String? = null,
+): IdeaComposeHotRunTask = IdeaComposeHotRunTaskImpl(
+    taskName = taskName,
+    taskClass = taskClass,
+    targetName = targetName,
+    compilationName = compilationName,
+    sourceSets = sourceSets,
+    argFile = argFile,
+    argFileTaskName = argFileTaskName,
 )
+
+@Serializable
+internal data class IdeaComposeHotRunTaskImpl(
+    override val taskName: String? = null,
+    override val taskClass: String? = null,
+    override val targetName: String? = null,
+    override val compilationName: String? = null,
+    override val sourceSets: List<String> = emptyList(),
+    override val argFile: @Contextual Path? = null,
+    override val argFileTaskName: String? = null,
+) : IdeaComposeHotRunTask
 
 private class PathSerializer : KSerializer<Path> {
     override val descriptor = PrimitiveSerialDescriptor("Path", PrimitiveKind.STRING)
