@@ -10,10 +10,9 @@ import org.jetbrains.compose.reload.core.BuildSystem.Amper
 import org.jetbrains.compose.reload.core.BuildSystem.Gradle
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty
-import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.LaunchMode
+import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.createLogger
-import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_COMPILER
@@ -155,7 +154,7 @@ private fun ProcessBuilder.startRecompilerProcess(): Int? {
     val process: Process = start()
     val shutdownHook = thread(start = false) {
         logger.debug("'Recompiler': Destroying process (Shutdown)")
-        process.destroyWithDescendants()
+        process.destroy()
     }
 
     Runtime.getRuntime().addShutdownHook(shutdownHook)
@@ -174,7 +173,7 @@ private fun ProcessBuilder.startRecompilerProcess(): Int? {
         process.waitFor()
     } catch (_: InterruptedException) {
         logger.debug("'Recompiler': Destroying process")
-        process.destroyWithDescendants()
+        process.destroy()
         if (!process.waitFor(15, TimeUnit.SECONDS)) {
             logger.debug("'Recompiler': Force destroying process (Interrupt)")
             process.destroyForcibly()
