@@ -35,6 +35,7 @@ private val json = Json {
     ignoreUnknownKeys = true
     isLenient = true
     coerceInputValues = true
+    encodeDefaults = true
     serializersModule = module
 }
 
@@ -42,6 +43,7 @@ private val prettyJson = Json {
     ignoreUnknownKeys = true
     isLenient = true
     coerceInputValues = true
+    encodeDefaults = true
     prettyPrint = true
     serializersModule = module
 }
