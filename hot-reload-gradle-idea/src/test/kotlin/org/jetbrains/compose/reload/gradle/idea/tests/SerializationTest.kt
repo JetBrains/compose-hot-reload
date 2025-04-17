@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.gradle.idea.tests
 
 import org.jetbrains.compose.reload.gradle.idea.IdeaComposeHotReloadModel
+import org.jetbrains.compose.reload.gradle.idea.IdeaComposeHotReloadModelImpl
 import org.jetbrains.compose.reload.gradle.idea.IdeaComposeHotRunTask
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
@@ -35,7 +36,7 @@ class SerializationTest {
 
     @Test
     fun `test - malformed json - is lenient`() {
-        val model = IdeaComposeHotReloadModel.Surrogate(
+        val model = IdeaComposeHotReloadModelImpl.Surrogate(
             """
             {
                 "unknownField": "myValue", 
