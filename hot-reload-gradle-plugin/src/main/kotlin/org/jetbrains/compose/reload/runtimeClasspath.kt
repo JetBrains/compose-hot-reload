@@ -23,6 +23,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskAction
+import org.gradle.internal.component.local.model.OpaqueComponentArtifactIdentifier
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.provideDelegate
@@ -119,7 +120,7 @@ internal val KotlinCompilation<*>.composeHotReloadRuntimeClasspath: FileCollecti
 
 internal val KotlinCompilation<*>.hotRuntimeFiles: FileCollection by lazyProperty {
     project.files(this.output.allOutputs, composeDevRuntimeDependencies.incoming.artifactView { view ->
-        view.componentFilter { id -> id.isCurrentBuild() }
+        view.componentFilter { id -> id.isCurrentBuild() || id is OpaqueComponentArtifactIdentifier }
     }.files)
 }
 
