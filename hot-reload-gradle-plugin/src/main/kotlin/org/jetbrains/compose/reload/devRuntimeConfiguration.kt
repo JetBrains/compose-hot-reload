@@ -13,7 +13,6 @@ import org.gradle.api.attributes.Usage
 import org.gradle.api.attributes.java.TargetJvmEnvironment.STANDARD_JVM
 import org.gradle.api.attributes.java.TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE
 import org.gradle.kotlin.dsl.named
-import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.gradle.HotReloadUsage
 import org.jetbrains.compose.reload.gradle.HotReloadUsageType
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
@@ -40,12 +39,7 @@ internal val KotlinCompilation<*>.composeDevRuntimeDependencies: Configuration b
          * bring in additional runtime artifacts required by hot-reload
          */
         extendsFrom(runtimeConfiguration)
-
-        /**
-         * The dev runtime should also include the 'runtime-api,' which will resolve to the dev variant,
-         * practically engaging the 'DevelopmentEntryPoint {}' transformations
-         */
-        project.dependencies.add(name, "org.jetbrains.compose.hot-reload:runtime-api:$HOT_RELOAD_VERSION")
+        extendsFrom(project.hotReloadRuntimeConfiguration)
 
         isCanBeResolved = true
         isCanBeConsumed = false
