@@ -6,6 +6,8 @@
 package org.jetbrains.compose.reload.tests.gradle
 
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
+import org.jetbrains.compose.reload.core.testFixtures.repositoryRoot
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKts
@@ -23,6 +25,7 @@ import org.jetbrains.compose.reload.utils.assertMatches
 import java.io.File
 import kotlin.io.path.appendText
 import kotlin.io.path.createParentDirectories
+import kotlin.io.path.pathString
 import kotlin.io.path.writeText
 
 class RuntimeDependenciesTest {
@@ -48,10 +51,12 @@ class RuntimeDependenciesTest {
 
         fixture.resolveRuntimeClasspath("app").assertMatches(
             PathRegex(".*/app/build/run/jvmMain/classpath/classes"),
-            PathRegex(".*/app/build/run/jvmMain/classpath/libs/hot/lib-jvm.jar"),
+            PathRegex(".*/app/build/run/jvmMain/classpath/libs/lib/.*/lib-jvm.jar"),
             *stdlib,
             *hotReloadAgentDependencies,
-            *coldDependencies,
+            *hotReloadRuntimeDependencies,
+            *testRuntimeDependencies,
+            PathRegex(".*/build/gradleHome/.*")
         )
     }
 
@@ -94,10 +99,12 @@ class RuntimeDependenciesTest {
 
         fixture.resolveRuntimeClasspath("app").assertMatches(
             PathRegex(".*/app/build/run/jvmMain/classpath/classes"),
-            PathRegex(".*/app/build/run/jvmMain/classpath/libs/hot/lib-jvm.jar"),
+            PathRegex(".*/app/build/run/jvmMain/classpath/libs/lib/.*/lib-jvm.jar"),
             *stdlib,
             *hotReloadAgentDependencies,
-            *coldDependencies,
+            *hotReloadRuntimeDependencies,
+            *testRuntimeDependencies,
+            PathRegex(".*/build/gradleHome/.*")
         )
     }
 
@@ -111,13 +118,15 @@ class RuntimeDependenciesTest {
             PathRegex(".*/build/run/main/classpath/classes"),
             *stdlib,
             *hotReloadAgentDependencies,
-            *coldDependencies,
+            *hotReloadRuntimeDependencies,
+            *testRuntimeDependencies,
+            PathRegex(".*/build/gradleHome/.*")
         )
     }
 }
 
-private suspend fun HotReloadTestFixture.resolveRuntimeClasspath(projectPath: String = ""): List<File> =
-    runTransaction {
+private suspend fun HotReloadTestFixture.resolveRuntimeClasspath(projectPath: String = ""): List<File> {
+    return runTransaction {
         this@resolveRuntimeClasspath.projectDir.subproject(projectPath)
             .resolve(this@resolveRuntimeClasspath.getDefaultMainKtSourceFile())
             .createParentDirectories().writeText(
@@ -130,9 +139,14 @@ private suspend fun HotReloadTestFixture.resolveRuntimeClasspath(projectPath: St
                     }
                     """.trimIndent()
             )
-        this@resolveRuntimeClasspath.launchApplication(":$projectPath")
-        (skipToMessage<TestEvent>().payload as String).split(File.pathSeparator).map(::File)
+        try {
+            this@resolveRuntimeClasspath.launchApplication(":$projectPath")
+            (skipToMessage<TestEvent>().payload as String).split(File.pathSeparator).map(::File)
+        } finally {
+            OrchestrationMessage.ShutdownRequest("Explicitly requested by the test").send()
+        }
     }
+}
 
 
 private val stdlib = arrayOf(
@@ -141,16 +155,20 @@ private val stdlib = arrayOf(
 )
 
 private val hotReloadAgentDependencies = arrayOf(
-    PathRegex(".*/classpath/agent/asm-9.7.1.jar"),
-    PathRegex(".*/classpath/agent/asm-tree-9.7.1.jar"),
-    PathRegex(".*/classpath/agent/javassist-3.30.2-GA.jar"),
-    PathRegex(".*/classpath/agent/slf4j-api-2.0.16.jar"),
-    PathRegex(".*/classpath/agent/agent-$HOT_RELOAD_VERSION.jar"),
-    PathRegex(".*/classpath/agent/core-$HOT_RELOAD_VERSION.jar"),
-    PathRegex(".*/classpath/agent/orchestration-$HOT_RELOAD_VERSION.jar"),
-    PathRegex(".*/classpath/agent/analysis-$HOT_RELOAD_VERSION.jar"),
+    PathRegex(".*/gradleHome/.*/asm-9.7.1.jar"),
+    PathRegex(".*/gradleHome/.*/asm-tree-9.7.1.jar"),
+    PathRegex(".*/gradleHome/.*/javassist-3.30.2-GA.jar"),
+    PathRegex(".*/gradleHome/.*/slf4j-api-2.0.16.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/agent-$HOT_RELOAD_VERSION.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/core-$HOT_RELOAD_VERSION.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/orchestration-$HOT_RELOAD_VERSION.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/analysis-$HOT_RELOAD_VERSION.jar"),
 )
 
-private val coldDependencies = arrayOf(
-    PathRegex(".*/classpath/libs/cold/.*")
+private val hotReloadRuntimeDependencies = arrayOf(
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/runtime-jvm-$HOT_RELOAD_VERSION-dev.jar"),
+)
+
+private val testRuntimeDependencies = arrayOf(
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/test-$HOT_RELOAD_VERSION.jar"),
 )

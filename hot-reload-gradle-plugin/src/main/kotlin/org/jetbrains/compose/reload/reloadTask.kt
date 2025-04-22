@@ -39,7 +39,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadCla
 import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import java.io.File
-import java.util.concurrent.TimeUnit
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import kotlin.io.path.createParentDirectories
@@ -147,10 +146,9 @@ open class ComposeReloadHotClasspathTask : DefaultTask() {
             client.sendMessage(ReloadClassesRequest(changedClassFiles))
 
         } finally {
+            client.closeGracefully()
             classpathSnapshotFile.toPath().createParentDirectories()
                 .writeClasspathSnapshot(snapshot)
-
-            client.closeGracefully().get(15, TimeUnit.SECONDS)
         }
     }
 
