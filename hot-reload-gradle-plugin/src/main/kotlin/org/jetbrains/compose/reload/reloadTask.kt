@@ -132,7 +132,7 @@ open class ComposeReloadHotClasspathTask : DefaultTask() {
                 return
             }
 
-            logger.info("Incremental run")
+            logger.quiet("Incremental run")
             val changedClassFiles = mutableMapOf<File, ChangeType>()
             inputs.getFileChanges(classpath).forEach { change ->
                 if (change.file.isFile && change.file.extension == "class") {
