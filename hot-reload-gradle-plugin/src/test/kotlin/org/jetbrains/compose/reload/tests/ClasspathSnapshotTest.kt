@@ -22,10 +22,10 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteExisting
 import kotlin.io.path.inputStream
+import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.isDirectory
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.outputStream
-import kotlin.io.path.pathString
 import kotlin.io.path.relativeTo
 import kotlin.io.path.walk
 import kotlin.io.path.writeText
@@ -104,12 +104,12 @@ class ClasspathSnapshotTest(
         ZipOutputStream(zip.outputStream()).use { zipOut ->
             content.walk().forEach { file ->
                 if (file.isDirectory()) {
-                    zipOut.putNextEntry(ZipEntry(file.relativeTo(content).pathString + "/"))
+                    zipOut.putNextEntry(ZipEntry(file.relativeTo(content).invariantSeparatorsPathString + "/"))
                     zipOut.closeEntry()
                 }
 
                 if (file.isRegularFile()) {
-                    zipOut.putNextEntry(ZipEntry(file.relativeTo(content).pathString))
+                    zipOut.putNextEntry(ZipEntry(file.relativeTo(content).invariantSeparatorsPathString))
                     file.inputStream().copyTo(zipOut)
                     zipOut.closeEntry()
                 }
