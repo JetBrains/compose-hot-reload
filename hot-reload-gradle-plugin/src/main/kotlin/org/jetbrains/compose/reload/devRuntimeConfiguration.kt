@@ -7,48 +7,18 @@
 
 package org.jetbrains.compose.reload
 
-import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.type.ArtifactTypeDefinition
-import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE
 import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.Usage
 import org.gradle.api.attributes.java.TargetJvmEnvironment.STANDARD_JVM
 import org.gradle.api.attributes.java.TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE
-import org.gradle.api.internal.artifacts.transform.UnzipTransform
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.withType
+import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.gradle.HotReloadUsage
 import org.jetbrains.compose.reload.gradle.HotReloadUsageType
-import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
-import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
-import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
-import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 import org.jetbrains.kotlin.tooling.core.extrasLazyProperty
-
-/**
- * Hot Reloading works significantly better if only class directories are used.
- * Therefore, this method will create additional variants which will provide the classes dirs directly
- * as outgoing runtime elements.
- */
-internal fun Project.setupComposeHotReloadRuntimeElements() {
-    project.dependencies.registerTransform(UnzipTransform::class.java) { transform ->
-        transform.from.attribute(ARTIFACT_TYPE_ATTRIBUTE, ArtifactTypeDefinition.JAR_TYPE)
-        transform.to.attribute(ARTIFACT_TYPE_ATTRIBUTE, ArtifactTypeDefinition.DIRECTORY_TYPE)
-    }
-
-    kotlinJvmOrNull?.apply {
-        target.createComposeHotReloadRuntimeElements()
-    }
-
-    kotlinMultiplatformOrNull?.apply {
-        targets.withType<KotlinJvmTarget>().all { target ->
-            target.createComposeHotReloadRuntimeElements()
-        }
-    }
-}
 
 
 /**
@@ -70,7 +40,12 @@ internal val KotlinCompilation<*>.composeDevRuntimeDependencies: Configuration b
          * bring in additional runtime artifacts required by hot-reload
          */
         extendsFrom(runtimeConfiguration)
-        extendsFrom(project.hotReloadRuntimeConfiguration)
+
+        /**
+         * The dev runtime should also include the 'runtime-api,' which will resolve to the dev variant,
+         * practically engaging the 'DevelopmentEntryPoint {}' transformations
+         */
+        project.dependencies.add(name, "org.jetbrains.compose.hot-reload:runtime-api:$HOT_RELOAD_VERSION")
 
         isCanBeResolved = true
         isCanBeConsumed = false
@@ -79,42 +54,5 @@ internal val KotlinCompilation<*>.composeDevRuntimeDependencies: Configuration b
         attributes.attribute(Category.CATEGORY_ATTRIBUTE, project.objects.named(Category.LIBRARY))
         attributes.attribute(TARGET_JVM_ENVIRONMENT_ATTRIBUTE, project.objects.named(STANDARD_JVM))
         attributes.attribute(HotReloadUsageType.attribute, HotReloadUsageType.Dev)
-    }
-}
-
-private fun KotlinTarget.createComposeHotReloadRuntimeElements() {
-    val main = compilations.getByName("main")
-    val runtimeConfiguration = project.configurations.getByName(main.runtimeDependencyConfigurationName ?: return)
-    val hotRuntimeConfigurationName = main.runtimeDependencyConfigurationName + "ComposeHot"
-    val existingConfiguration = project.configurations.findByName(hotRuntimeConfigurationName)
-    if (existingConfiguration != null) return
-
-    project.configurations.create(hotRuntimeConfigurationName) { configuration ->
-        configuration.extendsFrom(runtimeConfiguration)
-
-        configuration.attributes.attribute(KotlinPlatformType.attribute, platformType)
-        configuration.attributes.attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(HotReloadUsage.COMPOSE_DEV_RUNTIME_USAGE))
-        configuration.attributes.attribute(Category.CATEGORY_ATTRIBUTE, project.objects.named(Category.LIBRARY))
-        configuration.attributes.attribute(TARGET_JVM_ENVIRONMENT_ATTRIBUTE, project.objects.named(STANDARD_JVM))
-        configuration.attributes.attribute(HotReloadUsageType.attribute, HotReloadUsageType.Dev)
-
-        configuration.isCanBeResolved = false
-        configuration.isCanBeConsumed = true
-
-        project.afterEvaluate {
-            main.output.classesDirs.forEach { classesDir ->
-                configuration.outgoing.artifact(classesDir) { artifact ->
-                    artifact.builtBy(main.output.allOutputs)
-                    artifact.builtBy(main.compileTaskProvider)
-                    artifact.type = ArtifactTypeDefinition.DIRECTORY_TYPE
-                }
-            }
-        }
-
-        configuration.outgoing.artifact(project.provider { main.output.resourcesDirProvider }) { artifact ->
-            artifact.builtBy(main.output.allOutputs)
-            artifact.builtBy(main.compileTaskProvider)
-            artifact.type = ArtifactTypeDefinition.DIRECTORY_TYPE
-        }
     }
 }

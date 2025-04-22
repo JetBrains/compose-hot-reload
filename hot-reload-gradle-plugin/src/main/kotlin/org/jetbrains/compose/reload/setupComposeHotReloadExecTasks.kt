@@ -51,7 +51,7 @@ private fun KotlinTarget.createComposeHotReloadExecTask() {
 }
 
 internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<KotlinCompilation<*>>) {
-    classpath = project.files(compilation.map { it.applicationClasspath })
+    classpath = project.files(compilation.map { it.composeHotReloadRuntimeClasspath })
 
     val argfile = if (this is AbstractComposeHotRun) this.argFile
     else compilation.flatMap { compilation -> compilation.runBuildFile("$name.argfile") }

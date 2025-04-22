@@ -5,28 +5,44 @@
 
 package org.jetbrains.compose.reload
 
+import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.artifacts.ArtifactCollection
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ComponentIdentifier
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
-import org.gradle.api.artifacts.type.ArtifactTypeDefinition
 import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.Usage
 import org.gradle.api.attributes.java.TargetJvmEnvironment.STANDARD_JVM
 import org.gradle.api.attributes.java.TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE
-import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.Classpath
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.Sync
-import org.gradle.internal.component.local.model.OpaqueComponentArtifactIdentifier
+import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.provideDelegate
+import org.gradle.kotlin.dsl.register
+import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
+import org.jetbrains.compose.reload.core.asFileName
 import org.jetbrains.compose.reload.gradle.HotReloadUsage.COMPOSE_DEV_RUNTIME_USAGE
 import org.jetbrains.compose.reload.gradle.HotReloadUsageType
-import org.jetbrains.compose.reload.gradle.capitalized
+import org.jetbrains.compose.reload.gradle.camelCase
 import org.jetbrains.compose.reload.gradle.composeHotReloadAgentRuntimeClasspath
+import org.jetbrains.compose.reload.gradle.files
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+import java.util.zip.CRC32
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.createDirectories
+import kotlin.io.path.createParentDirectories
+import kotlin.io.path.deleteRecursively
+import kotlin.io.path.exists
 
 private const val hotReloadRuntimeConfigurationName = "hotReloadRuntime"
 
@@ -61,86 +77,114 @@ internal val Project.hotReloadRuntimeConfiguration: Configuration
  */
 val Project.hotReloadRuntimeClasspath: FileCollection get() = hotReloadRuntimeConfiguration
 
-/**
- * The raw runtime classpath: This will be the direct output of the
- * compilations inside this project. This is the classpath, which will
- * change and can be tracked.
- *
- * Note: The [hotRuntimeClasspath] is used to later construct the
- * [hotApplicationClasspath]. The [hotApplicationClasspath] will then be
- * used to actually run the application against.
- */
-internal val KotlinCompilation<*>.hotRuntimeClasspath: FileCollection by lazyProperty {
-    val projectDependencies = composeDevRuntimeDependencies.incoming.artifactView { view ->
+internal val KotlinCompilation<*>.composeHotClassesRuntimeDirectory
+    get() = runBuildDirectory("classpath/classes")
+
+internal val KotlinCompilation<*>.composeHotReloadRuntimeClasspath: FileCollection by lazyProperty {
+    val thisOutput = output.allOutputs
+    val agentClasspath = project.composeHotReloadAgentRuntimeClasspath()
+
+    val hotLibs = composeDevRuntimeDependencies.incoming.artifactView { view ->
         view.componentFilter { id -> id.isCurrentBuild() }
-        view.attributes { attributes ->
-            attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, ArtifactTypeDefinition.DIRECTORY_TYPE)
-        }
-    }.files
-
-    /**
-     * Associated compilations can add opaque dependencies, which we will still
-     * consider to be hot!
-     */
-    val opaqueDirectoryDependencies = composeDevRuntimeDependencies.incoming.artifactView { view ->
-        view.componentFilter { id -> id is OpaqueComponentArtifactIdentifier && id.file.isDirectory }
-    }.files
-
-    project.files(output.allOutputs, projectDependencies, opaqueDirectoryDependencies)
-}
-
-/**
- * The part of the classpath which is known to never change (e.g. binary
- * dependencies downloaded from the network)
- */
-internal val KotlinCompilation<*>.coldRuntimeClasspath: FileCollection by lazyProperty {
-    composeDevRuntimeDependencies.incoming.artifactView { view ->
-        view.componentFilter { id ->
-            if (id.isCurrentBuild()) return@componentFilter false
-            if (id is OpaqueComponentArtifactIdentifier && id.file.isDirectory) return@componentFilter false
-            true
-        }
-    }.files
-}
-
-/**
- * The classpath used to start the application with. This will be
- * constructed from several parts:
- * - compose reload agent classpath
- * - [hotApplicationClasspath]
- * - [coldRuntimeClasspath]
- */
-internal val KotlinCompilation<*>.applicationClasspath: FileCollection by lazyProperty {
-    project.files(
-        project.composeHotReloadAgentRuntimeClasspath(),
-        hotApplicationClasspath,
-        coldRuntimeClasspath
-    )
-}
-
-/**
- * Should contain the same content as the [hotRuntimeClasspath]. These
- * files are used to actually run the application with. The files will be
- * copied to a given directory before actually starting the application.
- * This protects the classes, which are used by the application, from
- * being affected by re-compiling (which might delete said classes).
- */
-internal val KotlinCompilation<*>.hotApplicationClasspath: FileCollection by lazyProperty {
-    val targetDirectory = runBuildDirectory("classes")
-
-    val syncTask = project.tasks.register(
-        "sync${target.name}${name.capitalized}ApplicationClasses", Sync::class.java
-    ) { task ->
-        val hotRuntimeClasspath = hotRuntimeClasspath
-        task.from(hotRuntimeClasspath) { it.duplicatesStrategy = DuplicatesStrategy.WARN }
-        task.into(targetDirectory)
     }
 
-    project.files(targetDirectory).builtBy(syncTask)
+    val coldLibs = composeDevRuntimeDependencies.incoming.artifactView { view ->
+        view.componentFilter { id -> !id.isCurrentBuild() }
+    }
+
+    val classesDirectory = runBuildDirectory("classpath/classes")
+    val hotLibsDirectory = runBuildDirectory("classpath/libs")
+
+    val syncClasses = project.tasks.register<Sync>(
+        camelCase("build", target.name, compilationName, "startup", "classpath")
+    ) {
+        destinationDir = classesDirectory.get().asFile
+        from(thisOutput)
+    }
+
+    val snycHotLibs = project.tasks.register<SyncArtifactsTask>(
+        camelCase("build", target.name, compilationName, "startup", "libs")
+    ) {
+        artifactCollection.add(hotLibs.artifacts)
+        destinationDir.set(hotLibsDirectory.get())
+    }
+
+    project.files(
+        agentClasspath,
+        composeHotClassesRuntimeDirectory,
+        snycHotLibs.map { it.destinationDir.asFileTree },
+        coldLibs.files,
+    ).builtBy(syncClasses, snycHotLibs)
 }
 
+internal val KotlinCompilation<*>.hotRuntimeFiles: FileCollection by lazyProperty {
+    project.files(this.output.allOutputs, composeDevRuntimeDependencies.incoming.artifactView { view ->
+        view.componentFilter { id -> id.isCurrentBuild() }
+    }.files)
+}
 
 private fun ComponentIdentifier.isCurrentBuild(): Boolean {
     @Suppress("DEPRECATION") // Copy approach from KGP?
     return this is ProjectComponentIdentifier && build.isCurrentBuild
+}
+
+@DisableCachingByDefault(because = "Not worth caching")
+private open class SyncArtifactsTask : DefaultTask() {
+
+    @get:Internal
+    val artifactCollection = project.objects.listProperty<ArtifactCollection>()
+
+    @Suppress("unused") // UP-TO-DATE checks
+    @get:Classpath
+    val files: FileCollection get() = project.files { artifactCollection.get().map { it.artifactFiles } }
+
+
+    @get:OutputDirectory
+    val destinationDir: DirectoryProperty = project.objects.directoryProperty()
+
+
+    @OptIn(ExperimentalPathApi::class)
+    @TaskAction
+    fun sync() {
+        val destination = destinationDir.asFile.get().toPath()
+        if (destination.exists()) destination.deleteRecursively()
+        destination.createDirectories()
+
+        artifactCollection.get().flatten().forEach { artifact ->
+            val crc = CRC32()
+
+            artifact.variant.capabilities.forEach { capability ->
+                crc.update(capability.name.encodeToByteArray())
+                crc.update(capability.group.encodeToByteArray())
+                crc.update(capability.version?.encodeToByteArray() ?: byteArrayOf())
+            }
+
+            artifact.variant.attributes.keySet().forEach { key ->
+                crc.update(key.name.encodeToByteArray())
+                crc.update(artifact.variant.attributes.getAttribute(key).toString().encodeToByteArray())
+            }
+
+            val disambiguationHash = crc.value.toInt().toString(24)
+
+            val componentIdentifier = artifact.id.componentIdentifier
+            val targetFile = when (componentIdentifier) {
+                is ModuleComponentIdentifier -> destination.resolve(
+                    "${componentIdentifier.group.asFileName()}/" +
+                        "${componentIdentifier.module.asFileName()}/" +
+                        "${componentIdentifier.version.asFileName()}/" +
+                        "${disambiguationHash}/" +
+                        "${artifact.file.nameWithoutExtension}.${artifact.file.extension}"
+                )
+
+                is ProjectComponentIdentifier -> destination.resolve(
+                    @Suppress("UnstableApiUsage")
+                    componentIdentifier.buildTreePath.removePrefix(":").replace(":", "/").asFileName()
+                ).resolve(disambiguationHash).resolve(artifact.file.name)
+
+                else -> destination.resolve("opaque").resolve(disambiguationHash).resolve(artifact.file.name)
+            }
+            targetFile.createParentDirectories()
+            artifact.file.copyTo(targetFile.toFile(), overwrite = true)
+        }
+    }
 }

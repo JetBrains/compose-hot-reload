@@ -163,7 +163,7 @@ internal constructor(
 
 private class CriticalExceptionCancellation(
     criticalExceptionMessage: OrchestrationMessage.CriticalException
-) : CancellationException(criticalExceptionMessage.message) {
+) : CancellationException("${criticalExceptionMessage.exceptionClassName}: ${criticalExceptionMessage.message}") {
     init {
         stackTrace = criticalExceptionMessage.stacktrace.toTypedArray()
     }

@@ -23,7 +23,6 @@ class ComposeHotReloadPlugin : Plugin<Project> {
 private fun Project.onKotlinPluginApplied() {
     setupComposeHotReloadModelBuilder()
     setupComposeHotReloadAttributes()
-    setupComposeHotReloadRuntimeElements()
     setupComposeReloadHotClasspathTasks()
     setupComposeHotReloadExecTasks()
     setupComposeHotRunConventions()
