@@ -34,8 +34,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.fail
 
-class ClasspathSnapshotTest(
-) {
+class ClasspathSnapshotTest {
     @TempDir
     lateinit var tmp: Path
 
