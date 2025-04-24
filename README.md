@@ -29,7 +29,7 @@ plugins {
     kotlin("multiplatform") version "2.1.20" // <- Use Kotlin 2.1.20 or higher!
     kotlin("plugin.compose") version "2.1.20" // <- Use Compose Compiler Plugin 2.1.20 or higher!
     id("org.jetbrains.compose")
-    id("org.jetbrains.compose.hot-reload") version "1.0.0-alpha07" // <- add this additionally
+    id("org.jetbrains.compose.hot-reload") version "1.0.0-alpha08" // <- add this additionally
 }
 ```
 
