@@ -78,3 +78,8 @@ class StringProvider(val property: Provider<String>) : Serializable {
         return property.get()
     }
 }
+
+
+@InternalHotReloadGradleApi
+val Project.intellijDebuggerDispatchPort: Provider<Int>
+    get() = providers.systemProperty("idea.debugger.dispatch.port").map { it.toInt() }

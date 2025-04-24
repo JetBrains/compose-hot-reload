@@ -19,6 +19,6 @@ fun premain(@Suppress("unused") args: String?, instrumentation: Instrumentation)
     launchRuntimeTracking(instrumentation)
     launchReloadRequestHandler(instrumentation)
     launchJdwpTracker(instrumentation)
-    launchRecompiler()
+    //launchRecompiler()
     launchDevtoolsApplication()
 }

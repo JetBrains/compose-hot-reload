@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.sp
 fun SomeWidget() {
     val transition = rememberInfiniteTransition()
     val scale by transition.animateFloat(
-        0.95f, 1.04f, infiniteRepeatable(tween(500), RepeatMode.Reverse)
+        0.95f, 1.04f, infiniteRepeatable(tween(289), RepeatMode.Reverse)
     )
 
-    Text("👋 Hello from 'widgets'!", fontSize = 24.0.sp, modifier = Modifier.scale(scale))
+    Text("👋 Hello from 'widgets'! kasjdfölasjdfla", fontSize = 24.0.sp, modifier = Modifier.scale(scale))
 }

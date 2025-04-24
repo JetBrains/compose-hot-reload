@@ -5,8 +5,6 @@
 
 package org.jetbrains.compose.reload.test
 
-import org.gradle.api.Project
-
 internal fun lowerCamelCase(vararg parts: String?): String {
     return buildString {
         parts.filterNotNull().filter { it.isNotBlank() }.forEachIndexed { i, part ->
@@ -15,6 +13,3 @@ internal fun lowerCamelCase(vararg parts: String?): String {
         }
     }
 }
-
-internal val Project.intellijDebuggerDispatchPort
-    get() = providers.systemProperty("idea.debugger.dispatch.port").map { it.toInt() }

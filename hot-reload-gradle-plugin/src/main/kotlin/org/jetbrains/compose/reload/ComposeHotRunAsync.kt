@@ -13,6 +13,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.options.Option
+import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.compose.reload.core.HotReloadProperty
@@ -25,8 +26,11 @@ import org.jetbrains.compose.reload.gradle.core.composeReloadJetBrainsRuntimeBin
 import org.jetbrains.compose.reload.gradle.core.composeReloadStderrFile
 import org.jetbrains.compose.reload.gradle.core.composeReloadStdinFile
 import org.jetbrains.compose.reload.gradle.core.composeReloadStdoutFile
+import org.jetbrains.compose.reload.gradle.files
+import org.jetbrains.compose.reload.gradle.intellijDebuggerDispatchPort
 import org.jetbrains.compose.reload.gradle.jetbrainsRuntimeLauncher
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.isRegularFile
 import kotlin.jvm.optionals.getOrNull
@@ -46,7 +50,7 @@ private fun Project.registerComposeHotAsyncRunTask(
     runTask: TaskProvider<AbstractComposeHotRun>,
     argFileTaskProvider: TaskProvider<ComposeHotArgfileTask>
 ) {
-    tasks.register(runTask.name + "Async", ComposeHotAsyncRun::class.java) { task ->
+    val run = tasks.register(runTask.name + "Async", ComposeHotAsyncRun::class.java) { task ->
         task.argFile.set(argFileTaskProvider.flatMap { it.argFile })
 
         task.pidFile.set(project.provider {
@@ -86,6 +90,18 @@ private fun Project.registerComposeHotAsyncRunTask(
 
         task.mainClass.set(runTask.flatMap { it.mainClass })
     }
+
+    val reload = tasks.register<ComposeReloadHotClasspathTask>(run.name + "Reload") {
+        this.classpath.from(project.files { runTask.get().compilation.get().hotRuntimeFiles })
+        this.agentPort.set(project.providers.fileContents(run.get().pidFile).asBytes.map {
+            PidFileInfo(it).leftOrNull()?.orchestrationPort ?: -1
+        })
+        this.classesDirectory.set(runTask.get().compilation.get().composeHotClassesRuntimeDirectory)
+    }
+
+    run.configure {
+        it.finalizedBy(reload)
+    }
 }
 
 @DisableCachingByDefault(because = "This task should always run")
@@ -120,7 +136,10 @@ internal open class ComposeHotAsyncRun : DefaultTask() {
     @get:Internal
     internal val intellijDebuggerDispatchPort = project.providers
         .environmentVariable(HotReloadProperty.IntelliJDebuggerDispatchPort.key)
-        .orNull?.toIntOrNull()
+        .map { it.toInt() }
+        .orElse(project.intellijDebuggerDispatchPort)
+        .orNull
+
 
     @Suppress("unused")
     @Option(option = "mainClass", description = "Override the main class name")
@@ -146,13 +165,14 @@ internal open class ComposeHotAsyncRun : DefaultTask() {
          * If the app is currently running, then we'll kill it before launching another instance.
          */
         if (pidFile.get().asFile.toPath().isRegularFile()) run pid@{
-            val pidFileInfo = PidFileInfo(pidFile.get().asFile.toPath()).leftOr { return@pid }
+            return
+            /*val pidFileInfo = PidFileInfo(pidFile.get().asFile.toPath()).leftOr { return@pid }
             val pid = pidFileInfo.pid ?: return@pid
             val processHandle = ProcessHandle.of(pid).getOrNull() ?: return@pid
             logger.info("A previous run ($pid) still running, killing...")
             processHandle.destroyWithDescendants()
             processHandle.onExit().get(15, TimeUnit.SECONDS)
-            logger.info("Previous run ($pid) killed")
+            logger.info("Previous run ($pid) killed")*/
         }
 
         pidFile.get().asFile.toPath().createParentDirectories()
@@ -180,8 +200,6 @@ internal open class ComposeHotAsyncRun : DefaultTask() {
             mainClass.get(),
             *additionalArguments
         )
-            .redirectOutput(stdoutFile.get().asFile)
-            .redirectError(stderrFile.get().asFile)
 
         if (stdinFile.isPresent) {
             processBuilder.redirectInput(stdinFile.get().asFile)
@@ -189,5 +207,17 @@ internal open class ComposeHotAsyncRun : DefaultTask() {
 
         val process = processBuilder.start()
         logger.quiet("Started '${mainClass.get()}' in background (${process.pid()})")
+
+        thread {
+            process.inputStream.use {
+                it.bufferedReader().forEachLine { line -> logger.quiet(line) }
+            }
+        }
+
+        thread {
+            process.errorStream.use {
+                it.bufferedReader().forEachLine { line -> logger.error(line) }
+            }
+        }
     }
 }

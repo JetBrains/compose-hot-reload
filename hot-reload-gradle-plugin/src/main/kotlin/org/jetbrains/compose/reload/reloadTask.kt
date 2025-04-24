@@ -118,6 +118,14 @@ abstract class ComposeReloadHotClasspathTask : DefaultTask() {
 
     @TaskAction
     fun execute(inputs: InputChanges) {
+        val classpathSnapshotFile = classpathSnapshotFile.get().asFile.toPath()
+
+        if (!inputs.isIncremental) {
+            logger.debug("Non-incremental run: Taking classpath snapshot")
+            classpathSnapshotFile.writeClasspathSnapshot(ClasspathSnapshot(classpath))
+            return
+        }
+
         val client = runCatching { connectOrchestrationClient(Compiler, agentPort.get()) }.getOrNull() ?: run {
             logger.quiet("Failed to create 'OrchestrationClient'!")
             getCancellationToken().cancel()
@@ -127,12 +135,7 @@ abstract class ComposeReloadHotClasspathTask : DefaultTask() {
         client.use {
             client.sendMessage(OrchestrationMessage.RecompilerReady())
 
-            val classpathSnapshotFile = classpathSnapshotFile.get().asFile.toPath()
-            if (!inputs.isIncremental) {
-                logger.debug("Non-incremental run: Taking classpath snapshot")
-                classpathSnapshotFile.writeClasspathSnapshot(ClasspathSnapshot(classpath))
-                return
-            }
+
 
             val snapshot = if (classpathSnapshotFile.exists()) classpathSnapshotFile.readClasspathSnapshot()
             else ClasspathSnapshot(classpath)

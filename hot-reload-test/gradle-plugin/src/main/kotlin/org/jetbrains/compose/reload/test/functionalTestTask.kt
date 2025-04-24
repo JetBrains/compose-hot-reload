@@ -23,6 +23,7 @@ import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.gradle.core.composeReloadJetBrainsRuntimeBinary
 import org.jetbrains.compose.reload.gradle.files
+import org.jetbrains.compose.reload.gradle.intellijDebuggerDispatchPort
 import org.jetbrains.compose.reload.gradle.jetbrainsRuntimeLauncher
 import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
 import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
