@@ -22,3 +22,13 @@ internal object I104NonDurableLambdaNames {
         }
     }
 }
+
+internal object I104DefaultLambdaNames {
+    inline fun <T> inlineHazard(a: List<T>, noinline b: (item: T) -> Any? = { null }, c: (item: T) -> Unit) = Unit
+
+    @Composable
+    fun render() {
+        val array = mutableListOf("A", "B", "C")
+        inlineHazard(array) { }
+    }
+}
