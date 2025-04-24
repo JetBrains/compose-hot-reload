@@ -24,7 +24,7 @@ internal object I104NonDurableLambdaNames {
 }
 
 internal object I104DefaultLambdaNames {
-    inline fun <T> inlineHazard(a: List<T>, noinline b: (item: T) -> Any? = { null }, c: (item: T) -> Unit) = Unit
+    inline fun <T> inlineHazard(a: List<T>, b: (item: T) -> Any? = { null }, c: (item: T) -> Unit) = Unit
 
     @Composable
     fun render() {

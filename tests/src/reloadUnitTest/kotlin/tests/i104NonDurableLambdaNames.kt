@@ -36,8 +36,8 @@ fun `test - #104 - inline function overloads produce non-durable default lambda 
     var source = readSource("i104NonDurableLambdaNames.objects.kt")
     source = source
         .replace(
-            "inline fun <T> inlineHazard(a: List<T>, noinline b: (item: T) -> Any? = { null }, c: (item: T) -> Unit) = Unit",
-            "inline fun inlineHazard(a: IntArray, noinline b: (item: Int, Any) -> Any? = { a, b -> null }, c: (item: Int) -> Unit) = Unit"
+            "inline fun <T> inlineHazard(a: List<T>, b: (item: T) -> Any? = { null }, c: (item: T) -> Unit) = Unit",
+            "inline fun inlineHazard(a: IntArray, b: (item: Int, Any) -> Any? = { a, b -> null }, c: (item: Int) -> Unit) = Unit"
         )
         .replace("val array = mutableListOf(\"A\", \"B\", \"C\")", "val array = intArrayOf(1, 2, 3)")
 
