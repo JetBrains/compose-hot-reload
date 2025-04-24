@@ -2,7 +2,7 @@
 
 [![JetBrains team project](https://jb.gg/badges/incubator.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
-Iterate on your compose UIs faster, and let your creativity run free when building multiplatform user interfaces.
+Iterate on your Compose UIs faster, and let your creativity run free when building multiplatform user interfaces.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./readme-assets/banner_dark.png">
@@ -29,7 +29,7 @@ plugins {
     kotlin("multiplatform") version "2.1.20" // <- Use Kotlin 2.1.20 or higher!
     kotlin("plugin.compose") version "2.1.20" // <- Use Compose Compiler Plugin 2.1.20 or higher!
     id("org.jetbrains.compose")
-    id("org.jetbrains.compose.hot-reload") version "1.0.0-alpha05" // <- add this additionally
+    id("org.jetbrains.compose.hot-reload") version "1.0.0-alpha06" // <- add this additionally
 }
 ```
 
@@ -40,19 +40,19 @@ Using Kotlin Multiplatform and IntelliJ, launching your app is as simple as pres
 
 #### Launch from Gradle task
 The plugin will create the following tasks to launch the application in 'hot reload mode':
-- `:jvmRunHot`: Multiplatform
-- `:runHot`: Kotlin/JVM
+- `:jvmRunHot`: Multiplatform, async alternative (`jvmRunHotAsync`)
+- `:runHot`: Kotlin/JVM, async alternative (`runHotAsync`)
 
-The tasks 'mainClass' can be configured:
+The tasks 'mainClass' can be configured in the buildscript
 ```kotlin
 tasks.withType<ComposeHotRun>().configureEach {
     mainClass.set("com.example.MainKt")
 }
 ```
 
-and then launched with
+or provided when invoking the task
 ```shell
-./gradlew jvmRunHot // optional, provide mainClass using -PmainClass=com.example.MainKt
+./gradlew jvmRunHot --mainClass=com.example.MainKt
 ```
 
 ### Enable 'OptimizeNonSkippingGroups':
