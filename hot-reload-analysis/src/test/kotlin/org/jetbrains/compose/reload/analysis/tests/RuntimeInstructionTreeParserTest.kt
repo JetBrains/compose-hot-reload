@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.analysis.tests
 
 import org.jetbrains.compose.reload.analysis.plusAssign
 import org.jetbrains.compose.reload.analysis.renderRuntimeInstructionTree
+import org.jetbrains.compose.reload.analysis.util.renderAsmTree
 import org.jetbrains.compose.reload.core.asFileName
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
 import org.jetbrains.compose.reload.core.testFixtures.WithCompiler
@@ -90,7 +91,7 @@ class RuntimeInstructionTreeParserTest {
     )
 
     @Test
-    fun `test - composable with eager return`(compiler: Compiler, testInfo: TestInfo) = doTest(
+    fun `test - #152 - composable with eager return`(compiler: Compiler, testInfo: TestInfo) = doTest(
         compiler, testInfo, """
             import androidx.compose.runtime.*
             import androidx.compose.foundation.layout.*
@@ -106,7 +107,6 @@ class RuntimeInstructionTreeParserTest {
                 val value = Value() ?: return
                 Column {
                     Text(value)
-                    Text("Foo: A")
                 }
             }
     """.trimIndent()
@@ -123,7 +123,7 @@ class RuntimeInstructionTreeParserTest {
                 .createParentDirectories().writeBytes(bytecode)
         }
 
-        val rendered = buildString {
+        val renderedTree = buildString {
             appendLine(" /* Code */")
             appendLine(code)
             appendLine()
@@ -134,20 +134,43 @@ class RuntimeInstructionTreeParserTest {
             }
         }.sanitized()
 
-        val expectFile = directory.resolve("runtime-instructions-tree.txt")
+        val renderedAsm = buildString {
+            appendLine(" /* Code */")
+            appendLine(code)
+            appendLine()
+
+            appendLine(" /* Tree */ ")
+            compiled.forEach { (_, bytecode) ->
+                this += renderAsmTree(bytecode)
+            }
+        }.sanitized()
+
+        val expectTreeFile = directory.resolve("runtime-instructions-tree.txt")
+        val expectAsmFile = directory.resolve("runtime-instructions-asm.txt")
         if (TestEnvironment.updateTestData) {
-            expectFile.createParentDirectories().writeText(rendered)
+            expectTreeFile.createParentDirectories().writeText(renderedTree)
+            expectAsmFile.createParentDirectories().writeText(renderedAsm)
             return
         }
 
-        if (!expectFile.exists()) {
-            expectFile.createParentDirectories().writeText(rendered)
-            error("Runtime Instruction Tree '${expectFile.toUri()}' did not exist; Generated")
+        if (!expectTreeFile.exists()) {
+            expectTreeFile.createParentDirectories().writeText(renderedTree)
+            error("Runtime Instruction Tree '${expectTreeFile.toUri()}' did not exist; Generated")
         }
 
-        if (expectFile.readText().sanitized() != rendered) {
-            expectFile.resolveSibling(expectFile.nameWithoutExtension + "-actual.txt").writeText(rendered)
-            error("Runtime Instruction Tree '${expectFile.toUri()}' did not match")
+        if (expectTreeFile.readText().sanitized() != renderedTree) {
+            expectTreeFile.resolveSibling(expectTreeFile.nameWithoutExtension + "-actual.txt").writeText(renderedTree)
+            error("Runtime Instruction Tree '${expectTreeFile.toUri()}' did not match")
+        }
+
+        if (!expectAsmFile.exists()) {
+            expectAsmFile.createParentDirectories().writeText(renderedAsm)
+            error("Runtime Asm Tree '${expectAsmFile.toUri()}' did not exist; Generated")
+        }
+
+        if (expectAsmFile.readText().sanitized() != renderedAsm) {
+            expectAsmFile.resolveSibling(expectAsmFile.nameWithoutExtension + "-actual.txt").writeText(renderedAsm)
+            error("Runtime Asm Tree '${expectAsmFile.toUri()}' did not match")
         }
     }
 }

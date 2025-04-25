@@ -32,8 +32,6 @@ private val logger = createLogger()
 data class RuntimeInstructionTree(
     val group: ComposeGroupKey?,
     val type: RuntimeScopeType,
-    val startIndex: Int,
-    val lastIndex: Int,
     val tokens: List<RuntimeInstructionToken>,
     val children: List<RuntimeInstructionTree>,
 
@@ -48,7 +46,7 @@ internal fun parseRuntimeInstructionTreeLenient(methodId: MethodId, methodNode: 
     if (methodNode.instructions.size() == 0) {
         return RuntimeInstructionTree(
             group = methodNode.readFunctionKeyMetaAnnotation(), type = RuntimeScopeType.Method,
-            startIndex = -1, lastIndex = -1, tokens = emptyList(), children = emptyList()
+            tokens = emptyList(), children = emptyList()
         )
     }
 
@@ -59,8 +57,6 @@ internal fun parseRuntimeInstructionTreeLenient(methodId: MethodId, methodNode: 
         return RuntimeInstructionTree(
             group = methodNode.readFunctionKeyMetaAnnotation(),
             type = RuntimeScopeType.Method,
-            startIndex = 0,
-            lastIndex = tokens.lastIndex,
             tokens = tokens,
             children = emptyList(),
             failure = right.value
@@ -72,8 +68,6 @@ internal fun parseRuntimeInstructionTreeLenient(methodId: MethodId, methodNode: 
         return RuntimeInstructionTree(
             group = methodNode.readFunctionKeyMetaAnnotation(),
             type = RuntimeScopeType.Method,
-            startIndex = 0,
-            lastIndex = tokens.lastIndex,
             tokens = tokens,
             children = emptyList(),
             failure = right.value
@@ -90,167 +84,152 @@ internal fun parseRuntimeInstructionTree(methodNode: MethodNode): Either<Runtime
 internal fun parseRuntimeInstructionTree(
     methodNode: MethodNode, tokens: List<RuntimeInstructionToken>
 ): Either<RuntimeInstructionTree, Failure> {
-    val groupKey = methodNode.readFunctionKeyMetaAnnotation()
-    return parseRuntimeInstructionTree(
-        groupKey, RuntimeScopeType.Method, tokens, startIndex = 0, endIndex = tokens.lastIndex
+    return linearParseRuntimeInstructionTree(methodNode, tokens)
+}
+
+private class MutableTree(
+    var group: ComposeGroupKey?,
+    var type: RuntimeScopeType,
+    val tokens: MutableList<RuntimeInstructionToken>,
+    val children: MutableList<MutableTree>,
+    var parent: MutableTree? = null,
+    val markers: MutableSet<Int> = mutableSetOf()
+) {
+    fun toRuntimeInstructionTree(): RuntimeInstructionTree = RuntimeInstructionTree(
+        group = this.group,
+        type = this.type,
+        tokens = this.tokens,
+        children = this.children.map { it.toRuntimeInstructionTree() },
     )
 }
 
-private fun parseRuntimeInstructionTree(
-    group: ComposeGroupKey?,
-    type: RuntimeScopeType,
-    tokens: List<RuntimeInstructionToken>,
-    /**
-     * The index to start parsing from
-     */
-    startIndex: Int,
+private fun MutableList<MutableTree?>.matchToken2Tree(
+    tokenIndex: Int,
+    tree: MutableTree?
+) {
+    if (this[tokenIndex] == null) {
+        this[tokenIndex] = tree
+    }
+}
 
-    /**
-     * The index (exclusive) where to stop parsing!
-     */
-    endIndex: Int,
-
-    consumed: List<RuntimeInstructionToken> = mutableListOf(),
-    children: List<RuntimeInstructionTree> = mutableListOf(),
+private fun linearParseRuntimeInstructionTree(
+    methodNode: MethodNode, tokens: List<RuntimeInstructionToken>
 ): Either<RuntimeInstructionTree, Failure> {
     if (tokens.isEmpty()) return Failure("empty tokens").toRight()
-    val consumed = consumed.toMutableList()
-    val children = children.toMutableList()
-    val marker = mutableListOf<CurrentMarkerToken>()
 
-    var index = startIndex
-    while (index < tokens.size) {
-        if (index > endIndex) return Failure("Scope ended").toRight()
+    val token2Tree = MutableList<MutableTree?>(tokens.size + 1) { null }
+    val root = MutableTree(
+        group = methodNode.readFunctionKeyMetaAnnotation(),
+        type = RuntimeScopeType.Method,
+        tokens = mutableListOf(),
+        children = mutableListOf(),
+    )
+    token2Tree.matchToken2Tree(0, root)
 
-        val currentToken = tokens[index]
-        val currentIndex = index
-
+    for ((currentIndex, currentToken) in tokens.withIndex()) {
+        val currentNode = token2Tree[currentIndex] ?: continue
+        val nextIndex = currentIndex + 1
         when (currentToken) {
-            is BlockToken, is LabelToken,
-            is SourceInformation, is SourceInformationMarkerStart, is SourceInformationMarkerEnd -> {
-                consumed += currentToken
-                index++
+            is BlockToken, is LabelToken, is SourceInformation, is SourceInformationMarkerStart, is SourceInformationMarkerEnd -> {
+                currentNode.tokens += currentToken
+                token2Tree.matchToken2Tree(nextIndex, currentNode)
             }
 
-            is CurrentMarkerToken -> {
-                marker += currentToken
-                consumed += currentToken
-                index++
+            is StartRestartGroup -> {
+                val newNode = MutableTree(
+                    group = currentToken.key,
+                    type = RuntimeScopeType.RestartGroup,
+                    tokens = mutableListOf(),
+                    children = mutableListOf(),
+                    parent = currentNode,
+                )
+                token2Tree[currentIndex] = newNode
+
+                currentNode.children += newNode
+                newNode.tokens += currentToken
+                token2Tree.matchToken2Tree(nextIndex, newNode)
             }
 
-            is EndToMarkerToken -> {
-                if (marker.any { it.variableIndex == currentToken.variableIndex }) {
-                    index++
-                } else {
-                    /* Yield the token to the parent, by only consuming it when its part of this scope */
-                    consumed += currentToken
-                    index--
-                    break
+            is EndRestartGroup -> {
+                if (currentNode.type != RuntimeScopeType.RestartGroup) {
+                    return Failure("EndRestartGroup is not allowed in ${currentNode.type} scope").toRight()
+                }
+                currentNode.tokens += currentToken
+                token2Tree.matchToken2Tree(nextIndex, currentNode.parent)
+            }
+
+            is StartReplaceGroup -> {
+                val newNode = MutableTree(
+                    group = currentToken.key,
+                    type = RuntimeScopeType.ReplaceGroup,
+                    tokens = mutableListOf(),
+                    children = mutableListOf(),
+                    parent = currentNode
+                )
+                token2Tree[currentIndex] = newNode
+
+                currentNode.children += newNode
+                newNode.tokens += currentToken
+                token2Tree.matchToken2Tree(nextIndex, newNode)
+            }
+
+            is EndReplaceGroup -> {
+                if (currentNode.type != RuntimeScopeType.ReplaceGroup) {
+                    return Failure("EndReplaceGroup is not allowed in ${currentNode.type} scope").toRight()
+                }
+                currentNode.tokens += currentToken
+                token2Tree.matchToken2Tree(nextIndex, currentNode.parent)
+            }
+
+            is JumpToken -> {
+                currentNode.tokens += currentToken
+
+                val jumpIndex = tokens.indexOfFirst {
+                    it is LabelToken && it.labelInsn.label == currentToken.jumpInsn.label.label
+                }
+
+                /* Perform the forward jump; We don't care about backward jumps, because they are already handled */
+                if (jumpIndex > currentIndex) {
+                    token2Tree.matchToken2Tree(jumpIndex, currentNode)
+                }
+
+                /* Continue execution on path w/o jump */
+                if (currentToken.jumpInsn.opcode != Opcodes.GOTO) {
+                    token2Tree.matchToken2Tree(nextIndex, currentNode)
                 }
             }
 
             is ReturnToken -> {
-                if (type != RuntimeScopeType.Method) {
-                    return Failure("ReturnToken is not allowed in $type scope").toRight()
+                if (currentNode.type != RuntimeScopeType.Method) {
+                    return Failure("ReturnToken is not allowed in ${currentNode.type} scope").toRight()
                 }
-                consumed += currentToken
-                break
+                currentNode.tokens += currentToken
             }
 
-            is EndRestartGroup -> {
-                if (type != RuntimeScopeType.RestartGroup) {
-                    return Failure("EndRestartGroup is not allowed in $type scope").toRight()
-                }
-                consumed += currentToken
-                break
+            is CurrentMarkerToken -> {
+                currentNode.tokens += currentToken
+                currentNode.markers += currentToken.variableIndex
+                token2Tree.matchToken2Tree(nextIndex, currentNode)
             }
 
-            is EndReplaceGroup -> {
-                if (type != RuntimeScopeType.ReplaceGroup) {
-                    return Failure("EndReplaceGroup is not allowed in $type scope").toRight()
+            is EndToMarkerToken -> {
+                currentNode.tokens += currentToken
+                when (currentToken.variableIndex) {
+                    in currentNode.markers -> {
+                        token2Tree.matchToken2Tree(nextIndex, currentNode)
+                    }
+                    else -> {
+                        var parent = currentNode
+                        do {
+                            parent = parent.parent
+                                ?: return Failure("EndToMarkerToken(${currentToken.variableIndex}) is not matched in ${currentNode.type} scope").toRight()
+                        } while (currentToken.variableIndex !in parent.markers)
+                        token2Tree.matchToken2Tree(nextIndex, parent)
+                    }
                 }
-                consumed += currentToken
-                break
-            }
-
-            is StartRestartGroup -> {
-                val child = parseRuntimeInstructionTree(
-                    group = currentToken.key,
-                    type = RuntimeScopeType.RestartGroup,
-                    tokens = tokens,
-                    startIndex = currentIndex + 1,
-                    endIndex = endIndex,
-                    consumed = listOf(currentToken)
-                ).leftOr { return it }
-
-                children += child
-                index = index + child.lastIndex + 1
-            }
-
-
-            is StartReplaceGroup -> {
-                val child = parseRuntimeInstructionTree(
-                    group = currentToken.key,
-                    type = RuntimeScopeType.ReplaceGroup,
-                    tokens = tokens,
-                    startIndex = currentIndex + 1,
-                    endIndex = endIndex,
-                    consumed = listOf(currentToken)
-                ).leftOr { return it }
-                children += child
-                index = child.lastIndex + 1
-            }
-
-            is JumpToken -> {
-                consumed += currentToken
-
-                /* Perform Jump */
-                val jumpIndex = tokens.indexOfFirst {
-                    it is LabelToken && it.labelInsn.label == currentToken.jumpInsn.label
-                }
-
-                /* Loop jump; We only care about forward jumps atm */
-                if (jumpIndex <= index) {
-                    index++
-                    continue
-                }
-
-                /* Perform the forward jump */
-                children += parseRuntimeInstructionTree(
-                    group = group,
-                    type = type,
-                    tokens = tokens,
-                    startIndex = tokens.indexOfFirst {
-                        it is LabelToken && it.labelInsn.label == currentToken.jumpInsn.label
-                    },
-                    endIndex = endIndex
-                ).leftOr { return it }
-
-
-                /* Continue execution on path w/o jump */
-                if (currentToken.jumpInsn.opcode != Opcodes.GOTO) {
-                    val child = parseRuntimeInstructionTree(
-                        group = group,
-                        type = type,
-                        tokens = tokens,
-                        startIndex = currentIndex + 1,
-                        endIndex = jumpIndex,
-                    ).leftOr { return it }
-                    children += child
-                    index = child.lastIndex + 1
-                }
-
-                break
             }
         }
     }
 
-    return RuntimeInstructionTree(
-        group = group,
-        type = type,
-        tokens = consumed,
-        children = children,
-        startIndex = startIndex,
-        lastIndex = index
-    ).toLeft()
+    return root.toRuntimeInstructionTree().toLeft()
 }

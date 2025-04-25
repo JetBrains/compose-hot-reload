@@ -22,7 +22,7 @@ FooKt {
     Foo {
         desc: (Landroidx/compose/runtime/Composer;I)V
         key: -965539098
-        codeHash: 1719358010
+        codeHash: 3669107203
         methodDependencies: [
             FooKt.Foo$lambda$5 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         ]

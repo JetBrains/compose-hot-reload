@@ -22,7 +22,7 @@ import org.objectweb.asm.tree.MethodNode
 
 
 fun RuntimeInfo.render(): String = buildString {
-    classIndex.toSortedMap().forEach { (classId, classInfo) ->
+    classIndex.toSortedMap().forEach { (_, classInfo) ->
         append(classInfo.render())
         appendLine()
     }
@@ -155,7 +155,7 @@ fun ClassNode.renderRuntimeInstructionTree(): String = buildString {
 }
 
 fun MethodNode.render(tree: RuntimeInstructionTree): String = buildString {
-    this += "${tree.type} (group=${tree.group}) [${tree.startIndex}:${tree.lastIndex}] {"
+    this += "${tree.type} (group=${tree.group}) {"
     this += tree.tokens.joinToString("\n") { token -> render(token).trim() }.indent()
 
     if (tree.children.isNotEmpty()) {
@@ -175,4 +175,4 @@ fun StringBuilder.withIndent(builder: StringBuilder.() -> Unit) {
     appendLine(buildString(builder).trim().prependIndent("    "))
 }
 
-fun String.indent() = prependIndent("    ")
+fun String.indent(n: Int = 1) = prependIndent("    ".repeat(n))

@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.analysis
 
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.BenchmarkMode
+import kotlinx.benchmark.Blackhole
 import kotlinx.benchmark.Measurement
 import kotlinx.benchmark.Mode
 import kotlinx.benchmark.OutputTimeUnit
@@ -33,17 +34,17 @@ private val logger = createLogger()
 @Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
-open class ResolveDirtyScopesBenchmark {
+open class RuntimeInstructionTreeParseBenchmark {
 
-    @Param("1000", "10000")
+    @Param("1000")
     var currentRuntimeSize = 0
-    val currentRuntime = TrackingRuntimeInfo()
 
-    @Param("10", "100")
-    var pendingRedefinitionSize = 0
-    val pendingRedefinition = TrackingRuntimeInfo()
+    @Param("1", "5", "10", "20")
+    var depth = 0
 
     lateinit var workingDir: Path
+
+    lateinit var baselineBytecode: Map<String, ByteArray>
 
     @Setup
     fun setup() {
@@ -53,18 +54,33 @@ open class ResolveDirtyScopesBenchmark {
 
         fun generateSource(index: Int, stringLiteral: String): String {
             val logIndex = log2(index.toFloat()).roundToInt()
+
+            fun generateIfCombo(depth: Int, index: Int): String = """
+                if(staticField$index > 0) {
+                    Text("Hello")
+                } else {
+                    if(res.length > $depth) {
+                        Text("Hello " + res)
+                        ${if (depth > 0) generateIfCombo(depth - 1, index) else ""}
+                    }
+                    
+                    Text("Hello else")
+                }
+            """.trimIndent()
+
             return """
                     import androidx.compose.runtime.*
+                    import androidx.compose.material.Text
                     var staticField$index = $index
-
+                   
                     open class Foo$index${if (logIndex > 0 && logIndex % 2 == 0) ": Foo${logIndex}()" else ""}
-
+                    
                     fun helper$index() = "$stringLiteral: %staticField$index"
-
+                   
                     @Composable
                     fun Widget$index() {
-                       helper$index()
-                      // helper$logIndex()
+                        val res = helper$index()
+                        ${generateIfCombo(depth, index)}
                     }
                 """.trimIndent().replace("%", "$")
         }
@@ -75,27 +91,8 @@ open class ResolveDirtyScopesBenchmark {
             }
         }
 
-        val redefineSources = buildMap {
-            repeat(currentRuntimeSize) { index ->
-                put("Foo$index.kt", generateSource(index, "redefine"))
-            }
-        }
-
         logger.info("Compiling baseline sources...")
-        val baselineBytecode = compiler.compile(baselineSources)
-
-        logger.info("Compiling redefine sources...")
-        val redefineBytecode = compiler.compile(redefineSources)
-
-        logger.info("Loading baseline classes...")
-        baselineBytecode.forEach { (fileName, bytecode) ->
-            currentRuntime.add(ClassInfo(bytecode)!!)
-        }
-
-        logger.info("Loading redefine classes...")
-        redefineBytecode.entries.toList().takeLast(pendingRedefinitionSize).forEach { (fileName, bytecode) ->
-            pendingRedefinition.add(ClassInfo(bytecode)!!)
-        }
+        baselineBytecode = compiler.compile(baselineSources)
     }
 
     @OptIn(ExperimentalPathApi::class)
@@ -105,8 +102,11 @@ open class ResolveDirtyScopesBenchmark {
     }
 
     @Benchmark
-    fun redefine(): RuntimeDirtyScopes {
-        return currentRuntime.resolveDirtyRuntimeScopes(pendingRedefinition)
+    fun parse(blackhole: Blackhole) {
+        baselineBytecode.forEach { (_, bytecode) ->
+            ClassNode(bytecode).methods.forEach {
+                blackhole.consume(parseRuntimeInstructionTree(it))
+            }
+        }
     }
-
 }

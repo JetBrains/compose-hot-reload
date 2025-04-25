@@ -58,6 +58,7 @@ dependencies {
     implementation(deps.asm.tree)
 
     testImplementation(deps.logback)
+    testImplementation(deps.asm.util)
 
     testFixturesImplementation(kotlin("test"))
     testFixturesImplementation(deps.junit.jupiter)
