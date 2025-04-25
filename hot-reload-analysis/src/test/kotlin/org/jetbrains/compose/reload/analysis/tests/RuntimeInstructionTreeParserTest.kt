@@ -89,6 +89,29 @@ class RuntimeInstructionTreeParserTest {
     """.trimIndent()
     )
 
+    @Test
+    fun `test - composable with eager return`(compiler: Compiler, testInfo: TestInfo) = doTest(
+        compiler, testInfo, """
+            import androidx.compose.runtime.*
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.material3.Text
+                         
+            @Composable
+            fun Value(): String? {
+                return "value: 0"
+            }
+          
+            @Composable
+            fun Foo() {
+                val value = Value() ?: return
+                Column {
+                    Text(value)
+                    Text("Foo: A")
+                }
+            }
+    """.trimIndent()
+    )
+
     private fun doTest(compiler: Compiler, testInfo: TestInfo, code: String) {
         val directory = Path("src/test/resources/runtimeInstructionTree")
             .resolve(testInfo.testClass.get().name.asFileName())

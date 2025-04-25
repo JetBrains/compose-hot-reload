@@ -639,4 +639,34 @@ class ScreenshotTests {
         fixture.replaceSourceCodeAndReload("val foo = 42", "val foo = 1902")
         fixture.checkScreenshot("1-after-foo-changed")
     }
+
+    @HotReloadTest
+    fun `test - eager return`(fixture: HotReloadTestFixture) = fixture.runTest {
+        fixture initialSourceCode """
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.runtime.*
+            import org.jetbrains.compose.reload.test.*
+            
+            @Composable
+            fun Value(): String? {
+                return "value: 0"
+            }
+          
+            fun main() = screenshotTestApplication {
+                val value = Value() ?: return@screenshotTestApplication
+                Column {
+                    TestText(value)
+                    TestText("Foo: A")
+                }
+            }
+        """.trimIndent()
+
+        fixture.checkScreenshot("0-before")
+
+        fixture.replaceSourceCodeAndReload("Foo: A", "Foo: B")
+        fixture.checkScreenshot("1-after-Foo-B")
+
+        fixture.replaceSourceCodeAndReload("value: 0", "value: 1")
+        fixture.checkScreenshot("2-after-value-1")
+    }
 }
