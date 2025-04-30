@@ -10,11 +10,11 @@ plugins {
     `publishing-conventions`
 }
 
-publishing {
-    publications.withType<MavenPublication>().configureEach {
-        this.artifactId = "test-gradle-plugin"
-    }
+publishingConventions {
+    artifactId = "hot-reload-test-gradle-plugin"
+    oldArtifactId = "test-gradle-plugin"
 }
+
 
 gradlePlugin {
     plugins.create("hot-reload-test") {

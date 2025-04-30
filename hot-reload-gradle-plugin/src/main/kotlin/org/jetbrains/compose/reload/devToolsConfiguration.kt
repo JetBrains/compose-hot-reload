@@ -46,7 +46,7 @@ internal val Project.composeHotReloadDevToolsConfiguration: Configuration
             )
 
             configuration.dependencies.add(
-                project.dependencies.create("org.jetbrains.compose.hot-reload:devtools:$HOT_RELOAD_VERSION")
+                project.dependencies.create("org.jetbrains.compose.hot-reload:hot-reload-devtools:$HOT_RELOAD_VERSION")
             )
 
             /**

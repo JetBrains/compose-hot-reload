@@ -130,7 +130,7 @@ class AfterHotReloadEffectTest {
 
     class Extension : BuildGradleKtsExtension {
         override fun commonDependencies(context: ExtensionContext): String? {
-            return "implementation(\"org.jetbrains.compose.hot-reload:runtime-api:$HOT_RELOAD_VERSION\")"
+            return "implementation(\"org.jetbrains.compose.hot-reload:hot-reload-runtime-api:$HOT_RELOAD_VERSION\")"
         }
     }
 }

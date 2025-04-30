@@ -69,7 +69,7 @@ internal val Project.hotReloadRuntimeConfiguration: Configuration
              * practically engaging the 'DevelopmentEntryPoint {}' transformations
              */
             project.dependencies.add(
-                configuration.name, "org.jetbrains.compose.hot-reload:runtime-api:$HOT_RELOAD_VERSION"
+                configuration.name, "org.jetbrains.compose.hot-reload:hot-reload-runtime-api:$HOT_RELOAD_VERSION"
             )
         }
 

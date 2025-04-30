@@ -33,7 +33,7 @@ private fun KotlinTarget.setupComposeDevCompilation() {
 
     dev.defaultSourceSet.dependencies {
         if (project.composeReloadAutoRuntimeDependenciesEnabled) {
-            implementation("org.jetbrains.compose.hot-reload:runtime-api:$HOT_RELOAD_VERSION")
+            implementation("org.jetbrains.compose.hot-reload:hot-reload-runtime-api:$HOT_RELOAD_VERSION")
         }
 
         project.withComposePlugin {

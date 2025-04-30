@@ -162,8 +162,8 @@ private fun KotlinTarget.configureDefaultHotReloadTestTask() {
     }
 
     compilation.defaultSourceSet.dependencies {
-        implementation("org.jetbrains.compose.hot-reload:test:${HOT_RELOAD_VERSION}")
-        implementation("org.jetbrains.compose.hot-reload:runtime-jvm:${HOT_RELOAD_VERSION}")
+        implementation("org.jetbrains.compose.hot-reload:hot-reload-test:${HOT_RELOAD_VERSION}")
+        implementation("org.jetbrains.compose.hot-reload:hot-reload-runtime-jvm:${HOT_RELOAD_VERSION}")
         project.withComposePlugin {
             implementation(project.extensions.getByType<ComposeExtension>().dependencies.desktop.currentOs)
         }

@@ -29,6 +29,7 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.extension
 import kotlin.io.path.isRegularFile
+import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.pathString
 import kotlin.io.path.readText
@@ -83,6 +84,8 @@ open class CheckPublicationTask : DefaultTask() {
 
     @OptIn(ExperimentalPathApi::class)
     private fun checkPublicationDump(root: Path) {
+        val hashRegex = Regex(""""[a-zA-Z0-9]{16,}"""")
+        val sizeRegex = Regex(""""size":\h*(?<size>\d+)""")
         val issues = mutableListOf<String>()
 
         val expectedPublicationDirectory = expectedPublicationDirectory.get().asFile.toPath()
@@ -92,11 +95,13 @@ open class CheckPublicationTask : DefaultTask() {
             .toMutableSet()
 
         fun String.sanitize() = lineSequence()
-            .map { line -> line.replace(projectVersion, "<HOT RELOAD VERSION>") }
+            .map { line -> line.replace(projectVersion, "{{Hot Reload Version}}") }
+            .map { line -> line.replace(hashRegex, "\"{{HASH}}\"")}
+            .map { line -> line.replace(sizeRegex, """"size": {{SIZE}}""") }
             .joinToString(System.lineSeparator())
 
         root.walk().forEach { path ->
-            if (path.extension in listOf("sha1", "sha256", "sha512", "md5")) return@forEach
+            if (path.extension in listOf("sha1", "sha256", "sha512", "md5", "actual")) return@forEach
 
             val actualText = if (path.extension in listOf("pom", "module")) {
                 path.readText().sanitize()
@@ -116,9 +121,9 @@ open class CheckPublicationTask : DefaultTask() {
             if (!expectFile.exists()) {
                 issues.add("${path.toUri()}: Unexpected file")
             } else if (expectFile.readText().sanitize() != actualText) {
-                issues.add("${path.toUri()}: Content mismatch")
+                issues.add("${expectFile.toUri()}: Content mismatch")
                 expectFile
-                    .resolveSibling("${expectFile.nameWithoutExtension}-actual.${expectFile.extension}")
+                    .resolveSibling("${expectFile.name}.actual")
                     .writeText(actualText)
             }
         }

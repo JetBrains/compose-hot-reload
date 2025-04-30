@@ -13,9 +13,14 @@ configurations.configureEach {
             if (requested !is ModuleComponentSelector) return@dependency
             if (requested.group != project.group.toString()) return@dependency
 
+
             val projectPath = when (requested.module) {
                 "test-gradle" -> ":hot-reload-test:gradle-testFixtures"
-                else -> ":hot-reload-${requested.module}"
+                "hot-reload-gradle-testFixtures" -> ":hot-reload-test:gradle-testFixtures"
+                else -> {
+                    if (requested.module.startsWith("hot-reload-")) ":${requested.module}"
+                    else ":hot-reload-${requested.module}"
+                }
             }
 
             useTarget(project(projectPath))

@@ -1,3 +1,8 @@
+@file:OptIn(InternalHotReloadGradleApi::class)
+
+import org.jetbrains.compose.reload.gradle.InternalHotReloadGradleApi
+import org.jetbrains.compose.reload.gradle.camelCase
+
 /*
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
@@ -16,6 +21,8 @@ private val fireworkPassword = providers.gradleProperty("fireworkPassword").orNu
 private val signingKeyId = providers.gradleProperty("signing.keyId").orNull
 private val signingSecretKey = providers.gradleProperty("signing.key").orNull
 private val signingPassword = providers.gradleProperty("signing.key.password").orNull
+
+val extension = project.extensions.create("publishingConventions", PublishingConventions::class.java, project)
 
 plugins.withType<MavenPublishPlugin>().all {
     publishing {
@@ -54,8 +61,11 @@ plugins.withType<MavenPublishPlugin>().all {
 
             suppressPomMetadataWarningsFor("testFixturesApiElements")
             suppressPomMetadataWarningsFor("testFixturesRuntimeElements")
+            val defaultArtifactId = artifactId
 
-            artifactId = project.name.removePrefix("hot-reload-")
+            afterEvaluate {
+                artifactId = artifactId.replace(project.name, extension.artifactId.get())
+            }
 
             pom {
                 name = project.name
@@ -147,6 +157,34 @@ fun MavenPublication.signPublicationIfKeyPresent() {
 
         tasks.withType<PublishToMavenRepository>().configureEach {
             dependsOn(tasks.withType<Sign>())
+        }
+    }
+}
+
+
+afterEvaluate {
+    publishing {
+        val oldArtifactId = extension.oldArtifactId.orNull ?: return@publishing
+        publications.toList().forEach { publication ->
+            if (publication !is MavenPublication) return@forEach
+
+            /* No relocation for gradle plugin markers */
+            if (publication.artifactId.endsWith("gradle.plugin")) return@forEach
+
+            publications.create(camelCase(publication.name, "relocation"), MavenPublication::class.java) {
+                afterEvaluate {
+                    artifactId = publication.artifactId.replace(extension.artifactId.get(), oldArtifactId)
+                    pom {
+                        distributionManagement {
+                            relocation {
+                                group = publication.groupId
+                                artifactId = publication.artifactId
+                                version = publication.version
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

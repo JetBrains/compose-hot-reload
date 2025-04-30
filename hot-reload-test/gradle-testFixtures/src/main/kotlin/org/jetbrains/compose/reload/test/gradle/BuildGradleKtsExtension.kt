@@ -181,7 +181,7 @@ internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
 
     override fun jvmMainDependencies(context: ExtensionContext): String? = """
         implementation(compose.desktop.currentOs)
-        implementation("org.jetbrains.compose.hot-reload:test:$HOT_RELOAD_VERSION")
+        implementation("org.jetbrains.compose.hot-reload:hot-reload-test:$HOT_RELOAD_VERSION")
     """.trimIndent()
 
 

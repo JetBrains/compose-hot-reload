@@ -162,16 +162,17 @@ private val hotReloadAgentDependencies = arrayOf(
     PathRegex(".*/gradleHome/.*/asm-tree-9.7.1.jar"),
     PathRegex(".*/gradleHome/.*/javassist-3.30.2-GA.jar"),
     PathRegex(".*/gradleHome/.*/slf4j-api-2.0.16.jar"),
-    PathRegex("${repositoryRoot.pathString}/build/repo/.*/agent-$HOT_RELOAD_VERSION.jar"),
-    PathRegex("${repositoryRoot.pathString}/build/repo/.*/core-$HOT_RELOAD_VERSION.jar"),
-    PathRegex("${repositoryRoot.pathString}/build/repo/.*/orchestration-$HOT_RELOAD_VERSION.jar"),
-    PathRegex("${repositoryRoot.pathString}/build/repo/.*/analysis-$HOT_RELOAD_VERSION.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-agent-$HOT_RELOAD_VERSION.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-core-$HOT_RELOAD_VERSION.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-orchestration-$HOT_RELOAD_VERSION.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-analysis-$HOT_RELOAD_VERSION.jar"),
 )
 
 private val hotReloadRuntimeDependencies = arrayOf(
-    PathRegex("${repositoryRoot.pathString}/build/repo/.*/runtime-jvm-$HOT_RELOAD_VERSION-dev.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-runtime-api-jvm-$HOT_RELOAD_VERSION.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-runtime-jvm-$HOT_RELOAD_VERSION-dev.jar"),
 )
 
 private val testRuntimeDependencies = arrayOf(
-    PathRegex("${repositoryRoot.pathString}/build/repo/.*/test-$HOT_RELOAD_VERSION.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-test-$HOT_RELOAD_VERSION.jar"),
 )

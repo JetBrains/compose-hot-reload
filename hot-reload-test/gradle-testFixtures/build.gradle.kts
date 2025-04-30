@@ -30,8 +30,7 @@ dependencies {
     implementation(deps.junit.jupiter.engine)
 }
 
-publishing {
-    publications.withType<MavenPublication>().configureEach {
-        artifactId = "test-gradle"
-    }
+publishingConventions {
+    artifactId = "hot-reload-gradle-testFixtures"
+    oldArtifactId = "test-gradle"
 }
