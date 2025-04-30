@@ -1,0 +1,155 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "url": "../../runtime-api/<HOT RELOAD VERSION>/runtime-api-<HOT RELOAD VERSION>.module",
+    "group": "org.jetbrains.compose.hot-reload",
+    "module": "runtime-api",
+    "version": "<HOT RELOAD VERSION>",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.12.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "releaseApiElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "hot-reload-runtime-api-release.aar",
+          "url": "runtime-api-android-<HOT RELOAD VERSION>.aar",
+          "size": 7106,
+          "sha512": "0890eb5b3483aa1ed44d4a3d3d803b0928132a66552869c391ceea086b9542d80052f7e7c95cfbd4fae553c94ff127664476bf51892bb42d246e4dacf7c9306a",
+          "sha256": "3e1f0e33cf65be9beca734041fbd2cebc2817bacfd9920344f52f3fe94e8f38a",
+          "sha1": "f23e307bbb94d41982c1d556459a681ae87bf696",
+          "md5": "1e1a2f6dddad0661c2a6899a77bacbb3"
+        }
+      ]
+    },
+    {
+      "name": "releaseRuntimeElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          },
+          "excludes": [
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-stdlib-common"
+            },
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-test-common"
+            },
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-test-annotations-common"
+            }
+          ]
+        },
+        {
+          "group": "org.jetbrains.compose.runtime",
+          "module": "runtime",
+          "version": {
+            "requires": "1.7.3"
+          },
+          "excludes": [
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-stdlib-common"
+            },
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-test-common"
+            },
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-test-annotations-common"
+            }
+          ]
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-core",
+          "version": {
+            "requires": "1.10.1"
+          },
+          "excludes": [
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-stdlib-common"
+            },
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-test-common"
+            },
+            {
+              "group": "org.jetbrains.kotlin",
+              "module": "kotlin-test-annotations-common"
+            }
+          ]
+        }
+      ],
+      "files": [
+        {
+          "name": "hot-reload-runtime-api-release.aar",
+          "url": "runtime-api-android-<HOT RELOAD VERSION>.aar",
+          "size": 7106,
+          "sha512": "0890eb5b3483aa1ed44d4a3d3d803b0928132a66552869c391ceea086b9542d80052f7e7c95cfbd4fae553c94ff127664476bf51892bb42d246e4dacf7c9306a",
+          "sha256": "3e1f0e33cf65be9beca734041fbd2cebc2817bacfd9920344f52f3fe94e8f38a",
+          "sha1": "f23e307bbb94d41982c1d556459a681ae87bf696",
+          "md5": "1e1a2f6dddad0661c2a6899a77bacbb3"
+        }
+      ]
+    },
+    {
+      "name": "releaseSourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "files": [
+        {
+          "name": "hot-reload-runtime-api-android-<HOT RELOAD VERSION>-sources.jar",
+          "url": "runtime-api-android-<HOT RELOAD VERSION>-sources.jar",
+          "size": 3916,
+          "sha512": "a2ddf4d578d43a3a717df87a59b592f332b478147d91aab3b359c7c9dd9145c638b2c12a95da1ad0f62c284c55b22542d071d85259e77d5dd809de7b2e61a6b3",
+          "sha256": "52af30a820561a5b87d5f2a336ddc750c562612d88c8b6c4d6846ee85eee7bc9",
+          "sha1": "4f657750522741b1a7aae5227bb1ff9240cadc0d",
+          "md5": "44c1cee2639c38bf9a209dc86c9211a1"
+        }
+      ]
+    }
+  ]
+}

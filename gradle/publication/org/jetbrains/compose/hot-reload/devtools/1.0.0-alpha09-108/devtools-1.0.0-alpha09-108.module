@@ -1,0 +1,213 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "org.jetbrains.compose.hot-reload",
+    "module": "devtools",
+    "version": "<HOT RELOAD VERSION>",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.12.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 17,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "devtools-<HOT RELOAD VERSION>.jar",
+          "url": "devtools-<HOT RELOAD VERSION>.jar",
+          "size": 440075,
+          "sha512": "c7db2ccf8d43fd77a247694e6df242d45771e04609e354782095ee63f65d2c476062a422000f3053615ef3da25ea8b1e681e1fb2fda40b64d7e1394c49d088c0",
+          "sha256": "d8f1bfad05cd58b528fb4f5babfb87e441b260292567eb8be1215c18540ed893",
+          "sha1": "cdf7e2914a2d8effa17235c6671a255b2fb69bf0",
+          "md5": "ec23ef349a13f26ee6ddf04082c2d411"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 17,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.compose.runtime",
+          "module": "runtime",
+          "version": {
+            "requires": "1.7.3"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "core",
+          "version": {
+            "requires": "<HOT RELOAD VERSION>"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "orchestration",
+          "version": {
+            "requires": "<HOT RELOAD VERSION>"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "runtime-api",
+          "version": {
+            "requires": "<HOT RELOAD VERSION>"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "runtime-jvm",
+          "version": {
+            "requires": "<HOT RELOAD VERSION>"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.desktop",
+          "module": "desktop",
+          "version": {
+            "requires": "1.7.3"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.material3",
+          "module": "material3",
+          "version": {
+            "requires": "1.7.3"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.components",
+          "module": "components-resources",
+          "version": {
+            "requires": "1.7.3"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-swing",
+          "version": {
+            "requires": "1.10.1"
+          }
+        },
+        {
+          "group": "ch.qos.logback",
+          "module": "logback-classic",
+          "version": {
+            "requires": "1.5.16"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-datetime",
+          "version": {
+            "requires": "0.6.2"
+          }
+        },
+        {
+          "group": "io.sellmair",
+          "module": "evas",
+          "version": {
+            "requires": "1.2.0"
+          }
+        },
+        {
+          "group": "io.sellmair",
+          "module": "evas-compose",
+          "version": {
+            "requires": "1.2.0"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "devtools-<HOT RELOAD VERSION>.jar",
+          "url": "devtools-<HOT RELOAD VERSION>.jar",
+          "size": 440075,
+          "sha512": "c7db2ccf8d43fd77a247694e6df242d45771e04609e354782095ee63f65d2c476062a422000f3053615ef3da25ea8b1e681e1fb2fda40b64d7e1394c49d088c0",
+          "sha256": "d8f1bfad05cd58b528fb4f5babfb87e441b260292567eb8be1215c18540ed893",
+          "sha1": "cdf7e2914a2d8effa17235c6671a255b2fb69bf0",
+          "md5": "ec23ef349a13f26ee6ddf04082c2d411"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "devtools-<HOT RELOAD VERSION>-sources.jar",
+          "url": "devtools-<HOT RELOAD VERSION>-sources.jar",
+          "size": 38470,
+          "sha512": "c5103677077a3ffe7caf0030ba78989cf5154241175ae903959c21ee5fe7bdbf399fe9f0983cea3ac1d3401eea79e260d523e36ebfc7150308de6630f7dafeef",
+          "sha256": "5c084204adffd589e0cf22f532151c0cc022041e3dfc797d3d385114ae71f9b4",
+          "sha1": "c999bd3682056654988b75c74379a73619cc8f1b",
+          "md5": "f66c4dcabe1753c1ecdba95f67c30c2b"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "devtools-<HOT RELOAD VERSION>-javadoc.jar",
+          "url": "devtools-<HOT RELOAD VERSION>-javadoc.jar",
+          "size": 261,
+          "sha512": "5c492b89219935bf1aaf13a60f882a30b9f4df72e8cfaf96d128d0372ef76237925f5a3419eca64bfc377b5e10735ec558462cede1083870336393b7eb17297d",
+          "sha256": "d3952d51c058c25906a4f33185d13a04753c23077163d64e56e6a85b1c3682fa",
+          "sha1": "ef3745d59453f912d03e029e8b478eadf23cfa19",
+          "md5": "4ba4d712823c2afd2a722aacc0aca39e"
+        }
+      ]
+    }
+  ]
+}

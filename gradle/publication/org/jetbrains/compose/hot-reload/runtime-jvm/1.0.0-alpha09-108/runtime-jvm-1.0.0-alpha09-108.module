@@ -1,0 +1,171 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "org.jetbrains.compose.hot-reload",
+    "module": "runtime-jvm",
+    "version": "<HOT RELOAD VERSION>",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.12.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.compose.reload.usageType": "Main",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "runtime-jvm-<HOT RELOAD VERSION>.jar",
+          "url": "runtime-jvm-<HOT RELOAD VERSION>.jar",
+          "size": 12097,
+          "sha512": "ed03d7a4238b96bb1331409741d3a4fa00f36440eb51941544dceb98dac666927e0e693ecd117649e9e7d9ba3d0bae07f7c00cfa0c629e2a97d9130819a6f7d1",
+          "sha256": "8cc20739220c809f728d7789084f0b8af6e1e0c6549eb057d02f5b7da608e6dc",
+          "sha1": "9997f01dc7c93df318f05575b8fc7444711b5f2e",
+          "md5": "40d6ea65440a72ffa2c8e0695c77d0bb"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.compose.reload.usageType": "Main",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.compose.runtime",
+          "module": "runtime",
+          "version": {
+            "requires": "1.7.3"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "runtime-jvm-<HOT RELOAD VERSION>.jar",
+          "url": "runtime-jvm-<HOT RELOAD VERSION>.jar",
+          "size": 12097,
+          "sha512": "ed03d7a4238b96bb1331409741d3a4fa00f36440eb51941544dceb98dac666927e0e693ecd117649e9e7d9ba3d0bae07f7c00cfa0c629e2a97d9130819a6f7d1",
+          "sha256": "8cc20739220c809f728d7789084f0b8af6e1e0c6549eb057d02f5b7da608e6dc",
+          "sha1": "9997f01dc7c93df318f05575b8fc7444711b5f2e",
+          "md5": "40d6ea65440a72ffa2c8e0695c77d0bb"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "runtime-jvm-<HOT RELOAD VERSION>-sources.jar",
+          "url": "runtime-jvm-<HOT RELOAD VERSION>-sources.jar",
+          "size": 2897,
+          "sha512": "e3ee525b886715d62af0c7ac51d5dd16739b2891c11f1b6a934a6482d1f87f8c9e21f53fb219d5ccfa686ad73f6818ab8a3ff688d4ce6e7b738b914b0a554bad",
+          "sha256": "c93475fd01421c491d9ccaff191c4960c4d16636b2dddc99377848c120873301",
+          "sha1": "0f02731ffe74e6f1ef3dbc927434bf8da161eb58",
+          "md5": "8cb0e571f038c2ad58110f7d142e47d9"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "runtime-jvm-<HOT RELOAD VERSION>-javadoc.jar",
+          "url": "runtime-jvm-<HOT RELOAD VERSION>-javadoc.jar",
+          "size": 637,
+          "sha512": "4292bb09b95c7b93186c900908979ac449c8a81cbac02fe5a03e496d0bba395a9118831096b84bc5c0212f9bc8c3faef9a55eece98620c6f47533b752cf361af",
+          "sha256": "714f69814d0e12acb95441a1252ca0e39c3334d0b4b6d47ad5c5f3b74004040f",
+          "sha1": "8de77dce604886c4514b877621f1c84ee5a99a2e",
+          "md5": "bfd58c02195c6f608465dea69a11b32f"
+        }
+      ]
+    },
+    {
+      "name": "jvmDevRuntimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "compose-dev-java-runtime",
+        "org.jetbrains.compose.reload.usageType": "Dev",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.compose.runtime",
+          "module": "runtime",
+          "version": {
+            "requires": "1.7.3"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "runtime-jvm-<HOT RELOAD VERSION>-dev.jar",
+          "url": "runtime-jvm-<HOT RELOAD VERSION>-dev.jar",
+          "size": 132102,
+          "sha512": "3396d821d0b3b4ebb64ab01662d76fb764c33ff5156ca352ed5204fc8355929676486262516a308499913cab7ed4a6ad07d647435eb7c0ac1d6652d50e50eb9d",
+          "sha256": "a95adcd5bd68c452a422bcd11a7aa06a5a59027e4578b2cd7b59979d6a998759",
+          "sha1": "f5800bdb2781bff5c4d9a8b68468c6d7feb648ed",
+          "md5": "d170e52e6c7feceeb600ec822a08d89c"
+        }
+      ]
+    }
+  ]
+}

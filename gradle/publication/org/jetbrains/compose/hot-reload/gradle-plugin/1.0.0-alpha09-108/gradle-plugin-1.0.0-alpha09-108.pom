@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <!-- This module was also published with a richer model, Gradle metadata,  -->
+  <!-- which should be used instead. Do not delete the following line which  -->
+  <!-- is to indicate to Gradle or any Gradle module metadata file consumer  -->
+  <!-- that they should prefer consuming it instead. -->
+  <!-- do_not_remove: published-with-gradle-metadata -->
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jetbrains.compose.hot-reload</groupId>
+  <artifactId>gradle-plugin</artifactId>
+  <version><HOT RELOAD VERSION></version>
+  <name>hot-reload-gradle-plugin</name>
+  <description>Compose Hot Reload implementation</description>
+  <url>https://github.com/JetBrains/compose-hot-reload</url>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>JetBrains</id>
+      <name>JetBrains Team</name>
+      <organization>JetBrains</organization>
+      <organizationUrl>https://www.jetbrains.com</organizationUrl>
+    </developer>
+  </developers>
+  <scm>
+    <url>https://github.com/JetBrains/compose-hot-reload</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib</artifactId>
+      <version>2.1.20</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.compose.hot-reload</groupId>
+      <artifactId>gradle-core</artifactId>
+      <version><HOT RELOAD VERSION></version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.compose.hot-reload</groupId>
+      <artifactId>gradle-idea</artifactId>
+      <version><HOT RELOAD VERSION></version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.compose.hot-reload</groupId>
+      <artifactId>core</artifactId>
+      <version><HOT RELOAD VERSION></version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.compose.hot-reload</groupId>
+      <artifactId>orchestration</artifactId>
+      <version><HOT RELOAD VERSION></version>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
+</project>

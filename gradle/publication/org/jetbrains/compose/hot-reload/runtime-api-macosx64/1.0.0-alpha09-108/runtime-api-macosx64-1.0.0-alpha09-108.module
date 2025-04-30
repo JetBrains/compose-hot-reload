@@ -1,0 +1,178 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "url": "../../runtime-api/<HOT RELOAD VERSION>/runtime-api-<HOT RELOAD VERSION>.module",
+    "group": "org.jetbrains.compose.hot-reload",
+    "module": "runtime-api",
+    "version": "<HOT RELOAD VERSION>",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.12.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "macosX64ApiElements-published",
+      "attributes": {
+        "artifactType": "org.jetbrains.kotlin.klib",
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-api",
+        "org.jetbrains.kotlin.native.target": "macos_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.runtime",
+          "module": "runtime",
+          "version": {
+            "requires": "1.7.3"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-core",
+          "version": {
+            "requires": "1.10.1"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "hot-reload-runtime-api-macosX64Main-<HOT RELOAD VERSION>.klib",
+          "url": "runtime-api-macosx64-<HOT RELOAD VERSION>.klib",
+          "size": 11424,
+          "sha512": "4740dbdd8de8768d922aa3a55bc694225dc5ad042ef103651a90f4ffddadf9fcb09f868a0893a2c53a4afc71e18898c3505fc1faca11643ddaddbde666259b37",
+          "sha256": "5bcbbae683d7a5069f9e067214b31528cbd8cc12a95d3510489895ba4902a381",
+          "sha1": "eeef3640dc966d71df588d8fd4533a396f9ee155",
+          "md5": "22a47b4dc166a854ee71a37ef09717ea"
+        }
+      ]
+    },
+    {
+      "name": "macosX64SourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-runtime",
+        "org.jetbrains.kotlin.native.target": "macos_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "files": [
+        {
+          "name": "hot-reload-runtime-api-macosx64-<HOT RELOAD VERSION>-sources.jar",
+          "url": "runtime-api-macosx64-<HOT RELOAD VERSION>-sources.jar",
+          "size": 3916,
+          "sha512": "466409993b63860de279beed924b990ce792019a7580c27d9ae95a97be29fbc320688d25a16a19be579c0cfcacadf0c7dfb811bcdbf5cabda09911fb6a4b1de7",
+          "sha256": "98e36377544037036a4361f7a03dd339b3d4c1d699b853a52663f98bf8d579a3",
+          "sha1": "351c17ef76983f924841c70a3629607fcaf67376",
+          "md5": "105db3c5f4edfbaf71c005b797c1a97d"
+        }
+      ]
+    },
+    {
+      "name": "macosX64ResourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.libraryelements": "kotlin-multiplatformresources",
+        "org.gradle.usage": "kotlin-multiplatformresources",
+        "org.jetbrains.kotlin.native.target": "macos_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.runtime",
+          "module": "runtime",
+          "version": {
+            "requires": "1.7.3"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-core",
+          "version": {
+            "requires": "1.10.1"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "hot-reload-runtime-api-<HOT RELOAD VERSION>.kotlin_resources.zip",
+          "url": "runtime-api-macosx64-<HOT RELOAD VERSION>-kotlin_resources.kotlin_resources.zip",
+          "size": 398,
+          "sha512": "407084270e0436508c4b3959f9b027da0a9b61464be417b86463e5c11de62b5b2eda28ac5e5285bdba01e75565eeead7ab0fd7671984b76e3935fb24c99f0ce9",
+          "sha256": "60bb1902eeb4f7050fe3526406c9632b9678c5048b8a9907feb3a3253aefafd5",
+          "sha1": "864110dce1f831ed8e8704cef40894bd525fb685",
+          "md5": "6c6cb831eaf3ff278edf3b6f92d11272"
+        }
+      ]
+    },
+    {
+      "name": "macosX64MetadataElements-published",
+      "attributes": {
+        "artifactType": "org.jetbrains.kotlin.klib",
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-metadata",
+        "org.jetbrains.kotlin.native.target": "macos_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.runtime",
+          "module": "runtime",
+          "version": {
+            "requires": "1.7.3"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-core",
+          "version": {
+            "requires": "1.10.1"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "hot-reload-runtime-api-macosx64-<HOT RELOAD VERSION>-metadata.jar",
+          "url": "runtime-api-macosx64-<HOT RELOAD VERSION>-metadata.jar",
+          "size": 261,
+          "sha512": "c4dd693e23f651fe4521dd7a42025a671dda0c9767ba0c60835835886a0f7d7539a8b5340ec37b050827b85ca44ad76b371bb0f936c9f40d1f7e9597a83570d1",
+          "sha256": "3c9371a168d1393b0d7e117ce4a6e0ac63f7d9d9b5a9edfae843c4a82d6e5bc6",
+          "sha1": "31afb1eef219b64481c3512695e8588f4abe4172",
+          "md5": "1bc9db44f31cca4747ae1aaae3bf6f7e"
+        }
+      ]
+    }
+  ]
+}

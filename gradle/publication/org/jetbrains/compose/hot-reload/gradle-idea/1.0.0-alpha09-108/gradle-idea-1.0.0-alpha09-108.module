@@ -1,0 +1,129 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "org.jetbrains.compose.hot-reload",
+    "module": "gradle-idea",
+    "version": "<HOT RELOAD VERSION>",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.12.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "gradle-idea-<HOT RELOAD VERSION>.jar",
+          "url": "gradle-idea-<HOT RELOAD VERSION>.jar",
+          "size": 31044,
+          "sha512": "f83d1b1640a243f8597d206d27f5fad1e7e5e9e9fdaf87cc33508370fdd0f3f1b3a409722acb961e10d0807c0cb524b8f932acc0984ef435cfdedeacd0fd49e6",
+          "sha256": "185a9a6c643d1e57ab3baec1cbd4d247b39b03eed6690a1f1f4917343a1720b8",
+          "sha1": "2cbf7740154fef26a89b736f9615d3ce67e935c1",
+          "md5": "516c32978c06267b07a0d689d37e5b15"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-serialization-json",
+          "version": {
+            "requires": "1.8.0"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "gradle-idea-<HOT RELOAD VERSION>.jar",
+          "url": "gradle-idea-<HOT RELOAD VERSION>.jar",
+          "size": 31044,
+          "sha512": "f83d1b1640a243f8597d206d27f5fad1e7e5e9e9fdaf87cc33508370fdd0f3f1b3a409722acb961e10d0807c0cb524b8f932acc0984ef435cfdedeacd0fd49e6",
+          "sha256": "185a9a6c643d1e57ab3baec1cbd4d247b39b03eed6690a1f1f4917343a1720b8",
+          "sha1": "2cbf7740154fef26a89b736f9615d3ce67e935c1",
+          "md5": "516c32978c06267b07a0d689d37e5b15"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "gradle-idea-<HOT RELOAD VERSION>-sources.jar",
+          "url": "gradle-idea-<HOT RELOAD VERSION>-sources.jar",
+          "size": 2469,
+          "sha512": "c72145ba6372f9759bcbf2f55204f2de262d857d22782a3dcf0b5ed4d9c164153538603b42c647c8c64f5ddc1f5bdad0c5ed68c27b7b36eebac569c4122c84cc",
+          "sha256": "297a671886509698a2c1400b630cc3be80b0437cc3af78ef772ec90a5157f458",
+          "sha1": "13d4ee54a6127e3c0dd33b3c294b24e0121e3457",
+          "md5": "176e17580780e77b4cefd42f918cb1c8"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "gradle-idea-<HOT RELOAD VERSION>-javadoc.jar",
+          "url": "gradle-idea-<HOT RELOAD VERSION>-javadoc.jar",
+          "size": 261,
+          "sha512": "c9df4b283cc7d997abcb976ddd1cc743e64fc15068cbd44fa7661807cd2b6970dc2b1fcbdec6e3c263c4a9a971017556430ba329c52000be146b6e5998cb192d",
+          "sha256": "cf8823a310bb15ce44f6aeeeae0a972951eb61d522f5fdd05a877c88aad94d40",
+          "sha1": "83d09f7ac0681f253f09b8483f1fdf9aae0e5e6b",
+          "md5": "971bab9b3f94697634a7428c1688ad9b"
+        }
+      ]
+    }
+  ]
+}

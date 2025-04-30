@@ -37,6 +37,10 @@ val publishLocally by tasks.registering {
     }
 }
 
+checkPublishLocally.configure {
+    dependsOn(publishLocally)
+}
+
 val cleanDeploy by tasks.registering(Delete::class) {
     delete(layout.buildDirectory.dir("deploy"))
 }
@@ -48,6 +52,10 @@ val checkPublishDeploy by tasks.registering(CheckPublicationTask::class) {
 val publishDeploy by tasks.registering {
     dependsOn(updateVersions)
     finalizedBy(checkPublishDeploy)
+}
+
+checkPublishDeploy.configure {
+    dependsOn(publishDeploy)
 }
 
 

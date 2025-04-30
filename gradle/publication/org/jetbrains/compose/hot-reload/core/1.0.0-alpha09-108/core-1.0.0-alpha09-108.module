@@ -1,0 +1,258 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "org.jetbrains.compose.hot-reload",
+    "module": "core",
+    "version": "<HOT RELOAD VERSION>",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.12.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.slf4j",
+          "module": "slf4j-api",
+          "version": {
+            "requires": "2.0.16"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "core-<HOT RELOAD VERSION>.jar",
+          "url": "core-<HOT RELOAD VERSION>.jar",
+          "size": 160968,
+          "sha512": "f8d59421008e16d4f66a4afe1feb12e476101886b8580d0a3c21329985fb1ee429d7a83c85f905ae02b90409b54d3644359f32b6ea73532796c14f563f07b10d",
+          "sha256": "6f33d37868808b5c11f1896a0b0abed632a6312e147e93c5fed9e2fd3569a5be",
+          "sha1": "b48626596accf769baa418f0546ef584bd59518e",
+          "md5": "63ad0df13e037e6a026458a0bd553328"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.slf4j",
+          "module": "slf4j-api",
+          "version": {
+            "requires": "2.0.16"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "core-<HOT RELOAD VERSION>.jar",
+          "url": "core-<HOT RELOAD VERSION>.jar",
+          "size": 160968,
+          "sha512": "f8d59421008e16d4f66a4afe1feb12e476101886b8580d0a3c21329985fb1ee429d7a83c85f905ae02b90409b54d3644359f32b6ea73532796c14f563f07b10d",
+          "sha256": "6f33d37868808b5c11f1896a0b0abed632a6312e147e93c5fed9e2fd3569a5be",
+          "sha1": "b48626596accf769baa418f0546ef584bd59518e",
+          "md5": "63ad0df13e037e6a026458a0bd553328"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "core-<HOT RELOAD VERSION>-sources.jar",
+          "url": "core-<HOT RELOAD VERSION>-sources.jar",
+          "size": 25093,
+          "sha512": "38fb06b242544cd3d5d4ab5b366807c401fdcb6c5828ff205ee2090fb7f394e39bdd85963bdd5538937463688c24b2e8d2cf69d37807fc2c28f19119f8ab66af",
+          "sha256": "916b31412f495a0f7d374c6baae9dafb3f0a100809a355d8941fe706c8c0e51b",
+          "sha1": "cc092617f8a674d8cc9a0266d241e0a1bc3081a6",
+          "md5": "6e0059b2c5559c4462c76265f2a597d1"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "core-<HOT RELOAD VERSION>-javadoc.jar",
+          "url": "core-<HOT RELOAD VERSION>-javadoc.jar",
+          "size": 261,
+          "sha512": "c9df4b283cc7d997abcb976ddd1cc743e64fc15068cbd44fa7661807cd2b6970dc2b1fcbdec6e3c263c4a9a971017556430ba329c52000be146b6e5998cb192d",
+          "sha256": "cf8823a310bb15ce44f6aeeeae0a972951eb61d522f5fdd05a877c88aad94d40",
+          "sha1": "83d09f7ac0681f253f09b8483f1fdf9aae0e5e6b",
+          "md5": "971bab9b3f94697634a7428c1688ad9b"
+        }
+      ]
+    },
+    {
+      "name": "testFixturesApiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "core",
+          "version": {
+            "requires": "<HOT RELOAD VERSION>"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "test-core",
+          "version": {
+            "requires": "<HOT RELOAD VERSION>"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "core-<HOT RELOAD VERSION>-test-fixtures.jar",
+          "url": "core-<HOT RELOAD VERSION>-test-fixtures.jar",
+          "size": 12958,
+          "sha512": "49c6bd7062868819ddf126a33328665ca6e466c4f62325a244e220521cc8760c5f94d31bf87840266ede6a4b83f77edad25f08cddfda0eea877259cbd029abb4",
+          "sha256": "4d6a5945aeb9882f3cfd0f86c84b216568797932f1877aab0825ba531cf7d53e",
+          "sha1": "46785ea7fa29ac46538a1853c2cb5d55655375ef",
+          "md5": "3e2e78e5bae0335631c4d54b560b2464"
+        }
+      ],
+      "capabilities": [
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "name": "hot-reload-core-test-fixtures",
+          "version": "<HOT RELOAD VERSION>"
+        }
+      ]
+    },
+    {
+      "name": "testFixturesRuntimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-tooling-core"
+        },
+        {
+          "group": "org.junit.jupiter",
+          "module": "junit-jupiter",
+          "version": {
+            "requires": "5.11.4"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "core",
+          "version": {
+            "requires": "<HOT RELOAD VERSION>"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "test-core",
+          "version": {
+            "requires": "<HOT RELOAD VERSION>"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.20"
+          }
+        }
+      ],
+      "dependencyConstraints": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-tooling-core",
+          "version": {
+            "requires": "2.1.20"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "core-<HOT RELOAD VERSION>-test-fixtures.jar",
+          "url": "core-<HOT RELOAD VERSION>-test-fixtures.jar",
+          "size": 12958,
+          "sha512": "49c6bd7062868819ddf126a33328665ca6e466c4f62325a244e220521cc8760c5f94d31bf87840266ede6a4b83f77edad25f08cddfda0eea877259cbd029abb4",
+          "sha256": "4d6a5945aeb9882f3cfd0f86c84b216568797932f1877aab0825ba531cf7d53e",
+          "sha1": "46785ea7fa29ac46538a1853c2cb5d55655375ef",
+          "md5": "3e2e78e5bae0335631c4d54b560b2464"
+        }
+      ],
+      "capabilities": [
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "name": "hot-reload-core-test-fixtures",
+          "version": "<HOT RELOAD VERSION>"
+        }
+      ]
+    }
+  ]
+}

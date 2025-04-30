@@ -24,11 +24,17 @@ import java.nio.file.Path
 import java.util.zip.ZipFile
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.absolute
+import kotlin.io.path.createDirectories
+import kotlin.io.path.exists
 import kotlin.io.path.extension
+import kotlin.io.path.isRegularFile
+import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.pathString
 import kotlin.io.path.readText
 import kotlin.io.path.relativeTo
 import kotlin.io.path.walk
+import kotlin.io.path.writeText
 
 /*
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
@@ -53,12 +59,17 @@ open class CheckPublicationTask : DefaultTask() {
     @get:InputDirectory
     val publicationDirectory = project.objects.directoryProperty()
 
+    @get:InputDirectory
+    val expectedPublicationDirectory = project.objects.directoryProperty()
+        .value(project.layout.projectDirectory.dir("gradle/publication"))
+
     @TaskAction
     fun checkPublication() {
         val root = publicationDirectory.get().asFile
         if (!root.exists()) error("No publication directory found")
         if (!root.isDirectory) error("Publication directory is not a directory")
         checkPublicationFile(root.toPath())
+        checkPublicationDump(root.toPath())
     }
 
     @OptIn(ExperimentalPathApi::class)
@@ -67,6 +78,60 @@ open class CheckPublicationTask : DefaultTask() {
             if (path.extension == "pom") checkPomFile(path)
             if (path.extension == "jar") checkJarFile(path)
             if (path.extension == "module") checkModuleFile(path)
+        }
+    }
+
+    @OptIn(ExperimentalPathApi::class)
+    private fun checkPublicationDump(root: Path) {
+        val issues = mutableListOf<String>()
+
+        val expectedPublicationDirectory = expectedPublicationDirectory.get().asFile.toPath()
+
+        val expectedFiles = expectedPublicationDirectory.walk().filter { it.isRegularFile() }
+            .map { it.absolute() }
+            .toMutableSet()
+
+        fun String.sanitize() = lineSequence()
+            .map { line -> line.replace(projectVersion, "<HOT RELOAD VERSION>") }
+            .joinToString(System.lineSeparator())
+
+        root.walk().forEach { path ->
+            if (path.extension in listOf("sha1", "sha256", "sha512", "md5")) return@forEach
+
+            val actualText = if (path.extension in listOf("pom", "module")) {
+                path.readText().sanitize()
+            } else ""
+
+            val expectFile = expectedPublicationDirectory.resolve(path.relativeTo(root).pathString)
+            expectedFiles.remove(expectFile.absolute())
+
+            // Write mode
+            if (expectedFiles.isEmpty()) {
+                expectFile.parent.createDirectories()
+                expectFile.writeText(actualText)
+                return@forEach
+            }
+
+            // Check
+            if (!expectFile.exists()) {
+                issues.add("${path.toUri()}: Unexpected file")
+            } else if (expectFile.readText().sanitize() != actualText) {
+                issues.add("${path.toUri()}: Content mismatch")
+                expectFile
+                    .resolveSibling("${expectFile.nameWithoutExtension}-actual.${expectFile.extension}")
+                    .writeText(actualText)
+            }
+        }
+
+        expectedFiles.forEach { file ->
+            issues.add("${file.toUri()}: Missing file")
+        }
+
+        if (issues.isNotEmpty()) {
+            error(buildString {
+                appendLine("Publication dump is inconsistent:")
+                issues.forEach { issue -> appendLine("    $issue") }
+            })
         }
     }
 
