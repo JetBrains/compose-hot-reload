@@ -1,7 +1,6 @@
 public final class org/jetbrains/compose/reload/test/core/CompilerOption : java/lang/Enum {
 	public static final field GenerateFunctionKeyMetaAnnotations Lorg/jetbrains/compose/reload/test/core/CompilerOption;
 	public static final field OptimizeNonSkippingGroups Lorg/jetbrains/compose/reload/test/core/CompilerOption;
-	public static final field SourceInformation Lorg/jetbrains/compose/reload/test/core/CompilerOption;
 	public final fun getDefault ()Z
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/test/core/CompilerOption;

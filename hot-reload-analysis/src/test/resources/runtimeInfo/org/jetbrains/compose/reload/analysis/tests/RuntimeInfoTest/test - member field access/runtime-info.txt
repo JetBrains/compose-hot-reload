@@ -77,13 +77,13 @@ FooKt {
     
         RestartGroup {
             key: -965539098
-            codeHash: 2275534377
+            codeHash: 3757456798
             methodDependencies: []
             fieldDependencies: []
     
             ReplaceGroup {
                 key: 1849434622
-                codeHash: 107027927
+                codeHash: 880027027
                 methodDependencies: [
                     Bar.getX ()I
                 ]

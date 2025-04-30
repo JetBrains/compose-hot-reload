@@ -194,7 +194,6 @@ internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
             "featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups.disabled())".takeUnless {
                 options.getValue(CompilerOption.OptimizeNonSkippingGroups)
             },
-            "includeSourceInformation = ${options.getValue(CompilerOption.SourceInformation)}"
         ).joinToString(lineSeparator()).ifEmpty { return null }
     }
 }

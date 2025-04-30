@@ -30,41 +30,41 @@ FooKt {
     
         RestartGroup {
             key: -965539098
-            codeHash: 3083956004
+            codeHash: 820940876
             methodDependencies: []
             fieldDependencies: []
     
             ReplaceGroup {
                 key: 1849434622
-                codeHash: 443256290
+                codeHash: 2657670680
                 methodDependencies: []
                 fieldDependencies: []
             }
     
             ReplaceGroup {
                 key: 5004770
-                codeHash: 1697772683
+                codeHash: 2636498991
                 methodDependencies: []
                 fieldDependencies: []
             }
     
             ReplaceGroup {
                 key: -1633490746
-                codeHash: 100601079
+                codeHash: 273230945
                 methodDependencies: []
                 fieldDependencies: []
             }
     
             ReplaceGroup {
                 key: -1746271574
-                codeHash: 1232412233
+                codeHash: 1639117805
                 methodDependencies: []
                 fieldDependencies: []
             }
     
             ReplaceGroup {
                 key: -1224400529
-                codeHash: 3787462843
+                codeHash: 2877529710
                 methodDependencies: []
                 fieldDependencies: []
             }

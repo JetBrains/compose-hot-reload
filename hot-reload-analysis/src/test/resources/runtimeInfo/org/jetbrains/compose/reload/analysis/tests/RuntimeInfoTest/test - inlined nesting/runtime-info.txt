@@ -33,7 +33,7 @@ FooKt {
     Bar {
         desc: (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
         key: 490236094
-        codeHash: 139250553
+        codeHash: 3716371361
         methodDependencies: []
         fieldDependencies: []
     }
@@ -49,7 +49,7 @@ FooKt {
     
         RestartGroup {
             key: -965539098
-            codeHash: 3275013374
+            codeHash: 3846139333
             methodDependencies: []
             fieldDependencies: []
         }

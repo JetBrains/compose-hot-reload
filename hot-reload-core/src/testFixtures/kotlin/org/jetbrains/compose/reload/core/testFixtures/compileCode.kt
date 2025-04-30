@@ -110,9 +110,6 @@ class CompilerImpl(
                 .takeIf { options[CompilerOption.OptimizeNonSkippingGroups] == true },
             "plugin:androidx.compose.compiler.plugins.kotlin:generateFunctionKeyMetaAnnotations=true"
                 .takeIf { options[CompilerOption.GenerateFunctionKeyMetaAnnotations] == true },
-            "plugin:androidx.compose.compiler.plugins.kotlin:sourceInformation=" +
-                "${options[CompilerOption.SourceInformation]}"
-
         ).toTypedArray()
 
         arguments.freeArgs = code.keys.map { path -> workingDir.resolve(path).absolutePathString() }

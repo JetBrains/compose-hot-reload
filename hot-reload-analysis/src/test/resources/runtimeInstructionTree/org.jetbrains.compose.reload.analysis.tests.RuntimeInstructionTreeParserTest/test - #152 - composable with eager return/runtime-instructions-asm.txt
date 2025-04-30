@@ -57,9 +57,6 @@ class TestKt {
             LDC -607362160
             INVOKEINTERFACE androidx/compose/runtime/Composer.startRestartGroup (I)Landroidx/compose/runtime/Composer; (itf)
             ASTORE 0
-            ALOAD 0
-            LDC "C(Foo)11@231L7,12@253L34:Test.kt"
-            INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformation (Landroidx/compose/runtime/Composer;Ljava/lang/String;)V
             ILOAD 1
             IFNE L1
             ALOAD 0
@@ -382,12 +379,7 @@ class TestKt {
             ICONST_0
             ISTORE 29
             L61
-            ALOAD 27
-            LDC -333101486
-            LDC "C13@270L11:Test.kt"
-            L62
-            LINENUMBER 14 L62
-            INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerStart (Landroidx/compose/runtime/Composer;ILjava/lang/String;)V
+            LINENUMBER 14 L61
             ALOAD 2
             ACONST_NULL
             LCONST_0
@@ -410,61 +402,59 @@ class TestKt {
             ICONST_0
             LDC 131070
             INVOKESTATIC androidx/compose/material3/TextKt.Text--4IGK_g (Ljava/lang/String;Landroidx/compose/ui/Modifier;JJLandroidx/compose/ui/text/font/FontStyle;Landroidx/compose/ui/text/font/FontWeight;Landroidx/compose/ui/text/font/FontFamily;JLandroidx/compose/ui/text/style/TextDecoration;Landroidx/compose/ui/text/style/TextAlign;JIZIILkotlin/jvm/functions/Function1;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)V
-            ALOAD 27
-            INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V
-            L63
-            LINENUMBER 15 L63
+            L62
+            LINENUMBER 15 L62
             NOP
-            L64
-            LINENUMBER 53 L64
+            L63
+            LINENUMBER 53 L63
             ALOAD 24
             INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V
-            L65
-            LINENUMBER 52 L65
+            L64
+            LINENUMBER 52 L64
             ALOAD 0
-            L66
-            LINENUMBER 54 L66
+            L65
+            LINENUMBER 54 L65
             INVOKEINTERFACE androidx/compose/runtime/Composer.endNode ()V (itf)
             ALOAD 0
+            L66
+            LINENUMBER 31 L66
+            INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V
             L67
-            LINENUMBER 31 L67
-            INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V
+            LINENUMBER 55 L67
+            NOP
             L68
-            LINENUMBER 55 L68
-            NOP
+            ALOAD 0
             L69
-            ALOAD 0
+            LINENUMBER 25 L69
+            INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V
             L70
-            LINENUMBER 25 L70
-            INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V
+            LINENUMBER 56 L70
+            NOP
             L71
-            LINENUMBER 56 L71
-            NOP
-            L72
             ALOAD 0
-            L73
-            LINENUMBER 17 L73
+            L72
+            LINENUMBER 17 L72
             INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V
-            L74
-            LINENUMBER 57 L74
+            L73
+            LINENUMBER 57 L73
             NOP
-            L75
+            L74
             INVOKESTATIC androidx/compose/runtime/ComposerKt.isTraceInProgress ()Z
-            IFEQ L76
+            IFEQ L75
             INVOKESTATIC androidx/compose/runtime/ComposerKt.traceEventEnd ()V
-            L77
-            GOTO L76
+            L76
+            GOTO L75
             L2
             FRAME FULL [androidx/compose/runtime/Composer I] []
             ALOAD 0
             INVOKEINTERFACE androidx/compose/runtime/Composer.skipToGroupEnd ()V (itf)
-            L76
+            L75
             FRAME SAME
             ALOAD 0
             INVOKEINTERFACE androidx/compose/runtime/Composer.endRestartGroup ()Landroidx/compose/runtime/ScopeUpdateScope; (itf)
         Method (group=ComposeGroupKey(key=-607362160))
         DUP
-        IFNULL L78
+        IFNULL L77
         ILOAD 1
         INVOKEDYNAMIC invoke(I)Lkotlin/jvm/functions/Function2; [
               // handle kind 0x6 : INVOKESTATIC
@@ -476,48 +466,40 @@ class TestKt {
               (Landroidx/compose/runtime/Composer;Ljava/lang/Integer;)Lkotlin/Unit;
             ]
         INVOKEINTERFACE androidx/compose/runtime/ScopeUpdateScope.updateScope (Lkotlin/jvm/functions/Function2;)V (itf)
-        GOTO L79
-        L78
+        GOTO L78
+        L77
         FRAME SAME1 androidx/compose/runtime/ScopeUpdateScope
         POP
-        L79
-        LINENUMBER 16 L79
+        L78
+        LINENUMBER 16 L78
         FRAME SAME
         RETURN
-        L80
+        L79
         }
     }
     
     fun Value (Landroidx/compose/runtime/Composer;I)Ljava/lang/String; {
         Method (group=ComposeGroupKey(key=-1250970360))
         L0
-        ALOAD 0
-        LDC -1250970360
-        LDC "C(Value):Test.kt"
-        L1
-        LINENUMBER 6 L1
-        INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerStart (Landroidx/compose/runtime/Composer;ILjava/lang/String;)V
         INVOKESTATIC androidx/compose/runtime/ComposerKt.isTraceInProgress ()Z
-        IFEQ L2
+        IFEQ L1
         LDC -1250970360
         ILOAD 1
         ICONST_M1
         LDC "Value (Test.kt:5)"
         INVOKESTATIC androidx/compose/runtime/ComposerKt.traceEventStart (IIILjava/lang/String;)V
-        L2
+        L1
         FRAME SAME
         INVOKESTATIC androidx/compose/runtime/ComposerKt.isTraceInProgress ()Z
-        IFEQ L3
+        IFEQ L2
         INVOKESTATIC androidx/compose/runtime/ComposerKt.traceEventEnd ()V
-        L3
+        L2
         FRAME SAME
-        ALOAD 0
-        INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V
         LDC "value: 0"
-        L4
-        LINENUMBER 7 L4
+        L3
+        LINENUMBER 7 L3
         ARETURN
-        L5
+        L4
         }
     }
 }

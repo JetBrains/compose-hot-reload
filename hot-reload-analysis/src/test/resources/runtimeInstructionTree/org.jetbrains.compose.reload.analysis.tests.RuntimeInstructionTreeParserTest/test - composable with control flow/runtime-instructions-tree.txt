@@ -41,9 +41,7 @@ class TestKt {
     
             RestartGroup (group=ComposeGroupKey(key=-643616831)) {
                 StartRestartGroup(key=ComposeGroupKey(key=-643616831))
-                BlockToken(2)
-                SourceInformation(C(Foo):Test.kt)
-                BlockToken(2)
+                BlockToken(3)
                 LabelToken(L1)
                 BlockToken(3)
                 JumpToken(L4, opocde=154)
@@ -84,8 +82,6 @@ class TestKt {
     
                 ReplaceGroup (group=ComposeGroupKey(key=-1254950492)) {
                     StartReplaceGroup(key=ComposeGroupKey(key=-1254950492))
-                    BlockToken(1)
-                    SourceInformation(6@136L13)
                     LabelToken(L7)
                     BlockToken(23)
                     LabelToken(L8)
@@ -95,8 +91,6 @@ class TestKt {
     
                 ReplaceGroup (group=ComposeGroupKey(key=-1254913354)) {
                     StartReplaceGroup(key=ComposeGroupKey(key=-1254913354))
-                    BlockToken(1)
-                    SourceInformation(12@244L18)
                     LabelToken(L10)
                     BlockToken(3)
                     JumpToken(L13, opocde=164)
@@ -112,8 +106,6 @@ class TestKt {
     
                     ReplaceGroup (group=ComposeGroupKey(key=-1254890631)) {
                         StartReplaceGroup(key=ComposeGroupKey(key=-1254890631))
-                        BlockToken(1)
-                        SourceInformation(9@200L16)
                         LabelToken(L11)
                         BlockToken(23)
                         LabelToken(L12)

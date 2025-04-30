@@ -11,7 +11,6 @@ import org.jetbrains.compose.reload.test.core.CompilerOption.entries
 public enum class CompilerOption(public val default: Boolean) {
     OptimizeNonSkippingGroups(true),
     GenerateFunctionKeyMetaAnnotations(true),
-    SourceInformation(true);
 }
 
 @InternalHotReloadTestApi

@@ -42,9 +42,6 @@ class TestKt {
             LDC -643616831
             INVOKEINTERFACE androidx/compose/runtime/Composer.startRestartGroup (I)Landroidx/compose/runtime/Composer; (itf)
             ASTORE 1
-            ALOAD 1
-            LDC "C(Foo):Test.kt"
-            INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformation (Landroidx/compose/runtime/Composer;Ljava/lang/String;)V
             ILOAD 2
             ISTORE 3
             L1
@@ -94,9 +91,6 @@ class TestKt {
                 ReplaceGroup (group=ComposeGroupKey(key=-1254950492))
                 LDC -1254950492
                 INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
-                ALOAD 1
-                LDC "6@136L13"
-                INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformation (Landroidx/compose/runtime/Composer;Ljava/lang/String;)V
                 L9
                 LINENUMBER 7 L9
                 LDC "Hello"
@@ -134,9 +128,6 @@ class TestKt {
                 ReplaceGroup (group=ComposeGroupKey(key=-1254913354))
                 LDC -1254913354
                 INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
-                ALOAD 1
-                LDC "12@244L18"
-                INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformation (Landroidx/compose/runtime/Composer;Ljava/lang/String;)V
                 L12
                 LINENUMBER 9 L12
                 ILOAD 0
@@ -146,9 +137,6 @@ class TestKt {
                     ReplaceGroup (group=ComposeGroupKey(key=-1254890631))
                     LDC -1254890631
                     INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
-                    ALOAD 1
-                    LDC "9@200L16"
-                    INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformation (Landroidx/compose/runtime/Composer;Ljava/lang/String;)V
                     L14
                     LINENUMBER 10 L14
                     LDC "Hello 10"

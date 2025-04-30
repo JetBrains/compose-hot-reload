@@ -33,9 +33,6 @@ class TestKt {
             LDC -607362160
             INVOKEINTERFACE androidx/compose/runtime/Composer.startRestartGroup (I)Landroidx/compose/runtime/Composer; (itf)
             ASTORE 0
-            ALOAD 0
-            LDC "C(Foo)5@102L13:Test.kt"
-            INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformation (Landroidx/compose/runtime/Composer;Ljava/lang/String;)V
             ILOAD 1
             IFNE L1
             ALOAD 0

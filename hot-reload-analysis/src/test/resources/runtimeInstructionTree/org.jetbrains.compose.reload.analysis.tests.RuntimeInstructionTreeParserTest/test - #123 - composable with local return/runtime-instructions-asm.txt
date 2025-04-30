@@ -35,14 +35,7 @@ class TestKt {
         ICONST_0
         ISTORE 3
         L1
-        ALOAD 1
-        LDC 1571995832
-        LDC "CC(Bar)20@382L13,21@400L9,22@414L13:Test.kt"
-        L2
-        LINENUMBER 20 L2
-        INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerStart (Landroidx/compose/runtime/Composer;ILjava/lang/String;)V
-        L3
-        LINENUMBER 21 L3
+        LINENUMBER 21 L1
         LDC "Bar A"
         ACONST_NULL
         LCONST_0
@@ -65,8 +58,8 @@ class TestKt {
         ICONST_0
         LDC 131070
         INVOKESTATIC androidx/compose/material3/TextKt.Text--4IGK_g (Ljava/lang/String;Landroidx/compose/ui/Modifier;JJLandroidx/compose/ui/text/font/FontStyle;Landroidx/compose/ui/text/font/FontWeight;Landroidx/compose/ui/text/font/FontFamily;JLandroidx/compose/ui/text/style/TextDecoration;Landroidx/compose/ui/text/style/TextAlign;JIZIILkotlin/jvm/functions/Function1;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)V
-        L4
-        LINENUMBER 22 L4
+        L2
+        LINENUMBER 22 L2
         ALOAD 0
         ALOAD 1
         BIPUSH 14
@@ -75,8 +68,8 @@ class TestKt {
         INVOKESTATIC java/lang/Integer.valueOf (I)Ljava/lang/Integer;
         INVOKEINTERFACE kotlin/jvm/functions/Function2.invoke (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; (itf)
         POP
-        L5
-        LINENUMBER 23 L5
+        L3
+        LINENUMBER 23 L3
         LDC "Bar B"
         ACONST_NULL
         LCONST_0
@@ -99,14 +92,10 @@ class TestKt {
         ICONST_0
         LDC 131070
         INVOKESTATIC androidx/compose/material3/TextKt.Text--4IGK_g (Ljava/lang/String;Landroidx/compose/ui/Modifier;JJLandroidx/compose/ui/text/font/FontStyle;Landroidx/compose/ui/text/font/FontWeight;Landroidx/compose/ui/text/font/FontFamily;JLandroidx/compose/ui/text/style/TextDecoration;Landroidx/compose/ui/text/style/TextAlign;JIZIILkotlin/jvm/functions/Function1;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)V
-        ALOAD 1
-        L6
-        LINENUMBER 20 L6
-        INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V
-        L7
-        LINENUMBER 24 L7
+        L4
+        LINENUMBER 24 L4
         RETURN
-        L8
+        L5
         }
     }
     
@@ -151,9 +140,6 @@ class TestKt {
             LDC -643616831
             INVOKEINTERFACE androidx/compose/runtime/Composer.startRestartGroup (I)Landroidx/compose/runtime/Composer; (itf)
             ASTORE 1
-            ALOAD 1
-            LDC "C(Foo)5@113L9,15@303L9:Test.kt"
-            INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformation (Landroidx/compose/runtime/Composer;Ljava/lang/String;)V
             ALOAD 1
             INVOKEINTERFACE androidx/compose/runtime/Composer.getCurrentMarker ()I (itf)
             ISTORE 3
@@ -231,9 +217,6 @@ class TestKt {
                 ReplaceGroup (group=ComposeGroupKey(key=-1254930869))
                 LDC -1254930869
                 INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
-                ALOAD 1
-                LDC "7@153L134"
-                INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformation (Landroidx/compose/runtime/Composer;Ljava/lang/String;)V
                 ICONST_0
                 ISTORE 5
                 L10
@@ -243,14 +226,7 @@ class TestKt {
                 ICONST_0
                 ISTORE 6
                 L12
-                ALOAD 1
-                LDC 1571995832
-                LDC "CC(Bar)20@382L13,21@400L9,22@414L13:Test.kt"
-                L13
-                LINENUMBER 25 L13
-                INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerStart (Landroidx/compose/runtime/Composer;ILjava/lang/String;)V
-                L14
-                LINENUMBER 26 L14
+                LINENUMBER 25 L12
                 LDC "Bar A"
                 ACONST_NULL
                 LCONST_0
@@ -273,26 +249,23 @@ class TestKt {
                 ICONST_0
                 LDC 131070
                 INVOKESTATIC androidx/compose/material3/TextKt.Text--4IGK_g (Ljava/lang/String;Landroidx/compose/ui/Modifier;JJLandroidx/compose/ui/text/font/FontStyle;Landroidx/compose/ui/text/font/FontWeight;Landroidx/compose/ui/text/font/FontFamily;JLandroidx/compose/ui/text/style/TextDecoration;Landroidx/compose/ui/text/style/TextAlign;JIZIILkotlin/jvm/functions/Function1;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)V
-                L15
-                LINENUMBER 27 L15
+                L13
+                LINENUMBER 26 L13
                 ALOAD 1
                 BIPUSH 14
                 ILOAD 5
                 IAND
                 ISTORE 7
                 ASTORE 8
-                L16
+                L14
                 ICONST_0
                 ISTORE 9
-                L17
-                LINENUMBER 9 L17
+                L15
+                LINENUMBER 9 L15
                 ALOAD 8
                     ReplaceGroup (group=ComposeGroupKey(key=-1795835205))
                     LDC -1795835205
                     INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
-                    ALOAD 8
-                    LDC "C8@171L9,11@268L9:Test.kt"
-                    INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformation (Landroidx/compose/runtime/Composer;Ljava/lang/String;)V
                     LDC "B"
                     ACONST_NULL
                     LCONST_0
@@ -315,35 +288,35 @@ class TestKt {
                     ICONST_0
                     LDC 131070
                     INVOKESTATIC androidx/compose/material3/TextKt.Text--4IGK_g (Ljava/lang/String;Landroidx/compose/ui/Modifier;JJLandroidx/compose/ui/text/font/FontStyle;Landroidx/compose/ui/text/font/FontWeight;Landroidx/compose/ui/text/font/FontFamily;JLandroidx/compose/ui/text/style/TextDecoration;Landroidx/compose/ui/text/style/TextAlign;JIZIILkotlin/jvm/functions/Function1;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)V
-                    L18
-                    LINENUMBER 10 L18
+                    L16
+                    LINENUMBER 10 L16
                     ILOAD 0
-                    IFLE L19
+                    IFLE L17
                     ALOAD 8
                     INVOKEINTERFACE androidx/compose/runtime/Composer.endReplaceGroup ()V (itf)
                 ReplaceGroup (group=ComposeGroupKey(key=-1254930869))
-                GOTO L20
+                GOTO L18
                     ReplaceGroup (group=ComposeGroupKey(key=-1795835205))
-                    L19
-                    LINENUMBER 11 L19
+                    L17
+                    LINENUMBER 11 L17
                     FRAME FULL [I androidx/compose/runtime/Composer I I I I I I androidx/compose/runtime/Composer I] []
                     ILOAD 0
                     BIPUSH 10
-                    IF_ICMPLE L21
+                    IF_ICMPLE L19
                     ALOAD 8
                     ILOAD 3
                     INVOKEINTERFACE androidx/compose/runtime/Composer.endToMarker (I)V (itf)
             RestartGroup (group=ComposeGroupKey(key=-643616831))
             INVOKESTATIC androidx/compose/runtime/ComposerKt.isTraceInProgress ()Z
-            IFEQ L22
+            IFEQ L20
             INVOKESTATIC androidx/compose/runtime/ComposerKt.traceEventEnd ()V
-            L22
+            L20
             FRAME SAME
             ALOAD 1
             INVOKEINTERFACE androidx/compose/runtime/Composer.endRestartGroup ()Landroidx/compose/runtime/ScopeUpdateScope; (itf)
         Method (group=ComposeGroupKey(key=-643616831))
         DUP
-        IFNULL L23
+        IFNULL L21
         ILOAD 0
         ILOAD 2
         INVOKEDYNAMIC invoke(II)Lkotlin/jvm/functions/Function2; [
@@ -356,16 +329,16 @@ class TestKt {
               (Landroidx/compose/runtime/Composer;Ljava/lang/Integer;)Lkotlin/Unit;
             ]
         INVOKEINTERFACE androidx/compose/runtime/ScopeUpdateScope.updateScope (Lkotlin/jvm/functions/Function2;)V (itf)
-        GOTO L24
-        L23
+        GOTO L22
+        L21
         FRAME SAME1 androidx/compose/runtime/ScopeUpdateScope
         POP
-        L24
+        L22
         FRAME SAME
         RETURN
                     ReplaceGroup (group=ComposeGroupKey(key=-1795835205))
-                    L21
-                    LINENUMBER 12 L21
+                    L19
+                    LINENUMBER 12 L19
                     FRAME SAME
                     LDC "C"
                     ACONST_NULL
@@ -392,15 +365,15 @@ class TestKt {
                     ALOAD 8
                     INVOKEINTERFACE androidx/compose/runtime/Composer.endReplaceGroup ()V (itf)
                 ReplaceGroup (group=ComposeGroupKey(key=-1254930869))
-                L25
-                LINENUMBER 13 L25
+                L23
+                LINENUMBER 13 L23
                 NOP
-                L20
-                LINENUMBER 27 L20
+                L18
+                LINENUMBER 26 L18
                 FRAME SAME
                 NOP
-                L26
-                LINENUMBER 28 L26
+                L24
+                LINENUMBER 27 L24
                 LDC "Bar B"
                 ACONST_NULL
                 LCONST_0
@@ -423,19 +396,15 @@ class TestKt {
                 ICONST_0
                 LDC 131070
                 INVOKESTATIC androidx/compose/material3/TextKt.Text--4IGK_g (Ljava/lang/String;Landroidx/compose/ui/Modifier;JJLandroidx/compose/ui/text/font/FontStyle;Landroidx/compose/ui/text/font/FontWeight;Landroidx/compose/ui/text/font/FontFamily;JLandroidx/compose/ui/text/style/TextDecoration;Landroidx/compose/ui/text/style/TextAlign;JIZIILkotlin/jvm/functions/Function1;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)V
-                ALOAD 1
-                L27
-                LINENUMBER 25 L27
-                INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V
-                L28
-                LINENUMBER 29 L28
+                L25
+                LINENUMBER 28 L25
                 NOP
-                L29
-                LINENUMBER 7 L29
+                L26
+                LINENUMBER 7 L26
                 ALOAD 1
                 INVOKEINTERFACE androidx/compose/runtime/Composer.endReplaceGroup ()V (itf)
             RestartGroup (group=ComposeGroupKey(key=-643616831))
-            GOTO L30
+            GOTO L27
             L9
             LINENUMBER 14 L9
             FRAME FULL [I androidx/compose/runtime/Composer I I I] []
@@ -446,8 +415,8 @@ class TestKt {
                 ALOAD 1
                 INVOKEINTERFACE androidx/compose/runtime/Composer.endReplaceGroup ()V (itf)
             RestartGroup (group=ComposeGroupKey(key=-643616831))
-            L30
-            LINENUMBER 16 L30
+            L27
+            LINENUMBER 16 L27
             FRAME SAME
             LDC "D"
             ACONST_NULL
@@ -472,20 +441,20 @@ class TestKt {
             LDC 131070
             INVOKESTATIC androidx/compose/material3/TextKt.Text--4IGK_g (Ljava/lang/String;Landroidx/compose/ui/Modifier;JJLandroidx/compose/ui/text/font/FontStyle;Landroidx/compose/ui/text/font/FontWeight;Landroidx/compose/ui/text/font/FontFamily;JLandroidx/compose/ui/text/style/TextDecoration;Landroidx/compose/ui/text/style/TextAlign;JIZIILkotlin/jvm/functions/Function1;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)V
             INVOKESTATIC androidx/compose/runtime/ComposerKt.isTraceInProgress ()Z
-            IFEQ L31
+            IFEQ L28
             INVOKESTATIC androidx/compose/runtime/ComposerKt.traceEventEnd ()V
-            GOTO L31
+            GOTO L28
             L6
             FRAME SAME
             ALOAD 1
             INVOKEINTERFACE androidx/compose/runtime/Composer.skipToGroupEnd ()V (itf)
-            L31
+            L28
             FRAME SAME
             ALOAD 1
             INVOKEINTERFACE androidx/compose/runtime/Composer.endRestartGroup ()Landroidx/compose/runtime/ScopeUpdateScope; (itf)
         Method (group=ComposeGroupKey(key=-643616831))
         DUP
-        IFNULL L32
+        IFNULL L29
         ILOAD 0
         ILOAD 2
         INVOKEDYNAMIC invoke(II)Lkotlin/jvm/functions/Function2; [
@@ -498,15 +467,15 @@ class TestKt {
               (Landroidx/compose/runtime/Composer;Ljava/lang/Integer;)Lkotlin/Unit;
             ]
         INVOKEINTERFACE androidx/compose/runtime/ScopeUpdateScope.updateScope (Lkotlin/jvm/functions/Function2;)V (itf)
-        GOTO L33
-        L32
+        GOTO L30
+        L29
         FRAME SAME1 androidx/compose/runtime/ScopeUpdateScope
         POP
-        L33
-        LINENUMBER 17 L33
+        L30
+        LINENUMBER 17 L30
         FRAME SAME
         RETURN
-        L34
+        L31
         }
     }
 }

@@ -34,8 +34,6 @@ class TestKt {
             RestartGroup (group=ComposeGroupKey(key=-607362160)) {
                 StartRestartGroup(key=ComposeGroupKey(key=-607362160))
                 BlockToken(2)
-                SourceInformation(C(Foo)5@102L13:Test.kt)
-                BlockToken(1)
                 JumpToken(L1, opocde=154)
                 BlockToken(2)
                 JumpToken(L3, opocde=154)
