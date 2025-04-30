@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.analysis.tests
 import org.jetbrains.compose.reload.analysis.plusAssign
 import org.jetbrains.compose.reload.analysis.renderRuntimeInstructionTree
 import org.jetbrains.compose.reload.analysis.util.renderAsmTree
+import org.jetbrains.compose.reload.analysis.util.renderSourceTree
 import org.jetbrains.compose.reload.core.asFileName
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
 import org.jetbrains.compose.reload.core.testFixtures.WithCompiler
@@ -145,32 +146,41 @@ class RuntimeInstructionTreeParserTest {
             }
         }.sanitized()
 
+        val renderedSource = run {
+            var current = code
+            compiled.forEach { (_, bytecode) ->
+                current = renderSourceTree(current, bytecode)
+            }
+            current
+        }.sanitized()
+
         val expectTreeFile = directory.resolve("runtime-instructions-tree.txt")
         val expectAsmFile = directory.resolve("runtime-instructions-asm.txt")
+        val expectSourceFile = directory.resolve("runtime-instructions-source.txt")
+
+        val file2Render = mapOf(
+            expectTreeFile to renderedTree,
+            expectAsmFile to renderedAsm,
+            expectSourceFile to renderedSource,
+        )
+
         if (TestEnvironment.updateTestData) {
-            expectTreeFile.createParentDirectories().writeText(renderedTree)
-            expectAsmFile.createParentDirectories().writeText(renderedAsm)
+            file2Render.forEach { file, render ->
+                file.createParentDirectories().writeText(render)
+            }
             return
         }
 
-        if (!expectTreeFile.exists()) {
-            expectTreeFile.createParentDirectories().writeText(renderedTree)
-            error("Runtime Instruction Tree '${expectTreeFile.toUri()}' did not exist; Generated")
-        }
+        file2Render.forEach { file, render ->
+            if (!file.exists()) {
+                file.createParentDirectories().writeText(render)
+                error("Render '${file.toUri()}' did not exist; Generated")
+            }
 
-        if (expectTreeFile.readText().sanitized() != renderedTree) {
-            expectTreeFile.resolveSibling(expectTreeFile.nameWithoutExtension + "-actual.txt").writeText(renderedTree)
-            error("Runtime Instruction Tree '${expectTreeFile.toUri()}' did not match")
-        }
-
-        if (!expectAsmFile.exists()) {
-            expectAsmFile.createParentDirectories().writeText(renderedAsm)
-            error("Runtime Asm Tree '${expectAsmFile.toUri()}' did not exist; Generated")
-        }
-
-        if (expectAsmFile.readText().sanitized() != renderedAsm) {
-            expectAsmFile.resolveSibling(expectAsmFile.nameWithoutExtension + "-actual.txt").writeText(renderedAsm)
-            error("Runtime Asm Tree '${expectAsmFile.toUri()}' did not match")
+            if (file.readText().sanitized() != render) {
+                file.resolveSibling(file.nameWithoutExtension + "-actual.txt").writeText(render)
+                error("Render '${file.toUri()}' did not match")
+            }
         }
     }
 }

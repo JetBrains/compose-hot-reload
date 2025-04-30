@@ -110,7 +110,7 @@ internal fun MethodNode.renderAsm(tree: RuntimeInstructionTree) = buildString {
     val printer = Textifier()
     val mp = TraceMethodVisitor(printer)
 
-    this += "${tree.type} (group=${tree.group})"
+    this += tree.render()
 
     var prevTree: RuntimeInstructionTree? = tree
     for (inst in instructions) {
@@ -134,3 +134,5 @@ internal fun AbstractInsnNode.print(printer: Textifier, mp: TraceMethodVisitor):
     printer.getText().clear()
     return sw.toString().trim()
 }
+
+internal fun RuntimeInstructionTree.render(): String = "${type} (group=${group})"
