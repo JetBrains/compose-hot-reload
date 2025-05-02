@@ -39,7 +39,7 @@ fun DtSidecarStatusSection() {
                     .dtVerticalPadding()
             ) {
                 DtReloadStatusItem()
-                DtReloadCounterStatusItem()
+                DtExpandedReloadCounterStatusItem()
                 DtMissingJbrStatusItem()
                 DtRuntimeErrorStatusItem()
             }

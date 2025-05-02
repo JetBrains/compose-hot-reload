@@ -159,6 +159,15 @@ DevToolsTransparencyEnabled:
     Some platforms might not be able to render transparency correctly (e.g. some linux environments).
     This property will allow such platforms to disable/enable transparency
 
+DevToolsAlwaysShowReloadCounter:
+  key: compose.reload.devToolsAlwaysShowReloadCounter
+  type: boolean
+  default: "false"
+  defaultIsExpression: false
+  target: [ application, build, devtools ]
+  documentation: |
+    When set to `true` dev tools will always show the current reload counter, even when the side bar is not expanded.
+
 IntelliJDebuggerDispatchPort:
   key: compose.reload.idea.debugger.dispatch.port
   type: int
