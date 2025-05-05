@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload
 
+import org.gradle.api.Project
 import org.jetbrains.kotlin.tooling.core.HasMutableExtras
 import org.jetbrains.kotlin.tooling.core.extrasKeyOf
 import org.jetbrains.kotlin.tooling.core.getOrPut
@@ -29,5 +30,37 @@ internal class LazyProperty<R : HasMutableExtras, T>(
 
     private companion object {
         val propertiesKey = extrasKeyOf<MutableMap<LazyProperty<*, *>, Any?>>()
+    }
+}
+
+internal fun <T> lazyProjectProperty(initializer: Project.() -> T): ReadOnlyProperty<Project, T> {
+    return LazyProjectProperty(initializer)
+}
+
+private class LazyProjectProperty<T>(
+    private val initializer: (Project.() -> T)
+) : ReadOnlyProperty<Project, T> {
+
+    companion object {
+        private const val KEY = "org.jetbrains.compose.reload.extras"
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun getValue(thisRef: Project, property: KProperty<*>): T {
+        val extraProperties = thisRef.extensions.extraProperties
+
+        val values = if (extraProperties.has(KEY)) {
+            extraProperties.get(KEY) as MutableMap<LazyProjectProperty<*>, Any?>
+        } else {
+            val map = mutableMapOf<LazyProjectProperty<*>, Any?>()
+            extraProperties.set(KEY, map)
+            map
+        }
+
+        if (this in values) return values[this] as T
+
+        val newValue = initializer.invoke(thisRef)
+        values[this] = newValue
+        return newValue
     }
 }
