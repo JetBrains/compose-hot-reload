@@ -8,7 +8,7 @@ package org.jetbrains.compose.reload.tests
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.testfixtures.ProjectBuilder
-import org.jetbrains.compose.reload.lazyProjectProperty
+import org.jetbrains.compose.reload.gradle.lazyProjectProperty
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
 import kotlin.test.assertEquals

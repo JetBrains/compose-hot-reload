@@ -30,3 +30,6 @@ public final class org/jetbrains/compose/reload/gradle/HotReloadUsageType$Compan
 public abstract interface annotation class org/jetbrains/compose/reload/gradle/InternalHotReloadGradleApi : java/lang/annotation/Annotation {
 }
 
+public final class org/jetbrains/compose/reload/gradle/Lifecycle$Key : kotlin/coroutines/CoroutineContext$Key {
+}
+

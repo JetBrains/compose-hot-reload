@@ -37,6 +37,7 @@ import org.jetbrains.compose.reload.gradle.HotReloadUsageType
 import org.jetbrains.compose.reload.gradle.camelCase
 import org.jetbrains.compose.reload.gradle.composeHotReloadAgentRuntimeClasspath
 import org.jetbrains.compose.reload.gradle.files
+import org.jetbrains.compose.reload.gradle.lazyProperty
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import java.util.zip.CRC32

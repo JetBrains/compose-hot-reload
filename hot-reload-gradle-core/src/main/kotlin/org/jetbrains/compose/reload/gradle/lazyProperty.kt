@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.jetbrains.compose.reload
+package org.jetbrains.compose.reload.gradle
 
 import org.gradle.api.Project
 import org.jetbrains.kotlin.tooling.core.HasMutableExtras
@@ -12,7 +12,8 @@ import org.jetbrains.kotlin.tooling.core.getOrPut
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-internal fun <R : HasMutableExtras, T> lazyProperty(initializer: R.() -> T): ReadOnlyProperty<R, T> {
+@InternalHotReloadGradleApi
+fun <R : HasMutableExtras, T> lazyProperty(initializer: R.() -> T): ReadOnlyProperty<R, T> {
     return LazyProperty(initializer)
 }
 
@@ -33,7 +34,8 @@ internal class LazyProperty<R : HasMutableExtras, T>(
     }
 }
 
-internal fun <T> lazyProjectProperty(initializer: Project.() -> T): ReadOnlyProperty<Project, T> {
+@InternalHotReloadGradleApi
+fun <T> lazyProjectProperty(initializer: Project.() -> T): ReadOnlyProperty<Project, T> {
     return LazyProjectProperty(initializer)
 }
 
