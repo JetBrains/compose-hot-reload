@@ -46,6 +46,11 @@ public sealed class OrchestrationMessage : Serializable {
     }
 
     /**
+     * Deprecated
+     * This messages was used to indicate that the 'recompiler' is ready.
+     * With newer compilation models, the recompiler can be invoked directly after starting the app
+     * and therefore is always considered ready.
+     *
      * Indicates that the 'recompiler' is ready to receive requests.
      * If the build is continuous, then this is sent by the Gradle daemon which gets alive.
      * If the build is not continuous, then the message will be sent once the agent is ready to
@@ -53,6 +58,7 @@ public sealed class OrchestrationMessage : Serializable {
      *
      * Note: This message can be sent multiple times!
      */
+    @Deprecated("This message is not required anymore")
     public class RecompilerReady : OrchestrationMessage()
 
     /**

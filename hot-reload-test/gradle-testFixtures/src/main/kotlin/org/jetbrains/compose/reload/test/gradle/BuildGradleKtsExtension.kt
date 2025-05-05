@@ -133,10 +133,6 @@ private val jvmBuildGradleKtsTemplate = Template(
         {{$jvmMainDependenciesKey}}
     }
     
-    tasks.create<ComposeHotRun>("run") {
-        mainClass.set("MainKt")
-    }
-    
     tasks.withType<JavaExec>().configureEach {
         {{$javaExecConfigureKey}}
     }

@@ -33,7 +33,7 @@ class RecompilerPropertiesTest {
 
         arguments.assertSystemPropertyEquals(GradleBuildRoot, project.rootDir.absolutePath)
         arguments.assertSystemPropertyEquals(GradleBuildProject, ":")
-        arguments.assertSystemPropertyEquals(GradleBuildTask, "reloadJvmMainClasspath")
+        arguments.assertSystemPropertyEquals(GradleBuildTask, "hotReloadJvmMain")
         arguments.assertSystemPropertyEquals(GradleJavaHome, System.getProperty("java.home"))
     }
 
@@ -53,6 +53,6 @@ class RecompilerPropertiesTest {
 
         arguments.assertSystemPropertyEquals(GradleBuildRoot, project.rootDir.absolutePath)
         arguments.assertSystemPropertyEquals(GradleBuildProject, ":foo")
-        arguments.assertSystemPropertyEquals(GradleBuildTask, "reloadJvmMainClasspath")
+        arguments.assertSystemPropertyEquals(GradleBuildTask, "hotReloadJvmMain")
     }
 }

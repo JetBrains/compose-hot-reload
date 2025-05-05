@@ -34,6 +34,7 @@ import java.io.IOException
 import java.io.InputStream
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.isRegularFile
+import kotlin.io.path.pathString
 import kotlin.io.path.writeText
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -64,13 +65,18 @@ class ArgFileTest {
             ProjectMode.Jvm -> "runHot"
         }
 
+        val argFileName = when (projectMode) {
+            ProjectMode.Kmp -> "jvmMain.argfile"
+            ProjectMode.Jvm -> "main.argfile"
+        }
+
         val compilationClassifier = when (projectMode) {
             ProjectMode.Kmp -> "jvmMain"
             ProjectMode.Jvm -> "main"
         }
 
         assertEquals(GradleRunner.ExitCode.success, fixture.gradleRunner.build("${runTaskName}Argfile"))
-        val argFile = fixture.projectDir.resolve("build/run/$compilationClassifier/$runTaskName.argfile")
+        val argFile = fixture.projectDir.resolve("build/run/$compilationClassifier/$argFileName")
         if (!argFile.isRegularFile()) {
             fail("Expected argfile at '$argFile', but it does not exist")
         }
@@ -78,8 +84,7 @@ class ArgFileTest {
         val (applicationProcess, applicationConnectedMessage) = fixture.runTransaction {
             val applicationProcess = ProcessBuilder(
                 ProcessHandle.current().info().command().orElseThrow(),
-                "@${fixture.projectDir.resolve("build/run/$compilationClassifier/$runTaskName.argfile")}",
-                "MainKt"
+                "@${argFile.pathString}", "MainKt"
             ).directory(fixture.projectDir.path.toFile()).start()
 
             testJob.invokeOnCompletion {

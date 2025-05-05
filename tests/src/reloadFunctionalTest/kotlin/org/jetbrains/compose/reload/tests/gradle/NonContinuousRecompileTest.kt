@@ -13,6 +13,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.Recompile
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
+import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
 import kotlin.io.path.appendLines
@@ -32,12 +33,7 @@ class NonContinuousRecompileTest {
             .apply { if (!exists()) createFile() }
             .appendLines(listOf("${HotReloadProperty.GradleBuildContinuous.key}=false"))
 
-        runTransaction {
-            launchChildTransaction {
-                skipToMessage<RecompileResult>("Waiting for initial 'Recompile Result'")
-            }
-
-            this initialSourceCode """
+        fixture initialSourceCode """
                 import androidx.compose.foundation.layout.*
                 import androidx.compose.ui.unit.sp
                 import androidx.compose.ui.window.*
@@ -49,7 +45,6 @@ class NonContinuousRecompileTest {
                     }
                 }
                 """.trimIndent()
-        }
 
         fixture.checkScreenshot("0-before")
         replaceSourceCode("Before", "After")

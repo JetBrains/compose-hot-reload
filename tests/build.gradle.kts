@@ -76,7 +76,16 @@ dependencies {
     reloadFunctionalTestImplementation(kotlin("test"))
     reloadFunctionalTestImplementation(deps.junit.jupiter)
     reloadFunctionalTestImplementation(deps.junit.jupiter.engine)
-    reloadFunctionalTestImplementation(testFixtures(project(":hot-reload-core")))
     reloadFunctionalTestImplementation(deps.asm)
     reloadFunctionalTestImplementation(deps.asm.tree)
+
+    reloadFunctionalTestImplementation(testFixtures(project(":hot-reload-core")))
+
+    reloadFunctionalTestImplementation(project(":hot-reload-gradle-plugin")) {
+        isTransitive = false
+    }
+
+    reloadFunctionalTestImplementation(project(":hot-reload-gradle-core")) {
+        isTransitive = false
+    }
 }

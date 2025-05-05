@@ -11,7 +11,7 @@
                 "jvmMain",
                 "commonMain"
             ],
-            "argFile": "<PROJECT_DIR>/build/run/jvmDev/jvmRunDev.argfile",
+            "argFile": "<PROJECT_DIR>/build/run/jvmDev/jvmDev.argfile",
             "argFileTaskName": "jvmRunDevArgfile"
         },
         {
@@ -23,7 +23,7 @@
                 "jvmMain",
                 "commonMain"
             ],
-            "argFile": "<PROJECT_DIR>/build/run/jvmMain/jvmRunHot.argfile",
+            "argFile": "<PROJECT_DIR>/build/run/jvmMain/jvmMain.argfile",
             "argFileTaskName": "jvmRunHotArgfile"
         }
     ]

@@ -13,11 +13,14 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.initialization.BuildCancellationToken
 import org.gradle.kotlin.dsl.register
-import org.gradle.kotlin.dsl.withType
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.compose.reload.core.PidFileInfo
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.leftOr
+import org.jetbrains.compose.reload.gradle.Future
+import org.jetbrains.compose.reload.gradle.PluginStage
+import org.jetbrains.compose.reload.gradle.await
+import org.jetbrains.compose.reload.gradle.projectFuture
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
@@ -27,11 +30,9 @@ import javax.inject.Inject
 import kotlin.io.path.exists
 import kotlin.jvm.optionals.getOrNull
 
-internal fun Project.composeHotReloadProcessManagerTask(): TaskProvider<ComposeHotReloadProcessManagerTask> {
-    val name = "composeHotReloadProcessManager"
-    val tasks = tasks.withType<ComposeHotReloadProcessManagerTask>()
-    return if (name in tasks.names) tasks.named(name)
-    else project.tasks.register<ComposeHotReloadProcessManagerTask>(name)
+internal val Project.hotProcessManagerTask: Future<TaskProvider<ComposeHotReloadProcessManagerTask>> by projectFuture {
+    PluginStage.EagerConfiguration.await()
+    project.tasks.register<ComposeHotReloadProcessManagerTask>("composeHotReloadProcessManager")
 }
 
 @DisableCachingByDefault(because = "This task should always run")

@@ -6,10 +6,10 @@
 package org.jetbrains.compose.reload.gradle
 
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.provideDelegate
+import org.jetbrains.kotlin.gradle.plugin.HasProject
+import org.jetbrains.kotlin.tooling.core.HasMutableExtras
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.CoroutineContext
@@ -17,6 +17,7 @@ import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.createCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.properties.ReadOnlyProperty
 
 @InternalHotReloadGradleApi
 fun interface Future<T> {
@@ -78,26 +79,24 @@ fun <T, R> Future<T>.flatMap(mapper: (T) -> Future<R>) = Future {
 }
 
 @InternalHotReloadGradleApi
-suspend inline fun <reified T> Future<T>.toProvider(): Provider<T> {
-    val property = currentProject().objects.property(T::class.java)
-    property.set(await())
-    property.disallowChanges()
-    return property
-}
-
-@InternalHotReloadGradleApi
 val Project.lifecycle: Lifecycle by lazyProjectProperty { Lifecycle(this) }
 
 @InternalHotReloadGradleApi
 fun Project.launch(action: suspend () -> Unit) = lifecycle.launch(action)
 
 @InternalHotReloadGradleApi
-fun <T> future(action: suspend Project.() -> T) = lazyProjectProperty {
+fun <T> projectFuture(action: suspend Project.() -> T) = lazyProjectProperty {
     future { action() }
 }
 
 @InternalHotReloadGradleApi
-suspend fun currentProject(): Project {
+fun <R, T> future(action: suspend R.() -> T): ReadOnlyProperty<R, Future<T>>
+    where R : HasMutableExtras, R : HasProject = lazyProperty<R, Future<T>> {
+    project.future { action() }
+}
+
+@InternalHotReloadGradleApi
+suspend fun project(): Project {
     val lifecycle = coroutineContext[Lifecycle] ?: error("Project is not initialized yet")
     return lifecycle.project
 }
@@ -112,6 +111,12 @@ internal fun <T> Project.future(action: suspend () -> T): Future<T> {
         )
     }
     return future
+}
+
+@InternalHotReloadGradleApi
+suspend fun <T> Provider<T>.await(): T? {
+    PluginStage.DeferredConfiguration.await()
+    return orNull
 }
 
 @InternalHotReloadGradleApi

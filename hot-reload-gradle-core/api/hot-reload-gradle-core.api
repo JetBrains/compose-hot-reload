@@ -33,3 +33,15 @@ public abstract interface annotation class org/jetbrains/compose/reload/gradle/I
 public final class org/jetbrains/compose/reload/gradle/Lifecycle$Key : kotlin/coroutines/CoroutineContext$Key {
 }
 
+public final class org/jetbrains/compose/reload/gradle/PluginStage$State : java/lang/Enum {
+	public static final field Finished Lorg/jetbrains/compose/reload/gradle/PluginStage$State;
+	public static final field Started Lorg/jetbrains/compose/reload/gradle/PluginStage$State;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/gradle/PluginStage$State;
+	public static fun values ()[Lorg/jetbrains/compose/reload/gradle/PluginStage$State;
+}
+
+public final class org/jetbrains/compose/reload/gradle/UtilsKt {
+	public static final fun forAllJvmTargets (Lorg/gradle/api/Project;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

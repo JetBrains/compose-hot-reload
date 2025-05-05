@@ -11,6 +11,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.withType
@@ -21,30 +22,33 @@ import org.jetbrains.compose.reload.core.PidFileInfo
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
 import org.jetbrains.compose.reload.core.leftOr
+import org.jetbrains.compose.reload.gradle.Future
 import org.jetbrains.compose.reload.gradle.core.composeReloadJetBrainsRuntimeBinary
 import org.jetbrains.compose.reload.gradle.core.composeReloadStderrFile
 import org.jetbrains.compose.reload.gradle.core.composeReloadStdinFile
 import org.jetbrains.compose.reload.gradle.core.composeReloadStdoutFile
 import org.jetbrains.compose.reload.gradle.jetbrainsRuntimeLauncher
+import org.jetbrains.compose.reload.gradle.projectFuture
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.isRegularFile
 import kotlin.jvm.optionals.getOrNull
 
-internal fun Project.registerComposeHotAsyncRunTasks() {
-    val runTasks = tasks.withType<AbstractComposeHotRun>()
-    val argFileTasks = tasks.withType<ComposeHotArgfileTask>()
+internal val Project.hotAsyncRunTasks: Future<TaskCollection<ComposeHotAsyncRun>> by projectFuture {
+    val runTasks = hotRunTasks.await()
+    val argFileTasks = hotArgFileTasks.await().associateBy { it.name }
 
-    runTasks.names.forEach { runTaskName ->
-        val runTask = runTasks.named(runTaskName)
-        val argFileTask = argFileTasks.named(runTask.argFileTaskName())
+    runTasks.forEach { runTask ->
+        val argFileTask = argFileTasks.getValue(runTask.argFileTaskName())
         registerComposeHotAsyncRunTask(runTask, argFileTask)
     }
+
+    tasks.withType<ComposeHotAsyncRun>()
 }
 
 private fun Project.registerComposeHotAsyncRunTask(
-    runTask: TaskProvider<AbstractComposeHotRun>,
-    argFileTaskProvider: TaskProvider<ComposeHotArgfileTask>
+    runTask: TaskProvider<out AbstractComposeHotRun>,
+    argFileTaskProvider: TaskProvider<HotArgFileTask>
 ) {
     tasks.register(runTask.name + "Async", ComposeHotAsyncRun::class.java) { task ->
         task.argFile.set(argFileTaskProvider.flatMap { it.argFile })

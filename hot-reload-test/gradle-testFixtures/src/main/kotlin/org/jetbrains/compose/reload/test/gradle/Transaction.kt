@@ -28,7 +28,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.Ack
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.Ping
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompilerReady
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIRendered
@@ -123,19 +122,17 @@ public class TransactionScope internal constructor(
     ): Unit = withAsyncTrace("'launchApplicationAndWait'") {
         fixture.launchApplication(projectPath, mainClass)
         var uiRendered = false
-        var recompilerReady = false
 
         skipToMessage<OrchestrationMessage>("Waiting for application to start") { message ->
             if (message is UIRendered) uiRendered = true
-            if (message is RecompilerReady) recompilerReady = true
             if (message is ClientDisconnected && message.clientRole == OrchestrationClientRole.Application) {
                 fail("Application disconnected")
             }
             if (message !is LogMessage && message !is Ack && message !is Ping) {
                 logger.debug("application startup: received message: $message")
-                logger.debug("application startup: uiRendered=$uiRendered, recompilerReady=$recompilerReady")
+                logger.debug("application startup: uiRendered=$uiRendered")
             }
-            uiRendered && recompilerReady
+            uiRendered
         }
     }
 
@@ -145,14 +142,7 @@ public class TransactionScope internal constructor(
         funName: String
     ): Unit = withAsyncTrace("'launchDevApplicationAndWait'") {
         fixture.launchDevApplication(projectPath, className, funName)
-        var uiRendered = false
-        var recompilerReady = false
-
-        skipToMessage<OrchestrationMessage>("Waiting for dev application to start") { message ->
-            if (message is UIRendered) uiRendered = true
-            if (message is RecompilerReady) recompilerReady = true
-            uiRendered && recompilerReady
-        }
+        skipToMessage<UIRendered>("Waiting for dev application to start")
     }
 
     public suspend fun sync(): Unit = withAsyncTrace("'sync'") {

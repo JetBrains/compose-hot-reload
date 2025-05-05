@@ -8,8 +8,12 @@ package org.jetbrains.compose.reload
 import org.gradle.api.Project
 import org.gradle.api.attributes.Usage
 import org.jetbrains.compose.reload.gradle.HotReloadUsage
+import org.jetbrains.compose.reload.gradle.PluginStage
+import org.jetbrains.compose.reload.gradle.await
+import org.jetbrains.compose.reload.gradle.launch
 
-internal fun Project.setupComposeHotReloadAttributes() {
+internal fun Project.configureComposeHotReloadAttributes() = project.launch {
+    PluginStage.EagerConfiguration.await()
     dependencies.attributesSchema.attribute(Usage.USAGE_ATTRIBUTE)
         .compatibilityRules.add(HotReloadUsage.CompatibilityRule::class.java)
 }

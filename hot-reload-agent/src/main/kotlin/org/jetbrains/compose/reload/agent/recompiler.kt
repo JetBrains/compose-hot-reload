@@ -48,7 +48,7 @@ private val isGradleDaemon = run {
 private val amperBuildRoot: String? = HotReloadEnvironment.amperBuildRoot
 private val amperBuildTask: String? = HotReloadEnvironment.amperBuildTask
 
-private val recompileRequests = LinkedBlockingQueue<RecompileRequest>(
+private val recompileRequests = LinkedBlockingQueue(
     /*
     Starting with one initial recompile request.
 
@@ -60,7 +60,7 @@ private val recompileRequests = LinkedBlockingQueue<RecompileRequest>(
       For Gradle, in particular, the tracking of the classpath
       is incremental; this means that the file collection has to be built initially (with this request)
      */
-    listOf(RecompileRequest())
+    listOfNotNull(if (HotReloadEnvironment.gradleBuildContinuous) RecompileRequest() else null)
 )
 
 internal fun launchRecompiler() {
@@ -118,14 +118,6 @@ internal fun launchRecompiler() {
         logger.debug("'Recompiler': started")
 
         try {
-            /*
-            On continuous builds, the Gradle daemon will send the 'ready' signal once started up
-            and listening for changes
-            */
-            if (!HotReloadEnvironment.gradleBuildContinuous) {
-                OrchestrationMessage.RecompilerReady().send()
-            }
-
             while (true) {
                 val requests = takeRecompileRequests()
                 logger.debug("'Recompiler': Requests: ${requests.map { it.messageId }}")

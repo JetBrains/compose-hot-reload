@@ -9,36 +9,38 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.kotlin.dsl.withType
+import org.jetbrains.compose.reload.gradle.Future
 import org.jetbrains.compose.reload.gradle.files
+import org.jetbrains.compose.reload.gradle.projectFuture
 import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.outputStream
 
-internal fun Project.registerArgfileTasks() {
-    val runTasks = tasks.withType<AbstractComposeHotRun>()
-    runTasks.names.forEach { runTaskName ->
-        val runTask = runTasks.named(runTaskName)
-        registerArgfileTask(runTask)
+internal val Project.hotArgFileTasks: Future<Collection<TaskProvider<HotArgFileTask>>> by projectFuture {
+    hotRunTasks.await().map { runTask ->
+        registerHotArgfileTask(runTask)
     }
+
 }
 
-internal fun TaskProvider<AbstractComposeHotRun>.argFileTaskName(): String {
+internal fun TaskProvider<out JavaExec>.argFileTaskName(): String {
     return "${name}Argfile"
 }
 
-private fun Project.registerArgfileTask(
-    runTask: TaskProvider<AbstractComposeHotRun>
-): TaskProvider<ComposeHotArgfileTask> {
-    val createArgsTask = tasks.register(runTask.argFileTaskName(), ComposeHotArgfileTask::class.java) { task ->
+private fun Project.registerHotArgfileTask(
+    runTask: TaskProvider<out AbstractComposeHotRun>
+): TaskProvider<HotArgFileTask> {
+    val createArgsTask = tasks.register(runTask.argFileTaskName(), HotArgFileTask::class.java) { task ->
         task.runTaskName.set(runTask.name)
         task.argFile.set(provider { runTask.get().argFile.get() })
         task.arguments.addAll(provider { runTask.get().allJvmArgs + runTask.get().jvmArgs.orEmpty() })
         task.classpath.from(project.files { runTask.get().classpath })
+        task.dependsOn(provider { runTask.get().snapshotTaskName })
     }
 
     runTask.configure { task ->
@@ -49,7 +51,7 @@ private fun Project.registerArgfileTask(
     return createArgsTask
 }
 
-internal open class ComposeHotArgfileTask : DefaultTask() {
+internal open class HotArgFileTask : DefaultTask() {
     @get:Input
     internal val arguments = project.objects.listProperty(String::class.java)
 

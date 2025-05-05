@@ -100,7 +100,7 @@ internal val KotlinCompilation<*>.composeHotReloadRuntimeClasspath: FileCollecti
     ) {
         val hotClassesDir = hotClassesOutputDirectory
         delete(hotClassesDir)
-        delete(composeHotReloadClasspathSnapshotFile)
+        delete(hotClasspathSnapshotFile)
         doLast { hotClassesDir.get().asFile.toPath().createDirectories() }
     }
 

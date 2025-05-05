@@ -6,27 +6,28 @@
 package org.jetbrains.compose.reload
 
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.withType
 import org.jetbrains.compose.ComposePlugin
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
+import org.jetbrains.compose.reload.gradle.Future
+import org.jetbrains.compose.reload.gradle.PluginStage
+import org.jetbrains.compose.reload.gradle.await
+import org.jetbrains.compose.reload.gradle.awaitKotlinPlugin
 import org.jetbrains.compose.reload.gradle.core.composeReloadAutoRuntimeDependenciesEnabled
-import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
-import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
+import org.jetbrains.compose.reload.gradle.forAllJvmTargets
+import org.jetbrains.compose.reload.gradle.future
+import org.jetbrains.compose.reload.gradle.projectFuture
 import org.jetbrains.compose.reload.gradle.withComposePlugin
-import org.jetbrains.kotlin.gradle.ExternalKotlinTargetApi
+import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
-import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 
-internal fun Project.setupComposeDevCompilation() {
-    kotlinMultiplatformOrNull?.targets?.withType<KotlinJvmTarget>()?.configureEach { target ->
-        target.setupComposeDevCompilation()
-    }
-
-    kotlinJvmOrNull?.target?.setupComposeDevCompilation()
+internal val Project.hotDevCompilations: Future<List<KotlinCompilation<*>>> by projectFuture {
+    forAllJvmTargets { target -> target.hotDevCompilation }.map { it.await() }
 }
 
-@OptIn(ExternalKotlinTargetApi::class)
-private fun KotlinTarget.setupComposeDevCompilation() {
+internal val KotlinTarget.hotDevCompilation: Future<KotlinCompilation<*>> by future {
+    PluginStage.EagerConfiguration.await()
+    awaitKotlinPlugin()
+
     val main = compilations.getByName("main")
     val dev = compilations.maybeCreate("dev")
     dev.associateWith(main)
@@ -41,9 +42,5 @@ private fun KotlinTarget.setupComposeDevCompilation() {
         }
     }
 
-    project.tasks.register(
-        "${targetName}RunDev".replaceFirstChar { it.lowercase() }, ComposeDevRun::class.java
-    ) { task ->
-        task.compilation.set(dev)
-    }
+    dev
 }

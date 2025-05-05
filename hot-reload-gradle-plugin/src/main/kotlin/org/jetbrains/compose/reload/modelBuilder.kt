@@ -12,11 +12,15 @@ import org.gradle.tooling.provider.model.ToolingModelBuilder
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.core.withClosure
+import org.jetbrains.compose.reload.gradle.PluginStage
+import org.jetbrains.compose.reload.gradle.await
 import org.jetbrains.compose.reload.gradle.idea.IdeaComposeHotReloadModel
 import org.jetbrains.compose.reload.gradle.idea.IdeaComposeHotRunTask
+import org.jetbrains.compose.reload.gradle.launch
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 
-internal fun Project.setupComposeHotReloadModelBuilder() {
+internal fun Project.configureComposeHotReloadModelBuilder() = launch {
+    PluginStage.EagerConfiguration.await()
     serviceOf<ToolingModelBuilderRegistry>().register(IdeaComposeHotReloadModelBuilder())
 }
 

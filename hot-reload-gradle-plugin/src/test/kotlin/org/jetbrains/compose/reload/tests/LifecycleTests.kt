@@ -9,13 +9,13 @@ import org.gradle.internal.impldep.junit.framework.TestCase.assertFalse
 import org.gradle.internal.impldep.junit.framework.TestCase.assertTrue
 import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.compose.reload.gradle.Future
-import org.jetbrains.compose.reload.PluginStage
-import org.jetbrains.compose.reload.await
-import org.jetbrains.compose.reload.awaitFinish
+import org.jetbrains.compose.reload.gradle.PluginStage
+import org.jetbrains.compose.reload.gradle.await
+import org.jetbrains.compose.reload.gradle.awaitFinish
 import org.jetbrains.compose.reload.gradle.flatMap
 import org.jetbrains.compose.reload.gradle.launch
 import org.jetbrains.compose.reload.gradle.map
-import org.jetbrains.compose.reload.runStage
+import org.jetbrains.compose.reload.gradle.runStage
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.Test
 import kotlin.test.assertEquals

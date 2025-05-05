@@ -5,55 +5,12 @@
 
 package org.jetbrains.compose.reload
 
-import org.gradle.api.Project
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.property
-import org.gradle.kotlin.dsl.withType
-import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
-import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
-import org.jetbrains.compose.reload.gradle.string
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
-import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
-
-internal fun Project.setupComposeHotRunConventions() {
-    project.composeHotReloadProcessManagerTask()
-
-    tasks.withType<AbstractComposeHotRun>().configureEach { task ->
-        task.group = "run"
-        task.configureJavaExecTaskForHotReload(task.compilation)
-    }
-
-    tasks.withType<ComposeHotRun>().configureEach { task ->
-        task.description = "Compose Application Run (Hot Reload enabled) | -PmainClass=..."
-
-        task.mainClass.convention(
-            project.providers.gradleProperty("mainClass")
-                .orElse(project.providers.systemProperty("mainClass"))
-        )
-
-        task.compilation.convention(provider {
-            kotlinMultiplatformOrNull?.let { kotlin ->
-                return@provider kotlin.targets.withType<KotlinJvmTarget>()
-                    .firstOrNull()?.compilations?.getByName("main")
-            }
-
-            kotlinJvmOrNull?.let { kotlin ->
-                return@provider kotlin.target.compilations.getByName("main")
-            }
-            null
-        })
-    }
-
-    /* Configure the dev run: Expect -DclassName and -DfunName */
-    tasks.withType<ComposeDevRun>().configureEach { task ->
-        task.description = "Compose Application Dev Run (Hot Reload enabled) | -PclassName=... -PfunName=..."
-        task.mainClass.set("org.jetbrains.compose.reload.jvm.DevApplication")
-        task.args("--className", task.className.string(), "--funName", task.funName.string())
-    }
-}
 
 sealed class AbstractComposeHotRun : JavaExec() {
     @Transient
@@ -62,14 +19,17 @@ sealed class AbstractComposeHotRun : JavaExec() {
 
     @get:Internal
     internal val pidFile = project.objects.fileProperty()
-        .value(compilation.flatMap { compilation -> compilation.runBuildFile("$name.pid") })
+        .value(compilation.flatMap { compilation -> compilation.pidFile })
 
     @get:InputFile
     internal val argFile = project.objects.fileProperty()
-        .value(compilation.flatMap { compilation -> compilation.runBuildFile("$name.argfile") })
+        .value(compilation.flatMap { compilation -> compilation.argFile })
 
     @get:Internal
     internal val argFileTaskName = project.objects.property<String>()
+
+    @get:Internal
+    internal val snapshotTaskName = project.objects.property<String>()
 }
 
 /**

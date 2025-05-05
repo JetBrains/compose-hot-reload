@@ -10,7 +10,7 @@
                 "dev",
                 "main"
             ],
-            "argFile": "<PROJECT_DIR>/build/run/dev/runDev.argfile",
+            "argFile": "<PROJECT_DIR>/build/run/dev/dev.argfile",
             "argFileTaskName": "runDevArgfile"
         },
         {
@@ -21,7 +21,7 @@
             "sourceSets": [
                 "main"
             ],
-            "argFile": "<PROJECT_DIR>/build/run/main/runHot.argfile",
+            "argFile": "<PROJECT_DIR>/build/run/main/main.argfile",
             "argFileTaskName": "runHotArgfile"
         }
     ]
