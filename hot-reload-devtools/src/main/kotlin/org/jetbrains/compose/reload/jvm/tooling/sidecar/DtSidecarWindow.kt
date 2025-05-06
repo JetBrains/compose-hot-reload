@@ -33,7 +33,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowState
-import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsAlwaysShowReloadCounter
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
@@ -140,9 +139,7 @@ fun DtSidecarWindowContent(
                                 reloadingColor = DtColors.statusColorOrange2
                             ).value
                         )
-                        if (devToolsAlwaysShowReloadCounter) {
-                            DtCollapsedReloadCounterStatusItem()
-                        }
+                        DtCollapsedReloadCounterStatusItem()
                     }
                 }
 

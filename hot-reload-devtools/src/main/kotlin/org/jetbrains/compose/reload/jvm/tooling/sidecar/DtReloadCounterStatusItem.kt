@@ -5,10 +5,12 @@
 
 package org.jetbrains.compose.reload.jvm.tooling.sidecar
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import io.sellmair.evas.compose.composeValue
@@ -38,12 +40,18 @@ fun DtCollapsedReloadCounterStatusItem() {
     val state = ReloadCountState.composeValue()
     if (state.successfulReloads < 1) return
 
-    val defaultText = "⟳${state.successfulReloads}"
-    val defaultModifier = Modifier.tag(ReloadCounterText)
-    val (text, modifier) = when {
-        state.successfulReloads < 10 -> defaultText to defaultModifier
-        state.successfulReloads < 100 -> defaultText to defaultModifier.scale(0.9f)
-        else -> defaultText.drop(1) to defaultModifier.scale(0.7f)
+    val textScale = when {
+        state.successfulReloads < 10 -> 1.0f
+        state.successfulReloads < 100 -> 0.9f
+        else -> 0.7f
     }
-    DtText(text = text, modifier = modifier)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.scale(textScale)
+    ) {
+        if (state.successfulReloads < 100) {
+            DtText("⟳", modifier = Modifier.scale(1.25f))
+        }
+        DtText(text = "${state.successfulReloads}", modifier = Modifier.tag(ReloadCounterText))
+    }
 }
