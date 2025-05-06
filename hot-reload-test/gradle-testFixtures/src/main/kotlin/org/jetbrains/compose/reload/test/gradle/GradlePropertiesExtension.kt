@@ -34,7 +34,7 @@ internal fun renderGradleProperties(context: ExtensionContext): String = gradleP
 private const val androidEnabledKey = "android.enabled"
 private const val propertiesKey = "properties"
 private val gradlePropertiesTemplate = """
-    org.gradle.caching=true
+    org.gradle.caching=false
     org.gradle.jvmargs=-Xmx1G -XX:+UseParallelGC
     org.gradle.daemon.idletimeout=${10.minutes.inWholeMilliseconds}
     {{if $androidEnabledKey}}
