@@ -8,7 +8,6 @@ import java.util.Properties
 
 plugins {
     `kotlin-dsl`
-    kotlin("jvm") version deps.versions.kotlin
 }
 
 repositories {

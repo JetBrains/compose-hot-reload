@@ -120,7 +120,7 @@ class TestKt {
                 EndRestartGroup()
                 JumpToken(L26, opocde=167)
                 LabelToken(L25)
-                BlockToken(3)
+                BlockToken(2)
                 LabelToken(L26)
                 BlockToken(25)
                 JumpToken(L28, opocde=153)
@@ -132,9 +132,9 @@ class TestKt {
                 BlockToken(2)
                 EndRestartGroup()
     
-                ReplaceGroup (group=ComposeGroupKey(key=-1254930869)) {
-                    StartReplaceGroup(key=ComposeGroupKey(key=-1254930869))
-                    BlockToken(2)
+                ReplaceGroup (group=ComposeGroupKey(key=-1254942773)) {
+                    StartReplaceGroup(key=ComposeGroupKey(key=-1254942773))
+                    BlockToken(4)
                     LabelToken(L8)
                     BlockToken(2)
                     LabelToken(L9)
@@ -179,8 +179,8 @@ class TestKt {
                     }
                 }
     
-                ReplaceGroup (group=ComposeGroupKey(key=-1254786719)) {
-                    StartReplaceGroup(key=ComposeGroupKey(key=-1254786719))
+                ReplaceGroup (group=ComposeGroupKey(key=-1255090271)) {
+                    StartReplaceGroup(key=ComposeGroupKey(key=-1255090271))
                     BlockToken(1)
                     EndReplaceGroup()
                 }

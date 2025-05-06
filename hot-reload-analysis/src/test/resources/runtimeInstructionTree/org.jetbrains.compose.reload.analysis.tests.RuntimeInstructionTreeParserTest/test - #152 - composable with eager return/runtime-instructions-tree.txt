@@ -79,7 +79,7 @@ class TestKt {
                 LabelToken(L6)
                 BlockToken(2)
                 LabelToken(L7)
-                BlockToken(2)
+                BlockToken(4)
                 LabelToken(L8)
                 BlockToken(2)
                 LabelToken(L9)

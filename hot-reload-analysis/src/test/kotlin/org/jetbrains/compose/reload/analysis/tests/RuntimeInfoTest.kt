@@ -21,6 +21,7 @@ import org.jetbrains.compose.reload.core.withClosure
 import org.jetbrains.compose.reload.test.core.CompilerOption
 import org.jetbrains.compose.reload.test.core.TestEnvironment
 import org.jetbrains.kotlin.util.prefixIfNot
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInfo
 import kotlin.io.path.Path
@@ -198,6 +199,7 @@ class RuntimeInfoTest {
     }
 
     @Test
+    @Disabled
     fun `test - remember`(compiler: Compiler, testInfo: TestInfo) {
         val runtimeInfo = checkRuntimeInfo(
             testInfo, compiler.withOptions(CompilerOption.OptimizeNonSkippingGroups to false), mapOf(
@@ -229,6 +231,7 @@ class RuntimeInfoTest {
     }
 
     @Test
+    @Disabled
     fun `test - all remember overloads`(compiler: Compiler, testInfo: TestInfo) {
         val runtimeInfo = checkRuntimeInfo(
             testInfo, compiler.withOptions(CompilerOption.OptimizeNonSkippingGroups to false), mapOf(

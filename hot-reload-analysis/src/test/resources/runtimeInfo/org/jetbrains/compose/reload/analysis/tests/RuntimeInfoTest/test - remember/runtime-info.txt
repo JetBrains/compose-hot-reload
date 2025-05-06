@@ -27,23 +27,9 @@ FooKt {
     
         RestartGroup {
             key: -965539098
-            codeHash: 3034049798
+            codeHash: 150829833
             methodDependencies: []
             fieldDependencies: []
-    
-            ReplaceGroup {
-                key: 1849434622
-                codeHash: 498681312
-                methodDependencies: []
-                fieldDependencies: []
-            }
-    
-            ReplaceGroup {
-                key: 1849434622
-                codeHash: 2457322313
-                methodDependencies: []
-                fieldDependencies: []
-            }
         }
     }
     

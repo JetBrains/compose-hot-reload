@@ -54,6 +54,7 @@ class RuntimeDependenciesTest {
             PathRegex(".*/app/build/run/jvmMain/classpath/hot"),
             PathRegex(".*/app/build/run/jvmMain/classpath/libs/lib/.*/lib-jvm.jar"),
             *stdlib,
+            *kotlinCompilerDependencies,
             *hotReloadAgentDependencies,
             *hotReloadRuntimeDependencies,
             *testRuntimeDependencies,
@@ -103,6 +104,7 @@ class RuntimeDependenciesTest {
             PathRegex(".*/app/build/run/jvmMain/classpath/hot"),
             PathRegex(".*/app/build/run/jvmMain/classpath/libs/lib/.*/lib-jvm.jar"),
             *stdlib,
+            *kotlinCompilerDependencies,
             *hotReloadAgentDependencies,
             *hotReloadRuntimeDependencies,
             *testRuntimeDependencies,
@@ -120,6 +122,7 @@ class RuntimeDependenciesTest {
             PathRegex(".*/build/run/main/classpath/classes"),
             PathRegex(".*/build/run/main/classpath/hot"),
             *stdlib,
+            *kotlinCompilerDependencies,
             *hotReloadAgentDependencies,
             *hotReloadRuntimeDependencies,
             *testRuntimeDependencies,
@@ -175,4 +178,8 @@ private val hotReloadRuntimeDependencies = arrayOf(
 
 private val testRuntimeDependencies = arrayOf(
     PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-test-$HOT_RELOAD_VERSION.jar"),
+)
+
+private val kotlinCompilerDependencies = arrayOf(
+    PathRegex(".*/org/jetbrains/kotlin/kotlin-.*/2.2.255-SNAPSHOT/.*"),
 )

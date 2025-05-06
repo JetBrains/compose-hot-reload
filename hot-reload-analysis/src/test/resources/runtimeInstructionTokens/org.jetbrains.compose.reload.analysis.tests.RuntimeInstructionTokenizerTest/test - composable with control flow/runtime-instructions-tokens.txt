@@ -116,8 +116,8 @@ class FooKt {
             JumpInsNode(L9)) [158])
         BlockToken(1)
             VarInsnNode [25]
-        StartReplaceGroup(key=ComposeGroupKey(key=-1460235184))
-            LdcInsnNode(-1460235184) [18]
+        StartReplaceGroup(key=ComposeGroupKey(key=-1460247088))
+            LdcInsnNode(-1460247088) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]
         LabelToken(L7)
             LabelNode(L7)
@@ -160,8 +160,8 @@ class FooKt {
             LineNumberNode [-1]
             FrameNode [-1]
             VarInsnNode [25]
-        StartReplaceGroup(key=ComposeGroupKey(key=-1460198046))
-            LdcInsnNode(-1460198046) [18]
+        StartReplaceGroup(key=ComposeGroupKey(key=-1460209950))
+            LdcInsnNode(-1460209950) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]
         LabelToken(L10)
             LabelNode(L10)
@@ -173,8 +173,8 @@ class FooKt {
             JumpInsNode(L13)) [164])
         BlockToken(1)
             VarInsnNode [25]
-        StartReplaceGroup(key=ComposeGroupKey(key=-1460175323))
-            LdcInsnNode(-1460175323) [18]
+        StartReplaceGroup(key=ComposeGroupKey(key=-1460187227))
+            LdcInsnNode(-1460187227) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]
         LabelToken(L11)
             LabelNode(L11)
@@ -213,12 +213,11 @@ class FooKt {
             JumpInsNode(L14)) [GOTO])
         LabelToken(L13)
             LabelNode(L13)
-        BlockToken(3)
-            LineNumberNode [-1]
+        BlockToken(2)
             FrameNode [-1]
             VarInsnNode [25]
-        StartReplaceGroup(key=ComposeGroupKey(key=-1460136883))
-            LdcInsnNode(-1460136883) [18]
+        StartReplaceGroup(key=ComposeGroupKey(key=-1460373971))
+            LdcInsnNode(-1460373971) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]
         BlockToken(1)
             VarInsnNode [25]

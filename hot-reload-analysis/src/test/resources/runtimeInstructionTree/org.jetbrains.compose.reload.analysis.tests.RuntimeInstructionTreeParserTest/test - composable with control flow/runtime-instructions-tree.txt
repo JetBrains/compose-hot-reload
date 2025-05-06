@@ -80,8 +80,8 @@ class TestKt {
                 BlockToken(2)
                 EndRestartGroup()
     
-                ReplaceGroup (group=ComposeGroupKey(key=-1254950492)) {
-                    StartReplaceGroup(key=ComposeGroupKey(key=-1254950492))
+                ReplaceGroup (group=ComposeGroupKey(key=-1254962396)) {
+                    StartReplaceGroup(key=ComposeGroupKey(key=-1254962396))
                     LabelToken(L7)
                     BlockToken(23)
                     LabelToken(L8)
@@ -89,23 +89,23 @@ class TestKt {
                     EndReplaceGroup()
                 }
     
-                ReplaceGroup (group=ComposeGroupKey(key=-1254913354)) {
-                    StartReplaceGroup(key=ComposeGroupKey(key=-1254913354))
+                ReplaceGroup (group=ComposeGroupKey(key=-1254925258)) {
+                    StartReplaceGroup(key=ComposeGroupKey(key=-1254925258))
                     LabelToken(L10)
                     BlockToken(3)
                     JumpToken(L13, opocde=164)
                     BlockToken(1)
                     JumpToken(L14, opocde=167)
                     LabelToken(L13)
-                    BlockToken(3)
+                    BlockToken(2)
                     LabelToken(L14)
                     BlockToken(24)
                     LabelToken(L15)
                     BlockToken(2)
                     EndReplaceGroup()
     
-                    ReplaceGroup (group=ComposeGroupKey(key=-1254890631)) {
-                        StartReplaceGroup(key=ComposeGroupKey(key=-1254890631))
+                    ReplaceGroup (group=ComposeGroupKey(key=-1254902535)) {
+                        StartReplaceGroup(key=ComposeGroupKey(key=-1254902535))
                         LabelToken(L11)
                         BlockToken(23)
                         LabelToken(L12)
@@ -113,8 +113,8 @@ class TestKt {
                         EndReplaceGroup()
                     }
     
-                    ReplaceGroup (group=ComposeGroupKey(key=-1254852191)) {
-                        StartReplaceGroup(key=ComposeGroupKey(key=-1254852191))
+                    ReplaceGroup (group=ComposeGroupKey(key=-1255089279)) {
+                        StartReplaceGroup(key=ComposeGroupKey(key=-1255089279))
                         BlockToken(1)
                         EndReplaceGroup()
                     }
