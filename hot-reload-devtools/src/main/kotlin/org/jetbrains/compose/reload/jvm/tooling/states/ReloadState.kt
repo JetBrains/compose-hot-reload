@@ -70,6 +70,16 @@ fun CoroutineScope.launchReloadState() = launchState(ReloadState) {
             ReloadState.Reloading().emit()
         }
 
+        if (message is OrchestrationMessage.BuildTaskResult && !message.isSuccess) {
+            ReloadState.Failed("Compilation Failed", logs = collectedLogs.toList()).emit()
+        }
+
+        if (message is OrchestrationMessage.BuildTaskResult && message.isSuccess) {
+            if (currentReloadRequest == null) {
+                ReloadState.Reloading().emit()
+            }
+        }
+
         if (message is OrchestrationMessage.LogMessage && message.tag == TAG_COMPILER) {
             if (message.message.contains("executing build...")) {
                 currentReloadRequest = null

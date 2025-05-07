@@ -90,9 +90,11 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
             }
 
             /* Expand testing against different launch modes */
-            result += launchModes.filter { it != ApplicationLaunchMode.default }.map { launchMode ->
-                baselineContext.copy {
-                    this.launchMode = launchMode
+            if (!context.hasAnnotation<QuickTest>()) {
+                result += launchModes.filter { it != ApplicationLaunchMode.default }.map { launchMode ->
+                    baselineContext.copy {
+                        this.launchMode = launchMode
+                    }
                 }
             }
         }

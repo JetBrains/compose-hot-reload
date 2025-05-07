@@ -17,10 +17,10 @@ import org.jetbrains.compose.reload.jvm.tooling.theme.dtHorizontalPadding
 import org.jetbrains.compose.reload.jvm.tooling.widgets.DtHeader2
 
 @Composable
-fun DtCompilerConsole(
-    tag: String, modifier: Modifier = Modifier
+fun DtMainConsole(
+    modifier: Modifier = Modifier
 ) {
-    val logState = ConsoleLogState.Key(tag).composeValue()
+    val logState = ConsoleLogState.composeValue()
     val scroll = rememberScrollState(0)
 
     LaunchedEffect(scroll.maxValue) {
@@ -29,7 +29,7 @@ fun DtCompilerConsole(
     }
 
     Column(modifier = modifier) {
-        DtHeader2(tag, modifier = Modifier.dtHorizontalPadding())
+        DtHeader2("Console", modifier = Modifier.dtHorizontalPadding())
         DtConsole(logs = logState.logs, modifier = Modifier.fillMaxSize())
     }
 }

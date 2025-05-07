@@ -80,6 +80,23 @@ public sealed class OrchestrationMessage : Serializable {
         public val exitCode: Int?
     ) : OrchestrationMessage()
 
+    public sealed class BuildEvent : OrchestrationMessage()
+
+    public class BuildStarted : BuildEvent()
+
+    public data class BuildTaskResult(
+        public val taskId: String,
+        public val isSuccess: Boolean,
+        public val startTime: Long?,
+        public val endTime: Long?,
+        public val failures: List<BuildTaskFailure>
+    ) : BuildEvent() {
+        public data class BuildTaskFailure(
+            val message: String?,
+            val description: String?,
+        ) : Serializable
+    }
+
     /**
      * Signals to the application (agent) that it should reload the provided classes.
      *

@@ -100,6 +100,45 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildEvent : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildStarted : org/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildEvent {
+	public fun <init> ()V
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult : org/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildEvent {
+	public fun <init> (Ljava/lang/String;ZLjava/lang/Long;Ljava/lang/Long;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/Long;
+	public final fun component4 ()Ljava/lang/Long;
+	public final fun component5 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;ZLjava/lang/Long;Ljava/lang/Long;Ljava/util/List;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult;Ljava/lang/String;ZLjava/lang/Long;Ljava/lang/Long;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEndTime ()Ljava/lang/Long;
+	public final fun getFailures ()Ljava/util/List;
+	public final fun getStartTime ()Ljava/lang/Long;
+	public final fun getTaskId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isSuccess ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult$BuildTaskFailure : java/io/Serializable {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult$BuildTaskFailure;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult$BuildTaskFailure;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult$BuildTaskFailure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$CleanCompositionRequest : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
 	public fun <init> ()V
 }
@@ -287,4 +326,3 @@ public abstract interface class org/jetbrains/compose/reload/orchestration/Orche
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationServerKt {
 	public static final fun startOrchestrationServer ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationServer;
 }
-

@@ -6,7 +6,6 @@
 package org.jetbrains.compose.reload.tests.gradle
 
 import kotlinx.coroutines.flow.toList
-import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.PidFileInfo
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.gradle.readObject
@@ -15,8 +14,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadCla
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest.ChangeType.Modified
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
-import org.jetbrains.compose.reload.test.gradle.ExtendGradleProperties
-import org.jetbrains.compose.reload.test.gradle.GradlePropertiesExtension
 import org.jetbrains.compose.reload.test.gradle.GradleRunner
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
@@ -33,9 +30,9 @@ import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.getDefaultMainKtSourceFile
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
+import org.jetbrains.compose.reload.utils.BuildMode
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
 import org.jetbrains.compose.reload.utils.QuickTest
-import org.junit.jupiter.api.extension.ExtensionContext
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.deleteExisting
 import kotlin.io.path.exists
@@ -51,7 +48,7 @@ import kotlin.test.fail
 @TestedLaunchMode(ApplicationLaunchMode.Detached)
 @TestedProjectMode(ProjectMode.Kmp)
 @GradleIntegrationTest
-@ExtendGradleProperties(HotSnapshotAndReloadTaskTest.Extension::class)
+@BuildMode(isContinuous = false)
 class HotSnapshotAndReloadTaskTest {
 
     private val HotReloadTestFixture.snapshotFile get() = projectDir.resolve("build/run/jvmMain/classpath/.snapshot")
@@ -276,11 +273,5 @@ class HotSnapshotAndReloadTaskTest {
             mapOf("Bar.class" to Added),
             request.changedClassFiles.mapKeys { it.key.name }
         )
-    }
-
-    class Extension : GradlePropertiesExtension {
-        override fun properties(context: ExtensionContext): List<String> {
-            return listOf("${HotReloadProperty.GradleBuildContinuous.key}=false")
-        }
     }
 }

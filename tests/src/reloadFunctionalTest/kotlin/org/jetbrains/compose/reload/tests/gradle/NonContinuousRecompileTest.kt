@@ -5,7 +5,6 @@
 
 package org.jetbrains.compose.reload.tests.gradle
 
-import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
@@ -15,24 +14,19 @@ import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
+import org.jetbrains.compose.reload.utils.BuildMode
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
-import kotlin.io.path.appendLines
-import kotlin.io.path.createFile
-import kotlin.io.path.createParentDirectories
-import kotlin.io.path.exists
+import org.jetbrains.compose.reload.utils.QuickTest
 import kotlin.test.assertEquals
 
+@BuildMode(isContinuous = false)
+@QuickTest
 class NonContinuousRecompileTest {
     private val logger = createLogger()
 
     @HotReloadTest
     @GradleIntegrationTest
     fun `test - non continuous build`(fixture: HotReloadTestFixture) = fixture.runTest {
-        projectDir.resolve("gradle.properties")
-            .createParentDirectories()
-            .apply { if (!exists()) createFile() }
-            .appendLines(listOf("${HotReloadProperty.GradleBuildContinuous.key}=false"))
-
         fixture initialSourceCode """
                 import androidx.compose.foundation.layout.*
                 import androidx.compose.ui.unit.sp

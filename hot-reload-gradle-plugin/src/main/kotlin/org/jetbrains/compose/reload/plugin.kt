@@ -3,6 +3,8 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
+@file:Suppress("DuplicatedCode")
+
 package org.jetbrains.compose.reload
 
 import org.gradle.api.Plugin
@@ -21,6 +23,7 @@ class ComposeHotReloadPlugin : Plugin<Project> {
             target.extensions.create(composeHotReloadExtensionName, ComposeHotReloadExtension::class.java, target)
 
             /* Launch future configurations */
+            target.launch { target.statusService.await() }
             target.launch { target.hotRunTasks.await() }
             target.launch { target.jvmRunHijackTasks.await() }
             target.launch { target.hotAsyncRunTasks.await() }

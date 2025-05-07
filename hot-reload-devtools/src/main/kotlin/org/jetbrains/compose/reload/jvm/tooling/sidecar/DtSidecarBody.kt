@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.reload.jvm.tooling.theme.DtColors
 import org.jetbrains.compose.reload.jvm.tooling.widgets.animateReloadStatusColor
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 
 @Composable
 internal fun DtSidecarBody(modifier: Modifier = Modifier) {
@@ -24,11 +23,11 @@ internal fun DtSidecarBody(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize()
     ) {
         DtSidecarActionBar()
-        Divider(modifier =
-            Modifier.height(.5.dp),
+        Divider(
+            modifier = Modifier.height(.5.dp),
             color = animateReloadStatusColor(DtColors.text).value
         )
         DtSidecarStatusSection()
-        DtCompilerConsole(LogMessage.TAG_COMPILER, Modifier.fillMaxSize())
+        DtMainConsole(Modifier.fillMaxSize())
     }
 }

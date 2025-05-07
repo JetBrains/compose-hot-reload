@@ -8,35 +8,51 @@ package org.jetbrains.compose.reload.jvm.tooling.states
 import io.sellmair.evas.State
 import io.sellmair.evas.launchState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterIsInstance
 import org.jetbrains.compose.reload.jvm.tooling.orchestration
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asFlow
+import kotlin.time.Duration.Companion.milliseconds
 
 data class ConsoleLogState(val logs: List<String>) : State {
-    data class Key(val tag: String) : State.Key<ConsoleLogState> {
+    companion object Key : State.Key<ConsoleLogState> {
         override val default: ConsoleLogState = ConsoleLogState(emptyList())
-    }
-
-    companion object {
         const val limit = 4096
     }
+
 }
 
-internal fun CoroutineScope.launchConsoleLogState() {
-    launchConsoleLogState(ConsoleLogState.Key(LogMessage.TAG_AGENT))
-    launchConsoleLogState(ConsoleLogState.Key(LogMessage.TAG_RUNTIME))
-    launchConsoleLogState(ConsoleLogState.Key(LogMessage.TAG_COMPILER))
-}
-
-internal fun CoroutineScope.launchConsoleLogState(key: ConsoleLogState.Key) = launchState(key) {
+internal fun CoroutineScope.launchConsoleLogState() = launchState(ConsoleLogState) {
     val logDeque = ArrayDeque<String>()
-    orchestration.asFlow().filterIsInstance<LogMessage>()
-        .filter { message -> message.tag == key.tag }
-        .collect { event ->
-            logDeque += event.message
-            if (logDeque.size > ConsoleLogState.limit) logDeque.removeFirst()
-            ConsoleLogState(logs = logDeque.toList()).emit()
+
+    orchestration.asFlow().collect { event ->
+        if (event is OrchestrationMessage.LogMessage) {
+            logDeque.add("${event.tag} | ${event.message}")
         }
+
+        if (event is OrchestrationMessage.BuildTaskResult) {
+            logDeque.add(event.toLog())
+        }
+
+        if (logDeque.size > ConsoleLogState.limit) logDeque.removeFirst()
+        ConsoleLogState(logs = logDeque.toList()).emit()
+    }
+}
+
+private fun OrchestrationMessage.BuildTaskResult.toLog(): String {
+    return buildString {
+        if (isSuccess) append("☑️ Build | ") else append("❌ Build | ")
+
+        append(taskId)
+        val startTime = startTime
+        val endTime = endTime
+        if (startTime != null && endTime != null) {
+            val duration = (endTime - startTime).milliseconds
+            append(" (${duration.inWholeMilliseconds} ms)")
+        }
+
+        failures.forEach { failure ->
+            appendLine()
+            if (failure.message != null) append(failure.message) else appendLine("<No message>")
+        }
+    }
 }

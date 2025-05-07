@@ -7,7 +7,6 @@ package org.jetbrains.compose.reload
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -39,11 +38,13 @@ import javax.inject.Inject
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.exists
 
-internal val Project.hotReloadLifecycleTask: Future<TaskProvider<Task>> by projectFuture {
+internal val Project.hotReloadLifecycleTask: Future<TaskProvider<HotReloadLifecycleTask>?> by projectFuture {
     PluginStage.EagerConfiguration.await()
     val name = "reload"
-    if (name in tasks.names) tasks.named(name)
-    else tasks.register(name) { task ->
+    if (name in tasks.names) {
+        logger.error("Conflicting '$name' task detected")
+        return@projectFuture null
+    } else tasks.register(name, HotReloadLifecycleTask::class.java) { task ->
         task.group = "compose"
         task.description = "Hot Reloads code for all running applications"
     }
@@ -76,9 +77,11 @@ internal val KotlinCompilation<*>.hotReloadTask: Future<TaskProvider<HotReloadTa
         task.dependsOn(snapshotTask)
     }
 
-    project.hotReloadLifecycleTask.await().configure { lifecycleTask ->
+    project.hotReloadLifecycleTask.await()?.configure { lifecycleTask ->
         if (pidFileOrchestrationPort.isPresent) {
             lifecycleTask.dependsOn(task)
+            lifecycleTask.pidFiles.from(pidFile)
+            lifecycleTask.activeReloadTaskPaths.add(task.map { it.path })
         }
     }
 
@@ -102,20 +105,6 @@ abstract class HotReloadTask : DefaultTask() {
 
     @TaskAction
     fun execute() {
-        val pendingRequestFile = pendingRequestFile.get().asFile.toPath()
-        if (!pendingRequestFile.exists()) {
-            logger.quiet("UP-TO-DATE")
-            return
-        }
-
-        val request = pendingRequestFile.readObject<ReloadClassesRequest>()
-        if (request.changedClassFiles.isEmpty()) {
-            logger.quiet("UP-TO-DATE: No changed classes found")
-            return
-        }
-
-        logger.quiet(reloadReport(request))
-
         val client = runCatching { connectOrchestrationClient(Compiler, agentPort.get()) }.getOrNull() ?: run {
             logger.quiet("Failed to create 'OrchestrationClient'!")
             getCancellationToken().cancel()
@@ -123,6 +112,18 @@ abstract class HotReloadTask : DefaultTask() {
         }
 
         client.use { client ->
+            val pendingRequestFile = pendingRequestFile.get().asFile.toPath()
+
+            val request = if (pendingRequestFile.exists()) pendingRequestFile.readObject<ReloadClassesRequest>() else {
+                logger.info("UP-TO-DATE")
+                ReloadClassesRequest(emptyMap())
+            }
+
+            if (request.changedClassFiles.isEmpty()) {
+                logger.debug("UP-TO-DATE: No changed classes found")
+            }
+
+            logger.quiet(reloadReport(request))
             client.sendMessage(request).get()
             pendingRequestFile.deleteIfExists()
         }
@@ -157,4 +158,12 @@ abstract class HotReloadTask : DefaultTask() {
             }
         }
     }
+}
+
+internal abstract class HotReloadLifecycleTask : DefaultTask() {
+    @get:Internal
+    internal val pidFiles = project.objects.fileCollection()
+
+    @get:Internal
+    internal val activeReloadTaskPaths = project.objects.listProperty(String::class.java)
 }
