@@ -64,8 +64,6 @@ internal class DeclaredHotReloadProperty(
     val targets: List<Target>,
     val documentation: String?
 ) {
-    val environmentVariableKey = key.replace(".", "_").uppercase()
-
     enum class Type {
         String, Boolean, Int, File, Files, Enum
     }

@@ -149,7 +149,7 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
                 "propertyName"(property.name.replaceFirstChar { it.lowercase() })
                 "type"(property.toKotlinType())
                 "statement"("val value = System.getProperty(\"${property.key}\")")
-                "statement"("   ?: System.getenv(\"${property.environmentVariableKey}\")")
+                "statement"("   ?: System.getenv(\"${property.key}\")")
                 if (property.default != null) {
                     "statement"("    ?: ${property.renderDefault()}")
                 } else {

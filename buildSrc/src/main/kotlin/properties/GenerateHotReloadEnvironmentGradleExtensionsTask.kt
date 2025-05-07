@@ -58,7 +58,7 @@ open class GenerateHotReloadEnvironmentGradleExtensionsTask : DefaultTask() {
                     }
                     "statement"("""val value = providers.gradleProperty("${property.key}")""")
                     "statement"("""    .orElse(providers.systemProperty("${property.key}"))""")
-                    "statement"("""    .orElse(providers.environmentVariable("${property.environmentVariableKey}"))""")
+                    "statement"("""    .orElse(providers.environmentVariable("${property.key}"))""")
                     if (property.default != null) "statement"("""    .orElse(${property.renderDefault()})""")
                     if (property.default != null) "statement"("""    .get()""")
                     else "statement"("""    .getOrNull() ?: return null""")
