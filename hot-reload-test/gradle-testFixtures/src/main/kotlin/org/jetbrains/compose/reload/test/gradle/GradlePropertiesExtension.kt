@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import org.jetbrains.compose.reload.core.asTemplateOrThrow
+import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
 import org.jetbrains.compose.reload.core.renderOrThrow
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations
@@ -35,7 +36,7 @@ private const val androidEnabledKey = "android.enabled"
 private const val propertiesKey = "properties"
 private val gradlePropertiesTemplate = """
     org.gradle.caching=true
-    org.gradle.jvmargs=-Xmx1G -XX:+UseParallelGC
+    org.gradle.jvmargs=-Xmx1G -XX:+UseParallelGC ${issueNewDebugSessionJvmArguments().joinToString(" ")}
     org.gradle.daemon.idletimeout=${10.minutes.inWholeMilliseconds}
     {{if $androidEnabledKey}}
     android.useAndroidX=true
