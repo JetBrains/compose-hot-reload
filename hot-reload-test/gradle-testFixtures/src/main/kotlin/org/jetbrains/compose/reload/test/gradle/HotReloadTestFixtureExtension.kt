@@ -13,9 +13,7 @@ import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolver
-import org.junit.platform.commons.util.AnnotationUtils
 import java.nio.file.Files
-import kotlin.jvm.optionals.getOrNull
 
 internal class HotReloadTestFixtureExtension(
     private val context: HotReloadTestInvocationContext
@@ -61,12 +59,11 @@ internal class HotReloadTestFixtureExtension(
     }
 
     private fun ExtensionContext.createTestFixture(): HotReloadTestFixture {
-        val debugAnnotation = AnnotationUtils.findAnnotation(testMethod, Debug::class.java).isPresent
+        val debugAnnotation = hasAnnotation<Debug>()
         val projectDir = ProjectDir(Files.createTempDirectory("hot-reload-test"))
         val orchestrationServer = startOrchestrationServer()
 
-        val isHeadless = AnnotationUtils.findAnnotation(testMethod, Headless::class.java).getOrNull()
-            ?.isHeadless ?: true
+        val isHeadless = findAnnotation<Headless>()?.isHeadless ?: true
 
         val gradleRunner = GradleRunner(
             projectRoot = projectDir.path,

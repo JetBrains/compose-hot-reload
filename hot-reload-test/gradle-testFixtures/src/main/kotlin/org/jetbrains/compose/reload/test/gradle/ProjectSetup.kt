@@ -6,7 +6,6 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import org.junit.jupiter.api.extension.ExtensionContext
-import org.junit.platform.commons.util.AnnotationUtils.findRepeatableAnnotations
 import java.util.ServiceLoader
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createParentDirectories
@@ -29,8 +28,7 @@ internal fun HotReloadTestFixture.setupProject(context: ExtensionContext) {
 
     /* Setup build.gradle.kts files */
     val buildGradleKts = renderBuildGradleKts(context)
-    findRepeatableAnnotations(context.requiredTestMethod, BuildGradleKts::class.java)
-        .plus(findRepeatableAnnotations(context.requiredTestClass, BuildGradleKts::class.java))
+    context.findRepeatableAnnotations<BuildGradleKts>()
         .map { annotation -> annotation.path }.toSet()
         .map { path -> projectDir.subproject(path) }
         .ifEmpty { setOf(projectDir) }
@@ -39,7 +37,7 @@ internal fun HotReloadTestFixture.setupProject(context: ExtensionContext) {
         .forEach { buildGradleKtsPath -> buildGradleKtsPath.writeText(buildGradleKts) }
 
     renderGradleProperties(context).let { properties ->
-        if(properties.isBlank()) return@let
+        if (properties.isBlank()) return@let
         projectDir.resolve("gradle.properties").writeText(properties)
     }
 

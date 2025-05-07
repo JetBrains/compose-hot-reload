@@ -19,13 +19,13 @@ import org.jetbrains.compose.reload.test.gradle.TestedGradleVersion
 import org.jetbrains.compose.reload.test.gradle.TestedKotlinVersion
 import org.jetbrains.compose.reload.test.gradle.TestedLaunchMode
 import org.jetbrains.compose.reload.test.gradle.copy
+import org.jetbrains.compose.reload.test.gradle.findAnnotation
+import org.jetbrains.compose.reload.test.gradle.findRepeatableAnnotations
+import org.jetbrains.compose.reload.test.gradle.hasAnnotation
 import org.jetbrains.kotlin.tooling.core.KotlinToolingVersion
 import org.junit.jupiter.api.extension.ExtensionContext
-import org.junit.platform.commons.support.AnnotationSupport
-import org.junit.platform.commons.util.AnnotationUtils
 import java.awt.GraphicsEnvironment
 import java.security.MessageDigest
-import kotlin.jvm.optionals.getOrNull
 
 private val logger = createLogger()
 
@@ -45,9 +45,8 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
             version.isDefault
         }
 
-        val launchModes = AnnotationSupport.findRepeatableAnnotations(
-            context.requiredTestMethod, TestedLaunchMode::class.java
-        ).map { it.mode }.toSet().ifEmpty { ApplicationLaunchMode.entries.toList() }
+        val launchModes = context.findRepeatableAnnotations<TestedLaunchMode>()
+            .map { it.mode }.toSet().ifEmpty { ApplicationLaunchMode.entries.toList() }
 
         val defaultLaunchMode = launchModes.singleOrNull() ?: ApplicationLaunchMode.default
 
@@ -61,7 +60,7 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
         var result = setOf(baselineContext)
 
         /* Expand Kotlin Versions */
-        if (!AnnotationUtils.isAnnotated(context.requiredTestMethod, QuickTest::class.java)) {
+        if (!context.hasAnnotation<QuickTest>()) {
             result += repositoryDeclaredTestDimensions.kotlin.flatMap { declaredKotlinVersion ->
                 result.map { context ->
                     context.copy {
@@ -71,7 +70,7 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
             }
         }
 
-        if (AnnotationUtils.isAnnotated(context.requiredTestMethod, GradleIntegrationTest::class.java)) {
+        if (context.hasAnnotation<GradleIntegrationTest>()) {
             /* Expand Gradle Versions */
             result += repositoryDeclaredTestDimensions.gradle.flatMap { declaredGradleVersion ->
                 result.mapNotNull { context ->
@@ -99,7 +98,7 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
         }
 
         /* Expand Compose version */
-        if (!AnnotationUtils.isAnnotated(context.requiredTestMethod, QuickTest::class.java)) {
+        if (!context.hasAnnotation<QuickTest>()) {
             result += repositoryDeclaredTestDimensions.compose.map { declaredComposeVersion ->
                 baselineContext.copy {
                     composeVersion = TestedComposeVersion(declaredComposeVersion.version)
@@ -108,7 +107,7 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
         }
 
         /* Expand compiler options */
-        if (!AnnotationUtils.isAnnotated(context.requiredTestMethod, TestOnlyDefaultCompilerOptions::class.java)) {
+        if (!context.hasAnnotation<TestOnlyDefaultCompilerOptions>()) {
             result += baselineContext.copy {
                 compilerOption(
                     CompilerOption.OptimizeNonSkippingGroups,
@@ -168,8 +167,7 @@ class HotReloadTestDimensionFilter : HotReloadTestDimensionExtension {
 
         if (GraphicsEnvironment.isHeadless()) {
             result = result.filter { invocationContext ->
-                AnnotationUtils.findAnnotation(context.requiredTestMethod, Headless::class.java)
-                    .getOrNull()?.isHeadless ?: true
+                context.findAnnotation<Headless>()?.isHeadless ?: true
             }
         }
 

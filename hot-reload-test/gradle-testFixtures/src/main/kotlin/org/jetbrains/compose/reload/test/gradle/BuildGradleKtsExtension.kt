@@ -14,7 +14,6 @@ import org.jetbrains.compose.reload.core.renderOrThrow
 import org.jetbrains.compose.reload.test.core.CompilerOption
 import org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi
 import org.junit.jupiter.api.extension.ExtensionContext
-import org.junit.platform.commons.util.AnnotationUtils.findRepeatableAnnotations
 import java.lang.System.lineSeparator
 import java.util.ServiceLoader
 
@@ -37,12 +36,9 @@ public fun renderBuildGradleKts(context: ExtensionContext): String {
     else kmpBuildGradleKtsTemplate
 
     return template.renderOrThrow {
-        val extensionsFromAnnotation =
-            findRepeatableAnnotations(context.requiredTestMethod, ExtendBuildGradleKts::class.java)
-                .plus(findRepeatableAnnotations(context.requiredTestClass, ExtendBuildGradleKts::class.java))
-                .map { annotation ->
-                    annotation.extension.objectInstance ?: annotation.extension.java.getConstructor().newInstance()
-                }
+        val extensionsFromAnnotation = context.findRepeatableAnnotations<ExtendBuildGradleKts>().map { annotation ->
+            annotation.extension.objectInstance ?: annotation.extension.java.getConstructor().newInstance()
+        }
 
         ServiceLoader.load(BuildGradleKtsExtension::class.java).plus(extensionsFromAnnotation).forEach { extension ->
             headerKey(extension.header(context))

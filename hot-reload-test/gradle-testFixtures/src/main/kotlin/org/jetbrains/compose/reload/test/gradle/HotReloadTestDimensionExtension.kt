@@ -6,7 +6,6 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import org.junit.jupiter.api.extension.ExtensionContext
-import org.junit.platform.commons.util.AnnotationUtils.findRepeatableAnnotations
 import java.util.ServiceLoader
 
 public interface HotReloadTestDimensionExtension {
@@ -17,11 +16,9 @@ public interface HotReloadTestDimensionExtension {
 }
 
 internal fun buildHotReloadTestDimensions(context: ExtensionContext): List<HotReloadTestInvocationContext> {
-    val fromAnnotation = findRepeatableAnnotations(context.requiredTestMethod, ExtendHotReloadTestDimension::class.java)
-        .plus(findRepeatableAnnotations(context.requiredTestClass, ExtendHotReloadTestDimension::class.java))
-        .map { annotation ->
-            annotation.extension.objectInstance ?: annotation.extension.java.getDeclaredConstructor().newInstance()
-        }
+    val fromAnnotation = context.findRepeatableAnnotations<ExtendHotReloadTestDimension>().map { annotation ->
+        annotation.extension.objectInstance ?: annotation.extension.java.getDeclaredConstructor().newInstance()
+    }
 
     return ServiceLoader.load(HotReloadTestDimensionExtension::class.java).plus(fromAnnotation)
         .fold(listOf(HotReloadTestInvocationContext())) { tests, extension ->

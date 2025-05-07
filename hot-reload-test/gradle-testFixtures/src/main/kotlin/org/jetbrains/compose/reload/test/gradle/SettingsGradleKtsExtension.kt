@@ -12,7 +12,6 @@ import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.renderOrThrow
 import org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi
 import org.junit.jupiter.api.extension.ExtensionContext
-import org.junit.platform.commons.util.AnnotationUtils.findRepeatableAnnotations
 import java.util.ServiceLoader
 
 public interface SettingsGradleKtsExtension {
@@ -32,8 +31,7 @@ public interface SettingsGradleKtsRepositoriesExtension {
 
 @InternalHotReloadTestApi
 public fun renderSettingsGradleKts(context: ExtensionContext): String = settingsGradleKtsTemplate.renderOrThrow {
-    findRepeatableAnnotations(context.requiredTestMethod, BuildGradleKts::class.java)
-        .plus(findRepeatableAnnotations(context.requiredTestClass, BuildGradleKts::class.java))
+    context.findRepeatableAnnotations<BuildGradleKts>()
         .forEach { buildGradleKts ->
             if (buildGradleKts.path != ":" && buildGradleKts.path.isNotEmpty()) {
                 footerKey("""include(":${buildGradleKts.path}")""")

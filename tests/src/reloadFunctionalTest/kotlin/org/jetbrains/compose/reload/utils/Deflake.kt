@@ -9,10 +9,9 @@ import org.jetbrains.compose.reload.test.gradle.HotReloadTestDimension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestDimensionExtension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestInvocationContext
 import org.jetbrains.compose.reload.test.gradle.copy
+import org.jetbrains.compose.reload.test.gradle.findAnnotation
 import org.jetbrains.kotlin.tooling.core.extrasKeyOf
 import org.junit.jupiter.api.extension.ExtensionContext
-import org.junit.platform.commons.util.AnnotationUtils
-import kotlin.jvm.optionals.getOrNull
 
 /**
  * Can be used to 'Deflake' a test by running it many times.
@@ -34,7 +33,7 @@ internal class DeflakeExtension : HotReloadTestDimensionExtension {
     override fun transform(
         context: ExtensionContext, tests: List<HotReloadTestInvocationContext>
     ): List<HotReloadTestInvocationContext> {
-        AnnotationUtils.findAnnotation(context.requiredTestMethod, Deflake::class.java).getOrNull() ?: return tests
+        context.findAnnotation<Deflake>() ?: return tests
         return buildList {
             repeat(1024) { index ->
                 addAll(tests.map { context ->
