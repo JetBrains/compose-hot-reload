@@ -6,6 +6,8 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.job
 import org.jetbrains.compose.reload.core.destroyWithDescendants
@@ -33,6 +35,7 @@ public data class GradleRunner @InternalHotReloadTestApi constructor(
     public value class ExitCode internal constructor(public val value: Int) {
         public companion object {
             public val success: ExitCode = ExitCode(0)
+            public val failure: ExitCode = ExitCode(1)
         }
     }
 }
@@ -42,7 +45,10 @@ public fun ExitCode?.assertSuccess() {
     if (value != 0) fail("Expected successful execution; Exit code: $value")
 }
 
-public suspend fun GradleRunner.build(vararg args: String): ExitCode? {
+@JvmOverloads
+public suspend fun GradleRunner.build(
+    vararg args: String, stdout: SendChannel<String>? = null, stderr: SendChannel<String>? = null,
+): ExitCode? {
     gradleHome.createDirectories()
     createWrapperPropertiesFile()
     copyGradleWrapper()
@@ -82,18 +88,22 @@ public suspend fun GradleRunner.build(vararg args: String): ExitCode? {
             }
         }
 
-        thread(name = "Gradle Runner Output Reader") {
+        val stdoutReader = thread(name = "Gradle Runner Output Reader") {
             process.inputStream.bufferedReader().use { reader ->
                 while (true) {
-                    logger.debug(reader.readLine() ?: break)
+                    val stdoutLine = reader.readLine() ?: break
+                    stdout?.trySendBlocking(stdoutLine)
+                    logger.debug(stdoutLine)
                 }
             }
         }
 
-        thread(name = "Gradle Runner Error Reader") {
+        val stderrReader = thread(name = "Gradle Runner Error Reader") {
             process.errorStream.bufferedReader().use { reader ->
                 while (true) {
-                    logger.debug(reader.readLine() ?: break)
+                    val stderrLine = reader.readLine() ?: break
+                    stderr?.trySendBlocking(stderrLine)
+                    logger.debug(stderrLine)
                 }
             }
         }
@@ -105,7 +115,11 @@ public suspend fun GradleRunner.build(vararg args: String): ExitCode? {
         Runtime.getRuntime().addShutdownHook(shutdownHook)
 
         try {
-            exitCode.complete(ExitCode(process.waitFor()))
+            val rawCode = process.waitFor()
+            stdoutReader.join()
+            stderrReader.join()
+
+            exitCode.complete(ExitCode(rawCode))
         } catch (_: InterruptedException) {
             exitCode.complete(null)
             process.destroy()
