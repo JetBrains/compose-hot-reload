@@ -37,4 +37,9 @@ object DtTextStyles {
         fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.Normal,
     )
+
+    val smallSemiBold = small.copy(
+        fontSize = 12.sp,
+        fontWeight = FontWeight.SemiBold
+    )
 }
