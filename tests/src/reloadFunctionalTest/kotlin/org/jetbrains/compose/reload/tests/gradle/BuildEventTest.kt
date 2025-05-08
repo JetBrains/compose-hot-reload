@@ -7,10 +7,13 @@ package org.jetbrains.compose.reload.tests.gradle
 
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.toList
+import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildStarted
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildTaskResult
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
+import org.jetbrains.compose.reload.test.gradle.BuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.GradleRunner.ExitCode.Companion.failure
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
@@ -20,11 +23,17 @@ import org.jetbrains.compose.reload.test.gradle.TestedProjectMode
 import org.jetbrains.compose.reload.test.gradle.assertExitCode
 import org.jetbrains.compose.reload.test.gradle.assertSuccessful
 import org.jetbrains.compose.reload.test.gradle.buildFlow
+import org.jetbrains.compose.reload.test.gradle.checkScreenshot
+import org.jetbrains.compose.reload.test.gradle.getDefaultMainKtSourceFile
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
+import org.jetbrains.compose.reload.test.gradle.launchApplicationAndWait
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
+import org.jetbrains.compose.reload.test.gradle.replaceText
 import org.jetbrains.compose.reload.utils.BuildMode
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
 import org.jetbrains.compose.reload.utils.QuickTest
+import kotlin.io.path.createParentDirectories
+import kotlin.io.path.writeText
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -103,6 +112,69 @@ class BuildEventTest {
         } ?: fail("Cannot find ':compileKotlinJvm' task result")
         assertTrue(compileTaskResult2.isSuccess, "Expected ':compileKotlinJvm' to be successful")
         if (compileTaskResult2.failures.isNotEmpty()) fail("Unexpected 'failures' in ':compileKotlinJvm' task result")
+    }
+
+    @HotReloadTest
+    @BuildGradleKts("foo")
+    @BuildGradleKts("bar")
+    fun `test - two applications`(fixture: HotReloadTestFixture) = fixture.runTest {
+        val fooDir = projectDir.subproject("foo")
+        val barDir = projectDir.subproject("bar")
+
+        val fooMain = fooDir.path.resolve(getDefaultMainKtSourceFile())
+        fooMain.createParentDirectories().writeText(
+            """
+            import org.jetbrains.compose.reload.test.*
+            fun main() {
+                screenshotTestApplication {
+                   TestText("Foo")
+                }
+            }
+        """.trimIndent()
+        )
+
+        val barMain = barDir.path.resolve(getDefaultMainKtSourceFile())
+        barMain.createParentDirectories().writeText(
+            """
+            import org.jetbrains.compose.reload.test.*
+            fun main() {
+                screenshotTestApplication {
+                   TestText("Bar")
+                }
+            }
+        """.trimIndent()
+        )
+
+        /*
+        Start 'foo' and issue a reload
+         */
+        launchApplicationAndWait(":foo")
+        fooMain.replaceText("Foo", "Foo2")
+        runTransaction {
+            fixture.gradleRunner.buildFlow("reload").toList().assertSuccessful()
+            assertEquals(
+                1, pullMessages().count { it is BuildStarted },
+                "Expected a single '${BuildStarted::class}' message"
+            )
+        }
+
+        /* Stop 'foo*' and start 'bar' */
+        sendMessage(OrchestrationMessage.ShutdownRequest("Requested by the test")) {
+            skipToMessage<OrchestrationMessage.ClientDisconnected> { message -> message.clientRole == Application }
+        }
+        launchApplicationAndWait(":bar")
+        checkScreenshot("bar-0")
+
+        /* Update and issue a reload */
+        barMain.replaceText("Bar", "Bar1")
+        runTransaction {
+            fixture.gradleRunner.buildFlow("reload").toList().assertSuccessful()
+            fixture.checkScreenshot("bar-1")
+            assertEquals(
+                1, pullMessages().count { it is BuildStarted },
+                "Expected a single '${BuildStarted::class}' message"
+            )
+        }
     }
 }
 

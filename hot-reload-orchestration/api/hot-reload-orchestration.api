@@ -103,6 +103,10 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 public abstract class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildEvent : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
 }
 
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildFinished : org/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildEvent {
+	public fun <init> ()V
+}
+
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildStarted : org/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildEvent {
 	public fun <init> ()V
 }
@@ -326,3 +330,4 @@ public abstract interface class org/jetbrains/compose/reload/orchestration/Orche
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationServerKt {
 	public static final fun startOrchestrationServer ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationServer;
 }
+

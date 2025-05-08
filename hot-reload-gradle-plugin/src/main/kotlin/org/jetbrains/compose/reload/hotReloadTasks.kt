@@ -44,9 +44,12 @@ internal val Project.hotReloadLifecycleTask: Future<TaskProvider<HotReloadLifecy
     if (name in tasks.names) {
         logger.error("Conflicting '$name' task detected")
         return@projectFuture null
-    } else tasks.register(name, HotReloadLifecycleTask::class.java) { task ->
+    }
+
+    tasks.register(name, HotReloadLifecycleTask::class.java) { task ->
         task.group = "compose"
         task.description = "Hot Reloads code for all running applications"
+        task.dependsOn(tasks.withType<HotReloadTask>().matching { it.agentPort.isPresent })
     }
 }
 
@@ -75,14 +78,6 @@ internal val KotlinCompilation<*>.hotReloadTask: Future<TaskProvider<HotReloadTa
     task.configure { task ->
         task.pendingRequestFile.set(snapshotTask.flatMap { it.pendingRequestFile })
         task.dependsOn(snapshotTask)
-    }
-
-    project.hotReloadLifecycleTask.await()?.configure { lifecycleTask ->
-        if (pidFileOrchestrationPort.isPresent) {
-            lifecycleTask.dependsOn(task)
-            lifecycleTask.pidFiles.from(pidFile)
-            lifecycleTask.activeReloadTaskPaths.add(task.map { it.path })
-        }
     }
 
     task
@@ -160,10 +155,4 @@ abstract class HotReloadTask : DefaultTask() {
     }
 }
 
-internal abstract class HotReloadLifecycleTask : DefaultTask() {
-    @get:Internal
-    internal val pidFiles = project.objects.fileCollection()
-
-    @get:Internal
-    internal val activeReloadTaskPaths = project.objects.listProperty(String::class.java)
-}
+internal abstract class HotReloadLifecycleTask : DefaultTask()

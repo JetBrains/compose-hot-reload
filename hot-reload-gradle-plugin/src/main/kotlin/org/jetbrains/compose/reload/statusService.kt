@@ -8,7 +8,7 @@
 package org.jetbrains.compose.reload
 
 import org.gradle.api.Project
-import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildService
@@ -22,17 +22,18 @@ import org.gradle.tooling.events.task.TaskFailureResult
 import org.gradle.tooling.events.task.TaskFinishEvent
 import org.gradle.tooling.events.task.TaskSuccessResult
 import org.gradle.util.GradleVersion
-import org.jetbrains.compose.reload.core.PidFileInfo
 import org.jetbrains.compose.reload.core.update
 import org.jetbrains.compose.reload.gradle.Future
 import org.jetbrains.compose.reload.gradle.projectFuture
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildFinished
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildTaskResult
 import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
 import java.lang.AutoCloseable
 import java.util.concurrent.atomic.AtomicReference
+
 
 /**
  * This [statusService] will connect to running (hot) applications and sends notifications
@@ -49,15 +50,18 @@ internal val Project.statusService: Future<Provider<StatusService>?> by projectF
         return@projectFuture null
     }
 
-    val reloadLifecycleTask = project.hotReloadLifecycleTask.await() ?: return@projectFuture null
+    val reloadTasks = tasks.withType(HotReloadTask::class.java)
+    val activeReloadTasks = objects.listProperty(HotReloadTask::class.java)
 
     val service = gradle.sharedServices.registerIfAbsent("StatusService ($buildTreePath)", StatusService::class.java) {
         it.parameters.projectPath.set(path)
-        it.parameters.pidFiles.from(reloadLifecycleTask.get().pidFiles)
+        it.parameters.ports.set(activeReloadTasks.map { tasks -> tasks.mapNotNull { task -> task.agentPort.orNull } })
     }
 
     gradle.taskGraph.whenReady { graph ->
-        if (reloadLifecycleTask.get().activeReloadTaskPaths.get().any { path -> graph.hasTask(path) }) {
+        val activeTaskNames = reloadTasks.names.filter { name -> graph.hasTask(project.absoluteProjectPath(name)) }
+        activeReloadTasks.set(reloadTasks.named { it in activeTaskNames })
+        if (activeTaskNames.isNotEmpty()) {
             gradle.serviceOf<BuildEventsListenerRegistry>().onTaskCompletion(service)
         }
     }
@@ -69,21 +73,19 @@ internal abstract class StatusService : BuildService<StatusService.Params>, Oper
 
     interface Params : BuildServiceParameters {
         val projectPath: Property<String>
-        val pidFiles: ConfigurableFileCollection
+        val ports: ListProperty<Int>
     }
 
     private val clients = AtomicReference<List<OrchestrationClient>>(emptyList())
 
+
     init {
         clients.getAndSet(emptyList()).forEach { it.closeGracefully() }
 
-        val pidFiles = parameters.pidFiles.toList().mapNotNull { it.absoluteFile }.filter { it.exists() }.toSet()
-        clients.set(pidFiles.mapNotNull { pidFile ->
-            val port = PidFileInfo(pidFile.toPath()).leftOrNull()?.orchestrationPort ?: return@mapNotNull null
+        clients.set(parameters.ports.get().mapNotNull { port ->
             runCatching { connectOrchestrationClient(OrchestrationClientRole.Compiler, port) }.getOrNull()
         }.onEach { client ->
             client.sendMessage(OrchestrationMessage.BuildStarted())
-
             client.invokeWhenClosed {
                 clients.update { it - client }
             }
@@ -91,6 +93,8 @@ internal abstract class StatusService : BuildService<StatusService.Params>, Oper
     }
 
     override fun onFinish(event: FinishEvent) {
+        if (clients.get().isEmpty()) return
+
         if (event !is TaskFinishEvent) return
         val message = when (val result = event.result) {
             is TaskSuccessResult -> BuildTaskResult(
@@ -122,6 +126,7 @@ internal abstract class StatusService : BuildService<StatusService.Params>, Oper
 
     override fun close() {
         val clients = clients.getAndSet(emptyList())
-        clients.forEach { it.closeGracefully() }
+        clients.forEach { client -> client.sendMessage(BuildFinished()) }
+        clients.forEach { client -> client.closeGracefully() }
     }
 }

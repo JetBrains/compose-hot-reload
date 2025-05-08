@@ -586,6 +586,7 @@ public final class org/jetbrains/compose/reload/test/gradle/TransactionScope : k
 	public final fun launchChildTransaction (Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun launchDevApplicationAndWait (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun launchDevApplicationAndWait$default (Lorg/jetbrains/compose/reload/test/gradle/TransactionScope;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun pullMessages ()Ljava/util/List;
 	public final fun replaceSourceCode (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun replaceSourceCode (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun replaceSourceCodeAndReload (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

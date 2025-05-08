@@ -84,6 +84,8 @@ public sealed class OrchestrationMessage : Serializable {
 
     public class BuildStarted : BuildEvent()
 
+    public class BuildFinished: BuildEvent()
+
     public data class BuildTaskResult(
         public val taskId: String,
         public val isSuccess: Boolean,

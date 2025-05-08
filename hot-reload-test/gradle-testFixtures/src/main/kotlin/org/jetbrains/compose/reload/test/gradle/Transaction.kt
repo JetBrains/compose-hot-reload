@@ -71,6 +71,15 @@ public class TransactionScope internal constructor(
         }
     }
 
+    /**
+     * Collects all currently available messages into a list
+     */
+    public fun pullMessages(): List<OrchestrationMessage> = buildList {
+        while (true) {
+            incomingMessages.tryReceive().getOrNull()?.let(::add) ?: break
+        }
+    }
+
     public suspend inline fun <reified T> skipToMessage(
         title: String = "Waiting for message '${T::class.simpleName.toString()}'",
         timeout: Duration = 5.minutes,
