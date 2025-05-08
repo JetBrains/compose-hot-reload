@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.jvm.tooling.widgets
 
 import androidx.compose.animation.Animatable
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -18,23 +19,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.sellmair.evas.compose.composeFlow
-import kotlinx.coroutines.coroutineScope
+import io.sellmair.evas.compose.composeState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.reload.jvm.tooling.states.ReloadState
 import org.jetbrains.compose.reload.jvm.tooling.theme.DtColors
 import kotlin.time.Duration.Companion.seconds
@@ -74,16 +71,25 @@ fun animateReloadStatusColor(
 
 @Composable
 fun animatedReloadStatusBrush(
-    idleColor: Color = Color.Transparent,
     okColor: Color = DtColors.statusColorOk,
     errorColor: Color = DtColors.statusColorError,
 ): Brush {
-    val none = SolidColor(Color.Transparent)
-    val brush = remember { mutableStateOf<Brush>(none) }
+    val state by ReloadState.composeState()
 
-    val solidColor = remember { Animatable(idleColor) }
-    val movingColorA = remember { Animatable(idleColor) }
-    val movingColorB = remember { Animatable(idleColor) }
+    val movingColorA by animateColorAsState(
+        when (state) {
+            is ReloadState.Ok -> okColor
+            is ReloadState.Failed ->  errorColor
+            is ReloadState.Reloading -> DtColors.statusColorOrange1
+        }
+    )
+    val movingColorB by animateColorAsState(
+        when (state) {
+            is ReloadState.Ok -> okColor
+            is ReloadState.Failed ->  errorColor
+            is ReloadState.Reloading -> DtColors.statusColorOrange2
+        }
+    )
 
     val movingTransition = rememberInfiniteTransition()
     val movingGradientShift by movingTransition.animateFloat(
@@ -91,54 +97,8 @@ fun animatedReloadStatusBrush(
         targetValue = 800f,
         animationSpec = infiniteRepeatable(tween(1000, easing = LinearEasing))
     )
-
-    var showSolid by remember { mutableStateOf(true) }
-
-
-    val state = ReloadState.composeFlow()
-    LaunchedEffect(Unit) {
-        state.collectLatest { state ->
-            when (state) {
-                is ReloadState.Ok -> {
-                    coroutineScope {
-                        launch { solidColor.animateTo(okColor) }
-                        launch { movingColorA.animateTo(okColor) }
-                        launch { movingColorB.animateTo(okColor) }
-                    }
-
-                    delay(1.seconds)
-                    launch { solidColor.animateTo(idleColor) }
-                    launch { movingColorA.animateTo(idleColor) }
-                    launch { movingColorB.animateTo(idleColor) }
-                    showSolid = true
-                }
-
-                is ReloadState.Failed -> {
-                    coroutineScope {
-                        launch { solidColor.animateTo(errorColor) }
-                        launch { movingColorA.animateTo(errorColor) }
-                        launch { movingColorB.animateTo(errorColor) }
-                    }
-                    brush.value = SolidColor(solidColor.value)
-                    showSolid = true
-                }
-
-                is ReloadState.Reloading -> {
-                    coroutineScope {
-                        launch { solidColor.animateTo(DtColors.statusColorOrange2) }
-                        launch { movingColorA.animateTo(DtColors.statusColorOrange1) }
-                        launch { movingColorB.animateTo(DtColors.statusColorOrange2) }
-                    }
-                    showSolid = false
-                }
-
-            }
-        }
-    }
-
-    return if (showSolid) SolidColor(solidColor.value)
-    else Brush.linearGradient(
-        colors = listOf(movingColorA.value, movingColorB.value),
+    return Brush.linearGradient(
+        colors = listOf(movingColorA, movingColorB),
         start = Offset(0f, movingGradientShift),
         end = Offset(0f, movingGradientShift + 400),
         tileMode = TileMode.Mirror,
@@ -159,7 +119,6 @@ fun Modifier.animatedReloadStatusBorder(
     return border(
         width = width,
         brush = animatedReloadStatusBrush(
-            idleColor = idleColor,
         ),
         shape = shape
     )

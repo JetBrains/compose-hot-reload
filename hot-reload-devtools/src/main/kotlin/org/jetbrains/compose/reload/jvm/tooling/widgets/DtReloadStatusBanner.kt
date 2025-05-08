@@ -38,9 +38,6 @@ internal fun DtReloadStatusBanner(modifier: Modifier = Modifier) {
     val targetApplicationWindowState = targetApplicationWindowStateLocal.current ?: return
 
     Box(modifier = modifier.heightIn(max = targetApplicationWindowState.size.height).fillMaxHeight()) {
-
-        val color by animateReloadStatusColor()
-
         var visibilityState by remember { mutableStateOf(false) }
         LaunchedEffect(state) {
             if (state is ReloadState.Ok) {
@@ -71,7 +68,6 @@ internal fun DtReloadStatusBanner(modifier: Modifier = Modifier) {
                         .fillMaxSize()
                         .clip(RoundedCornerShape(4.dp))
                         .background(animatedReloadStatusBrush())
-                        .background(color)
                 )
             }
         }
