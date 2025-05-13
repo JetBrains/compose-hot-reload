@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.isIgnoredClassId
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.toLeft
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
@@ -111,7 +112,7 @@ private fun issueExternalReloadRequest(definition: ClassDefinition) {
 
             val uuid = UUID.randomUUID()
             logger.info("'external reload': Reloaded ${aggregate.definitions.size} classes: $uuid")
-            val redefined = redefineRuntimeInfo().get()
+            val redefined = redefineRuntimeInfo().get().getOrThrow()
             val reload = Reload(uuid, definitions = aggregate.definitions, redefined)
 
             reinitializeStaticsIfNecessary(reload)

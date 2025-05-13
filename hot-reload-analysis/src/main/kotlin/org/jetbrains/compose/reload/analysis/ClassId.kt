@@ -23,6 +23,7 @@ value class ClassId(val value: String) : Comparable<ClassId> {
 
     companion object {
         fun fromFqn(fqn: String): ClassId = ClassId(fqn.replace(".", "/"))
+        fun fromDesc(desc: String): ClassId = ClassId(desc.removePrefix("L").removeSuffix(";"))
     }
 }
 

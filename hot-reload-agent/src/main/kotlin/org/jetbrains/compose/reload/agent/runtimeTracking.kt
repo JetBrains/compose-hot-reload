@@ -11,6 +11,8 @@ import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
 import org.jetbrains.compose.reload.analysis.TrackingRuntimeInfo
 import org.jetbrains.compose.reload.analysis.isIgnoredClassId
 import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
+import org.jetbrains.compose.reload.analysis.verifyRedefinitions
+import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.submitSafe
 import java.lang.instrument.ClassFileTransformer
@@ -39,21 +41,24 @@ internal fun launchRuntimeTracking(instrumentation: Instrumentation) {
     instrumentation.addTransformer(RuntimeTrackingTransformer)
 }
 
-internal fun redefineRuntimeInfo(): Future<RuntimeDirtyScopes> = runtimeAnalysisThread.submitSafe {
-    val redefinition = currentRuntime.resolveDirtyRuntimeScopes(pendingRedefinitions)
+internal fun redefineRuntimeInfo(): Future<Try<RuntimeDirtyScopes>> = runtimeAnalysisThread.submitSafe {
+    Try {
+        currentRuntime.verifyRedefinitions(pendingRedefinitions)
 
-    /* Patch current runtime info */
-    val patchDuration = measureTime {
-        pendingRedefinitions.classIndex.forEach { (classId, classInfo) ->
-            currentRuntime.remove(classId)
-            currentRuntime.add(classInfo)
+        val redefinition = currentRuntime.resolveDirtyRuntimeScopes(pendingRedefinitions)
+
+        /* Patch current runtime info */
+        val patchDuration = measureTime {
+            pendingRedefinitions.classIndex.forEach { (classId, classInfo) ->
+                currentRuntime.remove(classId)
+                currentRuntime.add(classInfo)
+            }
+            pendingRedefinitions.clear()
         }
-        pendingRedefinitions.clear()
+
+        logger.debug("Applied redefined 'RuntimeInfo' in [$patchDuration]")
+        redefinition
     }
-
-    logger.debug("Applied redefined 'RuntimeInfo' in [$patchDuration]")
-
-    redefinition
 }
 
 internal fun findClassLoader(classId: ClassId): Future<ClassLoader?> = runtimeAnalysisThread.submitSafe {

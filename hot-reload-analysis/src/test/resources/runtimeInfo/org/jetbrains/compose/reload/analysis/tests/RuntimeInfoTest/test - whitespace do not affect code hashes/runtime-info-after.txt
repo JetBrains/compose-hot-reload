@@ -33,6 +33,7 @@ fun Bar() {
 
 FooKt {
     Foo {
+        type: Composable
         desc: (Landroidx/compose/runtime/Composer;I)V
         key: -965539098
         codeHash: 3522926397
@@ -52,6 +53,7 @@ FooKt {
     }
     
     Bar {
+        type: Composable
         desc: (Landroidx/compose/runtime/Composer;I)V
         key: -2097341767
         codeHash: 2970487593
@@ -69,6 +71,7 @@ FooKt {
     }
     
     Foo$lambda$0 {
+        type: Regular
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         key: null
         codeHash: 3190275455
@@ -79,6 +82,7 @@ FooKt {
     }
     
     Bar$lambda$1 {
+        type: Regular
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         key: null
         codeHash: 860307750

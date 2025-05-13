@@ -20,6 +20,7 @@ FooKt {
     val x: I
 
     getX {
+        type: Regular
         desc: ()I
         key: null
         codeHash: 3555685996
@@ -30,6 +31,7 @@ FooKt {
     }
     
     Foo {
+        type: Composable
         desc: (Landroidx/compose/runtime/Composer;I)V
         key: -965539098
         codeHash: 3552136347
@@ -56,6 +58,7 @@ FooKt {
     }
     
     Foo$lambda$1 {
+        type: Regular
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         key: null
         codeHash: 3190275455
@@ -66,6 +69,7 @@ FooKt {
     }
     
     <clinit> {
+        type: Regular
         desc: ()V
         key: null
         codeHash: 2373262093

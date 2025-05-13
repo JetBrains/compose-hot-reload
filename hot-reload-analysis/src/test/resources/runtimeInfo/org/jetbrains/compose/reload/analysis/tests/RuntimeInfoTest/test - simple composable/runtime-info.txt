@@ -16,6 +16,7 @@ fun Foo() {
 
 FooKt {
     Foo {
+        type: Composable
         desc: (Landroidx/compose/runtime/Composer;I)V
         key: -965539098
         codeHash: 3522926397
@@ -33,6 +34,7 @@ FooKt {
     }
     
     Foo$lambda$0 {
+        type: Regular
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         key: null
         codeHash: 3190275455

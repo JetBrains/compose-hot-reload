@@ -114,24 +114,30 @@ internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
     )
 }
 
-internal fun RuntimeScopeInfo(classNode: ClassNode, methodNode: MethodNode): RuntimeScopeInfo? {
+internal fun RuntimeScopeInfo(
+    classNode: ClassNode,
+    methodNode: MethodNode
+): RuntimeScopeInfo? {
     val methodId = MethodId(classNode, methodNode)
     val runtimeInstructionTree = parseRuntimeInstructionTreeLenient(methodId, methodNode)
-    return createRuntimeScopeInfo(methodId, runtimeInstructionTree)
+    val methodType = MethodType(methodNode)
+    return createRuntimeScopeInfo(methodId, runtimeInstructionTree, methodType)
 }
 
 
 internal fun createRuntimeScopeInfo(
     methodId: MethodId,
     tree: RuntimeInstructionTree,
+    methodType: MethodType,
 ): RuntimeScopeInfo {
     return RuntimeScopeInfo(
         methodId = methodId,
-        type = tree.type,
+        methodType = methodType,
+        scopeType = tree.type,
         group = tree.group,
         methodDependencies = tree.methodDependencies(),
         fieldDependencies = tree.fieldDependencies(),
-        children = tree.children.map { child -> createRuntimeScopeInfo(methodId, child) },
-        hash = tree.codeHash()
+        children = tree.children.map { child -> createRuntimeScopeInfo(methodId, child, methodType) },
+        hash = tree.codeHash(),
     )
 }

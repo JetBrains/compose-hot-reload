@@ -30,6 +30,7 @@ ComposableSingletons$FooKt {
     val lambda$904522804: Lkotlin/jvm/functions/Function3;
 
     <init> {
+        type: Regular
         desc: ()V
         key: null
         codeHash: 3570755298
@@ -38,6 +39,7 @@ ComposableSingletons$FooKt {
     }
     
     getLambda$1969856002$testModule {
+        type: Regular
         desc: ()Lkotlin/jvm/functions/Function3;
         key: null
         codeHash: 2196316711
@@ -48,6 +50,7 @@ ComposableSingletons$FooKt {
     }
     
     getLambda$904522804$testModule {
+        type: Regular
         desc: ()Lkotlin/jvm/functions/Function3;
         key: null
         codeHash: 304986901
@@ -58,6 +61,7 @@ ComposableSingletons$FooKt {
     }
     
     <clinit> {
+        type: Regular
         desc: ()V
         key: null
         codeHash: 2144001912
@@ -78,6 +82,7 @@ ComposableSingletons$FooKt$lambda$1969856002$1 {
     val INSTANCE: LComposableSingletons$FooKt$lambda$1969856002$1;
 
     <init> {
+        type: Regular
         desc: ()V
         key: null
         codeHash: 3570755298
@@ -86,6 +91,7 @@ ComposableSingletons$FooKt$lambda$1969856002$1 {
     }
     
     invoke {
+        type: Composable
         desc: (Landroidx/compose/foundation/layout/ColumnScope;Landroidx/compose/runtime/Composer;I)V
         key: 1969856002
         codeHash: 2373654039
@@ -94,6 +100,7 @@ ComposableSingletons$FooKt$lambda$1969856002$1 {
     }
     
     invoke {
+        type: Regular
         desc: (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
         key: null
         codeHash: 800344929
@@ -104,6 +111,7 @@ ComposableSingletons$FooKt$lambda$1969856002$1 {
     }
     
     <clinit> {
+        type: Regular
         desc: ()V
         key: null
         codeHash: 2164608135
@@ -120,6 +128,7 @@ ComposableSingletons$FooKt$lambda$904522804$1 {
     val INSTANCE: LComposableSingletons$FooKt$lambda$904522804$1;
 
     <init> {
+        type: Regular
         desc: ()V
         key: null
         codeHash: 3570755298
@@ -128,6 +137,7 @@ ComposableSingletons$FooKt$lambda$904522804$1 {
     }
     
     invoke {
+        type: Composable
         desc: (Landroidx/compose/foundation/layout/ColumnScope;Landroidx/compose/runtime/Composer;I)V
         key: 904522804
         codeHash: 353463363
@@ -140,6 +150,7 @@ ComposableSingletons$FooKt$lambda$904522804$1 {
     }
     
     invoke {
+        type: Regular
         desc: (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
         key: null
         codeHash: 3802197612
@@ -150,6 +161,7 @@ ComposableSingletons$FooKt$lambda$904522804$1 {
     }
     
     <clinit> {
+        type: Regular
         desc: ()V
         key: null
         codeHash: 2886943498
@@ -164,6 +176,7 @@ ComposableSingletons$FooKt$lambda$904522804$1 {
 
 FooKt {
     Foo {
+        type: Composable
         desc: (Landroidx/compose/runtime/Composer;I)V
         key: -965539098
         codeHash: 3522926397
@@ -185,6 +198,7 @@ FooKt {
     }
     
     Foo$lambda$0 {
+        type: Regular
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         key: null
         codeHash: 3190275455

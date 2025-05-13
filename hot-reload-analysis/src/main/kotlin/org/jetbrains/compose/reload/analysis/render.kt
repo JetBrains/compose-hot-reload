@@ -45,7 +45,7 @@ fun ClassInfo.render(): String = buildString {
 }
 
 internal fun RuntimeScopeInfo.render(): String = buildString {
-    when (type) {
+    when (scopeType) {
         Method -> appendLine("${methodId.methodName} {")
         RestartGroup -> appendLine("RestartGroup {")
         ReplaceGroup -> appendLine("ReplaceGroup {")
@@ -53,7 +53,8 @@ internal fun RuntimeScopeInfo.render(): String = buildString {
     }
 
     withIndent {
-        if (type == Method) {
+        if (scopeType == Method) {
+            appendLine("type: $methodType")
             appendLine("desc: ${methodId.methodDescriptor}")
         }
 

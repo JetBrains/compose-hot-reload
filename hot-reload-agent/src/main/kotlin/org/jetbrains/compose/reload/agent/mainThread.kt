@@ -21,3 +21,8 @@ internal fun <T> runOnMainThread(action: () -> T): CompletableFuture<T> {
     }
     return future
 }
+
+internal fun <T> runOnMainThreadBlocking(action: () -> T): T {
+    if (isMainThread) return action()
+    return runOnMainThread(action).get()
+}

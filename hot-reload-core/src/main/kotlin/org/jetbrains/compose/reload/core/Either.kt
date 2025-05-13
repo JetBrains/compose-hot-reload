@@ -31,3 +31,24 @@ public inline fun <L, R> Either<L, R>.leftOr(alternative: (Right<R>) -> L): L {
         is Right<R> -> alternative(this)
     }
 }
+
+public inline fun <L, R> Either<L, R>.rightOr(alternative: (Left<L>) -> R): R {
+    return when (this) {
+        is Left<L> -> alternative(this)
+        is Right<R> -> value
+    }
+}
+
+public inline fun <L, R, T> Either<L, R>.mapLeft(mapper: (L) -> T): Either<T, R> {
+    return when (this) {
+        is Left<L> -> mapper(this.value).toLeft()
+        is Right<R> -> this
+    }
+}
+
+public inline fun <L, R, T> Either<L, R>.mapRight(mapper: (R) -> T): Either<L, T> {
+    return when (this) {
+        is Left<L> -> this
+        is Right<R> -> mapper(this.value).toRight()
+    }
+}

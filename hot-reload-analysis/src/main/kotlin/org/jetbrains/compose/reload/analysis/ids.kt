@@ -6,6 +6,9 @@
 package org.jetbrains.compose.reload.analysis
 
 object Ids {
+    object Composable {
+        val classId = ClassId("androidx/compose/runtime/Composable")
+    }
     object Composer {
         val classId = ClassId("androidx/compose/runtime/Composer")
 
@@ -89,6 +92,50 @@ object Ids {
 
     object WindowDesktopKt {
         val classId = ClassId("androidx/compose/ui/window/Window_desktopKt")
+
+        val singleWindowApplication = MethodId(
+            classId,
+            methodName = "singleWindowApplication",
+            methodDescriptor = "(Landroidx/compose/ui/window/WindowState;ZLjava/lang/String;Landroidx/compose/ui/graphics/painter/Painter;ZZZZZZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ZLkotlin/jvm/functions/Function3;)V",
+        )
+
+        val singleWindowApplication_default = MethodId(
+            classId,
+            methodName = "singleWindowApplication\$default",
+            methodDescriptor = "(Landroidx/compose/ui/window/WindowState;ZLjava/lang/String;Landroidx/compose/ui/graphics/painter/Painter;ZZZZZZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ZLkotlin/jvm/functions/Function3;ILjava/lang/Object;)V",
+        )
+    }
+
+    object ApplicationDesktopKt {
+        val classId = ClassId("androidx/compose/ui/window/Application_desktopKt")
+
+        val application = MethodId(
+            classId,
+            methodName = "application",
+            methodDescriptor = "(ZLkotlin/jvm/functions/Function3;)V",
+        )
+
+        val application_default = MethodId(
+            classId,
+            methodName = "application\$default",
+            methodDescriptor = "(ZLkotlin/jvm/functions/Function3;ILjava/lang/Object;)V",
+        )
+    }
+
+    object ScreenshotTestApplicationKt {
+        val classId = ClassId("org/jetbrains/compose/reload/test/ScreenshotTestApplicationKt")
+
+        val screenshotTestApplication = MethodId(
+            classId,
+            methodName = "screenshotTestApplication",
+            methodDescriptor = "(IIILkotlin/jvm/functions/Function2;)V",
+        )
+
+        val screenshotTestApplication_default = MethodId(
+            classId,
+            methodName = "screenshotTestApplication\$default",
+            methodDescriptor = "(IIILkotlin/jvm/functions/Function2;ILjava/lang/Object;)V",
+        )
     }
 
     object ComposeWindow {

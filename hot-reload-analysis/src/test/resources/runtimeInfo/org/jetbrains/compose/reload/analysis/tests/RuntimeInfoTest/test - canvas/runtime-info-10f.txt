@@ -35,6 +35,7 @@ fun App() {
 
 FooKt {
     App {
+        type: Composable
         desc: (Landroidx/compose/runtime/Composer;I)V
         key: 857161579
         codeHash: 514008694
@@ -54,6 +55,7 @@ FooKt {
     }
     
     App$lambda$2$lambda$1$lambda$0 {
+        type: Regular
         desc: (Landroidx/compose/ui/graphics/drawscope/DrawScope;)Lkotlin/Unit;
         key: null
         codeHash: 2832409942
@@ -62,6 +64,7 @@ FooKt {
     }
     
     App$lambda$3 {
+        type: Regular
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         key: null
         codeHash: 186677020

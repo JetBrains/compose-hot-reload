@@ -32,9 +32,9 @@ class AfterHotReloadEffectTest {
             import org.jetbrains.compose.reload.AfterHotReloadEffect
             import org.jetbrains.compose.reload.test.*
             
+            val decoy = 0
+                
             fun main() {
-                val decoy = 0
-            
                 screenshotTestApplication {
                     var invocations by remember { mutableStateOf(0) }
                     var engaged by remember { mutableStateOf(true) }

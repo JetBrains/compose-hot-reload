@@ -313,7 +313,7 @@ class RuntimeInfoTest {
         beforeScopes.forEachIndexed { index, beforeScope ->
             val afterScope = afterScopes[index]
             assertEquals(beforeScope.group, afterScope.group)
-            assertEquals(beforeScope.type, afterScope.type)
+            assertEquals(beforeScope.scopeType, afterScope.scopeType)
             assertEquals(beforeScope.methodDependencies, afterScope.methodDependencies)
             assertEquals(beforeScope.hash, afterScope.hash)
         }

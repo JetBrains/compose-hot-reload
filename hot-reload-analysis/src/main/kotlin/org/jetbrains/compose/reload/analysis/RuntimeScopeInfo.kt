@@ -7,7 +7,8 @@ package org.jetbrains.compose.reload.analysis
 
 data class RuntimeScopeInfo(
     val methodId: MethodId,
-    val type: RuntimeScopeType,
+    val methodType: MethodType,
+    val scopeType: RuntimeScopeType,
     val group: ComposeGroupKey?,
     val methodDependencies: Set<MethodId>,
     val fieldDependencies: Set<FieldId>,

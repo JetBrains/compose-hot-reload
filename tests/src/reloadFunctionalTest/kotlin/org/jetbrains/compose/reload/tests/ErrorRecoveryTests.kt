@@ -126,4 +126,92 @@ class ErrorRecoveryTests {
             fixture.checkScreenshot("3-after-change")
         }
     }
+
+    @HotReloadTest
+    @QuickTest
+    fun `illegal code change - update compose entry function`(fixture: HotReloadTestFixture) = fixture.runTest {
+        val d = "\$"
+        val code = fixture.initialSourceCode(
+            """
+                import androidx.compose.material.Text
+                import org.jetbrains.compose.reload.test.*
+                
+                fun main() {
+                    screenshotTestApplication {
+                        Text("Hello")
+                    }
+                }
+            """.trimIndent()
+        )
+
+        fixture.checkScreenshot("0-initial")
+
+        fixture.runTransaction {
+            /*
+            Legal Change: replace the code inside the composable function
+            */
+            code.replaceText("""Text("Hello")""", """Text("hello")""")
+            requestReload()
+            val request = skipToMessage<OrchestrationMessage.ReloadClassesRequest>()
+            val result = skipToMessage<OrchestrationMessage.ReloadClassesResult>()
+            assertEquals(request.messageId, result.reloadRequestId)
+            assertTrue(result.isSuccess)
+            fixture.checkScreenshot("1-correct-change")
+        }
+
+        fixture.runTransaction {
+            /*
+            Illegal Change: replace the code outside composable scope
+            */
+            code.replaceText(
+                """
+                fun main() {
+                    screenshotTestApplication {
+                        Text("hello")
+                    }
+                }""".trimIndent(),
+                """
+                fun main() {
+                    var myVariable = 0
+                    screenshotTestApplication {
+                        myVariable = 1
+                        Text("${d}myVariable")
+                    }
+                }""".trimIndent()
+            )
+            requestReload()
+            val request = skipToMessage<OrchestrationMessage.ReloadClassesRequest>()
+            val result = skipToMessage<OrchestrationMessage.ReloadClassesResult>()
+            assertEquals(request.messageId, result.reloadRequestId)
+            assertFalse(result.isSuccess)
+        }
+
+        fixture.runTransaction {
+            /*
+            Illegal Change: replace the code outside composable scope
+            */
+            code.replaceText(
+                """
+                fun main() {
+                    var myVariable = 0
+                    screenshotTestApplication {
+                        myVariable = 1
+                        Text("${d}myVariable")
+                    }
+                }""".trimIndent(),
+                """
+                fun main() {
+                    screenshotTestApplication {
+                        Text("hello")
+                    }
+                }""".trimIndent()
+            )
+            requestReload()
+            val request = skipToMessage<OrchestrationMessage.ReloadClassesRequest>()
+            val result = skipToMessage<OrchestrationMessage.ReloadClassesResult>()
+            assertEquals(request.messageId, result.reloadRequestId)
+            assertTrue(result.isSuccess)
+            fixture.checkScreenshot("3-restore-after-invalid-change")
+        }
+    }
 }

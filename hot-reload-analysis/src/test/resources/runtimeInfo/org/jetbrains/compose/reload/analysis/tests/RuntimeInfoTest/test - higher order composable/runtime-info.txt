@@ -26,6 +26,7 @@ ComposableSingletons$FooKt {
     val lambda$-1435676418: Lkotlin/jvm/functions/Function2;
 
     <init> {
+        type: Regular
         desc: ()V
         key: null
         codeHash: 3570755298
@@ -34,6 +35,7 @@ ComposableSingletons$FooKt {
     }
     
     getLambda$-1435676418$testModule {
+        type: Regular
         desc: ()Lkotlin/jvm/functions/Function2;
         key: null
         codeHash: 4084180226
@@ -44,6 +46,7 @@ ComposableSingletons$FooKt {
     }
     
     <clinit> {
+        type: Regular
         desc: ()V
         key: null
         codeHash: 2631766068
@@ -62,6 +65,7 @@ ComposableSingletons$FooKt$lambda$-1435676418$1 {
     val INSTANCE: LComposableSingletons$FooKt$lambda$-1435676418$1;
 
     <init> {
+        type: Regular
         desc: ()V
         key: null
         codeHash: 3570755298
@@ -70,6 +74,7 @@ ComposableSingletons$FooKt$lambda$-1435676418$1 {
     }
     
     invoke {
+        type: Composable
         desc: (Landroidx/compose/runtime/Composer;I)V
         key: -1435676418
         codeHash: 3730114898
@@ -78,6 +83,7 @@ ComposableSingletons$FooKt$lambda$-1435676418$1 {
     }
     
     invoke {
+        type: Regular
         desc: (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
         key: null
         codeHash: 1519915706
@@ -88,6 +94,7 @@ ComposableSingletons$FooKt$lambda$-1435676418$1 {
     }
     
     <clinit> {
+        type: Regular
         desc: ()V
         key: null
         codeHash: 385586306
@@ -102,6 +109,7 @@ ComposableSingletons$FooKt$lambda$-1435676418$1 {
 
 FooKt {
     Bar {
+        type: Composable
         desc: (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
         key: 490236094
         codeHash: 994824479
@@ -119,6 +127,7 @@ FooKt {
     }
     
     Foo {
+        type: Composable
         desc: (Landroidx/compose/runtime/Composer;I)V
         key: -965539098
         codeHash: 3552136347
@@ -141,6 +150,7 @@ FooKt {
     }
     
     Bar$lambda$0 {
+        type: Regular
         desc: (Lkotlin/jvm/functions/Function2;ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         key: null
         codeHash: 74709383
@@ -151,6 +161,7 @@ FooKt {
     }
     
     Foo$lambda$1 {
+        type: Regular
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         key: null
         codeHash: 3190275455
