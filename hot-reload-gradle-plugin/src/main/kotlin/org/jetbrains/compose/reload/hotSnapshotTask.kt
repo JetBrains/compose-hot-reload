@@ -67,7 +67,7 @@ internal val KotlinCompilation<*>.hotSnapshotTask: Future<TaskProvider<HotSnapsh
 
 @DisableCachingByDefault(because = "Should always run")
 @InternalHotReloadGradleApi
-internal abstract class HotSnapshotTask : DefaultTask() {
+abstract class HotSnapshotTask : DefaultTask() {
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Incremental
