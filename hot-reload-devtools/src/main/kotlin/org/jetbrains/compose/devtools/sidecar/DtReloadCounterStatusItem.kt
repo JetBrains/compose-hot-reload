@@ -5,9 +5,9 @@
 
 package org.jetbrains.compose.devtools.sidecar
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.unit.dp
 import io.sellmair.evas.compose.composeValue
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.states.ReloadCountState
@@ -54,13 +53,8 @@ fun DtCollapsedReloadCounterStatusItem() {
     }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.scale(scale)
+        modifier = Modifier.scale(scale).horizontalScroll(rememberScrollState())
     ) {
-        if (state.successfulReloads < 100) {
-            Box(modifier = Modifier.size(12.dp)) {
-                Icon(Icons.Default.Refresh, "Reload", tint = DtColors.text)
-            }
-        }
         DtText(
             text = "${state.successfulReloads}",
             modifier = Modifier.tag(Tag.ReloadCounterText),
