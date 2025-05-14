@@ -38,10 +38,31 @@ plugins {
 Using Kotlin Multiplatform and IntelliJ, launching your app is as simple as pressing 'run' on your main function:
 <img alt="IntelliJ Run Gutter" src="./readme-assets/run-gutter.png">
 
-#### Launch from Gradle task
+#### Gradle Tasks
+**Run Tasks**
+
 The plugin will create the following tasks to launch the application in 'hot reload mode':
 - `:jvmRunHot`: Multiplatform, async alternative (`jvmRunHotAsync`)
 - `:runHot`: Kotlin/JVM, async alternative (`runHotAsync`)
+
+**Arguments**
+
+- `--mainClass <Main Class FQN>`:<br>
+The main class to run.<br> 
+_Example: `--mainClass com.example.MainKt`_
+
+
+- `--autoReload <true|false>?` or `--auto`:<br>
+Enable/disable automatic reloading. Default: `false`.<br> 
+_Example: `--autoReload true`_<br>
+_Example: `--auto`_
+
+**Reload Task**
+
+If the application was launched from CLI without the `--auto` option, 
+then 'recompile + reloads' can be executed using the following task:
+- `reload`: Generic task to reload all, currently running, applications.
+- `hotReloadJvmMain`: Reload all applications that use the `jvmMain` source set.
 
 The tasks 'mainClass' can be configured in the buildscript
 ```kotlin
@@ -52,10 +73,10 @@ tasks.withType<ComposeHotRun>().configureEach {
 
 or provided when invoking the task
 ```shell
-./gradlew jvmRunHot --mainClass=com.example.MainKt
+./gradlew jvmRunHot --mainClass com.example.MainKt
 ```
 
-### Enable 'OptimizeNonSkippingGroups':
+### Optimization: Enable 'OptimizeNonSkippingGroups' (Not Required):
 Note: This optimization is not required, but will lead to a better user experience.
 It is expected that the feature will be enabled by default in future versions of the compiler.
 
