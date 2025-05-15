@@ -35,8 +35,9 @@ plugins {
 
 ### Run the application
 #### Multiplatform + IntelliJ
-Using Kotlin Multiplatform and IntelliJ, launching your app is as simple as pressing 'run' on your main function:
-<img alt="IntelliJ Run Gutter" src="./readme-assets/run-gutter.png">
+Using Kotlin Multiplatform and IntelliJ, launching your app is as simple as pressing the 'run' guter on your main function，and select `run with Compose Hot Reload`:
+
+<img width="474" alt="IntelliJ Run Gutter" src="https://github.com/user-attachments/assets/bdea89df-e163-44e5-a922-554cc2941e03" />
 
 #### Launch from Gradle task
 The plugin will create the following tasks to launch the application in 'hot reload mode':
