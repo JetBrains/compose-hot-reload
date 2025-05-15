@@ -86,41 +86,45 @@ suspend fun runHeadlessApplication(
 
     /* Main loop */
     applicationScope.launch {
-        var time = 0L
-        val delay = 256.milliseconds
-        var silence = 0.milliseconds
-        var previousSilenceWarning = Clock.System.now()
+        var virtualTime = 0L
+        val virtualFrameDuration = 256.milliseconds
+
+        var previousMessageClockTime = Clock.System.now()
+        var previousSilenceWarningSystemClockTime = Clock.System.now()
 
         while (isActive) {
-            time += delay.inWholeNanoseconds
+            virtualTime += virtualFrameDuration.inWholeNanoseconds
 
             if (scene.hasInvalidations()) {
-                scene.render(time)
+                scene.render(virtualTime)
                 continue
             }
 
             val message = select {
                 messages.onReceive { it }
-                onTimeout(delay) { null }
+                onTimeout(virtualFrameDuration) { null }
             }
 
             if (message == null || message.isSilenceWarning()) {
                 val timeout = currentCoroutineContext()[SilenceTimeout]
-                silence += delay
+                val silenceDuration = Clock.System.now() - previousMessageClockTime
+                val previousWarningDuration = Clock.System.now() - previousSilenceWarningSystemClockTime
+
                 if (timeout != null) {
-                    if (silence >= timeout.timeout) throw TimeoutException(
-                        "No message received for $silence within timeout $timeout )"
+                    if (silenceDuration >= timeout.timeout) throw TimeoutException(
+                        "No message received for $silenceDuration within timeout $timeout )"
                     )
                 }
-                if (Clock.System.now() - previousSilenceWarning > 5.seconds) {
-                    issueSilenceWarning(silence, timeout)
-                    previousSilenceWarning = Clock.System.now()
+
+                if (previousWarningDuration > 5.seconds) {
+                    issueSilenceWarning(silenceDuration, timeout)
+                    previousSilenceWarningSystemClockTime = Clock.System.now()
                 }
 
                 continue
             }
 
-            silence = 0.milliseconds
+            previousMessageClockTime = Clock.System.now()
 
             if (message is ShutdownRequest) {
                 applicationScope.coroutineContext.job.cancelChildren()
@@ -143,7 +147,7 @@ suspend fun runHeadlessApplication(
             if (message is OrchestrationMessage.TakeScreenshotRequest) {
                 logger.info("Taking screenshot: '${message.messageId}'")
                 val baos = ByteArrayOutputStream()
-                ImageIO.write(scene.render(time).toComposeImageBitmap().toAwtImage(), "png", baos)
+                ImageIO.write(scene.render(virtualTime).toComposeImageBitmap().toAwtImage(), "png", baos)
                 orchestration.sendMessage(OrchestrationMessage.Screenshot("png", baos.toByteArray())).get()
                 logger.debug("Sent screenshot: '${message.messageId}'")
             }
