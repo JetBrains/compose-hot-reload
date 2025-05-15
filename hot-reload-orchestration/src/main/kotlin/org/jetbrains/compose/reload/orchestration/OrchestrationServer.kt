@@ -6,8 +6,10 @@
 package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.Disposable
+import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.submitSafe
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -41,7 +43,7 @@ public fun startOrchestrationServer(): OrchestrationServer {
     return server
 }
 
-private class OrchestrationServerImpl(
+internal class OrchestrationServerImpl(
     private val serverSocket: ServerSocket,
     private val logger: Logger
 ) : OrchestrationServer {
@@ -52,13 +54,18 @@ private class OrchestrationServerImpl(
     private val closeListeners = mutableListOf<() -> Unit>()
     private val clients = mutableListOf<Client>()
 
-    private inner class Client(
-        private val socket: Socket,
+    private class Client(
         val id: UUID,
         val role: OrchestrationClientRole,
+        private val socket: Socket,
         val input: ObjectInputStream,
-        private val output: ObjectOutputStream
+        private val output: ObjectOutputStream,
+        private val onClientClosed: ((Client) -> Unit),
     ) : AutoCloseable {
+
+        private val logger = createLogger()
+
+        private val isClosed = AtomicBoolean(false)
 
         private val writingThread = Executors.newSingleThreadExecutor { runnable ->
             thread(
@@ -80,21 +87,29 @@ private class OrchestrationServerImpl(
                     output.writeObject(message)
                     output.flush()
                 } catch (_: Throwable) {
-                    lock.withLock { clients.remove(this) }
                     logger.debug("Closing client: '$this'")
                     close()
                 }
             }
         }
 
-        override fun close() {
-            writingThread.shutdownNow()
-            if (!writingThread.awaitTermination(1, TimeUnit.SECONDS)) {
-                logger.warn("'writerThread' did not finish gracefully in 1 second '$this'")
-            }
 
-            socket.close()
-            sendMessage(OrchestrationMessage.ClientDisconnected(id, role))
+        override fun close() {
+            if (isClosed.getAndSet(true)) return
+            runInOrchestrationThreadImmediate {
+                try {
+                    writingThread.shutdown()
+                    if (!writingThread.awaitTermination(1, TimeUnit.SECONDS)) {
+                        writingThread.shutdownNow()
+                        logger.warn("'writerThread' did not finish gracefully in 1 second '$this'")
+                    }
+
+                    onClientClosed(this)
+                    socket.close()
+                } catch (t: Throwable) {
+                    logger.error("Failed closing client: '$this'", t)
+                }
+            }
         }
 
         override fun toString(): String {
@@ -104,6 +119,12 @@ private class OrchestrationServerImpl(
 
     override val port: Int
         get() = serverSocket.localPort
+
+    fun clients(): Future<List<AutoCloseable>> = orchestrationThread.submitSafe {
+        lock.withLock {
+            clients.toList()
+        }
+    }
 
     override fun invokeWhenMessageReceived(action: (OrchestrationMessage) -> Unit): Disposable {
         val registration = Throwable()
@@ -117,7 +138,10 @@ private class OrchestrationServerImpl(
                 assert(false) { throw t }
             }
         }
-        lock.withLock { listeners.add(safeListener) }
+        lock.withLock {
+            if (!isActive) return Disposable { }
+            listeners.add(safeListener)
+        }
         return Disposable {
             lock.withLock { listeners.remove(safeListener) }
         }
@@ -148,6 +172,10 @@ private class OrchestrationServerImpl(
             while (isActive) {
                 try {
                     val clientSocket = serverSocket.accept()
+                    if (!isActive) {
+                        clientSocket.close()
+                        break
+                    }
                     clientSocket.keepAlive = true
                     startClientReader(clientSocket)
                 } catch (t: IOException) {
@@ -168,9 +196,20 @@ private class OrchestrationServerImpl(
             val output = ObjectOutputStream(socket.getOutputStream().buffered())
             val handshake = input.readObject() as OrchestrationHandshake
 
-            val client = Client(socket, handshake.clientId, handshake.clientRole, input, output)
-            logger.debug("Client connected: '$client'")
-            lock.withLock { clients.add(client) }
+            val client = lock.withLock {
+                if (!isActive) return@thread
+                val client = Client(
+                    id = handshake.clientId,
+                    role = handshake.clientRole,
+                    socket = socket,
+                    input = input,
+                    output = output,
+                    onClientClosed = ::onClientClosed
+                )
+                logger.debug("Client connected: '$client'")
+                clients.add(client)
+                client
+            }
 
             /* Announce the new client to the whole orchestration */
             sendMessage(ClientConnected(client.id, client.role, handshake.clientPid))
@@ -184,27 +223,27 @@ private class OrchestrationServerImpl(
 
 
         /* Read messages  */
-        while (isActive) {
-            val message = try {
-                client.input.readObject()
-            } catch (_: IOException) {
-                logger.debug("Client disconnected: '$client'")
-                lock.withLock { clients.remove(client) }
-                client.close()
-                break
-            }
-            if (message !is OrchestrationMessage) {
-                logger.debug("Unknown message received '$message'")
-                continue
-            }
+        try {
+            while (isActive) {
+                val message = try {
+                    client.input.readObject()
+                } catch (_: IOException) {
+                    logger.debug("Client disconnected: '$client'")
+                    client.close()
+                    break
+                }
 
-            logger.trace(
-                "Received message: ${message.javaClass.simpleName} " +
-                    "'$client': '${message.messageId}'"
-            )
+                if (message !is OrchestrationMessage) {
+                    logger.debug("Unknown message received '$message'")
+                    continue
+                }
 
-            /* Broadcasting the message to all clients (including the one it came from) */
-            sendMessage(message).get()
+                /* Broadcasting the message to all clients (including the one it came from) */
+                sendMessage(message).get()
+            }
+        } catch (t: Throwable) {
+            logger.error("Failure in client reader", t)
+            client.close()
         }
     }
 
@@ -215,6 +254,11 @@ private class OrchestrationServerImpl(
     private fun invokeMessageListeners(message: OrchestrationMessage) {
         val listeners = lock.withLock { listeners.toList() }
         listeners.forEach { listener -> listener(message) }
+    }
+
+    private fun onClientClosed(client: Client) = runInOrchestrationThreadImmediate {
+        lock.withLock { clients.remove(client) }
+        sendMessage(ClientDisconnected(client.id, client.role))
     }
 
     override fun close() {
@@ -229,7 +273,7 @@ private class OrchestrationServerImpl(
             lock.withLock {
                 try {
                     logger.debug("Closing socket: '${serverSocket.localPort}'")
-                    clients.forEach { it.close() }
+                    clients.toList().forEach { it.close() }
                     clients.clear()
                     serverSocket.close()
                     closeListeners.forEach { it.invoke() }

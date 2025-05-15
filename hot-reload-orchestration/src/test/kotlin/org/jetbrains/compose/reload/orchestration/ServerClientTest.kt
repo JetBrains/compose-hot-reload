@@ -283,18 +283,14 @@ class ServerClientTest {
 
     @Test
     fun `test - stress test - fire and forget`() = runStressTest(
-        repetitions = 4,
-        parallelism = 2
+        repetitions = 4, parallelism = 2
     ) {
         val senderCoroutines = 4
         val messagesPerSender = 128
         val expectedMessages = senderCoroutines * messagesPerSender
 
-        val server = use(startOrchestrationServer())
+        val server = use(startOrchestrationServer()) as OrchestrationServerImpl
         val channel = server.asChannel()
-        currentCoroutineContext().job.invokeOnCompletion {
-            server.close()
-        }
 
         val messagesReceived = Array<CompletableDeferred<TestEvent>>(expectedMessages) { CompletableDeferred() }
 
@@ -328,6 +324,12 @@ class ServerClientTest {
         /* Await all clients to disconnect */
         val messages = messagesReceived.map { it.await() }
         assertEquals(expectedMessages, messages.size)
+
+        /* Await no more clients */
+        while (true) {
+            if (server.clients().get().isEmpty()) break
+        }
+
         server.closeGracefully().get()
     }
 
@@ -441,7 +443,7 @@ class ServerClientTest {
 
         try {
             coroutineScope {
-                withContext(CoroutineName("smokeTestScope.test($invocationIndex)")) {
+                withContext(CoroutineName("stressTestScope.test($invocationIndex)")) {
                     val smokeTestScope = StressTestScope(invocationIndex, coroutineContext, reportActivityChannel)
                     smokeTestScope.test()
                 }

@@ -6,8 +6,10 @@
 package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.submitSafe
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 
@@ -34,4 +36,16 @@ public fun checkIsOrchestrationThread(): Unit = check(isOrchestrationThread()) {
 public fun <T> runInOrchestrationThreadBlocking(action: () -> T): T {
     if (isOrchestrationThread()) return action()
     return orchestrationThread.submitSafe(action).get()
+}
+
+public fun <T> runInOrchestrationThreadImmediate(action: () -> T): Future<T> {
+    if (isOrchestrationThread()) {
+        val result = runCatching { action() }
+        return result.fold(
+            onSuccess = { value -> CompletableFuture.completedFuture(value) },
+            onFailure = { error -> CompletableFuture.failedFuture(error) }
+        )
+    }
+
+    return orchestrationThread.submit(action)
 }

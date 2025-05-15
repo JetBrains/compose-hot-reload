@@ -28,6 +28,7 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationExecu
 	public static final fun getOrchestrationThread ()Ljava/util/concurrent/ExecutorService;
 	public static final fun isOrchestrationThread ()Z
 	public static final fun runInOrchestrationThreadBlocking (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static final fun runInOrchestrationThreadImmediate (Lkotlin/jvm/functions/Function0;)Ljava/util/concurrent/Future;
 }
 
 public abstract interface class org/jetbrains/compose/reload/orchestration/OrchestrationHandle : java/lang/AutoCloseable {
