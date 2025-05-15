@@ -67,6 +67,8 @@ internal class OrchestrationServerImpl(
 
         private val isClosed = AtomicBoolean(false)
 
+        private val isClosedForWrite = AtomicBoolean(false)
+
         private val writingThread = Executors.newSingleThreadExecutor { runnable ->
             thread(
                 name = "Orchestration Client Writer (${socket.remoteSocketAddress})",
@@ -83,19 +85,23 @@ internal class OrchestrationServerImpl(
 
         fun write(message: OrchestrationMessage): Future<Unit> {
             return writingThread.submitSafe {
+                if (isClosed.get()) error("Client is closed")
+                if (isClosedForWrite.get()) error("Client is closed for write")
+
                 try {
                     output.writeObject(message)
                     output.flush()
-                } catch (_: Throwable) {
-                    logger.debug("Closing client: '$this'")
-                    close()
+                } catch (t: Throwable) {
+                    isClosedForWrite.set(true)
+                    throw t
                 }
             }
         }
 
-
         override fun close() {
             if (isClosed.getAndSet(true)) return
+            isClosedForWrite.set(true)
+
             runInOrchestrationThreadImmediate {
                 try {
                     writingThread.shutdown()

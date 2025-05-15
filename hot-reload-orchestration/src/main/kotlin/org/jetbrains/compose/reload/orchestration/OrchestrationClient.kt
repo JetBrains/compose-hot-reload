@@ -86,7 +86,6 @@ private class OrchestrationClientImpl(
                 logger.warn("'writer' did not finish gracefully in 1 second")
             }
 
-            output.close()
             this@OrchestrationClientImpl.closeGracefully()
         }
     }
