@@ -15,7 +15,6 @@ import org.gradle.initialization.BuildCancellationToken
 import org.gradle.kotlin.dsl.register
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.compose.reload.core.PidFileInfo
-import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.gradle.Future
 import org.jetbrains.compose.reload.gradle.PluginStage
@@ -72,8 +71,7 @@ private fun shutdownApplication(pidfile: Path, logger: Logger? = null) {
         try {
             process.onExit().get(5, TimeUnit.SECONDS)
         } catch (t: Throwable) {
-            logger?.error("Failed shutting down process using 'ShutdownRequest'", t)
-            process.destroyWithDescendants()
+            logger?.error("Failed to shutdown process: PID '$pid', orchestrationPort: '$port'", t)
             throw t
         }
     }
