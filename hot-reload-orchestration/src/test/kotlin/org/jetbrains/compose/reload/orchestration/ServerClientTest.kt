@@ -40,6 +40,7 @@ import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.yield
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
@@ -335,15 +336,29 @@ class ServerClientTest {
 
     @Test
     fun `test - stress test - connecting to closed server`() = runStressTest(
-        repetitions = 64,
+        repetitions = 12,
         parallelism = 4
     ) {
-        val port = ServerSocket(0).use { it.localPort }
-        repeat(8) {
+        ServerSocket(0).use { serverSocket ->
             launch(Dispatchers.IO) {
-                repeat(256) {
-                    reportActivity("Connecting to closed server #$it")
-                    assertFails { connectOrchestrationClient(Unknown, port) }
+                while (isActive) {
+                    try {
+                        serverSocket.accept().close()
+                    } catch (_: Throwable) {
+                        reportActivity("Server socket closed")
+                        break
+                    }
+                }
+            }
+
+            coroutineScope {
+                repeat(8) {
+                    launch(Dispatchers.IO) {
+                        repeat(128) {
+                            reportActivity("Connecting to closed server #$it")
+                            assertFails { connectOrchestrationClient(Unknown, serverSocket.localPort) }
+                        }
+                    }
                 }
             }
         }
@@ -374,6 +389,7 @@ class ServerClientTest {
         suspend fun reportActivity(message: String) {
             ensureActive()
             reportActivityChannel.send(message)
+            yield()
         }
     }
 

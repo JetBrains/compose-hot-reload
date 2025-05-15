@@ -35,11 +35,15 @@ public fun OrchestrationClient(role: OrchestrationClientRole): OrchestrationClie
 
 public fun connectOrchestrationClient(role: OrchestrationClientRole, port: Int): OrchestrationClient {
     val socket = Socket("127.0.0.1", port)
-
     socket.keepAlive = true
     val client = OrchestrationClientImpl(role, socket, port)
-    client.start().get()
-    return client
+    try {
+        client.start().get(15, TimeUnit.SECONDS)
+        return client
+    } catch (t: Throwable) {
+        client.close()
+        throw t
+    }
 }
 
 private class OrchestrationClientImpl(
