@@ -181,12 +181,17 @@ internal constructor(
         testScope.cancel()
         daemonTestScope.cancel()
 
-        /* Kludge: Windows tests failed to delete the project dir (maybe some files are still in use?) */
-        run deleteProjectDir@{
-            repeat(10) {
-                runCatching { projectDir.path.deleteRecursively() }
-                    .onSuccess { return@deleteProjectDir }
+        /* Use multiple attempts to delete the projectDir */
+        var cleanupAttempts = 0
+        while (true) {
+            val result = runCatching { projectDir.path.deleteRecursively() }
+            if (result.isSuccess) break
+            cleanupAttempts++
+            if (cleanupAttempts > 10) {
+                logger.error("Failed cleaning up projectDir: ${projectDir.path}")
+                break
             }
+            Thread.sleep(128)
         }
 
         resourcesLock.withLock {

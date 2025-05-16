@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ParameterResolver
 import java.nio.file.Files
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.exists
+import kotlin.io.path.listDirectoryEntries
 
 internal class HotReloadTestFixtureExtension(
     private val context: HotReloadTestInvocationContext
@@ -66,6 +67,10 @@ internal class HotReloadTestFixtureExtension(
 
         val debugAnnotation = hasAnnotation<Debug>()
         val projectDir = ProjectDir(Files.createTempDirectory("hot-reload-test"))
+        if (projectDir.path.listDirectoryEntries().isNotEmpty()) {
+            error("${projectDir.path}: is not empty")
+        }
+
         HotReloadTestFixtureShutdownHook.invokeOnShutdown {
             if (projectDir.path.exists()) {
                 projectDir.path.toFile().deleteRecursively()
