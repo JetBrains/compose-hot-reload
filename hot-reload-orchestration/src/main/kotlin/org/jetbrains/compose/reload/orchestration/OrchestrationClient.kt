@@ -35,7 +35,7 @@ public fun OrchestrationClient(role: OrchestrationClientRole): OrchestrationClie
 
 public fun connectOrchestrationClient(role: OrchestrationClientRole, port: Int): OrchestrationClient {
     val socket = Socket("127.0.0.1", port)
-    socket.keepAlive = true
+    socket.setOrchestrationDefaults()
     val client = OrchestrationClientImpl(role, socket, port)
     try {
         client.start().get(15, TimeUnit.SECONDS)

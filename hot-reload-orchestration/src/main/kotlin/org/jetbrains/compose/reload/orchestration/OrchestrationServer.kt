@@ -182,7 +182,7 @@ internal class OrchestrationServerImpl(
                         clientSocket.close()
                         break
                     }
-                    clientSocket.keepAlive = true
+                    clientSocket.setOrchestrationDefaults()
                     startClientReader(clientSocket)
                 } catch (t: IOException) {
                     if (isActive) {
