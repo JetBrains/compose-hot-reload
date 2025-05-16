@@ -26,6 +26,10 @@ kotlin {
 
 tasks.withType<AbstractTestTask> {
     dependsOn(":publishLocally")
+
+    /* As both tests start many orchestration servers, we shall relax to await those tests */
+    mustRunAfter(":hot-reload-orchestration:test")
+
     outputs.upToDateWhen { false }
 
     testLogging {
