@@ -28,6 +28,12 @@ fun OrchestrationMessage.send(): Future<Unit> {
 
 internal fun launchOrchestration() {
     orchestration.invokeWhenReceived<OrchestrationMessage.ShutdownRequest> { request ->
+        /* The request provides a pidFile: We therefore only respect the request when the pidFile matches */
+        if (!request.isApplicable()) {
+            logger.warn("ShutdownRequest(${request.reason}) ignored ('isApplicable() == false)")
+            return@invokeWhenReceived
+        }
+
         logger.info("Received shutdown request '${request.reason}'")
         exitProcess(0)
     }

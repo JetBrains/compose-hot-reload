@@ -143,7 +143,7 @@ suspend fun runHeadlessApplication(
             previousMessage = message
             previousMessageClockTime = Clock.System.now()
 
-            if (message is ShutdownRequest) {
+            if (message is ShutdownRequest && message.isApplicable()) {
                 applicationScope.coroutineContext.job.cancelChildren()
                 return@launch
             }

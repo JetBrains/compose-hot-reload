@@ -26,6 +26,7 @@ import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.io.path.absolute
 import kotlin.io.path.exists
 import kotlin.jvm.optionals.getOrNull
 
@@ -66,7 +67,14 @@ private fun shutdownApplication(pidfile: Path, logger: Logger? = null) {
     logger?.quiet("Sending 'ShutdownRequest' to '$port'")
 
     connectOrchestrationClient(OrchestrationClientRole.Tooling, port).use { client ->
-        client.sendMessage(ShutdownRequest("Gradle Build cancelled")).get(15, TimeUnit.SECONDS)
+        client.sendMessage(
+            ShutdownRequest(
+                "Gradle Build cancelled",
+                pidFile = pidfile.absolute().toFile(),
+                pid = pid,
+            )
+        ).get(15, TimeUnit.SECONDS)
+
         logger?.quiet("Waiting for process to exit. PID: '$pid'")
         try {
             process.onExit().get(5, TimeUnit.SECONDS)

@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.orchestration
 
+import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.withLinearClosure
 import java.io.File
@@ -16,10 +17,40 @@ public sealed class OrchestrationMessage : Serializable {
      * Requests that all participants in the orchestration are supposed to shut down.
      * Note: Closing the [OrchestrationServer] is also supposed to close all clients.
      */
-    public data class ShutdownRequest(public val reason: String? = null) : OrchestrationMessage() {
+    public data class ShutdownRequest @JvmOverloads constructor(
+        public val reason: String? = null,
+
+        /**
+         * When provided, the ShutdownRequest is only valid for the application associated with the
+         * given [pidFile]
+         */
+        public val pidFile: File? = null,
+
+        /**
+         * When provided, the ShutdownRequest is only valid for the application with the given pid
+         */
+        public val pid: Long? = null,
+    ) : OrchestrationMessage() {
         internal companion object {
             @Suppress("unused")
             internal const val serialVersionUID: Long = 0L
+        }
+
+
+        /**
+         * @return true: If the request is applicable to the current application, given
+         * the provided constraints ([pidFile], [pid])
+         */
+        public fun isApplicable(): Boolean {
+            if (pidFile != null) {
+                return HotReloadEnvironment.pidFile?.toFile()?.absoluteFile == pidFile.absoluteFile
+            }
+
+            if (pid != null) {
+                return pid == ProcessHandle.current().pid()
+            }
+
+            return true
         }
     }
 
@@ -359,6 +390,7 @@ public sealed class OrchestrationMessage : Serializable {
             exceptionClassName = throwable.javaClass.name,
             stacktrace = throwable.withLinearClosure { it.cause }.flatMap { it.stackTrace.toList() }
         )
+
         internal companion object {
             @Suppress("unused")
             internal const val serialVersionUID: Long = 0L
