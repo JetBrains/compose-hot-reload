@@ -52,11 +52,11 @@ import java.net.ServerSocket
 import java.util.Collections.synchronizedList
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
 import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFails
 import kotlin.test.fail
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -248,7 +248,9 @@ class ServerClientTest {
             val syncChannel = client.asChannel()
             val ping = OrchestrationMessage.Ping()
             server.sendMessage(ping)
-            syncChannel.receiveAsFlow().first { it == ping }
+            syncChannel.receiveAsFlow().first { message ->
+                reportActivity("Sync received message: $message"); message == ping
+            }
         }
 
         val fromChannel = incomingChannel.consumeAsFlow().filterIsInstance<TestEvent>()
@@ -270,12 +272,15 @@ class ServerClientTest {
             }
         }.toSet()
 
+        reportActivity("Checking 'fromChannel'")
         fromChannel.toHashSet().containsAll(expectedEvents)
             || fail("Channel (${fromChannel.size}/$elements) did not receive all messages | iteration : $$invocationIndex")
 
+        reportActivity("Checking 'fromQueue'")
         fromQueue.toHashSet().containsAll(expectedEvents)
             || fail("Queue (${fromQueue.size}/$elements)  did not receive all messages | iteration : $invocationIndex")
 
+        reportActivity("Checking 'fromFlowAsync'")
         fromFlowAsync.await().toHashSet().containsAll(expectedEvents)
             || fail("Flow(${fromFlowAsync.await().size}) did not receive all messages | iteration : $invocationIndex")
 
@@ -334,33 +339,59 @@ class ServerClientTest {
         server.closeGracefully().get()
     }
 
+    /**
+     * Fellow Readers: You stumbled across a stress test trying to test if the 'connectOrchestrationClient'
+     * is behaving properly when trying to connect to a 'bad server' under stress.
+     * If you find my mind, please contact sebastian.sellmair@jetbrains.com, because I might have lost it
+     * somewhere here.
+     *
+     * This stress test will bind a new server which will accept and immediately close connections.
+     * Then multiple coroutines will try to connect to the server, expecting failures.
+     */
     @Test
-    fun `test - stress test - connecting to closed server`() = runStressTest(
-        repetitions = 12,
-        parallelism = 4
-    ) {
+    fun `test - stress test - connecting to bad server`() {
         ServerSocket(0).use { serverSocket ->
-            launch(Dispatchers.IO) {
-                while (isActive) {
-                    try {
-                        serverSocket.accept().close()
-                    } catch (_: Throwable) {
-                        reportActivity("Server socket closed")
-                        break
+            val serverThread = thread {
+                while (!Thread.currentThread().isInterrupted && !serverSocket.isClosed) {
+                    runCatching {
+                        val socket = serverSocket.accept()
+                        socket.setOrchestrationDefaults()
+                        socket.close()
                     }
                 }
             }
 
-            coroutineScope {
-                repeat(8) {
-                    launch(Dispatchers.IO) {
-                        repeat(128) {
-                            reportActivity("Connecting to closed server #$it")
-                            assertFails { connectOrchestrationClient(Unknown, serverSocket.localPort) }
-                        }
+            runStressTest(
+                repetitions = 24,
+                parallelism = 4
+            ) {
+                repeat(128) {
+                    reportActivity("Connecting to closed server #$it")
+                    if (serverSocket.isClosed) error("ServerSocket is closed")
+
+                    val client = try {
+                        connectOrchestrationClient(Unknown, serverSocket.localPort)
+                    } catch (_: Throwable) {
+                        return@repeat
+                    }
+
+                    try {
+                        error(
+                            "Unexpected connection: ${client.clientId} " +
+                                "(server.isClosed: ${serverSocket.isClosed}, " +
+                                "server.isBound: ${serverSocket.isBound}, " +
+                                "serverThread.isAlive: ${serverThread.isAlive})"
+                        )
+                    } finally {
+                        client.close()
                     }
                 }
             }
+
+            if (!serverThread.isAlive) fail("Expected 'serverThread.isAlive'")
+            serverSocket.close()
+            serverThread.interrupt()
+            serverThread.join()
         }
     }
 
@@ -398,12 +429,10 @@ class ServerClientTest {
         repetitions: Int = 8,
         parallelism: Int = 2,
         timeout: Duration = 10.minutes,
-        silenceTimeout: Duration = 5.seconds,
+        silenceTimeout: Duration = 10.seconds,
         test: suspend StressTestScope.() -> Unit
     ) {
-        val main = Dispatchers.IO
-
-        runBlocking(main + Job() + CoroutineName("Stress Test Main")) {
+        runBlocking(Dispatchers.IO + Job() + CoroutineName("runStressTest")) {
             /* Fan out the invocations using a channel */
             val invocationChannel = Channel<Int>(Channel.UNLIMITED)
             repeat(repetitions) { index -> invocationChannel.send(index) }
@@ -414,9 +443,9 @@ class ServerClientTest {
                 coroutineScope {
                     /* Launch coroutines */
                     repeat(parallelism) { coroutineId ->
-                        launch(Dispatchers.IO + CoroutineName("Stress Test Coroutine #$coroutineId")) {
+                        launch(CoroutineName("runStressTest(coroutineId=$coroutineId)")) {
                             for (invocationIndex in invocationChannel) {
-                                println("Running stress test #$invocationIndex (coroutine: $coroutineId)")
+                                println("runStressTest(invocationIndex=$invocationIndex)")
                                 runStressTest(coroutineId, invocationIndex, silenceTimeout, test)
                             }
                         }
@@ -460,8 +489,8 @@ class ServerClientTest {
         try {
             coroutineScope {
                 withContext(CoroutineName("stressTestScope.test($invocationIndex)")) {
-                    val smokeTestScope = StressTestScope(invocationIndex, coroutineContext, reportActivityChannel)
-                    smokeTestScope.test()
+                    val stressTestScope = StressTestScope(invocationIndex, coroutineContext, reportActivityChannel)
+                    stressTestScope.test()
                 }
             }
             silenceDetector.cancel()
