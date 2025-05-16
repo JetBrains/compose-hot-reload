@@ -42,6 +42,8 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import org.jetbrains.compose.reload.orchestration.asChannel
 import java.io.ByteArrayOutputStream
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeoutException
 import javax.imageio.ImageIO
 import kotlin.coroutines.CoroutineContext
@@ -51,6 +53,8 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlin.time.toJavaInstant
 
 private val logger = createLogger()
 
@@ -89,7 +93,9 @@ suspend fun runHeadlessApplication(
         var virtualTime = 0L
         val virtualFrameDuration = 256.milliseconds
 
-        var previousMessageClockTime = Clock.System.now()
+        val startClockTime = Clock.System.now()
+        var previousMessage: OrchestrationMessage? = null
+        var previousMessageClockTime: Instant? = null
         var previousSilenceWarningSystemClockTime = Clock.System.now()
 
         while (isActive) {
@@ -107,16 +113,26 @@ suspend fun runHeadlessApplication(
 
             if (message == null || message.isSilenceWarning()) {
                 val timeout = currentCoroutineContext()[SilenceTimeout]
-                val silenceDuration = Clock.System.now() - previousMessageClockTime
+                val silenceDuration = Clock.System.now() - (previousMessageClockTime ?: startClockTime)
                 val previousWarningDuration = Clock.System.now() - previousSilenceWarningSystemClockTime
 
-                if (timeout != null) {
-                    if (silenceDuration >= timeout.timeout) throw TimeoutException(
-                        "No message received for $silenceDuration within timeout $timeout )"
+                if (timeout != null && silenceDuration >= timeout.timeout) {
+                    val currentTime = Clock.System.now()
+                        .toJavaInstant().atZone(ZoneId.systemDefault())
+                        .format(DateTimeFormatter.ISO_TIME)
+
+                    val previousMessageTime = previousMessageClockTime
+                        ?.toJavaInstant()?.atZone(ZoneId.systemDefault())
+                        ?.format(DateTimeFormatter.ISO_TIME) ?: "N/A"
+
+                    throw TimeoutException(
+                        "$currentTime No message received for $silenceDuration within timeout $timeout\n" +
+                            "previousMessageClockTime: $previousMessageTime\n" +
+                            "previousMessage: $previousMessage"
                     )
                 }
 
-                if (previousWarningDuration > 5.seconds) {
+                if (silenceDuration > 5.seconds && previousWarningDuration > 5.seconds) {
                     issueSilenceWarning(silenceDuration, timeout)
                     previousSilenceWarningSystemClockTime = Clock.System.now()
                 }
@@ -124,6 +140,7 @@ suspend fun runHeadlessApplication(
                 continue
             }
 
+            previousMessage = message
             previousMessageClockTime = Clock.System.now()
 
             if (message is ShutdownRequest) {
