@@ -81,6 +81,64 @@ class VerificationTests {
 
     @HotReloadTest
     @QuickTest
+    fun `multiple file change restored correctly`(fixture: HotReloadTestFixture) = fixture.runTest {
+        val d = "\$"
+        val code = fixture.initialSourceCode(
+            """
+                import androidx.compose.foundation.layout.Column
+                import androidx.compose.runtime.Composable
+                import org.jetbrains.compose.reload.test.*
+                
+                object Foo {
+                    @Composable
+                    fun foo() {
+                        TestText("Foo text")
+                    }
+                }
+                
+                fun main() {
+                    screenshotTestApplication {
+                        Column {
+                            TestText("Hello")
+                            Foo.foo()
+                        }
+                    }
+                }
+            """.trimIndent()
+        )
+
+        fixture.checkScreenshot("0-initial")
+
+        fixture.runTransaction {
+            /*
+            Illegal Change: replace the code inside the compose entry function
+            */
+            code.replaceText("""fun main() {""", """fun main() { val a = 10""")
+            code.replaceText("""TestText("Hello")""", """TestText("Hello ${d}a")""")
+            /*
+            Legal Change: change code in composable function
+            */
+            code.replaceText("""TestText("Foo text")""", """TestText("Foo")""")
+            requestReload()
+            val request = skipToMessage<OrchestrationMessage.ReloadClassesRequest>()
+            val result = skipToMessage<OrchestrationMessage.ReloadClassesResult>()
+            assertEquals(request.messageId, result.reloadRequestId)
+            assertFalse(result.isSuccess)
+        }
+
+        fixture.runTransaction {
+            /*
+            Revert the illegal change
+            */
+            code.replaceText("""fun main() { val a = 10""", """fun main() {""")
+            code.replaceText("""TestText("Hello ${d}a")""", """TestText("Hello")""")
+            requestAndAwaitReload()
+            fixture.checkScreenshot("2-restored-state")
+        }
+    }
+
+    @HotReloadTest
+    @QuickTest
     fun `illegal code change - change local variables in main`(fixture: HotReloadTestFixture) = fixture.runTest {
         val code = fixture.initialSourceCode(
             """
