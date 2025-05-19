@@ -17,9 +17,9 @@ import java.util.zip.CRC32
 import kotlin.collections.orEmpty
 
 @JvmInline
-value class RuntimeCodeHash(val value: Long)
+value class RuntimeInstructionTreeCodeHash(val value: Long)
 
-internal fun RuntimeInstructionTree.codeHash(methodNode: MethodNode): RuntimeCodeHash {
+internal fun RuntimeInstructionTree.codeHash(methodNode: MethodNode): RuntimeInstructionTreeCodeHash {
     val crc = CRCHasher()
 
     tokens.forEach token@{ token ->
@@ -103,7 +103,7 @@ internal fun RuntimeInstructionTree.codeHash(methodNode: MethodNode): RuntimeCod
         crc.pushHash(localVariable.desc)
     }
 
-    return RuntimeCodeHash(crc.value)
+    return RuntimeInstructionTreeCodeHash(crc.value)
 }
 
 internal class CRCHasher() {
