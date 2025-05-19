@@ -12,14 +12,17 @@ fun RuntimeInfo.verifyRedefinitions(redefinitions: RuntimeInfo) {
 private fun RuntimeInfo.verifyMethodRedefinitions(redefined: RuntimeInfo) {
     redefined.methodIndex.forEach { (methodId, redefinedMethod) ->
         val previousMethod = methodIndex[methodId] ?: return@forEach
-        if (
-            previousMethod.rootScope.methodType == MethodType.ComposeEntryPoint &&
-            previousMethod.rootScope.hash != redefinedMethod.rootScope.hash
-        ) {
-            throw IllegalStateException(
-                "Compose Hot Reload does not support the redefinition of the Compose entry method." +
-                    " Please restart the App or revert the changes in '$methodId'."
-            )
+
+        if (previousMethod.rootScope.methodType == MethodType.ComposeEntryPoint) {
+            if (
+                previousMethod.rootScope.codeHash != redefinedMethod.rootScope.codeHash ||
+                previousMethod.rootScope.variableHash != redefinedMethod.rootScope.variableHash
+            ) {
+                throw IllegalStateException(
+                    "Compose Hot Reload does not support the redefinition of the Compose entry method." +
+                        " Please restart the App or revert the changes in '$methodId'."
+                )
+            }
         }
     }
 }

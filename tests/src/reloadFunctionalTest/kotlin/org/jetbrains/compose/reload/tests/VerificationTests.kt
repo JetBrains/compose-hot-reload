@@ -86,9 +86,58 @@ class VerificationTests {
 
     @HotReloadTest
     @QuickTest
+    fun `illegal code change - change local variables in main`(fixture: HotReloadTestFixture) = fixture.runTest {
+        val code = fixture.initialSourceCode(
+            """
+                import androidx.compose.material.Text
+                import org.jetbrains.compose.reload.test.*
+                
+                fun main() {
+                    val str1 = "Hello"
+                    screenshotTestApplication {
+                        Text(str1 + "world!")
+                    }
+                }
+            """.trimIndent()
+        )
+
+        fixture.checkScreenshot("0-initial")
+
+        fixture.runTransaction {
+            /*
+            Legal Change: replace the code inside the composable function
+            */
+            code.replaceText(""""world!"""", """" world!"""")
+            requestReload()
+            val request = skipToMessage<OrchestrationMessage.ReloadClassesRequest>()
+            val result = skipToMessage<OrchestrationMessage.ReloadClassesResult>()
+            assertEquals(request.messageId, result.reloadRequestId)
+            assertTrue(result.isSuccess)
+            fixture.checkScreenshot("1-correct-change")
+        }
+
+        fixture.runTransaction {
+            /*
+            Illegal Change: change local variable name in main
+            */
+            code.replaceText("str1", "str2")
+            requestReload()
+            val request = skipToMessage<OrchestrationMessage.ReloadClassesRequest>()
+            val result = skipToMessage<OrchestrationMessage.ReloadClassesResult>()
+            assertEquals(request.messageId, result.reloadRequestId)
+            assertFalse(result.isSuccess)
+            assertEquals(
+                "Compose Hot Reload does not support the redefinition of the Compose entry method." +
+                    " Please restart the App or revert the changes in 'MainKt.main ()V'.",
+                result.errorMessage
+            )
+        }
+    }
+
+    @HotReloadTest
+    @QuickTest
     @Disabled("Current verification diagnostic does not support such cases")
     fun `illegal code change - update compose entry function transitively`(fixture: HotReloadTestFixture) = fixture.runTest {
-        val d = "\$"
         val code = fixture.initialSourceCode(
             """
             import androidx.compose.material.Text

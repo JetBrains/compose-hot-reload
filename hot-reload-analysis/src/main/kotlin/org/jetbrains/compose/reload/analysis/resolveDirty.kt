@@ -48,7 +48,7 @@ private fun RuntimeInfo.resolveDirtyRuntimeScopeInfos(redefined: RuntimeInfo): L
 private fun RuntimeInfo.resolveDirtyMethods(redefined: RuntimeInfo): List<MethodInfo> {
     return redefined.methodIndex.mapNotNull { (methodId, redefinedMethod) ->
         val previousMethod = methodIndex[methodId] ?: return@mapNotNull redefinedMethod
-        if (previousMethod.rootScope.hash != redefinedMethod.rootScope.hash) {
+        if (previousMethod.rootScope.codeHash != redefinedMethod.rootScope.codeHash) {
             return@mapNotNull redefinedMethod
         }
         if (previousMethod.rootScope.children.map { it.group } != redefinedMethod.rootScope.children.map { it.group }) {
@@ -210,7 +210,7 @@ private fun RuntimeInfo.resolveTransitivelyDirty(
 }
 
 private fun RuntimeScopeInfo.invalidationKey(): Long {
-    var result = hash.value
+    var result = codeHash.value
 
     fun push(value: Long) {
         result = 31L * result + value
@@ -228,7 +228,7 @@ private fun RuntimeScopeInfo.invalidationKey(): Long {
         Therefore, we push hash of those values into the invalidation key of this parent
          */
         if (SpecialComposeGroupKeys.isRememberGroup(child.group)) {
-            push(child.hash.value)
+            push(child.codeHash.value)
         }
     }
     return result
