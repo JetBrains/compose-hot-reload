@@ -59,7 +59,7 @@ internal fun RuntimeScopeInfo.render(): String = buildString {
         }
 
         appendLine("key: ${group?.key}")
-        appendLine("codeHash: ${codeHash.value}")
+        appendLine("codeHash: ${hash.value}")
         if (methodDependencies.isEmpty()) {
             appendLine("methodDependencies: []")
         } else {

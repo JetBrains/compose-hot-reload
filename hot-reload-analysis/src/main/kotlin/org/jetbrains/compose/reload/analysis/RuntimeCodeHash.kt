@@ -14,11 +14,12 @@ import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
 import org.objectweb.asm.tree.VarInsnNode
 import java.util.zip.CRC32
+import kotlin.collections.orEmpty
 
 @JvmInline
 value class RuntimeCodeHash(val value: Long)
 
-internal fun RuntimeInstructionTree.codeHash(): RuntimeCodeHash {
+internal fun RuntimeInstructionTree.codeHash(methodNode: MethodNode): RuntimeCodeHash {
     val crc = CRCHasher()
 
     tokens.forEach token@{ token ->
@@ -94,15 +95,12 @@ internal fun RuntimeInstructionTree.codeHash(): RuntimeCodeHash {
         crc.pushHash(child.failure?.throwable?.stackTraceToString())
     }
 
-    return RuntimeCodeHash(crc.value)
-}
-
-internal fun MethodNode.localVariablesHash(): RuntimeCodeHash {
-    val crc = CRCHasher()
-
-    for (local in localVariables.orEmpty()) {
-        crc.pushHash(local.name)
-        crc.pushHash(local.desc)
+    /**
+     * We need to store the information about local variables
+     */
+    methodNode.localVariables.orEmpty().forEach { localVariable ->
+        crc.pushHash(localVariable.name)
+        crc.pushHash(localVariable.desc)
     }
 
     return RuntimeCodeHash(crc.value)

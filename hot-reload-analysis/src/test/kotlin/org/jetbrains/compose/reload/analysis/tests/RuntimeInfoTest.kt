@@ -315,7 +315,7 @@ class RuntimeInfoTest {
             assertEquals(beforeScope.group, afterScope.group)
             assertEquals(beforeScope.scopeType, afterScope.scopeType)
             assertEquals(beforeScope.methodDependencies, afterScope.methodDependencies)
-            assertEquals(beforeScope.codeHash, afterScope.codeHash)
+            assertEquals(beforeScope.hash, afterScope.hash)
         }
     }
 

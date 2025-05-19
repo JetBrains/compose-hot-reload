@@ -13,6 +13,5 @@ data class RuntimeScopeInfo(
     val methodDependencies: Set<MethodId>,
     val fieldDependencies: Set<FieldId>,
     val children: List<RuntimeScopeInfo>,
-    val codeHash: RuntimeCodeHash,
-    val variableHash: RuntimeCodeHash,
+    val hash: RuntimeCodeHash,
 )

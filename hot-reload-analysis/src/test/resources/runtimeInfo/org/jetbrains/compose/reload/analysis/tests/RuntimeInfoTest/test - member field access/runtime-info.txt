@@ -28,7 +28,7 @@ Bar {
         type: Regular
         desc: ()V
         key: null
-        codeHash: 460411085
+        codeHash: 2910389127
         methodDependencies: []
         fieldDependencies: [
             Bar.x I
@@ -39,7 +39,7 @@ Bar {
         type: Regular
         desc: ()I
         key: null
-        codeHash: 3935943372
+        codeHash: 1184042145
         methodDependencies: []
         fieldDependencies: [
             Bar.x I
@@ -74,7 +74,7 @@ FooKt {
         type: Composable
         desc: (Landroidx/compose/runtime/Composer;I)V
         key: -965539098
-        codeHash: 3552136347
+        codeHash: 55349878
         methodDependencies: [
             FooKt.Foo$lambda$1 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         ]
@@ -82,13 +82,13 @@ FooKt {
     
         RestartGroup {
             key: -965539098
-            codeHash: 3757456798
+            codeHash: 1171473080
             methodDependencies: []
             fieldDependencies: []
     
             ReplaceGroup {
                 key: 1849434622
-                codeHash: 880027027
+                codeHash: 3843380681
                 methodDependencies: [
                     Bar.getX ()I
                 ]
@@ -103,7 +103,7 @@ FooKt {
         type: Composable
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         key: null
-        codeHash: 3190275455
+        codeHash: 210770274
         methodDependencies: [
             FooKt.Foo (Landroidx/compose/runtime/Composer;I)V
         ]

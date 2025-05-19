@@ -137,7 +137,6 @@ internal fun createRuntimeScopeInfo(
         methodDependencies = tree.methodDependencies(),
         fieldDependencies = tree.fieldDependencies(),
         children = tree.children.map { child -> createRuntimeScopeInfo(methodId, methodNode,child) },
-        codeHash = tree.codeHash(),
-        variableHash = methodNode.localVariablesHash(),
+        hash = tree.codeHash(methodNode),
     )
 }
