@@ -5,6 +5,8 @@
 
 package org.jetbrains.compose.reload.analysis
 
+class RedefinitionVerificationException(message: String) : Throwable(message)
+
 fun RuntimeInfo.verifyRedefinitions(redefinitions: RuntimeInfo) {
     verifyMethodRedefinitions(redefinitions)
 }
@@ -17,7 +19,7 @@ private fun RuntimeInfo.verifyMethodRedefinitions(redefined: RuntimeInfo) {
             previousMethod.rootScope.methodType == MethodType.ComposeEntryPoint &&
             previousMethod.rootScope.hash != redefinedMethod.rootScope.hash
         ) {
-            throw IllegalStateException(
+            throw RedefinitionVerificationException(
                 "Compose Hot Reload does not support the redefinition of the Compose entry method." +
                     " Please restart the App or revert the changes in '$methodId'."
             )

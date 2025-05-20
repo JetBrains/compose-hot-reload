@@ -213,13 +213,24 @@ public sealed class OrchestrationMessage : Serializable {
 
     public data class ReloadClassesResult(
         val reloadRequestId: UUID,
-        val isSuccess: Boolean,
+        val type: ResultType,
         val errorMessage: String? = null,
         val errorStacktrace: List<StackTraceElement>? = null,
     ) : OrchestrationMessage() {
+        public val isSuccess: Boolean get() = type == ResultType.Success
+
         internal companion object {
             @Suppress("unused")
             internal const val serialVersionUID: Long = 0L
+        }
+
+        public enum class ResultType {
+            Success, VerificationError, Failure;
+
+            internal companion object {
+                @Suppress("unused")
+                internal const val serialVersionUID: Long = 0L
+            }
         }
     }
 
