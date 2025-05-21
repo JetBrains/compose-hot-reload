@@ -114,17 +114,11 @@ fun CoroutineScope.launchReloadState() = launchState(ReloadState) {
         }
 
         if (message is OrchestrationMessage.ReloadClassesResult) {
-            when (message.type) {
-                OrchestrationMessage.ReloadClassesResult.ResultType.Success -> ReloadState.Ok(time = Clock.System.now())
-                OrchestrationMessage.ReloadClassesResult.ResultType.VerificationError -> ReloadState.Failed(
-                    "Verification failure during reload: (${message.errorMessage})",
-                    time = Clock.System.now()
-                )
-                OrchestrationMessage.ReloadClassesResult.ResultType.Failure -> ReloadState.Failed(
-                    "Failed reloading classes (${message.errorMessage})",
-                    logs = collectedLogs.toList()
-                )
-            }.emit()
+            if (message.isSuccess) ReloadState.Ok(time = Clock.System.now()).emit()
+            else ReloadState.Failed(
+                "Failed reloading classes (${message.errorMessage})",
+                logs = collectedLogs.toList()
+            ).emit()
         }
     }
 }

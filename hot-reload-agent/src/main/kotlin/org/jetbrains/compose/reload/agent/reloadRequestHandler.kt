@@ -6,7 +6,6 @@
 package org.jetbrains.compose.reload.agent
 
 
-import org.jetbrains.compose.reload.analysis.RedefinitionVerificationException
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.exception
 import org.jetbrains.compose.reload.core.isFailure
@@ -16,6 +15,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
 import java.io.File
 import java.lang.instrument.Instrumentation
+import javax.swing.SwingUtilities
 
 private val logger = createLogger()
 
@@ -36,20 +36,13 @@ internal fun launchReloadRequestHandler(instrumentation: Instrumentation) {
                 logger.orchestration("Reloaded classes: ${request.messageId}")
                 OrchestrationMessage.LogMessage(OrchestrationMessage.LogMessage.TAG_AGENT)
                 pendingChanges = emptyMap()
-                OrchestrationMessage.ReloadClassesResult(
-                    request.messageId,
-                    OrchestrationMessage.ReloadClassesResult.ResultType.Success
-                ).send()
+                OrchestrationMessage.ReloadClassesResult(request.messageId, true).send()
             }
 
             if (result.isFailure()) {
                 logger.orchestration("Failed to reload classes", result.exception)
-                val type = when (result.exception) {
-                    is RedefinitionVerificationException -> OrchestrationMessage.ReloadClassesResult.ResultType.VerificationError
-                    else -> OrchestrationMessage.ReloadClassesResult.ResultType.Failure
-                }
                 OrchestrationMessage.ReloadClassesResult(
-                    request.messageId, type, result.exception.message,
+                    request.messageId, false, result.exception.message,
                     result.exception.withLinearClosure { throwable -> throwable.cause }
                         .flatMap { throwable -> throwable.stackTrace.toList() }
                 ).send()
