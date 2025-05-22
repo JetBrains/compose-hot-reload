@@ -117,7 +117,7 @@ internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
 internal fun RuntimeScopeInfo(
     classNode: ClassNode,
     methodNode: MethodNode
-): RuntimeScopeInfo? {
+): RuntimeScopeInfo {
     val methodId = MethodId(classNode, methodNode)
     val runtimeInstructionTree = parseRuntimeInstructionTreeLenient(methodId, methodNode)
     return createRuntimeScopeInfo(methodId, methodNode, runtimeInstructionTree)
