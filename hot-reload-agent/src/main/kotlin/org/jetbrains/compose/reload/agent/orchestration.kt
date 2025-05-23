@@ -5,15 +5,16 @@
 
 package org.jetbrains.compose.reload.agent
 
+import org.jetbrains.compose.reload.core.CHRLogger
 import org.jetbrains.compose.reload.core.createLogger
-import org.jetbrains.compose.reload.orchestration.LoggerTag
+import org.jetbrains.compose.reload.core.with
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_AGENT
 import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
-import org.jetbrains.compose.reload.orchestration.withOrchestration
 import java.util.concurrent.Future
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
@@ -48,7 +49,10 @@ private fun startOrchestration(): OrchestrationHandle {
     val orchestration = run {
         /* Connecting to a server if we're instructed to */
         OrchestrationClient(Application)?.let { client ->
-            logger.withOrchestration(LoggerTag.Agent, client)
+            logger
+                .with(CHRLogger(logger.name, logger.level) { message ->
+                    client.sendMessage(OrchestrationMessage.LogMessage(TAG_AGENT, message))
+                })
                 .info("Agent: 'Client' mode (connected to '${client.port}')")
             return@run client
         }
@@ -56,13 +60,19 @@ private fun startOrchestration(): OrchestrationHandle {
         /* Otherwise, we start our own orchestration server */
         logger.debug("Hot Reload Agent is starting in 'server' mode")
         startOrchestrationServer().also { server ->
-            logger.withOrchestration(LoggerTag.Agent, server)
+            logger
+                .with(CHRLogger(logger.name, logger.level) { message ->
+                    server.sendMessage(OrchestrationMessage.LogMessage(TAG_AGENT, message))
+                })
                 .info("Agent: Server started on port '${server.port}'")
         }
     }
 
     Runtime.getRuntime().addShutdownHook(thread(start = false) {
-        logger.withOrchestration(LoggerTag.Agent, orchestration)
+        logger
+            .with(CHRLogger(logger.name, logger.level) { message ->
+                orchestration.sendMessage(OrchestrationMessage.LogMessage(TAG_AGENT, message))
+            })
             .info("Hot Reload Agent is shutting down")
         orchestration.closeImmediately()
     })

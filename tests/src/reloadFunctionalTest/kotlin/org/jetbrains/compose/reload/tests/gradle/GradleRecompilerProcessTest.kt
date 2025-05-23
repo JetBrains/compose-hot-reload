@@ -93,6 +93,7 @@ class GradleRecompilerProcessTest {
             val recompilerPidRegex = Regex("""'Recompiler': Started \((?<pid>\d+)\)""")
 
             skipToMessage<OrchestrationMessage>("Waiting for app & recompiler process") { event ->
+                System.err.println(event)
                 if (event is OrchestrationMessage.ClientConnected && event.clientRole == Application) {
                     application = event
                 }

@@ -266,10 +266,10 @@ LaunchMode:
     Tells the application 'how' it was launched
 
 LoggingLevel:
-  key: compose.reload.logginцgLevel
+  key: compose.reload.loggingLevel
   type: enum
   enumClass: org.slf4j.event.Level
   target: [ application, devtools ]
-  default: "INFO"
+  default: "DEBUG"
   documentation: |
     Set the logging level for the application

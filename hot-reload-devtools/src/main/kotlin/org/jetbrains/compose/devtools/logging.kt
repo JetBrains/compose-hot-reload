@@ -7,18 +7,32 @@ package org.jetbrains.compose.devtools
 
 import org.jetbrains.compose.reload.core.CHRLogger
 import org.jetbrains.compose.reload.core.createLogger
-import org.jetbrains.compose.reload.orchestration.LoggerTag
-import org.jetbrains.compose.reload.orchestration.withOrchestration
+import org.jetbrains.compose.reload.core.with
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import java.lang.invoke.MethodHandles
 
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun createDevToolsLogger(): Lazy<CHRLogger> {
     val clazz = MethodHandles.lookup().lookupClass()
-    return lazy { createLogger(clazz).withOrchestration(LoggerTag.DevTools, orchestration) }
+    return lazy {
+        createLogger(clazz).with(CHRLogger(clazz) { message ->
+            OrchestrationMessage.LogMessage(
+                OrchestrationMessage.LogMessage.TAG_DEVTOOLS,
+                message
+            ).send()
+        })
+    }
 }
 
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun createCompilerLogger(): Lazy<CHRLogger> {
     val clazz = MethodHandles.lookup().lookupClass()
-    return lazy { createLogger(clazz).withOrchestration(LoggerTag.Compiler, orchestration) }
+    return lazy {
+        createLogger(clazz).with(CHRLogger(clazz) { message ->
+            OrchestrationMessage.LogMessage(
+                OrchestrationMessage.LogMessage.TAG_COMPILER,
+                message
+            ).send()
+        })
+    }
 }

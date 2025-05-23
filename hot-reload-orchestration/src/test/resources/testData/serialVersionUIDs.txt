@@ -1,4 +1,3 @@
-org/jetbrains/compose/reload/orchestration/LoggerTag = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationClientRole = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationHandshake = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$Ack = 0

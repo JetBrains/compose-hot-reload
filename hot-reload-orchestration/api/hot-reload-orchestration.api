@@ -4,21 +4,6 @@ public final class org/jetbrains/compose/reload/orchestration/CoroutineExtension
 	public static final fun asFlow (Lorg/jetbrains/compose/reload/orchestration/OrchestrationHandle;)Lkotlinx/coroutines/flow/Flow;
 }
 
-public final class org/jetbrains/compose/reload/orchestration/LoggerTag : java/lang/Enum {
-	public static final field Agent Lorg/jetbrains/compose/reload/orchestration/LoggerTag;
-	public static final field Compiler Lorg/jetbrains/compose/reload/orchestration/LoggerTag;
-	public static final field DevTools Lorg/jetbrains/compose/reload/orchestration/LoggerTag;
-	public static final field Runtime Lorg/jetbrains/compose/reload/orchestration/LoggerTag;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public final fun toTagMessage ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/orchestration/LoggerTag;
-	public static fun values ()[Lorg/jetbrains/compose/reload/orchestration/LoggerTag;
-}
-
-public final class org/jetbrains/compose/reload/orchestration/LoggingKt {
-	public static final fun withOrchestration (Lorg/jetbrains/compose/reload/core/CHRLogger;Lorg/jetbrains/compose/reload/orchestration/LoggerTag;Lorg/jetbrains/compose/reload/orchestration/OrchestrationHandle;)Lorg/jetbrains/compose/reload/core/CHRLogger;
-}
-
 public abstract interface class org/jetbrains/compose/reload/orchestration/OrchestrationClient : org/jetbrains/compose/reload/orchestration/OrchestrationHandle {
 	public abstract fun getClientId ()Ljava/util/UUID;
 }

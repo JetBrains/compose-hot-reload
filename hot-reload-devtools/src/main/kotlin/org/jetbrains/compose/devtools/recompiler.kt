@@ -13,15 +13,12 @@ import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.BuildTool
 import org.jetbrains.compose.reload.core.LaunchMode
 import org.jetbrains.compose.reload.core.Os
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
-import org.jetbrains.compose.reload.orchestration.LoggerTag
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
 import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
-import org.jetbrains.compose.reload.orchestration.withOrchestration
 import java.io.File
 import java.nio.file.Path
 import java.util.concurrent.LinkedBlockingQueue

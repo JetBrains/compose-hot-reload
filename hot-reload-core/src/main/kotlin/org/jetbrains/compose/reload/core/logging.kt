@@ -28,6 +28,18 @@ public fun createLogger(clazz: Class<*>): CHRLogger = CHRLogger(clazz.name, logg
 public fun CHRLogger(clazz: Class<*>, level: Level): CHRLogger = CHRMultiLogger(clazz.name, level)
 public fun CHRLogger(name: String, level: Level): CHRLogger = CHRMultiLogger(name, level)
 
+public fun CHRLogger(clazz: Class<*>, delegate: (String) -> Unit): CHRLogger =
+    CHRDelegatingLogger(clazz.name, loggingLevel, delegate)
+
+public fun CHRLogger(name: String, delegate: (String) -> Unit): CHRLogger =
+    CHRDelegatingLogger(name, loggingLevel, delegate)
+
+public fun CHRLogger(clazz: Class<*>, level: Level, delegate: (String) -> Unit): CHRLogger =
+    CHRDelegatingLogger(clazz.name, level, delegate)
+
+public fun CHRLogger(name: String, level: Level, delegate: (String) -> Unit): CHRLogger =
+    CHRDelegatingLogger(name, level, delegate)
+
 public fun CHRLogFormatter(logger: CHRLogger): CHRLogFormatter = CHRDefaultFormatter(logger)
 
 public inline fun <reified T : CHRLogger> CHRLogger.with(): CHRLogger {
@@ -276,6 +288,47 @@ internal class CHRStdoutLogger(
     }
 }
 
+internal class CHRDelegatingLogger(
+    override val logName: String,
+    override val level: Level,
+    private val delegate: (String) -> Unit,
+) : CHRLogger {
+    private val formatter = CHRLogFormatter(this)
+
+    override fun log(level: Level, marker: Marker?, msg: String) {
+        if (isLevelEnabled(level)) {
+            delegate(formatter.format(level, marker, msg, null))
+        }
+    }
+
+    override fun log(level: Level, marker: Marker?, t: Throwable?) {
+        if (isLevelEnabled(level)) {
+            delegate(formatter.format(level, marker, null, t))
+        }
+    }
+
+    override fun log(
+        level: Level,
+        marker: Marker?,
+        msg: String,
+        t: Throwable?
+    ) {
+        if (isLevelEnabled(level)) {
+            delegate(formatter.format(level, marker, msg, t))
+        }
+    }
+
+    override fun log(
+        level: Level,
+        marker: Marker?,
+        format: String,
+        vararg arguments: Any?
+    ) {
+        if (isLevelEnabled(level)) {
+            delegate(formatter.format(level, marker, format, arguments))
+        }
+    }
+}
 
 public fun Throwable?.printToString(): String =
     StringWriter().let {

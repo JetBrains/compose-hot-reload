@@ -7,12 +7,21 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.core.CHRLogger
 import org.jetbrains.compose.reload.core.createLogger
-import org.jetbrains.compose.reload.orchestration.LoggerTag
-import org.jetbrains.compose.reload.orchestration.withOrchestration
+import org.jetbrains.compose.reload.core.with
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import java.lang.invoke.MethodHandles
 
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun createAgentLogger(): Lazy<CHRLogger> {
     val clazz = MethodHandles.lookup().lookupClass()
-    return lazy { createLogger(clazz).withOrchestration(LoggerTag.Agent, orchestration) }
+    return lazy {
+        createLogger(clazz).with(CHRLogger(clazz) { message ->
+            orchestration.sendMessage(
+                OrchestrationMessage.LogMessage(
+                    OrchestrationMessage.LogMessage.TAG_AGENT,
+                    message
+                )
+            )
+        })
+    }
 }
