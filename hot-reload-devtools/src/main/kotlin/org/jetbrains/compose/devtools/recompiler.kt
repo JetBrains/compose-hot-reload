@@ -10,6 +10,8 @@ import org.jetbrains.compose.reload.core.BuildSystem.Amper
 import org.jetbrains.compose.reload.core.BuildSystem.Gradle
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
+import org.jetbrains.compose.reload.core.HotReloadEnvironment.amperServerCommand
+import org.jetbrains.compose.reload.core.HotReloadEnvironment.amperServerPort
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.BuildTool
 import org.jetbrains.compose.reload.core.LaunchMode
@@ -30,7 +32,12 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessag
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_DEVTOOLS
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
 import java.io.File
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.nio.file.Path
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
@@ -82,10 +89,11 @@ internal fun launchRecompiler(): Future<Unit> = launchTask("Recompiler") task@{
     val port = orchestration.port.await().getOrThrow()
     logger.debug("'Recompiler': Using orchestration at '$port'")
 
-    val processBuilder = when (buildSystem) {
+    val recompilerThread = when (buildSystem) {
         Amper -> {
-            val amperBuildRoot = amperBuildRoot ?: run {
-                logger.error("Missing '${HotReloadProperty.AmperBuildRoot.key}' property")
+            logger.debug("'Recompiler': Using Amper")
+            val amperServerPort = amperServerPort ?: run {
+                logger.error("Missing '${HotReloadProperty.AmperServerPort.key}' property")
                 return@task
             }
 
@@ -94,13 +102,47 @@ internal fun launchRecompiler(): Future<Unit> = launchTask("Recompiler") task@{
                 return@task
             }
 
-            createRecompilerProcessBuilder(
-                amperBuildRoot = amperBuildRoot,
-                amperBuildTask = amperBuildTask,
-                orchestrationPort = port
-            )
-        }
+            val startupFuture = CompletableFuture<Unit>()
+            startAmperServer(amperServerPort, startupFuture)
+            thread(name = "Recompiler") {
+                try {
+                    while (true) {
+                        val requests = takeRecompileRequests()
+                        logger.debug("'Recompiler': Requests: ${requests.map { it.messageId }}")
 
+                        val parts = amperBuildTask.removePrefix(":").split(":")
+                        if (parts.size < 2) {
+                            error("Invalid amperBuildTask format. Expected ':module:task' or ':module:submodule:task', got $amperBuildTask")
+                        }
+
+                        val client = HttpClient.newHttpClient()
+                        val body = """{"taskHierarchy": [${parts.joinToString(", ")}]}"""
+                        val request = HttpRequest.newBuilder()
+                            .uri(URI.create("http://localhost:$amperServerPort/task"))
+                            .header("Content-Type", "application/json")
+                            .POST(HttpRequest.BodyPublishers.ofString(body))
+                            .build()
+
+                        startupFuture.get(30, TimeUnit.SECONDS) // suspend if the server hasn't been started yet
+                        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+                        if (response.statusCode() != 200) {
+                            logger.error("Amper server request failed with status ${response.statusCode()}")
+                            continue
+                        }
+
+                        requests.forEach { request ->
+                            OrchestrationMessage.RecompileResult(
+                                recompileRequestId = request.messageId,
+                                exitCode = 0,
+                            ).sendAsync()
+                        }
+                    }
+                } catch (_: InterruptedException) {
+                    logger.debug("'Recompiler': Interrupted: Shutting down")
+                    Thread.currentThread().interrupt()
+                }
+            }
+        }
         Gradle -> {
             val composeBuildRoot = gradleBuildRoot ?: run {
                 logger.error("Missing '${HotReloadProperty.GradleBuildRoot.key}' property")
@@ -117,32 +159,31 @@ internal fun launchRecompiler(): Future<Unit> = launchTask("Recompiler") task@{
                 return@task
             }
 
-            createRecompilerProcessBuilder(
+            val processBuilder = createRecompilerProcessBuilder(
                 gradleBuildRoot = composeBuildRoot,
                 gradleBuildProject = gradleBuildProject,
                 gradleBuildTask = gradleBuildTask,
                 orchestrationPort = port
             )
-        }
-    }
 
-
-    val recompilerThread = thread(name = "Recompiler") {
-        try {
-            while (true) {
-                val requests = takeRecompileRequests()
-                logger.debug("'Recompiler': Requests: ${requests.map { it.messageId }}")
-                val exitCode = processBuilder.startRecompilerProcess()
-                logger.debug("'Recompiler': Requests: ${requests.map { it.messageId }}: Exit code: $exitCode")
-                requests.forEach { request ->
-                    OrchestrationMessage.RecompileResult(
-                        recompileRequestId = request.messageId,
-                        exitCode = exitCode
-                    ).sendAsync()
+            thread(name = "Recompiler") {
+                try {
+                    while (true) {
+                        val requests = takeRecompileRequests()
+                        logger.debug("'Recompiler': Requests: ${requests.map { it.messageId }}")
+                        val exitCode = processBuilder.startRecompilerProcess()
+                        logger.debug("'Recompiler': Requests: ${requests.map { it.messageId }}: Exit code: $exitCode")
+                        requests.forEach { request ->
+                            OrchestrationMessage.RecompileResult(
+                                recompileRequestId = request.messageId,
+                                exitCode = exitCode
+                            ).sendAsync()
+                        }
+                    }
+                } catch (_: InterruptedException) {
+                    logger.debug("'Recompiler': Interrupted: Shutting down")
                 }
             }
-        } catch (_: InterruptedException) {
-            logger.debug("'Recompiler': Interrupted: Shutting down")
         }
     }
 
@@ -154,6 +195,61 @@ internal fun launchRecompiler(): Future<Unit> = launchTask("Recompiler") task@{
         logger.debug("'Recompiler': Sending close signal")
         recompilerThread.interrupt()
         recompilerThread.join()
+    }
+}
+
+private fun startAmperServer(port: Int, startupFuture: CompletableFuture<Unit> = CompletableFuture()) {
+    val amperBuildRoot = amperBuildRoot ?: run {
+        logger.error("Missing '${HotReloadProperty.AmperBuildRoot.key}' property")
+        return
+    }
+
+    val amperServerCommand = amperServerCommand ?: run {
+        logger.error("Missing '${HotReloadProperty.AmperServerCommand.key}' property")
+        return
+    }
+
+    val builder = ProcessBuilder()
+        .directory(File(amperBuildRoot))
+        .command(createRecompilerAmperCommandLineArgs(amperServerCommand, "-p", port.toString()))
+        .redirectErrorStream(true)
+
+    builder.environment().putIfAbsent("COMPOSE_HOT_RELOAD_ORCHESTRATION_PORT", orchestration.port.toString())
+
+    logger.debug("'Amper Server': Starting process:\n${builder.command().joinToString(" ")}")
+    val process = builder.start()
+
+    val shutdownHook = thread(start = false) {
+        logger.debug("'Amper Server': Destroying process (Shutdown)")
+        process.destroyRecompilerProcess()
+    }
+
+    Runtime.getRuntime().addShutdownHook(shutdownHook)
+
+    thread {
+        runCatching {
+            logger.debug("'Amper Server': Waiting for startup")
+            process.inputStream.bufferedReader().use { reader ->
+                while (true) {
+                    val line = reader.readLine() ?: break
+                    LogMessage(TAG_COMPILER, line).sendAsync()
+                    if (line.contains("Responding at")) {
+                        logger.debug("'Amper Server': Startup complete")
+                        startupFuture.complete(Unit)
+                    }
+                }
+            }
+        }.onFailure {
+            process.destroyRecompilerProcess()
+            Runtime.getRuntime().removeShutdownHook(shutdownHook)
+            when (it) {
+                is InterruptedException -> {
+                    logger.debug("'Amper Server': interrupted")
+                    Thread.currentThread().interrupt()
+                }
+                else -> throw it
+            }
+        }
     }
 }
 
@@ -226,18 +322,6 @@ private fun createRecompilerProcessBuilder(
         .redirectErrorStream(true)
 }
 
-private fun createRecompilerProcessBuilder(
-    amperBuildRoot: String,
-    amperBuildTask: String,
-    orchestrationPort: Int,
-): ProcessBuilder {
-    return ProcessBuilder().directory(File(amperBuildRoot))
-        .command(createRecompilerAmperCommandLineArgs(amperBuildTask))
-        .withHotReloadEnvironmentVariables(BuildTool)
-        .apply { environment().putIfAbsent("COMPOSE_HOT_RELOAD_ORCHESTRATION_PORT", orchestrationPort.toString()) }
-        .redirectErrorStream(true)
-}
-
 private fun createRecompilerGradleCommandLineArgs(
     gradleBuildProject: String,
     gradleBuildTask: String,
@@ -271,14 +355,17 @@ private fun createRecompilerGradleCommandLineArgs(
     )
 }
 
-private fun createRecompilerAmperCommandLineArgs(amperBuildTask: String): List<String> {
+private fun createRecompilerAmperCommandLineArgs(
+    command: String = "task",
+    vararg args: String = arrayOf(amperBuildTask ?: "")
+): List<String> {
     val amperScriptCommand = if (Os.currentOrNull() == Os.Windows) arrayOf("cmd", "/c", "amper.bat")
     else arrayOf("./amper")
 
     return listOfNotNull(
         *amperScriptCommand,
-        "task",
-        amperBuildTask,
+        command,
+        *args,
     )
 }
 
