@@ -19,7 +19,7 @@ fun App() {
 
     Column(modifier = Modifier.padding(16.dp)) {
         Row {
-            Text("Change Hot Reload Example", fontSize = 48.sp, fontWeight = FontWeight.Bold)
+            Text("Hot Reload Example", fontSize = 48.sp, fontWeight = FontWeight.Bold)
         }
 
         Row {
