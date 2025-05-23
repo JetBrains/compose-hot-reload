@@ -3,8 +3,9 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.jetbrains.compose.reload.agent
+package org.jetbrains.compose.reload.jvm
 
+import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.core.CHRLogger
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.LoggerTag
@@ -12,7 +13,7 @@ import org.jetbrains.compose.reload.orchestration.withOrchestration
 import java.lang.invoke.MethodHandles
 
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun createAgentLogger(): Lazy<CHRLogger> {
+internal inline fun createRuntimeLogger(): Lazy<CHRLogger> {
     val clazz = MethodHandles.lookup().lookupClass()
-    return lazy { createLogger(clazz).withOrchestration(LoggerTag.Agent, orchestration) }
+    return lazy { createLogger(clazz).withOrchestration(LoggerTag.Runtime, orchestration) }
 }

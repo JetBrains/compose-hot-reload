@@ -6,7 +6,6 @@
 package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.isIgnoredClassId
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.toLeft
 import java.io.ByteArrayOutputStream
@@ -20,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-private val logger = createLogger()
+private val logger by createAgentLogger()
 private val localReloadRequest = ThreadLocal<UUID>()
 private val externalReloadRequest = AtomicReference<ExternalReloadThreadState>(ExternalReloadThreadState.Idle)
 private val transformLock = ReentrantLock()
@@ -53,7 +52,7 @@ private object JdwpTracker : ClassFileTransformer {
                 clazz.classFile.write(daos)
                 baos.toByteArray()
             }.getOrElse { failure ->
-                logger.orchestration("Failed to transform '${className}'", failure)
+                logger.error("Failed to transform '${className}'", failure)
                 classfileBuffer
             }
 

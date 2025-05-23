@@ -11,7 +11,6 @@ import org.jetbrains.compose.reload.core.submitSafe
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -34,7 +33,7 @@ public fun startOrchestrationServer(): OrchestrationServer {
     val serverSocket = ServerSocket()
     serverSocket.bind(InetSocketAddress("127.0.0.1", 0))
 
-    val logger = LoggerFactory.getLogger("OrchestrationServer(${serverSocket.localPort})")
+    val logger = createLogger("OrchestrationServer(${serverSocket.localPort})")
     logger.debug("listening on port: ${serverSocket.localPort}")
 
     val server = OrchestrationServerImpl(serverSocket, logger)

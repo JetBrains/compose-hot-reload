@@ -9,12 +9,11 @@ import javassist.expr.ExprEditor
 import javassist.expr.MethodCall
 import org.jetbrains.compose.reload.analysis.Ids
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
-import org.jetbrains.compose.reload.core.createLogger
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.security.ProtectionDomain
 
-private val logger = createLogger()
+private val logger by createAgentLogger()
 
 /**
  * Transform Compose Desktop's 'Window' function to automatically setup the 'DevelopmentEntryPoint'
@@ -90,14 +89,14 @@ private fun transformWindowKt(
                         transformed = true
                     }
                 } catch (t: Throwable) {
-                    logger.orchestration("Failed to transform 'setContent' method", t)
+                    logger.error("Failed to transform 'setContent' method", t)
                 }
             }
         })
 
         return if (transformed) ctClass.toBytecode() else null
     } catch (t: Throwable) {
-        logger.orchestration("Failed to transform 'WindowKt'", t)
+        logger.error("Failed to transform 'WindowKt'", t)
         return null
     }
 }

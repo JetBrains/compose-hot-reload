@@ -7,7 +7,6 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ComposeGroupKey
 import org.jetbrains.compose.reload.analysis.Ids
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.isFailure
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
@@ -16,7 +15,7 @@ import java.util.WeakHashMap
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-private val logger = createLogger()
+private val logger by createAgentLogger()
 
 private val composeClassLoadersLock = ReentrantLock()
 private val composeClassLoaders = WeakHashMap<ClassLoader, Unit>()
@@ -62,7 +61,7 @@ private fun launchComposeGroupInvalidation() {
             .groupBy { it.group }
 
         if (invalidations.isEmpty()) {
-            logger.orchestration("All groups retained")
+            logger.info("All groups retained")
         }
 
         invalidations.forEach { group, methods ->
@@ -73,7 +72,7 @@ private fun launchComposeGroupInvalidation() {
                     "${methodId.classId}.${methodId.methodName}"
                 }
 
-            logger.orchestration("Invalidating group '${group.key}' $methods")
+            logger.info("Invalidating group '${group.key}' $methods")
             invalidateGroupsWithKey(group)
         }
     }

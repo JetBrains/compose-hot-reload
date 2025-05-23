@@ -6,7 +6,6 @@
 package org.jetbrains.compose.reload.agent
 
 
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.exception
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.isSuccess
@@ -15,9 +14,8 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
 import java.io.File
 import java.lang.instrument.Instrumentation
-import javax.swing.SwingUtilities
 
-private val logger = createLogger()
+private val logger by createAgentLogger()
 
 internal fun launchReloadRequestHandler(instrumentation: Instrumentation) {
     var pendingChanges = mapOf<File, OrchestrationMessage.ReloadClassesRequest.ChangeType>()
@@ -33,14 +31,13 @@ internal fun launchReloadRequestHandler(instrumentation: Instrumentation) {
             Yuhuu! We reloaded the classes; We can reset the 'pending changes'; No re-try necessary
              */
             if (result.isSuccess()) {
-                logger.orchestration("Reloaded classes: ${request.messageId}")
-                OrchestrationMessage.LogMessage(OrchestrationMessage.LogMessage.TAG_AGENT)
+                logger.info("Reloaded classes: ${request.messageId}")
                 pendingChanges = emptyMap()
                 OrchestrationMessage.ReloadClassesResult(request.messageId, true).send()
             }
 
             if (result.isFailure()) {
-                logger.orchestration("Failed to reload classes", result.exception)
+                logger.error("Failed to reload classes", result.exception)
                 OrchestrationMessage.ReloadClassesResult(
                     request.messageId, false, result.exception.message,
                     result.exception.withLinearClosure { throwable -> throwable.cause }

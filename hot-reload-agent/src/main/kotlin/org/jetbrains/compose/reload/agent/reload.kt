@@ -8,7 +8,6 @@ package org.jetbrains.compose.reload.agent
 import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
 import org.jetbrains.compose.reload.core.Try
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.mapLeft
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import java.io.ByteArrayOutputStream
@@ -18,7 +17,7 @@ import java.lang.instrument.ClassDefinition
 import java.lang.instrument.Instrumentation
 import java.util.UUID
 
-private val logger = createLogger()
+private val logger by createAgentLogger()
 
 data class Reload(
     val reloadRequestId: UUID,
@@ -76,7 +75,7 @@ internal fun reload(
                 return@mapNotNull null
             }
 
-            logger.orchestration(buildString {
+            logger.info(buildString {
                 appendLine("Reloading class: '${clazz.name}' (${change.name})")
 
                 if (originalClass.superclass?.name != clazz.superclass.name) {
@@ -103,7 +102,7 @@ internal fun reload(
             clazz.classFile.write(daos)
             baos.toByteArray()
         }.getOrElse { failure ->
-            logger.orchestration("Failed to transform '${originalClass?.name}'", failure)
+            logger.error("Failed to transform '${originalClass?.name}'", failure)
             code
         }
 

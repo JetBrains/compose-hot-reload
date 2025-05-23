@@ -18,7 +18,6 @@ data class ConsoleLogState(val logs: List<String>) : State {
         override val default: ConsoleLogState = ConsoleLogState(emptyList())
         const val limit = 4096
     }
-
 }
 
 internal fun CoroutineScope.launchConsoleLogState() = launchState(ConsoleLogState) {
@@ -26,7 +25,7 @@ internal fun CoroutineScope.launchConsoleLogState() = launchState(ConsoleLogStat
 
     orchestration.asFlow().collect { event ->
         if (event is OrchestrationMessage.LogMessage) {
-            logDeque.add("${event.tag} | ${event.message}")
+            logDeque.add("${event.tag} | ${event.message.substringAfterLast("] ")}")
         }
 
         if (event is OrchestrationMessage.BuildTaskResult) {

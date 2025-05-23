@@ -13,7 +13,6 @@ import org.jetbrains.compose.reload.analysis.isIgnoredClassId
 import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
 import org.jetbrains.compose.reload.analysis.verifyRedefinitions
 import org.jetbrains.compose.reload.core.Try
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.submitSafe
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
@@ -24,7 +23,7 @@ import java.util.concurrent.Future
 import kotlin.concurrent.thread
 import kotlin.time.measureTime
 
-private val logger = createLogger()
+private val logger by createAgentLogger()
 
 private val runtimeAnalysisThread = Executors.newSingleThreadExecutor { r ->
     thread(start = false, isDaemon = true, name = "Compose Runtime Analyzer", block = r::run)

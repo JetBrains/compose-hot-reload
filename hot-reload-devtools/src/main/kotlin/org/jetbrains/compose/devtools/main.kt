@@ -30,11 +30,10 @@ import org.jetbrains.compose.devtools.states.launchReloadState
 import org.jetbrains.compose.devtools.states.launchUIErrorState
 import org.jetbrains.compose.devtools.states.launchWindowsState
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
-import org.jetbrains.compose.reload.core.createLogger
 
 internal val applicationScope = CoroutineScope(Dispatchers.Main + SupervisorJob() + Events() + States())
 
-private val logger = createLogger()
+private val logger by createDevToolsLogger()
 
 /**
  * The associated [WindowState] of the target application (aka, the application under hot-reload, which we're
