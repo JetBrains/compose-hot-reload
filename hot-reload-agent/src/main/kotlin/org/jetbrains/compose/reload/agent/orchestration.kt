@@ -13,6 +13,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Applic
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_AGENT
+import org.jetbrains.compose.reload.orchestration.OrchestrationService
 import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import java.util.concurrent.Future
@@ -21,7 +22,15 @@ import kotlin.system.exitProcess
 
 private val logger = createLogger()
 
-val orchestration by lazy { startOrchestration() }
+internal class AgentOrchestrationService : OrchestrationService {
+    override fun getOrchestration(): OrchestrationHandle = _orchestration
+
+    private companion object {
+        private val _orchestration by lazy { startOrchestration() }
+    }
+}
+
+internal val orchestration: OrchestrationHandle = OrchestrationHandle()
 
 fun OrchestrationMessage.send(): Future<Unit> {
     return orchestration.sendMessage(this)

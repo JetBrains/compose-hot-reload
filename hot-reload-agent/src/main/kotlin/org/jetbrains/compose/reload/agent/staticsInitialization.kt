@@ -10,9 +10,10 @@ import javassist.CtConstructor
 import org.jetbrains.compose.reload.analysis.classId
 import org.jetbrains.compose.reload.analysis.classInitializerMethodId
 import org.jetbrains.compose.reload.core.sortedByTopology
+import org.jetbrains.compose.reload.orchestration.HotReloadLogger
 import java.lang.reflect.Modifier
 
-private val logger by createAgentLogger()
+private val logger = HotReloadLogger()
 
 internal const val reinitializeName = "\$chr\$clinit"
 

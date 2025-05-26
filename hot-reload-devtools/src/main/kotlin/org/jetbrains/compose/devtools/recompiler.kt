@@ -16,7 +16,9 @@ import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
+import org.jetbrains.compose.reload.orchestration.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_COMPILER
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
 import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
 import java.io.File
@@ -27,7 +29,7 @@ import kotlin.concurrent.thread
 import kotlin.io.path.pathString
 import kotlin.streams.asSequence
 
-private val logger by createDevToolsLogger()
+private val logger = HotReloadLogger()
 
 private val buildSystem: BuildSystem? = HotReloadEnvironment.buildSystem
 
@@ -169,7 +171,7 @@ private fun ProcessBuilder.startRecompilerProcess(): Int? {
 
     thread(name = "Recompiler Output", isDaemon = true) {
         process.inputStream.bufferedReader().use { reader ->
-            val logger by createCompilerLogger()
+            val logger = HotReloadLogger(TAG_COMPILER)
             while (true) {
                 val nextLine = reader.readLine() ?: break
                 logger.debug(nextLine)

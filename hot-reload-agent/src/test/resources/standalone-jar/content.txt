@@ -9,6 +9,8 @@ META-INF/maven/org.javassist/
 META-INF/maven/org.javassist/javassist/
 META-INF/maven/org.javassist/javassist/pom.properties
 META-INF/maven/org.javassist/javassist/pom.xml
+META-INF/services/
+META-INF/services/org.jetbrains.compose.reload.orchestration.OrchestrationService
 org/
 org/jetbrains/
 org/jetbrains/compose/

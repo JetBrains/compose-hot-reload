@@ -14,23 +14,30 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationService
 import org.jetbrains.compose.reload.orchestration.asFlow
 import java.util.ServiceLoader
 import java.util.concurrent.Future
 
 private val logger = createLogger()
 
-internal val orchestration: OrchestrationHandle = run {
-    val handle = ServiceLoader.load(OrchestrationExtension::class.java)
-        .firstNotNullOfOrNull { extension -> extension.getOrchestration() }
-        ?: (OrchestrationClient(OrchestrationClientRole.Tooling))
-        ?: run {
-            logger.error("Failed to create orchestration client")
-            shutdown()
-        }
+internal class DevToolsOrchestrationService : OrchestrationService {
+    override fun getOrchestration(): OrchestrationHandle = _orchestration
 
-    handle
+    private companion object {
+        private val _orchestration: OrchestrationHandle by lazy {
+            ServiceLoader.load(OrchestrationExtension::class.java)
+                .firstNotNullOfOrNull { extension -> extension.getOrchestration() }
+                ?: OrchestrationClient(OrchestrationClientRole.Tooling)
+                ?: run {
+                    logger.error("Failed to create orchestration client")
+                    shutdown()
+                }
+        }
+    }
 }
+
+internal val orchestration: OrchestrationHandle = OrchestrationHandle()
 
 internal fun OrchestrationMessage.send(): Future<Unit> {
     return orchestration.sendMessage(this)

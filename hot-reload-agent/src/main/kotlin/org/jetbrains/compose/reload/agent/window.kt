@@ -9,11 +9,12 @@ import javassist.expr.ExprEditor
 import javassist.expr.MethodCall
 import org.jetbrains.compose.reload.analysis.Ids
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
+import org.jetbrains.compose.reload.orchestration.HotReloadLogger
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.security.ProtectionDomain
 
-private val logger by createAgentLogger()
+private val logger = HotReloadLogger()
 
 /**
  * Transform Compose Desktop's 'Window' function to automatically setup the 'DevelopmentEntryPoint'

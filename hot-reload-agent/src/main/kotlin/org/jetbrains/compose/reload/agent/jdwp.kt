@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.agent
 import org.jetbrains.compose.reload.analysis.isIgnoredClassId
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.toLeft
+import org.jetbrains.compose.reload.orchestration.HotReloadLogger
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.lang.instrument.ClassDefinition
@@ -19,7 +20,7 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-private val logger by createAgentLogger()
+private val logger = HotReloadLogger()
 private val localReloadRequest = ThreadLocal<UUID>()
 private val externalReloadRequest = AtomicReference<ExternalReloadThreadState>(ExternalReloadThreadState.Idle)
 private val transformLock = ReentrantLock()

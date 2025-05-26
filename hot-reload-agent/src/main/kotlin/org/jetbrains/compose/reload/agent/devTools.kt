@@ -12,12 +12,13 @@ import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
+import org.jetbrains.compose.reload.orchestration.HotReloadLogger
 import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 
-private val logger by createAgentLogger()
+private val logger = HotReloadLogger()
 
 internal fun launchDevtoolsApplication() {
     if (!HotReloadEnvironment.devToolsEnabled) return

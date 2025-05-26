@@ -6,5 +6,5 @@
 package org.jetbrains.compose.reload.logging
 
 public enum class Level {
-    Trace, Debug, Info, Warn, Error
+    Error, Warn, Info, Debug, Trace
 }

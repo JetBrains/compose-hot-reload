@@ -10,12 +10,13 @@ import org.jetbrains.compose.reload.core.exception
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.isSuccess
 import org.jetbrains.compose.reload.core.withLinearClosure
+import org.jetbrains.compose.reload.orchestration.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
 import java.io.File
 import java.lang.instrument.Instrumentation
 
-private val logger by createAgentLogger()
+private val logger = HotReloadLogger()
 
 internal fun launchReloadRequestHandler(instrumentation: Instrumentation) {
     var pendingChanges = mapOf<File, OrchestrationMessage.ReloadClassesRequest.ChangeType>()

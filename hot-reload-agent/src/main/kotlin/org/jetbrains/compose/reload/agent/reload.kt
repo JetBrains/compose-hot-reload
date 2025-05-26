@@ -9,6 +9,7 @@ import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.mapLeft
+import org.jetbrains.compose.reload.orchestration.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
@@ -17,7 +18,7 @@ import java.lang.instrument.ClassDefinition
 import java.lang.instrument.Instrumentation
 import java.util.UUID
 
-private val logger by createAgentLogger()
+private val logger = HotReloadLogger()
 
 data class Reload(
     val reloadRequestId: UUID,

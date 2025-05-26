@@ -8,10 +8,11 @@ package org.jetbrains.compose.reload.agent
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.PidFileInfo
 import org.jetbrains.compose.reload.core.writePidFile
+import org.jetbrains.compose.reload.orchestration.HotReloadLogger
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteIfExists
 
-private val logger by createAgentLogger()
+private val logger = HotReloadLogger()
 
 internal fun createPidfile() {
     val pidFile = HotReloadEnvironment.pidFile ?: return
