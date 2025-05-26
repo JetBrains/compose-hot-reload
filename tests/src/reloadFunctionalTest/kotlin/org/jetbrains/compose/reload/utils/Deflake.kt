@@ -20,7 +20,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
 annotation class Deflake
 
 data class DeflakeInvocationIndex(val index: Int) : HotReloadTestDimension {
-    override fun displayName(): String? {
+    override fun displayName(): String {
         return "Deflake #$index"
     }
 

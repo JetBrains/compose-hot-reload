@@ -12,7 +12,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import kotlin.io.path.absolutePathString
 
 class LocalMavenRepositoryExtension : SettingsGradleKtsRepositoriesExtension {
-    override fun repositories(context: ExtensionContext): String? {
+    override fun repositories(context: ExtensionContext): String {
         return "maven(file(\"${repositoryRoot.resolve("build/repo").absolutePathString().replace("\\", "\\\\")}\"))"
     }
 }

@@ -47,7 +47,7 @@ internal class HotReloadTestFixtureExtension(
         )
     }
 
-    override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any? {
+    override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
         return when (parameterContext.parameter.type) {
             HotReloadTestFixture::class.java -> extensionContext.getHotReloadTestFixtureOrThrow()
             else -> throw IllegalArgumentException("Unknown type: ${parameterContext.parameter.type}")

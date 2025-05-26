@@ -95,7 +95,7 @@ private val settingsGradleKtsTemplate = Template(
 ).getOrThrow()
 
 internal class DefaultSettingsGradleKts : SettingsGradleKtsExtension {
-    override fun pluginManagementPlugins(context: ExtensionContext): String? {
+    override fun pluginManagementPlugins(context: ExtensionContext): String {
         val kotlinVersion = context.hotReloadTestInvocationContext?.kotlinVersion ?: TestedKotlinVersion.default
         val composeVersion = context.hotReloadTestInvocationContext?.composeVersion ?: TestedComposeVersion.default
         val androidVersion = context.hotReloadTestInvocationContext?.androidVersion
@@ -109,7 +109,7 @@ internal class DefaultSettingsGradleKts : SettingsGradleKtsExtension {
         """.trimIndent().asTemplateOrThrow().renderOrThrow("androidVersion" to androidVersion)
     }
 
-    override fun pluginManagementRepositories(context: ExtensionContext): String? {
+    override fun pluginManagementRepositories(context: ExtensionContext): String {
         return """
             gradlePluginPortal {
                 content {
@@ -130,11 +130,11 @@ internal class DefaultSettingsGradleKts : SettingsGradleKtsExtension {
         """.trimIndent()
     }
 
-    override fun plugins(context: ExtensionContext): String? {
+    override fun plugins(context: ExtensionContext): String {
         return """id("org.gradle.toolchains.foojay-resolver-convention") version "0.10.0""""
     }
 
-    override fun dependencyResolutionManagementRepositories(context: ExtensionContext): String? {
+    override fun dependencyResolutionManagementRepositories(context: ExtensionContext): String {
         return """
             google {
                 mavenContent {

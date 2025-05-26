@@ -25,7 +25,7 @@ internal fun parseHotReloadProperties(file: Path): List<DeclaredHotReloadPropert
 
 private fun parseHotReloadProperty(
     name: String, node: YamlNode
-): DeclaredHotReloadProperty? {
+): DeclaredHotReloadProperty {
     if (node !is YamlMap) error("Property '$name' must be map")
     val key = node.getScalar("key")?.content ?: error("Property '$name' must have 'key' field")
     val type = node.getScalar("type")?.content ?: error("Property '$name' must have 'type' field")
