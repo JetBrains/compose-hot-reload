@@ -22,7 +22,7 @@ class VerificationTests {
     @HotReloadTest
     @QuickTest
     fun `illegal code change - update compose entry function directly`(fixture: HotReloadTestFixture) = fixture.runTest {
-        val d = "\$"
+        val d = "$"
         val code = fixture.initialSourceCode(
             """
                 import org.jetbrains.compose.reload.test.*
