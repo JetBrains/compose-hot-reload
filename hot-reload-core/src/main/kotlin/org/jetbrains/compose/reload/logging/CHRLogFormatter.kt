@@ -8,7 +8,7 @@ package org.jetbrains.compose.reload.logging
 import java.time.LocalDateTime
 
 
-public fun CHRLogFormatter(logger: CHRLogger): CHRLogFormatter = CHRDefaultFormatter(logger)
+public fun CHRLogFormatter(logger: HotReloadLogger): CHRLogFormatter = CHRDefaultFormatter(logger)
 
 public interface CHRLogFormatter {
     public fun format(level: Level, msg: String?, t: Throwable?): String
@@ -16,7 +16,7 @@ public interface CHRLogFormatter {
 }
 
 internal class CHRDefaultFormatter(
-    private val logger: CHRLogger
+    private val logger: HotReloadLogger
 ) : CHRLogFormatter {
     private fun time(): LocalDateTime = LocalDateTime.now()
 

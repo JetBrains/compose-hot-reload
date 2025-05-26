@@ -8,7 +8,7 @@ package org.jetbrains.compose.reload.orchestration
 import org.jetbrains.compose.reload.core.Disposable
 import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.core.submitSafe
-import org.jetbrains.compose.reload.logging.CHRLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
 import java.io.IOException
@@ -44,7 +44,7 @@ public fun startOrchestrationServer(): OrchestrationServer {
 
 internal class OrchestrationServerImpl(
     private val serverSocket: ServerSocket,
-    private val logger: CHRLogger
+    private val logger: HotReloadLogger
 ) : OrchestrationServer {
     private val isClosed = AtomicBoolean(false)
     private val isActive get() = !isClosed.get()

@@ -28,7 +28,7 @@ import org.jetbrains.compose.reload.core.AsyncTraces
 import org.jetbrains.compose.reload.core.asyncTracesString
 import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.core.withAsyncTrace
-import org.jetbrains.compose.reload.logging.CHRLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.Ack
@@ -80,7 +80,7 @@ public class TransactionScope internal constructor(
     }
 
     @PublishedApi
-    internal val logger: CHRLogger = createLogger()
+    internal val logger: HotReloadLogger = createLogger()
 
     public fun OrchestrationMessage.send() {
         fixture.orchestration.sendMessage(this).get()

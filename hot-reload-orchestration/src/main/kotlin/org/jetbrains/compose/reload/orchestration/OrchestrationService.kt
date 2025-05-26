@@ -10,7 +10,7 @@ import java.util.ServiceLoader
 public fun OrchestrationHandle(): OrchestrationHandle {
     return ServiceLoader.load(OrchestrationService::class.java)
         .singleOrNull()?.getOrchestration()
-        ?: error("Could not create an orchestration handle: there were multiple OrchestrationService providers in the classpath")
+        ?: error("Could not create orchestration handle")
 }
 
 public interface OrchestrationService {

@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisallowComposableCalls
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.flow.filterIsInstance
-import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
@@ -19,8 +18,6 @@ import org.jetbrains.compose.reload.orchestration.asFlow
 import java.util.ServiceLoader
 import java.util.concurrent.Future
 
-private val logger = createLogger()
-
 internal class DevToolsOrchestrationService : OrchestrationService {
     override fun getOrchestration(): OrchestrationHandle = _orchestration
 
@@ -29,10 +26,7 @@ internal class DevToolsOrchestrationService : OrchestrationService {
             ServiceLoader.load(OrchestrationExtension::class.java)
                 .firstNotNullOfOrNull { extension -> extension.getOrchestration() }
                 ?: OrchestrationClient(OrchestrationClientRole.Tooling)
-                ?: run {
-                    logger.error("Failed to create orchestration client")
-                    shutdown()
-                }
+                ?: error("Could not create orchestration handle")
         }
     }
 }

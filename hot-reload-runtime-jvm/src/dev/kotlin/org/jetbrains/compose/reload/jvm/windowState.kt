@@ -13,7 +13,7 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import org.jetbrains.compose.reload.DevelopmentEntryPoint
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
-import org.jetbrains.compose.reload.logging.createLogger
+import org.jetbrains.compose.reload.orchestration.HotReloadLogger
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -26,7 +26,7 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.outputStream
 
-private val logger = createLogger()
+private val logger = HotReloadLogger()
 
 /**
  * Creates a [WindowState] which will be serialized/deserialized to/from disk.

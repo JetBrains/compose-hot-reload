@@ -46,12 +46,12 @@ import org.jetbrains.compose.devtools.widgets.animateReloadStatusColor
 import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
 import org.jetbrains.compose.reload.core.WindowId
-import org.jetbrains.compose.reload.logging.createLogger
+import org.jetbrains.compose.reload.orchestration.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowGainedFocus
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import kotlin.system.exitProcess
 
-private val logger = createLogger()
+private val logger = HotReloadLogger()
 
 // Modern rounded corners like JetBrains Toolbox
 private val DevToolingSidecarShape = RoundedCornerShape(8.dp)

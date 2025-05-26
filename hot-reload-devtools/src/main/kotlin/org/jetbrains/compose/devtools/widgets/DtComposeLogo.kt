@@ -23,7 +23,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.reload.core.Os
-import org.jetbrains.compose.reload.logging.createLogger
+import org.jetbrains.compose.reload.orchestration.HotReloadLogger
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.decodeToImageBitmap
 import org.jetbrains.compose.resources.decodeToSvgPainter
@@ -31,7 +31,7 @@ import java.lang.invoke.MethodHandles
 
 private val classLoader = MethodHandles.lookup().lookupClass().classLoader
 
-private val logger = createLogger()
+private val logger = HotReloadLogger()
 
 private val composeLogoSvgBinary = MainScope().async(Dispatchers.IO) {
     classLoader.getResource("img/compose-logo.svg")!!.openStream()

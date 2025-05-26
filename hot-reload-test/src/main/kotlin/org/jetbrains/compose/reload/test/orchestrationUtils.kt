@@ -17,6 +17,7 @@ import org.jetbrains.compose.reload.orchestration.asChannel
 
 private val logger = createLogger()
 private val orchestration = OrchestrationHandle()
+    ?: error("Could not test orchestration handle")
 
 public fun sendTestEvent(any: Any? = null) {
     orchestration.sendMessage(OrchestrationMessage.TestEvent(any))

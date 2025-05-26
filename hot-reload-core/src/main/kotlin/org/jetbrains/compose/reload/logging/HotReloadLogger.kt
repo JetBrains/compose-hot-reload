@@ -10,45 +10,45 @@ import java.lang.invoke.MethodHandles
 
 @Suppress("NOTHING_TO_INLINE") // We want the caller class!
 @JvmName("createLookupLogger")
-public inline fun createLogger(): CHRLogger =
-    CHRLogger(MethodHandles.lookup().lookupClass(), loggingLevel).with<CHRStdoutLogger>()
+public inline fun createLogger(): HotReloadLogger =
+    HotReloadLogger(MethodHandles.lookup().lookupClass(), loggingLevel).with<HotReloadStdoutLogger>()
 
-public inline fun <reified T : Any> createLogger(): CHRLogger =
-    CHRLogger(T::class.java, loggingLevel).with<CHRStdoutLogger>()
+public inline fun <reified T : Any> createLogger(): HotReloadLogger =
+    HotReloadLogger(T::class.java, loggingLevel).with<HotReloadStdoutLogger>()
 
-public fun createLogger(name: String): CHRLogger = CHRLogger(name, loggingLevel).with<CHRStdoutLogger>()
-public fun createLogger(clazz: Class<*>): CHRLogger = CHRLogger(clazz.name, loggingLevel).with<CHRStdoutLogger>()
+public fun createLogger(name: String): HotReloadLogger = HotReloadLogger(name, loggingLevel).with<HotReloadStdoutLogger>()
+public fun createLogger(clazz: Class<*>): HotReloadLogger = HotReloadLogger(clazz.name, loggingLevel).with<HotReloadStdoutLogger>()
 
-public fun CHRLogger(clazz: Class<*>, level: Level): CHRLogger = CHRMultiLogger(clazz.name, level)
-public fun CHRLogger(name: String, level: Level): CHRLogger = CHRMultiLogger(name, level)
+public fun HotReloadLogger(clazz: Class<*>, level: Level): HotReloadLogger = HotReloadMultiLogger(clazz.name, level)
+public fun HotReloadLogger(name: String, level: Level): HotReloadLogger = HotReloadMultiLogger(name, level)
 
-public fun CHRLogger(clazz: Class<*>, delegate: (String) -> Unit): CHRLogger =
-    CHRDelegatingLogger(clazz.name, loggingLevel, delegate)
+public fun HotReloadLogger(clazz: Class<*>, delegate: (String) -> Unit): HotReloadLogger =
+    HotReloadDelegatingLogger(clazz.name, loggingLevel, delegate)
 
-public fun CHRLogger(name: String, delegate: (String) -> Unit): CHRLogger =
-    CHRDelegatingLogger(name, loggingLevel, delegate)
+public fun HotReloadLogger(name: String, delegate: (String) -> Unit): HotReloadLogger =
+    HotReloadDelegatingLogger(name, loggingLevel, delegate)
 
-public fun CHRLogger(clazz: Class<*>, level: Level, delegate: (String) -> Unit): CHRLogger =
-    CHRDelegatingLogger(clazz.name, level, delegate)
+public fun HotReloadLogger(clazz: Class<*>, level: Level, delegate: (String) -> Unit): HotReloadLogger =
+    HotReloadDelegatingLogger(clazz.name, level, delegate)
 
-public fun CHRLogger(name: String, level: Level, delegate: (String) -> Unit): CHRLogger =
-    CHRDelegatingLogger(name, level, delegate)
+public fun HotReloadLogger(name: String, level: Level, delegate: (String) -> Unit): HotReloadLogger =
+    HotReloadDelegatingLogger(name, level, delegate)
 
-public inline fun <reified T : CHRLogger> CHRLogger.with(): CHRLogger {
+public inline fun <reified T : HotReloadLogger> HotReloadLogger.with(): HotReloadLogger {
     val other = T::class.java.getDeclaredConstructor(
         String::class.java, Level::class.java
     ).newInstance(name, level)
     return this.with(other)
 }
 
-public fun CHRLogger.with(other: CHRLogger): CHRLogger = when {
-    this is CHRMultiLogger && other is CHRMultiLogger -> CHRMultiLogger(name, level, loggers + other.loggers)
-    this is CHRMultiLogger -> CHRMultiLogger(name, level, loggers + other)
-    other is CHRMultiLogger -> CHRMultiLogger(name, level, listOf(this) + other.loggers)
-    else -> CHRMultiLogger(name, level, listOf(this, other))
+public fun HotReloadLogger.with(other: HotReloadLogger): HotReloadLogger = when {
+    this is HotReloadMultiLogger && other is HotReloadMultiLogger -> HotReloadMultiLogger(name, level, loggers + other.loggers)
+    this is HotReloadMultiLogger -> HotReloadMultiLogger(name, level, loggers + other)
+    other is HotReloadMultiLogger -> HotReloadMultiLogger(name, level, listOf(this) + other.loggers)
+    else -> HotReloadMultiLogger(name, level, listOf(this, other))
 }
 
-public interface CHRLogger {
+public interface HotReloadLogger {
     public val name: String
     public val level: Level
 
@@ -90,11 +90,11 @@ public interface CHRLogger {
     public fun error(msg: String, t: Throwable?): Unit = log(Level.Error, msg, t)
 }
 
-internal data class CHRMultiLogger(
+internal data class HotReloadMultiLogger(
     override val name: String,
     override val level: Level,
-    internal val loggers: List<CHRLogger> = mutableListOf()
-) : CHRLogger {
+    internal val loggers: List<HotReloadLogger> = mutableListOf()
+) : HotReloadLogger {
 
     override fun log(level: Level, msg: String) {
         loggers.forEach { logger ->
@@ -131,10 +131,10 @@ internal data class CHRMultiLogger(
 
 
 
-internal class CHRStdoutLogger(
+internal class HotReloadStdoutLogger(
     override val name: String,
     override val level: Level,
-) : CHRLogger {
+) : HotReloadLogger {
     private val formatter: CHRLogFormatter = CHRLogFormatter(this)
 
     override fun log(level: Level, msg: String) {
@@ -170,11 +170,11 @@ internal class CHRStdoutLogger(
     }
 }
 
-internal class CHRDelegatingLogger(
+internal class HotReloadDelegatingLogger(
     override val name: String,
     override val level: Level,
     private val delegate: (String) -> Unit,
-) : CHRLogger {
+) : HotReloadLogger {
     private val formatter = CHRLogFormatter(this)
 
     override fun log(level: Level, msg: String) {

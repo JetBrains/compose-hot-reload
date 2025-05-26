@@ -20,6 +20,7 @@ import androidx.compose.ui.window.FrameWindowScope
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import org.jetbrains.compose.reload.agent.send
+import org.jetbrains.compose.reload.orchestration.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.CleanCompositionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RetryFailedCompositionRequest
@@ -27,8 +28,8 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIExcepti
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIRendered
 import org.jetbrains.compose.reload.orchestration.asFlow
 
-private val logger by createRuntimeLogger()
 private val orchestration = OrchestrationHandle()
+private val logger = HotReloadLogger()
 
 @Composable
 fun DevelopmentEntryPoint(child: @Composable () -> Unit) {
