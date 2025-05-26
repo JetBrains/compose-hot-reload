@@ -6,7 +6,7 @@
 package org.jetbrains.compose.reload.analysis
 
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
-import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.core.simpleName
 import org.jetbrains.compose.reload.core.withClosure
 import kotlin.time.measureTimedValue

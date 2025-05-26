@@ -11,7 +11,7 @@ import androidx.compose.runtime.remember
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.jetbrains.compose.reload.agent.orchestration
-import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asChannel
 

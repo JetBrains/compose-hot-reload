@@ -72,14 +72,10 @@ internal fun enqueueRuntimeAnalysis(
         classLoaders[classInfo.classId] = WeakReference(loader)
 
         if (classBeingRedefined == null) {
-            if (logger.isTraceEnabled) {
-                logger.trace("Parsed 'RuntimeInfo' for '$className'")
-            }
+            logger.trace("Parsed 'RuntimeInfo' for '$className'")
             currentRuntime.add(classInfo)
         } else {
-            if (logger.isTraceEnabled) {
-                logger.trace("Parsed 'RuntimeInfo' for '$className' (redefined)")
-            }
+            logger.trace("Parsed 'RuntimeInfo' for '$className' (redefined)")
             pendingRedefinitions.add(classInfo)
         }
 

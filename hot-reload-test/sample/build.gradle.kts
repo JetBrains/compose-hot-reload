@@ -25,7 +25,6 @@ kotlin {
     sourceSets.getByName("jvmReloadUnitTest").dependencies {
         implementation(kotlin("test"))
         implementation(deps.coroutines.test)
-        implementation("ch.qos.logback:logback-classic:1.5.16")
     }
 }
 

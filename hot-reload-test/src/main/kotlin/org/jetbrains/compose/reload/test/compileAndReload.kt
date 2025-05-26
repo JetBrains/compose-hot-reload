@@ -9,7 +9,7 @@ package org.jetbrains.compose.reload.test
 
 import org.jetbrains.compose.reload.agent.invokeAfterHotReload
 import org.jetbrains.compose.reload.agent.send
-import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.isSuccess
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage

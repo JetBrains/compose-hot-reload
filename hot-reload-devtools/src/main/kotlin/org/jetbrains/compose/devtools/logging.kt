@@ -5,9 +5,9 @@
 
 package org.jetbrains.compose.devtools
 
-import org.jetbrains.compose.reload.core.CHRLogger
-import org.jetbrains.compose.reload.core.createLogger
-import org.jetbrains.compose.reload.core.with
+import org.jetbrains.compose.reload.logging.CHRLogger
+import org.jetbrains.compose.reload.logging.createLogger
+import org.jetbrains.compose.reload.logging.with
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import java.lang.invoke.MethodHandles
 

@@ -20,7 +20,7 @@ import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.StartReplac
 import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.StartRestartGroup
 import org.jetbrains.compose.reload.core.Either
 import org.jetbrains.compose.reload.core.Failure
-import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.core.toRight

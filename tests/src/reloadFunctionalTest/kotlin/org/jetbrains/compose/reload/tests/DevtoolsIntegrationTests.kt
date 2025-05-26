@@ -5,7 +5,7 @@
 
 package org.jetbrains.compose.reload.tests
 
-import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension

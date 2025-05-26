@@ -5,9 +5,9 @@
 
 package org.jetbrains.compose.reload.agent
 
-import org.jetbrains.compose.reload.core.CHRLogger
-import org.jetbrains.compose.reload.core.createLogger
-import org.jetbrains.compose.reload.core.with
+import org.jetbrains.compose.reload.logging.CHRLogger
+import org.jetbrains.compose.reload.logging.createLogger
+import org.jetbrains.compose.reload.logging.with
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle

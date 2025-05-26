@@ -6,11 +6,11 @@
 package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.Disposable
-import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.core.submitSafe
+import org.jetbrains.compose.reload.logging.CHRLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
-import org.slf4j.Logger
 import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -44,7 +44,7 @@ public fun startOrchestrationServer(): OrchestrationServer {
 
 internal class OrchestrationServerImpl(
     private val serverSocket: ServerSocket,
-    private val logger: Logger
+    private val logger: CHRLogger
 ) : OrchestrationServer {
     private val isClosed = AtomicBoolean(false)
     private val isActive get() = !isClosed.get()

@@ -16,6 +16,7 @@ org/jetbrains/compose/reload/
 org/jetbrains/compose/reload/agent/
 org/jetbrains/compose/reload/analysis/
 org/jetbrains/compose/reload/core/
+org/jetbrains/compose/reload/logging/
 org/jetbrains/compose/reload/orchestration/
 org/jetbrains/compose/reload/shaded/
 org/jetbrains/compose/reload/shaded/javassist/

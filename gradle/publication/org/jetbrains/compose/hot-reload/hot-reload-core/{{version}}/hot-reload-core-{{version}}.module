@@ -27,13 +27,6 @@
       },
       "dependencies": [
         {
-          "group": "org.slf4j",
-          "module": "slf4j-api",
-          "version": {
-            "requires": "2.0.17"
-          }
-        },
-        {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",
           "version": {
@@ -65,13 +58,6 @@
         "org.jetbrains.kotlin.platform.type": "jvm"
       },
       "dependencies": [
-        {
-          "group": "org.slf4j",
-          "module": "slf4j-api",
-          "version": {
-            "requires": "2.0.17"
-          }
-        },
         {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",

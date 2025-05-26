@@ -268,8 +268,8 @@ LaunchMode:
 LoggingLevel:
   key: compose.reload.loggingLevel
   type: enum
-  enumClass: org.slf4j.event.Level
+  enumClass: org.jetbrains.compose.reload.logging.Level
   target: [ application, devtools ]
-  default: "DEBUG"
+  default: "Debug"
   documentation: |
     Set the logging level for the application

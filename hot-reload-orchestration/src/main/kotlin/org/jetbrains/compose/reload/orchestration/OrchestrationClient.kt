@@ -7,7 +7,7 @@ package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.Disposable
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
-import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.core.submitSafe
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import java.io.ObjectInputStream

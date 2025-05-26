@@ -38,14 +38,13 @@ val packageStandalone = configurations.create("packageStandalone") {
 
     exclude("org.jetbrains.kotlin")
     exclude("org.jetbrains.kotlinx")
-    exclude("org.slf4j")
 }
 
 /*
 Create the standalone jar by providing all outputs from the compilation,
 and relocating necessary dependencies
 
-Note: Foundational dependencies like the kotlin stdlib and slf4j api are not packaged and still
+Note: Foundational dependencies like the kotlin stdlib are not packaged and still
 need to be provided in -cp
  */
 val standaloneJar = tasks.register<ShadowJar>("standaloneJar") {
@@ -137,8 +136,6 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies {
-    implementation(deps.slf4j.api)
-
     implementation(project(":hot-reload-core"))
     packageStandalone(project(":hot-reload-core"))
 
@@ -152,7 +149,6 @@ dependencies {
     packageStandalone(deps.javassist)
 
     testImplementation(testFixtures(project(":hot-reload-analysis")))
-    testImplementation(deps.logback)
     testImplementation(deps.asm)
     testImplementation(deps.asm.tree)
 
