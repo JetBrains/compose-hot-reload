@@ -84,7 +84,7 @@ internal fun reload(
                 }
 
                 val addedInterfaces = clazz.interfaces.map { it.name } -
-                    originalClass.interfaces.map { it.name }
+                    originalClass.interfaces.map { it.name }.toSet()
                 addedInterfaces.forEach { addedInterface ->
                     appendLine("⚠️ +Interface: '$addedInterface'")
                 }
