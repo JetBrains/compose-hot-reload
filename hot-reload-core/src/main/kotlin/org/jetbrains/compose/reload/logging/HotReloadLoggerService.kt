@@ -8,6 +8,10 @@ package org.jetbrains.compose.reload.logging
 import java.lang.invoke.MethodHandles
 import java.util.ServiceLoader
 
+/***
+ * Creates a Hot Reload logger from the available service.
+ * Should be used by default in all contexts, except in orchestration implementation
+ */
 @Suppress("NOTHING_TO_INLINE")
 public inline fun HotReloadLogger(): HotReloadLogger {
     val clazz = MethodHandles.lookup().lookupClass()
@@ -18,7 +22,7 @@ public fun HotReloadLogger(name: String, tag: String? = null): HotReloadLogger {
     return ServiceLoader.load(HotReloadLoggerService::class.java)
         ?.singleOrNull()
         ?.getLogger(name, tag)
-        ?: error("Did not find any loggers")
+        ?: createLogger(name)
 }
 
 public interface HotReloadLoggerService {

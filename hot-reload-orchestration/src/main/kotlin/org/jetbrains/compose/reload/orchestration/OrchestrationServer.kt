@@ -62,7 +62,7 @@ internal class OrchestrationServerImpl(
         private val onClientClosed: ((Client) -> Unit),
     ) : AutoCloseable {
 
-        private val logger = createLogger()
+        private val logger = HotReloadLogger()
 
         private val isClosed = AtomicBoolean(false)
 

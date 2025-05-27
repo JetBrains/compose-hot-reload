@@ -14,6 +14,7 @@ import kotlinx.coroutines.job
 import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi
 import org.jetbrains.compose.reload.test.gradle.GradleRunner.ExitCode
 import java.nio.file.Path
@@ -26,7 +27,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.writeText
 import kotlin.test.fail
 
-private val logger = createLogger("Gradle")
+private val logger = HotReloadLogger("Gradle")
 
 public class GradleRunner @InternalHotReloadTestApi constructor(
     public val projectRoot: Path,

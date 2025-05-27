@@ -7,6 +7,7 @@
 
 package org.jetbrains.compose.reload.utils
 
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.test.core.CompilerOption
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
@@ -29,7 +30,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import java.awt.GraphicsEnvironment
 import java.security.MessageDigest
 
-private val logger = createLogger()
+private val logger = HotReloadLogger()
 
 class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
     override fun transform(

@@ -44,13 +44,16 @@ or finished.
  */
 
 private val testLoggingScope = CoroutineScope(
-    Job() + Dispatchers.IO + CoroutineName("Orchestration Test Logging") + CoroutineExceptionHandler { ctx, e ->
+    Job() + Dispatchers.IO + CoroutineName("Orchestration Test Logging") + CoroutineExceptionHandler { _, e ->
         e.printStackTrace()
     }
 )
 
 @OptIn(ExperimentalPathApi::class)
 internal fun ExtensionContext.startOrchestrationTestLogging(server: OrchestrationServer) = testLoggingScope.launch {
+    // enable logging to stdout for tests
+    System.setProperty("compose.reload.enableStdoutLogging", "true")
+
     val testClass = requiredTestClass
     val testMethod = requiredTestMethod
     val context = hotReloadTestInvocationContextOrThrow

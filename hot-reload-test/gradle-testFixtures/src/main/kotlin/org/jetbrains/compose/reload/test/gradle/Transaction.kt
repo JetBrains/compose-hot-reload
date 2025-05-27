@@ -80,7 +80,7 @@ public class TransactionScope internal constructor(
     }
 
     @PublishedApi
-    internal val logger: HotReloadLogger = createLogger()
+    internal val logger: HotReloadLogger = HotReloadLogger()
 
     public fun OrchestrationMessage.send() {
         fixture.orchestration.sendMessage(this).get()

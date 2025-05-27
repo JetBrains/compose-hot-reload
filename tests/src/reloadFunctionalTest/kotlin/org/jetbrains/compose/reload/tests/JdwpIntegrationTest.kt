@@ -9,6 +9,7 @@ import com.sun.jdi.Bootstrap
 import com.sun.jdi.VirtualMachine
 import com.sun.jdi.connect.Connector
 import com.sun.jdi.connect.ListeningConnector
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
 import org.jetbrains.compose.reload.test.gradle.BuildMode
@@ -79,7 +80,7 @@ class JdwpIntegrationTest {
 
         thread {
             virtualMachineReference.set(connector.accept(arguments))
-            createLogger().info("VirtualMachine accepted")
+            HotReloadLogger().info("VirtualMachine accepted")
             virtualMachineReference.get().resume()
         }
 
@@ -119,10 +120,10 @@ class JdwpIntegrationTest {
         }
 
         /* Issue the reload request through the debugger and check the UI */
-        createLogger().info("Using 'redefineClasses' through the debugger...")
+        HotReloadLogger().info("Using 'redefineClasses' through the debugger...")
         virtualMachine.redefineClasses(reloads)
 
-        createLogger().info("Checking screenshot after the debugger command")
+        HotReloadLogger().info("Checking screenshot after the debugger command")
         checkScreenshot("1-after")
     }
 }

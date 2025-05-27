@@ -10,14 +10,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.receiveAsFlow
-import org.jetbrains.compose.reload.logging.createLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asChannel
 
-private val logger = createLogger()
+private val logger = HotReloadLogger()
 private val orchestration = OrchestrationHandle()
-    ?: error("Could not test orchestration handle")
 
 public fun sendTestEvent(any: Any? = null) {
     orchestration.sendMessage(OrchestrationMessage.TestEvent(any))

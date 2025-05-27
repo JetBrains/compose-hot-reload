@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.tests.gradle
 
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
@@ -34,7 +35,7 @@ import kotlin.test.fail
 @TestedBuildMode(BuildMode.Continuous)
 class GradleRecompilerProcessTest {
 
-    private val logger = createLogger()
+    private val logger = HotReloadLogger()
 
     @HotReloadTest
     @TestedLaunchMode(ApplicationLaunchMode.GradleBlocking)

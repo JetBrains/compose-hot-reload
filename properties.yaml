@@ -265,6 +265,14 @@ LaunchMode:
   documentation: |
     Tells the application 'how' it was launched
 
+EnableStdoutLogging:
+  key: compose.reload.enableStdoutLogging
+  type: boolean
+  target: [ application, devtools ]
+  default: "false"
+  documentation: |
+    Enable output of all logs into the standard output
+
 LoggingLevel:
   key: compose.reload.loggingLevel
   type: enum

@@ -5,19 +5,29 @@
 
 package org.jetbrains.compose.reload.logging
 
+import org.jetbrains.compose.reload.core.HotReloadEnvironment.enableStdoutLogging
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.loggingLevel
 import java.lang.invoke.MethodHandles
 
+/***
+ * Creates a default Hot Reload logger. This should not be used, unless `HotReloadLogger` is not applicable in
+ * the desired context
+ */
 @Suppress("NOTHING_TO_INLINE") // We want the caller class!
 @JvmName("createLookupLogger")
 public inline fun createLogger(): HotReloadLogger =
-    createLogger(MethodHandles.lookup().lookupClass().name).with<HotReloadStdoutLogger>()
+    createLogger(MethodHandles.lookup().lookupClass().name)
 
 public inline fun <reified T : Any> createLogger(): HotReloadLogger =
-    createLogger(T::class.java.name).with<HotReloadStdoutLogger>()
+    createLogger(T::class.java.name)
 
-public fun createLogger(name: String): HotReloadLogger = createLogger(name, loggingLevel).with<HotReloadStdoutLogger>()
-public fun createLogger(name: String, level: Level): HotReloadLogger = HotReloadMultiLogger(name, level)
+public fun createLogger(name: String): HotReloadLogger = createLogger(name, loggingLevel)
+public fun createLogger(name: String, level: Level): HotReloadLogger =
+    HotReloadMultiLogger(
+        name, level, loggers = listOfNotNull(
+            if (enableStdoutLogging) HotReloadStdoutLogger(name, level) else null,
+        )
+    )
 
 public fun createLogger(clazz: Class<*>, delegate: (String) -> Unit): HotReloadLogger =
     HotReloadDelegatingLogger(clazz.name, loggingLevel, delegate)
@@ -39,7 +49,11 @@ public inline fun <reified T : HotReloadLogger> HotReloadLogger.with(): HotReloa
 }
 
 public fun HotReloadLogger.with(other: HotReloadLogger): HotReloadLogger = when {
-    this is HotReloadMultiLogger && other is HotReloadMultiLogger -> HotReloadMultiLogger(name, level, loggers + other.loggers)
+    this is HotReloadMultiLogger && other is HotReloadMultiLogger -> HotReloadMultiLogger(
+        name,
+        level,
+        loggers + other.loggers
+    )
     this is HotReloadMultiLogger -> HotReloadMultiLogger(name, level, loggers + other)
     other is HotReloadMultiLogger -> HotReloadMultiLogger(name, level, listOf(this) + other.loggers)
     else -> HotReloadMultiLogger(name, level, listOf(this, other))
@@ -125,7 +139,6 @@ internal data class HotReloadMultiLogger(
         }
     }
 }
-
 
 
 internal class HotReloadStdoutLogger(

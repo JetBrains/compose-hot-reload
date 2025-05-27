@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.core.withAsyncTrace
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
@@ -45,7 +46,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
-private val logger = createLogger()
+private val logger = HotReloadLogger()
 
 @TransactionDslMarker
 public class HotReloadTestFixture
