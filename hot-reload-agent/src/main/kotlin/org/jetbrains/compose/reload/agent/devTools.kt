@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
+import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsDetached
 import org.jetbrains.compose.reload.core.HotReloadProperty.DevToolsClasspath
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.DevTools
 import org.jetbrains.compose.reload.core.Os
@@ -32,12 +33,14 @@ internal fun launchDevtoolsApplication() {
     logger.info("Starting 'DevTools'")
 
     val process = ProcessBuilder(
-        resolveDevtoolsJavaBinary(), "-cp", classpath.joinToString(File.pathSeparator),
+        resolveDevtoolsJavaBinary(),
+        *platformSpecificJvmArguments(),
+        "-cp", classpath.joinToString(File.pathSeparator),
         *subprocessDefaultArguments(DevTools, orchestration.port.getBlocking().getOrThrow()).toTypedArray(),
         *issueNewDebugSessionJvmArguments("DevTools"),
-        "-Dapple.awt.UIElement=true",
         "org.jetbrains.compose.devtools.Main",
-    ).withHotReloadEnvironmentVariables(DevTools)
+    )
+        .withHotReloadEnvironmentVariables(DevTools)
         .start()
 
     thread(name = "DevTools: Stderr", isDaemon = true) {
@@ -62,4 +65,17 @@ private fun resolveDevtoolsJavaBinary(): String? {
     }
 
     return null
+}
+
+private fun platformSpecificJvmArguments(): Array<String> = when (Os.current()) {
+    // Allow reflective access to X11 classes for Linux
+    // Required to properly set the app name in the taskbar
+    Os.Linux -> arrayOf("--add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED")
+    // Disable dock icon when not running in detached mode for MacOS
+    Os.MacOs -> arrayOf(
+        "-Dapple.awt.UIElement=${!devToolsDetached}",
+        "-Dapple.awt.application.name=Compose Hot Reload Dev Tools",
+    )
+    // No platform-specific options for Windows
+    Os.Windows -> emptyArray()
 }

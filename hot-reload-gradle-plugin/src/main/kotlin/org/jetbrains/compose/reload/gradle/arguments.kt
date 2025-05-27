@@ -13,7 +13,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.Optional
@@ -37,6 +36,8 @@ sealed interface ComposeHotReloadArgumentsBuilder {
     fun setDevToolsClasspath(files: FileCollection)
     fun setDevToolsHeadless(headless: Provider<Boolean>)
     fun setDevToolsTransparencyEnabled(enabled: Provider<Boolean>)
+
+    fun setDevToolsDetached(detached: Provider<Boolean>)
     fun setReloadTaskName(name: Provider<String>)
     fun setReloadTaskName(name: String)
     fun isAutoRecompileEnabled(isAutoRecompileEnabled: Provider<Boolean>)
@@ -99,6 +100,10 @@ internal class ComposeHotReloadArguments(project: Project) :
     @get:Input
     val devToolsTransparencyEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadDevToolsTransparencyEnabled)
+
+    @get:Input
+    val devToolsDetached: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .value(project.composeReloadDevToolsDetached)
 
     @get:Input
     @get:Optional
@@ -182,6 +187,10 @@ internal class ComposeHotReloadArguments(project: Project) :
         devToolsEnabled.set(enabled)
     }
 
+    override fun setDevToolsDetached(detached: Provider<Boolean>) {
+        devToolsDetached.set(devToolsDetached)
+    }
+
     override fun setDevToolsHeadless(headless: Provider<Boolean>) {
         devToolsIsHeadless.set(headless.orElse(false))
     }
@@ -250,6 +259,7 @@ internal class ComposeHotReloadArguments(project: Project) :
         if (isDevToolsEnabled) {
             add("-D${HotReloadProperty.DevToolsClasspath.key}=${devToolsClasspathFiles.asPath}")
             add("-D${HotReloadProperty.DevToolsTransparencyEnabled.key}=${devToolsTransparencyEnabled.orNull ?: true}")
+            add("-D${HotReloadProperty.DevToolsDetached.key}=${devToolsDetached.orNull ?: false}")
         }
 
         /* Provide "recompiler" properties */
