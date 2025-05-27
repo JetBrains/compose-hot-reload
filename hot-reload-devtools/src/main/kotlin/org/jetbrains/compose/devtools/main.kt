@@ -30,6 +30,7 @@ import org.jetbrains.compose.devtools.states.launchReloadState
 import org.jetbrains.compose.devtools.states.launchUIErrorState
 import org.jetbrains.compose.devtools.states.launchWindowsState
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
+import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsAlwaysOnTop
 import org.jetbrains.compose.reload.core.createLogger
 
 internal val applicationScope = CoroutineScope(Dispatchers.Main + SupervisorJob() + Events() + States())
@@ -72,7 +73,7 @@ fun main() {
                 key(windowId) {
                     CompositionLocalProvider(targetApplicationWindowStateLocal provides windowState) {
                         DtSidecarWindow(
-                            windowId, windowState, isAlwaysOnTop = windowsState.alwaysOnTop[windowId] == true
+                            windowId, windowState, isAlwaysOnTop = devToolsAlwaysOnTop || windowsState.alwaysOnTop[windowId] == true
                         )
                         DevToolingErrorOverlay(windowId, windowState)
                     }
