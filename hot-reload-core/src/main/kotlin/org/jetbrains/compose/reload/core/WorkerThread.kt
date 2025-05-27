@@ -13,7 +13,7 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 @OptIn(ExperimentalAtomicApi::class)
 public class WorkerThread(
     name: String, isDaemon: Boolean = true,
-) : Thread(name) {
+) : Thread(name), AutoCloseable {
 
     private val logger = createLogger()
 
@@ -57,6 +57,10 @@ public class WorkerThread(
 
         queue.add(End)
         return future
+    }
+
+    override fun close() {
+        shutdown()
     }
 
     /**

@@ -27,11 +27,11 @@ public interface Future<T> {
     public fun <R> invokeOnCompletion(onResult: (Result<T>) -> R): Future<R>
 }
 
-internal interface CompletableFuture<T> : Future<T> {
-    fun completeWith(result: Result<T>)
+public interface CompletableFuture<T> : Future<T> {
+    public fun completeWith(result: Result<T>)
 }
 
-internal fun <T> Future(): CompletableFuture<T> {
+public fun <T> Future(): CompletableFuture<T> {
     return FutureImpl()
 }
 
