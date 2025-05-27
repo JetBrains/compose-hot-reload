@@ -170,7 +170,7 @@ DevToolsTransparencyEnabled:
 DevToolsAlwaysOnTop:
   key: compose.reload.devToolsAlwaysOnTop
   type: boolean
-  default: "true"
+  default: "false"
   target: [ application, build, devtools ]
   documentation: |
     If enabled, dev tools window will be always on top. Otherwise, it will copy the status of the corresponding
