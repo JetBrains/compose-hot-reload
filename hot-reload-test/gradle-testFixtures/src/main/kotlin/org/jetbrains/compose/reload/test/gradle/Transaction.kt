@@ -26,7 +26,6 @@ import kotlinx.coroutines.withTimeout
 import org.intellij.lang.annotations.Language
 import org.jetbrains.compose.reload.core.AsyncTraces
 import org.jetbrains.compose.reload.core.asyncTracesString
-import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.core.withAsyncTrace
 import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application

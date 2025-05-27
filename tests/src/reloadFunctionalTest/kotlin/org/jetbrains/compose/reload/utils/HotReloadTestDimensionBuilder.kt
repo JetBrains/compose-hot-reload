@@ -8,7 +8,6 @@
 package org.jetbrains.compose.reload.utils
 
 import org.jetbrains.compose.reload.logging.HotReloadLogger
-import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.test.core.CompilerOption
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
 import org.jetbrains.compose.reload.test.gradle.BuildMode
@@ -184,7 +183,7 @@ class HotReloadTestDimensionFilter : HotReloadTestDimensionExtension {
         }
 
         if (GraphicsEnvironment.isHeadless()) {
-            result = result.filter { invocationContext ->
+            result = result.filter { _ ->
                 context.findAnnotation<Headless>()?.isHeadless ?: true
             }
         }

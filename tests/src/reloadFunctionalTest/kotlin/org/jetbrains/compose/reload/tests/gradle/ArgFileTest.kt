@@ -13,7 +13,6 @@ import kotlinx.coroutines.future.asDeferred
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
-import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
