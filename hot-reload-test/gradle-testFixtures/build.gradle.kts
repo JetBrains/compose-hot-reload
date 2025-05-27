@@ -20,12 +20,14 @@ kotlin {
 
 dependencies {
     implementation(project(":hot-reload-core"))
+    implementation(testFixtures(project(":hot-reload-core")))
     implementation(project(":hot-reload-test:core"))
     implementation(project(":hot-reload-orchestration"))
     implementation(kotlin("reflect"))
     api(kotlin("test"))
     api(kotlin("tooling-core"))
     api(deps.junit.jupiter)
+    api(deps.coroutines.core)
     api(deps.coroutines.test)
     implementation(deps.junit.jupiter.engine)
 }
