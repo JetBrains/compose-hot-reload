@@ -26,7 +26,7 @@ import org.jetbrains.compose.devtools.widgets.DtHeader1
 
 @Composable
 internal fun DtSidecarHeaderBar(
-    onClose: () -> Unit,
+    onClose: (() -> Unit),
     modifier: Modifier = Modifier,
 ) {
     Row(
