@@ -27,7 +27,7 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import org.jetbrains.compose.reload.core.createLogger
-import org.jetbrains.compose.reload.core.withAsyncTrace
+import org.jetbrains.compose.reload.core.testFixtures.withAsyncTrace
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest

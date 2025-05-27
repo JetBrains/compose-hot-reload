@@ -24,11 +24,11 @@ kotlin {
 
 dependencies {
     api(deps.slf4j.api)
-    compileOnly(deps.coroutines.core)
 
     testFixturesApi(project(":hot-reload-test:core"))
     testFixturesImplementation(kotlin("tooling-core"))
     testFixturesImplementation(deps.junit.jupiter)
+    testFixturesImplementation(deps.coroutines.core)
     testFixturesCompileOnly(kotlin("compiler-embeddable"))
 }
 
