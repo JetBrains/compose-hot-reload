@@ -24,7 +24,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compsoe.reload.analyzer.app.states.*
 import org.jetbrains.compsoe.reload.analyzer.app.ui.AppTheme
 import org.jetbrains.compsoe.reload.analyzer.app.ui.FileView
