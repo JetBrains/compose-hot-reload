@@ -20,7 +20,7 @@ import androidx.compose.ui.window.FrameWindowScope
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import org.jetbrains.compose.reload.agent.send
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.CleanCompositionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RetryFailedCompositionRequest

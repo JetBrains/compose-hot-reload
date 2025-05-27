@@ -11,27 +11,24 @@ import java.lang.invoke.MethodHandles
 @Suppress("NOTHING_TO_INLINE") // We want the caller class!
 @JvmName("createLookupLogger")
 public inline fun createLogger(): HotReloadLogger =
-    HotReloadLogger(MethodHandles.lookup().lookupClass(), loggingLevel).with<HotReloadStdoutLogger>()
+    createLogger(MethodHandles.lookup().lookupClass().name).with<HotReloadStdoutLogger>()
 
 public inline fun <reified T : Any> createLogger(): HotReloadLogger =
-    HotReloadLogger(T::class.java, loggingLevel).with<HotReloadStdoutLogger>()
+    createLogger(T::class.java.name).with<HotReloadStdoutLogger>()
 
-public fun createLogger(name: String): HotReloadLogger = HotReloadLogger(name, loggingLevel).with<HotReloadStdoutLogger>()
-public fun createLogger(clazz: Class<*>): HotReloadLogger = HotReloadLogger(clazz.name, loggingLevel).with<HotReloadStdoutLogger>()
+public fun createLogger(name: String): HotReloadLogger = createLogger(name, loggingLevel).with<HotReloadStdoutLogger>()
+public fun createLogger(name: String, level: Level): HotReloadLogger = HotReloadMultiLogger(name, level)
 
-public fun HotReloadLogger(clazz: Class<*>, level: Level): HotReloadLogger = HotReloadMultiLogger(clazz.name, level)
-public fun HotReloadLogger(name: String, level: Level): HotReloadLogger = HotReloadMultiLogger(name, level)
-
-public fun HotReloadLogger(clazz: Class<*>, delegate: (String) -> Unit): HotReloadLogger =
+public fun createLogger(clazz: Class<*>, delegate: (String) -> Unit): HotReloadLogger =
     HotReloadDelegatingLogger(clazz.name, loggingLevel, delegate)
 
-public fun HotReloadLogger(name: String, delegate: (String) -> Unit): HotReloadLogger =
+public fun createLogger(name: String, delegate: (String) -> Unit): HotReloadLogger =
     HotReloadDelegatingLogger(name, loggingLevel, delegate)
 
-public fun HotReloadLogger(clazz: Class<*>, level: Level, delegate: (String) -> Unit): HotReloadLogger =
+public fun createLogger(clazz: Class<*>, level: Level, delegate: (String) -> Unit): HotReloadLogger =
     HotReloadDelegatingLogger(clazz.name, level, delegate)
 
-public fun HotReloadLogger(name: String, level: Level, delegate: (String) -> Unit): HotReloadLogger =
+public fun createLogger(name: String, level: Level, delegate: (String) -> Unit): HotReloadLogger =
     HotReloadDelegatingLogger(name, level, delegate)
 
 public inline fun <reified T : HotReloadLogger> HotReloadLogger.with(): HotReloadLogger {

@@ -22,7 +22,7 @@ import org.jetbrains.compose.devtools.widgets.DtTextButton
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.LaunchMode
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists

@@ -6,8 +6,9 @@
 package org.jetbrains.compose.reload.jvm
 
 import androidx.compose.runtime.Recomposer
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 
-private val logger by createRuntimeLogger()
+private val logger = HotReloadLogger()
 
 internal fun retryFailedCompositions() {
     logger.info("ErrorRecovery: retryFailedCompositions")

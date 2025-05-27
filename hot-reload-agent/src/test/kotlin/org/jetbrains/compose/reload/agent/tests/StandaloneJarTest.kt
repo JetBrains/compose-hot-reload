@@ -7,11 +7,9 @@ package org.jetbrains.compose.reload.agent.tests
 
 import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.core.HotReloadProperty
-import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
 import org.jetbrains.compose.reload.logging.HotReloadLogger
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import org.jetbrains.compose.reload.test.core.TestEnvironment

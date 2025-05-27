@@ -30,7 +30,7 @@ import org.jetbrains.compose.devtools.states.launchReloadState
 import org.jetbrains.compose.devtools.states.launchUIErrorState
 import org.jetbrains.compose.devtools.states.launchWindowsState
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 
 internal val applicationScope = CoroutineScope(Dispatchers.Main + SupervisorJob() + Events() + States())
 

@@ -7,7 +7,7 @@ package org.jetbrains.compose.devtools
 
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import kotlin.concurrent.thread
 import kotlin.io.path.deleteIfExists
 import kotlin.jvm.optionals.getOrNull

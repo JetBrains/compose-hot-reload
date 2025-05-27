@@ -8,7 +8,7 @@ package org.jetbrains.compose.reload.agent
 import org.jetbrains.compose.reload.analysis.ComposeGroupKey
 import org.jetbrains.compose.reload.analysis.Ids
 import org.jetbrains.compose.reload.core.isFailure
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.security.ProtectionDomain

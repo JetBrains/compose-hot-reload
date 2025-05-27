@@ -8,7 +8,7 @@ package org.jetbrains.compose.reload.agent
 import org.jetbrains.compose.reload.analysis.isIgnoredClassId
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.toLeft
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.lang.instrument.ClassDefinition

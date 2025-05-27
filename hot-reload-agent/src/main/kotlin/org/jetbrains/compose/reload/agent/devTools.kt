@@ -12,7 +12,7 @@ import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.Path

@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.reload.core.asFileName
-import org.jetbrains.compose.reload.logging.createLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
@@ -95,7 +95,7 @@ internal fun ExtensionContext.startOrchestrationTestLogging(server: Orchestratio
         writer
     }
 
-    val testClassLogger = createLogger(testClass)
+    val testClassLogger = HotReloadLogger(testClass.name)
     testClassLogger.info(
         """
         ${requiredTestMethod.name} (${context.getDisplayName()})

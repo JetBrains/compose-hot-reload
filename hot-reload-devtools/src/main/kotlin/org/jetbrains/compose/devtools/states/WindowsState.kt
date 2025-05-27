@@ -15,7 +15,7 @@ import io.sellmair.evas.launchState
 import kotlinx.coroutines.CoroutineScope
 import org.jetbrains.compose.devtools.orchestration
 import org.jetbrains.compose.reload.core.WindowId
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asFlow
 

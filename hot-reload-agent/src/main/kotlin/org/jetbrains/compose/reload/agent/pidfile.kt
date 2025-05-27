@@ -8,7 +8,7 @@ package org.jetbrains.compose.reload.agent
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.PidFileInfo
 import org.jetbrains.compose.reload.core.writePidFile
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteIfExists
 

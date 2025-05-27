@@ -10,7 +10,7 @@ import org.jetbrains.compose.reload.core.exception
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.isSuccess
 import org.jetbrains.compose.reload.core.withLinearClosure
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
 import java.io.File

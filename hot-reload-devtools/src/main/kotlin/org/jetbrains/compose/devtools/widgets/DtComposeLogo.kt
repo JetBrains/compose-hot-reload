@@ -23,7 +23,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.reload.core.Os
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.decodeToImageBitmap
 import org.jetbrains.compose.resources.decodeToSvgPainter

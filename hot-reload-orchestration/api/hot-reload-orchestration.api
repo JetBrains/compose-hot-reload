@@ -4,11 +4,6 @@ public final class org/jetbrains/compose/reload/orchestration/CoroutineExtension
 	public static final fun asFlow (Lorg/jetbrains/compose/reload/orchestration/OrchestrationHandle;)Lkotlinx/coroutines/flow/Flow;
 }
 
-public final class org/jetbrains/compose/reload/orchestration/LoggingKt {
-	public static final fun HotReloadLogger (Ljava/lang/String;)Lorg/jetbrains/compose/reload/logging/CHRLogger;
-	public static synthetic fun HotReloadLogger$default (Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/logging/CHRLogger;
-}
-
 public abstract interface class org/jetbrains/compose/reload/orchestration/OrchestrationClient : org/jetbrains/compose/reload/orchestration/OrchestrationHandle {
 	public abstract fun getClientId ()Ljava/util/UUID;
 }

@@ -14,7 +14,7 @@ import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
 import org.jetbrains.compose.reload.analysis.verifyRedefinitions
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.submitSafe
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.lang.ref.WeakReference

@@ -9,7 +9,7 @@ import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.mapLeft
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream

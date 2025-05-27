@@ -16,7 +16,7 @@ import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_COMPILER
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
@@ -171,7 +171,7 @@ private fun ProcessBuilder.startRecompilerProcess(): Int? {
 
     thread(name = "Recompiler Output", isDaemon = true) {
         process.inputStream.bufferedReader().use { reader ->
-            val logger = HotReloadLogger(TAG_COMPILER)
+            val logger = HotReloadLogger(this::class.java.name, tag = TAG_COMPILER)
             while (true) {
                 val nextLine = reader.readLine() ?: break
                 logger.debug(nextLine)

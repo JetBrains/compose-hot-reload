@@ -5,7 +5,6 @@
 
 package org.jetbrains.compose.reload.agent
 
-import org.jetbrains.compose.reload.logging.HotReloadLogger
 import org.jetbrains.compose.reload.logging.createLogger
 import org.jetbrains.compose.reload.logging.with
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
@@ -59,7 +58,7 @@ private fun startOrchestration(): OrchestrationHandle {
         /* Connecting to a server if we're instructed to */
         OrchestrationClient(Application)?.let { client ->
             logger
-                .with(HotReloadLogger(logger.name, logger.level) { message ->
+                .with(createLogger(logger.name, logger.level) { message ->
                     client.sendMessage(OrchestrationMessage.LogMessage(TAG_AGENT, message))
                 })
                 .info("Agent: 'Client' mode (connected to '${client.port}')")
@@ -70,7 +69,7 @@ private fun startOrchestration(): OrchestrationHandle {
         logger.debug("Hot Reload Agent is starting in 'server' mode")
         startOrchestrationServer().also { server ->
             logger
-                .with(HotReloadLogger(logger.name, logger.level) { message ->
+                .with(createLogger(logger.name, logger.level) { message ->
                     server.sendMessage(OrchestrationMessage.LogMessage(TAG_AGENT, message))
                 })
                 .info("Agent: Server started on port '${server.port}'")
@@ -79,7 +78,7 @@ private fun startOrchestration(): OrchestrationHandle {
 
     Runtime.getRuntime().addShutdownHook(thread(start = false) {
         logger
-            .with(HotReloadLogger(logger.name, logger.level) { message ->
+            .with(createLogger(logger.name, logger.level) { message ->
                 orchestration.sendMessage(OrchestrationMessage.LogMessage(TAG_AGENT, message))
             })
             .info("Hot Reload Agent is shutting down")

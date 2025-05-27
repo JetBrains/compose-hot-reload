@@ -10,7 +10,7 @@ import javassist.CtConstructor
 import org.jetbrains.compose.reload.analysis.classId
 import org.jetbrains.compose.reload.analysis.classInitializerMethodId
 import org.jetbrains.compose.reload.core.sortedByTopology
-import org.jetbrains.compose.reload.orchestration.HotReloadLogger
+import org.jetbrains.compose.reload.logging.HotReloadLogger
 import java.lang.reflect.Modifier
 
 private val logger = HotReloadLogger()
