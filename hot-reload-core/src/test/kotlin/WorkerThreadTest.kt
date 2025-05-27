@@ -22,7 +22,7 @@ import kotlin.time.Duration.Companion.seconds
  */
 
 @OptIn(ExperimentalAtomicApi::class)
-class DispatchThreadTest {
+class WorkerThreadTest {
 
     val thread = WorkerThread("Test")
 
