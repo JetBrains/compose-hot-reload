@@ -135,6 +135,7 @@ internal class HotReloadUnitTestExecutor(
                 "-D${HotReloadProperty.IsHeadless.key}=true",
                 "-D${HotReloadProperty.DevToolsEnabled.key}=false",
                 "-D${HotReloadProperty.OrchestrationPort.key}=${orchestrationServer.port}",
+                "-D${HotReloadProperty.EnableStdoutLogging.key}=true",
                 "org.jetbrains.compose.reload.test.Main",
                 "--class", testMethodDescriptor.className, "--method", testMethodDescriptor.methodName,
             )

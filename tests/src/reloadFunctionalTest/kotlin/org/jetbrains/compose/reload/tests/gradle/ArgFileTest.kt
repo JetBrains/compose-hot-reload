@@ -14,7 +14,7 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 import org.jetbrains.compose.reload.core.destroyWithDescendants
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
@@ -40,7 +40,7 @@ import kotlin.test.assertEquals
 import kotlin.test.fail
 
 class ArgFileTest {
-    private val logger = HotReloadLogger()
+    private val logger = Logger()
 
     @HotReloadTest
     @HostIntegrationTest

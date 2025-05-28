@@ -5,12 +5,13 @@
 
 package org.jetbrains.compose.reload.orchestration
 
+import org.jetbrains.compose.reload.core.Try
 import java.util.ServiceLoader
 
-public fun OrchestrationHandle(): OrchestrationHandle {
-    return ServiceLoader.load(OrchestrationService::class.java)
-        .singleOrNull()?.getOrchestration()
-        ?: error("Could not create orchestration handle")
+public fun OrchestrationHandle(): Try<OrchestrationHandle> = Try {
+    ServiceLoader.load(OrchestrationService::class.java)
+        .single()
+        .getOrchestration()
 }
 
 public interface OrchestrationService {

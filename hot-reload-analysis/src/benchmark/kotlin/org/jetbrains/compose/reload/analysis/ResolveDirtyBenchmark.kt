@@ -17,7 +17,7 @@ import kotlinx.benchmark.State
 import kotlinx.benchmark.TearDown
 import kotlinx.benchmark.Warmup
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
@@ -26,7 +26,7 @@ import kotlin.io.path.deleteRecursively
 import kotlin.math.log2
 import kotlin.math.roundToInt
 
-private val logger = HotReloadLogger()
+private val logger = Logger()
 
 @State(Scope.Benchmark)
 @Measurement(iterations = 5, time = 3, timeUnit = TimeUnit.SECONDS)

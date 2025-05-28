@@ -6,9 +6,9 @@
 package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.Disposable
-import org.jetbrains.compose.reload.logging.createLogger
+import org.jetbrains.compose.reload.core.logging.createLogger
 import org.jetbrains.compose.reload.core.submitSafe
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
 import java.io.IOException
@@ -44,7 +44,7 @@ public fun startOrchestrationServer(): OrchestrationServer {
 
 internal class OrchestrationServerImpl(
     private val serverSocket: ServerSocket,
-    private val logger: HotReloadLogger
+    private val logger: Logger
 ) : OrchestrationServer {
     private val isClosed = AtomicBoolean(false)
     private val isActive get() = !isClosed.get()
@@ -62,7 +62,7 @@ internal class OrchestrationServerImpl(
         private val onClientClosed: ((Client) -> Unit),
     ) : AutoCloseable {
 
-        private val logger = HotReloadLogger()
+        private val logger = Logger()
 
         private val isClosed = AtomicBoolean(false)
 

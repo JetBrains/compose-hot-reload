@@ -193,12 +193,14 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 	public static final field TAG_DEVTOOLS Ljava/lang/String;
 	public static final field TAG_RUNTIME Ljava/lang/String;
 	public fun <init> (Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage;
-	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeader ()Ljava/lang/String;
 	public final fun getMessage ()Ljava/lang/String;
 	public final fun getTag ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -345,6 +347,6 @@ public abstract interface class org/jetbrains/compose/reload/orchestration/Orche
 }
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationServiceKt {
-	public static final fun OrchestrationHandle ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationHandle;
+	public static final fun OrchestrationHandle ()Lorg/jetbrains/compose/reload/core/Either;
 }
 

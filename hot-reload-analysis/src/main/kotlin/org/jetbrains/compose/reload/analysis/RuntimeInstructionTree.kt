@@ -23,11 +23,11 @@ import org.jetbrains.compose.reload.core.Failure
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.core.toRight
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.MethodNode
 
-private val logger = HotReloadLogger()
+private val logger = Logger()
 
 data class RuntimeInstructionTree(
     val group: ComposeGroupKey?,

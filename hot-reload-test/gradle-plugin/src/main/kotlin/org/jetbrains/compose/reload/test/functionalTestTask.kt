@@ -74,6 +74,11 @@ internal fun Project.configureGradleTestTasks() {
             task.screenshotsDirectory.map { it.asFile.absolutePath }.string()
         )
 
+        task.systemProperty(
+            HotReloadProperty.EnableStdoutLogging.key,
+            "true"
+        )
+
         task.environment("GRADLE_USER_HOME", project.testGradleUserHome.absolutePath)
         task.environment("JAVA_HOME", testJavaHome.absolutePath)
 

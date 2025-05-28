@@ -19,17 +19,16 @@ import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.window.FrameWindowScope
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
+import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.send
-import org.jetbrains.compose.reload.logging.HotReloadLogger
-import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.CleanCompositionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RetryFailedCompositionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIException
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIRendered
 import org.jetbrains.compose.reload.orchestration.asFlow
 
-private val orchestration = OrchestrationHandle()
-private val logger = HotReloadLogger()
+private val logger = Logger()
 
 @Composable
 fun DevelopmentEntryPoint(child: @Composable () -> Unit) {

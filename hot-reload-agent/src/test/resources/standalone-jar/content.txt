@@ -10,7 +10,7 @@ META-INF/maven/org.javassist/javassist/
 META-INF/maven/org.javassist/javassist/pom.properties
 META-INF/maven/org.javassist/javassist/pom.xml
 META-INF/services/
-META-INF/services/org.jetbrains.compose.reload.logging.HotReloadLoggerService
+META-INF/services/org.jetbrains.compose.reload.core.logging.LoggerService
 META-INF/services/org.jetbrains.compose.reload.orchestration.OrchestrationService
 org/
 org/jetbrains/
@@ -19,7 +19,7 @@ org/jetbrains/compose/reload/
 org/jetbrains/compose/reload/agent/
 org/jetbrains/compose/reload/analysis/
 org/jetbrains/compose/reload/core/
-org/jetbrains/compose/reload/logging/
+org/jetbrains/compose/reload/core/logging/
 org/jetbrains/compose/reload/orchestration/
 org/jetbrains/compose/reload/shaded/
 org/jetbrains/compose/reload/shaded/javassist/

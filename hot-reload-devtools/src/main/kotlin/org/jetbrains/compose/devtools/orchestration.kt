@@ -19,19 +19,15 @@ import java.util.ServiceLoader
 import java.util.concurrent.Future
 
 internal class DevToolsOrchestrationService : OrchestrationService {
-    override fun getOrchestration(): OrchestrationHandle = _orchestration
-
-    private companion object {
-        private val _orchestration: OrchestrationHandle by lazy {
-            ServiceLoader.load(OrchestrationExtension::class.java)
-                .firstNotNullOfOrNull { extension -> extension.getOrchestration() }
-                ?: OrchestrationClient(OrchestrationClientRole.Tooling)
-                ?: error("Could not create orchestration handle")
-        }
-    }
+    override fun getOrchestration(): OrchestrationHandle = orchestration
 }
 
-internal val orchestration: OrchestrationHandle = OrchestrationHandle()
+internal val orchestration: OrchestrationHandle = run {
+    ServiceLoader.load(OrchestrationExtension::class.java)
+        .firstNotNullOfOrNull { extension -> extension.getOrchestration() }
+        ?: OrchestrationClient(OrchestrationClientRole.Tooling)
+        ?: error("Could not create orchestration handle")
+}
 
 internal fun OrchestrationMessage.send(): Future<Unit> {
     return orchestration.sendMessage(this)

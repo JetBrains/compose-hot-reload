@@ -22,7 +22,7 @@ internal fun createLogfile() {
     val queue = LinkedBlockingDeque<String>()
 
     orchestration.invokeWhenReceived<OrchestrationMessage.LogMessage> { message ->
-        queue.add("[${message.tag}]: ${message.message}")
+        queue.add("[${message.tag}]: ${message.header} ${message.message}")
     }
 
     orchestration.invokeWhenReceived<OrchestrationMessage.CriticalException> { exception ->

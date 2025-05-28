@@ -41,7 +41,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
-import org.jetbrains.compose.reload.logging.createLogger
+import org.jetbrains.compose.reload.core.logging.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected

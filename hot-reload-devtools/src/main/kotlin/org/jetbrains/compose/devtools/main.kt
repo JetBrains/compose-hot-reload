@@ -30,7 +30,7 @@ import org.jetbrains.compose.devtools.states.launchReloadState
 import org.jetbrains.compose.devtools.states.launchUIErrorState
 import org.jetbrains.compose.devtools.states.launchWindowsState
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 
 internal val applicationScope = CoroutineScope(Dispatchers.Main + SupervisorJob() + Events() + States())
 
@@ -60,7 +60,7 @@ fun main() {
         if (HotReloadEnvironment.devToolsIsHeadless) return@application
         if (!HotReloadEnvironment.devToolsEnabled) return@application
 
-        val logger = HotReloadLogger()
+        val logger = Logger()
 
         installEvas(
             applicationScope.coroutineContext.eventsOrThrow,

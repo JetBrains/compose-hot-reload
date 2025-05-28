@@ -5,8 +5,10 @@
 
 package org.jetbrains.compose.reload.agent
 
-import org.jetbrains.compose.reload.logging.HotReloadLogger
-import org.jetbrains.compose.reload.logging.createLogger
+import org.jetbrains.compose.reload.core.logging.Level
+import org.jetbrains.compose.reload.core.logging.Logger
+import org.jetbrains.compose.reload.core.logging.createLogger
+import org.jetbrains.compose.reload.core.logging.formatLogHeader
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
@@ -20,21 +22,17 @@ import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
 internal class AgentOrchestrationService : OrchestrationService {
-    override fun getOrchestration(): OrchestrationHandle = _orchestration
-
-    private companion object {
-        private val _orchestration by lazy { startOrchestration() }
-    }
+    override fun getOrchestration(): OrchestrationHandle = orchestration
 }
 
-internal val orchestration: OrchestrationHandle = OrchestrationHandle()
+val orchestration: OrchestrationHandle by lazy { startOrchestration() }
 
 fun OrchestrationMessage.send(): Future<Unit> {
     return orchestration.sendMessage(this)
 }
 
 internal fun launchOrchestration() {
-    val logger = HotReloadLogger()
+    val logger = Logger()
     orchestration.invokeWhenReceived<OrchestrationMessage.ShutdownRequest> { request ->
         /* The request provides a pidFile: We therefore only respect the request when the pidFile matches */
         if (!request.isApplicable()) {
@@ -59,7 +57,13 @@ private fun startOrchestration(): OrchestrationHandle {
         OrchestrationClient(Application)?.let { client ->
             val message = "Agent: 'Client' mode (connected to '${client.port}')"
             logger.info(message)
-            client.sendMessage(OrchestrationMessage.LogMessage(TAG_AGENT, message))
+            client.sendMessage(
+                OrchestrationMessage.LogMessage(
+                    TAG_AGENT,
+                    formatLogHeader("Agent", Level.Info),
+                    message
+                )
+            )
             return@run client
         }
 
@@ -68,14 +72,26 @@ private fun startOrchestration(): OrchestrationHandle {
         startOrchestrationServer().also { server ->
             val message = "Agent: Server started on port '${server.port}'"
             logger.info(message)
-            server.sendMessage(OrchestrationMessage.LogMessage(TAG_AGENT, message))
+            server.sendMessage(
+                OrchestrationMessage.LogMessage(
+                    TAG_AGENT,
+                    formatLogHeader("Agent", Level.Info),
+                    message
+                )
+            )
         }
     }
 
     Runtime.getRuntime().addShutdownHook(thread(start = false) {
         val message = "Hot Reload Agent is shutting down"
         logger.info(message)
-        orchestration.sendMessage(OrchestrationMessage.LogMessage(TAG_AGENT, message))
+        orchestration.sendMessage(
+            OrchestrationMessage.LogMessage(
+                TAG_AGENT,
+                formatLogHeader("Agent", Level.Info),
+                message
+            )
+        )
         orchestration.closeImmediately()
     })
 

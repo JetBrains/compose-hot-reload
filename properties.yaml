@@ -268,7 +268,7 @@ LaunchMode:
 EnableStdoutLogging:
   key: compose.reload.enableStdoutLogging
   type: boolean
-  target: [ application, devtools ]
+  target: [ application, build, devtools ]
   default: "false"
   documentation: |
     Enable output of all logs into the standard output
@@ -276,7 +276,7 @@ EnableStdoutLogging:
 LoggingLevel:
   key: compose.reload.loggingLevel
   type: enum
-  enumClass: org.jetbrains.compose.reload.logging.Level
+  enumClass: org.jetbrains.compose.reload.core.logging.Level
   target: [ application, devtools ]
   default: "Debug"
   documentation: |
