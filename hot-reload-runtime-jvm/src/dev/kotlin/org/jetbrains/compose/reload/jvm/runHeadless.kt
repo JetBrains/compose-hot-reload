@@ -34,10 +34,12 @@ import kotlinx.coroutines.selects.onTimeout
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.yield
 import org.jetbrains.compose.reload.InternalHotReloadApi
+import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.send
 import org.jetbrains.compose.reload.core.asTemplateOrThrow
+import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.renderOrThrow
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
@@ -58,8 +60,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlin.time.toJavaInstant
 
-private val logger = HotReloadLogger()
-private val orchestration = OrchestrationHandle()
+private val logger = Logger()
 
 internal data class SilenceTimeout(val timeout: Duration) : CoroutineContext.Element {
     override val key: CoroutineContext.Key<*> = Key

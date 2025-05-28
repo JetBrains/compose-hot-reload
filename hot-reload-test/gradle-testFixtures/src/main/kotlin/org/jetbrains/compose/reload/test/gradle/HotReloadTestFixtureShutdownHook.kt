@@ -5,13 +5,13 @@
 
 package org.jetbrains.compose.reload.test.gradle
 
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 internal object HotReloadTestFixtureShutdownHook : Thread() {
-    private val logger = HotReloadLogger()
+    private val logger = Logger()
     private val isRegistered = AtomicBoolean(false)
     private val lock = ReentrantLock()
     private val hooks = mutableListOf<Hook>()

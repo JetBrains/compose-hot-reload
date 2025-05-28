@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.reload.core.asFileName
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
@@ -51,9 +51,6 @@ private val testLoggingScope = CoroutineScope(
 
 @OptIn(ExperimentalPathApi::class)
 internal fun ExtensionContext.startOrchestrationTestLogging(server: OrchestrationServer) = testLoggingScope.launch {
-    // enable logging to stdout for tests
-    System.setProperty("compose.reload.enableStdoutLogging", "true")
-
     val testClass = requiredTestClass
     val testMethod = requiredTestMethod
     val context = hotReloadTestInvocationContextOrThrow
@@ -98,7 +95,7 @@ internal fun ExtensionContext.startOrchestrationTestLogging(server: Orchestratio
         writer
     }
 
-    val testClassLogger = HotReloadLogger(testClass.name)
+    val testClassLogger = Logger(testClass.name)
     testClassLogger.info(
         """
         ${requiredTestMethod.name} (${context.getDisplayName()})

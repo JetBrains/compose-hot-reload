@@ -13,11 +13,11 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.send
 import org.jetbrains.compose.reload.core.WindowId
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
-import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowPositioned
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
@@ -28,7 +28,7 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 
 
-private val logger = HotReloadLogger()
+private val logger = Logger()
 
 @Composable
 @Suppress("INVISIBLE_REFERENCE")
@@ -111,7 +111,7 @@ internal fun startWindowManager(): WindowId? {
         window.addComponentListener(componentListener)
 
         launch {
-            OrchestrationHandle().asFlow().filterIsInstance<ClientConnected>().collect { message ->
+            orchestration.asFlow().filterIsInstance<ClientConnected>().collect { message ->
                 if (message.clientRole == OrchestrationClientRole.Tooling && isActive) {
                     broadcastActiveState()
                 }

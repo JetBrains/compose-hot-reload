@@ -15,9 +15,9 @@ import androidx.compose.runtime.reflect.getDeclaredComposableMethod
 import androidx.compose.ui.window.singleWindowApplication
 import org.jetbrains.compose.reload.DevelopmentEntryPoint
 import org.jetbrains.compose.reload.InternalHotReloadApi
+import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
-import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import java.awt.Taskbar
 import kotlin.system.exitProcess
@@ -28,7 +28,7 @@ internal fun main(args: Array<String>) {
     try {
         run(args)
     } catch (t: Throwable) {
-        OrchestrationHandle().sendMessage(OrchestrationMessage.CriticalException(Application, t))
+        orchestration.sendMessage(OrchestrationMessage.CriticalException(Application, t))
         exitProcess(1)
     }
 }

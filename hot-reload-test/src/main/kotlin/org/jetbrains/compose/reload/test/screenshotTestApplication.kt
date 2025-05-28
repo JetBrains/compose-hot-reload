@@ -8,13 +8,13 @@ package org.jetbrains.compose.reload.test
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.reload.agent.send
 import org.jetbrains.compose.reload.jvm.runHeadlessApplicationBlocking
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
-private val logger = HotReloadLogger()
+private val logger = Logger()
 
 /**
  * Entry points for "Applications under test"

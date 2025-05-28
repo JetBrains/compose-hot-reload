@@ -7,13 +7,13 @@ package org.jetbrains.compose.devtools
 
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import kotlin.concurrent.thread
 import kotlin.io.path.deleteIfExists
 import kotlin.jvm.optionals.getOrNull
 import kotlin.system.exitProcess
 
-private val logger = HotReloadLogger()
+private val logger = Logger()
 
 internal fun setupDevToolsProcess() {
     setupOrchestration()

@@ -9,7 +9,7 @@ import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import org.jetbrains.compose.reload.test.core.TestEnvironment
@@ -47,7 +47,7 @@ class StandaloneJarTest {
         val aliveMessage = CompletableFuture<OrchestrationMessage.TestEvent>()
 
         server.invokeWhenMessageReceived { message ->
-            HotReloadLogger().info("Received message: $message")
+            Logger().info("Received message: $message")
             if (message is OrchestrationMessage.TestEvent && message.payload == "Alive") {
                 aliveMessage.complete(message)
             }
@@ -136,11 +136,11 @@ internal object StandaloneJarTestMain {
             exitProcess(42)
         }
 
-        HotReloadLogger().info("Started process: Sending signal")
+        Logger().info("Started process: Sending signal")
 
         orchestration.sendMessage(OrchestrationMessage.TestEvent("Alive")).get()
 
-        HotReloadLogger().info("Signal Sent: Exiting process")
+        Logger().info("Signal Sent: Exiting process")
         exitProcess(0)
     }
 }

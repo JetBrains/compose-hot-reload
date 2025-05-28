@@ -25,7 +25,7 @@ internal fun CoroutineScope.launchConsoleLogState() = launchState(ConsoleLogStat
 
     orchestration.asFlow().collect { event ->
         if (event is OrchestrationMessage.LogMessage) {
-            logDeque.add("${event.tag} | ${event.message.substringAfterLast("] ")}")
+            logDeque.add("${event.tag} | ${event.message}")
         }
 
         if (event is OrchestrationMessage.BuildTaskResult) {

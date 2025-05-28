@@ -5,7 +5,7 @@
 
 package org.jetbrains.compose.reload.tests.gradle
 
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileResult
@@ -20,7 +20,7 @@ import kotlin.test.assertEquals
 
 @QuickTest
 class RecompileRequestTest {
-    private val logger = HotReloadLogger()
+    private val logger = Logger()
 
     @HotReloadTest
     @GradleIntegrationTest

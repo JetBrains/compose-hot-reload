@@ -6,6 +6,7 @@
 @file:OptIn(ExperimentalComposeLibrary::class)
 
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.internal.classpath.Instrumented.systemProperty
 import org.jetbrains.compose.ExperimentalComposeLibrary
 
 plugins {
@@ -31,6 +32,8 @@ tasks.withType<AbstractTestTask> {
     mustRunAfter(":hot-reload-orchestration:test")
 
     outputs.upToDateWhen { false }
+
+    systemProperty("compose.reload.enableStdoutLogging", "true")
 
     testLogging {
         events = setOf(

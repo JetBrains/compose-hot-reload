@@ -9,7 +9,8 @@ import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.mapLeft
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
+import org.jetbrains.compose.reload.core.logging.info
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
@@ -18,7 +19,7 @@ import java.lang.instrument.ClassDefinition
 import java.lang.instrument.Instrumentation
 import java.util.UUID
 
-private val logger = HotReloadLogger()
+private val logger = Logger()
 
 data class Reload(
     val reloadRequestId: UUID,
@@ -76,7 +77,7 @@ internal fun reload(
                 return@mapNotNull null
             }
 
-            logger.info(buildString {
+            logger.info {
                 appendLine("Reloading class: '${clazz.name}' (${change.name})")
 
                 if (originalClass.superclass?.name != clazz.superclass.name) {
@@ -94,7 +95,7 @@ internal fun reload(
                 removedInterfaces.forEach { removedInterface ->
                     appendLine("⚠️ -Interface: '$removedInterface'")
                 }
-            }.trim())
+            }
 
             clazz.transformForStaticsInitialization(originalClass)
 

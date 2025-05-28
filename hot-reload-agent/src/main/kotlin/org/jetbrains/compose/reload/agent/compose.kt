@@ -8,7 +8,7 @@ package org.jetbrains.compose.reload.agent
 import org.jetbrains.compose.reload.analysis.ComposeGroupKey
 import org.jetbrains.compose.reload.analysis.Ids
 import org.jetbrains.compose.reload.core.isFailure
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.security.ProtectionDomain
@@ -16,7 +16,7 @@ import java.util.WeakHashMap
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-private val logger = HotReloadLogger()
+private val logger = Logger()
 
 private val composeClassLoadersLock = ReentrantLock()
 private val composeClassLoaders = WeakHashMap<ClassLoader, Unit>()

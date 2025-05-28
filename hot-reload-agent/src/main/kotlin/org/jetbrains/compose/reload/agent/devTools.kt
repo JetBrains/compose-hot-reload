@@ -10,28 +10,52 @@ import org.jetbrains.compose.reload.core.HotReloadProperty.DevToolsClasspath
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.DevTools
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
+import org.jetbrains.compose.reload.core.logging.Level
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
+import org.jetbrains.compose.reload.core.logging.formatLogHeader
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_DEVTOOLS
 import java.io.File
 import java.nio.file.Path
+import kotlin.concurrent.thread
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 
-private val logger = HotReloadLogger()
+private val logger = Logger()
 
 internal fun launchDevtoolsApplication() {
     if (!HotReloadEnvironment.devToolsEnabled) return
     val classpath = HotReloadEnvironment.devToolsClasspath ?: error("Missing '${DevToolsClasspath}'")
     logger.info("Starting 'DevTools'")
 
-    ProcessBuilder(
+    val process = ProcessBuilder(
         resolveDevtoolsJavaBinary(), "-cp", classpath.joinToString(File.pathSeparator),
         *subprocessDefaultArguments(DevTools, orchestration.port).toTypedArray(),
         *issueNewDebugSessionJvmArguments("DevTools"),
         "-Dapple.awt.UIElement=true",
         "org.jetbrains.compose.devtools.Main",
     ).withHotReloadEnvironmentVariables(DevTools).start()
+
+    thread(name = "DevTools: Stdout", isDaemon = true) {
+        process.inputStream.bufferedReader().forEachLine { line ->
+            OrchestrationMessage.LogMessage(
+                TAG_DEVTOOLS,
+                formatLogHeader("DevTools: Stdout", Level.Info),
+                "stdout: $line"
+            ).send()
+        }
+    }
+    thread(name = "DevTools: Stderr", isDaemon = true) {
+        process.errorStream.bufferedReader().forEachLine { line ->
+            OrchestrationMessage.LogMessage(
+                TAG_DEVTOOLS,
+                formatLogHeader("DevTools: Stderr", Level.Error),
+                "stderr: $line"
+            ).send()
+        }
+    }
 }
 
 private fun resolveDevtoolsJavaBinary(): String? {

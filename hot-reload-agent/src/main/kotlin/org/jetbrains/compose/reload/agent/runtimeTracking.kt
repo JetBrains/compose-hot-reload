@@ -14,7 +14,7 @@ import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
 import org.jetbrains.compose.reload.analysis.verifyRedefinitions
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.submitSafe
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.lang.ref.WeakReference
@@ -24,7 +24,7 @@ import java.util.concurrent.Future
 import kotlin.concurrent.thread
 import kotlin.time.measureTime
 
-private val logger = HotReloadLogger()
+private val logger = Logger()
 
 private val runtimeAnalysisThread = Executors.newSingleThreadExecutor { r ->
     thread(start = false, isDaemon = true, name = "Compose Runtime Analyzer", block = r::run)

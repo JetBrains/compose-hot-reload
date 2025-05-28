@@ -11,7 +11,7 @@ import org.jetbrains.compose.reload.agent.invokeAfterHotReload
 import org.jetbrains.compose.reload.agent.send
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.isSuccess
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest.ChangeType.Added
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest.ChangeType.Modified
@@ -123,7 +123,7 @@ public fun compileAndReload(sourceCode: String) {
         }
     }
 
-    HotReloadLogger().debug("Sending reload request (${request.messageId})")
+    Logger().debug("Sending reload request (${request.messageId})")
     request.send()
 
     try {

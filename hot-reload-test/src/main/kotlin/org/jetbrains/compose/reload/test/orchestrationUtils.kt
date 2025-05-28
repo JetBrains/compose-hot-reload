@@ -10,20 +10,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.receiveAsFlow
-import org.jetbrains.compose.reload.logging.HotReloadLogger
-import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
+import org.jetbrains.compose.reload.agent.orchestration
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asChannel
 
-private val logger = HotReloadLogger()
-private val orchestration = OrchestrationHandle()
+private val logger = Logger()
 
 public fun sendTestEvent(any: Any? = null) {
     orchestration.sendMessage(OrchestrationMessage.TestEvent(any))
 }
 
 public fun sendLog(any: Any?) {
-    orchestration.sendMessage(OrchestrationMessage.LogMessage("test", any.toString()))
+    orchestration.sendMessage(OrchestrationMessage.LogMessage("test", null,  any.toString()))
 }
 
 @Composable

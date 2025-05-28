@@ -9,13 +9,13 @@
 package org.jetbrains.compose.reload.test
 
 import org.jetbrains.compose.reload.agent.send
-import org.jetbrains.compose.reload.logging.HotReloadLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import java.lang.reflect.InvocationTargetException
 import kotlin.system.exitProcess
 
-private val logger = HotReloadLogger()
+private val logger = Logger()
 
 internal enum class ExitCode(val value: Int) {
     Success(0),
