@@ -18,6 +18,7 @@ import kotlin.time.Duration
  * be called from the [reloadMainThread])
  */
 public interface Future<T> {
+
     /**
      * Registers a completion handler for this future.
      * If the future is already completed, the result handler will be called with the known value
@@ -28,8 +29,14 @@ public interface Future<T> {
 }
 
 public interface CompletableFuture<T> : Future<T> {
-    public fun completeWith(result: Result<T>)
+    public fun completeWith(result: Result<T>): Boolean
 }
+
+public fun <T> CompletableFuture<T>.complete(value: T) =
+    completeWith(Result.success(value))
+
+public fun <T> CompletableFuture<T>.completeExceptionally(exception: Throwable) =
+    completeWith(Result.failure(exception))
 
 public fun <T> Future(): CompletableFuture<T> {
     return FutureImpl()
@@ -37,6 +44,14 @@ public fun <T> Future(): CompletableFuture<T> {
 
 internal fun <T> Future(result: Result<T>): Future<T> {
     return CompletedFuture(result)
+}
+
+internal fun <T> SuccessFuture(result: T): Future<T> {
+    return CompletedFuture(Result.success(result))
+}
+
+internal fun <T> FailureFuture(result: Throwable): Future<T> {
+    return CompletedFuture(Result.failure(result))
 }
 
 private class FutureImpl<T> : CompletableFuture<T> {
@@ -66,9 +81,11 @@ private class FutureImpl<T> : CompletableFuture<T> {
 
 
     override fun completeWith(result: Result<T>) = lock.withLock {
+        if (this.result != null) return false
         this.result = result
         listeners.toTypedArray().forEach { listener -> listener(result) }
         listeners.clear()
+        true
     }
 }
 

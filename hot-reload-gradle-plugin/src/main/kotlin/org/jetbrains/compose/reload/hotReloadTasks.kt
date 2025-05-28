@@ -118,8 +118,9 @@ abstract class HotReloadTask : DefaultTask() {
                 logger.debug("UP-TO-DATE: No changed classes found")
             }
 
+            client.shutdown()
             logger.quiet(reloadReport(request))
-            client.sendMessage(request).get()
+            client.sendMessage(request) // <- fail!
             pendingRequestFile.deleteIfExists()
         }
     }

@@ -6,19 +6,24 @@
 package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.Disposable
-import java.util.concurrent.Future
+import org.jetbrains.compose.reload.core.Future
+import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.globalLaunch
+import kotlin.time.Duration
 
 
 public interface OrchestrationHandle : AutoCloseable {
     public val port: Int
-    public fun invokeWhenClosed(action: () -> Unit)
+    public fun invokeWhenClosed(action: () -> Unit): Disposable
     public fun invokeWhenMessageReceived(action: (OrchestrationMessage) -> Unit): Disposable
-    public fun sendMessage(message: OrchestrationMessage): Future<Unit>
+
+
+    public suspend fun sendMessage(message: OrchestrationMessage)
 
     /**
      * Will gracefully close the orchestration; The returned future shall not be awaited on the orchestration thread
      */
-    public fun closeGracefully(): Future<Unit>
+    public suspend fun closeGracefully()
 
     /**
      * Can be used as 'Shutdown Hook' to close the sockets immediately.
@@ -26,6 +31,20 @@ public interface OrchestrationHandle : AutoCloseable {
      */
     public fun closeImmediately()
 }
+
+public fun OrchestrationHandle.sendMessageAsync(message: OrchestrationMessage): Future<Unit> = globalLaunch {
+    sendMessage(message)
+}
+
+public fun OrchestrationHandle.sendMessageBlocking(message: OrchestrationMessage): Result<Unit> = globalLaunch {
+    sendMessage(message)
+}.getBlocking()
+
+public fun OrchestrationHandle.sendMessageBlocking(
+    message: OrchestrationMessage, timeout: Duration
+): Result<Unit> = globalLaunch {
+    sendMessage(message)
+}.getBlocking(timeout)
 
 public inline fun <reified T> OrchestrationHandle.invokeWhenReceived(crossinline action: (T) -> Unit): Disposable {
     return invokeWhenMessageReceived { message ->

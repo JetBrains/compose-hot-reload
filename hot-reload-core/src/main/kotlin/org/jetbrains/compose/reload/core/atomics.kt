@@ -22,7 +22,6 @@ public inline fun <T> AtomicReference<T>.update(updater: (T) -> T): Update<T> {
 }
 
 
-
 @OptIn(ExperimentalAtomicApi::class)
 @JvmName("updateKotlin")
 public inline fun <T> KAtomicReference<T>.update(updater: (T) -> T): Update<T> {
@@ -32,5 +31,14 @@ public inline fun <T> KAtomicReference<T>.update(updater: (T) -> T): Update<T> {
         if (compareAndSet(value, updated)) {
             return Update(value, updated)
         }
+    }
+}
+
+@OptIn(ExperimentalAtomicApi::class)
+@JvmName("updateKotlin")
+public inline fun <T, R> KAtomicReference<T>.loop(action: (T) -> R): R {
+    while (true) {
+        val value = load()
+        return action(value)
     }
 }

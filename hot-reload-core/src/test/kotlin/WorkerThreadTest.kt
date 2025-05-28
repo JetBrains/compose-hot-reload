@@ -33,14 +33,12 @@ class WorkerThreadTest {
 
     @Test
     fun `test - simple invoke`() {
-        val resultInvocations = AtomicInt(0)
         val actionInvocations = AtomicInt(0)
 
         val result = thread.invoke {
             actionInvocations.incrementAndFetch()
         }.getBlocking(5.seconds)
 
-        assertEquals(1, resultInvocations.load())
         assertEquals(1, actionInvocations.load())
         assertEquals(Result.success(1), result)
 

@@ -5,21 +5,30 @@
 
 package org.jetbrains.compose.reload.core
 
+import java.util.concurrent.RejectedExecutionException
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.CoroutineContext
 
 @InternalHotReloadApi
-public class ThreadDispatcher(
+public class WorkerThreadDispatcher(
     private val workerThread: WorkerThread,
     private val isImmediate: Boolean = false,
 ) : ContinuationInterceptor {
     override fun <T> interceptContinuation(continuation: Continuation<T>): Continuation<T> {
         return Continuation(continuation.context) { result ->
+            /* Fast path: We can invoke immediately */
             if (Thread.currentThread() == workerThread && isImmediate) {
                 continuation.resumeWith(result)
-            } else {
-                workerThread.invoke { continuation.resumeWith(result) }
+                return@Continuation
+            }
+
+            /* We dispatch to the worker thread */
+            workerThread.invoke { continuation.resumeWith(result) }.invokeOnCompletion { result ->
+                val exception = result.exceptionOrNull()
+                if (exception is RejectedExecutionException) {
+                    continuation.resumeWith(Result.failure(exception))
+                }
             }
         }
     }
@@ -27,3 +36,9 @@ public class ThreadDispatcher(
     override val key: CoroutineContext.Key<*>
         get() = ContinuationInterceptor.Key
 }
+
+public val WorkerThread.dispatcher: ContinuationInterceptor
+    get() = WorkerThreadDispatcher(this)
+
+public val WorkerThread.dispatcherImmediate: ContinuationInterceptor
+    get() = WorkerThreadDispatcher(this, isImmediate = true)
