@@ -83,7 +83,7 @@ internal fun reload(
                     appendLine("⚠️ Superclass: '${originalClass.superclass?.name}' -> '${clazz.superclass?.name}'")
                 }
 
-                val addedInterfaces = clazz.interfaces.map { it.name } -
+                val addedInterfaces = clazz.interfaces.map { it.name }.toSet() -
                     originalClass.interfaces.map { it.name }.toSet()
                 addedInterfaces.forEach { addedInterface ->
                     appendLine("⚠️ +Interface: '$addedInterface'")
