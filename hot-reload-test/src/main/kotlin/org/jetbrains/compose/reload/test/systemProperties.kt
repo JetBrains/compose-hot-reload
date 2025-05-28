@@ -12,7 +12,7 @@ internal val compileClasspath = requireEnvVar("chr.compilePath").split(File.path
 
 internal val compilePluginClasspath = requireEnvVar("chr.compilePluginPath").split(File.pathSeparator).map(::Path)
 
-internal val compileModuleName = requireEnvVar("chr.compileModuleName").toString()
+internal val compileModuleName = requireEnvVar("chr.compileModuleName")
 
 internal fun applicationClassesDir() = Path(requireSystemProperty("applicationClassesDir"))
 

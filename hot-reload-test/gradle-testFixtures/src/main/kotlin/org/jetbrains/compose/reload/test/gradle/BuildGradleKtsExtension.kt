@@ -151,7 +151,7 @@ internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
         androidEnabledKey(context.testedAndroidVersion != null)
     }
 
-    override fun plugins(context: ExtensionContext): String? {
+    override fun plugins(context: ExtensionContext): String {
         return """
             kotlin("{{kotlin.plugin}}")
             kotlin("plugin.compose")
@@ -166,12 +166,12 @@ internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
         }
     }
 
-    override fun commonDependencies(context: ExtensionContext): String? = """
+    override fun commonDependencies(context: ExtensionContext): String = """
         implementation(compose.foundation)
         implementation(compose.material3)
         """.trimIndent()
 
-    override fun jvmMainDependencies(context: ExtensionContext): String? = """
+    override fun jvmMainDependencies(context: ExtensionContext): String = """
         implementation(compose.desktop.currentOs)
         implementation("org.jetbrains.compose.hot-reload:hot-reload-test:$HOT_RELOAD_VERSION")
     """.trimIndent()

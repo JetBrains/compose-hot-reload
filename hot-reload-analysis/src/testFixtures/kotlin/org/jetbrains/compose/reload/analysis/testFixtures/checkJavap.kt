@@ -51,9 +51,8 @@ fun checkJavap(testInfo: TestInfo, name: String = "", code: Map<String, ByteArra
         }
     }
 
-    val expectedContent = directory.listDirectoryEntries("*.javap.txt").associate { path ->
-        path to path.readText().trim()
-    }
+    val expectedContent = directory.listDirectoryEntries("*.javap.txt")
+        .associateWith { path -> path.readText().trim() }
 
     val unexpectedActualPaths = actualContent.keys - expectedContent.keys
     if (unexpectedActualPaths.isNotEmpty()) {

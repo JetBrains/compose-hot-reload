@@ -15,11 +15,6 @@ import properties.DeclaredHotReloadProperty.Type
 import java.nio.file.Path
 import kotlin.io.path.readText
 
-/*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
- * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
- */
-
 internal fun parseHotReloadProperties(file: Path): List<DeclaredHotReloadProperty> {
     val objects = Yaml.default.decodeFromString<YamlMap>(file.readText())
     return objects.entries.mapNotNull { (key, value) ->
@@ -30,7 +25,7 @@ internal fun parseHotReloadProperties(file: Path): List<DeclaredHotReloadPropert
 
 private fun parseHotReloadProperty(
     name: String, node: YamlNode
-): DeclaredHotReloadProperty? {
+): DeclaredHotReloadProperty {
     if (node !is YamlMap) error("Property '$name' must be map")
     val key = node.getScalar("key")?.content ?: error("Property '$name' must have 'key' field")
     val type = node.getScalar("type")?.content ?: error("Property '$name' must have 'type' field")
@@ -81,7 +76,7 @@ internal fun DeclaredHotReloadProperty.toKotlinType(nullable: Boolean = default 
         Type.Long -> "Long"
         Type.File -> "Path"
         Type.Files -> "List<Path>"
-        Type.Enum -> (enumClass ?: error("Unknown enum ${type}"))
+        Type.Enum -> (enumClass ?: error("Unknown enum $type"))
     }.plus("?".takeIf { nullable } ?: "")
 }
 
@@ -100,7 +95,7 @@ internal fun DeclaredHotReloadProperty.convertTypeCode(variableName: String) = w
     Type.Long -> "$variableName.toLong()"
     Type.File -> "Path($variableName)"
     Type.Files -> "$variableName.split(File.pathSeparator).map(::Path)"
-    Type.Enum -> """enumValueOf<${enumClass ?: error("Unknown enum ${type}")}>($variableName)"""
+    Type.Enum -> """enumValueOf<${enumClass ?: error("Unknown enum $type")}>($variableName)"""
 }
 
 internal fun DeclaredHotReloadProperty.renderDefault(): String? {

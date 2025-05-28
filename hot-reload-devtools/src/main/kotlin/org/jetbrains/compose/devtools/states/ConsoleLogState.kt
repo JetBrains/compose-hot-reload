@@ -16,7 +16,7 @@ import kotlin.time.Duration.Companion.milliseconds
 data class ConsoleLogState(val logs: List<String>) : State {
     companion object Key : State.Key<ConsoleLogState> {
         override val default: ConsoleLogState = ConsoleLogState(emptyList())
-        const val limit = 4096
+        const val LIMIT = 4096
     }
 
 }
@@ -33,7 +33,7 @@ internal fun CoroutineScope.launchConsoleLogState() = launchState(ConsoleLogStat
             logDeque.add(event.toLog())
         }
 
-        if (logDeque.size > ConsoleLogState.limit) logDeque.removeFirst()
+        if (logDeque.size > ConsoleLogState.LIMIT) logDeque.removeFirst()
         ConsoleLogState(logs = logDeque.toList()).emit()
     }
 }

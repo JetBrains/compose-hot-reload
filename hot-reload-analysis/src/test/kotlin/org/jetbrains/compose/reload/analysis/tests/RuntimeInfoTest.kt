@@ -364,7 +364,7 @@ class RuntimeInfoTest {
 
 private fun checkRuntimeInfo(
     testInfo: TestInfo, compiler: Compiler, code: Map<String, String>, name: String? = null
-): RuntimeInfo? {
+): RuntimeInfo {
     val runtimeInfo = TrackingRuntimeInfo()
     val output = compiler.compile(code)
      output.values

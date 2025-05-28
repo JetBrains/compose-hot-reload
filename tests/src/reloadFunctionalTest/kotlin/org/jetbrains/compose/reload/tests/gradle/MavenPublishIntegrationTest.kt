@@ -131,7 +131,7 @@ private class DefaultSettingsGradleKtsExtension : ParameterResolver {
     override fun resolveParameter(
         parameterContext: ParameterContext,
         extensionContext: ExtensionContext
-    ): Any? {
+    ): Any {
         return renderSettingsGradleKts(extensionContext)
     }
 }

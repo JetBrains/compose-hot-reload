@@ -17,12 +17,12 @@ internal fun createTestFailure(message: OrchestrationMessage.CriticalException):
 
     return object : TestFailure() {
         override fun getCauses(): List<TestFailure?> = emptyList()
-        override fun getRawFailure(): Throwable? = throwable
+        override fun getRawFailure(): Throwable = throwable
 
         override fun getDetails(): TestFailureDetails = object : TestFailureDetails {
             override fun getMessage(): String? = message.message
             override fun getClassName(): String? = message.exceptionClassName
-            override fun getStacktrace(): String? = throwable.stackTraceToString()
+            override fun getStacktrace(): String = throwable.stackTraceToString()
             override fun isAssertionFailure(): Boolean =
                 message.exceptionClassName?.contains("AssertionFailed") == true
 

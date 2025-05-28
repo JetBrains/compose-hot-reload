@@ -51,7 +51,7 @@ class ErrorRecoveryTests {
     @HotReloadTest
     @QuickTest
     fun `illegal code change - with recovery`(fixture: HotReloadTestFixture) = fixture.runTest {
-        val d = "\$"
+        val d = "$"
         val code = fixture.initialSourceCode(
             """
             import androidx.compose.foundation.layout.*
@@ -130,7 +130,7 @@ class ErrorRecoveryTests {
     @HotReloadTest
     @QuickTest
     fun `illegal code change - update compose entry function`(fixture: HotReloadTestFixture) = fixture.runTest {
-        val d = "\$"
+        val d = "$"
         val code = fixture.initialSourceCode(
             """
                 import androidx.compose.material.Text

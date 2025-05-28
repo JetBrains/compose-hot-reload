@@ -135,4 +135,4 @@ internal fun AbstractInsnNode.print(printer: Textifier, mp: TraceMethodVisitor):
     return sw.toString().trim()
 }
 
-internal fun RuntimeInstructionTree.render(): String = "${type} (group=${group})"
+internal fun RuntimeInstructionTree.render(): String = "$type (group=${group})"

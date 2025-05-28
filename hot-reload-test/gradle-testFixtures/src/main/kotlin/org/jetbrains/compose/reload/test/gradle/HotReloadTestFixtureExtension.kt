@@ -24,7 +24,7 @@ internal class HotReloadTestFixtureExtension(
 ) : ParameterResolver, BeforeEachCallback, AfterEachCallback, BeforeTestExecutionCallback {
 
     companion object {
-        const val testFixtureKey = "hotReloadTestFixture"
+        const val TEST_FIXTURE_KEY = "hotReloadTestFixture"
     }
 
     override fun beforeEach(context: ExtensionContext) {
@@ -47,7 +47,7 @@ internal class HotReloadTestFixtureExtension(
         )
     }
 
-    override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any? {
+    override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
         return when (parameterContext.parameter.type) {
             HotReloadTestFixture::class.java -> extensionContext.getHotReloadTestFixtureOrThrow()
             else -> throw IllegalArgumentException("Unknown type: ${parameterContext.parameter.type}")
@@ -56,7 +56,7 @@ internal class HotReloadTestFixtureExtension(
 
     private fun ExtensionContext.getOrCreateTestFixture(): HotReloadTestFixture {
         return getStore(namespace).getOrComputeIfAbsent(
-            testFixtureKey,
+            TEST_FIXTURE_KEY,
             { createTestFixture() },
             HotReloadTestFixture::class.java
         )
@@ -108,7 +108,7 @@ internal class HotReloadTestFixtureExtension(
 
 internal fun ExtensionContext.getHotReloadTestFixtureOrThrow(): HotReloadTestFixture {
     return getStore(namespace).get(
-        HotReloadTestFixtureExtension.testFixtureKey,
+        HotReloadTestFixtureExtension.TEST_FIXTURE_KEY,
         HotReloadTestFixture::class.java
     ) ?: error("Missing '${HotReloadTestFixture::class.simpleName}'")
 }

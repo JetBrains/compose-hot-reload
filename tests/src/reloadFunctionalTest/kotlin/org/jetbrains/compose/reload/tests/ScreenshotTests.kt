@@ -47,7 +47,7 @@ class ScreenshotTests {
     @HotReloadTest
     @Debug(".*Continuous.*")
     fun `test - retained state`(fixture: HotReloadTestFixture) = fixture.runTest {
-        val d = "\$"
+        val d = "$"
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.*
             import androidx.compose.material3.*
