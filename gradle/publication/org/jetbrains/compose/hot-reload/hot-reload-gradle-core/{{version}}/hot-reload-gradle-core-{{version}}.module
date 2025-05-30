@@ -66,7 +66,7 @@
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",
           "version": {
-            "requires": "2.1.20"
+            "requires": "2.1.21"
           }
         }
       ],
