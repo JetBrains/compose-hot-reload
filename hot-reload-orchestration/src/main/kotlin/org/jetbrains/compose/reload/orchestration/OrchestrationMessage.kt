@@ -271,7 +271,7 @@ public sealed class OrchestrationMessage : Serializable {
         }
 
         override fun toString(): String = buildString {
-            append("Log [$tag]")
+            append("Log [$tag] ")
             if (header != null) append("$header ")
             append(message)
         }

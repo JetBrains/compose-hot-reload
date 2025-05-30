@@ -268,8 +268,8 @@ LaunchMode:
 EnableStdoutLogging:
   key: compose.reload.enableStdoutLogging
   type: boolean
-  target: [ application, devtools ]
-  default: "true"
+  target: [ application, build, devtools ]
+  default: "false"
   documentation: |
     Enable output of all logs into the standard output
 

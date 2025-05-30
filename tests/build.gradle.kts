@@ -6,7 +6,6 @@
 @file:OptIn(ExperimentalComposeLibrary::class)
 
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.gradle.internal.classpath.Instrumented.systemProperty
 import org.jetbrains.compose.ExperimentalComposeLibrary
 
 plugins {
@@ -33,8 +32,6 @@ tasks.withType<AbstractTestTask> {
 
     outputs.upToDateWhen { false }
 
-    systemProperty("compose.reload.enableStdoutLogging", "true")
-
     testLogging {
         events = setOf(
             TestLogEvent.STARTED,
@@ -48,6 +45,8 @@ tasks.withType<AbstractTestTask> {
 }
 
 tasks.reloadFunctionalTest.configure {
+    environment("compose.reload.enableStdoutLogging", "true")
+
     providers.environmentVariable("TESTED_BUCKET").orNull?.let { value ->
         environment("TESTED_BUCKET", value)
     }
