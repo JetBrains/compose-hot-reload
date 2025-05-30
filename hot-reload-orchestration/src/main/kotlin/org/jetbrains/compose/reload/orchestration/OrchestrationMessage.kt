@@ -255,9 +255,10 @@ public sealed class OrchestrationMessage : Serializable {
      */
     public data class LogMessage(
         val tag: String?,
+        val header: String?,
         val message: String,
     ) : OrchestrationMessage() {
-        public constructor(message: String) : this(null, message)
+        public constructor(message: String) : this(null, null, message)
 
         public companion object {
             public const val TAG_COMPILER: String = "Compiler"
@@ -269,8 +270,10 @@ public sealed class OrchestrationMessage : Serializable {
             internal const val serialVersionUID: Long = 0L
         }
 
-        override fun toString(): String {
-            return "Log [$tag] $message"
+        override fun toString(): String = buildString {
+            append("Log [$tag] ")
+            if (header != null) append("$header ")
+            append(message)
         }
     }
 

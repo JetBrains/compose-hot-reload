@@ -53,11 +53,9 @@ tasks.named { it == "benchmarkBenchmark" }.configureEach {
 dependencies {
     implementation(project(":hot-reload-core"))
 
-    implementation(deps.slf4j.api)
     implementation(deps.asm)
     implementation(deps.asm.tree)
 
-    testImplementation(deps.logback)
     testImplementation(deps.asm.util)
 
     testFixturesImplementation(kotlin("test"))

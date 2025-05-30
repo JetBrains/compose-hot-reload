@@ -9,11 +9,13 @@ import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty.DevToolsClasspath
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.DevTools
 import org.jetbrains.compose.reload.core.Os
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
+import org.jetbrains.compose.reload.core.logging.Level
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
+import org.jetbrains.compose.reload.core.logging.Logger
+import org.jetbrains.compose.reload.core.logging.formatLogHeader
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_DEVTOOLS
 import java.io.File
 import java.nio.file.Path
@@ -21,7 +23,7 @@ import kotlin.concurrent.thread
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 
-private val logger = createLogger()
+private val logger = Logger()
 
 internal fun launchDevtoolsApplication() {
     if (!HotReloadEnvironment.devToolsEnabled) return
@@ -38,14 +40,20 @@ internal fun launchDevtoolsApplication() {
 
     thread(name = "DevTools: Stdout", isDaemon = true) {
         process.inputStream.bufferedReader().forEachLine { line ->
-            LogMessage(TAG_DEVTOOLS, line).send()
+            OrchestrationMessage.LogMessage(
+                TAG_DEVTOOLS,
+                formatLogHeader("DevTools: Stdout", Level.Info),
+                "stdout: $line"
+            ).send()
         }
-        logger.info("DevTools process exited")
     }
-
     thread(name = "DevTools: Stderr", isDaemon = true) {
         process.errorStream.bufferedReader().forEachLine { line ->
-            LogMessage(TAG_DEVTOOLS, "stderr: $line").send()
+            OrchestrationMessage.LogMessage(
+                TAG_DEVTOOLS,
+                formatLogHeader("DevTools: Stderr", Level.Error),
+                "stderr: $line"
+            ).send()
         }
     }
 }

@@ -20,14 +20,14 @@ import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.StartReplac
 import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.StartRestartGroup
 import org.jetbrains.compose.reload.core.Either
 import org.jetbrains.compose.reload.core.Failure
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.core.toRight
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.MethodNode
 
-private val logger = createLogger()
+private val logger = Logger()
 
 data class RuntimeInstructionTree(
     val group: ComposeGroupKey?,

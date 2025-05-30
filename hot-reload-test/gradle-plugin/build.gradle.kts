@@ -33,5 +33,4 @@ dependencies {
     implementation(project(":hot-reload-orchestration"))
     implementation(deps.asm)
     implementation(deps.asm.tree)
-    implementation(deps.logback)
 }

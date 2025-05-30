@@ -193,7 +193,6 @@ private val hotReloadAgentDependencies = arrayOf(
     PathRegex(".*/gradleHome/.*/asm-9.8.jar"),
     PathRegex(".*/gradleHome/.*/asm-tree-9.8.jar"),
     PathRegex(".*/gradleHome/.*/javassist-3.30.2-GA.jar"),
-    PathRegex(".*/gradleHome/.*/slf4j-api-2.0.17.jar"),
     PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-agent-$HOT_RELOAD_VERSION.jar"),
     PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-core-$HOT_RELOAD_VERSION.jar"),
     PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-orchestration-$HOT_RELOAD_VERSION.jar"),

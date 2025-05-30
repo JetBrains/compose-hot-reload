@@ -45,6 +45,8 @@ tasks.withType<AbstractTestTask> {
 }
 
 tasks.reloadFunctionalTest.configure {
+    environment("compose.reload.enableStdoutLogging", "true")
+
     providers.environmentVariable("TESTED_BUCKET").orNull?.let { value ->
         environment("TESTED_BUCKET", value)
     }
@@ -70,8 +72,6 @@ dependencies {
     implementation(project(":hot-reload-core"))
     implementation(project(":hot-reload-orchestration"))
     implementation(kotlin("test"))
-    implementation(deps.slf4j.api)
-    implementation(deps.logback)
     implementation(compose.runtime)
     implementation(deps.kotlinxSerialization.json)
 

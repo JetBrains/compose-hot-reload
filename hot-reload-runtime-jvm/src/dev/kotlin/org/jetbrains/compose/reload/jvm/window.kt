@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.send
 import org.jetbrains.compose.reload.core.WindowId
-import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowPositioned
@@ -28,7 +28,7 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 
 
-private val logger = createLogger()
+private val logger = Logger()
 
 @Composable
 @Suppress("INVISIBLE_REFERENCE")
