@@ -11,8 +11,13 @@ import org.jetbrains.compose.reload.core.withLinearClosure
 import java.io.File
 import java.io.Serializable
 import java.util.UUID
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.fetchAndIncrement
+import kotlin.uuid.ExperimentalUuidApi
 
-public sealed class OrchestrationMessage : Serializable {
+@OptIn(ExperimentalUuidApi::class)
+public sealed class OrchestrationMessage : OrchestrationPackage(), Serializable {
     /**
      * Requests that all participants in the orchestration are supposed to shut down.
      * Note: Closing the [OrchestrationServer] is also supposed to close all clients.
@@ -59,7 +64,7 @@ public sealed class OrchestrationMessage : Serializable {
      * @param clientId: uuid used which identifies the connection
      */
     public data class ClientConnected(
-        public val clientId: UUID,
+        public val clientId: OrchestrationClientId,
         public val clientRole: OrchestrationClientRole,
         public val clientPid: Long? = null
     ) : OrchestrationMessage() {
@@ -424,8 +429,7 @@ public sealed class OrchestrationMessage : Serializable {
 
 
     /* Base implementation */
-
-    public val messageId: UUID = UUID.randomUUID()
+    public val messageId: OrchestrationMessageId = OrchestrationMessageId.random()
 
     override fun equals(other: Any?): Boolean {
         if (other !is OrchestrationMessage) return false
@@ -439,5 +443,21 @@ public sealed class OrchestrationMessage : Serializable {
 
     override fun toString(): String {
         return this.javaClass.simpleName
+    }
+}
+
+public data class OrchestrationMessageId(internal val value: String) : Serializable {
+    @OptIn(ExperimentalAtomicApi::class)
+    internal companion object {
+        const val serialVersionUID: Long = 0L
+        private val messagesIndex = AtomicInt(0)
+
+        fun random(): OrchestrationMessageId = OrchestrationMessageId(
+            "${messagesIndex.fetchAndIncrement()}: ${UUID.randomUUID()}"
+        )
+    }
+
+    override fun toString(): String {
+        return value
     }
 }

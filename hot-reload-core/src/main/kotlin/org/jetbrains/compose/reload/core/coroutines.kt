@@ -14,31 +14,33 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.createCoroutine
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-private val global get() = Task()
+private val global get() = Task<Unit>()
 
-public fun <T> globalLaunch(action: suspend Task.() -> T): Future<T> = global.launch { action() }
+public fun <T> launchTask(action: suspend Task<T>.() -> T): Task<T> = global.launch { action() }
 
 @InternalHotReloadApi
 public suspend fun <T> withThread(
     workerThread: WorkerThread, isImmediate: Boolean = false, action: suspend () -> T
 ): T {
     val newContext = coroutineContext + WorkerThreadDispatcher(workerThread, isImmediate)
-    return suspendCoroutine { continuation ->
+    return suspendStoppableCoroutine { continuation ->
         action.createCoroutine(Continuation(newContext) { result -> continuation.resumeWith(result) })
             .resume(Unit)
     }
 }
 
+
 @InternalHotReloadApi
-public suspend fun <T> Future<T>.await(): T = suspendCoroutine { continuation ->
-    invokeOnCompletion { result -> continuation.resumeWith(result) }
+public suspend fun <T> Future<T>.await(): Try<T> = suspendCoroutine { continuation ->
+    invokeOnCompletion { result -> continuation.resume(result) }
 }
 
 @InternalHotReloadApi
-public suspend fun <T> newTask(action: suspend Task.() -> T): T {
-    val task = Task()
+public suspend fun <T> newTask(action: suspend Task<T>.() -> T): T {
+    val task = Task<T>()
 
     val newContext = coroutineContext + task
     return suspendCoroutine { continuation ->
@@ -49,73 +51,108 @@ public suspend fun <T> newTask(action: suspend Task.() -> T): T {
     }
 }
 
+public suspend inline fun <T> suspendStoppableCoroutine(crossinline action: (Continuation<T>) -> Unit): T {
+    val task = coroutineContext[Task] ?: error("No 'CoroutineLifecycle' in context")
+    var onStop: Disposable? = null
+    try {
+        return suspendCoroutine { continuation ->
+            onStop = task.invokeOnStop { error -> continuation.resumeWithException(StoppedException(error)) }
+            action(continuation)
+        }
+    } finally {
+        onStop?.dispose()
+    }
+}
+
+public suspend fun stopNow(): Nothing = throw StoppedException()
+
 public suspend fun stop(error: Throwable? = null) {
     coroutineContext[Task]?.stop(error) ?: error("No 'CoroutineLifecycle' in context")
 }
 
-public suspend fun invokeOnStop(action: (error: Throwable?) -> Unit) {
-    coroutineContext[Task]?.invokeOnStop(action) ?: error("No 'CoroutineLifecycle' in context")
+public suspend fun invokeOnStop(action: (error: Throwable?) -> Unit): Disposable {
+    return coroutineContext[Task]?.invokeOnStop(action) ?: error("No 'CoroutineLifecycle' in context")
 }
 
+public suspend fun invokeOnFinish(action: (error: Throwable?) -> Unit): Disposable {
+    return coroutineContext[Task]?.invokeOnFinish(action) ?: error("No 'CoroutineLifecycle' in context")
+}
+
+public suspend fun isActive(): Boolean = coroutineContext[Task]?.isActive ?: false
 
 @OptIn(ExperimentalAtomicApi::class)
-public class Task internal constructor(
-    context: CoroutineContext = EmptyCoroutineContext,
-) : CoroutineContext.Element {
+public class Task<T> internal constructor(
+    private val parent: Task<*>? = null, context: CoroutineContext = EmptyCoroutineContext,
+) : CoroutineContext.Element, Future<T> {
 
     override val key: CoroutineContext.Key<*> = Key
 
-    private val context = reloadMainDispatcher + context + this
+    private val context: CoroutineContext =
+        reloadMainDispatcher + (parent?.context ?: EmptyCoroutineContext) + context + this
+
     private val state = AtomicReference<State>(State.Active(emptyList()))
-    private val onFinished = Future<Result<*>>()
+    private val onFinished = Future<T>()
     private val onStop = Future<Unit>()
+
+    public val isActive: Boolean get() = state.load() is State.Active
+
+    override fun isCompleted(): Boolean {
+        return onFinished.isCompleted()
+    }
+
+    override fun invokeOnCompletion(onResult: (Try<T>) -> Unit): Disposable {
+        return onFinished.invokeOnCompletion(onResult)
+    }
 
     public fun <T> launch(
         context: CoroutineContext = EmptyCoroutineContext,
-        action: suspend Task.() -> T
-    ): Future<T> {
+        action: suspend Task<T>.() -> T
+    ): Task<T> {
         /* Enqueue child task */
-        val newTask = Task(this.context + context)
+        val newTask = Task<T>(this, context)
         state.update { currentState ->
             when (currentState) {
                 is State.Active -> State.Active(currentState.children + newTask)
                 is State.Stopping,
-                is State.Finished -> return FailureFuture(RejectedExecutionException("Task is not active"))
+                is State.Finished -> {
+                    newTask.onFinished.completeExceptionally(RejectedExecutionException("Task is finished"))
+                    return newTask
+                }
             }
         }
 
-        val future = Future<T>()
-
         action.createCoroutine(newTask, Continuation(newTask.context) { result ->
             /* A failure in the supplied action is supposed to the entire task */
-            if (result.isFailure) {
-                stop(result.exceptionOrNull())
+            val failure = result.exceptionOrNull()
+            if (failure != null) {
+                newTask.stop(if (failure is StoppedException) failure.cause else failure)
             }
 
-            /* Remove this coroutine */
-            state.update { currentState ->
-                when (currentState) {
-                    is State.Active -> currentState.copy(children = currentState.children - newTask)
-                    is State.Stopping -> currentState.copy(children = currentState.children - newTask)
-                    is State.Finished -> error("Illegal state: Task is finished")
+            val finish: suspend (Try<T>) -> Try<T> = { result ->
+                /* Remove this coroutine */
+                state.update { currentState ->
+                    when (currentState) {
+                        is State.Active -> currentState.copy(children = currentState.children - newTask)
+                        is State.Stopping -> currentState.copy(children = currentState.children - newTask)
+                        is State.Finished -> error("Illegal state: Task is finished")
+                    }
                 }
-            }
 
-            val finish: suspend (Result<T>) -> Result<T> = { result ->
                 newTask.finishWith(result)
             }
 
-            finish.createCoroutine(result, Continuation(newTask.context) { finishResult ->
-                future.completeWith(finishResult.getOrThrow())
+            finish.createCoroutine(result.toTry(), Continuation(newTask.context) { finishResult ->
+
             }).resume(Unit)
 
         }).resume(Unit)
 
-        return future
+        return newTask
     }
 
     public fun stop(error: Throwable? = null): Boolean {
-        val result = if (error != null) Result.failure(error) else Result.success(Unit)
+        val result =
+            error?.toRight() ?: Unit.toLeft()//if (error != null) Result.failure(error) else Result.success(Unit)
 
         val activeState = state.update { currentState ->
             when (currentState) {
@@ -127,16 +164,33 @@ public class Task internal constructor(
 
         onStop.completeWith(result)
         activeState.children.forEach { it.stop(error) }
+        parent?.stop(error)
         return true
     }
 
-    public fun invokeOnStop(action: (error: Throwable?) -> Unit) {
-        onStop.invokeOnCompletion { action(it.exceptionOrNull()) }
+    public fun invokeOnStop(action: (error: Throwable?) -> Unit): Disposable {
+        return onStop.invokeOnCompletion { action(it.exceptionOrNull()) }
     }
 
-    private suspend fun <T> finishWith(result: Result<T>): Result<T> {
+    public fun invokeOnFinish(action: (error: Throwable?) -> Unit): Disposable {
+        return onFinished.invokeOnCompletion { action(it.exceptionOrNull()) }
+    }
+
+    public fun launchOnStop(action: suspend (error: Throwable?) -> Unit): Disposable {
+        return invokeOnStop {
+            launchTask { action(it) }
+        }
+    }
+
+    public fun launchOnFinish(action: suspend (error: Throwable?) -> Unit): Disposable {
+        return invokeOnFinish {
+            launchTask { action(it) }
+        }
+    }
+
+    private suspend fun finishWith(result: Try<T>): Try<T> {
         /* Await all children */
-        var finalResult: Result<T> = result
+        var finalResult: Try<T> = result
         while (true) {
             val currentState = state.load()
             val children = currentState.children.orEmpty()
@@ -156,25 +210,26 @@ public class Task internal constructor(
                 val childResult = child.onFinished.await()
 
                 /* Conflate the final result: We'll accept the first failure */
-                finalResult = if (finalResult.isSuccess && childResult.isFailure)
-                    Result.failure(childResult.exceptionOrNull()!!)
+                finalResult = if (finalResult.isSuccess() && childResult.isFailure()) childResult
                 else finalResult
             }
         }
 
-        onFinished.complete(finalResult)
+        onFinished.completeWith(finalResult)
         return finalResult
     }
 
     private sealed class State {
-        data class Active(override val children: List<Task>) : State()
-        data class Stopping(val result: Result<*>, override val children: List<Task>) : State()
-        data class Finished(val result: Result<*>) : State() {
-            override val children: List<Task>? = null
+        data class Active(override val children: List<Task<*>>) : State()
+        data class Stopping(val result: Try<*>, override val children: List<Task<*>>) : State()
+        data class Finished(val result: Try<*>) : State() {
+            override val children: List<Task<*>>? = null
         }
 
-        abstract val children: List<Task>?
+        abstract val children: List<Task<*>>?
     }
 
-    public companion object Key : CoroutineContext.Key<Task>
+    public companion object Key : CoroutineContext.Key<Task<*>>
 }
+
+public class StoppedException(override val cause: Throwable? = null) : Exception()

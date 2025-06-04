@@ -33,7 +33,7 @@ public class WorkerThread(
                 element.execute()
             }
         } finally {
-            isClosed.completeWith(Result.success(Unit))
+            isClosed.complete(Unit)
         }
     }
 
@@ -91,7 +91,7 @@ public class WorkerThread(
 
     private class Work<T>(private val future: CompletableFuture<T>, private val action: () -> T) {
         fun execute() {
-            val result = runCatching { action() }
+            val result = Try { action() }
             future.completeWith(result)
         }
     }

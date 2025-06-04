@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.gradle
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.provideDelegate
+import org.jetbrains.compose.reload.core.suspendStoppableCoroutine
 import org.jetbrains.kotlin.gradle.plugin.HasProject
 import org.jetbrains.kotlin.tooling.core.HasMutableExtras
 import kotlin.coroutines.Continuation
@@ -16,7 +17,6 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.createCoroutine
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlin.properties.ReadOnlyProperty
 
 @InternalHotReloadGradleApi
@@ -53,7 +53,7 @@ class CompletableFuture<T> : Future<T> {
     override suspend fun await(): T {
         val result = result
         return if (result != null) result.getOrThrow()
-        else suspendCoroutine { continuation ->
+        else suspendStoppableCoroutine { continuation ->
             continuations.add(continuation)
         }
     }

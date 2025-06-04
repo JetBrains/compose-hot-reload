@@ -5,7 +5,7 @@
 
 package org.jetbrains.compose.reload.core
 
-public fun <T> Iterator<T>.nextOrNull(): T? = if (hasNext()) next() else null
+public fun <T> Iterator<T>.nextOrNothing(): T? = if (hasNext()) next() else null
 
 public inline fun <reified T> name(): String {
     return T::class.java.name

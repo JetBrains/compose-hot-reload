@@ -17,7 +17,9 @@ import kotlin.time.Duration
  * The result can also be awaited by blocking the current thread, using the [getBlocking] (which cannot
  * be called from the [reloadMainThread])
  */
-public interface Future<T> {
+public interface Future<out T> {
+
+    public fun isCompleted(): Boolean
 
     /**
      * Registers a completion handler for this future.
@@ -25,73 +27,105 @@ public interface Future<T> {
      * If the future is not yet completed, the result handler will be called once the future completes.
      * The [onResult] will always be called on the [reloadMainThread]
      */
-    public fun <R> invokeOnCompletion(onResult: (Result<T>) -> R): Future<R>
+    public fun invokeOnCompletion(onResult: (Try<T>) -> Unit): Disposable
 }
 
 public interface CompletableFuture<T> : Future<T> {
-    public fun completeWith(result: Result<T>): Boolean
+    public fun completeWith(result: Try<T>): Boolean
 }
 
 public fun <T> CompletableFuture<T>.complete(value: T) =
-    completeWith(Result.success(value))
+    completeWith(value.toLeft())
+
+public fun <T> CompletableFuture<T>.completeWith(result: Try<T>) {
+    when (result) {
+        is Left<T> -> complete(result.value)
+        is Right<Throwable> -> completeExceptionally(result.exception)
+    }
+}
 
 public fun <T> CompletableFuture<T>.completeExceptionally(exception: Throwable) =
-    completeWith(Result.failure(exception))
+    completeWith(exception.toRight())
 
 public fun <T> Future(): CompletableFuture<T> {
     return FutureImpl()
 }
 
 internal fun <T> Future(result: Result<T>): Future<T> {
+    return CompletedFuture(result.toTry())
+}
+
+internal fun <T> Future(result: Try<T>): Future<T> {
     return CompletedFuture(result)
 }
 
 internal fun <T> SuccessFuture(result: T): Future<T> {
-    return CompletedFuture(Result.success(result))
+    return CompletedFuture(result.toLeft())
 }
 
-internal fun <T> FailureFuture(result: Throwable): Future<T> {
-    return CompletedFuture(Result.failure(result))
+internal fun FailureFuture(result: Throwable): Future<Nothing> {
+    return CompletedFuture(result.toRight())
 }
 
 private class FutureImpl<T> : CompletableFuture<T> {
     private val lock = ReentrantLock()
 
-    private val listeners = mutableListOf<(Result<T>) -> Unit>()
+    private val listeners = mutableListOf<(Try<T>) -> Unit>()
 
     @Volatile
-    private var result: Result<T>? = null
+    private var result: Try<T>? = null
 
-    override fun <R> invokeOnCompletion(onResult: (Result<T>) -> R): Future<R> = lock.withLock {
+    override fun isCompleted(): Boolean = lock.withLock {
+        result != null
+    }
+
+    override fun invokeOnCompletion(onResult: (Try<T>) -> Unit): Disposable = lock.withLock {
         val result = result
 
         /* Fast path: Result is already known */
         if (result != null) {
-            return reloadMainThread.invoke { onResult(result) }
+            reloadMainThread.invoke { onResult(result) }
+            Disposable {}
         }
 
         /* Slow path: Create a future and wait for completion */
-        val future = Future<R>()
-        listeners.add { tResult ->
-            reloadMainThread.invokeImmediate { onResult(tResult) }
-                .invokeOnCompletion { result -> future.completeWith(result) }
+        val listener: (Try<T>) -> Unit = { result: Try<T> ->
+            reloadMainThread.invokeImmediate { onResult(result) }
         }
-        future
+        listeners.add(listener)
+
+        Disposable {
+            lock.withLock {
+                listeners.remove(listener)
+            }
+        }
     }
 
 
-    override fun completeWith(result: Result<T>) = lock.withLock {
-        if (this.result != null) return false
-        this.result = result
-        listeners.toTypedArray().forEach { listener -> listener(result) }
-        listeners.clear()
-        true
+    override fun completeWith(result: Try<T>): Boolean {
+        val listeners = lock.withLock {
+            if (this.result != null) return false
+            this.result = result
+            listeners.toTypedArray().apply {
+                listeners.clear()
+            }
+        }
+
+        listeners.forEach { listener ->
+            listener(result)
+        }
+        return true
     }
 }
 
-private class CompletedFuture<T>(val result: Result<T>) : Future<T> {
-    override fun <R> invokeOnCompletion(onResult: (Result<T>) -> R): Future<R> {
-        return reloadMainThread.invoke { onResult(result) }
+private class CompletedFuture<T>(val result: Try<T>) : Future<T> {
+    override fun isCompleted(): Boolean {
+        return true
+    }
+
+    override fun invokeOnCompletion(onResult: (Try<T>) -> Unit): Disposable {
+        reloadMainThread.invoke { onResult(result) }
+        return Disposable {}
     }
 }
 
@@ -102,9 +136,9 @@ private class CompletedFuture<T>(val result: Result<T>) : Future<T> {
  *  result object has different semantics than this precondition.
  */
 @OptIn(ExperimentalAtomicApi::class)
-public fun <T> Future<T>.getBlocking(): Result<T> {
+public fun <T> Future<T>.getBlocking(): Try<T> {
     if (isReloadMainThread) throw IllegalStateException("Cannot call getBlocking() from the 'reloadMainThread'")
-    val javaFuture = java.util.concurrent.CompletableFuture<Result<T>>()
+    val javaFuture = java.util.concurrent.CompletableFuture<Try<T>>()
     invokeOnCompletion { javaFuture.complete(it) }
     return javaFuture.get()
 }
@@ -114,13 +148,13 @@ public fun <T> Future<T>.getBlocking(): Result<T> {
  * [TimeoutException] if the timeout is reached.]
  */
 @OptIn(ExperimentalAtomicApi::class)
-public fun <T> Future<T>.getBlocking(timeout: Duration): Result<T> {
+public fun <T> Future<T>.getBlocking(timeout: Duration): Try<T> {
     if (isReloadMainThread) throw IllegalStateException("Cannot call getBlocking() from the 'reloadMainThread'")
-    val javaFuture = java.util.concurrent.CompletableFuture<Result<T>>()
+    val javaFuture = java.util.concurrent.CompletableFuture<Try<T>>()
     invokeOnCompletion { javaFuture.complete(it) }
     return try {
         javaFuture.get(timeout.inWholeMilliseconds, java.util.concurrent.TimeUnit.MILLISECONDS)
     } catch (t: TimeoutException) {
-        return Result.failure(t)
+        return t.toRight()
     }
 }

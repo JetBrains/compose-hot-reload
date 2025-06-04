@@ -1,6 +1,11 @@
 import org.jetbrains.compose.reload.core.WorkerThread
+import org.jetbrains.compose.reload.core.exceptionOrNull
 import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.isFailure
+import org.jetbrains.compose.reload.core.isSuccess
 import org.jetbrains.compose.reload.core.reloadMainThread
+import org.jetbrains.compose.reload.core.toLeft
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
@@ -40,7 +45,7 @@ class WorkerThreadTest {
         }.getBlocking(5.seconds)
 
         assertEquals(1, actionInvocations.load())
-        assertEquals(Result.success(1), result)
+        assertEquals(1.toLeft(), result)
 
         thread.shutdown()
     }
@@ -60,7 +65,7 @@ class WorkerThreadTest {
         val future1 = thread.shutdown()
         val future2 = thread.shutdown()
         assertSame(future1, future2)
-        assertEquals(Result.success(Unit), future1.getBlocking(5.seconds))
+        assertEquals(Unit.toLeft(), future1.getBlocking(5.seconds))
     }
 
     @Test
@@ -70,27 +75,26 @@ class WorkerThreadTest {
         val future3 = thread.shutdown()
         val future4 = thread.invoke { }
 
-        assertTrue(future1.getBlocking(5.seconds).isSuccess)
-        assertTrue(future2.getBlocking(5.seconds).isSuccess)
-        assertTrue(future3.getBlocking(5.seconds).isSuccess)
-        assertTrue(future4.getBlocking(5.seconds).isFailure)
+        assertTrue(future1.getBlocking(5.seconds).isSuccess())
+        assertTrue(future2.getBlocking(5.seconds).isSuccess())
+        assertTrue(future3.getBlocking(5.seconds).isSuccess())
+        assertTrue(future4.getBlocking(5.seconds).isFailure())
     }
 
     @Test
     fun `test - exception`() {
         val result = thread.invoke { error("Foo") }.getBlocking(5.seconds)
-        assertTrue(result.isFailure)
+        assertTrue(result.isFailure())
         assertEquals("Foo", result.exceptionOrNull()?.message)
     }
 
     @Test
     fun `test - completion handler is invoked in reloadMain`() {
         val invocationThread = AtomicReference<Thread?>(null)
-        val result = thread.invoke { }.invokeOnCompletion {
+        thread.invoke { }.invokeOnCompletion {
             assertNull(invocationThread.exchange(Thread.currentThread()))
         }
-
-        assertTrue(result.getBlocking(5.seconds).isSuccess)
+        assertTrue(thread.invoke { }.getBlocking(5.seconds).isSuccess())
         assertEquals(reloadMainThread, invocationThread.load())
     }
 

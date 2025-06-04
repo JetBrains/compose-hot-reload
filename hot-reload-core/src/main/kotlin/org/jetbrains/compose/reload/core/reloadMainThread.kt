@@ -23,3 +23,6 @@ public val reloadMainDispatcherImmediate: ContinuationInterceptor =
  * @see reloadMainThread
  */
 internal val isReloadMainThread get() = Thread.currentThread() == reloadMainThread
+
+public suspend inline fun<T> withReloadMainThread(noinline action: suspend () -> T): T =
+    withThread(reloadMainThread, true, action)

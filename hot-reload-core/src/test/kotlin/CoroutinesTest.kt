@@ -1,19 +1,27 @@
 import org.jetbrains.compose.reload.core.Future
+import org.jetbrains.compose.reload.core.StoppedException
 import org.jetbrains.compose.reload.core.WorkerThread
 import org.jetbrains.compose.reload.core.await
 import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.dispatcher
+import org.jetbrains.compose.reload.core.exceptionOrNull
 import org.jetbrains.compose.reload.core.getBlocking
-import org.jetbrains.compose.reload.core.globalLaunch
+import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.isFailure
+import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.newTask
 import org.jetbrains.compose.reload.core.reloadMainThread
+import org.jetbrains.compose.reload.core.suspendStoppableCoroutine
 import org.jetbrains.compose.reload.core.withThread
 import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.fetchAndIncrement
 import kotlin.coroutines.suspendCoroutine
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -43,7 +51,7 @@ class CoroutinesTest {
 
     @Test
     fun `test - launch`() {
-        val future = globalLaunch {
+        val future = launchTask {
             assertTrue(Thread.currentThread() == reloadMainThread, "Expected 'reloadMainThread'")
             42
         }
@@ -53,7 +61,7 @@ class CoroutinesTest {
 
     @Test
     fun `test - switching threads`() {
-        val threads = globalLaunch {
+        val threads = launchTask {
             val threads = mutableListOf<Thread>()
             threads += Thread.currentThread()
             val worker1 = use(WorkerThread("w1"))
@@ -82,13 +90,13 @@ class CoroutinesTest {
 
     @Test
     fun `test - error`() {
-        val future: Future<Int> = globalLaunch {
+        val future: Future<Int> = launchTask {
             withThread(use(WorkerThread("w1"))) {
                 error("Foo")
             }
         }
 
-        assertTrue(future.getBlocking(5.seconds).isFailure)
+        assertTrue(future.getBlocking(5.seconds).isFailure())
         assertEquals("Foo", future.getBlocking(5.seconds).exceptionOrNull()?.message)
     }
 
@@ -100,17 +108,17 @@ class CoroutinesTest {
         val worker1CancelThread = Future<Thread>()
         val worker2CancelThread = Future<Thread>()
 
-        globalLaunch {
+        launchTask {
             newTask {
                 withThread(worker1) {
                     invokeOnStop {
-                        assertTrue(worker1CancelThread.completeWith(Result.success(Thread.currentThread())))
+                        assertTrue(worker1CancelThread.complete(Thread.currentThread()))
                     }
                 }
 
                 withThread(worker2) {
                     invokeOnStop {
-                        assertTrue(worker2CancelThread.completeWith(Result.success(Thread.currentThread())))
+                        assertTrue(worker2CancelThread.complete(Thread.currentThread()))
                     }
                 }
 
@@ -128,7 +136,7 @@ class CoroutinesTest {
         val worker2 = use(WorkerThread("w2"))
         val receivedCompletion = Future<Throwable?>()
 
-        globalLaunch {
+        launchTask {
             launch(worker1.dispatcher) {
                 invokeOnStop { error ->
                     assertTrue(receivedCompletion.complete(error))
@@ -149,7 +157,7 @@ class CoroutinesTest {
     @Test
     fun `test - stop is not called if coroutine finished`() {
         val stopCalled = AtomicBoolean(false)
-        globalLaunch {
+        launchTask {
             launch {
                 invokeOnStop {
                     assertFalse(stopCalled.exchange(true))
@@ -160,5 +168,53 @@ class CoroutinesTest {
         }.getBlocking(5.seconds)
 
         assertEquals(false, stopCalled.load())
+    }
+
+    @Test
+    fun `test - stop is called when waiting for child`() {
+        val stopCalled = AtomicBoolean(false)
+        val childLaunched = Future<Unit>()
+        val finishChild = Future<Unit>()
+
+        val testCoroutine = launchTask {
+            invokeOnStop {
+                assertTrue(stopCalled.exchange(true))
+            }
+
+            launch {
+                childLaunched.complete(Unit)
+                finishChild.await()
+                stop()
+            }
+        }
+
+        childLaunched.getBlocking(5.seconds).getOrThrow()
+        finishChild.complete(Unit)
+        testCoroutine.getBlocking(5.seconds).getOrThrow()
+        assertEquals(true, stopCalled.load())
+    }
+
+    @Test
+    fun `test - stop invokes the onFinish`() {
+        val finishInvocations = AtomicInt(0)
+        launchTask {
+            invokeOnFinish {
+                assertEquals(0, finishInvocations.fetchAndIncrement())
+            }
+            stop()
+        }.getBlocking(5.seconds)
+        assertEquals(1, finishInvocations.load())
+    }
+
+    @Test
+    fun `test - suspendStoppableCoroutine`() {
+        val task = launchTask {
+            suspendStoppableCoroutine<Unit> {
+                /* never completes */
+            }
+        }
+        assertTrue(task.isActive)
+        task.stop()
+        assertFailsWith<StoppedException> { task.getBlocking().getOrThrow() }
     }
 }

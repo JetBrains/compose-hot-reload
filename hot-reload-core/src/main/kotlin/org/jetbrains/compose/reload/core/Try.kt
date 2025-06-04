@@ -55,3 +55,10 @@ public fun <T> Try<T>.exceptionOrNull(): Throwable? = when (this) {
 
 public val Right<Throwable>.exception: Throwable
     get() = value
+
+public fun <T> Result<T>.toTry(): Try<T> {
+    return fold(
+        onSuccess = { it.toLeft() },
+        onFailure = { it.toRight() }
+    )
+}

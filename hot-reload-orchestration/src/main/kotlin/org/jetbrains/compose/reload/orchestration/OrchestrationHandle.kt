@@ -8,7 +8,7 @@ package org.jetbrains.compose.reload.orchestration
 import org.jetbrains.compose.reload.core.Disposable
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.getBlocking
-import org.jetbrains.compose.reload.core.globalLaunch
+import org.jetbrains.compose.reload.core.launchTask
 import kotlin.time.Duration
 
 
@@ -32,17 +32,17 @@ public interface OrchestrationHandle : AutoCloseable {
     public fun closeImmediately()
 }
 
-public fun OrchestrationHandle.sendMessageAsync(message: OrchestrationMessage): Future<Unit> = globalLaunch {
+public fun OrchestrationHandle.sendMessageAsync(message: OrchestrationMessage): Future<Unit> = launchTask {
     sendMessage(message)
 }
 
-public fun OrchestrationHandle.sendMessageBlocking(message: OrchestrationMessage): Result<Unit> = globalLaunch {
+public fun OrchestrationHandle.sendMessageBlocking(message: OrchestrationMessage): Result<Unit> = launchTask {
     sendMessage(message)
 }.getBlocking()
 
 public fun OrchestrationHandle.sendMessageBlocking(
     message: OrchestrationMessage, timeout: Duration
-): Result<Unit> = globalLaunch {
+): Result<Unit> = launchTask {
     sendMessage(message)
 }.getBlocking(timeout)
 
