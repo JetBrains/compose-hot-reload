@@ -25,7 +25,7 @@ import kotlin.time.Duration.Companion.milliseconds
 private val animationDuration = 512.milliseconds
 
 @Composable
-fun DtSidecarWindowState(
+fun DtAttachedSidecarWindowState(
     targetWindowState: WindowState,
     isExpanded: Boolean
 ): DialogState {
@@ -41,6 +41,17 @@ fun DtSidecarWindowState(
         state.position = position
     }
 
+    return state
+}
+
+@Composable
+fun DtDetachedSidecarWindowState(
+    targetWindowState: WindowState,
+    isExpanded: Boolean
+): DialogState {
+    val state = remember { DialogState() }
+    val size = windowSize(targetWindowState, isExpanded)
+    state.size = size
     return state
 }
 

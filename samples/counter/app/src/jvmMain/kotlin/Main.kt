@@ -15,6 +15,7 @@ fun main() {
 
     application {
         Window(
+            title = "Counter",
             onCloseRequest = ::exitApplication,
             alwaysOnTop = true,
             state = rememberWindowState(

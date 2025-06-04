@@ -167,14 +167,13 @@ DevToolsTransparencyEnabled:
     Some platforms might not be able to render transparency correctly (e.g. some linux environments).
     This property will allow such platforms to disable/enable transparency
 
-DevToolsAlwaysOnTop:
-  key: compose.reload.devToolsAlwaysOnTop
+DevToolsDetached:
+  key: compose.reload.devToolsDetached
   type: boolean
-  default: "false"
+  default: "true"
   target: [ application, build, devtools ]
   documentation: |
-    If enabled, dev tools window will be always on top. Otherwise, it will copy the status of the corresponding
-    application window    
+    If enabled, dev tools window will be detached from the main application
 
 IntelliJDebuggerDispatchPort:
   key: compose.reload.idea.debugger.dispatch.port

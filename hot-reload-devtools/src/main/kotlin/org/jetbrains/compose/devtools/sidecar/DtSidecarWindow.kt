@@ -16,6 +16,9 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,8 +36,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogState
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowState
+import androidx.compose.ui.window.rememberDialogState
 import org.jetbrains.compose.devtools.invokeWhenMessageReceived
 import org.jetbrains.compose.devtools.orchestration
 import org.jetbrains.compose.devtools.theme.DtColors
@@ -44,6 +49,7 @@ import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusBackground
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusColor
 import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
+import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsDetached
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
@@ -63,21 +69,21 @@ fun DtSidecarWindow(
     isAlwaysOnTop: Boolean,
 ) {
 
-    var isExpanded by remember { mutableStateOf(false) }
+    var isExpanded by remember { mutableStateOf(devToolsDetached) }
 
     DialogWindow(
         onCloseRequest = {
             orchestration.sendMessage(ShutdownRequest("Requested by user through 'devtools'")).get()
             exitProcess(0)
         },
-        state = DtSidecarWindowState(windowState, isExpanded),
-        undecorated = true,
-        transparent = devToolsTransparencyEnabled,
-        resizable = false,
+        state = if (devToolsDetached) DtDetachedSidecarWindowState(windowState, isExpanded)
+        else DtAttachedSidecarWindowState(windowState, isExpanded),
+        undecorated = !devToolsDetached,
+        transparent = devToolsTransparencyEnabled && !devToolsDetached,
+        resizable = devToolsDetached,
         focusable = true,
-        alwaysOnTop = isAlwaysOnTop
+        alwaysOnTop = isAlwaysOnTop,
     ) {
-
         invokeWhenMessageReceived<ApplicationWindowGainedFocus> { event ->
             if (event.windowId == windowId) {
                 logger.debug("$windowId: Sidecar window 'toFront()'")
@@ -133,8 +139,7 @@ fun DtSidecarWindowContent(
                             exit = if (devToolsTransparencyEnabled) fadeOut(tween(50)) else ExitTransition.None
                         ).clickable { isExpandedChanged(true) }
                         .padding(DtPadding.small)
-                        .animateContentSize(alignment = Alignment.TopCenter)
-                    ,
+                        .animateContentSize(alignment = Alignment.TopCenter),
                 ) {
                     DtComposeLogo(
                         Modifier.size(28.dp).padding(4.dp),
