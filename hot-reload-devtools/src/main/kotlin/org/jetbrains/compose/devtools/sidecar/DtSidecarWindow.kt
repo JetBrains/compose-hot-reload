@@ -16,9 +16,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,10 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogState
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.rememberDialogState
 import org.jetbrains.compose.devtools.invokeWhenMessageReceived
 import org.jetbrains.compose.devtools.orchestration
 import org.jetbrains.compose.devtools.theme.DtColors
@@ -76,8 +71,8 @@ fun DtSidecarWindow(
             orchestration.sendMessage(ShutdownRequest("Requested by user through 'devtools'")).get()
             exitProcess(0)
         },
-        state = if (devToolsDetached) DtDetachedSidecarWindowState(windowState, isExpanded)
-        else DtAttachedSidecarWindowState(windowState, isExpanded),
+        state = DtSideCarWindowState(devToolsDetached, windowState, isExpanded),
+        title = "Compose Hot Reload Dev Tools",
         undecorated = !devToolsDetached,
         transparent = devToolsTransparencyEnabled && !devToolsDetached,
         resizable = devToolsDetached,
