@@ -36,12 +36,6 @@ object PublishDevBuild : BuildType({
         }
 
         schedule {
-            schedulingPolicy = weekly {
-                dayOfWeek = ScheduleTrigger.DAY.Wednesday
-                timezone = "Europe/Berlin"
-                hour = 3
-            }
-
             branchFilter = "+:<default>"
             withPendingChangesOnly = true
         }
