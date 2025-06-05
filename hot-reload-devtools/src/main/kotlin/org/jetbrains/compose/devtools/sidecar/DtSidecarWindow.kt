@@ -9,6 +9,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,9 +34,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
+import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.invokeWhenMessageReceived
 import org.jetbrains.compose.devtools.orchestration
 import org.jetbrains.compose.devtools.theme.DtColors
@@ -49,12 +55,18 @@ import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowGainedFocus
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
+import java.awt.Dimension
+import java.awt.Point
 import kotlin.system.exitProcess
+import kotlin.time.Duration.Companion.milliseconds
 
 private val logger = createLogger()
 
 // Modern rounded corners like JetBrains Toolbox
 private val DevToolingSidecarShape = RoundedCornerShape(8.dp)
+
+// animation time of window effects
+private val animationDuration = 512.milliseconds
 
 @Composable
 fun DtSidecarWindow(
@@ -62,21 +74,35 @@ fun DtSidecarWindow(
     windowState: WindowState,
     isAlwaysOnTop: Boolean,
 ) {
-
     var isExpanded by remember { mutableStateOf(false) }
+    var isInitializing by remember { mutableStateOf(true) }
 
     DialogWindow(
         onCloseRequest = {
             orchestration.sendMessage(ShutdownRequest("Requested by user through 'devtools'")).get()
             exitProcess(0)
         },
-        state = DtSidecarWindowState(windowState, isExpanded),
         undecorated = true,
         transparent = devToolsTransparencyEnabled,
         resizable = false,
         focusable = true,
         alwaysOnTop = isAlwaysOnTop
     ) {
+        if (isInitializing) {
+            isInitializing = false
+            val initialSize = getSideCarWindowSize(windowState, isExpanded)
+            window.size = initialSize.toDimension()
+            window.location = getSideCarWindowPosition(windowState, initialSize.width).toPoint()
+        } else {
+            val newSize = animateWindowSize(windowState, isExpanded)
+            val newPosition = animateWindowPosition(windowState, newSize)
+            if (window.size != newSize.toDimension()) {
+                window.size = newSize.toDimension()
+            }
+            if (window.location != newPosition.toPoint()) {
+                window.location = newPosition.toPoint()
+            }
+        }
 
         invokeWhenMessageReceived<ApplicationWindowGainedFocus> { event ->
             if (event.windowId == windowId) {
@@ -133,8 +159,7 @@ fun DtSidecarWindowContent(
                             exit = if (devToolsTransparencyEnabled) fadeOut(tween(50)) else ExitTransition.None
                         ).clickable { isExpandedChanged(true) }
                         .padding(DtPadding.small)
-                        .animateContentSize(alignment = Alignment.TopCenter)
-                    ,
+                        .animateContentSize(alignment = Alignment.TopCenter),
                 ) {
                     DtComposeLogo(
                         Modifier.size(28.dp).padding(4.dp),
@@ -161,4 +186,76 @@ fun DtSidecarWindowContent(
             )
         }
     }
+}
+
+@Composable
+private fun animateWindowSize(
+    mainWindowState: WindowState,
+    isExpanded: Boolean,
+): DpSize {
+    val currentIsExpanded = remember { mutableStateOf(isExpanded) }
+    var currentSize by remember { mutableStateOf(getSideCarWindowSize(mainWindowState, isExpanded)) }
+    val targetSize = getSideCarWindowSize(mainWindowState, isExpanded)
+    /* No delay when we do not have the transparency enabled */
+    if (!devToolsTransparencyEnabled) {
+        currentSize = targetSize
+    }
+
+    // We're closing
+    if (currentIsExpanded.value && !isExpanded) {
+        LaunchedEffect(Unit) {
+            delay(animationDuration)
+            currentIsExpanded.value = false
+            currentSize = targetSize
+        }
+    }
+
+    // We're opening
+    if (!currentIsExpanded.value && isExpanded) {
+        currentIsExpanded.value = true
+        currentSize = targetSize
+    }
+
+    if (currentSize.height != targetSize.height) {
+        currentSize = currentSize.copy(height = targetSize.height)
+    }
+    return currentSize
+}
+
+@Composable
+private fun animateWindowPosition(
+    mainWindowState: WindowState,
+    windowSize: DpSize,
+): WindowPosition {
+    val currentWidth = remember { mutableStateOf(windowSize.width) }
+    val targetPosition = getSideCarWindowPosition(mainWindowState, windowSize.width)
+    return when {
+        currentWidth.value != windowSize.width -> {
+            currentWidth.value = windowSize.width
+            targetPosition
+        }
+        else -> {
+            val x by animateDpAsState(targetPosition.x, animationSpec = tween(128))
+            val y by animateDpAsState(targetPosition.y, animationSpec = tween(128))
+            WindowPosition(x, y)
+        }
+    }
+}
+
+private fun DpSize.toDimension(): Dimension = Dimension(width.value.toInt(), height.value.toInt())
+
+private fun WindowPosition.toPoint(): Point = Point(x.value.toInt(), y.value.toInt())
+
+private fun getSideCarWindowPosition(windowState: WindowState, width: Dp): WindowPosition {
+    val targetX = windowState.position.x - width - if (!devToolsTransparencyEnabled) 12.dp else 0.dp
+    val targetY = windowState.position.y
+    return WindowPosition(targetX, targetY)
+}
+
+private fun getSideCarWindowSize(windowState: WindowState, isExpanded: Boolean): DpSize {
+    return DpSize(
+        width = if (isExpanded) 512.dp else 32.dp + 4.dp + (12.dp.takeIf { devToolsTransparencyEnabled } ?: 0.dp),
+        height = if (isExpanded) maxOf(windowState.size.height, 512.dp)
+        else if (devToolsTransparencyEnabled) maxOf(windowState.size.height, 512.dp) else 28.dp + 4.dp,
+    )
 }
