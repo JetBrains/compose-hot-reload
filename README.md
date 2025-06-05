@@ -1,4 +1,4 @@
-# 🔥 Compose Hot Reload
+# <img src="readme-assets/compose-logo.png" alt="drawing" width="30"/> Compose Hot Reload
 
 [![JetBrains team project](https://jb.gg/badges/incubator.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
