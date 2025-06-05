@@ -4,13 +4,13 @@
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$/samples/counter/app" />
       <option name="externalSystemIdString" value="GRADLE" />
-      <option name="scriptParameters" value="-DmainClass=MainKt --quiet" />
+      <option name="scriptParameters" value="--mainClass MainKt --auto --quiet" />
       <option name="taskDescriptions">
         <list />
       </option>
       <option name="taskNames">
         <list>
-          <option value=":app:jvmRun" />
+          <option value=":app:jvmRunHot" />
         </list>
       </option>
       <option name="vmOptions" />
