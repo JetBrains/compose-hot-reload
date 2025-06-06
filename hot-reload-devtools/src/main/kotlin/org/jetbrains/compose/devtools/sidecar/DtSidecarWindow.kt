@@ -204,7 +204,7 @@ private fun animateWindowSize(
     if (isExpandedChanged && !isExpanded) {
         LaunchedEffect(Unit) {
             delay(animationDuration)
-            currentSize = getSideCarWindowSize(windowState, isExpanded)
+            currentSize = targetSize
         }
     }
 
@@ -231,7 +231,7 @@ private fun animateWindowPosition(
         else -> {
             val x by animateDpAsState(targetPosition.x, animationSpec = tween(128))
             val y by animateDpAsState(targetPosition.y, animationSpec = tween(128))
-           WindowPosition(x, y)
+            WindowPosition(x, y)
         }
     }
 }
