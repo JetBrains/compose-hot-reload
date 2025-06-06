@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.WindowSize
 import androidx.compose.ui.window.WindowState
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.invokeWhenMessageReceived
@@ -77,7 +78,8 @@ fun DtSidecarWindow(
     isAlwaysOnTop: Boolean,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-    val initialized = remember { mutableStateOf(true) }
+    var oldIsExpanded by remember { mutableStateOf(isExpanded) }
+    var isInitializing by remember { mutableStateOf(true) }
 
     DialogWindow(
         onCloseRequest = {
@@ -90,13 +92,18 @@ fun DtSidecarWindow(
         focusable = true,
         alwaysOnTop = isAlwaysOnTop
     ) {
-        if (initialized.value) {
-            initialized.value = false
-            window.size = getSideCarWindowSize(windowState, isExpanded).toDimension()
-            window.location = getSideCarWindowPosition(windowState, window.size.width.dp).toPoint()
+        val isExpandedChanged = oldIsExpanded == isExpanded
+        if (isInitializing) {
+            isInitializing = false
+            val initialSize = getSideCarWindowSize(windowState, isExpanded)
+            window.size = initialSize.toDimension()
+            window.location = getSideCarWindowPosition(windowState, initialSize.width).toPoint()
         } else {
-            animateWindowSize(window, windowState, isExpanded)
-            animateWindowPosition(window, windowState)
+            val newSize = animateWindowSize(windowState, isExpanded, isExpandedChanged)
+            val newPosition = animateWindowPosition(windowState, newSize, isExpandedChanged)
+            window.size = newSize.toDimension()
+            window.location = newPosition.toPoint()
+            oldIsExpanded = isExpanded
         }
 
         invokeWhenMessageReceived<ApplicationWindowGainedFocus> { event ->
@@ -185,57 +192,50 @@ fun DtSidecarWindowContent(
 
 @Composable
 private fun animateWindowSize(
-    window: ComposeDialog,
     windowState: WindowState,
-    isExpanded: Boolean
-) {
-    val currentSize = remember { mutableStateOf(getSideCarWindowSize(windowState, isExpanded)) }
+    isExpanded: Boolean,
+    isExpandedChanged: Boolean
+): DpSize {
+    var currentSize by remember { mutableStateOf(getSideCarWindowSize(windowState, isExpanded)) }
     val targetSize = getSideCarWindowSize(windowState, isExpanded)
-    val currentIsExpanded = remember { mutableStateOf(isExpanded) }
     /* No delay when we do not have the transparency enabled */
     if (!devToolsTransparencyEnabled) {
-        currentSize.value = targetSize
+        currentSize = targetSize
     }
 
     // We're closing
-    if (currentIsExpanded.value && !isExpanded) {
+    if (isExpandedChanged && !isExpanded) {
         LaunchedEffect(Unit) {
             delay(animationDuration)
-            currentIsExpanded.value = false
-            currentSize.value = getSideCarWindowSize(windowState, isExpanded)
+            currentSize = getSideCarWindowSize(windowState, isExpanded)
         }
-        currentSize.value = getSideCarWindowSize(windowState, isExpanded)
     }
 
     // We're opening
-    if (!currentIsExpanded.value && isExpanded) {
-        currentIsExpanded.value = true
-        currentSize.value = targetSize
+    if (isExpandedChanged && isExpanded) {
+        currentSize = targetSize
     }
 
-    if (currentSize.value.height != targetSize.height) {
-        currentSize.value = currentSize.value.copy(height = targetSize.height)
+    if (currentSize.height != targetSize.height) {
+        currentSize = currentSize.copy(height = targetSize.height)
     }
-    window.size = currentSize.value.toDimension()
+    return currentSize
 }
 
 @Composable
 private fun animateWindowPosition(
-    window: ComposeDialog,
-    windowState: WindowState
-) {
-    val currentWidth = remember { mutableStateOf(window.size.width) }
-    val targetPosition = getSideCarWindowPosition(windowState, window.size.width.dp)
+    windowState: WindowState,
+    newSize: DpSize,
+    isExpandedChanged: Boolean,
+): WindowPosition {
+    val targetPosition = getSideCarWindowPosition(windowState, newSize.width)
     /* Width has changed: Animation shall be skipped */
-    when {
-        currentWidth.value != window.size.width -> {
-            currentWidth.value = window.size.width
-            window.location = targetPosition.toPoint()
-        }
+    return when {
+        isExpandedChanged -> targetPosition
         else -> {
             val x by animateDpAsState(targetPosition.x, animationSpec = tween(128))
             val y by animateDpAsState(targetPosition.y, animationSpec = tween(128))
-            window.location = WindowPosition(x, y).toPoint()
+           WindowPosition(x, y)
         }
     }
 }
