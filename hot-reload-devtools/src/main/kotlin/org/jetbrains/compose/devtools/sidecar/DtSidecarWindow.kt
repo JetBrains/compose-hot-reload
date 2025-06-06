@@ -44,6 +44,7 @@ import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusBackground
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusColor
 import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
+import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsDetached
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
@@ -63,21 +64,21 @@ fun DtSidecarWindow(
     isAlwaysOnTop: Boolean,
 ) {
 
-    var isExpanded by remember { mutableStateOf(false) }
+    var isExpanded by remember { mutableStateOf(devToolsDetached) }
 
     DialogWindow(
         onCloseRequest = {
             orchestration.sendMessage(ShutdownRequest("Requested by user through 'devtools'")).get()
             exitProcess(0)
         },
-        state = DtSidecarWindowState(windowState, isExpanded),
-        undecorated = true,
-        transparent = devToolsTransparencyEnabled,
-        resizable = false,
+        state = DtSideCarWindowState(devToolsDetached, windowState, isExpanded),
+        title = "Compose Hot Reload Dev Tools",
+        undecorated = !devToolsDetached,
+        transparent = devToolsTransparencyEnabled && !devToolsDetached,
+        resizable = devToolsDetached,
         focusable = true,
-        alwaysOnTop = isAlwaysOnTop
+        alwaysOnTop = isAlwaysOnTop,
     ) {
-
         invokeWhenMessageReceived<ApplicationWindowGainedFocus> { event ->
             if (event.windowId == windowId) {
                 logger.debug("$windowId: Sidecar window 'toFront()'")
@@ -133,8 +134,7 @@ fun DtSidecarWindowContent(
                             exit = if (devToolsTransparencyEnabled) fadeOut(tween(50)) else ExitTransition.None
                         ).clickable { isExpandedChanged(true) }
                         .padding(DtPadding.small)
-                        .animateContentSize(alignment = Alignment.TopCenter)
-                    ,
+                        .animateContentSize(alignment = Alignment.TopCenter),
                 ) {
                     DtComposeLogo(
                         Modifier.size(28.dp).padding(4.dp),

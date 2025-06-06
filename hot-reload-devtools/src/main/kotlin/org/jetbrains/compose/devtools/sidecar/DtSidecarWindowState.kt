@@ -25,7 +25,17 @@ import kotlin.time.Duration.Companion.milliseconds
 private val animationDuration = 512.milliseconds
 
 @Composable
-fun DtSidecarWindowState(
+fun DtSideCarWindowState(
+    isDetached: Boolean,
+    targetWindowState: WindowState,
+    isExpanded: Boolean,
+): DialogState = when {
+    isDetached -> DtDetachedSidecarWindowState(targetWindowState, isExpanded)
+    else -> DtAttachedSidecarWindowState(targetWindowState, isExpanded)
+}
+
+@Composable
+fun DtAttachedSidecarWindowState(
     targetWindowState: WindowState,
     isExpanded: Boolean
 ): DialogState {
@@ -45,10 +55,41 @@ fun DtSidecarWindowState(
 }
 
 @Composable
+fun DtDetachedSidecarWindowState(
+    targetWindowState: WindowState,
+    isExpanded: Boolean,
+): DialogState {
+    val currentIsExpanded = remember { mutableStateOf(isExpanded) }
+    val state = remember {
+        val size = getSideCarWindowSize(targetWindowState.size, isExpanded)
+        DialogState(
+            position = WindowPosition(targetWindowState.position.x - size.width - 12.dp, targetWindowState.position.y),
+            size = size
+        )
+    }
+    // We're closing
+    if (currentIsExpanded.value && !isExpanded) {
+        LaunchedEffect(Unit) {
+            delay(animationDuration)
+            currentIsExpanded.value = false
+            state.size = getSideCarWindowSize(targetWindowState.size, isExpanded)
+        }
+    }
+
+    // We're opening
+    if (!currentIsExpanded.value && isExpanded) {
+        currentIsExpanded.value = true
+        state.size = getSideCarWindowSize(targetWindowState.size, isExpanded)
+    }
+
+    return state
+}
+
+@Composable
 private fun windowSize(targetWindowState: WindowState, isExpanded: Boolean): DpSize {
     val currentIsExpanded = remember { mutableStateOf(isExpanded) }
-    val currentSize = remember { mutableStateOf(getSideCarWindowSize(targetWindowState, isExpanded)) }
-    val targetSize = getSideCarWindowSize(targetWindowState, isExpanded)
+    val currentSize = remember { mutableStateOf(getSideCarWindowSize(targetWindowState.size, isExpanded)) }
+    val targetSize = getSideCarWindowSize(targetWindowState.size, isExpanded)
 
     /* No delay when we do not have the transparency enabled */
     if (!devToolsTransparencyEnabled) {
@@ -60,7 +101,7 @@ private fun windowSize(targetWindowState: WindowState, isExpanded: Boolean): DpS
         LaunchedEffect(Unit) {
             delay(animationDuration)
             currentIsExpanded.value = false
-            currentSize.value = getSideCarWindowSize(targetWindowState, isExpanded)
+            currentSize.value = getSideCarWindowSize(targetWindowState.size, isExpanded)
         }
     }
 
@@ -97,10 +138,10 @@ private fun animateWindowPosition(
     return WindowPosition(x, y)
 }
 
-private fun getSideCarWindowSize(windowState: WindowState, isExpanded: Boolean): DpSize {
+private fun getSideCarWindowSize(windowSize: DpSize, isExpanded: Boolean): DpSize {
     return DpSize(
-        width = if (isExpanded) 512.dp else 28.dp + 4.dp +(12.dp.takeIf { devToolsTransparencyEnabled } ?: 0.dp),
-        height = if (isExpanded) maxOf(windowState.size.height, 512.dp)
-        else if (devToolsTransparencyEnabled) maxOf(windowState.size.height, 512.dp) else 28.dp + 4.dp,
+        width = if (isExpanded) 512.dp else 28.dp + 4.dp + (12.dp.takeIf { devToolsTransparencyEnabled } ?: 0.dp),
+        height = if (isExpanded) maxOf(windowSize.height, 512.dp)
+        else if (devToolsTransparencyEnabled) maxOf(windowSize.height, 512.dp) else 28.dp + 4.dp,
     )
 }
