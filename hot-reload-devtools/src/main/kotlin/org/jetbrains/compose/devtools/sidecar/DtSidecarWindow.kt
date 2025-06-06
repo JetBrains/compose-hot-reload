@@ -189,12 +189,12 @@ fun DtSidecarWindowContent(
 
 @Composable
 private fun animateWindowSize(
-    windowState: WindowState,
+    mainWindowState: WindowState,
     isExpanded: Boolean,
     isExpandedChanged: Boolean
 ): DpSize {
-    var currentSize by remember { mutableStateOf(getSideCarWindowSize(windowState, isExpanded)) }
-    val targetSize = getSideCarWindowSize(windowState, isExpanded)
+    var currentSize by remember { mutableStateOf(getSideCarWindowSize(mainWindowState, isExpanded)) }
+    val targetSize = getSideCarWindowSize(mainWindowState, isExpanded)
     /* No delay when we do not have the transparency enabled */
     if (!devToolsTransparencyEnabled) {
         currentSize = targetSize
@@ -221,11 +221,11 @@ private fun animateWindowSize(
 
 @Composable
 private fun animateWindowPosition(
-    windowState: WindowState,
-    newSize: DpSize,
+    mainWindowState: WindowState,
+    windowSize: DpSize,
     isExpandedChanged: Boolean,
 ): WindowPosition {
-    val targetPosition = getSideCarWindowPosition(windowState, newSize.width)
+    val targetPosition = getSideCarWindowPosition(mainWindowState, windowSize.width)
     return when {
         isExpandedChanged -> targetPosition
         else -> {
