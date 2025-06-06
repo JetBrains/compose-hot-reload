@@ -171,7 +171,7 @@ private fun ProcessBuilder.startRecompilerProcess(): Int? {
 
     thread(name = "Recompiler Output", isDaemon = true) {
         process.inputStream.bufferedReader().use { reader ->
-            val logger = Logger(this::class.java.name, tag = TAG_COMPILER)
+            val logger = Logger("Recompiler", tag = TAG_COMPILER)
             while (true) {
                 val nextLine = reader.readLine() ?: break
                 logger.debug(nextLine)

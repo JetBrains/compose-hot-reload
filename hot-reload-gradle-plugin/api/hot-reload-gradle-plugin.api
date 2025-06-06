@@ -14,8 +14,10 @@ public abstract interface class org/jetbrains/compose/reload/ComposeHotReloadArg
 	public abstract fun setDevToolsClasspath (Lorg/gradle/api/file/FileCollection;)V
 	public abstract fun setDevToolsEnabled (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setDevToolsTransparencyEnabled (Lorg/gradle/api/provider/Provider;)V
+	public abstract fun setEnableStdoutLogging (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setHotClasspath (Lorg/gradle/api/file/FileCollection;)V
 	public abstract fun setIsHeadless (Lorg/gradle/api/provider/Provider;)V
+	public abstract fun setLoggingLevel (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setMainClass (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setPidFile (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setReloadTaskName (Ljava/lang/String;)V

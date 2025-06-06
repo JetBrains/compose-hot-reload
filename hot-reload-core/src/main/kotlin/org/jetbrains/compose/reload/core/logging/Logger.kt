@@ -57,11 +57,17 @@ public fun Logger.with(other: Logger): Logger = when {
     else -> CompositeLogger(name, level, listOf(this, other))
 }
 
-public fun Logger.trace(msg: StringBuilder.() -> Unit): Unit = log(Level.Trace, msg)
-public fun Logger.debug(msg: StringBuilder.() -> Unit): Unit = log(Level.Debug, msg)
-public fun Logger.info(msg: StringBuilder.() -> Unit): Unit = log(Level.Info, msg)
-public fun Logger.warn(msg: StringBuilder.() -> Unit): Unit = log(Level.Warn, msg)
-public fun Logger.error(msg: StringBuilder.() -> Unit): Unit = log(Level.Error, msg)
+public fun Logger.trace(lazyMsg: () -> String): Unit = log(Level.Trace, lazyMsg)
+public fun Logger.debug(lazyMsg: () -> String): Unit = log(Level.Debug, lazyMsg)
+public fun Logger.info(lazyMsg: () -> String): Unit = log(Level.Info, lazyMsg)
+public fun Logger.warn(lazyMsg: () -> String): Unit = log(Level.Warn, lazyMsg)
+public fun Logger.error(lazyMsg: () -> String): Unit = log(Level.Error, lazyMsg)
+
+public fun Logger.traceBuilder(msg: StringBuilder.() -> Unit): Unit = log(Level.Trace, msg)
+public fun Logger.debugBuilder(msg: StringBuilder.() -> Unit): Unit = log(Level.Debug, msg)
+public fun Logger.infoBuilder(msg: StringBuilder.() -> Unit): Unit = log(Level.Info, msg)
+public fun Logger.warnBuilder(msg: StringBuilder.() -> Unit): Unit = log(Level.Warn, msg)
+public fun Logger.errorBuilder(msg: StringBuilder.() -> Unit): Unit = log(Level.Error, msg)
 
 public interface Logger {
     public val name: String
@@ -87,6 +93,11 @@ public interface Logger {
     public fun error(msg: String, t: Throwable? = null): Unit = log(Level.Error, msg, t)
 }
 
+internal inline fun Logger.log(level: Level, lazyMsg: () -> String) {
+    if (!isLevelEnabled(level)) return
+    this.log(level, lazyMsg())
+}
+
 internal inline fun Logger.log(level: Level, msg: StringBuilder.() -> Unit) {
     if (!isLevelEnabled(level)) return
     val sb = StringBuilder()
@@ -101,9 +112,9 @@ private fun time(): String {
 }
 
 public fun formatLogHeader(name: String, level: Level): String = buildString {
+    append("[${level.name}] ")
     append("[${time()}] ")
     append("[$name] ")
-    append("[${level.name}] ")
 }.trim()
 
 public fun formatLogMessage(msg: String?, t: Throwable?): String = buildString {
@@ -134,6 +145,9 @@ internal data class CompositeLogger(
     }
 }
 
+private const val COLOUR_RED = "\u001b[31m"
+private const val COLOUR_YELLOW = "\u001b[33m"
+private const val COLOUR_RESET = "\u001b[0m"
 
 internal class StdoutLogger(
     override val name: String,
@@ -145,7 +159,12 @@ internal class StdoutLogger(
         t: Throwable?
     ) {
         if (isLevelEnabled(level)) {
-            println("${formatLogHeader(name, level)} ${formatLogMessage(msg, t)}")
+            val (colour, reset) = when (level) {
+                Level.Warn -> COLOUR_YELLOW to COLOUR_RESET
+                Level.Error -> COLOUR_RED to COLOUR_RESET
+                else -> "" to ""
+            }
+            println("$colour${formatLogHeader(name, level)} ${formatLogMessage(msg, t)}$reset")
         }
     }
 }

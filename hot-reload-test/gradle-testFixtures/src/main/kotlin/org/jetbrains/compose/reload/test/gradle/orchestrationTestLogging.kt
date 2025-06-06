@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.reload.core.asFileName
-import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
@@ -48,6 +47,11 @@ private val testLoggingScope = CoroutineScope(
         e.printStackTrace()
     }
 )
+
+private fun printImmediately(message: String) {
+    println(message)
+    System.out.flush()
+}
 
 @OptIn(ExperimentalPathApi::class)
 internal fun ExtensionContext.startOrchestrationTestLogging(server: OrchestrationServer) = testLoggingScope.launch {
@@ -95,13 +99,12 @@ internal fun ExtensionContext.startOrchestrationTestLogging(server: Orchestratio
         writer
     }
 
-    val testClassLogger = Logger(testClass.name)
-    testClassLogger.info(
+    printImmediately(
         """
-        ${requiredTestMethod.name} (${context.getDisplayName()})
-        logs: ${allLogs.toUri()}
-        messages: ${allMessages.toUri()}
-    """.trimIndent()
+            ${requiredTestMethod.name} (${context.getDisplayName()})
+            logs: ${allLogs.toUri()}
+            messages: ${allMessages.toUri()}
+        """.trimIndent()
     )
 
     /* We collect all messages and log them: The flow will be closed when the orchestration closes */

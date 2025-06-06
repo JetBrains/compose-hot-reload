@@ -20,6 +20,7 @@ internal class OrchestrationLoggerService : LoggerService {
         val tag = when {
             tag != null -> tag
             name.startsWith("org.jetbrains.compose.reload.agent") -> TAG_AGENT
+            name.startsWith("org.jetbrains.compose.reload.analysis") -> TAG_AGENT
             name.startsWith("org.jetbrains.compose.devtools") -> TAG_DEVTOOLS
             name.startsWith("org.jetbrains.compose.reload.jvm") -> TAG_RUNTIME
             else -> null

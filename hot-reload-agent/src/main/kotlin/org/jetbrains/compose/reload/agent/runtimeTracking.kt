@@ -15,6 +15,7 @@ import org.jetbrains.compose.reload.analysis.verifyRedefinitions
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.submitSafe
 import org.jetbrains.compose.reload.core.logging.Logger
+import org.jetbrains.compose.reload.core.logging.trace
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.lang.ref.WeakReference
@@ -73,10 +74,10 @@ internal fun enqueueRuntimeAnalysis(
         classLoaders[classInfo.classId] = WeakReference(loader)
 
         if (classBeingRedefined == null) {
-            logger.trace("Parsed 'RuntimeInfo' for '$className'")
+            logger.trace { "Parsed 'RuntimeInfo' for '$className'" }
             currentRuntime.add(classInfo)
         } else {
-            logger.trace("Parsed 'RuntimeInfo' for '$className' (redefined)")
+            logger.trace { "Parsed 'RuntimeInfo' for '$className' (redefined)" }
             pendingRedefinitions.add(classInfo)
         }
 

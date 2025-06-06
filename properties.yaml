@@ -277,7 +277,7 @@ LoggingLevel:
   key: compose.reload.loggingLevel
   type: enum
   enumClass: org.jetbrains.compose.reload.core.logging.Level
-  target: [ application, devtools ]
+  target: [ application, build, devtools ]
   default: "Debug"
   documentation: |
     Set the logging level for the application

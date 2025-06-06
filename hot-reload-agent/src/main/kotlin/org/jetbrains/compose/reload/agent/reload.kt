@@ -10,7 +10,7 @@ import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.mapLeft
 import org.jetbrains.compose.reload.core.logging.Logger
-import org.jetbrains.compose.reload.core.logging.info
+import org.jetbrains.compose.reload.core.logging.infoBuilder
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
@@ -77,7 +77,7 @@ internal fun reload(
                 return@mapNotNull null
             }
 
-            logger.info {
+            logger.infoBuilder {
                 appendLine("Reloading class: '${clazz.name}' (${change.name})")
 
                 if (originalClass.superclass?.name != clazz.superclass.name) {
