@@ -32,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.ComposeDialog
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
@@ -40,7 +39,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.WindowSize
 import androidx.compose.ui.window.WindowState
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.invokeWhenMessageReceived
@@ -61,7 +59,6 @@ import java.awt.Dimension
 import java.awt.Point
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.milliseconds
-
 
 private val logger = createLogger()
 
@@ -92,7 +89,7 @@ fun DtSidecarWindow(
         focusable = true,
         alwaysOnTop = isAlwaysOnTop
     ) {
-        val isExpandedChanged = oldIsExpanded == isExpanded
+        val isExpandedChanged = oldIsExpanded != isExpanded
         if (isInitializing) {
             isInitializing = false
             val initialSize = getSideCarWindowSize(windowState, isExpanded)
@@ -229,7 +226,6 @@ private fun animateWindowPosition(
     isExpandedChanged: Boolean,
 ): WindowPosition {
     val targetPosition = getSideCarWindowPosition(windowState, newSize.width)
-    /* Width has changed: Animation shall be skipped */
     return when {
         isExpandedChanged -> targetPosition
         else -> {
