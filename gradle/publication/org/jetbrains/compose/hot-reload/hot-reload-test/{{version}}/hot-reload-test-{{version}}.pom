@@ -97,12 +97,6 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>1.5.18</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
       <groupId>org.jetbrains.compose.hot-reload</groupId>
       <artifactId>hot-reload-core</artifactId>
       <version>{{Hot Reload Version}}</version>

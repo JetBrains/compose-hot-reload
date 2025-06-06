@@ -7,7 +7,7 @@
 
 package org.jetbrains.compose.reload.utils
 
-import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.test.core.CompilerOption
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
 import org.jetbrains.compose.reload.test.gradle.BuildMode
@@ -29,7 +29,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import java.awt.GraphicsEnvironment
 import java.security.MessageDigest
 
-private val logger = createLogger()
+private val logger = Logger()
 
 class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
     override fun transform(
@@ -183,7 +183,7 @@ class HotReloadTestDimensionFilter : HotReloadTestDimensionExtension {
         }
 
         if (GraphicsEnvironment.isHeadless()) {
-            result = result.filter { invocationContext ->
+            result = result.filter { _ ->
                 context.findAnnotation<Headless>()?.isHeadless ?: true
             }
         }
