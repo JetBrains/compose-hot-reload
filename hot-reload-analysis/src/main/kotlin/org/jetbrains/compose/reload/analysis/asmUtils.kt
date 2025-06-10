@@ -13,6 +13,7 @@ import org.objectweb.asm.Handle
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Opcodes.ASM9
 import org.objectweb.asm.tree.AbstractInsnNode
+import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldInsnNode
 import org.objectweb.asm.tree.FieldNode
@@ -38,7 +39,7 @@ internal fun AbstractInsnNode.intValueOrNull(): Int? {
 }
 
 internal fun MethodNode.readFunctionKeyMetaAnnotation(): ComposeGroupKey? {
-    val functionKey = visibleAnnotations.orEmpty().find { annotationNode ->
+    val functionKey = allAnnotations.find { annotationNode ->
         annotationNode.desc == Ids.FunctionKeyMeta.classId.descriptor
     }?.values?.zipWithNext()?.find { (name, _) -> name == "key" }?.second as? Int
 
@@ -102,3 +103,9 @@ internal fun FieldId(classNode: ClassNode, fieldNode: FieldNode): FieldId = Fiel
     fieldName = fieldNode.name,
     fieldDescriptor = fieldNode.desc
 )
+
+internal val MethodNode.allAnnotations: List<AnnotationNode>
+    get() = buildList {
+        addAll(visibleAnnotations.orEmpty())
+        addAll(invisibleAnnotations.orEmpty())
+    }
