@@ -57,8 +57,8 @@ class HotSnapshotTaskTest {
             val classDirectory = "build/run/main/classpath"
             val changes = listOf(
                 tmp.resolve(classDirectory).resolve("a.class").also { it.writeText("a") } to ReloadClassesRequest.ChangeType.Removed,
-                tmp.resolve(classDirectory).resolve("b.class").also { it.writeText("b") } to ReloadClassesRequest.ChangeType.Modified,
-                tmp.resolve(classDirectory).resolve("c.class").also { it.writeText("c") } to ReloadClassesRequest.ChangeType.Added,
+                tmp.resolve(classDirectory).resolve("b.jpg").also { it.writeText("b") } to ReloadClassesRequest.ChangeType.Modified,
+                tmp.resolve(classDirectory).resolve("c.txt").also { it.writeText("c") } to ReloadClassesRequest.ChangeType.Added,
             )
 
             val pendingRequestFile = hotSnapshotTask.pendingRequestFile.get().asFile.toPath()

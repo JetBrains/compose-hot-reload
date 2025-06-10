@@ -105,22 +105,20 @@ abstract class HotSnapshotTask : DefaultTask() {
         else ClasspathSnapshot(classpath)
 
         try {
-            val changedClassFiles = if (pendingRequestFile.exists()) {
+            val changedFiles = if (pendingRequestFile.exists()) {
                 pendingRequestFile.readObject<ReloadClassesRequest>().changedClassFiles.toMutableMap()
             } else mutableMapOf()
 
             inputs.getFileChanges(classpath).forEach { change ->
-                if (change.file.extension == "class") {
-                    changedClassFiles += resolveChangedClassFile(change)
-                }
-
                 if (change.file.extension == "jar") {
-                    changedClassFiles += resolveChangedJar(snapshot, change)
+                    changedFiles += resolveChangedJar(snapshot, change)
+                } else {
+                    changedFiles += resolveChangedFile(change)
                 }
             }
 
             pendingRequestFile.createParentDirectories()
-                .writeObject(ReloadClassesRequest(changedClassFiles))
+                .writeObject(ReloadClassesRequest(changedFiles))
 
             classpathSnapshotFile
                 .createParentDirectories()
@@ -133,7 +131,7 @@ abstract class HotSnapshotTask : DefaultTask() {
         }
     }
 
-    private fun resolveChangedClassFile(change: FileChange): Pair<File, ChangeType> {
+    private fun resolveChangedFile(change: FileChange): Pair<File, ChangeType> {
         val changeType = when (change.changeType) {
             org.gradle.work.ChangeType.ADDED -> Added
             org.gradle.work.ChangeType.MODIFIED -> Modified
