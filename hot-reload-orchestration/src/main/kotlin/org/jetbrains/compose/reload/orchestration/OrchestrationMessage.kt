@@ -192,6 +192,10 @@ public sealed class OrchestrationMessage : Serializable {
      * Note: In case of any failure of a reload of classes, the 'pending changes'
      * will be kept by the Agent: This means, that a 'retry' is effectively just a request without
      * additional changed files
+     *
+     * Note 2: This entity, while being named 'Reload Classes Request' will also carry changed
+     * resource files (not just classes). It will be renamed to 'Reload Changes Request' once the protocol
+     * is stabilized.
      */
     public data class ReloadClassesRequest(
         val changedClassFiles: Map<File, ChangeType> = emptyMap()
