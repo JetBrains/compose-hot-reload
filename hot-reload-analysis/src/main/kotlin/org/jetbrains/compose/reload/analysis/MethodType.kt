@@ -5,10 +5,8 @@
 
 package org.jetbrains.compose.reload.analysis
 
-import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
-import kotlin.collections.orEmpty
 
 internal fun MethodType(methodNode: MethodNode): MethodType = when {
     methodNode.instructions.filterIsInstance<MethodInsnNode>()
@@ -55,9 +53,3 @@ private val COMPOSE_FUNCTION_ANNOTATIONS = setOf(
     Ids.Composable.classId,
     Ids.FunctionKeyMeta.classId,
 )
-
-private val MethodNode.allAnnotations: List<AnnotationNode>
-    get() = buildList {
-        addAll(visibleAnnotations.orEmpty())
-        addAll(invisibleAnnotations.orEmpty())
-    }
