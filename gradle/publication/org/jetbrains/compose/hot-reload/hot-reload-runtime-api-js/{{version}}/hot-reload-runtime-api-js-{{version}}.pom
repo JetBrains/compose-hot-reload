@@ -47,7 +47,7 @@
     <dependency>
       <groupId>org.jetbrains.compose.runtime</groupId>
       <artifactId>runtime-js</artifactId>
-      <version>1.8.0</version>
+      <version>1.8.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

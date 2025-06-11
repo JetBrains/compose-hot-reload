@@ -80,7 +80,7 @@
           "group": "org.jetbrains.compose.runtime",
           "module": "runtime",
           "version": {
-            "requires": "1.8.0"
+            "requires": "1.8.1"
           }
         },
         {
@@ -156,7 +156,7 @@
           "group": "org.jetbrains.compose.runtime",
           "module": "runtime",
           "version": {
-            "requires": "1.8.0"
+            "requires": "1.8.1"
           }
         },
         {
