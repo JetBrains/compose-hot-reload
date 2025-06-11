@@ -7,18 +7,26 @@
 
 package org.jetbrains.compose.reload.orchestration
 
+import kotlinx.coroutines.isActive
 import org.jetbrains.compose.reload.core.Actor
 import org.jetbrains.compose.reload.core.Broadcast
+import org.jetbrains.compose.reload.core.Bus
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.Queue
 import org.jetbrains.compose.reload.core.StoppedException
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.WorkerThread
-import org.jetbrains.compose.reload.core.await
 import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
+import org.jetbrains.compose.reload.core.exceptionOrNull
+import org.jetbrains.compose.reload.core.isActive
+import org.jetbrains.compose.reload.core.isFailure
+import org.jetbrains.compose.reload.core.launchOnFinish
+import org.jetbrains.compose.reload.core.launchOnStop
 import org.jetbrains.compose.reload.core.launchTask
+import org.jetbrains.compose.reload.core.stopNow
+import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.core.withThread
 import org.jetbrains.compose.reload.orchestration.OrchestrationPackage.Introduction
 import org.slf4j.LoggerFactory
@@ -30,10 +38,18 @@ import kotlin.uuid.ExperimentalUuidApi
 
 public fun OrchestrationClient(role: OrchestrationClientRole): OrchestrationClient? {
     val port = HotReloadEnvironment.orchestrationPort ?: return null
-    return connectOrchestrationClient(role, port = port)
+    return OrchestrationClient(role, port = port)
 }
 
-public fun connectOrchestrationClient(clientRole: OrchestrationClientRole, port: Int): OrchestrationClient {
+public suspend fun connectOrchestrationClient(role: OrchestrationClientRole, port: Int): Try<OrchestrationClient> {
+    val client = OrchestrationClient(role, port)
+    val connected = client.connect()
+    return if (connected.isFailure()) connected
+    else client.toLeft()
+}
+
+
+public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): OrchestrationClient {
     val logger = LoggerFactory.getLogger("OrchestrationClient($clientRole, $port)")
 
     val connect = Future<Unit>()
@@ -41,19 +57,19 @@ public fun connectOrchestrationClient(clientRole: OrchestrationClientRole, port:
 
     val clientId = OrchestrationClientId.random()
     val sendActor = Actor<OrchestrationMessage, Unit>()
-    val receiveBroadcast = Broadcast<OrchestrationMessage>()
+    val receiveBroadcast = Bus<OrchestrationMessage>()
     val ackQueue = Queue<OrchestrationPackage.Ack>()
 
 
-    val task = launchTask {
+    val task = launchTask<Unit>("OrchestrationClient($clientRole, $port)") {
         connect.await()
 
         val writer = WorkerThread("Orchestration IO: Writer")
         val reader = WorkerThread("Orchestration IO: Reader")
 
-        launchOnFinish { error ->
-            sendActor.close(error)
-            isConnected.completeExceptionally(error ?: StoppedException())
+        launchOnFinish { result ->
+            sendActor.close(result.exceptionOrNull())
+            isConnected.completeExceptionally(result.exceptionOrNull() ?: StoppedException())
 
             writer.shutdown().await()
             reader.shutdown().await()
@@ -89,13 +105,14 @@ public fun connectOrchestrationClient(clientRole: OrchestrationClientRole, port:
         isConnected.complete(Unit)
 
         /* Launch sequential writer coroutine */
-        launch {
+        subtask("Writer") {
             sendActor.process { message ->
                 /* Get dispatch and write it as package */
                 io.writePackage(message)
 
                 /* Await the ack from the server */
                 val ack = ackQueue.receive()
+
                 check(ack.messageId == message.messageId) {
                     "Unexpected ack '${ack.messageId}'"
                 }
@@ -103,9 +120,9 @@ public fun connectOrchestrationClient(clientRole: OrchestrationClientRole, port:
         }
 
         /* Launch sequential reader coroutine */
-        launch {
-            while (isActive) {
-                val pkg = io.readPackage()
+        subtask("Reader") {
+            while (isActive()) {
+                val pkg = io.readPackage() ?: stopNow()
                 if (pkg is OrchestrationPackage.Ack) ackQueue.send(pkg)
                 if (pkg !is OrchestrationMessage) continue
                 receiveBroadcast.send(pkg)
@@ -114,35 +131,30 @@ public fun connectOrchestrationClient(clientRole: OrchestrationClientRole, port:
     }
 
     return object : OrchestrationClient {
+        override val port: Future<Int> = Future(port)
         override val clientId: OrchestrationClientId = clientId
         override val clientRole: OrchestrationClientRole = clientRole
+        override val messages: Broadcast<OrchestrationMessage> = receiveBroadcast
+        override val closed: Future<Unit> = task
 
         override suspend fun connect(): Try<Unit> {
             connect.complete(Unit)
             return isConnected.await()
         }
 
-        override val messages: Broadcast<OrchestrationMessage> = receiveBroadcast
 
         override suspend fun send(message: OrchestrationMessage) {
-            sendActor(message)
+            sendActor.invoke(message)
         }
 
         override suspend fun isActive(): Boolean {
             return task.isActive
         }
 
-        override suspend fun close(): Boolean {
+        override suspend fun shutdown(): Boolean {
             return task.stop()
         }
     }
-}
-
-public interface OrchestrationHandle {
-    public val messages: Broadcast<OrchestrationMessage>
-    public suspend fun send(message: OrchestrationMessage)
-    public suspend fun isActive(): Boolean
-    public suspend fun close(): Boolean
 }
 
 public interface OrchestrationClient : OrchestrationHandle {
@@ -154,5 +166,6 @@ public interface OrchestrationClient : OrchestrationHandle {
 public data class OrchestrationClientId(val value: String) : Serializable {
     public companion object {
         public fun random(): OrchestrationClientId = OrchestrationClientId(UUID.randomUUID().toString())
+        internal const val serialVersionUID: Long = 0L
     }
 }

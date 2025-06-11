@@ -13,6 +13,8 @@ public enum class OrchestrationProtocolVersion(public val intValue: Int) {
     V1(1);
 
     public companion object {
+        internal const val serialVersionUID: Long = 0L
+
         public val current: OrchestrationProtocolVersion get() = V1
 
         public fun from(intValue: Int): Try<OrchestrationProtocolVersion> {

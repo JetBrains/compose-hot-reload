@@ -7,12 +7,9 @@ package org.jetbrains.compose.reload.core
 
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.RejectedExecutionException
-import kotlin.concurrent.atomics.AtomicInt
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.concurrent.atomics.fetchAndDecrement
-import kotlin.concurrent.atomics.fetchAndIncrement
+import java.util.concurrent.atomic.AtomicInteger
 
-@OptIn(ExperimentalAtomicApi::class)
+
 public class WorkerThread(
     name: String, isDaemon: Boolean = true,
 ) : Thread(name), AutoCloseable {
@@ -23,12 +20,16 @@ public class WorkerThread(
      * Int.MIN_VALUE + n: The worker thread is shutting down, but there are still [n] pending dispatches
      * 0..Int.MAX_VALUE: The worker thread is running and accepting dispatches
      */
-    private val pendingDispatches = AtomicInt(0)
+    private val pendingDispatches = AtomicInteger(0)
     private val isClosed = Future<Unit>()
 
     override fun run() {
+        fun <T> Work<T>.execute() {
+            future.completeWith(Try { action() })
+        }
+
         try {
-            while (pendingDispatches.load() != Int.MIN_VALUE) {
+            while (pendingDispatches.get() != Int.MIN_VALUE || queue.isNotEmpty()) {
                 val element = queue.take()
                 element.execute()
             }
@@ -40,11 +41,11 @@ public class WorkerThread(
     public fun shutdown(): Future<Unit> {
         /* Try closing the worker thread by setting 'pendingDispatches' to 'Int.MIN_VALUE' */
         while (true) {
-            val currentPendingDispatches = pendingDispatches.load()
+            val currentPendingDispatches = pendingDispatches.get()
             if (currentPendingDispatches < 0) return isClosed
             if (pendingDispatches.compareAndSet(currentPendingDispatches, Int.MIN_VALUE + currentPendingDispatches)) {
                 /* Send an empty task to awaken the worker thread */
-                queue.add(Work(Future()) {})
+                queue.add(Work.empty)
                 return isClosed
             }
         }
@@ -59,15 +60,16 @@ public class WorkerThread(
      * If the thread is already shut-down, or shutting down, the [FailureFuture] might contain a [RejectedExecutionException].
      */
     public fun <T> invoke(action: () -> T): Future<T> {
+
         val future = Future<T>()
 
         /* Fast path: The thread is already closed for further dispatches */
-        if (pendingDispatches.load() < 0) {
+        if (pendingDispatches.get() < 0) {
             return FailureFuture(RejectedExecutionException("WorkerThread '$name' is shutting down"))
         }
 
         val work = Work(future, action)
-        val previousPendingDispatches = pendingDispatches.fetchAndIncrement()
+        val previousPendingDispatches = pendingDispatches.andIncrement
         try {
             if (previousPendingDispatches < 0) {
                 return FailureFuture(RejectedExecutionException("WorkerThread '$name' is shutting down"))
@@ -75,7 +77,7 @@ public class WorkerThread(
 
             queue.add(work)
         } finally {
-            pendingDispatches.fetchAndDecrement()
+            pendingDispatches.andDecrement
         }
         return future
     }
@@ -85,14 +87,13 @@ public class WorkerThread(
      * is already invoked on the correct thread.
      */
     public fun <T> invokeImmediate(action: () -> T): Future<T> {
-        return if (currentThread() == this) Future(runCatching { action() })
+        return if (currentThread() == this) Future(Try { action() })
         else invoke(action)
     }
 
-    private class Work<T>(private val future: CompletableFuture<T>, private val action: () -> T) {
-        fun execute() {
-            val result = Try { action() }
-            future.completeWith(result)
+    private class Work<T>(val future: CompletableFuture<T>, val action: () -> T) {
+        companion object {
+            val empty get() = Work(Future(), {})
         }
     }
 

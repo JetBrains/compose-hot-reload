@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.reload.core.Os
+import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
@@ -57,7 +58,7 @@ public fun HotReloadTestFixture.launchApplication(
 
                 val readerThread = thread(isDaemon = true, name = "App Output Reader") {
                     socketFile.bufferedReader().forEachLine { line ->
-                        orchestration.sendMessage(LogMessage("App", line))
+                        launchTask { orchestration.send(LogMessage(line)) }
                     }
                 }
 

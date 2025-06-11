@@ -1,14 +1,17 @@
-import org.jetbrains.compose.reload.core.Broadcast
+import org.jetbrains.compose.reload.core.Bus
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.WorkerThread
-import org.jetbrains.compose.reload.core.collectWhile
 import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.dispatcher
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.invokeOnFinish
+import org.jetbrains.compose.reload.core.isActive
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.reloadMainDispatcherImmediate
+import org.jetbrains.compose.reload.core.stopCollecting
 import org.jetbrains.compose.reload.core.withThread
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -22,14 +25,14 @@ import kotlin.time.Duration.Companion.seconds
 class BroadcastTest {
     @Test
     fun `test - send and receive`() {
-        val broadcast = Broadcast<Int>()
+        val broadcast = Bus<Int>()
         val received = mutableListOf<Int>()
 
         launchTask {
-            launch(reloadMainDispatcherImmediate) {
-                broadcast.collectWhile { value ->
+            subtask(context = reloadMainDispatcherImmediate) {
+                broadcast.collect { value ->
                     received.add(value)
-                    received.size < 5
+                    if (received.size >= 5) stopCollecting()
                 }
             }
 
@@ -44,30 +47,35 @@ class BroadcastTest {
 
     @Test
     fun `test - threads`() {
-        val broadcast = Broadcast<Int>()
+        val broadcast = Bus<Int>()
         val collectingThread = Future<Thread>()
         val worker1 = WorkerThread("w1")
         val worker2 = WorkerThread("w2")
 
-        launchTask {
+
+        val task = launchTask {
             invokeOnFinish { worker1.shutdown() }
             invokeOnFinish { worker2.shutdown() }
 
-            launch(worker1.dispatcher) {
-                broadcast.collectWhile { value ->
+            subtask(context = worker1.dispatcher) {
+                broadcast.collect { value ->
                     collectingThread.complete(Thread.currentThread())
-                    false
+                    stopCollecting()
                 }
             }
 
             withThread(worker2) {
+                val value = AtomicInteger(0)
                 while (!collectingThread.isCompleted()) {
-                    broadcast.send(0)
+                    broadcast.send(value.andIncrement)
                 }
             }
-        }.getBlocking()
+
+        }
+        task.getBlocking(5.seconds)
+        task.getBlocking(5.seconds).getOrThrow()
 
         assertTrue(collectingThread.isCompleted())
-        assertEquals(worker1, collectingThread.getBlocking().getOrThrow())
+        assertEquals(worker1, collectingThread.getBlocking(5.seconds).getOrThrow())
     }
 }

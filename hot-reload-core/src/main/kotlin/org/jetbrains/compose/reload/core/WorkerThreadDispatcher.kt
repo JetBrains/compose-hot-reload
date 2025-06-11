@@ -9,6 +9,7 @@ import java.util.concurrent.RejectedExecutionException
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.resumeWithException
 
 @InternalHotReloadApi
 public class WorkerThreadDispatcher(
@@ -23,12 +24,14 @@ public class WorkerThreadDispatcher(
                 return@Continuation
             }
 
+
             /* We dispatch to the worker thread */
-            workerThread.invoke { continuation.resumeWith(result) }.invokeOnCompletion { result ->
-                val exception = result.exceptionOrNull()
-                if (exception is RejectedExecutionException) {
-                    continuation.resumeWith(Result.failure(exception))
-                }
+            val future = workerThread.invoke {
+                continuation.resumeWith(result)
+            }
+            val exception = future.getOrNull()?.exceptionOrNull()
+            if (exception is RejectedExecutionException) {
+                continuation.resumeWithException(exception)
             }
         }
     }

@@ -3,12 +3,10 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-@file:OptIn(ExperimentalAtomicApi::class)
 
 package org.jetbrains.compose.reload.core
 
-import kotlin.concurrent.atomics.AtomicReference
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import java.util.concurrent.atomic.AtomicReference
 
 public interface Actor<In, Out> {
     public suspend operator fun invoke(input: In): Out
@@ -40,7 +38,7 @@ private class ActorImpl<In, Out> : Actor<In, Out> {
     }
 
     override suspend fun invoke(input: In): Out {
-        val currentState = state.load()
+        val currentState = state.get()
         if (currentState is State.Closed) {
             throw currentState.exception
         }
@@ -59,14 +57,14 @@ private class ActorImpl<In, Out> : Actor<In, Out> {
         }.previous
 
 
-        launchTask {
+        launchTask("ActorImpl.close") {
             queue.send(QueueClosed)
 
             if (previousState is State.Processing) {
                 previousState.future.await()
             }
 
-            while (isActive) {
+            while (isActive()) {
                 when (val element = queue.receive()) {
                     is QueueClosed -> continue
                     is CompletableInput<*, *> -> element.future.completeExceptionally(exception)
@@ -78,7 +76,7 @@ private class ActorImpl<In, Out> : Actor<In, Out> {
     }
 
     override fun isClosed(): Boolean {
-        return state.load() is State.Closed
+        return state.get() is State.Closed
     }
 
     override suspend fun process(action: suspend (In) -> Out) {
@@ -112,7 +110,7 @@ private class ActorImpl<In, Out> : Actor<In, Out> {
 
                 /* Handle the case where the current coroutine task finished before calling the 'finally' block */
                 val elementOnFinish = invokeOnFinish { error ->
-                    element.future.completeExceptionally(ActorClosedException(error))
+                    element.future.completeExceptionally(ActorClosedException(error.exceptionOrNull()))
                 }
                 try {
                     val result = action(element.input)

@@ -6,12 +6,12 @@
 package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.WorkerThread
-import org.jetbrains.compose.reload.core.await
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.withThread
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.net.Socket
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal interface OrchestrationIO {
     suspend infix fun writeInt(value: Int)
@@ -22,8 +22,13 @@ internal interface OrchestrationIO {
     suspend fun readInt(): Int
     suspend fun readShort(): Short
     suspend fun readByte(): Byte
-    suspend fun readPackage(): OrchestrationPackage
 
+    /**
+     * Returns `null` if the IO is closed
+     */
+    suspend fun readPackage(): OrchestrationPackage?
+
+    public fun isClosed(): Boolean
     suspend fun close()
 }
 
@@ -33,15 +38,19 @@ internal suspend fun OrchestrationIO(
 ): OrchestrationIO {
     val outputStream = withThread(writer) { DataOutputStream(socket.outputStream.buffered()) }
     val inputStream = withThread(reader) { DataInputStream(socket.inputStream.buffered()) }
-    return OrchestrationIOImpl(reader, writer, outputStream, inputStream)
+    return OrchestrationIOImpl(socket, reader, writer, outputStream, inputStream)
 }
 
 internal class OrchestrationIOImpl(
+    private val socket: Socket,
     private val reader: WorkerThread,
     private val writer: WorkerThread,
     private val output: DataOutputStream,
     private val input: DataInputStream
 ) : OrchestrationIO {
+
+    private val isClosed = AtomicBoolean(false)
+
     override suspend fun writeInt(value: Int) = withThread(writer) {
         output.writeInt(value)
         output.flush()
@@ -78,21 +87,34 @@ internal class OrchestrationIOImpl(
         input.readByte()
     }
 
-    override suspend fun readPackage(): OrchestrationPackage = withThread(reader) {
-        val pkgType = OrchestrationPackageType.from(input.readInt()).getOrThrow()
-        val pkgFormat = OrchestrationPackageFormat.from(input.readInt()).getOrThrow()
-        val pkgSize = input.readInt()
-        if (pkgSize < 0) error("Illegal pkg size: '$pkgSize'")
-        if (pkgSize > 12e6) error("Illegal pkg size: '$pkgSize'")
-        val pkgData = input.readNBytes(pkgSize)
-        val frame = OrchestrationFrame(pkgType, pkgFormat, pkgData)
-        frame.decodePackage()
+    override suspend fun readPackage(): OrchestrationPackage? = withThread(reader) {
+        try {
+            val pkgType = OrchestrationPackageType.from(input.readInt()).getOrThrow()
+            val pkgFormat = OrchestrationPackageFormat.from(input.readInt()).getOrThrow()
+            val pkgSize = input.readInt()
+            if (pkgSize < 0) error("Illegal pkg size: '$pkgSize'")
+            if (pkgSize > 12e6) error("Illegal pkg size: '$pkgSize'")
+            val pkgData = input.readNBytes(pkgSize)
+            val frame = OrchestrationFrame(pkgType, pkgFormat, pkgData)
+            frame.decodePackage()
+        } catch (t: Throwable) {
+            if (isClosed.get()) {
+                return@withThread null
+            }
+            throw t
+        }
     }
 
     override suspend fun close() {
+        if (!isClosed.getAndSet(true)) return
         writer.shutdown().await()
         input.close()
         output.close()
         reader.shutdown().await()
+        socket.close()
+    }
+
+    override fun isClosed(): Boolean {
+        return isClosed.get()
     }
 }

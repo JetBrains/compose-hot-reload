@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.test
 
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.reload.agent.send
+import org.jetbrains.compose.reload.agent.sendBlocking
 import org.jetbrains.compose.reload.jvm.runHeadlessApplicationBlocking
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
@@ -35,7 +36,7 @@ public fun screenshotTestApplication(
             message = throwable.message,
             exceptionClassName = throwable.javaClass.name,
             stacktrace = throwable.stackTrace.toList()
-        ).send()
+        ).sendBlocking()
     }
 
     runHeadlessApplicationBlocking(

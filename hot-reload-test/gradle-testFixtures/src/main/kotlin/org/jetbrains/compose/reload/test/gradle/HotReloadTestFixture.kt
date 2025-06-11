@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.testFixtures.withAsyncTrace
@@ -65,7 +66,7 @@ internal constructor(
     public suspend fun <T> runTransaction(
         block: suspend TransactionScope.() -> T
     ): T = withAsyncTrace("'runTransaction'") {
-        async {
+        coroutineScope {
             /*
             Multiple consumers will be able to 'receive' all messages sent during the transaction.
             Therefore, this shared flow is buffered with unlimited replay.
@@ -95,7 +96,7 @@ internal constructor(
                 currentCoroutineContext().cancelChildren()
                 messageChannel.close()
             }
-        }.await()
+        }
     }
 
     public suspend fun <T> sendMessage(
@@ -147,7 +148,7 @@ internal constructor(
                 val stderr = gradleRunner.stderrChannel?.receiveAsFlow() ?: emptyFlow()
                 val stdout = gradleRunner.stdoutChannel?.receiveAsFlow() ?: emptyFlow()
                 merge(stderr, stdout).collect { message ->
-                    orchestration.sendMessage(LogMessage("Gradle Test Runner", message)).get()
+                    orchestration.send(LogMessage("Gradle Test Runner", message))
                 }
             }
 
@@ -164,8 +165,10 @@ internal constructor(
     private val resources = mutableListOf<AutoCloseable>()
 
     override fun close() {
-        orchestration.sendMessage(ShutdownRequest("Requested by HotReloadTestFixture.close()")).get()
-        orchestration.closeGracefully().get()
+        runBlocking {
+            orchestration.send(ShutdownRequest("Requested by HotReloadTestFixture.close()"))
+            orchestration.close()
+        }
 
         testScope.cancel()
         daemonTestScope.cancel()

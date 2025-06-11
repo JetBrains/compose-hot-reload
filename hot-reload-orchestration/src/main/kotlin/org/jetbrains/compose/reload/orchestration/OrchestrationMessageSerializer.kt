@@ -72,6 +72,8 @@ internal enum class OrchestrationPackageType(val intValue: Int) {
     ClientIntroduction(2);
 
     companion object {
+        internal const val serialVersionUID: Long = 0L
+
         fun from(intValue: Int): Try<OrchestrationPackageType> {
             entries.firstOrNull { it.intValue == intValue }?.let { return it.toLeft() }
             return IllegalArgumentException("Unknown package type: $intValue").toRight()
@@ -79,16 +81,24 @@ internal enum class OrchestrationPackageType(val intValue: Int) {
     }
 }
 
-public sealed class OrchestrationPackage {
-    internal class Introduction(
-        val clientId: OrchestrationClientId,
-        val clientRole: OrchestrationClientRole,
-        val clientPid: Long? = null,
-    ) : OrchestrationPackage(), Serializable
+public sealed class OrchestrationPackage : Serializable {
+    public data class Introduction(
+        public val clientId: OrchestrationClientId,
+        public val clientRole: OrchestrationClientRole,
+        public val clientPid: Long? = null,
+    ) : OrchestrationPackage(), Serializable {
+        internal companion object {
+            const val serialVersionUID: Long = 0L
+        }
+    }
 
-    internal class Ack(
+    internal data class Ack(
         val messageId: OrchestrationMessageId
-    ) : OrchestrationPackage(), Serializable
+    ) : OrchestrationPackage(), Serializable {
+        companion object {
+            const val serialVersionUID: Long = 0L
+        }
+    }
 }
 
 internal enum class OrchestrationPackageFormat(val intValue: Int) {
@@ -97,6 +107,8 @@ internal enum class OrchestrationPackageFormat(val intValue: Int) {
     ;
 
     companion object {
+        internal const val serialVersionUID: Long = 0L
+
         fun from(intValue: Int): Try<OrchestrationPackageFormat> {
             OrchestrationPackageFormat.entries.firstOrNull { it.intValue == intValue }?.let { return it.toLeft() }
             return IllegalArgumentException("Unknown package type: $intValue").toRight()

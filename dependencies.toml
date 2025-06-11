@@ -6,6 +6,7 @@ kotlinxDatetime = "0.6.2"
 kotlinxBenchmark = "0.4.13"
 kotlinxBinaryCompatibilityValidator = "0.17.0"
 kotlinxSerialization = "1.8.1"
+kotlinxLincheck = "2.39"
 slf4j = "2.0.17"
 androidGradlePlugin = "8.7.1"
 junit = "5.11.4"
@@ -31,6 +32,8 @@ kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.r
 kotlinxSerialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 kotlinxSerialization-kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "kaml" }
 
+lincheck = { module = "org.jetbrains.kotlinx:lincheck", version.ref = "kotlinxLincheck" }
+
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
@@ -39,7 +42,7 @@ evas-compose = { module = "io.sellmair:evas-compose", version.ref = "evas" }
 
 compose-gradlePlugin = { module = "org.jetbrains.compose:org.jetbrains.compose.gradle.plugin", version.ref = "compose" }
 compose-compiler-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
-compose-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version = "1.7.3"}
+compose-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version = "1.7.3" }
 
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }

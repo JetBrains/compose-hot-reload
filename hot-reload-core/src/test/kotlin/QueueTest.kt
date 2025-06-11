@@ -17,14 +17,14 @@ class QueueTest {
 
         launchTask {
             val queue = Queue<Int>()
-            launch {
+            subtask {
                 repeat(6) {
                     val value = queue.receive()
                     events.add("received $value")
                 }
             }
 
-            launch {
+            subtask {
                 repeat(6) {
                     events.add("sending $it")
                     queue.send(it)

@@ -7,7 +7,8 @@ package org.jetbrains.compose.reload.test.gradle
 
 import kotlinx.coroutines.channels.Channel
 import org.jetbrains.compose.reload.core.HotReloadProperty
-import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
+import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
@@ -77,7 +78,7 @@ internal class HotReloadTestFixtureExtension(
             }
         }
 
-        val orchestrationServer = startOrchestrationServer()
+        val orchestrationServer = OrchestrationServer()
         startOrchestrationTestLogging(orchestrationServer)
         val isHeadless = findAnnotation<Headless>()?.isHeadless ?: true
 
@@ -85,7 +86,7 @@ internal class HotReloadTestFixtureExtension(
             projectRoot = projectDir.path,
             gradleVersion = context.gradleVersion.version,
             arguments = listOf(
-                "-P${HotReloadProperty.OrchestrationPort.key}=${orchestrationServer.port}",
+                "-P${HotReloadProperty.OrchestrationPort.key}=${orchestrationServer.port.getBlocking()}",
                 "-P${HotReloadProperty.IsHeadless.key}=$isHeadless",
             ),
             stdoutChannel = Channel(),

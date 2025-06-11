@@ -11,6 +11,7 @@ import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.mapLeft
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.io.File
@@ -21,14 +22,14 @@ import java.util.UUID
 private val logger = createLogger()
 
 data class Reload(
-    val reloadRequestId: UUID,
+    val reloadRequestId: OrchestrationMessageId,
     val definitions: List<ClassDefinition>,
     val dirtyRuntime: RuntimeDirtyScopes,
 )
 
 internal fun reload(
     instrumentation: Instrumentation,
-    reloadRequestId: UUID,
+    reloadRequestId: OrchestrationMessageId,
     pendingChanges: Map<File, OrchestrationMessage.ReloadClassesRequest.ChangeType>
 ): Try<Reload> = Try {
     val definitions = pendingChanges.mapNotNull { (file, change) ->

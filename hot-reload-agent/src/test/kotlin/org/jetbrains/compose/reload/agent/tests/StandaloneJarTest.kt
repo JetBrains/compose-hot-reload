@@ -9,9 +9,10 @@ import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.destroyWithDescendants
+import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
+import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.test.core.TestEnvironment
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -44,7 +45,7 @@ class StandaloneJarTest {
 
     @Test
     fun `test - launching process with standalone agent jar`() {
-        val server = startOrchestrationServer()
+        val server = OrchestrationServer()
         val aliveMessage = CompletableFuture<OrchestrationMessage.TestEvent>()
 
         server.invokeWhenMessageReceived { message ->
@@ -54,7 +55,7 @@ class StandaloneJarTest {
             }
         }
 
-        cleanupActions.add { server.close() }
+        cleanupActions.add { server.shutdown() }
 
         val currentProcessInfo = ProcessHandle.current().info()
         val testProcess = ProcessBuilder(
@@ -72,7 +73,7 @@ class StandaloneJarTest {
                 ch.qos.logback.core.Context::class.java.protectionDomain.codeSource.location.file,
                 ch.qos.logback.classic.Logger::class.java.protectionDomain.codeSource.location.file,
             ).joinToString(File.pathSeparator),
-            "-D${HotReloadProperty.OrchestrationPort.key}=${server.port}",
+            "-D${HotReloadProperty.OrchestrationPort.key}=${server.port.getBlocking()}",
             "-D${HotReloadProperty.IsHeadless.key}=true",
             "-D${HotReloadProperty.DevToolsEnabled.key}=false",
             StandaloneJarTestMain::class.qualifiedName,

@@ -8,6 +8,8 @@ package org.jetbrains.compose.reload.agent
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.PidFileInfo
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.writePidFile
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteIfExists
@@ -20,7 +22,7 @@ internal fun createPidfile() {
     pidFile.createParentDirectories().writePidFile(
         PidFileInfo(
             pid = ProcessHandle.current().pid(),
-            orchestrationPort = orchestration.port
+            orchestrationPort = orchestration.port.getBlocking().getOrThrow()
         )
     )
 

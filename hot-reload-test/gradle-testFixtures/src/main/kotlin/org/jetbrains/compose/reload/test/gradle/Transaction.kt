@@ -82,8 +82,8 @@ public class TransactionScope internal constructor(
     @PublishedApi
     internal val logger: Logger = createLogger()
 
-    public fun OrchestrationMessage.send() {
-        fixture.orchestration.sendMessage(this).get()
+    public suspend fun OrchestrationMessage.send() {
+        fixture.orchestration.send(this)
     }
 
     /**

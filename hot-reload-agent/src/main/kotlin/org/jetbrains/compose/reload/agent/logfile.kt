@@ -6,8 +6,11 @@
 package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
+import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.invokeOnValue
+import org.jetbrains.compose.reload.core.launchTask
+import org.jetbrains.compose.reload.core.withType
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
 import java.time.LocalDateTime
 import java.util.concurrent.LinkedBlockingDeque
 import kotlin.concurrent.thread
@@ -15,17 +18,17 @@ import kotlin.io.path.createParentDirectories
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.outputStream
 
-internal fun createLogfile() {
-    val pidFile = HotReloadEnvironment.pidFile ?: return
+internal fun createLogfile() = launchTask<Unit> task@{
+    val pidFile = HotReloadEnvironment.pidFile ?: return@task
     val logFile = pidFile.resolveSibling(pidFile.nameWithoutExtension + ".chr.log")
 
     val queue = LinkedBlockingDeque<String>()
 
-    orchestration.invokeWhenReceived<OrchestrationMessage.LogMessage> { message ->
+    orchestration.messages.withType<OrchestrationMessage.LogMessage>().invokeOnValue { message ->
         queue.add("[${message.tag}]: ${message.message}")
     }
 
-    orchestration.invokeWhenReceived<OrchestrationMessage.CriticalException> { exception ->
+    orchestration.messages.withType<OrchestrationMessage.CriticalException>().invokeOnValue { exception ->
         queue.add(buildString {
             appendLine("[${exception.clientRole.name}] ${exception.exceptionClassName} :")
             exception.stacktrace.forEach { line ->
@@ -37,7 +40,7 @@ internal fun createLogfile() {
     thread(name = "Compose Hot Reload: Logger") {
         queue.add("Compose Hot Reload: Run at ${LocalDateTime.now()}")
         queue.add("Compose Hot Reload: PID: ${ProcessHandle.current().pid()}")
-        queue.add("Compose Hot Reload: Orchestration port: ${orchestration.port}")
+        queue.add("Compose Hot Reload: Orchestration port: ${orchestration.port.getBlocking()}")
 
         HotReloadEnvironment::class.java.declaredMethods
             .filter { it.name.startsWith("get") }

@@ -3,12 +3,9 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-@file:OptIn(ExperimentalAtomicApi::class)
-
 package org.jetbrains.compose.reload.core
 
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.withLock
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -17,9 +14,7 @@ public class QueueClosedException(
     override val cause: Throwable?
 ) : Exception("Queue closed")
 
-public interface SendQueue<T> {
-    public suspend fun send(value: T)
-}
+public interface SendQueue<T> : Send<T>
 
 public interface ReceiveQueue<T> {
     public suspend fun receive(): T
@@ -61,6 +56,7 @@ private class QueueImpl<T> : Queue<T> {
 
             /* We can only reach this point if a receiver was indeed available */
             receiver.continuation.resume(value)
+            continuation.resume(Unit)
         }
     }
 
@@ -72,7 +68,7 @@ private class QueueImpl<T> : Queue<T> {
             return sender.value
         }
 
-        return suspendStoppableCoroutine <T> { continuation ->
+        return suspendStoppableCoroutine { continuation ->
             val senderOrNull = lock.withLock {
                 /* Double Check: Until this point a new sender could be available! */
                 if (senders.isNotEmpty()) {
@@ -83,8 +79,11 @@ private class QueueImpl<T> : Queue<T> {
                 null
             }
 
-            senderOrNull?.continuation?.resume(Unit)
-        }
+            if (senderOrNull != null) {
+                senderOrNull.continuation.resume(Unit)
+                continuation.resume(senderOrNull.value)
+            }
+        }.getOrThrow()
     }
 
     override fun nextOrNothing(): Either<T, Nothing?> {
@@ -95,6 +94,10 @@ private class QueueImpl<T> : Queue<T> {
         }
 
         return null.toRight()
+    }
+
+    override fun toString(): String {
+        return "Queue(${hashCode().toString(32)})"
     }
 
     private class SuspendedSender<T>(

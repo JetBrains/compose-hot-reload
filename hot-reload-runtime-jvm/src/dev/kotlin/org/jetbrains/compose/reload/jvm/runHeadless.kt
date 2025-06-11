@@ -36,6 +36,8 @@ import kotlinx.coroutines.yield
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.send
+import org.jetbrains.compose.reload.agent.sendAsync
+import org.jetbrains.compose.reload.agent.sendBlocking
 import org.jetbrains.compose.reload.core.asTemplateOrThrow
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.renderOrThrow
@@ -175,7 +177,7 @@ suspend fun runHeadlessApplication(
                     logger.info("Responding to ping '${message.messageId}'")
                 }
 
-                orchestration.sendMessage(OrchestrationMessage.Ack(message.messageId)).get()
+                orchestration.send(OrchestrationMessage.Ack(message.messageId))
             }
 
             /* Break out for TestEvents and give the main thread time to handle that */
@@ -187,7 +189,7 @@ suspend fun runHeadlessApplication(
                 logger.info("Taking screenshot: '${message.messageId}'")
                 val baos = ByteArrayOutputStream()
                 ImageIO.write(scene.render(virtualTime).toComposeImageBitmap().toAwtImage(), "png", baos)
-                orchestration.sendMessage(OrchestrationMessage.Screenshot("png", baos.toByteArray())).get()
+                orchestration.send(OrchestrationMessage.Screenshot("png", baos.toByteArray()))
                 logger.debug("Sent screenshot: '${message.messageId}'")
             }
         }
@@ -215,7 +217,7 @@ fun runHeadlessApplicationBlocking(
                     message = throwable.message,
                     exceptionClassName = throwable::class.qualifiedName,
                     stacktrace = throwable.stackTrace.toList()
-                ).send()
+                ).sendAsync()
             }) {
 
         runHeadlessApplication(timeout, width, height, content)

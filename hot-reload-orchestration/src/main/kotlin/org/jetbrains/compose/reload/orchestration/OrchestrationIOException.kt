@@ -9,4 +9,9 @@ import java.io.IOException
 
 public class OrchestrationIOException(
     override val message: String?, override val cause: Throwable? = null
-) : IOException(message, cause)
+) : IOException(message, cause) {
+    internal companion object {
+        @Suppress("unused")
+        const val serialVersionUID: Long = 0L
+    }
+}

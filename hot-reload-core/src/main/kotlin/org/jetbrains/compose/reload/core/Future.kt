@@ -6,9 +6,9 @@
 package org.jetbrains.compose.reload.core
 
 import java.util.concurrent.TimeoutException
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.concurrent.withLock
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration
 
 /**
@@ -18,21 +18,32 @@ import kotlin.time.Duration
  * be called from the [reloadMainThread])
  */
 public interface Future<out T> {
-
     public fun isCompleted(): Boolean
-
-    /**
-     * Registers a completion handler for this future.
-     * If the future is already completed, the result handler will be called with the known value
-     * If the future is not yet completed, the result handler will be called once the future completes.
-     * The [onResult] will always be called on the [reloadMainThread]
-     */
-    public fun invokeOnCompletion(onResult: (Try<T>) -> Unit): Disposable
+    public fun getOrNull(): Try<T>?
+    public suspend fun await(): Try<T>
+    public fun awaitWith(continuation: Continuation<T>): Disposable
 }
 
-public interface CompletableFuture<T> : Future<T> {
+/**
+ * Registers a completion handler for this future.
+ * If the future is already completed, the result handler will be called with the known value
+ * If the future is not yet completed, the result handler will be called once the future completes.
+ * The [onResult] will always be called on the [reloadMainThread]
+ */
+public fun <T> Future<T>.invokeOnCompletion(onResult: (Try<T>) -> Unit): Disposable {
+    return awaitWith(Continuation(EmptyCoroutineContext) { result ->
+        reloadMainThread.invoke {
+            onResult(result.toTry())
+        }
+    })
+}
+
+public sealed interface CompletableFuture<T> : Future<T> {
     public fun completeWith(result: Try<T>): Boolean
 }
+
+public fun CompletableFuture<Unit>.complete() =
+    completeWith(Unit.toLeft())
 
 public fun <T> CompletableFuture<T>.complete(value: T) =
     completeWith(value.toLeft())
@@ -51,15 +62,23 @@ public fun <T> Future(): CompletableFuture<T> {
     return FutureImpl()
 }
 
-internal fun <T> Future(result: Result<T>): Future<T> {
+@JvmName("UnitFuture")
+public fun Future(): CompletableFuture<Unit> {
+    return Future<Unit>()
+}
+
+@JvmName("FutureFromResult")
+public fun <T> Future(result: Result<T>): Future<T> {
     return CompletedFuture(result.toTry())
 }
 
-internal fun <T> Future(result: Try<T>): Future<T> {
+@JvmName("FutureFromTry")
+public fun <T> Future(result: Try<T>): Future<T> {
     return CompletedFuture(result)
 }
 
-internal fun <T> SuccessFuture(result: T): Future<T> {
+@JvmName("FutureFromValue")
+public fun <T> Future(result: T): Future<T> {
     return CompletedFuture(result.toLeft())
 }
 
@@ -67,54 +86,74 @@ internal fun FailureFuture(result: Throwable): Future<Nothing> {
     return CompletedFuture(result.toRight())
 }
 
-private class FutureImpl<T> : CompletableFuture<T> {
-    private val lock = ReentrantLock()
+internal class FutureImpl<T> : CompletableFuture<T> {
 
-    private val listeners = mutableListOf<(Try<T>) -> Unit>()
+    private val state = AtomicReference<State<T>>(State.Waiting<T>(emptyList()))
 
-    @Volatile
-    private var result: Try<T>? = null
+    override fun isCompleted(): Boolean = state.get() is State.Completed<T>
 
-    override fun isCompleted(): Boolean = lock.withLock {
-        result != null
+    sealed class State<out T> {
+        data class Waiting<T>(val waiting: List<Continuation<T>>) : State<T>()
+        data class Completed<T>(val result: Try<T>) : State<T>()
     }
 
-    override fun invokeOnCompletion(onResult: (Try<T>) -> Unit): Disposable = lock.withLock {
-        val result = result
+    override fun getOrNull(): Try<T>? {
+        return (state.get() as? State.Completed<T>)?.result
+    }
 
-        /* Fast path: Result is already known */
-        if (result != null) {
-            reloadMainThread.invoke { onResult(result) }
-            Disposable {}
+    override fun awaitWith(continuation: Continuation<T>): Disposable {
+        state.update { currentState ->
+            when (currentState) {
+                is State.Completed<T> -> {
+                    /* Meanwhile: Already completed, we can continue already */
+                    continuation.resumeWith(currentState.result)
+                    return Disposable.empty
+                }
+
+                /* Try to add the current continuation to the list of waiters */
+                is State.Waiting<T> ->
+                    currentState.copy(currentState.waiting + continuation)
+            }
         }
 
-        /* Slow path: Create a future and wait for completion */
-        val listener: (Try<T>) -> Unit = { result: Try<T> ->
-            reloadMainThread.invokeImmediate { onResult(result) }
-        }
-        listeners.add(listener)
-
-        Disposable {
-            lock.withLock {
-                listeners.remove(listener)
+        return Disposable {
+            state.update { currentState ->
+                when (currentState) {
+                    is State.Completed<*> -> return@Disposable
+                    is State.Waiting<T> -> currentState.copy(currentState.waiting - continuation)
+                }
             }
         }
     }
 
+    override suspend fun await(): Try<T> {
+        /* Fast path: Already completed */
+        (state.get() as? State.Completed<T>)?.result?.let { return it }
+        return suspendStoppableCoroutine { continuation ->
+            awaitWith(continuation)
+        }
+    }
 
     override fun completeWith(result: Try<T>): Boolean {
-        val listeners = lock.withLock {
-            if (this.result != null) return false
-            this.result = result
-            listeners.toTypedArray().apply {
-                listeners.clear()
+        while (true) {
+            val currentState = state.get()
+            when (currentState) {
+                is State.Completed<*> -> return false
+                is State.Waiting<T> -> {
+                    if (!state.compareAndSet(currentState, State.Completed(result))) continue
+                    currentState.waiting.forEach { continuation -> continuation.resumeWith(result) }
+                    return true
+                }
             }
         }
+    }
 
-        listeners.forEach { listener ->
-            listener(result)
+    override fun toString(): String {
+        val state = state.get()
+        return when (state) {
+            is State.Completed<*> -> "Future(${hashCode().toString(32)}): Completed(${state.result})"
+            is State.Waiting<*> -> "Future(${hashCode().toString(32)}: Waiting(${state.waiting.size})"
         }
-        return true
     }
 }
 
@@ -123,9 +162,17 @@ private class CompletedFuture<T>(val result: Try<T>) : Future<T> {
         return true
     }
 
-    override fun invokeOnCompletion(onResult: (Try<T>) -> Unit): Disposable {
-        reloadMainThread.invoke { onResult(result) }
-        return Disposable {}
+    override fun getOrNull(): Try<T> {
+        return result
+    }
+
+    override suspend fun await(): Try<T> {
+        return result
+    }
+
+    override fun awaitWith(continuation: Continuation<T>): Disposable {
+        continuation.resumeWith(result)
+        return Disposable.empty
     }
 }
 
@@ -135,7 +182,6 @@ private class CompletedFuture<T>(val result: Try<T>) : Future<T> {
  *  - This is done to prevent deadlocking the main thread. An exception is thrown because a failing
  *  result object has different semantics than this precondition.
  */
-@OptIn(ExperimentalAtomicApi::class)
 public fun <T> Future<T>.getBlocking(): Try<T> {
     if (isReloadMainThread) throw IllegalStateException("Cannot call getBlocking() from the 'reloadMainThread'")
     val javaFuture = java.util.concurrent.CompletableFuture<Try<T>>()
@@ -147,7 +193,6 @@ public fun <T> Future<T>.getBlocking(): Try<T> {
  * Same as [getBlocking], but with a given [timeout] which will return a failing Result, containing a
  * [TimeoutException] if the timeout is reached.]
  */
-@OptIn(ExperimentalAtomicApi::class)
 public fun <T> Future<T>.getBlocking(timeout: Duration): Try<T> {
     if (isReloadMainThread) throw IllegalStateException("Cannot call getBlocking() from the 'reloadMainThread'")
     val javaFuture = java.util.concurrent.CompletableFuture<Try<T>>()

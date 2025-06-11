@@ -14,7 +14,6 @@ public fun Serializable.encodeToByteArray(): ByteArray {
     val baos = ByteArrayOutputStream()
     ObjectOutputStream(baos).use { stream ->
         stream.writeObject(this)
-        stream.flush()
     }
     return baos.toByteArray()
 }

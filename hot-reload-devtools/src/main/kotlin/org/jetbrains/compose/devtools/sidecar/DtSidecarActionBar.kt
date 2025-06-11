@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.sellmair.evas.compose.EvasLaunching
 import org.jetbrains.compose.devtools.send
+import org.jetbrains.compose.devtools.sendAsync
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.widgets.DtTextButton
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
@@ -44,7 +45,7 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
                 text = "Reload",
                 icon = Icons.Filled.Refresh,
                 onClick = {
-                    OrchestrationMessage.RecompileRequest().send()
+                    OrchestrationMessage.RecompileRequest().sendAsync()
                 }
             )
         }
@@ -53,7 +54,7 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
             text = "Retry Failed Compositions",
             icon = Icons.Filled.Refresh,
             onClick = {
-                OrchestrationMessage.RetryFailedCompositionRequest().send()
+                OrchestrationMessage.RetryFailedCompositionRequest().sendAsync()
             }
         )
 
@@ -99,7 +100,7 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
             text = "Clean Composition",
             icon = Icons.Filled.Delete,
             onClick = {
-                OrchestrationMessage.CleanCompositionRequest().send()
+                OrchestrationMessage.CleanCompositionRequest().sendAsync()
             }
         )
 
@@ -107,7 +108,7 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
             text = "Exit",
             icon = Icons.Filled.Close,
             onClick = {
-                OrchestrationMessage.ShutdownRequest("Requested by user through 'devtools'").send()
+                OrchestrationMessage.ShutdownRequest("Requested by user through 'devtools'").sendAsync()
             }
         )
     }

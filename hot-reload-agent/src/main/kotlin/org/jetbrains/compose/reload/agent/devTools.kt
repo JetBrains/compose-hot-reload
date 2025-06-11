@@ -10,6 +10,8 @@ import org.jetbrains.compose.reload.core.HotReloadProperty.DevToolsClasspath
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.DevTools
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
@@ -30,7 +32,7 @@ internal fun launchDevtoolsApplication() {
 
     val process = ProcessBuilder(
         resolveDevtoolsJavaBinary(), "-cp", classpath.joinToString(File.pathSeparator),
-        *subprocessDefaultArguments(DevTools, orchestration.port).toTypedArray(),
+        *subprocessDefaultArguments(DevTools, orchestration.port.getBlocking().getOrThrow()).toTypedArray(),
         *issueNewDebugSessionJvmArguments("DevTools"),
         "-Dapple.awt.UIElement=true",
         "org.jetbrains.compose.devtools.Main",
@@ -38,14 +40,14 @@ internal fun launchDevtoolsApplication() {
 
     thread(name = "DevTools: Stdout", isDaemon = true) {
         process.inputStream.bufferedReader().forEachLine { line ->
-            LogMessage(TAG_DEVTOOLS, line).send()
+            LogMessage(TAG_DEVTOOLS, line).sendAsync()
         }
         logger.info("DevTools process exited")
     }
 
     thread(name = "DevTools: Stderr", isDaemon = true) {
         process.errorStream.bufferedReader().forEachLine { line ->
-            LogMessage(TAG_DEVTOOLS, "stderr: $line").send()
+            LogMessage(TAG_DEVTOOLS, "stderr: $line").sendAsync()
         }
     }
 }

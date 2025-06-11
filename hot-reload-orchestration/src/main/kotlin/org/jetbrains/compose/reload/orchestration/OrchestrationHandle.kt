@@ -5,49 +5,31 @@
 
 package org.jetbrains.compose.reload.orchestration
 
-import org.jetbrains.compose.reload.core.Disposable
+import org.jetbrains.compose.reload.core.Broadcast
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.launchTask
-import kotlin.time.Duration
-
+import org.jetbrains.compose.reload.core.reloadMainDispatcherImmediate
+import org.jetbrains.compose.reload.core.reloadMainThread
+import kotlin.time.Duration.Companion.seconds
 
 public interface OrchestrationHandle : AutoCloseable {
-    public val port: Int
-    public fun invokeWhenClosed(action: () -> Unit): Disposable
-    public fun invokeWhenMessageReceived(action: (OrchestrationMessage) -> Unit): Disposable
+    public val port: Future<Int>
+    public val messages: Broadcast<OrchestrationMessage>
+    public val closed: Future<Unit>
 
+    public suspend infix fun send(message: OrchestrationMessage)
+    public suspend fun isActive(): Boolean
+    public suspend fun shutdown(): Boolean
 
-    public suspend fun sendMessage(message: OrchestrationMessage)
+    override fun close() {
+        val shutdownTask = launchTask("$this.close()", reloadMainDispatcherImmediate) {
+            shutdown()
+        }
 
-    /**
-     * Will gracefully close the orchestration; The returned future shall not be awaited on the orchestration thread
-     */
-    public suspend fun closeGracefully()
-
-    /**
-     * Can be used as 'Shutdown Hook' to close the sockets immediately.
-     * Note: This will not invoke any close listeners! Use the default '.close' instead.
-     */
-    public fun closeImmediately()
-}
-
-public fun OrchestrationHandle.sendMessageAsync(message: OrchestrationMessage): Future<Unit> = launchTask {
-    sendMessage(message)
-}
-
-public fun OrchestrationHandle.sendMessageBlocking(message: OrchestrationMessage): Result<Unit> = launchTask {
-    sendMessage(message)
-}.getBlocking()
-
-public fun OrchestrationHandle.sendMessageBlocking(
-    message: OrchestrationMessage, timeout: Duration
-): Result<Unit> = launchTask {
-    sendMessage(message)
-}.getBlocking(timeout)
-
-public inline fun <reified T> OrchestrationHandle.invokeWhenReceived(crossinline action: (T) -> Unit): Disposable {
-    return invokeWhenMessageReceived { message ->
-        if (message is T) action(message)
+        if (Thread.currentThread() != reloadMainThread) {
+            shutdownTask.getBlocking(15.seconds).getOrThrow()
+        }
     }
 }

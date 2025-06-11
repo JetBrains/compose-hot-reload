@@ -25,6 +25,10 @@ kotlin {
 dependencies {
     api(deps.slf4j.api)
 
+    testImplementation(deps.coroutines.test)
+    testImplementation(deps.lincheck)
+    testImplementation(deps.logback)
+
     testFixturesApi(project(":hot-reload-test:core"))
     testFixturesImplementation(kotlin("tooling-core"))
     testFixturesImplementation(deps.junit.jupiter)
@@ -41,12 +45,21 @@ kotlin {
             }
         }
     }
+
+    target.compilations.create("kotlinxCoroutinesBridge") {
+        target.compilations.getByName("main").associateWith(this)
+        tasks.jar.configure {
+            from(this@create.output.allOutputs)
+        }
+        project.dependencies {
+            this@create.configurations.compileDependencyConfiguration.name(deps.coroutines.core)
+        }
+    }
 }
 
 benchmark {
     targets.register("benchmark")
 }
-
 
 /* Make the current 'Hot Reload Version (aka version of this project) available */
 run {
@@ -92,9 +105,10 @@ run {
         }
     }
 
-    val generateEnvironmentSources = tasks.register<properties.GenerateHotReloadEnvironmentTask>("generateHotReloadEnvironment") {
-        outputSourcesDir = generatedSourceDir
-    }
+    val generateEnvironmentSources =
+        tasks.register<properties.GenerateHotReloadEnvironmentTask>("generateHotReloadEnvironment") {
+            outputSourcesDir = generatedSourceDir
+        }
 
     kotlin {
         sourceSets.main.get().kotlin.srcDir(generatedSourceDir)

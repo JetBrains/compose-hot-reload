@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.send
+import org.jetbrains.compose.reload.agent.sendAsync
+import org.jetbrains.compose.reload.agent.sendBlocking
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.CleanCompositionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RetryFailedCompositionRequest
@@ -69,7 +71,7 @@ fun DevelopmentEntryPoint(child: @Composable () -> Unit) {
                 windowId = windowId,
                 message = exception.message,
                 stacktrace = exception.stackTrace.toList()
-            ).send()
+            ).sendBlocking()
 
         }.onSuccess {
             hotReloadState.update { state -> state.copy(uiError = null) }
@@ -77,7 +79,7 @@ fun DevelopmentEntryPoint(child: @Composable () -> Unit) {
                 windowId = windowId,
                 reloadRequestId = currentHotReloadState.reloadRequestId,
                 currentHotReloadState.iteration
-            ).send()
+            ).sendAsync()
         }.getOrThrow()
     }
 

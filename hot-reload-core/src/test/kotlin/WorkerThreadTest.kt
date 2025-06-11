@@ -2,6 +2,7 @@ import org.jetbrains.compose.reload.core.WorkerThread
 import org.jetbrains.compose.reload.core.exceptionOrNull
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.invokeOnCompletion
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.isSuccess
 import org.jetbrains.compose.reload.core.reloadMainThread
@@ -9,10 +10,8 @@ import org.jetbrains.compose.reload.core.toLeft
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
-import kotlin.concurrent.atomics.AtomicInt
-import kotlin.concurrent.atomics.AtomicReference
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.concurrent.atomics.incrementAndFetch
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,10 +25,9 @@ import kotlin.time.Duration.Companion.seconds
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-@OptIn(ExperimentalAtomicApi::class)
 class WorkerThreadTest {
 
-    val thread = WorkerThread("Test")
+    val thread = WorkerThread("Worker Thread (under test)")
 
     @AfterTest
     fun shutdown() {
@@ -38,13 +36,13 @@ class WorkerThreadTest {
 
     @Test
     fun `test - simple invoke`() {
-        val actionInvocations = AtomicInt(0)
+        val actionInvocations = AtomicInteger(0)
 
         val result = thread.invoke {
-            actionInvocations.incrementAndFetch()
+            actionInvocations.incrementAndGet()
         }.getBlocking(5.seconds)
 
-        assertEquals(1, actionInvocations.load())
+        assertEquals(1, actionInvocations.get())
         assertEquals(1.toLeft(), result)
 
         thread.shutdown()
@@ -75,9 +73,9 @@ class WorkerThreadTest {
         val future3 = thread.shutdown()
         val future4 = thread.invoke { }
 
-        assertTrue(future1.getBlocking(5.seconds).isSuccess())
-        assertTrue(future2.getBlocking(5.seconds).isSuccess())
-        assertTrue(future3.getBlocking(5.seconds).isSuccess())
+        future1.getBlocking(5.seconds).getOrThrow()
+        future2.getBlocking(5.seconds).getOrThrow()
+        future3.getBlocking(5.seconds).getOrThrow()
         assertTrue(future4.getBlocking(5.seconds).isFailure())
     }
 
@@ -92,10 +90,10 @@ class WorkerThreadTest {
     fun `test - completion handler is invoked in reloadMain`() {
         val invocationThread = AtomicReference<Thread?>(null)
         thread.invoke { }.invokeOnCompletion {
-            assertNull(invocationThread.exchange(Thread.currentThread()))
+            assertNull(invocationThread.getAndSet(Thread.currentThread()))
         }
         assertTrue(thread.invoke { }.getBlocking(5.seconds).isSuccess())
-        assertEquals(reloadMainThread, invocationThread.load())
+        assertEquals(reloadMainThread, invocationThread.get())
     }
 
     @Test

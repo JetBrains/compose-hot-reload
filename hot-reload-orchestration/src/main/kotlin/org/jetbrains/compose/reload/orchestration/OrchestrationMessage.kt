@@ -11,9 +11,7 @@ import org.jetbrains.compose.reload.core.withLinearClosure
 import java.io.File
 import java.io.Serializable
 import java.util.UUID
-import kotlin.concurrent.atomics.AtomicInt
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.concurrent.atomics.fetchAndIncrement
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.uuid.ExperimentalUuidApi
 
 @OptIn(ExperimentalUuidApi::class)
@@ -83,7 +81,7 @@ public sealed class OrchestrationMessage : OrchestrationPackage(), Serializable 
      * @param clientId: uuid which identifies the connection (same as [ClientConnected.clientId])
      */
     public data class ClientDisconnected(
-        public val clientId: UUID,
+        public val clientId: OrchestrationClientId,
         public val clientRole: OrchestrationClientRole,
     ) : OrchestrationMessage() {
 
@@ -134,7 +132,7 @@ public sealed class OrchestrationMessage : OrchestrationPackage(), Serializable 
      * The exitCode is optional, as it may happen that the process gets interrupted.
      */
     public class RecompileResult(
-        public val recompileRequestId: UUID,
+        public val recompileRequestId: OrchestrationMessageId,
         /**
          * The exitCode of the recompilation process, or null if the process failed to launch or
          * was interrupted before finishing.
@@ -221,7 +219,7 @@ public sealed class OrchestrationMessage : OrchestrationPackage(), Serializable 
     }
 
     public data class ReloadClassesResult(
-        val reloadRequestId: UUID,
+        val reloadRequestId: OrchestrationMessageId,
         val isSuccess: Boolean,
         val errorMessage: String? = null,
         val errorStacktrace: List<StackTraceElement>? = null,
@@ -298,7 +296,7 @@ public sealed class OrchestrationMessage : OrchestrationPackage(), Serializable 
      * Note: There is no guarantee for acks, this message can be used by tooling or in tests if needed
      */
     public data class Ack(
-        val acknowledgedMessageId: UUID
+        val acknowledgedMessageId: OrchestrationMessageId
     ) : OrchestrationMessage() {
         internal companion object {
             @Suppress("unused")
@@ -359,7 +357,7 @@ public sealed class OrchestrationMessage : OrchestrationPackage(), Serializable 
      */
     public data class UIRendered(
         val windowId: WindowId?,
-        val reloadRequestId: UUID?,
+        val reloadRequestId: OrchestrationMessageId?,
         val iteration: Int,
     ) : OrchestrationMessage() {
         internal companion object {
@@ -447,13 +445,12 @@ public sealed class OrchestrationMessage : OrchestrationPackage(), Serializable 
 }
 
 public data class OrchestrationMessageId(internal val value: String) : Serializable {
-    @OptIn(ExperimentalAtomicApi::class)
     internal companion object {
         const val serialVersionUID: Long = 0L
-        private val messagesIndex = AtomicInt(0)
+        private val messagesIndex = AtomicInteger(0)
 
         fun random(): OrchestrationMessageId = OrchestrationMessageId(
-            "${messagesIndex.fetchAndIncrement()}: ${UUID.randomUUID()}"
+            "${messagesIndex.andIncrement}$${UUID.randomUUID()}"
         )
     }
 
