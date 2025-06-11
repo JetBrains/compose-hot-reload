@@ -10,6 +10,7 @@ import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.invokeOnCompletion
+import org.jetbrains.compose.reload.core.isActive
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.mapLeft
 import kotlin.time.Duration
@@ -44,7 +45,7 @@ private class OrchestrationClientBlockingImpl(
     }
 
     override fun invokeOnClose(action: () -> Unit): Disposable {
-        return handle.closed.invokeOnCompletion { action() }
+        return handle.invokeOnCompletion { action() }
     }
 
     override fun send(message: OrchestrationMessage) {
@@ -52,6 +53,6 @@ private class OrchestrationClientBlockingImpl(
     }
 
     override fun close() {
-        launchTask("blocking.close") { handle.shutdown() }.getBlocking(timeout).getOrThrow()
+        handle.stop()
     }
 }

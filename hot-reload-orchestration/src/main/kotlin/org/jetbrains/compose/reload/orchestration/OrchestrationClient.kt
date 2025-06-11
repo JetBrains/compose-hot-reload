@@ -7,7 +7,6 @@
 
 package org.jetbrains.compose.reload.orchestration
 
-import kotlinx.coroutines.isActive
 import org.jetbrains.compose.reload.core.Actor
 import org.jetbrains.compose.reload.core.Broadcast
 import org.jetbrains.compose.reload.core.Bus
@@ -15,6 +14,7 @@ import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.Queue
 import org.jetbrains.compose.reload.core.StoppedException
+import org.jetbrains.compose.reload.core.Task
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.WorkerThread
 import org.jetbrains.compose.reload.core.complete
@@ -130,12 +130,11 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
         }
     }
 
-    return object : OrchestrationClient {
+    return object : OrchestrationClient, Task<Nothing> by task {
         override val port: Future<Int> = Future(port)
         override val clientId: OrchestrationClientId = clientId
         override val clientRole: OrchestrationClientRole = clientRole
         override val messages: Broadcast<OrchestrationMessage> = receiveBroadcast
-        override val closed: Future<Unit> = task
 
         override suspend fun connect(): Try<Unit> {
             connect.complete(Unit)
@@ -145,14 +144,6 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
 
         override suspend fun send(message: OrchestrationMessage) {
             sendActor.invoke(message)
-        }
-
-        override suspend fun isActive(): Boolean {
-            return task.isActive
-        }
-
-        override suspend fun shutdown(): Boolean {
-            return task.stop()
         }
     }
 }

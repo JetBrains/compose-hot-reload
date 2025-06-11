@@ -62,7 +62,7 @@ internal fun launchOrchestration() {
     }
 
 
-    orchestration.closed.invokeOnCompletion {
+    orchestration.invokeOnCompletion {
         logger.info("Application Orchestration closed")
         exitProcess(0)
     }

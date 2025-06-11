@@ -14,6 +14,7 @@ import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.exceptionOrNull
+import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.invokeOnFinish
 import org.jetbrains.compose.reload.core.invokeOnStop
@@ -30,10 +31,14 @@ import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
 
-public suspend fun startOrchestrationServer(): OrchestrationServer {
+public fun startOrchestrationServer(): OrchestrationServer {
     val server = OrchestrationServer()
-    server.start()
-    server.port.await().getOrThrow()
+
+    launchTask("startOrchestrationServer") {
+        server.start()
+        server.port.await().getOrThrow()
+    }.getBlocking().getOrThrow()
+
     return server
 }
 
@@ -71,22 +76,16 @@ public fun OrchestrationServer(): OrchestrationServer {
         }
     }
 
-    return object : OrchestrationServer {
+    return object : OrchestrationServer, Task<Nothing> by task {
         override val messages = messages
         override val port: Future<Int> = port
-        override val closed: Future<Unit> = task
 
         override suspend fun send(message: OrchestrationMessage) {
             messages.send(message)
         }
 
-        override suspend fun isActive(): Boolean {
-            return task.isActive()
-        }
 
-        override suspend fun shutdown(): Boolean {
-            return task.stop()
-        }
+
 
         override suspend fun bind() {
             bind.complete(Unit)
@@ -162,7 +161,7 @@ private fun launchClient(
     }
 }
 
-public interface OrchestrationServer : OrchestrationHandle {
+public interface OrchestrationServer : OrchestrationHandle{
     public suspend fun bind()
     public suspend fun start()
 }

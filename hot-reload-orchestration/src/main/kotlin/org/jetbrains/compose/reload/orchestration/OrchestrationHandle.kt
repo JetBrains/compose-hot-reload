@@ -7,29 +7,15 @@ package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.Broadcast
 import org.jetbrains.compose.reload.core.Future
-import org.jetbrains.compose.reload.core.getBlocking
-import org.jetbrains.compose.reload.core.getOrThrow
-import org.jetbrains.compose.reload.core.launchTask
-import org.jetbrains.compose.reload.core.reloadMainDispatcherImmediate
-import org.jetbrains.compose.reload.core.reloadMainThread
-import kotlin.time.Duration.Companion.seconds
+import org.jetbrains.compose.reload.core.Task
 
-public interface OrchestrationHandle : AutoCloseable {
+public interface OrchestrationHandle : AutoCloseable, Task<Nothing> {
     public val port: Future<Int>
     public val messages: Broadcast<OrchestrationMessage>
-    public val closed: Future<Unit>
 
     public suspend infix fun send(message: OrchestrationMessage)
-    public suspend fun isActive(): Boolean
-    public suspend fun shutdown(): Boolean
 
     override fun close() {
-        val shutdownTask = launchTask("$this.close()", reloadMainDispatcherImmediate) {
-            shutdown()
-        }
-
-        if (Thread.currentThread() != reloadMainThread) {
-            shutdownTask.getBlocking(15.seconds).getOrThrow()
-        }
+        stop()
     }
 }

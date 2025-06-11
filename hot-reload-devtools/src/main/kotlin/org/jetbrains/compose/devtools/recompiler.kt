@@ -18,6 +18,7 @@ import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.invokeOnCompletion
+import org.jetbrains.compose.reload.core.invokeOnError
 import org.jetbrains.compose.reload.core.invokeOnValue
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
@@ -72,7 +73,7 @@ private val recompileRequests = LinkedBlockingQueue(
     listOfNotNull(if (HotReloadEnvironment.gradleBuildContinuous) RecompileRequest() else null)
 )
 
-internal fun launchRecompiler(): Future<Unit> = launchTask task@{
+internal fun launchRecompiler(): Future<Unit> = launchTask("Recompiler") task@{
     if (buildSystem == null) return@task
     invokeOnError { error ->
         logger.error("Recompiler Error: ${error.message}", error)
@@ -149,7 +150,7 @@ internal fun launchRecompiler(): Future<Unit> = launchTask task@{
         recompileRequests.put(value)
     }
 
-    orchestration.closed.invokeOnCompletion {
+    orchestration.invokeOnCompletion {
         logger.debug("'Recompiler': Sending close signal")
         recompilerThread.interrupt()
         recompilerThread.join()

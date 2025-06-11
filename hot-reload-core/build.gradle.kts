@@ -1,4 +1,5 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 /*
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
@@ -46,13 +47,32 @@ kotlin {
         }
     }
 
+    /*
+    Create kotlinx bridge:
+    We allow sources in 'kotlinxCoroutinesBridge' to compile against kotlinx coroutines
+    Those classes will be included in the main jar and regular sources can compile against the
+    API of this bridge.
+    */
     target.compilations.create("kotlinxCoroutinesBridge") {
-        target.compilations.getByName("main").associateWith(this)
+        val kotlinxBridgeClasses = output.classesDirs
+
+        project.dependencies {
+            /* Add compileOnly dependency to the bridges. */
+            compileOnly(kotlinxBridgeClasses)
+
+            /* Add coroutines core as a compilation dependency for the bridge */
+            configurations.compileDependencyConfiguration.name(deps.coroutines.core)
+        }
+
+        /* Mark bridges as 'friend' to allow using internal APIs */
+        target.compilations.getByName("main").compileTaskProvider.configure {
+            this as KotlinJvmCompile
+            this.friendPaths.from(kotlinxBridgeClasses)
+        }
+
+        /* Include bridges in the main jar */
         tasks.jar.configure {
             from(this@create.output.allOutputs)
-        }
-        project.dependencies {
-            this@create.configurations.compileDependencyConfiguration.name(deps.coroutines.core)
         }
     }
 }

@@ -47,6 +47,21 @@ public fun Task<*>.launchOnStop(name: String, body: suspend Task<*>.(error: Thro
         }
     }
 
+public fun Task<*>.invokeOnError(action: (error: Throwable) -> Unit): Disposable {
+    return value.invokeOnCompletion { result ->
+        if (result.isFailure()) {
+            action(result.exception)
+        }
+    }
+}
+
+public fun Task<*>.launchOnError(name: String, body: suspend Task<*>.(error: Throwable) -> Unit): Disposable =
+    invokeOnError { error ->
+        launchTask(name) {
+            body(error)
+        }
+    }
+
 public fun <T> Task<T>.invokeOnFinish(action: (result: Try<T>) -> Unit): Disposable {
     return value.invokeOnCompletion { result -> action(result) }
 }

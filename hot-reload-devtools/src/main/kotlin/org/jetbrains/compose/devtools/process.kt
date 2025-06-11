@@ -45,7 +45,7 @@ private fun bindParentProcess() {
 }
 
 private fun setupOrchestration() {
-    orchestration.closed.invokeOnCompletion {
+    orchestration.invokeOnCompletion {
         shutdown()
     }
 }

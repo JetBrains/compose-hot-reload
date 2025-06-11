@@ -43,7 +43,7 @@ public fun OrchestrationHandle.asFlow(): Flow<OrchestrationMessage> = callbackFl
     }
 
     launchTask("asFlow.close") {
-        closed.await()
+        this@asFlow.await()
         producer.close()
     }
 
@@ -60,7 +60,7 @@ public fun OrchestrationHandle.asChannel(): ReceiveChannel<OrchestrationMessage>
     }
 
     launchTask("asChannel.close") {
-        closed.await()
+        this@asChannel.await()
         channel.close()
     }
 
