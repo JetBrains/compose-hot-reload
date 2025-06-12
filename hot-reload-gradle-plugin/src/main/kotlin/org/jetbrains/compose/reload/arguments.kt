@@ -18,6 +18,7 @@ import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.gradle.composeHotReloadAgentJar
 import org.jetbrains.compose.reload.gradle.core.composeReloadDevToolsEnabled
+import org.jetbrains.compose.reload.gradle.core.composeReloadDevToolsIsHeadless
 import org.jetbrains.compose.reload.gradle.core.composeReloadDevToolsTransparencyEnabled
 import org.jetbrains.compose.reload.gradle.core.composeReloadDirtyResolveDepthLimit
 import org.jetbrains.compose.reload.gradle.core.composeReloadGradleBuildContinuous
@@ -41,6 +42,7 @@ sealed interface ComposeHotReloadArgumentsBuilder {
     fun setArgFile(file: Provider<File>)
     fun setDevToolsEnabled(enabled: Provider<Boolean>)
     fun setDevToolsClasspath(files: FileCollection)
+    fun setDevToolsHeadless(headless: Provider<Boolean>)
     fun setDevToolsTransparencyEnabled(enabled: Provider<Boolean>)
     fun setReloadTaskName(name: Provider<String>)
     fun setReloadTaskName(name: String)
@@ -98,6 +100,9 @@ private class ComposeHotReloadArgumentsBuilderImpl(
     private val devToolsTransparencyEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadDevToolsTransparencyEnabled)
 
+    private val devToolsIsHeadless: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .value(project.composeReloadDevToolsIsHeadless)
+
     private val reloadTaskName: Property<String> = project.objects.property(String::class.java)
 
     private val isRecompileContinues: Property<Boolean> = project.objects.property(Boolean::class.java)
@@ -139,6 +144,10 @@ private class ComposeHotReloadArgumentsBuilderImpl(
         devToolsEnabled.set(enabled)
     }
 
+    override fun setDevToolsHeadless(headless: Provider<Boolean>) {
+        devToolsIsHeadless.set(headless.orElse(false))
+    }
+
     override fun setReloadTaskName(name: Provider<String>) {
         reloadTaskName.set(name)
     }
@@ -166,6 +175,7 @@ private class ComposeHotReloadArgumentsBuilderImpl(
             devToolsClasspath = devToolsClasspath,
             devToolsEnabled = devToolsEnabled,
             devToolsTransparencyEnabled = devToolsTransparencyEnabled,
+            devToolsIsHeadless = devToolsIsHeadless,
             reloadTaskName = reloadTaskName,
             isRecompileContinues = isRecompileContinues,
             orchestrationPort = project.provider { project.composeReloadOrchestrationPort },
@@ -193,6 +203,7 @@ private class ComposeHotReloadArgumentsImpl(
     private val devToolsClasspath: FileCollection,
     private val devToolsEnabled: Provider<Boolean>,
     private val devToolsTransparencyEnabled: Provider<Boolean>,
+    private val devToolsIsHeadless: Provider<Boolean>,
     private val reloadTaskName: Provider<String>,
     private val isRecompileContinues: Provider<Boolean>,
     private val orchestrationPort: Provider<Int>,
@@ -272,6 +283,7 @@ private class ComposeHotReloadArgumentsImpl(
         /* Provide dev tools */
         val isDevToolsEnabled = devToolsEnabled.getOrElse(true)
         add("-D${HotReloadProperty.DevToolsEnabled.key}=$isDevToolsEnabled")
+        add("-D${HotReloadProperty.DevToolsIsHeadless.key}=${devToolsIsHeadless.orNull ?: false}")
 
         if (isDevToolsEnabled) {
             add("-D${HotReloadProperty.DevToolsClasspath.key}=${devToolsClasspath.asPath}")
