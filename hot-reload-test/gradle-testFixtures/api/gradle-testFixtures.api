@@ -79,6 +79,17 @@ public abstract interface annotation class org/jetbrains/compose/reload/test/gra
 	public abstract fun target ()Ljava/lang/String;
 }
 
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/DisabledVersion : java/lang/annotation/Annotation {
+	public abstract fun compose ()Ljava/lang/String;
+	public abstract fun gradle ()Ljava/lang/String;
+	public abstract fun kotlin ()Ljava/lang/String;
+	public abstract fun reason ()Ljava/lang/String;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/DisabledVersion$Container : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lorg/jetbrains/compose/reload/test/gradle/DisabledVersion;
+}
+
 public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/ExtendBuildGradleKts : java/lang/annotation/Annotation {
 	public abstract fun extension ()Ljava/lang/Class;
 }

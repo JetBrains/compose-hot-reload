@@ -52,3 +52,9 @@ public annotation class ExtendHotReloadTestDimension(val extension: KClass<out H
 @Repeatable
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 public annotation class TestedBuildMode(val mode: BuildMode)
+
+@Repeatable
+@Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.FUNCTION)
+public annotation class DisabledVersion(
+    val reason: String, val kotlin: String = "", val compose: String = "", val gradle: String = ""
+)

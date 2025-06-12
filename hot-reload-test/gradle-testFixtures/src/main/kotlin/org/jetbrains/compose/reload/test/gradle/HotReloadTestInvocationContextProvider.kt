@@ -35,6 +35,23 @@ internal class HotReloadTestInvocationContextProvider : TestTemplateInvocationCo
                     return@filter false
                 }
 
+                val ignored = context.findRepeatableAnnotations<DisabledVersion>()
+                ignored.forEach { ignoreVersion ->
+                    if (ignoreVersion.kotlin.isNotEmpty() &&
+                        ignoreVersion.kotlin != invocationContext.kotlinVersion.version.toString()
+                    ) return@forEach
+
+                    if (ignoreVersion.compose.isNotEmpty() &&
+                        ignoreVersion.compose != invocationContext.composeVersion.version
+                    ) return@forEach
+
+                    if (ignoreVersion.gradle.isNotEmpty() &&
+                        ignoreVersion.gradle != invocationContext.gradleVersion.version
+                    ) return@forEach
+
+                    return@filter false
+                }
+
                 true
             }
             .filterIndexed filter@{ index, invocationContext ->
