@@ -181,6 +181,16 @@ object Ids {
             methodDescriptor = "(Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;)V"
         )
     }
+
+    object ImageResourcesKt {
+        val classId = ClassId("org/jetbrains/compose/resources/ImageResourcesKt")
+
+        val dropImageCache = MethodId(
+            classId,
+            methodName = "dropImageCache",
+            methodDescriptor = "()V"
+        )
+    }
 }
 
 val ClassId.classInitializerMethodId: MethodId
