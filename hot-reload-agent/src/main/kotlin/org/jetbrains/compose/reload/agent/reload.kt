@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
+import org.jetbrains.compose.reload.analysis.Ids
 import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
@@ -30,6 +31,8 @@ data class Reload(
     val dirtyRuntime: RuntimeDirtyScopes,
 )
 
+private fun File.isClass() = extension == "class"
+
 internal fun reload(
     instrumentation: Instrumentation,
     reloadRequestId: OrchestrationMessageId,
@@ -43,7 +46,7 @@ internal fun reload(
 
         logger.info("${change.name}:  $file")
 
-        if (file.extension != "class") {
+        if (!file.isClass()) {
             return@mapNotNull null
         }
 
@@ -113,10 +116,29 @@ internal fun reload(
         ClassDefinition(originalClass, transformed)
     }
 
+    val changedResources = pendingChanges.keys.filter { !it.isClass() && it.isFile }
+
+    if (changedResources.isNotEmpty()) {
+        cleanResourceCache()
+    }
+
     instrumentation.redefineClasses(*definitions.toTypedArray())
-    return redefineRuntimeInfo().get().mapLeft { redefinition ->
+    return redefineRuntimeInfo(changedResources).get().mapLeft { redefinition ->
         val reload = Reload(reloadRequestId, definitions, redefinition)
         reinitializeStaticsIfNecessary(reload)
         reload
     }
+}
+
+private fun cleanResourceCache() {
+    val classId = Ids.ImageResourcesKt.classId
+    val loader = findClassLoader(classId).get()
+    if (loader == null) {
+        logger.info("Resource cache cleaning skipped: '$classId' is not loaded yet.")
+        return
+    }
+    loader.loadClass(classId.toFqn())
+        .getDeclaredMethod(Ids.ImageResourcesKt.dropImageCache.methodName)
+        .invoke(null)
+    logger.info("Resource cache cleared")
 }
