@@ -12,6 +12,7 @@ import org.jetbrains.compose.reload.test.gradle.AndroidHotReloadTest
 import org.jetbrains.compose.reload.test.gradle.Debug
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
+import org.jetbrains.compose.reload.test.gradle.DisabledVersion
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
@@ -101,6 +102,7 @@ class ScreenshotTests {
         fixture.checkScreenshot("after")
     }
 
+    @DisabledVersion("#128: ComposableSingleton + Indy", kotlin = "2.2.0-RC2", compose = "1.9.0-alpha02")
     @HotReloadTest
     fun `test - add button`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
@@ -133,6 +135,7 @@ class ScreenshotTests {
     }
 
 
+    @DisabledVersion("#128: ComposableSingleton + Indy", kotlin = "2.2.0-RC2", compose = "1.9.0-alpha02")
     @HotReloadTest
     fun `test - add remembered state`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
@@ -172,6 +175,7 @@ class ScreenshotTests {
         }
     }
 
+    @DisabledVersion("#128: ComposableSingleton + Indy", kotlin = "2.2.0-RC2", compose = "1.9.0-alpha02")
     @HotReloadTest
     fun `test - update remembered value`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """

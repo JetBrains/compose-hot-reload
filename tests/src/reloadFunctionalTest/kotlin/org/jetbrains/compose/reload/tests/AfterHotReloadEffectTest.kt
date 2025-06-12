@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.tests
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
+import org.jetbrains.compose.reload.test.gradle.DisabledVersion
 import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
@@ -95,6 +96,7 @@ class AfterHotReloadEffectTest {
         }
     }
 
+    @DisabledVersion("#128: ComposableSingleton + Indy", kotlin = "2.2.0-RC2", compose = "1.9.0-alpha02")
     @HotReloadTest
     fun `test - remove AfterHotReloadEffect code`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
