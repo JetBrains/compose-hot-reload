@@ -9,6 +9,7 @@ import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.simpleName
 import org.jetbrains.compose.reload.core.withClosure
+import java.io.File
 import kotlin.time.measureTimedValue
 
 private val logger = createLogger()
@@ -20,11 +21,11 @@ data class RuntimeDirtyScopes(
     val dirtyMethodIds = dirtyScopes.groupBy { it.methodId }
 }
 
-fun RuntimeInfo.resolveDirtyRuntimeScopes(redefined: RuntimeInfo): RuntimeDirtyScopes {
+fun RuntimeInfo.resolveDirtyRuntimeScopes(redefined: RuntimeInfo, changedResources: List<File> = emptyList()): RuntimeDirtyScopes {
     val (redefinition, duration) = measureTimedValue {
         RuntimeDirtyScopes(
             redefinedClasses = redefined.classIndex.values.toList(),
-            dirtyScopes = resolveDirtyRuntimeScopeInfos(redefined)
+            dirtyScopes = resolveDirtyRuntimeScopeInfos(redefined, changedResources)
         )
     }
 
@@ -32,16 +33,18 @@ fun RuntimeInfo.resolveDirtyRuntimeScopes(redefined: RuntimeInfo): RuntimeDirtyS
     return redefinition
 }
 
-private fun RuntimeInfo.resolveDirtyRuntimeScopeInfos(redefined: RuntimeInfo): List<RuntimeScopeInfo> {
+private fun RuntimeInfo.resolveDirtyRuntimeScopeInfos(redefined: RuntimeInfo, changedResources: List<File>): List<RuntimeScopeInfo> {
     val dirtyComposeScopes = resolveDirtyComposeScopes(redefined) + resolveRemovedComposeScopes(redefined)
     val dirtyMethods = resolveDirtyMethods(redefined) + resolveRemovedMethods(redefined)
     val dirtyFields = resolveDirtyFields(redefined)
     val transitivelyDirty = resolveTransitivelyDirty(redefined, dirtyMethods, dirtyFields)
+    val dirtyResources = resolveDirtyResources(changedResources)
 
     return buildSet {
         addAll(dirtyMethods.map { it.rootScope })
         addAll(dirtyComposeScopes)
         addAll(transitivelyDirty)
+        addAll(dirtyResources)
     }.toList()
 }
 
@@ -255,4 +258,12 @@ private fun RuntimeInfo.resolveParentRuntimeScopeInfo(
     }
 
     return parentScope
+}
+
+private fun RuntimeInfo.resolveDirtyResources(changedResources: List<File>): List<RuntimeScopeInfo> {
+    if (changedResources.isEmpty()) return emptyList()
+    // Conservatively mark all scopes of all methods of ImageResources.kt of Compose Resources Library as dirty.
+    // In the future, we can make it smarter counting actually changed resources.
+    return classIndex[Ids.ImageResourcesKt.classId]?.methods?.values?.flatMap(MethodInfo::allScopes)
+        ?: emptyList()
 }
