@@ -18,6 +18,7 @@ import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.withType
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.compose.reload.core.asTemplateOrThrow
+import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.renderOrThrow
@@ -36,7 +37,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadCla
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest.ChangeType.Modified
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest.ChangeType.Removed
 import org.jetbrains.compose.reload.orchestration.connectBlocking
-import org.jetbrains.compose.reload.orchestration.portBlocking
 import org.jetbrains.compose.reload.orchestration.sendBlocking
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import javax.inject.Inject
@@ -112,7 +112,7 @@ abstract class HotReloadTask : DefaultTask() {
                 error("Failed to create 'OrchestrationClient'!")
             }
 
-            logger.quiet("Connected to '${client.portBlocking().getOrThrow()}'")
+            logger.quiet("Connected to '${client.port.getOrNull()}'")
 
             val pendingRequestFile = pendingRequestFile.get().asFile.toPath()
 
