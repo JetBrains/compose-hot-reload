@@ -75,7 +75,6 @@ fun DtSidecarWindow(
     isAlwaysOnTop: Boolean,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-    var oldIsExpanded by remember { mutableStateOf(isExpanded) }
     var isInitializing by remember { mutableStateOf(true) }
 
     DialogWindow(
@@ -89,18 +88,20 @@ fun DtSidecarWindow(
         focusable = true,
         alwaysOnTop = isAlwaysOnTop
     ) {
-        val isExpandedChanged = oldIsExpanded != isExpanded
         if (isInitializing) {
             isInitializing = false
             val initialSize = getSideCarWindowSize(windowState, isExpanded)
             window.size = initialSize.toDimension()
             window.location = getSideCarWindowPosition(windowState, initialSize.width).toPoint()
         } else {
-            val newSize = animateWindowSize(windowState, isExpanded, isExpandedChanged)
-            val newPosition = animateWindowPosition(windowState, newSize, isExpandedChanged)
-            window.size = newSize.toDimension()
-            window.location = newPosition.toPoint()
-            oldIsExpanded = isExpanded
+            val newSize = animateWindowSize(windowState, isExpanded)
+            val newPosition = animateWindowPosition(windowState, newSize)
+            if (window.size != newSize.toDimension()) {
+                window.size = newSize.toDimension()
+            }
+            if (window.location != newPosition.toPoint()) {
+                window.location = newPosition.toPoint()
+            }
         }
 
         invokeWhenMessageReceived<ApplicationWindowGainedFocus> { event ->
@@ -191,8 +192,8 @@ fun DtSidecarWindowContent(
 private fun animateWindowSize(
     mainWindowState: WindowState,
     isExpanded: Boolean,
-    isExpandedChanged: Boolean
 ): DpSize {
+    val currentIsExpanded = remember { mutableStateOf(isExpanded) }
     var currentSize by remember { mutableStateOf(getSideCarWindowSize(mainWindowState, isExpanded)) }
     val targetSize = getSideCarWindowSize(mainWindowState, isExpanded)
     /* No delay when we do not have the transparency enabled */
@@ -201,15 +202,17 @@ private fun animateWindowSize(
     }
 
     // We're closing
-    if (isExpandedChanged && !isExpanded) {
+    if (currentIsExpanded.value && !isExpanded) {
         LaunchedEffect(Unit) {
             delay(animationDuration)
+            currentIsExpanded.value = false
             currentSize = targetSize
         }
     }
 
     // We're opening
-    if (isExpandedChanged && isExpanded) {
+    if (!currentIsExpanded.value && isExpanded) {
+        currentIsExpanded.value = true
         currentSize = targetSize
     }
 
@@ -223,11 +226,14 @@ private fun animateWindowSize(
 private fun animateWindowPosition(
     mainWindowState: WindowState,
     windowSize: DpSize,
-    isExpandedChanged: Boolean,
 ): WindowPosition {
+    val currentWidth = remember { mutableStateOf(windowSize.width) }
     val targetPosition = getSideCarWindowPosition(mainWindowState, windowSize.width)
     return when {
-        isExpandedChanged -> targetPosition
+        currentWidth.value != windowSize.width -> {
+            currentWidth.value = windowSize.width
+            targetPosition
+        }
         else -> {
             val x by animateDpAsState(targetPosition.x, animationSpec = tween(128))
             val y by animateDpAsState(targetPosition.y, animationSpec = tween(128))
