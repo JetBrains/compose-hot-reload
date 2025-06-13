@@ -7,13 +7,12 @@ package org.jetbrains.compose.reload.agent.tests
 
 import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.core.HotReloadProperty
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import org.jetbrains.compose.reload.test.core.TestEnvironment
-import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
@@ -48,7 +47,7 @@ class StandaloneJarTest {
         val aliveMessage = CompletableFuture<OrchestrationMessage.TestEvent>()
 
         server.invokeWhenMessageReceived { message ->
-            createLogger().info("Received message: $message")
+            Logger().info("Received message: $message")
             if (message is OrchestrationMessage.TestEvent && message.payload == "Alive") {
                 aliveMessage.complete(message)
             }
@@ -66,11 +65,6 @@ class StandaloneJarTest {
                 StandaloneJarTestMain::class.java.protectionDomain.codeSource.location.file,
                 // Kotlin Stdlib
                 ArrayDeque::class.java.protectionDomain.codeSource.location.file,
-                // Slf4j
-                LoggerFactory::class.java.protectionDomain.codeSource.location.file,
-                // Logback
-                ch.qos.logback.core.Context::class.java.protectionDomain.codeSource.location.file,
-                ch.qos.logback.classic.Logger::class.java.protectionDomain.codeSource.location.file,
             ).joinToString(File.pathSeparator),
             "-D${HotReloadProperty.OrchestrationPort.key}=${server.port}",
             "-D${HotReloadProperty.IsHeadless.key}=true",
@@ -142,11 +136,11 @@ internal object StandaloneJarTestMain {
             exitProcess(42)
         }
 
-        createLogger().info("Started process: Sending signal")
+        Logger().info("Started process: Sending signal")
 
         orchestration.sendMessage(OrchestrationMessage.TestEvent("Alive")).get()
 
-        createLogger().info("Signal Sent: Exiting process")
+        Logger().info("Signal Sent: Exiting process")
         exitProcess(0)
     }
 }

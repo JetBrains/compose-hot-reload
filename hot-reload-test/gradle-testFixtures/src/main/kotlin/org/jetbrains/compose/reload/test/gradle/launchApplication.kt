@@ -57,7 +57,7 @@ public fun HotReloadTestFixture.launchApplication(
 
                 val readerThread = thread(isDaemon = true, name = "App Output Reader") {
                     socketFile.bufferedReader().forEachLine { line ->
-                        orchestration.sendMessage(LogMessage("App", line))
+                        orchestration.sendMessage(LogMessage("App", null, line))
                     }
                 }
 

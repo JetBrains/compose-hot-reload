@@ -16,14 +16,17 @@ import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.HotReloadProperty
+import org.jetbrains.compose.reload.core.logging.Level
 import org.jetbrains.compose.reload.gradle.composeHotReloadAgentJar
 import org.jetbrains.compose.reload.gradle.core.composeReloadDevToolsEnabled
 import org.jetbrains.compose.reload.gradle.core.composeReloadDevToolsIsHeadless
 import org.jetbrains.compose.reload.gradle.core.composeReloadDevToolsTransparencyEnabled
 import org.jetbrains.compose.reload.gradle.core.composeReloadDirtyResolveDepthLimit
+import org.jetbrains.compose.reload.gradle.core.composeReloadEnableStdoutLoggingProvider
 import org.jetbrains.compose.reload.gradle.core.composeReloadGradleBuildContinuous
 import org.jetbrains.compose.reload.gradle.core.composeReloadIsHeadless
 import org.jetbrains.compose.reload.gradle.core.composeReloadJetBrainsRuntimeBinary
+import org.jetbrains.compose.reload.gradle.core.composeReloadLoggingLevel
 import org.jetbrains.compose.reload.gradle.core.composeReloadOrchestrationPort
 import org.jetbrains.compose.reload.gradle.core.composeReloadStderrFile
 import org.jetbrains.compose.reload.gradle.core.composeReloadStdinFile
@@ -47,6 +50,8 @@ sealed interface ComposeHotReloadArgumentsBuilder {
     fun setReloadTaskName(name: Provider<String>)
     fun setReloadTaskName(name: String)
     fun isRecompileContinuous(isRecompileContinuous: Provider<Boolean>)
+    fun setEnableStdoutLogging(enableStdoutLogging: Provider<Boolean>)
+    fun setLoggingLevel(loggingLevel: Provider<Level>)
 }
 
 fun <T> T.withComposeHotReloadArguments(builder: ComposeHotReloadArgumentsBuilder.() -> Unit) where T : JavaForkOptions, T : Task {
@@ -108,6 +113,12 @@ private class ComposeHotReloadArgumentsBuilderImpl(
     private val isRecompileContinues: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadGradleBuildContinuous)
 
+    private val enableStdoutLogging: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .value(project.composeReloadEnableStdoutLoggingProvider)
+
+    private val loggingLevel: Property<Level> = project.objects.property(Level::class.java)
+        .value(project.composeReloadLoggingLevel)
+
     override fun setMainClass(mainClass: Provider<String>) {
         this.mainClass.set(mainClass)
     }
@@ -160,6 +171,14 @@ private class ComposeHotReloadArgumentsBuilderImpl(
         this.isRecompileContinues.set(isRecompileContinuous.orElse(true))
     }
 
+    override fun setEnableStdoutLogging(enableStdoutLogging: Provider<Boolean>) {
+        this.enableStdoutLogging.set(enableStdoutLogging)
+    }
+
+    override fun setLoggingLevel(loggingLevel: Provider<Level>) {
+        this.loggingLevel.set(loggingLevel)
+    }
+
     fun build(): ComposeHotReloadArguments {
         return ComposeHotReloadArgumentsImpl(
             logger = project.logger,
@@ -178,6 +197,8 @@ private class ComposeHotReloadArgumentsBuilderImpl(
             devToolsIsHeadless = devToolsIsHeadless,
             reloadTaskName = reloadTaskName,
             isRecompileContinues = isRecompileContinues,
+            enableStdoutLogging = enableStdoutLogging,
+            loggingLevel = loggingLevel,
             orchestrationPort = project.provider { project.composeReloadOrchestrationPort },
             /* Non API elements */
             virtualMethodResolveEnabled = project.composeReloadVirtualMethodResolveEnabled,
@@ -206,6 +227,8 @@ private class ComposeHotReloadArgumentsImpl(
     private val devToolsIsHeadless: Provider<Boolean>,
     private val reloadTaskName: Provider<String>,
     private val isRecompileContinues: Provider<Boolean>,
+    private val enableStdoutLogging: Provider<Boolean>,
+    private val loggingLevel: Provider<Level>,
     private val orchestrationPort: Provider<Int>,
     /* Non API elements */
     private val virtualMethodResolveEnabled: Boolean,
@@ -301,6 +324,9 @@ private class ComposeHotReloadArgumentsImpl(
         javaHome.orNull?.let { javaHome ->
             add("-D${HotReloadProperty.GradleJavaHome.key}=$javaHome")
         }
+
+        add("-D${HotReloadProperty.EnableStdoutLogging.key}=${enableStdoutLogging.getOrElse(false)}")
+        add("-D${HotReloadProperty.LoggingLevel.key}=${loggingLevel.getOrElse(Level.Debug)}")
 
         /* Forward the orchestration port if one is explicitly requested (client mode) */
         if (orchestrationPort.isPresent) {

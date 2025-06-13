@@ -29,7 +29,6 @@ dependencies {
     implementation(deps.coroutines.swing)
     implementation(deps.asm.tree)
     implementation(deps.asm)
-    implementation(deps.logback)
     implementation(project(":hot-reload-core"))
     implementation(project(":hot-reload-analysis"))
     implementation(kotlin("compiler-embeddable"))

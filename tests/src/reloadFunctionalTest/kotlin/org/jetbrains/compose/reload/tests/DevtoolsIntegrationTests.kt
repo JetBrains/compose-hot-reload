@@ -5,7 +5,7 @@
 
 package org.jetbrains.compose.reload.tests
 
-import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
@@ -22,7 +22,7 @@ import kotlin.jvm.optionals.getOrNull
 import kotlin.time.Duration.Companion.seconds
 
 class DevtoolsIntegrationTests {
-    private val logger = createLogger()
+    private val logger = Logger()
 
     /**
      * This test will launch an empty application, but in *non-headless* mode:

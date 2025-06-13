@@ -13,14 +13,12 @@ import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.BuildTool
 import org.jetbrains.compose.reload.core.LaunchMode
 import org.jetbrains.compose.reload.core.Os
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_COMPILER
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_DEVTOOLS
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
 import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
 import java.io.File
@@ -31,7 +29,7 @@ import kotlin.concurrent.thread
 import kotlin.io.path.pathString
 import kotlin.streams.asSequence
 
-private val logger = createLogger()
+private val logger = Logger()
 
 private val buildSystem: BuildSystem? = HotReloadEnvironment.buildSystem
 
@@ -159,7 +157,7 @@ private fun takeRecompileRequests(): List<RecompileRequest> {
 }
 
 private fun ProcessBuilder.startRecompilerProcess(): Int? {
-    LogMessage(TAG_DEVTOOLS, "Starting recompiler process:\n${this.command().joinToString("        \n")}").send()
+    logger.debug("Starting recompiler process:\n${this.command().joinToString("        \n")}")
 
     val process: Process = start()
     logger.debug("'Recompiler': Started (${process.pid()})")
@@ -173,9 +171,10 @@ private fun ProcessBuilder.startRecompilerProcess(): Int? {
 
     thread(name = "Recompiler Output", isDaemon = true) {
         process.inputStream.bufferedReader().use { reader ->
+            val logger = Logger("Recompiler", tag = TAG_COMPILER)
             while (true) {
                 val nextLine = reader.readLine() ?: break
-                LogMessage(TAG_COMPILER, nextLine).send()
+                logger.debug(nextLine)
             }
         }
     }

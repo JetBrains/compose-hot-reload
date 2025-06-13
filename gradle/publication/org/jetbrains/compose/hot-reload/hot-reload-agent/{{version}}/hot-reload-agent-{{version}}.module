@@ -59,13 +59,6 @@
       },
       "dependencies": [
         {
-          "group": "org.slf4j",
-          "module": "slf4j-api",
-          "version": {
-            "requires": "2.0.17"
-          }
-        },
-        {
           "group": "org.jetbrains.compose.hot-reload",
           "module": "hot-reload-core",
           "version": {

@@ -24,17 +24,16 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compsoe.reload.analyzer.app.states.*
 import org.jetbrains.compsoe.reload.analyzer.app.ui.AppTheme
 import org.jetbrains.compsoe.reload.analyzer.app.ui.FileView
 import org.jetbrains.compsoe.reload.analyzer.app.ui.NavigationBar
 
-private val logger = createLogger()
 
 private val applicationScope = CoroutineScope(
     SupervisorJob() + Dispatchers.Main + Events() + States() +
-        CoroutineExceptionHandler { context, throwable -> logger.error("Unhandled exception", throwable) }
+        CoroutineExceptionHandler { context, throwable -> Logger().error("Unhandled exception", throwable) }
 )
 
 fun main() {
