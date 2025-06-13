@@ -9,7 +9,6 @@ package org.jetbrains.compose.reload.tests
 
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.AndroidHotReloadTest
-import org.jetbrains.compose.reload.test.gradle.Debug
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.DisabledVersion
@@ -45,8 +44,8 @@ class ScreenshotTests {
 
     @GradleIntegrationTest
     @HostIntegrationTest
+    @DisabledVersion("#128: ComposableSingleton + Indy", kotlin = "2.2.0-RC2", compose = "1.9.0-alpha02")
     @HotReloadTest
-    @Debug(".*Continuous.*")
     fun `test - retained state`(fixture: HotReloadTestFixture) = fixture.runTest {
         val d = "$"
         fixture initialSourceCode """
