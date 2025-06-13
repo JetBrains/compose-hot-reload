@@ -80,7 +80,7 @@ public fun <T> launchTask(body: suspend Task<T>.() -> T): Task<T> {
 public fun <T> launchTask(
     name: String? = null, context: CoroutineContext = EmptyCoroutineContext, body: suspend Task<T>.() -> T
 ): Task<T> {
-    val task = TaskImpl(name, context, body)
+    val task = TaskImpl(name, context.withAsyncTraces("launchTask($name)"), body)
     task.start()
     return task
 }
@@ -117,6 +117,11 @@ private class TaskImpl<T>(
 
             /* A failure will cause the entire task graph to stop */
             if (result.isFailure()) {
+                val asyncTraces = coroutineContext[AsyncTraces]
+                if (asyncTraces != null) {
+                    result.exception.addSuppressed(AsyncTracesThrowable(asyncTraces))
+                }
+
                 stop(result.exception)
             }
 
@@ -173,7 +178,8 @@ private class TaskImpl<T>(
     override fun <T> subtask(
         name: String?, context: CoroutineContext, body: suspend Task<T>.() -> T
     ): Task<T> {
-        val subtask = TaskImpl(name, context, body)
+
+        val subtask = TaskImpl(name, context.withAsyncTraces("subtask($name)"), body)
 
         state.update { currentState ->
             when (currentState) {

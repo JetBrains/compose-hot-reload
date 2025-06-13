@@ -44,13 +44,11 @@ private class BusImpl<T> : Bus<T> {
 
         val dispatchQueues = dispatchQueues.get()
         dispatchQueues.map { queue ->
-            launchTask("BusImpl.dispatch") {
+            launchTask("BusImpl.dispatch($queue)") {
                 val dispatch = Dispatch(value)
                 queue.send(dispatch)
                 dispatch.future.await()
             }
-        }.forEachIndexed { index, future ->
-            future.await()
         }
     }
 
@@ -76,7 +74,6 @@ private class BusImpl<T> : Bus<T> {
                 dispatch.future.complete(result)
             } catch (_: StopCollectingException) {
                 dispatch.future.complete(Unit)
-
                 break
             } catch (t: Throwable) {
                 dispatch.future.completeExceptionally(t)

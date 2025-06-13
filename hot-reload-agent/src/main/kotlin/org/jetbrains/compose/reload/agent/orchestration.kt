@@ -21,7 +21,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_AGENT
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
-import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
+import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.seconds
@@ -82,7 +82,8 @@ private suspend fun startOrchestration(): OrchestrationHandle {
 
         /* Otherwise, we start our own orchestration server */
         logger.debug("Hot Reload Agent is starting in 'server' mode")
-        startOrchestrationServer().also { server ->
+        OrchestrationServer().also { server ->
+            server.start()
             val message = "Agent: Server started on port '${server.port.awaitOrThrow()}'"
             logger.info(message)
             server.send(LogMessage(TAG_AGENT, message))

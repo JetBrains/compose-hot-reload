@@ -26,13 +26,14 @@ import org.jetbrains.compose.reload.core.update
 import org.jetbrains.compose.reload.gradle.Future
 import org.jetbrains.compose.reload.gradle.projectFuture
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
-import org.jetbrains.compose.reload.orchestration.OrchestrationClientBlocking
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildFinished
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildTaskResult
-import org.jetbrains.compose.reload.orchestration.asBlocking
-import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
+import org.jetbrains.compose.reload.orchestration.connectBlocking
+import org.jetbrains.compose.reload.orchestration.invokeOnClose
+import org.jetbrains.compose.reload.orchestration.sendAsync
+import org.jetbrains.compose.reload.orchestration.sendBlocking
 import java.lang.AutoCloseable
 import java.util.concurrent.atomic.AtomicReference
 
@@ -78,13 +79,13 @@ internal abstract class StatusService : BuildService<StatusService.Params>, Oper
         val ports: ListProperty<Int>
     }
 
-    private val clients = AtomicReference<List<OrchestrationClientBlocking>>(emptyList())
+    private val clients = AtomicReference<List<OrchestrationClient>>(emptyList())
 
     init {
         clients.set(parameters.ports.get().mapNotNull { port ->
-             OrchestrationClient(OrchestrationClientRole.Compiler, port).asBlocking().connect().leftOrNull()
+             OrchestrationClient(OrchestrationClientRole.Compiler, port).connectBlocking().leftOrNull()
         }.onEach { client ->
-            client.send(OrchestrationMessage.BuildStarted())
+            client.sendAsync(OrchestrationMessage.BuildStarted())
             client.invokeOnClose {
                 clients.update { it - client }
             }
@@ -119,13 +120,13 @@ internal abstract class StatusService : BuildService<StatusService.Params>, Oper
         }
 
         clients.get().forEach { client ->
-            client.send(message)
+            client.sendAsync(message)
         }
     }
 
     override fun close() {
         val clients = clients.getAndSet(emptyList())
-        clients.forEach { client -> client.send(BuildFinished()) }
+        clients.forEach { client -> client.sendAsync(BuildFinished()) }
         clients.forEach { client -> client.close() }
     }
 }

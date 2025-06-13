@@ -62,8 +62,15 @@ public fun <T> Result<T>.toTry(): Try<T> {
 }
 
 public fun <T> Try<T>.toResult(): Result<T> {
-    return when(this){
+    return when (this) {
         is Left<T> -> Result.success(value)
         is Right -> Result.failure(exception)
+    }
+}
+
+public fun <T> Try<Try<T>>.flatten(): Try<T> {
+    return when (this) {
+        is Left<Try<T>> -> value
+        is Right<Throwable> -> this
     }
 }

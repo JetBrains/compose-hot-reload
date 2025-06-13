@@ -5,7 +5,6 @@
 
 package org.jetbrains.compose.reload.core
 
-import org.jetbrains.compose.reload.core.testFixtures.withAsyncTrace
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
@@ -96,7 +95,6 @@ public suspend fun launchOnStop(action: suspend Task<*>.(error: Throwable) -> Un
     val task = currentTask()
     return currentTask().launchOnStop("${task.name}.launchOnStop", action)
 }
-
 
 public suspend fun isActive(): Boolean = coroutineContext[Task]?.isActive() ?: false
 

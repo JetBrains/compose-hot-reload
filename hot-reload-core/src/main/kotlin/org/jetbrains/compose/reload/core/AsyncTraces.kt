@@ -3,13 +3,9 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.jetbrains.compose.reload.core.testFixtures
+package org.jetbrains.compose.reload.core
 
 
-import org.jetbrains.compose.reload.core.exception
-import org.jetbrains.compose.reload.core.isFailure
-import org.jetbrains.compose.reload.core.isSuccess
-import org.jetbrains.compose.reload.core.toTry
 import java.lang.invoke.MethodHandles
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
@@ -26,7 +22,10 @@ public data class AsyncTraces(val frames: List<Frame>) : CoroutineContext.Elemen
 
     override val key: CoroutineContext.Key<*> = Key
 
-    public data class Frame(val title: String? = null, val stackTraceElements: List<StackTraceElement>)
+    public data class Frame(
+        val title: String? = null,
+        val stackTraceElements: List<StackTraceElement> = currentStackTrace()
+    )
 }
 
 public suspend inline fun <T> withAsyncTrace(
@@ -46,6 +45,17 @@ public suspend inline fun <T> withAsyncTrace(
 
         }).resume(Unit)
     }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+public inline fun CoroutineContext.createAsyncTraces(title: String? = null): CoroutineContext {
+    val frames = (this[AsyncTraces]?.frames ?: emptyList()) + AsyncTraces.Frame(title)
+    return this + AsyncTraces(frames)
+}
+
+@Suppress("NOTHING_TO_INLINE")
+public inline fun CoroutineContext.withAsyncTraces(title: String? = null): CoroutineContext {
+    return this + createAsyncTraces(title)
 }
 
 @PublishedApi

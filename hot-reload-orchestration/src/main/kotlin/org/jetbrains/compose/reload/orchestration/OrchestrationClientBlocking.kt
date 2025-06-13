@@ -5,54 +5,47 @@
 
 package org.jetbrains.compose.reload.orchestration
 
-import org.jetbrains.compose.reload.core.Disposable
+import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.Try
+import org.jetbrains.compose.reload.core.flatten
 import org.jetbrains.compose.reload.core.getBlocking
-import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.invokeOnCompletion
-import org.jetbrains.compose.reload.core.isActive
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.mapLeft
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-public interface OrchestrationClientBlocking : AutoCloseable {
-    public fun connect(): Try<OrchestrationClientBlocking>
-    public fun port(): Int
-    public fun isActive(): Boolean
-    public fun invokeOnClose(action: () -> Unit): Disposable
-    public infix fun send(message: OrchestrationMessage)
+private val timeout = 15.seconds
+
+public infix fun OrchestrationHandle.sendBlocking(message: OrchestrationMessage): Try<Unit> {
+    return launchTask("sendBlocking") {
+        send(message)
+    }.getBlocking(timeout)
 }
 
-public fun OrchestrationClient.asBlocking(timeout: Duration = 15.seconds): OrchestrationClientBlocking =
-    OrchestrationClientBlockingImpl(this, timeout)
-
-private class OrchestrationClientBlockingImpl(
-    private val handle: OrchestrationClient,
-    private val timeout: Duration = 15.seconds
-) : OrchestrationClientBlocking {
-
-    override fun connect(): Try<OrchestrationClientBlocking> {
-        return launchTask("blocking.connect()") { handle.connect() }
-            .getBlocking(timeout).getOrThrow()
-            .mapLeft { this }
+public infix fun OrchestrationHandle.sendAsync(message: OrchestrationMessage): Future<Unit> {
+    return launchTask("sendAsync") {
+        send(message)
     }
+}
 
-    override fun port(): Int = handle.port.getBlocking(timeout).getOrThrow()
+public fun OrchestrationHandle.portBlocking(): Try<Int> {
+    return launchTask("portBlocking") {
+        port.await()
+    }.getBlocking(timeout).flatten()
+}
 
-    override fun isActive(): Boolean {
-        return launchTask("blocking.isActive()") { handle.isActive() }.getBlocking(timeout).getOrThrow()
-    }
+public infix fun OrchestrationHandle.invokeOnClose(action: () -> Unit) {
+    invokeOnCompletion { action() }
+}
 
-    override fun invokeOnClose(action: () -> Unit): Disposable {
-        return handle.invokeOnCompletion { action() }
-    }
+public fun OrchestrationClient.connectBlocking(): Try<OrchestrationClient> {
+    return launchTask("connectBlocking") {
+        connect()
+    }.getBlocking(timeout).flatten().mapLeft { this }
+}
 
-    override fun send(message: OrchestrationMessage) {
-        launchTask("blocking.send") { handle.send(message) }.getBlocking(timeout).getOrThrow()
-    }
-
-    override fun close() {
-        handle.stop()
-    }
+public fun OrchestrationServer.startBlocking(): Try<Unit> {
+    return launchTask("startBlocking") {
+        start()
+    }.getBlocking(timeout)
 }

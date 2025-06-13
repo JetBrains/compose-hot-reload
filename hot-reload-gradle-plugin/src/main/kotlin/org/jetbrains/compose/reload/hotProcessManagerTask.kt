@@ -24,7 +24,8 @@ import org.jetbrains.compose.reload.gradle.projectFuture
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
-import org.jetbrains.compose.reload.orchestration.asBlocking
+import org.jetbrains.compose.reload.orchestration.connectBlocking
+import org.jetbrains.compose.reload.orchestration.sendBlocking
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -68,11 +69,11 @@ private fun shutdownApplication(pidfile: Path, logger: Logger? = null) {
 
     logger?.quiet("Sending 'ShutdownRequest' to '$port'")
 
-    OrchestrationClient(OrchestrationClientRole.Tooling, port).asBlocking().use { client ->
-        client.connect().getOrThrow()
+    OrchestrationClient(OrchestrationClientRole.Tooling, port).use { client ->
+        client.connectBlocking().getOrThrow()
         logger?.debug("Connected to '$port'")
 
-        client send ShutdownRequest(
+        client sendBlocking ShutdownRequest(
             "Gradle Build cancelled",
             pidFile = pidfile.absolute().toFile(),
             pid = pid,

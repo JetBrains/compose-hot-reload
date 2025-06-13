@@ -26,6 +26,7 @@ import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
 import org.jetbrains.compose.reload.core.withType
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
+import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import java.io.File
 import java.io.File.pathSeparator
 import java.lang.System.currentTimeMillis
@@ -104,7 +105,7 @@ internal class HotReloadUnitTestExecutor(
     private fun launchTest(
         processor: TestResultProcessor,
         testMethodDescriptor: MethodDescriptor,
-    ) = OrchestrationServer().use { server ->
+    ) = startOrchestrationServer().use { server ->
         launchTest(server, processor, testMethodDescriptor)
     }
 

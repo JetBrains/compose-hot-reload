@@ -6,7 +6,6 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
@@ -79,7 +78,7 @@ internal class HotReloadTestFixtureExtension(
             }
         }
 
-        val orchestrationServer = runBlocking { startOrchestrationServer() }
+        val orchestrationServer = startOrchestrationServer()
         startOrchestrationTestLogging(orchestrationServer)
         val isHeadless = findAnnotation<Headless>()?.isHeadless ?: true
 

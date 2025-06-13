@@ -18,6 +18,7 @@ import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.withType
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.compose.reload.core.asTemplateOrThrow
+import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.renderOrThrow
 import org.jetbrains.compose.reload.gradle.Future
@@ -34,7 +35,9 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadCla
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest.ChangeType.Added
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest.ChangeType.Modified
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest.ChangeType.Removed
-import org.jetbrains.compose.reload.orchestration.asBlocking
+import org.jetbrains.compose.reload.orchestration.connectBlocking
+import org.jetbrains.compose.reload.orchestration.portBlocking
+import org.jetbrains.compose.reload.orchestration.sendBlocking
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import javax.inject.Inject
 import kotlin.io.path.deleteIfExists
@@ -102,14 +105,14 @@ abstract class HotReloadTask : DefaultTask() {
 
     @TaskAction
     fun execute() {
-        OrchestrationClient(Compiler, agentPort.get()).asBlocking().use { client ->
-            client.connect().leftOr {
+        OrchestrationClient(Compiler, agentPort.get()).use { client ->
+            client.connectBlocking().leftOr {
                 logger.quiet("Failed to create 'OrchestrationClient'!")
                 getCancellationToken().cancel()
                 error("Failed to create 'OrchestrationClient'!")
             }
 
-            logger.quiet("Connected to '${client.port()}'")
+            logger.quiet("Connected to '${client.portBlocking().getOrThrow()}'")
 
             val pendingRequestFile = pendingRequestFile.get().asFile.toPath()
 
@@ -123,7 +126,7 @@ abstract class HotReloadTask : DefaultTask() {
             }
 
             logger.quiet(reloadReport(request))
-            client.send(request)
+            client.sendBlocking(request)
             pendingRequestFile.deleteIfExists()
         }
     }

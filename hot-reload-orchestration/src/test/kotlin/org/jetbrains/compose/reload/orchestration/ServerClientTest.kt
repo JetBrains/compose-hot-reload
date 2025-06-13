@@ -43,10 +43,8 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
 import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.createLogger
-import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.invokeOnValue
-import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.reloadMainThread
 import org.jetbrains.compose.reload.core.withThread
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
@@ -85,15 +83,16 @@ class ServerClientTest {
 
     @AfterEach
     fun cleanup() = synchronized(this) {
-        resources.forEach { launchTask("cleanup") { it.shutdown() }.getBlocking(5.seconds) }
+        resources.forEach { it.close() }
     }
 
-
     @Test
-    fun `test - simple ping pong`() = runTest(timeout = 10.minutes) {
+    fun `test - simple ping pong`() = runTest(timeout = 10.seconds) {
         val server = use(startOrchestrationServer())
-
         val client = use(OrchestrationClient(Unknown, server.port.await().getOrThrow()))
+
+        val serverChannel = server.asChannel()
+        val clientChannel = client.asChannel()
 
         val serverReceivedMessages = mutableListOf<OrchestrationMessage>()
         val clientReceivedMessages = mutableListOf<OrchestrationMessage>()
@@ -112,6 +111,9 @@ class ServerClientTest {
 
         withThread(reloadMainThread) {
             client.send(LogMessage("A"))
+            clientChannel.consumeAsFlow().filterIsInstance<LogMessage>().first()
+            serverChannel.receiveAsFlow().filterIsInstance<LogMessage>().first()
+
             assertEquals(listOf<OrchestrationMessage>(LogMessage("A")), serverReceivedMessages)
             assertEquals(listOf<OrchestrationMessage>(LogMessage("A")), clientReceivedMessages)
         }
@@ -327,7 +329,7 @@ class ServerClientTest {
         /* Await all clients to disconnect */
         val messages = messagesReceived.map { it.await() }
         assertEquals(expectedMessages, messages.size)
-        server.shutdown()
+        server.close()
     }
 
 

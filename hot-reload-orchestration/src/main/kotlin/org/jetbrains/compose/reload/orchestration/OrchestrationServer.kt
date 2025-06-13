@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.Bus
 import org.jetbrains.compose.reload.core.Future
+import org.jetbrains.compose.reload.core.Queue
 import org.jetbrains.compose.reload.core.StoppedException
 import org.jetbrains.compose.reload.core.Task
 import org.jetbrains.compose.reload.core.WorkerThread
@@ -30,6 +31,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationPackage.Ack
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
+import kotlin.time.Duration.Companion.seconds
 
 public fun startOrchestrationServer(): OrchestrationServer {
     val server = OrchestrationServer()
@@ -37,7 +39,7 @@ public fun startOrchestrationServer(): OrchestrationServer {
     launchTask("startOrchestrationServer") {
         server.start()
         server.port.await().getOrThrow()
-    }.getBlocking().getOrThrow()
+    }.getBlocking(15.seconds).getOrThrow()
 
     return server
 }
@@ -83,8 +85,6 @@ public fun OrchestrationServer(): OrchestrationServer {
         override suspend fun send(message: OrchestrationMessage) {
             messages.send(message)
         }
-
-
 
 
         override suspend fun bind() {
@@ -161,7 +161,7 @@ private fun launchClient(
     }
 }
 
-public interface OrchestrationServer : OrchestrationHandle{
+public interface OrchestrationServer : OrchestrationHandle {
     public suspend fun bind()
     public suspend fun start()
 }

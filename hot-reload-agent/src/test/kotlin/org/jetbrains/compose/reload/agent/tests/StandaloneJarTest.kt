@@ -10,9 +10,12 @@ import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.invokeOnValue
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
+import org.jetbrains.compose.reload.orchestration.sendBlocking
 import org.jetbrains.compose.reload.test.core.TestEnvironment
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -48,14 +51,14 @@ class StandaloneJarTest {
         val server = OrchestrationServer()
         val aliveMessage = CompletableFuture<OrchestrationMessage.TestEvent>()
 
-        server.invokeWhenMessageReceived { message ->
+        server.messages.invokeOnValue { message ->
             createLogger().info("Received message: $message")
             if (message is OrchestrationMessage.TestEvent && message.payload == "Alive") {
                 aliveMessage.complete(message)
             }
         }
 
-        cleanupActions.add { server.shutdown() }
+        cleanupActions.add { server.close() }
 
         val currentProcessInfo = ProcessHandle.current().info()
         val testProcess = ProcessBuilder(
@@ -145,7 +148,7 @@ internal object StandaloneJarTestMain {
 
         createLogger().info("Started process: Sending signal")
 
-        orchestration.sendMessage(OrchestrationMessage.TestEvent("Alive")).get()
+        orchestration.sendBlocking(OrchestrationMessage.TestEvent("Alive")).getOrThrow()
 
         createLogger().info("Signal Sent: Exiting process")
         exitProcess(0)

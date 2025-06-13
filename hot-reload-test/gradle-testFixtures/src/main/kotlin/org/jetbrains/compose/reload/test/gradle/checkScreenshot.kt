@@ -6,7 +6,7 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import org.jetbrains.compose.reload.core.asFileName
-import org.jetbrains.compose.reload.core.testFixtures.withAsyncTrace
+import org.jetbrains.compose.reload.core.withAsyncTrace
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.Screenshot
 import org.jetbrains.compose.reload.test.core.TestEnvironment
