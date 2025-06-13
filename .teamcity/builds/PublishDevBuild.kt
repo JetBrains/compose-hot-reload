@@ -34,11 +34,6 @@ object PublishDevBuild : BuildType({
             branchFilter = "+:<default>"
             withPendingChangesOnly = true
         }
-
-        schedule {
-            branchFilter = "+:<default>"
-            withPendingChangesOnly = true
-        }
     }
 
 
