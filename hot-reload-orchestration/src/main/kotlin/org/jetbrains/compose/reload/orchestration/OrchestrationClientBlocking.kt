@@ -28,12 +28,6 @@ public infix fun OrchestrationHandle.sendAsync(message: OrchestrationMessage): F
     }
 }
 
-public fun OrchestrationHandle.portBlocking(): Try<Int> {
-    return launchTask("portBlocking") {
-        port.await()
-    }.getBlocking(timeout).flatten()
-}
-
 public infix fun OrchestrationHandle.invokeOnClose(action: () -> Unit) {
     invokeOnCompletion { action() }
 }

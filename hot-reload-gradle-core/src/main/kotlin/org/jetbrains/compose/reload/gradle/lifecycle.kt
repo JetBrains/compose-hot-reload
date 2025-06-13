@@ -18,6 +18,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.createCoroutine
 import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlin.properties.ReadOnlyProperty
 
 @InternalHotReloadGradleApi
@@ -54,9 +55,9 @@ class CompletableFuture<T> : Future<T> {
     override suspend fun await(): T {
         val result = result
         return if (result != null) result.getOrThrow()
-        else suspendStoppableCoroutine { continuation ->
+        else suspendCoroutine { continuation ->
             continuations.add(continuation)
-        }.getOrThrow()
+        }
     }
 
     private fun invokeContinuations() {

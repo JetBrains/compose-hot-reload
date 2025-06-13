@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
+import org.jetbrains.compose.reload.orchestration.sendAsync
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 import kotlin.io.path.absolutePathString
@@ -58,7 +59,7 @@ public fun HotReloadTestFixture.launchApplication(
 
                 val readerThread = thread(isDaemon = true, name = "App Output Reader") {
                     socketFile.bufferedReader().forEachLine { line ->
-                        launchTask { orchestration.send(LogMessage(line)) }
+                        orchestration.sendAsync(LogMessage(line))
                     }
                 }
 

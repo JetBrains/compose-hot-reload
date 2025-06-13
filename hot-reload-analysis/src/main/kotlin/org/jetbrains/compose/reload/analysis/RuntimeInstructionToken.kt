@@ -13,7 +13,7 @@ import org.jetbrains.compose.reload.analysis.RuntimeInstructionTokenizer.Tokeniz
 import org.jetbrains.compose.reload.core.Either
 import org.jetbrains.compose.reload.core.Failure
 import org.jetbrains.compose.reload.core.leftOr
-import org.jetbrains.compose.reload.core.nextOrNothing
+import org.jetbrains.compose.reload.core.nextOrNull
 import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.core.toRight
 import org.objectweb.asm.Opcodes
@@ -337,7 +337,7 @@ private object SourceInformationMarkerStartTokenizer : RuntimeInstructionTokeniz
         val consumer = context.consumer()
 
         /* Search for key */
-        val expectedKeyLoad = consumer.nextOrNothing() ?: return null
+        val expectedKeyLoad = consumer.nextOrNull() ?: return null
         val key = expectedKeyLoad.intValueOrNull() ?: return null
 
         /* search for source information */

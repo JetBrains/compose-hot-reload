@@ -21,6 +21,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asFlow
+import org.jetbrains.compose.reload.orchestration.connectBlocking
 import java.util.ServiceLoader
 import kotlin.time.Duration.Companion.seconds
 
@@ -30,20 +31,14 @@ internal val orchestration: OrchestrationHandle = run {
     logger.info("Connecting 'orchestration'")
     val handle = ServiceLoader.load(OrchestrationExtension::class.java)
         .firstNotNullOfOrNull { extension -> extension.getOrchestration() }
-        ?: (OrchestrationClient(OrchestrationClientRole.Tooling))
-        ?: run {
+        ?: OrchestrationClient(OrchestrationClientRole.Tooling)?.connectBlocking()?.leftOr { error ->
+            logger.error("Failed connecting 'orchestration'", error.exception)
+            shutdown()
+        } ?: run {
             logger.error("Failed to create orchestration client")
             shutdown()
         }
 
-    if (handle is OrchestrationClient) {
-        launchTask {
-            handle.connect().leftOr { error ->
-                logger.error("Failed connecting 'orchestration'", error.exception)
-                shutdown()
-            }
-        }
-    }
     logger.info("Connected 'orchestration'")
     handle
 }
