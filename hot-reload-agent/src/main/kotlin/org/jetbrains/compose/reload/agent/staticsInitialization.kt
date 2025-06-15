@@ -9,11 +9,11 @@ import javassist.CtClass
 import javassist.CtConstructor
 import org.jetbrains.compose.reload.analysis.classId
 import org.jetbrains.compose.reload.analysis.classInitializerMethodId
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.sortedByTopology
+import org.jetbrains.compose.reload.core.logging.Logger
 import java.lang.reflect.Modifier
 
-private val logger = createLogger()
+private val logger = Logger()
 
 internal const val reinitializeName = "\$chr\$clinit"
 

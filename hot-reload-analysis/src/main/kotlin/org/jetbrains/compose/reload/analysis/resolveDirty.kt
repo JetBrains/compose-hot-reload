@@ -6,12 +6,12 @@
 package org.jetbrains.compose.reload.analysis
 
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.simpleName
 import org.jetbrains.compose.reload.core.withClosure
+import org.jetbrains.compose.reload.core.logging.Logger
 import kotlin.time.measureTimedValue
 
-private val logger = createLogger()
+private val logger = Logger()
 
 data class RuntimeDirtyScopes(
     val redefinedClasses: List<ClassInfo>,

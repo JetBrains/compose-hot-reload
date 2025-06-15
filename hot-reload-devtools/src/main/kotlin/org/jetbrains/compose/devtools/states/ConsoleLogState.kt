@@ -18,7 +18,6 @@ data class ConsoleLogState(val logs: List<String>) : State {
         override val default: ConsoleLogState = ConsoleLogState(emptyList())
         const val LIMIT = 4096
     }
-
 }
 
 internal fun CoroutineScope.launchConsoleLogState() = launchState(ConsoleLogState) {

@@ -19,7 +19,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessag
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.junit.jupiter.api.extension.ExtensionContext
-import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -44,10 +43,15 @@ or finished.
  */
 
 private val testLoggingScope = CoroutineScope(
-    Job() + Dispatchers.IO + CoroutineName("Orchestration Test Logging") + CoroutineExceptionHandler { ctx, e ->
+    Job() + Dispatchers.IO + CoroutineName("Orchestration Test Logging") + CoroutineExceptionHandler { _, e ->
         e.printStackTrace()
     }
 )
+
+private fun printImmediately(message: String) {
+    println(message)
+    System.out.flush()
+}
 
 @OptIn(ExperimentalPathApi::class)
 internal fun ExtensionContext.startOrchestrationTestLogging(server: OrchestrationServer) = testLoggingScope.launch {
@@ -95,13 +99,12 @@ internal fun ExtensionContext.startOrchestrationTestLogging(server: Orchestratio
         writer
     }
 
-    val testClassLogger = LoggerFactory.getLogger(testClass)
-    testClassLogger.info(
+    printImmediately(
         """
-        ${requiredTestMethod.name} (${context.getDisplayName()})
-        logs: ${allLogs.toUri()}
-        messages: ${allMessages.toUri()}
-    """.trimIndent()
+            ${requiredTestMethod.name} (${context.getDisplayName()})
+            logs: ${allLogs.toUri()}
+            messages: ${allMessages.toUri()}
+        """.trimIndent()
     )
 
     /* We collect all messages and log them: The flow will be closed when the orchestration closes */

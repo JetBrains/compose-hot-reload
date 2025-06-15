@@ -20,14 +20,12 @@ kotlin {
 dependencies {
     implementation(project(":hot-reload-core"))
 
-    implementation(deps.slf4j.api)
     compileOnly(deps.coroutines.core)
 
     testImplementation(kotlin("test"))
     testImplementation(deps.junit.jupiter)
     testImplementation(deps.junit.jupiter.engine)
     testImplementation(deps.coroutines.test)
-    testImplementation(deps.logback)
     testImplementation(deps.asm)
     testImplementation(deps.asm.tree)
     testImplementation(project(":hot-reload-analysis"))

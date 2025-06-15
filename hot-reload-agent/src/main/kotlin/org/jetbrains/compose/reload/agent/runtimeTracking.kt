@@ -13,8 +13,9 @@ import org.jetbrains.compose.reload.analysis.isIgnoredClassId
 import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
 import org.jetbrains.compose.reload.analysis.verifyRedefinitions
 import org.jetbrains.compose.reload.core.Try
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.submitSafe
+import org.jetbrains.compose.reload.core.logging.Logger
+import org.jetbrains.compose.reload.core.logging.trace
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.lang.ref.WeakReference
@@ -24,7 +25,7 @@ import java.util.concurrent.Future
 import kotlin.concurrent.thread
 import kotlin.time.measureTime
 
-private val logger = createLogger()
+private val logger = Logger()
 
 private val runtimeAnalysisThread = Executors.newSingleThreadExecutor { r ->
     thread(start = false, isDaemon = true, name = "Compose Runtime Analyzer", block = r::run)
@@ -73,14 +74,10 @@ internal fun enqueueRuntimeAnalysis(
         classLoaders[classInfo.classId] = WeakReference(loader)
 
         if (classBeingRedefined == null) {
-            if (logger.isTraceEnabled) {
-                logger.trace("Parsed 'RuntimeInfo' for '$className'")
-            }
+            logger.trace { "Parsed 'RuntimeInfo' for '$className'" }
             currentRuntime.add(classInfo)
         } else {
-            if (logger.isTraceEnabled) {
-                logger.trace("Parsed 'RuntimeInfo' for '$className' (redefined)")
-            }
+            logger.trace { "Parsed 'RuntimeInfo' for '$className' (redefined)" }
             pendingRedefinitions.add(classInfo)
         }
 

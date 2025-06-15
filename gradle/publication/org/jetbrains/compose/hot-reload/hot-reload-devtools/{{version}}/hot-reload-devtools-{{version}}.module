@@ -129,13 +129,6 @@
           }
         },
         {
-          "group": "ch.qos.logback",
-          "module": "logback-classic",
-          "version": {
-            "requires": "1.5.18"
-          }
-        },
-        {
           "group": "org.jetbrains.kotlinx",
           "module": "kotlinx-datetime",
           "version": {

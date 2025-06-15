@@ -26,8 +26,8 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.withAsyncTrace
+import org.jetbrains.compose.reload.core.logging.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
@@ -45,7 +45,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
-private val logger = createLogger()
+private val logger = Logger()
 
 @TransactionDslMarker
 public class HotReloadTestFixture
@@ -147,7 +147,7 @@ internal constructor(
                 val stderr = gradleRunner.stderrChannel?.receiveAsFlow() ?: emptyFlow()
                 val stdout = gradleRunner.stdoutChannel?.receiveAsFlow() ?: emptyFlow()
                 merge(stderr, stdout).collect { message ->
-                    orchestration.sendMessage(LogMessage("Gradle Test Runner", message)).get()
+                    orchestration.sendMessage(LogMessage("Gradle Test Runner", null, message)).get()
                 }
             }
 
