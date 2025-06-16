@@ -227,6 +227,7 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 	public final fun getExceptionClassName ()Ljava/lang/String;
 	public final fun getMessage ()Ljava/lang/String;
 	public final fun getStacktrace ()Ljava/util/List;
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {

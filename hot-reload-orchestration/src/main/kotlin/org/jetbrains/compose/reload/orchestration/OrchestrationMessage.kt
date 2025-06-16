@@ -398,6 +398,11 @@ public sealed class OrchestrationMessage : OrchestrationPackage(), Serializable 
             stacktrace = throwable.withLinearClosure { it.cause }.flatMap { it.stackTrace.toList() }
         )
 
+        override fun toString(): String {
+            return "CriticalException($clientRole, $message)"
+        }
+
+
         internal companion object {
             @Suppress("unused")
             internal const val serialVersionUID: Long = 0L
