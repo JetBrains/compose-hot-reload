@@ -38,11 +38,12 @@ tasks.withType<AbstractTestTask>().configureEach {
         systemProperty("apple.awt.UIElement", true)
 
         if (!providers.gradleProperty("chr.tests.sequential").isPresent) {
-            val parallelism = providers.gradleProperty("chr.tests.parallelism").getOrElse("2")
-            systemProperty("junit.jupiter.execution.parallel.enabled", "true")
+            val parallelism = providers.gradleProperty("chr.tests.parallelism").getOrElse("2").toInt()
+            systemProperty("junit.jupiter.execution.parallel.enabled", true)
             systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
             systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
             systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", parallelism)
+            systemProperty("junit.jupiter.execution.parallel.config.fixed.max-pool-size", parallelism)
         }
     }
 

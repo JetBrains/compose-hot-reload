@@ -80,7 +80,9 @@ internal fun Project.configureGradleTestTasks() {
         intellijDebuggerDispatchPort.orNull?.let { port ->
             task.environment(HotReloadProperty.IntelliJDebuggerDispatchPort.key, port.toString())
             task.doFirst {
+                task.systemProperty("junit.jupiter.execution.parallel.enabled", false)
                 task.systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "1")
+                task.systemProperty("junit.jupiter.execution.parallel.config.fixed.max-pool-size", "1")
             }
         }
 
