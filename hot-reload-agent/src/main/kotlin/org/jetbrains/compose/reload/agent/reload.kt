@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.Ids
+import org.jetbrains.compose.reload.analysis.MethodId
 import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
@@ -130,15 +131,19 @@ internal fun reload(
     }
 }
 
-private fun cleanResourceCache() {
-    val classId = Ids.ImageResourcesKt.classId
+private fun cleanResourceCache(classId: ClassId, cleanMethod: MethodId, resourceCacheType: String) {
     val loader = findClassLoader(classId).get()
     if (loader == null) {
-        logger.info("Resource cache cleaning skipped: '$classId' is not loaded yet.")
+        logger.info("$resourceCacheType resource cache cleaning skipped: '$classId' is not loaded yet.")
         return
     }
     loader.loadClass(classId.toFqn())
-        .getDeclaredMethod(Ids.ImageResourcesKt.dropImageCache.methodName)
+        .getDeclaredMethod(cleanMethod.methodName)
         .invoke(null)
-    logger.info("Resource cache cleared")
+    logger.info("$resourceCacheType resource cache cleared")
+}
+
+private fun cleanResourceCache() {
+    cleanResourceCache(Ids.ImageResourcesKt.classId, Ids.ImageResourcesKt.dropImageCache, "Images")
+    cleanResourceCache(Ids.StringResourcesUtilsKt.classId, Ids.StringResourcesUtilsKt.dropStringItemsCache, "Strings")
 }

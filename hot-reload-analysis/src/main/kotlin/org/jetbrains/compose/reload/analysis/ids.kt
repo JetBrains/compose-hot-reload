@@ -191,6 +191,28 @@ object Ids {
             methodDescriptor = "()V"
         )
     }
+
+    object StringResourcesKt {
+        val classId = ClassId("org/jetbrains/compose/resources/StringResourcesKt")
+    }
+
+    object StringArrayResourcesKt {
+        val classId = ClassId("org/jetbrains/compose/resources/StringArrayResourcesKt")
+    }
+
+    object PluralStringResourcesKt {
+        val classId = ClassId("org/jetbrains/compose/resources/PluralStringResourcesKt")
+    }
+
+    object StringResourcesUtilsKt {
+        val classId = ClassId("org/jetbrains/compose/resources/StringResourcesUtilsKt")
+
+        val dropStringItemsCache = MethodId(
+            classId,
+            methodName = "dropStringItemsCache",
+            methodDescriptor = "()V"
+        )
+    }
 }
 
 val ClassId.classInitializerMethodId: MethodId
