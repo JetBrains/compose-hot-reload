@@ -307,8 +307,16 @@ private fun RuntimeInfo.resolveParentRuntimeScopeInfo(
 
 private fun RuntimeInfo.resolveDirtyResources(changedResources: List<File>): List<RuntimeScopeInfo> {
     if (changedResources.isEmpty()) return emptyList()
-    // Conservatively mark all scopes of all methods of ImageResources.kt of Compose Resources Library as dirty.
+    // Conservatively mark all scopes of all resource usage methods of Compose Resources Library as dirty.
     // In the future, we can make it smarter counting actually changed resources.
-    return classIndex[Ids.ImageResourcesKt.classId]?.methods?.values?.flatMap(MethodInfo::allScopes)
-        ?: emptyList()
+    return listOf(
+        Ids.ImageResourcesKt.classId,
+        Ids.StringResourcesKt.classId,
+        Ids.StringArrayResourcesKt.classId,
+        Ids.PluralStringResourcesKt.classId
+    )
+        .flatMap {
+            classIndex[it]?.methods?.values?.flatMap(MethodInfo::allScopes)
+                ?: emptyList()
+        }
 }
