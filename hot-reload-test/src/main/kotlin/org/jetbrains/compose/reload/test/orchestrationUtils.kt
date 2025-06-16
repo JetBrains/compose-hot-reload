@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.jetbrains.compose.reload.agent.orchestration
+import org.jetbrains.compose.reload.agent.sendAsync
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asChannel
@@ -18,11 +19,11 @@ import org.jetbrains.compose.reload.orchestration.asChannel
 private val logger = createLogger()
 
 public fun sendTestEvent(any: Any? = null) {
-    orchestration.sendMessage(OrchestrationMessage.TestEvent(any))
+    OrchestrationMessage.TestEvent(any).sendAsync()
 }
 
 public fun sendLog(any: Any?) {
-    orchestration.sendMessage(OrchestrationMessage.LogMessage("test", any.toString()))
+    OrchestrationMessage.LogMessage("test", any.toString()).sendAsync()
 }
 
 @Composable

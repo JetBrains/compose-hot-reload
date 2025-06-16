@@ -40,7 +40,7 @@ import androidx.compose.ui.window.WindowState
 import io.sellmair.evas.compose.composeFlow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
-import org.jetbrains.compose.devtools.send
+import org.jetbrains.compose.devtools.sendAsync
 import org.jetbrains.compose.devtools.states.UIErrorDescription
 import org.jetbrains.compose.devtools.states.UIErrorState
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
@@ -112,7 +112,7 @@ private fun DevToolingErrorOverlay(error: UIErrorDescription) {
                     }
 
                     Button(
-                        onClick = { ShutdownRequest("Requested by user through 'devtools'").send() },
+                        onClick = { ShutdownRequest("Requested by user through 'devtools'").sendAsync() },
                         colors = ButtonDefaults.filledTonalButtonColors()
                     ) {
                         Text("Shutdown")

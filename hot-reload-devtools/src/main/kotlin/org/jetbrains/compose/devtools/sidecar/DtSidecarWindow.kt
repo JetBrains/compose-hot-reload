@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowState
 import org.jetbrains.compose.devtools.invokeWhenMessageReceived
-import org.jetbrains.compose.devtools.orchestration
+import org.jetbrains.compose.devtools.sendBlocking
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.widgets.DtComposeLogo
@@ -67,7 +67,7 @@ fun DtSidecarWindow(
 
     DialogWindow(
         onCloseRequest = {
-            orchestration.sendMessage(ShutdownRequest("Requested by user through 'devtools'")).get()
+            ShutdownRequest("Requested by user through 'devtools'").sendBlocking()
             exitProcess(0)
         },
         state = DtSidecarWindowState(windowState, isExpanded),

@@ -30,5 +30,5 @@ public inline fun Logger.orchestration(message: String, throwable: Throwable? = 
         append(throwable.stackTraceToString())
     }
 
-    OrchestrationMessage.LogMessage(tag, message).send()
+    OrchestrationMessage.LogMessage(tag, message).sendAsync()
 }

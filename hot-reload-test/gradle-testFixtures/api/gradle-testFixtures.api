@@ -600,7 +600,7 @@ public final class org/jetbrains/compose/reload/test/gradle/TransactionScope : k
 	public static synthetic fun replaceSourceCodeAndReload$default (Lorg/jetbrains/compose/reload/test/gradle/TransactionScope;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun requestAndAwaitReload (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun requestReload (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun send (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage;)V
+	public final fun send (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun sync (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun writeCode (Ljava/lang/String;Ljava/lang/String;)Ljava/nio/file/Path;
 	public static synthetic fun writeCode$default (Lorg/jetbrains/compose/reload/test/gradle/TransactionScope;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/nio/file/Path;

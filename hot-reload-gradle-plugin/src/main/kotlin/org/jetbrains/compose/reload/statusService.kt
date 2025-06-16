@@ -30,7 +30,9 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildFinished
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildTaskResult
-import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
+import org.jetbrains.compose.reload.orchestration.connectBlocking
+import org.jetbrains.compose.reload.orchestration.invokeOnClose
+import org.jetbrains.compose.reload.orchestration.sendAsync
 import java.lang.AutoCloseable
 import java.util.concurrent.atomic.AtomicReference
 
@@ -80,10 +82,10 @@ internal abstract class StatusService : BuildService<StatusService.Params>, Oper
 
     init {
         clients.set(parameters.ports.get().mapNotNull { port ->
-            runCatching { connectOrchestrationClient(OrchestrationClientRole.Compiler, port) }.getOrNull()
+             OrchestrationClient(OrchestrationClientRole.Compiler, port).connectBlocking().leftOrNull()
         }.onEach { client ->
-            client.sendMessage(OrchestrationMessage.BuildStarted())
-            client.invokeWhenClosed {
+            client.sendAsync(OrchestrationMessage.BuildStarted())
+            client.invokeOnClose {
                 clients.update { it - client }
             }
         })
@@ -117,13 +119,13 @@ internal abstract class StatusService : BuildService<StatusService.Params>, Oper
         }
 
         clients.get().forEach { client ->
-            client.sendMessage(message)
+            client.sendAsync(message)
         }
     }
 
     override fun close() {
         val clients = clients.getAndSet(emptyList())
-        clients.forEach { client -> client.sendMessage(BuildFinished()) }
-        clients.forEach { client -> client.closeGracefully() }
+        clients.forEach { client -> client.sendAsync(BuildFinished()) }
+        clients.forEach { client -> client.close() }
     }
 }

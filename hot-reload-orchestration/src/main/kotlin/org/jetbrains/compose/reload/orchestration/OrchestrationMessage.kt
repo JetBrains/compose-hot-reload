@@ -11,8 +11,11 @@ import org.jetbrains.compose.reload.core.withLinearClosure
 import java.io.File
 import java.io.Serializable
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.uuid.ExperimentalUuidApi
 
-public sealed class OrchestrationMessage : Serializable {
+@OptIn(ExperimentalUuidApi::class)
+public sealed class OrchestrationMessage : OrchestrationPackage(), Serializable {
     /**
      * Requests that all participants in the orchestration are supposed to shut down.
      * Note: Closing the [OrchestrationServer] is also supposed to close all clients.
@@ -59,7 +62,7 @@ public sealed class OrchestrationMessage : Serializable {
      * @param clientId: uuid used which identifies the connection
      */
     public data class ClientConnected(
-        public val clientId: UUID,
+        public val clientId: OrchestrationClientId,
         public val clientRole: OrchestrationClientRole,
         public val clientPid: Long? = null
     ) : OrchestrationMessage() {
@@ -78,7 +81,7 @@ public sealed class OrchestrationMessage : Serializable {
      * @param clientId: uuid which identifies the connection (same as [ClientConnected.clientId])
      */
     public data class ClientDisconnected(
-        public val clientId: UUID,
+        public val clientId: OrchestrationClientId,
         public val clientRole: OrchestrationClientRole,
     ) : OrchestrationMessage() {
 
@@ -129,7 +132,7 @@ public sealed class OrchestrationMessage : Serializable {
      * The exitCode is optional, as it may happen that the process gets interrupted.
      */
     public class RecompileResult(
-        public val recompileRequestId: UUID,
+        public val recompileRequestId: OrchestrationMessageId,
         /**
          * The exitCode of the recompilation process, or null if the process failed to launch or
          * was interrupted before finishing.
@@ -216,7 +219,7 @@ public sealed class OrchestrationMessage : Serializable {
     }
 
     public data class ReloadClassesResult(
-        val reloadRequestId: UUID,
+        val reloadRequestId: OrchestrationMessageId,
         val isSuccess: Boolean,
         val errorMessage: String? = null,
         val errorStacktrace: List<StackTraceElement>? = null,
@@ -293,7 +296,7 @@ public sealed class OrchestrationMessage : Serializable {
      * Note: There is no guarantee for acks, this message can be used by tooling or in tests if needed
      */
     public data class Ack(
-        val acknowledgedMessageId: UUID
+        val acknowledgedMessageId: OrchestrationMessageId
     ) : OrchestrationMessage() {
         internal companion object {
             @Suppress("unused")
@@ -354,7 +357,7 @@ public sealed class OrchestrationMessage : Serializable {
      */
     public data class UIRendered(
         val windowId: WindowId?,
-        val reloadRequestId: UUID?,
+        val reloadRequestId: OrchestrationMessageId?,
         val iteration: Int,
     ) : OrchestrationMessage() {
         internal companion object {
@@ -424,8 +427,7 @@ public sealed class OrchestrationMessage : Serializable {
 
 
     /* Base implementation */
-
-    public val messageId: UUID = UUID.randomUUID()
+    public val messageId: OrchestrationMessageId = OrchestrationMessageId.random()
 
     override fun equals(other: Any?): Boolean {
         if (other !is OrchestrationMessage) return false
@@ -439,5 +441,20 @@ public sealed class OrchestrationMessage : Serializable {
 
     override fun toString(): String {
         return this.javaClass.simpleName
+    }
+}
+
+public data class OrchestrationMessageId(internal val value: String) : Serializable {
+    internal companion object {
+        const val serialVersionUID: Long = 0L
+        private val messagesIndex = AtomicInteger(0)
+
+        fun random(): OrchestrationMessageId = OrchestrationMessageId(
+            "${messagesIndex.andIncrement}$${UUID.randomUUID()}"
+        )
+    }
+
+    override fun toString(): String {
+        return value
     }
 }

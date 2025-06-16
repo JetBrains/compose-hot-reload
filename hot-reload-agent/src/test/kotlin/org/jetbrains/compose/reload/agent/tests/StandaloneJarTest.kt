@@ -9,8 +9,12 @@ import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.destroyWithDescendants
+import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.invokeOnValue
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.sendBlocking
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import org.jetbrains.compose.reload.test.core.TestEnvironment
 import org.slf4j.LoggerFactory
@@ -47,7 +51,7 @@ class StandaloneJarTest {
         val server = startOrchestrationServer()
         val aliveMessage = CompletableFuture<OrchestrationMessage.TestEvent>()
 
-        server.invokeWhenMessageReceived { message ->
+        server.messages.invokeOnValue { message ->
             createLogger().info("Received message: $message")
             if (message is OrchestrationMessage.TestEvent && message.payload == "Alive") {
                 aliveMessage.complete(message)
@@ -72,7 +76,7 @@ class StandaloneJarTest {
                 ch.qos.logback.core.Context::class.java.protectionDomain.codeSource.location.file,
                 ch.qos.logback.classic.Logger::class.java.protectionDomain.codeSource.location.file,
             ).joinToString(File.pathSeparator),
-            "-D${HotReloadProperty.OrchestrationPort.key}=${server.port}",
+            "-D${HotReloadProperty.OrchestrationPort.key}=${server.port.getBlocking()}",
             "-D${HotReloadProperty.IsHeadless.key}=true",
             "-D${HotReloadProperty.DevToolsEnabled.key}=false",
             StandaloneJarTestMain::class.qualifiedName,
@@ -144,7 +148,7 @@ internal object StandaloneJarTestMain {
 
         createLogger().info("Started process: Sending signal")
 
-        orchestration.sendMessage(OrchestrationMessage.TestEvent("Alive")).get()
+        orchestration.sendBlocking(OrchestrationMessage.TestEvent("Alive")).getOrThrow()
 
         createLogger().info("Signal Sent: Exiting process")
         exitProcess(0)

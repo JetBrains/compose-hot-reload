@@ -1,5 +1,7 @@
+org/jetbrains/compose/reload/orchestration/OrchestrationClientId = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationClientRole = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationHandshake = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationIOException = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$Ack = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ApplicationWindowGainedFocus = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ApplicationWindowGone = 0
@@ -27,3 +29,8 @@ org/jetbrains/compose/reload/orchestration/OrchestrationMessage$TakeScreenshotRe
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$TestEvent = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIException = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIRendered = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessageId = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationPackage$Ack = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationPackage$Introduction = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationPackageType = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion = 0

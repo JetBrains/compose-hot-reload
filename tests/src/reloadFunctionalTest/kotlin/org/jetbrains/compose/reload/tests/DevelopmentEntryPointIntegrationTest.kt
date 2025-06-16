@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.tests
 
+import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Tooling
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowPositioned
@@ -33,9 +34,11 @@ class DevelopmentEntryPointIntegrationTest {
         This test does not run the underlying screenshot test application.
         Therefore, we'll manually send back ACK messages
          */
-        orchestration.invokeWhenMessageReceived { message ->
-            if (message !is OrchestrationMessage.Ack) {
-                orchestration.sendMessage(OrchestrationMessage.Ack(message.messageId))
+        launchTask {
+            orchestration.messages.collect { message ->
+                if(message !is OrchestrationMessage.Ack) {
+                    orchestration send OrchestrationMessage.Ack(message.messageId)
+                }
             }
         }
 

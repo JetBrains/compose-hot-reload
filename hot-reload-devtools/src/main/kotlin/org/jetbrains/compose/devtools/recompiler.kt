@@ -8,6 +8,7 @@ package org.jetbrains.compose.devtools
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.BuildSystem.Amper
 import org.jetbrains.compose.reload.core.BuildSystem.Gradle
+import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.BuildTool
@@ -15,14 +16,19 @@ import org.jetbrains.compose.reload.core.LaunchMode
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.destroyWithDescendants
+import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.invokeOnCompletion
+import org.jetbrains.compose.reload.core.invokeOnError
+import org.jetbrains.compose.reload.core.invokeOnValue
+import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
+import org.jetbrains.compose.reload.core.withType
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_COMPILER
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_DEVTOOLS
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
-import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
 import java.io.File
 import java.nio.file.Path
 import java.util.concurrent.LinkedBlockingQueue
@@ -67,22 +73,25 @@ private val recompileRequests = LinkedBlockingQueue(
     listOfNotNull(if (HotReloadEnvironment.gradleBuildContinuous) RecompileRequest() else null)
 )
 
-internal fun launchRecompiler() {
-    if (buildSystem == null) return
+internal fun launchRecompiler(): Future<Unit> = launchTask("Recompiler") task@{
+    if (buildSystem == null) return@task
+    invokeOnError { error ->
+        logger.error("Recompiler Error: ${error.message}", error)
+    }
 
-    val port = orchestration.port
+    val port = orchestration.port.await().getOrThrow()
     logger.debug("'Recompiler': Using orchestration at '$port'")
 
     val processBuilder = when (buildSystem) {
         Amper -> {
             val amperBuildRoot = amperBuildRoot ?: run {
                 logger.error("Missing '${HotReloadProperty.AmperBuildRoot.key}' property")
-                return
+                return@task
             }
 
             val amperBuildTask = amperBuildTask ?: run {
                 logger.error("Missing '${HotReloadProperty.AmperBuildTask.key}' property")
-                return
+                return@task
             }
 
             createRecompilerProcessBuilder(
@@ -95,17 +104,17 @@ internal fun launchRecompiler() {
         Gradle -> {
             val composeBuildRoot = gradleBuildRoot ?: run {
                 logger.error("Missing '${HotReloadProperty.GradleBuildRoot.key}' property")
-                return
+                return@task
             }
 
             val gradleBuildProject = gradleBuildProject ?: run {
                 logger.error("Missing '${HotReloadProperty.GradleBuildProject.key}' property")
-                return
+                return@task
             }
 
             val gradleBuildTask = gradleBuildTask ?: run {
                 logger.error("Missing '${HotReloadProperty.GradleBuildTask.key}' property")
-                return
+                return@task
             }
 
             createRecompilerProcessBuilder(
@@ -129,7 +138,7 @@ internal fun launchRecompiler() {
                     OrchestrationMessage.RecompileResult(
                         recompileRequestId = request.messageId,
                         exitCode = exitCode
-                    ).send()
+                    ).sendAsync()
                 }
             }
         } catch (_: InterruptedException) {
@@ -137,11 +146,11 @@ internal fun launchRecompiler() {
         }
     }
 
-    orchestration.invokeWhenReceived<RecompileRequest> { value ->
+    orchestration.messages.withType<RecompileRequest>().invokeOnValue { value ->
         recompileRequests.put(value)
     }
 
-    orchestration.invokeWhenClosed {
+    orchestration.invokeOnCompletion {
         logger.debug("'Recompiler': Sending close signal")
         recompilerThread.interrupt()
         recompilerThread.join()
@@ -159,7 +168,7 @@ private fun takeRecompileRequests(): List<RecompileRequest> {
 }
 
 private fun ProcessBuilder.startRecompilerProcess(): Int? {
-    LogMessage(TAG_DEVTOOLS, "Starting recompiler process:\n${this.command().joinToString("        \n")}").send()
+    LogMessage(TAG_DEVTOOLS, "Starting recompiler process:\n${this.command().joinToString("        \n")}").sendAsync()
 
     val process: Process = start()
     logger.debug("'Recompiler': Started (${process.pid()})")
@@ -175,7 +184,7 @@ private fun ProcessBuilder.startRecompilerProcess(): Int? {
         process.inputStream.bufferedReader().use { reader ->
             while (true) {
                 val nextLine = reader.readLine() ?: break
-                LogMessage(TAG_COMPILER, nextLine).send()
+                LogMessage(TAG_COMPILER, nextLine).sendAsync()
             }
         }
     }

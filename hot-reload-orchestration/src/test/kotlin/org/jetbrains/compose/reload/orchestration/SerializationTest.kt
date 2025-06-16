@@ -20,20 +20,31 @@ class SerializationTest {
         )
 
         assertEquals(
-            expected = request, actual = decodeOrchestrationMessage(request.encodeToByteArray())
+            expected = request, actual = request.encodeToFrame().decodePackage()
         )
     }
-}
 
-fun OrchestrationMessage.encodeToByteArray(): ByteArray {
-    return ByteArrayOutputStream().use { baos ->
-        ObjectOutputStream(baos).use { oos -> oos.writeObject(this) }
-        baos.toByteArray()
+    @Test
+    fun `test - introduction`() {
+        val introduction = OrchestrationPackage.Introduction(
+            clientId = OrchestrationClientId.random(),
+            clientRole = OrchestrationClientRole.Unknown,
+            clientPid = 1602
+        )
+
+        val frame = introduction.encodeToFrame()
+        val deserialized = frame.decodePackage() as OrchestrationPackage.Introduction
+        assertEquals(
+            expected = introduction, actual = deserialized
+        )
     }
-}
 
-fun decodeOrchestrationMessage(bytes: ByteArray): OrchestrationMessage {
-    return ObjectInputStream(bytes.inputStream()).use { ois ->
-        ois.readObject() as OrchestrationMessage
+    @Test
+    fun `test - ack`() {
+        val ack = OrchestrationPackage.Ack(
+            messageId = OrchestrationMessageId.random()
+        )
+
+        assertEquals(ack, ack.encodeToFrame().decodePackage())
     }
 }

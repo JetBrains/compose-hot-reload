@@ -35,7 +35,7 @@ import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.yield
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.agent.orchestration
-import org.jetbrains.compose.reload.agent.send
+import org.jetbrains.compose.reload.agent.sendAsync
 import org.jetbrains.compose.reload.core.asTemplateOrThrow
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.renderOrThrow
@@ -53,6 +53,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -106,6 +107,22 @@ suspend fun runHeadlessApplication(
 
             if (scene.hasInvalidations()) {
                 scene.render(virtualTime)
+
+                /*
+                The 'continue' below requires us to yield the current thread before entering the loop again
+                to prevent thread starvation.
+                 */
+                yield()
+
+                /*
+                If we still have invalidations after the render + yield,
+                then we can throttle the loop
+                 */
+                if (scene.hasInvalidations()) {
+                    logger.info("Throttling render loop at ${virtualTime.nanoseconds}")
+                    delay(32.milliseconds)
+                }
+
                 continue
             }
 
@@ -175,7 +192,7 @@ suspend fun runHeadlessApplication(
                     logger.info("Responding to ping '${message.messageId}'")
                 }
 
-                orchestration.sendMessage(OrchestrationMessage.Ack(message.messageId)).get()
+                orchestration.send(OrchestrationMessage.Ack(message.messageId))
             }
 
             /* Break out for TestEvents and give the main thread time to handle that */
@@ -187,7 +204,7 @@ suspend fun runHeadlessApplication(
                 logger.info("Taking screenshot: '${message.messageId}'")
                 val baos = ByteArrayOutputStream()
                 ImageIO.write(scene.render(virtualTime).toComposeImageBitmap().toAwtImage(), "png", baos)
-                orchestration.sendMessage(OrchestrationMessage.Screenshot("png", baos.toByteArray())).get()
+                orchestration.send(OrchestrationMessage.Screenshot("png", baos.toByteArray()))
                 logger.debug("Sent screenshot: '${message.messageId}'")
             }
         }
@@ -215,7 +232,7 @@ fun runHeadlessApplicationBlocking(
                     message = throwable.message,
                     exceptionClassName = throwable::class.qualifiedName,
                     stacktrace = throwable.stackTrace.toList()
-                ).send()
+                ).sendAsync()
             }) {
 
         runHeadlessApplication(timeout, width, height, content)

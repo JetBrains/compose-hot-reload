@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import org.jetbrains.compose.reload.agent.invokeAfterHotReload
 import org.jetbrains.compose.reload.core.exceptionOrNull
-import java.util.UUID
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
 
 internal data class HotReloadState(
-    val reloadRequestId: UUID? = null,
+    val reloadRequestId: OrchestrationMessageId? = null,
     val iteration: Int,
     val reloadError: Throwable? = null,
     val uiError: Throwable? = null,
@@ -34,7 +34,7 @@ internal data class HotReloadState(
 internal val hotReloadStateLocal = compositionLocalOf<HotReloadState?> { null }
 
 internal val hotReloadState: MutableStateFlow<HotReloadState> = MutableStateFlow(HotReloadState(null, 0)).apply {
-    invokeAfterHotReload { reloadRequestId: UUID, result ->
+    invokeAfterHotReload { reloadRequestId: OrchestrationMessageId, result ->
         update { state ->
             state.copy(
                 reloadRequestId = reloadRequestId,

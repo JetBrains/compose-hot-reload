@@ -18,6 +18,7 @@ import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.withType
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.compose.reload.core.asTemplateOrThrow
+import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.renderOrThrow
 import org.jetbrains.compose.reload.gradle.Future
 import org.jetbrains.compose.reload.gradle.InternalHotReloadGradleApi
@@ -27,12 +28,14 @@ import org.jetbrains.compose.reload.gradle.forAllJvmCompilations
 import org.jetbrains.compose.reload.gradle.future
 import org.jetbrains.compose.reload.gradle.projectFuture
 import org.jetbrains.compose.reload.gradle.readObject
+import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Compiler
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest.ChangeType.Added
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest.ChangeType.Modified
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest.ChangeType.Removed
-import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
+import org.jetbrains.compose.reload.orchestration.connectBlocking
+import org.jetbrains.compose.reload.orchestration.sendBlocking
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import javax.inject.Inject
 import kotlin.io.path.deleteIfExists
@@ -100,13 +103,15 @@ abstract class HotReloadTask : DefaultTask() {
 
     @TaskAction
     fun execute() {
-        val client = runCatching { connectOrchestrationClient(Compiler, agentPort.get()) }.getOrNull() ?: run {
-            logger.quiet("Failed to create 'OrchestrationClient'!")
-            getCancellationToken().cancel()
-            error("Failed to create 'OrchestrationClient'!")
-        }
+        OrchestrationClient(Compiler, agentPort.get()).use { client ->
+            client.connectBlocking().leftOr {
+                logger.quiet("Failed to create 'OrchestrationClient'!")
+                getCancellationToken().cancel()
+                error("Failed to create 'OrchestrationClient'!")
+            }
 
-        client.use { client ->
+            logger.quiet("Connected to '${client.port.getOrNull()}'")
+
             val pendingRequestFile = pendingRequestFile.get().asFile.toPath()
 
             val request = if (pendingRequestFile.exists()) pendingRequestFile.readObject<ReloadClassesRequest>() else {
@@ -119,7 +124,7 @@ abstract class HotReloadTask : DefaultTask() {
             }
 
             logger.quiet(reloadReport(request))
-            client.sendMessage(request).get()
+            client.sendBlocking(request)
             pendingRequestFile.deleteIfExists()
         }
     }

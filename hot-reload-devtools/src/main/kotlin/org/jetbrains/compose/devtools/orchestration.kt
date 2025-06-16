@@ -9,31 +9,50 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisallowComposableCalls
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.flow.filterIsInstance
+import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.exception
+import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.launchTask
+import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asFlow
+import org.jetbrains.compose.reload.orchestration.connectBlocking
 import java.util.ServiceLoader
-import java.util.concurrent.Future
+import kotlin.time.Duration.Companion.seconds
 
 private val logger = createLogger()
 
 internal val orchestration: OrchestrationHandle = run {
+    logger.info("Connecting 'orchestration'")
     val handle = ServiceLoader.load(OrchestrationExtension::class.java)
         .firstNotNullOfOrNull { extension -> extension.getOrchestration() }
-        ?: (OrchestrationClient(OrchestrationClientRole.Tooling))
-        ?: run {
+        ?: OrchestrationClient(OrchestrationClientRole.Tooling)?.connectBlocking()?.leftOr { error ->
+            logger.error("Failed connecting 'orchestration'", error.exception)
+            shutdown()
+        } ?: run {
             logger.error("Failed to create orchestration client")
             shutdown()
         }
 
+    logger.info("Connected 'orchestration'")
     handle
 }
 
-internal fun OrchestrationMessage.send(): Future<Unit> {
-    return orchestration.sendMessage(this)
+internal suspend fun OrchestrationMessage.send() {
+    return orchestration.send(this)
+}
+
+internal fun OrchestrationMessage.sendAsync(): Future<Unit> {
+    return launchTask { orchestration.send(this@sendAsync) }
+}
+
+internal fun OrchestrationMessage.sendBlocking() {
+    return launchTask { orchestration.send(this@sendBlocking) }.getBlocking(15.seconds).getOrThrow()
 }
 
 @Composable

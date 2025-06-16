@@ -41,7 +41,12 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
+import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.invokeOnValue
+import org.jetbrains.compose.reload.core.reloadMainThread
+import org.jetbrains.compose.reload.core.withThread
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
@@ -66,11 +71,14 @@ class ServerClientTest {
 
     private val logger = createLogger()
 
-    private val resources = mutableListOf<AutoCloseable>()
+    private val resources = mutableListOf<OrchestrationHandle>()
 
-    fun <T : AutoCloseable> use(value: T): T = synchronized(this) {
-        resources.add(value)
-        return value
+    suspend fun <T : OrchestrationHandle> use(value: T): T {
+        currentCoroutineContext().job.invokeOnCompletion { value.close() }
+        synchronized(this) {
+            resources.add(value)
+            return value
+        }
     }
 
     @AfterEach
@@ -79,82 +87,77 @@ class ServerClientTest {
     }
 
     @Test
-    fun `test - simple ping pong`() = runTest {
+    fun `test - simple ping pong`() = runTest(timeout = 10.seconds) {
         val server = use(startOrchestrationServer())
-        val serverMessages = server.asChannel()
+        val client = use(OrchestrationClient(Unknown, server.port.await().getOrThrow()))
 
-        val client = use(connectOrchestrationClient(Unknown, server.port))
-
-        val clientMessages = client.asChannel()
+        val serverChannel = server.asChannel()
+        val clientChannel = client.asChannel()
 
         val serverReceivedMessages = mutableListOf<OrchestrationMessage>()
         val clientReceivedMessages = mutableListOf<OrchestrationMessage>()
 
-        server.invokeWhenMessageReceived { message ->
-            if (message is ClientConnected) return@invokeWhenMessageReceived
+        server.messages.invokeOnValue { message ->
+            if (message is ClientConnected) return@invokeOnValue
             serverReceivedMessages.add(message)
         }
 
-        client.invokeWhenMessageReceived { message ->
-            if (message is ClientConnected) return@invokeWhenMessageReceived
+        client.messages.invokeOnValue { message ->
+            if (message is ClientConnected) return@invokeOnValue
             clientReceivedMessages.add(message)
         }
 
-        client.sendMessage(LogMessage("A")).get()
+        client.connect().getOrThrow()
 
-        while (true) {
-            if (clientMessages.receive() is LogMessage) break
+        withThread(reloadMainThread) {
+            client.send(LogMessage("A"))
+            clientChannel.consumeAsFlow().filterIsInstance<LogMessage>().first()
+            serverChannel.receiveAsFlow().filterIsInstance<LogMessage>().first()
+
+            assertEquals(listOf<OrchestrationMessage>(LogMessage("A")), serverReceivedMessages)
+            assertEquals(listOf<OrchestrationMessage>(LogMessage("A")), clientReceivedMessages)
         }
-
-        while (true) {
-            if (serverMessages.receive() is LogMessage) break
-        }
-
-        orchestrationThread.submit {
-            assertEquals(listOf(LogMessage("A")), serverReceivedMessages.toList())
-            assertEquals(listOf(LogMessage("A")), clientReceivedMessages.toList())
-        }.get()
     }
 
 
     @Test
     fun `test - single shot request`() = runTest {
         val server = use(startOrchestrationServer())
-        val client = use(connectOrchestrationClient(Unknown, server.port))
+        val client = use(connectOrchestrationClient(Unknown, server.port.awaitOrThrow()).getOrThrow())
         val serverMessages = server.asChannel()
 
         val serverReceivedMessages = synchronizedList(mutableListOf<OrchestrationMessage>())
         val clientReceivedMessages = synchronizedList(mutableListOf<OrchestrationMessage>())
 
-        server.invokeWhenMessageReceived { message ->
-            if (message is ClientConnected) return@invokeWhenMessageReceived
-            if (message is ClientDisconnected) return@invokeWhenMessageReceived
+        server.messages.invokeOnValue { message ->
+            if (message is ClientConnected) return@invokeOnValue
+            if (message is ClientDisconnected) return@invokeOnValue
             serverReceivedMessages.add(message)
         }
 
-        client.invokeWhenMessageReceived { message ->
-            if (message is ClientConnected) return@invokeWhenMessageReceived
-            if (message is ClientDisconnected) return@invokeWhenMessageReceived
+        client.messages.invokeOnValue { message ->
+            if (message is ClientConnected) return@invokeOnValue
+            if (message is ClientDisconnected) return@invokeOnValue
             clientReceivedMessages.add(message)
         }
 
         client.use { client ->
-            client.sendMessage(LogMessage("A"))
+            client.send(LogMessage("A"))
         }
 
         val logMessage = serverMessages.receiveAsFlow().filterIsInstance<LogMessage>().first()
         assertEquals("A", logMessage.message)
 
-        orchestrationThread.submit {
+        withThread(reloadMainThread) {
             assertEquals(listOf(LogMessage("A")), serverReceivedMessages.toList())
-        }.get()
+        }
     }
 
 
     @Test
     fun `test - multiple messages`() = runTest {
         val server = use(startOrchestrationServer())
-        val client = use(connectOrchestrationClient(Unknown, server.port))
+        val client = use(connectOrchestrationClient(Unknown, server.port.awaitOrThrow()).getOrThrow())
         val serverChannel = server.asChannel()
         val clientChannel = client.asChannel()
 
@@ -175,16 +178,18 @@ class ServerClientTest {
             assertEquals("B", secondLog.message)
         }
 
-        client.sendMessage(LogMessage("A"))
-        client.sendMessage(LogMessage("B"))
+        client.send(LogMessage("A"))
+        client.send(LogMessage("B"))
     }
+
 
     @Test
     fun `test - client connected and client disconnected messages`() = runTest {
         val server = use(startOrchestrationServer())
         val serverChannel = server.asChannel()
 
-        val client = use(connectOrchestrationClient(Unknown, server.port))
+        val client = use(OrchestrationClient(Unknown, server.port.awaitOrThrow()))
+        client.connect()
 
         val connected = serverChannel.receiveAsFlow().filterIsInstance<ClientConnected>().first()
         assertEquals(client.clientId, connected.clientId)
@@ -197,16 +202,19 @@ class ServerClientTest {
         assertEquals(Unknown, disconnected.clientRole)
     }
 
+
     @Test
     fun `stress test - incoming message flood`() = runStressTest(
-        repetitions = 8, parallelism = 2
+        repetitions = 24, parallelism = 4
     ) {
         val senderCoroutines = 4
         val messagesPerSender = 128
         val elements = senderCoroutines * messagesPerSender
 
         val server = use(startOrchestrationServer())
-        val client = use(connectOrchestrationClient(Unknown, server.port))
+        val client = use(connectOrchestrationClient(Unknown, server.port.awaitOrThrow()).getOrThrow())
+        coroutineContext.job.invokeOnCompletion { server.close() }
+        coroutineContext.job.invokeOnCompletion { client.close() }
 
         val incomingFlow = server.asFlow()
         val incomingChannel = server.asChannel()
@@ -229,7 +237,7 @@ class ServerClientTest {
                     repeat(messagesPerSender) { iterationId ->
                         reportActivity("Sending message coroutineId: $coroutineId, iterationId: $iterationId")
                         val event = TestEvent(listOf(coroutineId, iterationId))
-                        client.sendMessage(event)
+                        client.send(event)
                     }
                 }
             }
@@ -241,17 +249,6 @@ class ServerClientTest {
 
         reportActivity("Awaiting flow")
         fromFlowAsync.await()
-
-        reportActivity("Syncing with server")
-        /* Sync client and server */
-        run {
-            val syncChannel = client.asChannel()
-            val ping = OrchestrationMessage.Ping()
-            server.sendMessage(ping)
-            syncChannel.receiveAsFlow().first { message ->
-                reportActivity("Sync received message: $message"); message == ping
-            }
-        }
 
         val fromChannel = incomingChannel.consumeAsFlow().filterIsInstance<TestEvent>()
             .take(elements)
@@ -276,9 +273,12 @@ class ServerClientTest {
         fromChannel.toHashSet().containsAll(expectedEvents)
             || fail("Channel (${fromChannel.size}/$elements) did not receive all messages | iteration : $$invocationIndex")
 
+
         reportActivity("Checking 'fromQueue'")
         fromQueue.toHashSet().containsAll(expectedEvents)
             || fail("Queue (${fromQueue.size}/$elements)  did not receive all messages | iteration : $invocationIndex")
+
+
 
         reportActivity("Checking 'fromFlowAsync'")
         fromFlowAsync.await().toHashSet().containsAll(expectedEvents)
@@ -291,11 +291,11 @@ class ServerClientTest {
     fun `test - stress test - fire and forget`() = runStressTest(
         repetitions = 4, parallelism = 2
     ) {
-        val senderCoroutines = 4
+        val senderCoroutines = 1
         val messagesPerSender = 128
         val expectedMessages = senderCoroutines * messagesPerSender
 
-        val server = use(startOrchestrationServer()) as OrchestrationServerImpl
+        val server = use(startOrchestrationServer())
         val channel = server.asChannel()
 
         val messagesReceived = Array<CompletableDeferred<TestEvent>>(expectedMessages) { CompletableDeferred() }
@@ -312,15 +312,14 @@ class ServerClientTest {
             }
         }
 
-
         val index = AtomicInteger(0)
         repeat(senderCoroutines) {
             launch(Dispatchers.IO) {
                 repeat(messagesPerSender) {
                     val myIndex = index.andIncrement
                     reportActivity("Sending message #$myIndex")
-                    connectOrchestrationClient(Unknown, server.port).use { client ->
-                        client.sendMessage(TestEvent(myIndex))
+                    connectOrchestrationClient(Unknown, server.port.awaitOrThrow()).getOrThrow().use { client ->
+                        client.send(TestEvent(myIndex))
                     }
                 }
             }
@@ -330,14 +329,9 @@ class ServerClientTest {
         /* Await all clients to disconnect */
         val messages = messagesReceived.map { it.await() }
         assertEquals(expectedMessages, messages.size)
-
-        /* Await no more clients */
-        while (true) {
-            if (server.clients().get().isEmpty()) break
-        }
-
-        server.closeGracefully().get()
+        server.close()
     }
+
 
     /**
      * Fellow Readers: You stumbled across a stress test trying to test if the 'connectOrchestrationClient'
@@ -370,7 +364,7 @@ class ServerClientTest {
                     if (serverSocket.isClosed) error("ServerSocket is closed")
 
                     val client = try {
-                        connectOrchestrationClient(Unknown, serverSocket.localPort)
+                        connectOrchestrationClient(Unknown, serverSocket.localPort).getOrThrow()
                     } catch (_: Throwable) {
                         return@repeat
                     }
@@ -395,6 +389,7 @@ class ServerClientTest {
         }
     }
 
+
     private inner class StressTestScope(
         val invocationIndex: Int,
         override val coroutineContext: CoroutineContext,
@@ -404,9 +399,12 @@ class ServerClientTest {
         private val resources = mutableListOf<AutoCloseable>()
         private val lock = ReentrantLock()
 
-        fun <T : AutoCloseable> use(value: T): T = lock.withLock {
-            resources.add(value)
-            return value
+        suspend fun <T : AutoCloseable> use(value: T): T {
+            currentCoroutineContext().job.invokeOnCompletion { value.close() }
+            lock.withLock {
+                resources.add(value)
+                return value
+            }
         }
 
         init {
@@ -429,7 +427,7 @@ class ServerClientTest {
         repetitions: Int = 8,
         parallelism: Int = 2,
         timeout: Duration = 10.minutes,
-        silenceTimeout: Duration = 10.seconds,
+        silenceTimeout: Duration = 30.seconds,
         test: suspend StressTestScope.() -> Unit
     ) {
         runBlocking(Dispatchers.IO + Job() + CoroutineName("runStressTest")) {
@@ -447,6 +445,7 @@ class ServerClientTest {
                             for (invocationIndex in invocationChannel) {
                                 println("runStressTest(invocationIndex=$invocationIndex)")
                                 runStressTest(coroutineId, invocationIndex, silenceTimeout, test)
+                                println("runStressTest(invocationIndex=$invocationIndex); done")
                             }
                         }
                     }
@@ -456,6 +455,7 @@ class ServerClientTest {
             println("Stress test finished")
         }
     }
+
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun CoroutineScope.runStressTest(

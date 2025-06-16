@@ -20,10 +20,12 @@ import org.gradle.api.tasks.testing.TestFailure
 import org.gradle.api.tasks.testing.TestOutputEvent
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.destroyWithDescendants
+import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.invokeOnValue
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
+import org.jetbrains.compose.reload.core.withType
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
-import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import java.io.File
 import java.io.File.pathSeparator
@@ -116,7 +118,7 @@ internal class HotReloadUnitTestExecutor(
         val applicationClassesDir = Files.createTempDirectory("reloadTest-applicationClasses")
         Runtime.getRuntime().addShutdownHook(Thread { applicationClassesDir.deleteRecursively() })
 
-        orchestrationServer.invokeWhenReceived<OrchestrationMessage.CriticalException> { exception ->
+        orchestrationServer.messages.withType<OrchestrationMessage.CriticalException>().invokeOnValue { exception ->
             processor.failure(testMethodDescriptor.id, createTestFailure(exception))
         }
 
@@ -134,7 +136,7 @@ internal class HotReloadUnitTestExecutor(
                 "-DtestClasses=${testClasses.asPath + pathSeparator + applicationClassesDir}",
                 "-D${HotReloadProperty.IsHeadless.key}=true",
                 "-D${HotReloadProperty.DevToolsEnabled.key}=false",
-                "-D${HotReloadProperty.OrchestrationPort.key}=${orchestrationServer.port}",
+                "-D${HotReloadProperty.OrchestrationPort.key}=${orchestrationServer.port.getBlocking()}",
                 "org.jetbrains.compose.reload.test.Main",
                 "--class", testMethodDescriptor.className, "--method", testMethodDescriptor.methodName,
             )

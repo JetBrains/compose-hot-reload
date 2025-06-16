@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.reload.agent.orchestration
-import org.jetbrains.compose.reload.agent.send
+import org.jetbrains.compose.reload.agent.sendAsync
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
@@ -43,12 +43,12 @@ internal fun startWindowManager(): WindowId? {
             isActive = true
             ApplicationWindowPositioned(
                 windowId, window.x, window.y, window.width, window.height, isAlwaysOnTop = window.isAlwaysOnTop
-            ).send()
+            ).sendAsync()
         }
 
         fun broadcastGone() {
             isActive = false
-            OrchestrationMessage.ApplicationWindowGone(windowId).send()
+            OrchestrationMessage.ApplicationWindowGone(windowId).sendAsync()
         }
 
         broadcastActiveState()
@@ -71,7 +71,7 @@ internal fun startWindowManager(): WindowId? {
 
             override fun windowGainedFocus(e: WindowEvent?) {
                 logger.trace("$windowId: windowGainedFocus")
-                OrchestrationMessage.ApplicationWindowGainedFocus(windowId).send()
+                OrchestrationMessage.ApplicationWindowGainedFocus(windowId).sendAsync()
                 super.windowGainedFocus(e)
             }
 

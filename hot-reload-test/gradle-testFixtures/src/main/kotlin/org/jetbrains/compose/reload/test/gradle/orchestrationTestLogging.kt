@@ -109,6 +109,7 @@ internal fun ExtensionContext.startOrchestrationTestLogging(server: Orchestratio
         val messageString = "$currentTime: $message"
         if (message is LogMessage) {
             allLogsWriter.appendLine(messageString)
+            allLogsWriter.flush()
             val tag = message.tag
             if (tag != null) {
                 taggedWriter(tag).appendLine(messageString)

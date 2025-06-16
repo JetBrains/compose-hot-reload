@@ -7,15 +7,16 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.core.Disposable
 import org.jetbrains.compose.reload.core.Try
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
 import java.util.UUID
 
 private val beforeReloadListeners =
-    mutableListOf<(reloadRequestId: UUID) -> Unit>()
+    mutableListOf<(reloadRequestId: OrchestrationMessageId) -> Unit>()
 
 private val afterReloadListeners =
-    mutableListOf<(reloadRequestId: UUID, result: Try<Reload>) -> Unit>()
+    mutableListOf<(reloadRequestId: OrchestrationMessageId, result: Try<Reload>) -> Unit>()
 
-fun invokeBeforeHotReload(block: (reloadRequestId: UUID) -> Unit): Disposable =
+fun invokeBeforeHotReload(block: (reloadRequestId: OrchestrationMessageId) -> Unit): Disposable =
     synchronized(beforeReloadListeners) {
         beforeReloadListeners.add(block)
         Disposable {
@@ -25,7 +26,7 @@ fun invokeBeforeHotReload(block: (reloadRequestId: UUID) -> Unit): Disposable =
         }
     }
 
-fun invokeAfterHotReload(block: (reloadRequestId: UUID, result: Try<Reload>) -> Unit): Disposable =
+fun invokeAfterHotReload(block: (reloadRequestId: OrchestrationMessageId, result: Try<Reload>) -> Unit): Disposable =
     synchronized(afterReloadListeners) {
         afterReloadListeners.add(block)
         Disposable {
@@ -35,12 +36,12 @@ fun invokeAfterHotReload(block: (reloadRequestId: UUID, result: Try<Reload>) -> 
         }
     }
 
-internal fun executeBeforeHotReloadListeners(reloadRequestId: UUID) {
+internal fun executeBeforeHotReloadListeners(reloadRequestId: OrchestrationMessageId) {
     val listeners = synchronized(beforeReloadListeners) { beforeReloadListeners.toList() }
     listeners.forEach { listener -> listener.invoke(reloadRequestId) }
 }
 
-internal fun executeAfterHotReloadListeners(reloadRequestId: UUID, result: Try<Reload>) {
+internal fun executeAfterHotReloadListeners(reloadRequestId: OrchestrationMessageId, result: Try<Reload>) {
     val listeners = synchronized(afterReloadListeners) { afterReloadListeners.toList() }
     listeners.forEach { listener -> listener.invoke(reloadRequestId, result) }
 }

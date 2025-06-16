@@ -8,7 +8,7 @@
 
 package org.jetbrains.compose.reload.test
 
-import org.jetbrains.compose.reload.agent.send
+import org.jetbrains.compose.reload.agent.sendBlocking
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
@@ -64,7 +64,7 @@ private fun executeTest(args: ListIterator<String>) {
             message = targetException.message,
             exceptionClassName = targetException.javaClass.name,
             stacktrace = targetException.stackTrace.toList()
-        ).send().get()
+        ).sendBlocking()
         exitProcess(if (targetException is AssertionError) ExitCode.AssertionError.value else ExitCode.ExecutionError.value)
     }
 }

@@ -24,9 +24,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.intellij.lang.annotations.Language
+import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.AsyncTraces
 import org.jetbrains.compose.reload.core.asyncTracesString
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.withAsyncTrace
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
@@ -82,8 +82,8 @@ public class TransactionScope internal constructor(
     @PublishedApi
     internal val logger: Logger = createLogger()
 
-    public fun OrchestrationMessage.send() {
-        fixture.orchestration.sendMessage(this).get()
+    public suspend fun OrchestrationMessage.send() {
+        fixture.orchestration.send(this)
     }
 
     /**

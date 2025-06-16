@@ -5,30 +5,54 @@
 
 package org.jetbrains.compose.reload.orchestration
 
-import org.jetbrains.compose.reload.core.Disposable
-import java.util.concurrent.Future
+import org.jetbrains.compose.reload.core.Broadcast
+import org.jetbrains.compose.reload.core.Future
+import org.jetbrains.compose.reload.core.Task
+import org.jetbrains.compose.reload.core.Try
+import org.jetbrains.compose.reload.core.flatten
+import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.invokeOnCompletion
+import org.jetbrains.compose.reload.core.launchTask
+import org.jetbrains.compose.reload.core.mapLeft
+import kotlin.time.Duration.Companion.seconds
 
+private val timeout = 15.seconds
 
-public interface OrchestrationHandle : AutoCloseable {
-    public val port: Int
-    public fun invokeWhenClosed(action: () -> Unit)
-    public fun invokeWhenMessageReceived(action: (OrchestrationMessage) -> Unit): Disposable
-    public fun sendMessage(message: OrchestrationMessage): Future<Unit>
+public interface OrchestrationHandle : AutoCloseable, Task<Nothing> {
+    public val port: Future<Int>
+    public val messages: Broadcast<OrchestrationMessage>
 
-    /**
-     * Will gracefully close the orchestration; The returned future shall not be awaited on the orchestration thread
-     */
-    public fun closeGracefully(): Future<Unit>
+    public suspend infix fun send(message: OrchestrationMessage)
 
-    /**
-     * Can be used as 'Shutdown Hook' to close the sockets immediately.
-     * Note: This will not invoke any close listeners! Use the default '.close' instead.
-     */
-    public fun closeImmediately()
+    override fun close() {
+        stop()
+    }
 }
 
-public inline fun <reified T> OrchestrationHandle.invokeWhenReceived(crossinline action: (T) -> Unit): Disposable {
-    return invokeWhenMessageReceived { message ->
-        if (message is T) action(message)
+public infix fun OrchestrationHandle.sendBlocking(message: OrchestrationMessage): Try<Unit> {
+    return launchTask("sendBlocking") {
+        send(message)
+    }.getBlocking(timeout)
+}
+
+public infix fun OrchestrationHandle.sendAsync(message: OrchestrationMessage): Future<Unit> {
+    return launchTask("sendAsync") {
+        send(message)
     }
+}
+
+public infix fun OrchestrationHandle.invokeOnClose(action: () -> Unit) {
+    invokeOnCompletion { action() }
+}
+
+public fun OrchestrationClient.connectBlocking(): Try<OrchestrationClient> {
+    return launchTask("connectBlocking") {
+        connect()
+    }.getBlocking(timeout).flatten().mapLeft { this }
+}
+
+public fun OrchestrationServer.startBlocking(): Try<Unit> {
+    return launchTask("startBlocking") {
+        start()
+    }.getBlocking(timeout)
 }

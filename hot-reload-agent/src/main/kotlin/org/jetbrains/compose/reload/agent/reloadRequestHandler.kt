@@ -10,20 +10,28 @@ import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.exception
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.isSuccess
+import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.withLinearClosure
+import org.jetbrains.compose.reload.core.withType
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import org.jetbrains.compose.reload.orchestration.invokeWhenReceived
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
 import java.io.File
 import java.lang.instrument.Instrumentation
-import javax.swing.SwingUtilities
 
 private val logger = createLogger()
 
-internal fun launchReloadRequestHandler(instrumentation: Instrumentation) {
-    var pendingChanges = mapOf<File, OrchestrationMessage.ReloadClassesRequest.ChangeType>()
+internal fun launchReloadRequestHandler(instrumentation: Instrumentation) = launchTask {
+    var pendingChanges = mapOf<File, ReloadClassesRequest.ChangeType>()
 
-    orchestration.invokeWhenReceived<OrchestrationMessage.ReloadClassesRequest> { request ->
-        runOnMainThreadBlocking {
+    orchestration.messages.withType<ReloadClassesRequest>().collect { request ->
+        /*
+        Important: We want to use the ui thread for the reloading to ensure the UI thread not trying
+        render, or work inside Compose in some inconsistent state!
+
+        We block the 'reloadMain' thread to also ensure that no other work can be done
+        while we're reloading.
+         */
+        runOnUiThreadBlocking {
             pendingChanges = pendingChanges + request.changedClassFiles
 
             executeBeforeHotReloadListeners(request.messageId)
@@ -36,7 +44,7 @@ internal fun launchReloadRequestHandler(instrumentation: Instrumentation) {
                 logger.orchestration("Reloaded classes: ${request.messageId}")
                 OrchestrationMessage.LogMessage(OrchestrationMessage.LogMessage.TAG_AGENT)
                 pendingChanges = emptyMap()
-                OrchestrationMessage.ReloadClassesResult(request.messageId, true).send()
+                OrchestrationMessage.ReloadClassesResult(request.messageId, true).sendAsync()
             }
 
             if (result.isFailure()) {
@@ -45,12 +53,10 @@ internal fun launchReloadRequestHandler(instrumentation: Instrumentation) {
                     request.messageId, false, result.exception.message,
                     result.exception.withLinearClosure { throwable -> throwable.cause }
                         .flatMap { throwable -> throwable.stackTrace.toList() }
-                ).send()
+                ).sendAsync()
             }
 
             executeAfterHotReloadListeners(request.messageId, result)
         }
     }
-
-    logger.debug("ReloadRequestHandler launched")
 }

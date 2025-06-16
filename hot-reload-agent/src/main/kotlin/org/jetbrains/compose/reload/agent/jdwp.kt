@@ -9,6 +9,7 @@ import org.jetbrains.compose.reload.analysis.isIgnoredClassId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.toLeft
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.lang.instrument.ClassDefinition
@@ -21,14 +22,14 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 private val logger = createLogger()
-private val localReloadRequest = ThreadLocal<UUID>()
+private val localReloadRequest = ThreadLocal<OrchestrationMessageId>()
 private val externalReloadRequest = AtomicReference<ExternalReloadThreadState>(ExternalReloadThreadState.Idle)
 private val transformLock = ReentrantLock()
 
 internal fun launchJdwpTracker(instrumentation: Instrumentation) {
     instrumentation.addTransformer(JdwpTracker)
-    invokeBeforeHotReload { uuid -> localReloadRequest.set(uuid) }
-    invokeAfterHotReload { uuid, result -> localReloadRequest.set(null) }
+    invokeBeforeHotReload { messageId -> localReloadRequest.set(messageId) }
+    invokeAfterHotReload { messageId, result -> localReloadRequest.set(null) }
 }
 
 private object JdwpTracker : ClassFileTransformer {
@@ -90,7 +91,7 @@ private fun issueExternalReloadRequest(definition: ClassDefinition) {
 
     /* Previously idle; Let's aggregate requests and perform the reload */
     if (previousState is ExternalReloadThreadState.Idle) {
-        runOnMainThread {
+        runOnUiThreadAsync {
             /* This loop will give any other thread 32ms of time to add to previous aggregates */
             val aggregate = externalReloadRequest.getAndUpdate { state ->
                 Thread.sleep(32)
@@ -107,10 +108,10 @@ private fun issueExternalReloadRequest(definition: ClassDefinition) {
 
             if (aggregate !is ExternalReloadThreadState.Pending) {
                 logger.error("Unexpected state: $aggregate")
-                return@runOnMainThread
+                return@runOnUiThreadAsync
             }
 
-            val uuid = UUID.randomUUID()
+            val uuid = OrchestrationMessageId("external-reload-${UUID.randomUUID()}")
             logger.info("'external reload': Reloaded ${aggregate.definitions.size} classes: $uuid")
             val redefined = redefineRuntimeInfo().get().getOrThrow()
             val reload = Reload(uuid, definitions = aggregate.definitions, redefined)

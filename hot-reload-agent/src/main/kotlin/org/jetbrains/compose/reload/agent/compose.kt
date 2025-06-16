@@ -39,7 +39,7 @@ private object ComposeTransformer : ClassFileTransformer {
             val loader = loader ?: ClassLoader.getSystemClassLoader()
             if (composeClassLoaders.put(loader, Unit) == null) {
                 /* put returning null -> loader was not known before, so we can setup copose */
-                runOnMainThread {
+                runOnUiThreadAsync {
                     enableComposeHotReloadMode(loader)
                 }
             }

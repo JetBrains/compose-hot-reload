@@ -8,6 +8,7 @@ package org.jetbrains.compose.devtools
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.invokeOnCompletion
 import kotlin.concurrent.thread
 import kotlin.io.path.deleteIfExists
 import kotlin.jvm.optionals.getOrNull
@@ -44,7 +45,7 @@ private fun bindParentProcess() {
 }
 
 private fun setupOrchestration() {
-    orchestration.invokeWhenClosed {
+    orchestration.invokeOnCompletion {
         shutdown()
     }
 }

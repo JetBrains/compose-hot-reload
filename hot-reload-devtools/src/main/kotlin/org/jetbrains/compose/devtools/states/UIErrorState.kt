@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.devtools.orchestration
 import org.jetbrains.compose.devtools.send
+import org.jetbrains.compose.devtools.sendAsync
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asFlow
@@ -58,6 +59,6 @@ private fun OrchestrationMessage.UIException.toDescription(): UIErrorDescription
         title = "UI Exception",
         message = message,
         stacktrace = stacktrace,
-        recovery = { OrchestrationMessage.RetryFailedCompositionRequest().send() }
+        recovery = { OrchestrationMessage.RetryFailedCompositionRequest().sendAsync() }
     )
 }

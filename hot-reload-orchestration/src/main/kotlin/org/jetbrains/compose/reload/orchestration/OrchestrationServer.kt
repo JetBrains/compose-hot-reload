@@ -5,306 +5,163 @@
 
 package org.jetbrains.compose.reload.orchestration
 
-import org.jetbrains.compose.reload.core.Disposable
+import org.jetbrains.compose.reload.core.Bus
+import org.jetbrains.compose.reload.core.Future
+import org.jetbrains.compose.reload.core.StoppedException
+import org.jetbrains.compose.reload.core.Task
+import org.jetbrains.compose.reload.core.WorkerThread
+import org.jetbrains.compose.reload.core.complete
+import org.jetbrains.compose.reload.core.completeExceptionally
 import org.jetbrains.compose.reload.core.createLogger
-import org.jetbrains.compose.reload.core.submitSafe
+import org.jetbrains.compose.reload.core.exceptionOrNull
+import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.invokeOnFinish
+import org.jetbrains.compose.reload.core.invokeOnStop
+import org.jetbrains.compose.reload.core.isActive
+import org.jetbrains.compose.reload.core.launchOnFinish
+import org.jetbrains.compose.reload.core.launchOnStop
+import org.jetbrains.compose.reload.core.launchTask
+import org.jetbrains.compose.reload.core.stopNow
+import org.jetbrains.compose.reload.core.withThread
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import java.io.IOException
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
+import org.jetbrains.compose.reload.orchestration.OrchestrationPackage.Ack
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
-import java.util.UUID
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.thread
-import kotlin.concurrent.withLock
-
-public interface OrchestrationServer : OrchestrationHandle
+import kotlin.time.Duration.Companion.seconds
 
 public fun startOrchestrationServer(): OrchestrationServer {
-    val serverSocket = ServerSocket()
-    serverSocket.bind(InetSocketAddress("127.0.0.1", 0))
+    val server = OrchestrationServer()
 
-    val logger = LoggerFactory.getLogger("OrchestrationServer(${serverSocket.localPort})")
-    logger.debug("listening on port: ${serverSocket.localPort}")
-
-    val server = OrchestrationServerImpl(serverSocket, logger)
-    server.start()
+    launchTask("startOrchestrationServer") {
+        server.start()
+        server.port.await().getOrThrow()
+    }.getBlocking(15.seconds).getOrThrow()
 
     return server
 }
 
-internal class OrchestrationServerImpl(
-    private val serverSocket: ServerSocket,
-    private val logger: Logger
-) : OrchestrationServer {
-    private val isClosed = AtomicBoolean(false)
-    private val isActive get() = !isClosed.get()
-    private val lock = ReentrantLock()
-    private val listeners = mutableListOf<(OrchestrationMessage) -> Unit>()
-    private val closeListeners = mutableListOf<() -> Unit>()
-    private val clients = mutableListOf<Client>()
+public interface OrchestrationServer : OrchestrationHandle {
+    public suspend fun bind()
+    public suspend fun start()
+}
 
-    private class Client(
-        val id: UUID,
-        val role: OrchestrationClientRole,
-        private val socket: Socket,
-        val input: ObjectInputStream,
-        private val output: ObjectOutputStream,
-        private val onClientClosed: ((Client) -> Unit),
-    ) : AutoCloseable {
 
-        private val logger = createLogger()
+public fun OrchestrationServer(): OrchestrationServer {
+    val bind = Future<Unit>()
+    val port = Future<Int>()
 
-        private val isClosed = AtomicBoolean(false)
+    val start = Future<Unit>()
 
-        private val isClosedForWrite = AtomicBoolean(false)
+    val messages = Bus<OrchestrationMessage>()
 
-        private val writingThread = Executors.newSingleThreadExecutor { runnable ->
-            thread(
-                name = "Orchestration Client Writer (${socket.remoteSocketAddress})",
-                isDaemon = true,
-                start = false
-            ) {
-                try {
-                    runnable.run()
-                } catch (t: Throwable) {
-                    logger.error("'writerThread' exception", t)
-                }
-            }
-        }
+    val task = launchTask("OrchestrationServer") {
+        invokeOnFinish { bind.completeExceptionally(it.exceptionOrNull() ?: StoppedException()) }
+        invokeOnFinish { port.completeExceptionally(it.exceptionOrNull() ?: StoppedException()) }
 
-        fun write(message: OrchestrationMessage): Future<Unit> {
-            return writingThread.submitSafe {
-                if (isClosed.get()) error("Client is closed")
-                if (isClosedForWrite.get()) error("Client is closed for write")
+        val serverThread = WorkerThread("Orchestration Server")
+        launchOnFinish { serverThread.shutdown().await() }
 
-                try {
-                    output.writeObject(message)
-                    output.flush()
-                } catch (t: Throwable) {
-                    isClosedForWrite.set(true)
-                    throw t
-                }
-            }
-        }
+        withThread(serverThread, true) {
+            val serverSocket = ServerSocket()
+            invokeOnStop { serverSocket.close() }
 
-        override fun close() {
-            if (isClosed.getAndSet(true)) return
-            isClosedForWrite.set(true)
+            bind.await()
+            serverSocket.bind(InetSocketAddress("127.0.0.1", 0))
+            port.complete(serverSocket.localPort)
 
-            runInOrchestrationThreadImmediate {
-                try {
-                    writingThread.shutdown()
-                    if (!writingThread.awaitTermination(1, TimeUnit.SECONDS)) {
-                        writingThread.shutdownNow()
-                        logger.warn("'writerThread' did not finish gracefully in 1 second '$this'")
-                    }
+            start.await()
+            while (isActive()) {
+                val clientSocket = serverSocket.accept()
+                clientSocket.setOrchestrationDefaults()
 
-                    onClientClosed(this)
-                    socket.close()
-                } catch (t: Throwable) {
-                    logger.error("Failed closing client: '$this'", t)
-                }
-            }
-        }
-
-        override fun toString(): String {
-            return "Client [$role] (${socket.remoteSocketAddress})"
-        }
-    }
-
-    override val port: Int
-        get() = serverSocket.localPort
-
-    fun clients(): Future<List<AutoCloseable>> = orchestrationThread.submitSafe {
-        lock.withLock {
-            clients.toList()
-        }
-    }
-
-    override fun invokeWhenMessageReceived(action: (OrchestrationMessage) -> Unit): Disposable {
-        val registration = Throwable()
-
-        val safeListener: (OrchestrationMessage) -> Unit = { message ->
-            try {
-                action(message)
-            } catch (t: Throwable) {
-                logger.error("Failed invoking orchestration listener", t)
-                logger.error("Failing listener was registered at:", registration)
-                assert(false) { throw t }
-            }
-        }
-        lock.withLock {
-            if (!isActive) return Disposable { }
-            listeners.add(safeListener)
-        }
-        return Disposable {
-            lock.withLock { listeners.remove(safeListener) }
-        }
-    }
-
-    override fun invokeWhenClosed(action: () -> Unit) {
-        lock.withLock {
-            if (isClosed.get()) action()
-            else closeListeners.add(action)
-        }
-    }
-
-    override fun sendMessage(message: OrchestrationMessage): Future<Unit> = orchestrationThread.submitSafe {
-        /* Send the message to all currently connected clients */
-        val clients = lock.withLock { clients.toList() }
-        clients.forEach { client -> client.write(message) }
-
-        /*
-        Send the message to all message listeners:
-        Clients will get an 'echo' from the server, once the server has handled the message.
-        When the server sends a message, the 'echo' will be sent once all clients received the message.
-         */
-        invokeMessageListeners(message)
-    }
-
-    fun start() {
-        thread(name = "Orchestration Server", isDaemon = true) {
-            while (isActive) {
-                try {
-                    val clientSocket = serverSocket.accept()
-                    if (!isActive) {
-                        clientSocket.close()
-                        break
-                    }
-                    clientSocket.setOrchestrationDefaults()
-                    startClientReader(clientSocket)
-                } catch (t: IOException) {
-                    if (isActive) {
-                        logger.warn("Server Socket exception", t)
-                        close()
-                    }
-                }
+                val client = launchClient(clientSocket, messages)
+                invokeOnFinish { client.stop() }
             }
         }
     }
 
-    private fun startClientReader(socket: Socket) = thread(name = "Orchestration Client Reader") {
-        /* Read Handshake and create the 'client' object */
-        val client = try {
-            logger.debug("Socket connected: '${socket.remoteSocketAddress}'")
-            val input = ObjectInputStream(socket.getInputStream().buffered())
-            val output = ObjectOutputStream(socket.getOutputStream().buffered())
-            val handshake = input.readObject() as OrchestrationHandshake
+    return object : OrchestrationServer, Task<Nothing> by task {
+        override val messages = messages
+        override val port: Future<Int> = port
 
-            val client = lock.withLock {
-                if (!isActive) return@thread
-                val client = Client(
-                    id = handshake.clientId,
-                    role = handshake.clientRole,
-                    socket = socket,
-                    input = input,
-                    output = output,
-                    onClientClosed = ::onClientClosed
-                )
-                logger.debug("Client connected: '$client'")
-                clients.add(client)
-                client
-            }
-
-            /* Announce the new client to the whole orchestration */
-            sendMessage(ClientConnected(client.id, client.role, handshake.clientPid))
-            client
-        } catch (t: Throwable) {
-            logger.debug("Client cannot be connected: '${socket.remoteSocketAddress}'")
-            logger.trace("Client cannot be connected: '${socket.remoteSocketAddress}'", t)
-            socket.close()
-            return@thread
+        override suspend fun send(message: OrchestrationMessage) {
+            messages.send(message)
         }
 
 
-        /* Read messages  */
-        try {
-            while (isActive) {
-                val message = try {
-                    client.input.readObject()
-                } catch (_: IOException) {
-                    logger.debug("Client disconnected: '$client'")
-                    client.close()
-                    break
-                }
+        override suspend fun bind() {
+            bind.complete(Unit)
+            port.await()
+        }
 
-                if (message !is OrchestrationMessage) {
-                    logger.debug("Unknown message received '$message'")
-                    continue
-                }
+        override suspend fun start() {
+            bind()
+            start.complete(Unit)
+        }
+    }
+}
 
-                /* Broadcasting the message to all clients (including the one it came from) */
-                sendMessage(message).get()
-            }
-        } catch (t: Throwable) {
-            logger.error("Failure in client reader", t)
-            client.close()
+private fun launchClient(
+    socket: Socket, messages: Bus<OrchestrationMessage>,
+): Task<*> = launchTask("Client Connection") {
+    val logger = createLogger()
+    val writer = WorkerThread("Orchestration Server: Writer")
+    val reader = WorkerThread("Orchestration Server: Reader")
+
+
+    val io = OrchestrationIO(socket, writer, reader)
+    launchOnStop { io.close() }
+    launchOnFinish { io.close() }
+
+    /* Check protocol magic number */
+    checkMagicNumberOrThrow(io.readInt())
+
+    /* Read the client protocol version */
+    val clientProtocolVersion = io.readInt()
+    logger.debug("client protocol version: $clientProtocolVersion")
+
+    /* Write protocol magic number and the servers protocol version */
+    io writeInt ORCHESTRATION_PROTOCOL_MAGIC_NUMBER
+    io writeInt OrchestrationProtocolVersion.current.intValue
+
+    /* We expect any given client to start with a proper introduction */
+    val clientIntroduction = io.readPackage()
+    if (clientIntroduction !is OrchestrationPackage.Introduction) {
+        throw OrchestrationIOException("Unexpected introduction: $clientIntroduction")
+    }
+
+    /* The introduction was successful, the client is connected */
+    val connected = ClientConnected(
+        clientId = clientIntroduction.clientId,
+        clientRole = clientIntroduction.clientRole,
+        clientPid = clientIntroduction.clientPid
+    )
+
+    /* Write the 'client connected' message into the bus and to the client as well */
+    messages.send(connected)
+    io writePackage connected
+
+    launchOnFinish {
+        messages send ClientDisconnected(connected.clientId, connected.clientRole)
+    }
+
+    /* Writer loop: Take elements from the bus and write them to the OrchestrationIO */
+    subtask("Writer") {
+        messages.collect { pkg ->
+            io.writePackage(pkg)
         }
     }
 
-    /**
-     * Expected to be called from the [orchestrationThread];
-     * Will invoke all listeners
-     */
-    private fun invokeMessageListeners(message: OrchestrationMessage) {
-        val listeners = lock.withLock { listeners.toList() }
-        listeners.forEach { listener -> listener(message) }
-    }
-
-    private fun onClientClosed(client: Client) = runInOrchestrationThreadImmediate {
-        lock.withLock { clients.remove(client) }
-        sendMessage(ClientDisconnected(client.id, client.role))
-    }
-
-    override fun close() {
-        closeGracefully()
-    }
-
-    override fun closeGracefully(): Future<Unit> {
-        if (isClosed.getAndSet(true)) CompletableFuture.completedFuture(Unit)
-
-        val finished = CompletableFuture<Unit>()
-        orchestrationThread.submit {
-            lock.withLock {
-                try {
-                    logger.debug("Closing socket: '${serverSocket.localPort}'")
-                    clients.toList().forEach { it.close() }
-                    clients.clear()
-                    serverSocket.close()
-                    closeListeners.forEach { it.invoke() }
-                    closeListeners.clear()
-                } catch (t: Throwable) {
-                    logger.warn("Failed closing server: '${serverSocket.localPort}'", t)
-                } finally {
-                    /* Send the 'finished' signal after all currently enqueued tasks have finished */
-                    orchestrationThread.submit {
-                        finished.complete(Unit)
-                    }
-                }
-            }
-        }
-        return finished
-    }
-
-    override fun closeImmediately() {
-        if (isClosed.getAndSet(true)) return
-
-        lock.withLock {
-            logger.debug("Closing socket (immediately): '${serverSocket.localPort}'")
-            clients.forEach { it.close() }
-            clients.clear()
-            serverSocket.close()
+    /* Reader loop: Read messages, push them through the Bus and send back an 'Ack' */
+    subtask("Reader") {
+        while (isActive()) {
+            val pkg = io.readPackage() ?: stopNow()
+            if (pkg !is OrchestrationMessage) continue
+            messages.send(pkg)
+            io.writePackage(Ack(pkg.messageId))
         }
     }
 }

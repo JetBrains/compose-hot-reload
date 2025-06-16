@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.tests.gradle
 
+import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIRendered
@@ -57,7 +58,7 @@ class PidFileTest {
         if (orchestrationPort.toIntOrNull() == null) {
             fail("Invalid orchestration port value: $orchestrationPort")
         }
-        assertEquals(fixture.orchestration.port, orchestrationPort.toInt())
+        assertEquals(fixture.orchestration.port.awaitOrThrow(), orchestrationPort.toInt())
         val processHandle = ProcessHandle.of(pid.toLong()).getOrNull() ?: fail("Process with pid=$pid not found")
 
         fixture.sendMessage(OrchestrationMessage.ShutdownRequest("Explicitly requested by the test")) {

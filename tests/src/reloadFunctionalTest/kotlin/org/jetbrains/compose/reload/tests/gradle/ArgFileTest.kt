@@ -114,7 +114,7 @@ class ArgFileTest {
         assertEquals(applicationProcess.pid(), applicationConnectedMessage.clientPid)
 
         runTransaction { skipToMessage<OrchestrationMessage.UIRendered>() }
-        orchestration.sendMessage(ShutdownRequest("Requested by test")).get()
+        orchestration.send(ShutdownRequest("Requested by test"))
         applicationProcess.onExit().asDeferred().await()
 
         if (applicationProcess.exitValue() !in listOf(0, 134)) fail(

@@ -15,14 +15,17 @@ import org.gradle.initialization.BuildCancellationToken
 import org.gradle.kotlin.dsl.register
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.compose.reload.core.PidFileInfo
+import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.gradle.Future
 import org.jetbrains.compose.reload.gradle.PluginStage
 import org.jetbrains.compose.reload.gradle.await
 import org.jetbrains.compose.reload.gradle.projectFuture
+import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
-import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
+import org.jetbrains.compose.reload.orchestration.connectBlocking
+import org.jetbrains.compose.reload.orchestration.sendBlocking
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -66,14 +69,15 @@ private fun shutdownApplication(pidfile: Path, logger: Logger? = null) {
 
     logger?.quiet("Sending 'ShutdownRequest' to '$port'")
 
-    connectOrchestrationClient(OrchestrationClientRole.Tooling, port).use { client ->
-        client.sendMessage(
-            ShutdownRequest(
-                "Gradle Build cancelled",
-                pidFile = pidfile.absolute().toFile(),
-                pid = pid,
-            )
-        ).get(15, TimeUnit.SECONDS)
+    OrchestrationClient(OrchestrationClientRole.Tooling, port).use { client ->
+        client.connectBlocking().getOrThrow()
+        logger?.debug("Connected to '$port'")
+
+        client sendBlocking ShutdownRequest(
+            "Gradle Build cancelled",
+            pidFile = pidfile.absolute().toFile(),
+            pid = pid,
+        )
 
         logger?.quiet("Waiting for process to exit. PID: '$pid'")
         try {
