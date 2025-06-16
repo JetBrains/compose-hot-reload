@@ -7,7 +7,6 @@ package org.jetbrains.compose.reload.core
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
-import kotlin.coroutines.cancellation.CancellationException
 
 public typealias Try<T> = Either<T, Throwable>
 
@@ -15,7 +14,6 @@ public inline fun <T> Try(block: () -> T): Try<T> {
     return try {
         block().toLeft()
     } catch (t: Throwable) {
-        if (t is CancellationException) throw t
         t.toRight()
     }
 }
@@ -55,3 +53,24 @@ public fun <T> Try<T>.exceptionOrNull(): Throwable? = when (this) {
 
 public val Right<Throwable>.exception: Throwable
     get() = value
+
+public fun <T> Result<T>.toTry(): Try<T> {
+    return fold(
+        onSuccess = { it.toLeft() },
+        onFailure = { it.toRight() }
+    )
+}
+
+public fun <T> Try<T>.toResult(): Result<T> {
+    return when (this) {
+        is Left<T> -> Result.success(value)
+        is Right -> Result.failure(exception)
+    }
+}
+
+public fun <T> Try<Try<T>>.flatten(): Try<T> {
+    return when (this) {
+        is Left<Try<T>> -> value
+        is Right<Throwable> -> this
+    }
+}

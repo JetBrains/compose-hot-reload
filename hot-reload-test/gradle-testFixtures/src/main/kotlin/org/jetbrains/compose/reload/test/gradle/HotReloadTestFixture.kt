@@ -65,7 +65,7 @@ internal constructor(
     public suspend fun <T> runTransaction(
         block: suspend TransactionScope.() -> T
     ): T = withAsyncTrace("'runTransaction'") {
-        async {
+        coroutineScope {
             /*
             Multiple consumers will be able to 'receive' all messages sent during the transaction.
             Therefore, this shared flow is buffered with unlimited replay.
@@ -95,7 +95,7 @@ internal constructor(
                 currentCoroutineContext().cancelChildren()
                 messageChannel.close()
             }
-        }.await()
+        }
     }
 
     public suspend fun <T> sendMessage(

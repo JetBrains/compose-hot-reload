@@ -205,6 +205,13 @@
           }
         },
         {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-core",
+          "version": {
+            "requires": "1.10.2"
+          }
+        },
+        {
           "group": "org.jetbrains.compose.hot-reload",
           "module": "hot-reload-core",
           "version": {

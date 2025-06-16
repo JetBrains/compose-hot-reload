@@ -5,10 +5,6 @@
 
 package org.jetbrains.compose.reload.core
 
-public fun interface Disposable {
-    public fun dispose()
-
-    public companion object {
-        internal val empty: Disposable by lazy { Disposable { } }
-    }
+public interface Send<T> {
+    public suspend infix fun send(value: T)
 }

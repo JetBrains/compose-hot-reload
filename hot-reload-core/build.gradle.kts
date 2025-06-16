@@ -1,4 +1,5 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 /*
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
@@ -24,11 +25,15 @@ kotlin {
 
 dependencies {
     api(deps.slf4j.api)
-    compileOnly(deps.coroutines.core)
+
+    testImplementation(deps.coroutines.test)
+    testImplementation(deps.lincheck)
+    testImplementation(deps.logback)
 
     testFixturesApi(project(":hot-reload-test:core"))
     testFixturesImplementation(kotlin("tooling-core"))
     testFixturesImplementation(deps.junit.jupiter)
+    testFixturesImplementation(deps.coroutines.core)
     testFixturesCompileOnly(kotlin("compiler-embeddable"))
 }
 
@@ -41,12 +46,40 @@ kotlin {
             }
         }
     }
+
+    /*
+    Create kotlinx bridge:
+    We allow sources in 'kotlinxCoroutinesBridge' to compile against kotlinx coroutines
+    Those classes will be included in the main jar and regular sources can compile against the
+    API of this bridge.
+    */
+    target.compilations.create("kotlinxCoroutinesBridge") {
+        val kotlinxBridgeClasses = output.classesDirs
+
+        project.dependencies {
+            /* Add compileOnly dependency to the bridges. */
+            compileOnly(kotlinxBridgeClasses)
+
+            /* Add coroutines core as a compilation dependency for the bridge */
+            configurations.compileDependencyConfiguration.name(deps.coroutines.core)
+        }
+
+        /* Mark bridges as 'friend' to allow using internal APIs */
+        target.compilations.getByName("main").compileTaskProvider.configure {
+            this as KotlinJvmCompile
+            this.friendPaths.from(kotlinxBridgeClasses)
+        }
+
+        /* Include bridges in the main jar */
+        tasks.jar.configure {
+            from(this@create.output.allOutputs)
+        }
+    }
 }
 
 benchmark {
     targets.register("benchmark")
 }
-
 
 /* Make the current 'Hot Reload Version (aka version of this project) available */
 run {
@@ -92,9 +125,10 @@ run {
         }
     }
 
-    val generateEnvironmentSources = tasks.register<properties.GenerateHotReloadEnvironmentTask>("generateHotReloadEnvironment") {
-        outputSourcesDir = generatedSourceDir
-    }
+    val generateEnvironmentSources =
+        tasks.register<properties.GenerateHotReloadEnvironmentTask>("generateHotReloadEnvironment") {
+            outputSourcesDir = generatedSourceDir
+        }
 
     kotlin {
         sourceSets.main.get().kotlin.srcDir(generatedSourceDir)
