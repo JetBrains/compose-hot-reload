@@ -9,17 +9,12 @@ package org.jetbrains.compose.reload.orchestration
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
@@ -34,18 +29,12 @@ import kotlinx.coroutines.internal.synchronized
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.selects.onTimeout
-import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
-import kotlinx.coroutines.yield
 import org.jetbrains.compose.reload.core.awaitOrThrow
-import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.invokeOnValue
 import org.jetbrains.compose.reload.core.reloadMainThread
+import org.jetbrains.compose.reload.core.testFixtures.runStressTest
 import org.jetbrains.compose.reload.core.withThread
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
@@ -53,23 +42,19 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDis
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
 import java.net.ServerSocket
 import java.util.Collections.synchronizedList
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
-import kotlin.concurrent.withLock
-import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
+@Execution(ExecutionMode.SAME_THREAD)
 class ServerClientTest {
-
-    private val logger = createLogger()
 
     private val resources = mutableListOf<OrchestrationHandle>()
 
@@ -289,7 +274,7 @@ class ServerClientTest {
 
     @Test
     fun `test - stress test - fire and forget`() = runStressTest(
-        repetitions = 4, parallelism = 2
+        repetitions = 12, parallelism = 2
     ) {
         val senderCoroutines = 1
         val messagesPerSender = 128
@@ -356,7 +341,7 @@ class ServerClientTest {
             }
 
             runStressTest(
-                repetitions = 24,
+                repetitions = 128,
                 parallelism = 4
             ) {
                 repeat(128) {
@@ -386,121 +371,6 @@ class ServerClientTest {
             serverSocket.close()
             serverThread.interrupt()
             serverThread.join()
-        }
-    }
-
-
-    private inner class StressTestScope(
-        val invocationIndex: Int,
-        override val coroutineContext: CoroutineContext,
-        private val reportActivityChannel: SendChannel<String>,
-    ) : CoroutineScope {
-
-        private val resources = mutableListOf<AutoCloseable>()
-        private val lock = ReentrantLock()
-
-        suspend fun <T : AutoCloseable> use(value: T): T {
-            currentCoroutineContext().job.invokeOnCompletion { value.close() }
-            lock.withLock {
-                resources.add(value)
-                return value
-            }
-        }
-
-        init {
-            coroutineContext.job.invokeOnCompletion {
-                lock.withLock {
-                    resources.forEach { it.close() }
-                }
-            }
-        }
-
-        suspend fun reportActivity(message: String) {
-            ensureActive()
-            reportActivityChannel.send(message)
-            yield()
-        }
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun runStressTest(
-        repetitions: Int = 8,
-        parallelism: Int = 2,
-        timeout: Duration = 10.minutes,
-        silenceTimeout: Duration = 30.seconds,
-        test: suspend StressTestScope.() -> Unit
-    ) {
-        runBlocking(Dispatchers.IO + Job() + CoroutineName("runStressTest")) {
-            /* Fan out the invocations using a channel */
-            val invocationChannel = Channel<Int>(Channel.UNLIMITED)
-            repeat(repetitions) { index -> invocationChannel.send(index) }
-            invocationChannel.close()
-
-            /* Setup tests overall timeout */
-            withTimeout(timeout) {
-                coroutineScope {
-                    /* Launch coroutines */
-                    repeat(parallelism) { coroutineId ->
-                        launch(CoroutineName("runStressTest(coroutineId=$coroutineId)")) {
-                            for (invocationIndex in invocationChannel) {
-                                println("runStressTest(invocationIndex=$invocationIndex)")
-                                runStressTest(coroutineId, invocationIndex, silenceTimeout, test)
-                                println("runStressTest(invocationIndex=$invocationIndex); done")
-                            }
-                        }
-                    }
-                }
-            }
-
-            println("Stress test finished")
-        }
-    }
-
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private suspend fun CoroutineScope.runStressTest(
-        coroutineId: Int, invocationIndex: Int,
-        silenceTimeout: Duration,
-        test: suspend StressTestScope.() -> Unit
-    ) {
-        val reportActivityChannel = Channel<String>(Channel.UNLIMITED)
-
-        val silenceDetector = launch(CoroutineName("Silence Detector #$coroutineId")) {
-            val reports = mutableListOf<String>()
-
-            while (isActive) {
-                val report = select {
-                    reportActivityChannel.onReceiveCatching { it }
-                    onTimeout(silenceTimeout) { null }
-                }
-
-                if (report == null) {
-                    logger.error("Stress test #$invocationIndex timed out (coroutine: $coroutineId)")
-                    fail(
-                        "Silence Timeout at coroutine '$coroutineId', invocation '$invocationIndex'\n" +
-                            reports.takeLast(64).joinToString("\n")
-                    )
-                }
-
-                reports.add(report.getOrNull() ?: break)
-            }
-        }
-
-        try {
-            coroutineScope {
-                withContext(CoroutineName("stressTestScope.test($invocationIndex)")) {
-                    val stressTestScope = StressTestScope(invocationIndex, coroutineContext, reportActivityChannel)
-                    stressTestScope.test()
-                }
-            }
-            silenceDetector.cancel()
-        } catch (t: Throwable) {
-            ensureActive()
-            throw AssertionError(
-                "Error at coroutine '$coroutineId', invocation '$invocationIndex'", t
-            )
-        } finally {
-            reportActivityChannel.close()
         }
     }
 }
