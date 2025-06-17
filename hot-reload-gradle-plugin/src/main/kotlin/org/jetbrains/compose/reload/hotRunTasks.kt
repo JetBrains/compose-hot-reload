@@ -53,10 +53,7 @@ internal val Project.hotRunTasks: Future<Collection<TaskProvider<out AbstractCom
     tasks.withType<ComposeHotRun>().configureEach { task ->
         task.description = "Compose Application Run (Hot Reload enabled) | -PmainClass=..."
 
-        task.mainClass.convention(
-            project.providers.gradleProperty("mainClass")
-                .orElse(project.providers.systemProperty("mainClass"))
-        )
+        task.mainClass.convention(mainClassConvention)
 
         task.compilation.convention(provider {
             kotlinMultiplatformOrNull?.let { kotlin ->

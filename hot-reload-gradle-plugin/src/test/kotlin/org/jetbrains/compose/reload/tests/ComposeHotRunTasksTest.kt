@@ -5,13 +5,21 @@
 
 package org.jetbrains.compose.reload.tests
 
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
 import org.gradle.testfixtures.ProjectBuilder
+import org.jetbrains.compose.ComposeExtension
+import org.jetbrains.compose.ComposePlugin
+import org.jetbrains.compose.desktop.DesktopExtension
 import org.jetbrains.compose.reload.AbstractComposeHotRun
+import org.jetbrains.compose.reload.ComposeHotReloadPlugin
+import org.jetbrains.compose.reload.ComposeHotRun
 import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
 import org.jetbrains.compose.reload.utils.evaluate
+import org.jetbrains.kotlin.gradle.plugin.KotlinMultiplatformPluginWrapper
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.fail
 
 class ComposeHotRunTasksTest {
     @Test
@@ -39,5 +47,32 @@ class ComposeHotRunTasksTest {
         assertEquals(
             setOf("jvmRunHot", "jvmRunDev"), project.tasks.withType<AbstractComposeHotRun>().map { it.name }.toSet()
         )
+    }
+
+    @Test
+    fun `test - mainClass`() {
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply(KotlinMultiplatformPluginWrapper::class.java)
+        project.plugins.apply(ComposePlugin::class.java)
+        project.plugins.apply(ComposeHotReloadPlugin::class.java)
+        project.plugins.apply("org.jetbrains.kotlin.plugin.compose")
+
+        project.kotlinMultiplatformOrNull?.jvm()
+
+        project.extensions.configure<ComposeExtension> {
+            this.extensions.configure<DesktopExtension> {
+                application { application ->
+                    application.mainClass = "Foo"
+                }
+            }
+        }
+
+        project.evaluate()
+        val runTasks = project.tasks.withType<ComposeHotRun>().toList()
+        if (runTasks.isEmpty()) fail("Missing run tasks")
+
+        runTasks.forEach { runTask ->
+            assertEquals("Foo", runTask.mainClass.get())
+        }
     }
 }

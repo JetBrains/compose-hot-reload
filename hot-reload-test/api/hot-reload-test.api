@@ -23,6 +23,8 @@ public final class org/jetbrains/compose/reload/test/OrchestrationUtilsKt {
 	public static final fun sendLog (Ljava/lang/Object;)V
 	public static final fun sendTestEvent (Ljava/lang/Object;)V
 	public static synthetic fun sendTestEvent$default (Ljava/lang/Object;ILjava/lang/Object;)V
+	public static final fun sendTestEventBlocking (Ljava/lang/Object;)V
+	public static synthetic fun sendTestEventBlocking$default (Ljava/lang/Object;ILjava/lang/Object;)V
 }
 
 public final class org/jetbrains/compose/reload/test/ScreenshotTestApplicationKt {

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.sendAsync
+import org.jetbrains.compose.reload.agent.sendBlocking
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asChannel
@@ -20,6 +21,10 @@ private val logger = createLogger()
 
 public fun sendTestEvent(any: Any? = null) {
     OrchestrationMessage.TestEvent(any).sendAsync()
+}
+
+public fun sendTestEventBlocking(any: Any? = null) {
+    OrchestrationMessage.TestEvent(any).sendBlocking()
 }
 
 public fun sendLog(any: Any?) {
