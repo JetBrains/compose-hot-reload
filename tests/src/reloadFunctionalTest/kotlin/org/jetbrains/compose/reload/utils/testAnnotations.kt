@@ -33,3 +33,8 @@ annotation class QuickTest
  * This test is supposed to only run against the default.
  */
 annotation class TestOnlyDefaultCompilerOptions
+
+/**
+ * Ensures that this test only runs with the default Kotlin version
+ */
+annotation class TestOnlyDefaultKotlinVersion
