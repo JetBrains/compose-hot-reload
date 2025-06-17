@@ -10,8 +10,10 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.createCoroutine
 import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 private val logger = createLogger()
 
@@ -30,8 +32,28 @@ public interface Task<T> : Future<T>, CoroutineContext.Element {
     public companion object Key : CoroutineContext.Key<Task<*>>
 }
 
+/**
+ * Note: This method will yield the current thread if possible.
+ * This allows writing loops using
+ * ```kotlin
+ * while(isActive()) {
+ *     // blocking code
+ * }
+ * ```
+ * @return true if the current task is still executing (no value produced, not stopped)
+ */
+public suspend fun Task<*>.isActive(): Boolean {
+    val currentContext = coroutineContext
+    return suspendCoroutine { continuation ->
+        suspend {
+            !value.isCompleted() && !isStopped()
+        }.createCoroutine(Continuation(currentContext) { result ->
+            continuation.resumeWith(result)
+        }).resume(Unit)
+    }
+}
 
-public fun Task<*>.isActive(): Boolean = !value.isCompleted() && !isStopped()
+
 public fun Task<*>.isStopped() = onStop.isCompleted()
 
 public fun Task<*>.invokeOnStop(action: (error: Throwable) -> Unit): Disposable {

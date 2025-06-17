@@ -1,9 +1,11 @@
+import org.jetbrains.compose.reload.core.StoppedException
 import org.jetbrains.compose.reload.core.Task
 import org.jetbrains.compose.reload.core.WorkerThread
 import org.jetbrains.compose.reload.core.dispatcher
 import org.jetbrains.compose.reload.core.exceptionOrNull
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.isActive
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.reloadMainThread
@@ -11,6 +13,7 @@ import org.jetbrains.compose.reload.core.withThread
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
@@ -95,5 +98,15 @@ class CoroutinesTest {
 
         assertTrue(task.value.getBlocking(5.seconds).isFailure())
         assertEquals("Foo", task.value.getBlocking(5.seconds).exceptionOrNull()?.message)
+    }
+
+    @Test
+    fun `test - isActive loop`() {
+        val task = launchTask("test") {
+            while (isActive()) Unit
+        }
+
+        launchTask { task.stop() }
+        assertFailsWith<StoppedException> { task.getBlocking(5.seconds).getOrThrow() }
     }
 }
