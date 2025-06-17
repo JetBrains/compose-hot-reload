@@ -65,9 +65,20 @@ then 'recompile + reloads' can be executed using the following task:
 - `hotReloadJvmMain`: Reload all applications that use the `jvmMain` source set.
 
 The tasks 'mainClass' can be configured in the buildscript
+
+**Using Compose Hot Reload:** 
 ```kotlin
 tasks.withType<ComposeHotRun>().configureEach {
     mainClass.set("com.example.MainKt")
+}
+```
+
+**Using Compose** 
+```kotlin
+compose.desktop {
+    application {
+        mainClass = "com.example.MainKt"
+    }
 }
 ```
 
