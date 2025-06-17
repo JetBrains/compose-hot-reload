@@ -35,7 +35,8 @@ internal class ResourcesDirtyResolver : DirtyResolver {
             Ids.ImageResourcesKt.classId,
             Ids.StringResourcesKt.classId,
             Ids.StringArrayResourcesKt.classId,
-            Ids.PluralStringResourcesKt.classId
+            Ids.PluralStringResourcesKt.classId,
+            Ids.FontResources_skikioKt.classId
         ).flatMap { currentRuntime.classIndex[it]?.methods?.values ?: emptyList() }
     }
 }
@@ -56,10 +57,47 @@ private fun cleanResourceCache(classId: ClassId, cleanMethod: MethodId, resource
     }
 }
 
+private fun tryCleanResourceCaches() {
+    try {
+        val classId = Ids.ResourceCaches.classId
+        val loader = findClassLoader(classId).get()
+        if (loader == null) {
+            tryCleanResourceCachesForOldCompose()
+            return
+        }
+
+        val resourceCachesClass = loader.loadClass(classId.toFqn())
+        val instance = resourceCachesClass.getDeclaredField(Ids.ResourceCaches.instance.fieldName).get(null)
+
+        val resourceCachesDesktopKtClass = loader.loadClass(Ids.ResourceCaches_desktopKt.classId.toFqn())
+        resourceCachesDesktopKtClass.getDeclaredMethod(
+            Ids.ResourceCaches_desktopKt.clearBlocking.methodName,
+            resourceCachesClass
+        ).invoke(null, instance)
+        logger.info("Resource caches cleared")
+
+    } catch (t: Throwable) {
+        logger.error("Failed to clean resource caches", t)
+    }
+}
+
+private fun tryCleanResourceCachesForOldCompose() {
+    cleanResourceCache(
+        Ids.ImageResourcesKt.classId,
+        Ids.ImageResourcesKt.dropImageCache,
+        "Images"
+    )
+    cleanResourceCache(
+        Ids.StringResourcesUtilsKt.classId,
+        Ids.StringResourcesUtilsKt.dropStringItemsCache,
+        "Strings"
+    )
+}
+
 internal fun Context.cleanResourceCacheIfNecessary() {
-    if (!hasChangedResources()) return
-    cleanResourceCache(Ids.ImageResourcesKt.classId, Ids.ImageResourcesKt.dropImageCache, "Images")
-    cleanResourceCache(Ids.StringResourcesUtilsKt.classId, Ids.StringResourcesUtilsKt.dropStringItemsCache, "Strings")
+    if (hasChangedResources()) {
+        tryCleanResourceCaches()
+    }
 }
 
 private fun Context.hasChangedResources(): Boolean {

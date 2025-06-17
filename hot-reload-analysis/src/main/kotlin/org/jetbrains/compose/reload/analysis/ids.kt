@@ -213,6 +213,26 @@ object Ids {
             methodDescriptor = "()V"
         )
     }
+
+    object FontResources_skikioKt {
+        val classId = ClassId("org/jetbrains/compose/resources/FontResources_skikoKt")
+    }
+
+    object ResourceCaches {
+        val classId = ClassId("org/jetbrains/compose/resources/ResourceCaches")
+        val instance = FieldId(classId,
+            "INSTANCE",
+            "Lorg/jetbrains/compose/resources/ResourceCaches;")
+    }
+
+    object ResourceCaches_desktopKt {
+        val classId = ClassId("org/jetbrains/compose/resources/ResourceCaches_desktopKt")
+        val clearBlocking = MethodId(
+            ResourceCaches.classId,
+            methodName = "clearBlocking",
+            methodDescriptor = "(Lorg/jetbrains/compose/resources/ResourceCaches;)V"
+        )
+    }
 }
 
 val ClassId.classInitializerMethodId: MethodId

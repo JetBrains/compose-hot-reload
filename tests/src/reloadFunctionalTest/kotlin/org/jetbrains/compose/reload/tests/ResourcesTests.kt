@@ -69,6 +69,13 @@ class ResourcesTests {
             }
     }
 
+    private fun HotReloadTestFixture.testFontResource(resourceName: String): Path {
+        return testResourceDir()
+            .resolve("font")
+            .resolve(resourceName)
+            .createParentDirectories()
+    }
+
     private fun copyTestResource(resource: String, to: Path) {
         val classLoader = Thread.currentThread().contextClassLoader
         (classLoader.getResourceAsStream("${ResourcesTests::class.java.simpleName}/$resource")
@@ -216,6 +223,42 @@ class ResourcesTests {
             importStatement = "org.jetbrains.compose.resources.stringArrayResource",
             resourceAccess = "stringArrayResource(Res.array.$resourceName)[0]"
         )
+    }
+
+    @HotReloadTest
+    fun `replace font resource`(fixture: HotReloadTestFixture) = fixture.runTest {
+        val resourceName = "testFontResource"
+
+        val testResource = testFontResource("$resourceName.ttf")
+        copyTestResource("testFontResource.ttf", testResource)
+
+        fixture.initialSourceCode(
+            """
+                import androidx.compose.ui.text.font.FontFamily
+                import androidx.compose.material3.Text
+                import androidx.compose.ui.unit.sp
+                import org.jetbrains.compose.reload.test.*
+                import ${fixture.projectName()}.generated.resources.*
+                import org.jetbrains.compose.resources.Font
+                
+                fun main() {
+                    screenshotTestApplication {
+                        Text("Font resource",
+                            fontSize = 48.sp,
+                            fontFamily = FontFamily(Font(Res.font.$resourceName)),
+                        )
+                    }
+                }
+                """.trimIndent()
+        )
+
+        fixture.checkScreenshot("initial")
+
+        fixture.runTransaction {
+            copyTestResource("testFontResource2.ttf", testResource)
+            requestReload()
+        }
+        fixture.checkScreenshot("replaced")
     }
 
     class Extension : BuildGradleKtsExtension {
