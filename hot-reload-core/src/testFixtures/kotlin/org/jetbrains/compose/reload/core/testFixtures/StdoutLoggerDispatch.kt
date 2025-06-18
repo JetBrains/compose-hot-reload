@@ -5,14 +5,11 @@
 
 package org.jetbrains.compose.reload.core.testFixtures
 
-import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.Logger
 import org.jetbrains.compose.reload.core.displayString
 
 internal class StdoutLoggerDispatch : Logger.Dispatch {
     override fun add(log: Logger.Log) {
-        if (HotReloadEnvironment.logStdout) {
-            println(log.displayString())
-        }
+        println(log.displayString())
     }
 }

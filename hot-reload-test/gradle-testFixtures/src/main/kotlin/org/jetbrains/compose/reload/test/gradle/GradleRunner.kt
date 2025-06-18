@@ -11,11 +11,14 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.job
+import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.destroyWithDescendants
+import org.jetbrains.compose.reload.core.error
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
 import org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi
 import org.jetbrains.compose.reload.test.gradle.GradleRunner.ExitCode
-import org.slf4j.LoggerFactory
 import java.nio.file.Path
 import kotlin.concurrent.thread
 import kotlin.io.path.Path
@@ -26,7 +29,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.writeText
 import kotlin.test.fail
 
-private val logger = LoggerFactory.getLogger("Gradle")
+private val logger = createLogger()
 
 public class GradleRunner @InternalHotReloadTestApi constructor(
     public val projectRoot: Path,

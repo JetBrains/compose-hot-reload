@@ -70,8 +70,6 @@ dependencies {
     implementation(project(":hot-reload-core"))
     implementation(project(":hot-reload-orchestration"))
     implementation(kotlin("test"))
-    implementation(deps.slf4j.api)
-    implementation(deps.logback)
     implementation(compose.runtime)
     implementation(deps.kotlinxSerialization.json)
 

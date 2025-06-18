@@ -51,7 +51,6 @@ dependencies {
     implementation(compose.components.resources)
     implementation(deps.compose.icons.core)
     implementation(deps.coroutines.swing)
-    implementation(deps.logback)
     implementation(deps.kotlinxDatetime)
 
     implementation(deps.evas)

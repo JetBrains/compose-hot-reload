@@ -16,11 +16,12 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.asFileName
+import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.junit.jupiter.api.extension.ExtensionContext
-import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.Path
@@ -89,7 +90,7 @@ internal fun ExtensionContext.startOrchestrationTestLogging(server: Orchestratio
         writer
     }
 
-    val testClassLogger = LoggerFactory.getLogger(testClass)
+    val testClassLogger = createLogger(testClass.name)
     testClassLogger.info(
         """
         ${requiredTestMethod.name} (${context.getDisplayName()})

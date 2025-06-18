@@ -19,6 +19,8 @@ import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.WorkerThread
 import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
+import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.exceptionOrNull
 import org.jetbrains.compose.reload.core.isActive
 import org.jetbrains.compose.reload.core.isFailure
@@ -29,7 +31,6 @@ import org.jetbrains.compose.reload.core.stopNow
 import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.core.withThread
 import org.jetbrains.compose.reload.orchestration.OrchestrationPackage.Introduction
-import org.slf4j.LoggerFactory
 import java.io.Serializable
 import java.net.Socket
 import java.util.UUID
@@ -61,7 +62,7 @@ public data class OrchestrationClientId(val value: String) : Serializable {
 }
 
 public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): OrchestrationClient {
-    val logger = LoggerFactory.getLogger("OrchestrationClient($clientRole, $port)")
+    val logger = createLogger("OrchestrationClient($clientRole, $port)")
 
     val connect = Future<Unit>()
     val isConnected = Future<Unit>()

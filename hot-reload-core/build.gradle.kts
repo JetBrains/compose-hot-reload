@@ -24,11 +24,8 @@ kotlin {
 }
 
 dependencies {
-    api(deps.slf4j.api)
-
     testImplementation(deps.coroutines.test)
     testImplementation(deps.lincheck)
-    testImplementation(deps.logback)
 
     testFixturesApi(project(":hot-reload-test:core"))
     testFixturesImplementation(kotlin("tooling-core"))
