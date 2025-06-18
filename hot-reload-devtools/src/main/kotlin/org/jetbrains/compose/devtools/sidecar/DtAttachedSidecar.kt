@@ -14,9 +14,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,26 +24,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowState
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
 import org.jetbrains.compose.devtools.widgets.DtComposeLogo
 import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
-import org.jetbrains.compose.devtools.widgets.animateReloadStatusBackground
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusColor
-import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
-import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
 import org.jetbrains.compose.reload.core.WindowId
 
 // Modern rounded corners like JetBrains Toolbox
@@ -57,32 +56,135 @@ fun DtAttachedSidecarWindow(
     isAlwaysOnTop: Boolean,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+
+    var isMinimisedVisible by remember { mutableStateOf(true) }
+    var minimisedVisibilityChanged by remember { mutableStateOf(false) }
+    var isExpandedVisible by remember { mutableStateOf(false) }
+    var expandedVisibilityChanged by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isExpanded) {
+        if (isExpanded) {
+            isMinimisedVisible = false
+            isExpandedVisible = true
+            minimisedVisibilityChanged = true
+            expandedVisibilityChanged = true
+        } else {
+            delay(animationDuration)
+            isMinimisedVisible = true
+            minimisedVisibilityChanged = true
+            // add delay between the switch so that
+            // minimised window will definitely be visible when expanded disappears
+            delay(animationDuration / 5)
+            isExpandedVisible = false
+            expandedVisibilityChanged = true
+        }
+    }
+
+    LaunchedEffect(minimisedVisibilityChanged) {
+        if (minimisedVisibilityChanged) {
+            minimisedVisibilityChanged = false
+        }
+    }
+
+    LaunchedEffect(expandedVisibilityChanged) {
+        if (expandedVisibilityChanged) {
+            expandedVisibilityChanged = false
+        }
+    }
+
+    /**
+     * Minimized sidecar window
+     */
     DtAnimatedWindow(
-        windowId,
-        windowState,
-        isExpandedByDefault = isExpanded,
-        onStateUpdate = {
-            val newSize = animateWindowSize(windowState.size, isExpanded)
-            val newPosition = animateWindowPosition(windowState.position, newSize)
+        windowId, windowState,
+        title = "$COMPOSE_HOT_RELOAD_TITLE (Minimised)",
+        alwaysOnTop = isAlwaysOnTop,
+        visible = isMinimisedVisible,
+        visibilityChanged = minimisedVisibilityChanged,
+        isExpandedByDefault = false,
+        onStateUpdate = { skipAnimation ->
+            val newSize = animateWindowSize(windowState.size, false)
+            val newPosition = animateWindowPosition(windowState.position, newSize, skipAnimation)
             newSize to newPosition
         },
-        title = COMPOSE_HOT_RELOAD_TITLE,
-        alwaysOnTop = isAlwaysOnTop,
     ) {
-        DtSidecarWindowContent(
-            isExpanded = isExpanded,
-            isExpandedChanged = { isExpanded = it },
-            enableStatusBar = devToolsTransparencyEnabled,
+        DtMinimizedSidecarWindowContent(
+            isExpandedChanged = {
+                System.err.println("(Minimised) isExpanded=$it")
+                isExpanded = it
+            }
+        )
+    }
+
+    /**
+     * Expanded sidecar window
+     */
+    DtAnimatedWindow(
+        windowId, windowState,
+        title = "$COMPOSE_HOT_RELOAD_TITLE (Expanded)",
+        alwaysOnTop = isAlwaysOnTop,
+        visible = isExpandedVisible,
+        visibilityChanged = expandedVisibilityChanged,
+        onStateUpdate = { skipAnimation ->
+            val newSize = animateWindowSize(windowState.size, true)
+            val newPosition = animateWindowPosition(windowState.position, newSize, skipAnimation)
+            newSize to newPosition
+        },
+        isExpandedByDefault = false,
+    ) {
+        DtExpandedSidecarWindowContent(
+            isExpanded,
+            isExpandedChanged = { isExpanded = it }
         )
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
+@Composable
+internal fun DtMinimizedSidecarWindowContent(
+    isExpandedChanged: (isExpanded: Boolean) -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    var inFocus by remember { mutableStateOf(false) }
+    Row(
+        modifier = modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.End,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .dtBackground()
+                .weight(1f, fill = false)
+                /* Hack for macOS to save from phantom clicks */
+                .onPointerEvent(PointerEventType.Enter) { inFocus = true }
+                .onPointerEvent(PointerEventType.Exit) { inFocus = false }
+                .clickable(enabled = inFocus) { isExpandedChanged(true) }
+                .padding(DtPadding.small)
+                .animateContentSize(alignment = Alignment.TopCenter),
+        ) {
+            DtComposeLogo(
+                Modifier.size(28.dp).padding(4.dp),
+                tint = animateReloadStatusColor(
+                    idleColor = Color.White,
+                    reloadingColor = DtColors.statusColorOrange2
+                ).value
+            )
+            DtCollapsedReloadCounterStatusItem()
+        }
+
+        if (devToolsUseTransparency) {
+            DtReloadStatusBanner(
+                modifier = Modifier
+                    .padding(DtPadding.small)
+            )
+        }
+    }
+}
 
 @Composable
-fun DtSidecarWindowContent(
+internal fun DtExpandedSidecarWindowContent(
     isExpanded: Boolean = true,
     isExpandedChanged: (isExpanded: Boolean) -> Unit = {},
-    enableStatusBar: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -92,16 +194,10 @@ fun DtSidecarWindowContent(
         AnimatedContent(
             isExpanded,
             modifier = Modifier
-                .animatedReloadStatusBorder(
-                    shape = DevToolingSidecarShape,
-                    idleColor = if (isExpanded) DtColors.border else Color.Transparent
-                )
-                .clip(DevToolingSidecarShape)
-                .background(DtColors.applicationBackground)
-                .animateReloadStatusBackground(DtColors.applicationBackground)
+                .dtBackground()
                 .weight(1f, fill = false),
             transitionSpec = {
-                if (devToolsTransparencyEnabled) {
+                if (devToolsUseTransparency) {
                     (fadeIn(animationSpec = tween(22, delayMillis = 128)) +
                         scaleIn(initialScale = 0.92f, animationSpec = tween(220, delayMillis = 128)))
                         .togetherWith(fadeOut(animationSpec = tween(90)))
@@ -115,15 +211,9 @@ fun DtSidecarWindowContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .animateEnterExit(
-                            enter = if (devToolsTransparencyEnabled) fadeIn(tween(220)) else EnterTransition.None,
-                            exit = if (devToolsTransparencyEnabled) fadeOut(tween(50)) else ExitTransition.None
-                        )
-                        .pointerInput(Unit) {
-                            detectDragGestures { change, _ ->
-                                change.consume()
-                            }
-                        }
-                        .clickable { isExpandedChanged(true) }
+                            enter = if (devToolsUseTransparency) fadeIn(tween(220)) else EnterTransition.None,
+                            exit = if (devToolsUseTransparency) fadeOut(tween(50)) else ExitTransition.None
+                        ).clickable { isExpandedChanged(true) }
                         .padding(DtPadding.small)
                         .animateContentSize(alignment = Alignment.TopCenter),
                 ) {
@@ -145,7 +235,7 @@ fun DtSidecarWindowContent(
             }
         }
 
-        if (enableStatusBar) {
+        if (devToolsUseTransparency) {
             DtReloadStatusBanner(
                 modifier = Modifier
                     .padding(DtPadding.small)

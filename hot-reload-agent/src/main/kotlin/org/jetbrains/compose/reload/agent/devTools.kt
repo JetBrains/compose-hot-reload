@@ -76,6 +76,8 @@ private fun platformSpecificJvmArguments(): Array<String> = when (Os.current()) 
         "-Dapple.awt.UIElement=${!devToolsDetached}",
         "-Dapple.awt.application.name=Compose Hot Reload Dev Tools",
     )
-    // No platform-specific options for Windows
-    Os.Windows -> emptyArray()
+    // We need no enable OpenGL rendering for skiko, because
+    // DirectX rendering has issues with managing transparency/opacity
+    // and click-through
+    Os.Windows -> arrayOf("-Dskiko.renderApi=OPENGL")
 }

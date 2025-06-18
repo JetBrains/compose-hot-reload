@@ -41,9 +41,9 @@ import io.sellmair.evas.compose.composeFlow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.devtools.sendAsync
+import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.states.UIErrorDescription
 import org.jetbrains.compose.devtools.states.UIErrorState
-import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 
@@ -58,7 +58,7 @@ internal fun ApplicationScope.DevToolingErrorOverlay(windowId: WindowId, windowS
             onCloseRequest = {},
             state = windowState,
             undecorated = true,
-            transparent = devToolsTransparencyEnabled,
+            transparent = devToolsUseTransparency,
             resizable = false,
             focusable = false,
             alwaysOnTop = true

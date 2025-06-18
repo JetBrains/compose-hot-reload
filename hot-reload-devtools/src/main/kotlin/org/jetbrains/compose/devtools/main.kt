@@ -25,6 +25,7 @@ import org.jetbrains.compose.devtools.errorOverlay.DevToolingErrorOverlay
 import org.jetbrains.compose.devtools.sidecar.DtDetachedSidecarWindow
 import org.jetbrains.compose.devtools.sidecar.DtAttachedSidecarWindow
 import org.jetbrains.compose.devtools.sidecar.DtDetachedStatusBar
+import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.states.WindowsState
 import org.jetbrains.compose.devtools.states.launchConsoleLogState
 import org.jetbrains.compose.devtools.states.launchReloadCountState
@@ -33,7 +34,6 @@ import org.jetbrains.compose.devtools.states.launchUIErrorState
 import org.jetbrains.compose.devtools.states.launchWindowsState
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsDetached
-import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.info
 
@@ -86,7 +86,7 @@ fun main() {
                 key(windowId) {
                     CompositionLocalProvider(targetApplicationWindowStateLocal provides windowState) {
                         if (devToolsDetached) {
-                            if (devToolsTransparencyEnabled) {
+                            if (devToolsUseTransparency) {
                                 DtDetachedStatusBar(
                                     windowId, windowState,
                                     isAlwaysOnTop = windowsState.alwaysOnTop[windowId] == true

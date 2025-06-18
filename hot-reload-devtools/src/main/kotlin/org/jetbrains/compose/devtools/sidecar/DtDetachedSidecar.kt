@@ -5,7 +5,6 @@
 
 package org.jetbrains.compose.devtools.sidecar
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -23,11 +21,8 @@ import org.jetbrains.compose.devtools.sendBlocking
 import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD
 import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
 import org.jetbrains.compose.devtools.theme.DtTitles.DEV_TOOLS
-import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
-import org.jetbrains.compose.devtools.widgets.animateReloadStatusBackground
-import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import kotlin.system.exitProcess
@@ -58,13 +53,7 @@ fun DtDetachedSidecarContent(
 ) {
     Row(
         modifier = modifier.fillMaxSize()
-            .animatedReloadStatusBorder(
-                shape = DevToolingSidecarShape,
-                idleColor = DtColors.border
-            )
-            .clip(DevToolingSidecarShape)
-            .background(DtColors.applicationBackground)
-            .animateReloadStatusBackground(DtColors.applicationBackground),
+            .dtBackground(),
         horizontalArrangement = Arrangement.End,
     ) {
         Column {
@@ -89,9 +78,9 @@ fun DtDetachedStatusBar(
         initialSize = initialSize,
         initialPosition = initialPosition,
         isExpandedByDefault = false,
-        onStateUpdate = {
+        onStateUpdate = { skipAnimation ->
             val newSize = animateWindowSize(windowState.size, false)
-            val newPosition = animateWindowPosition(windowState.position, newSize)
+            val newPosition = animateWindowPosition(windowState.position, newSize, skipAnimation)
             newSize.withStatusBarOffset() to newPosition.withStatusBarOffset()
         },
         title = "$COMPOSE_HOT_RELOAD Status Bar",
