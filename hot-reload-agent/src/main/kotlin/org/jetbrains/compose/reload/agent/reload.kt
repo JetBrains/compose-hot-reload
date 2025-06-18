@@ -6,8 +6,6 @@
 package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
-import org.jetbrains.compose.reload.analysis.Ids
-import org.jetbrains.compose.reload.analysis.MethodId
 import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
@@ -119,31 +117,11 @@ internal fun reload(
 
     val changedResources = pendingChanges.keys.filter { !it.isClass() && it.isFile }
 
-    if (changedResources.isNotEmpty()) {
-        cleanResourceCache()
-    }
-
     instrumentation.redefineClasses(*definitions.toTypedArray())
     return redefineRuntimeInfo(changedResources).get().mapLeft { redefinition ->
         val reload = Reload(reloadRequestId, definitions, redefinition)
         reinitializeStaticsIfNecessary(reload)
+        cleanResourceCacheIfNecessary(changedResources)
         reload
     }
-}
-
-private fun cleanResourceCache(classId: ClassId, cleanMethod: MethodId, resourceCacheType: String) {
-    val loader = findClassLoader(classId).get()
-    if (loader == null) {
-        logger.info("$resourceCacheType resource cache cleaning skipped: '$classId' is not loaded yet.")
-        return
-    }
-    loader.loadClass(classId.toFqn())
-        .getDeclaredMethod(cleanMethod.methodName)
-        .invoke(null)
-    logger.info("$resourceCacheType resource cache cleared")
-}
-
-private fun cleanResourceCache() {
-    cleanResourceCache(Ids.ImageResourcesKt.classId, Ids.ImageResourcesKt.dropImageCache, "Images")
-    cleanResourceCache(Ids.StringResourcesUtilsKt.classId, Ids.StringResourcesUtilsKt.dropStringItemsCache, "Strings")
 }
