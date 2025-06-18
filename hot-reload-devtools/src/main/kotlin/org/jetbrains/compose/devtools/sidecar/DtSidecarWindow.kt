@@ -53,6 +53,7 @@ import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowGainedFocus
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import java.awt.Dimension

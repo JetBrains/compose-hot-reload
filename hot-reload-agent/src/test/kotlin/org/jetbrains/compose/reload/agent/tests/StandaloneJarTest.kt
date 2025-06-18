@@ -11,6 +11,7 @@ import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.invokeOnValue
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage

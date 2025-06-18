@@ -264,3 +264,20 @@ LaunchMode:
   target: [ application, devtools ]
   documentation: |
     Tells the application 'how' it was launched
+
+LogLevel:
+  key: compose.reload.logLevel
+  type: enum
+  enumClass: org.jetbrains.compose.reload.core.Logger.Level
+  target: [application, devtools, build]
+  default: "Info"
+  documentation: |
+    Minimum logging level
+
+LogStdout:
+  key: compose.reload.logStdout
+  type: boolean
+  target: [ application, build, devtools ]
+  default: "false"
+  documentation: |
+    Enable output of all logs into the standard output

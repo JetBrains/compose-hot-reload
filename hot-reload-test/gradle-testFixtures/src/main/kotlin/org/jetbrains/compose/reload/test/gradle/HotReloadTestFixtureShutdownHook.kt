@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.error
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock

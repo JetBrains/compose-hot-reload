@@ -25,6 +25,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.error
+import org.jetbrains.compose.reload.core.info
 import org.junit.jupiter.api.fail
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock

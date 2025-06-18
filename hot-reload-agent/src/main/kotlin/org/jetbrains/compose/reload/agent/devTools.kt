@@ -5,18 +5,19 @@
 
 package org.jetbrains.compose.reload.agent
 
+import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty.DevToolsClasspath
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.DevTools
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_DEVTOOLS
 import java.io.File
 import java.nio.file.Path
 import kotlin.concurrent.thread
@@ -36,18 +37,13 @@ internal fun launchDevtoolsApplication() {
         *issueNewDebugSessionJvmArguments("DevTools"),
         "-Dapple.awt.UIElement=true",
         "org.jetbrains.compose.devtools.Main",
-    ).withHotReloadEnvironmentVariables(DevTools).start()
-
-    thread(name = "DevTools: Stdout", isDaemon = true) {
-        process.inputStream.bufferedReader().forEachLine { line ->
-            LogMessage(TAG_DEVTOOLS, line).sendAsync()
-        }
-        logger.info("DevTools process exited")
-    }
+    ).withHotReloadEnvironmentVariables(DevTools)
+        .start()
 
     thread(name = "DevTools: Stderr", isDaemon = true) {
+        val stderrLogger = createLogger("DevTools: Stderr", environment = Environment.devTools)
         process.errorStream.bufferedReader().forEachLine { line ->
-            LogMessage(TAG_DEVTOOLS, "stderr: $line").sendAsync()
+            stderrLogger.error(line)
         }
     }
 }

@@ -16,10 +16,8 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.jetbrains.compose.devtools.orchestration
+import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_AGENT
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_COMPILER
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_RUNTIME
 import org.jetbrains.compose.reload.orchestration.asFlow
 
 sealed class ReloadState : State {
@@ -54,11 +52,11 @@ fun CoroutineScope.launchReloadState() = launchState(ReloadState) {
         ReloadCountState.flow().collectLatest { reloadCountState ->
             collectedLogs.clear()
             orchestration.asFlow().filterIsInstance<OrchestrationMessage.LogMessage>().collect { message ->
-                if (message.tag == TAG_RUNTIME || message.tag == TAG_AGENT) {
+                if (message.environment == Environment.application) {
                     collectedLogs += message
                 }
 
-                if (message.tag == TAG_COMPILER && message.message.contains("e: ")) {
+                if (message.environment == Environment.build && message.message.contains("e: ")) {
                     collectedLogs += message
                 }
             }
@@ -80,7 +78,7 @@ fun CoroutineScope.launchReloadState() = launchState(ReloadState) {
             }
         }
 
-        if (message is OrchestrationMessage.LogMessage && message.tag == TAG_COMPILER) {
+        if (message is OrchestrationMessage.LogMessage && message.environment == Environment.build) {
             if (message.message.contains("executing build...")) {
                 currentReloadRequest = null
                 ReloadState.Reloading().emit()

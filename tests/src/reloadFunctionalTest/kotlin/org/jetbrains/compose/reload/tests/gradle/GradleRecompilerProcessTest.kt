@@ -5,10 +5,11 @@
 
 package org.jetbrains.compose.reload.tests.gradle
 
+import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_DEVTOOLS
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
 import org.jetbrains.compose.reload.test.gradle.BuildMode
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
@@ -97,7 +98,7 @@ class GradleRecompilerProcessTest {
                     application = event
                 }
 
-                if (event is OrchestrationMessage.LogMessage && event.tag == TAG_DEVTOOLS) {
+                if (event is OrchestrationMessage.LogMessage && event.environment == Environment.devTools) {
                     recompilerPidRegex.find(event.message)?.let { match ->
                         recompiler = match.groups["pid"]?.value?.toLongOrNull() ?: error("Invalid message '$event")
                     }

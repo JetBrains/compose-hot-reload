@@ -4,6 +4,11 @@ public final class org/jetbrains/compose/reload/orchestration/CoroutineExtension
 	public static final fun asFlow (Lorg/jetbrains/compose/reload/orchestration/OrchestrationHandle;)Lkotlinx/coroutines/flow/Flow;
 }
 
+public final class org/jetbrains/compose/reload/orchestration/OrchestartionLoggingKt {
+	public static final fun LogMessage-Xm7hTEE (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLorg/jetbrains/compose/reload/core/Logger$Level;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage;
+	public static synthetic fun LogMessage-Xm7hTEE$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLorg/jetbrains/compose/reload/core/Logger$Level;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage;
+}
+
 public abstract interface class org/jetbrains/compose/reload/orchestration/OrchestrationClient : org/jetbrains/compose/reload/orchestration/OrchestrationHandle {
 	public abstract fun connect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getClientId ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationClientId;
@@ -230,21 +235,30 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage : org/jetbrains/compose/reload/orchestration/OrchestrationMessage, org/jetbrains/compose/reload/core/Logger$Log {
 	public static final field Companion Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage$Companion;
-	public static final field TAG_AGENT Ljava/lang/String;
-	public static final field TAG_COMPILER Ljava/lang/String;
-	public static final field TAG_DEVTOOLS Ljava/lang/String;
-	public static final field TAG_RUNTIME Ljava/lang/String;
-	public fun <init> (Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLorg/jetbrains/compose/reload/core/Logger$Level;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-mvyzyrg ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage;
-	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()J
+	public final fun component5 ()Lorg/jetbrains/compose/reload/core/Logger$Level;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/util/List;
+	public final fun copy-1t-9WfE (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLorg/jetbrains/compose/reload/core/Logger$Level;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage;
+	public static synthetic fun copy-1t-9WfE$default (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLorg/jetbrains/compose/reload/core/Logger$Level;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getMessage ()Ljava/lang/String;
-	public final fun getTag ()Ljava/lang/String;
+	public fun getEnvironment-mvyzyrg ()Ljava/lang/String;
+	public fun getLevel ()Lorg/jetbrains/compose/reload/core/Logger$Level;
+	public fun getLoggerName ()Ljava/lang/String;
+	public fun getMessage ()Ljava/lang/String;
+	public fun getThreadName ()Ljava/lang/String;
+	public fun getThrowableClassName ()Ljava/lang/String;
+	public fun getThrowableMessage ()Ljava/lang/String;
+	public fun getThrowableStacktrace ()Ljava/util/List;
+	public fun getTimestamp ()J
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

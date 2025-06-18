@@ -11,9 +11,11 @@ import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.flow.filterIsInstance
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.exception
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
@@ -40,6 +42,7 @@ internal val orchestration: OrchestrationHandle = run {
         }
 
     logger.info("Connected 'orchestration'")
+    handle.startLoggingDispatch()
     handle
 }
 

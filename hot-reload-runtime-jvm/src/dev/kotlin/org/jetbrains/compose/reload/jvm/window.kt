@@ -17,6 +17,7 @@ import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.sendAsync
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.trace
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowPositioned
@@ -55,28 +56,28 @@ internal fun startWindowManager(): WindowId? {
 
         val windowListener = object : WindowAdapter() {
             override fun windowIconified(e: WindowEvent?) {
-                logger.trace("$windowId: $windowId: windowIconified")
+                logger.trace { "$windowId: $windowId: windowIconified" }
                 broadcastGone()
             }
 
             override fun windowDeiconified(e: WindowEvent?) {
-                logger.trace("$windowId: windowDeiconified")
+                logger.trace { "$windowId: windowDeiconified" }
                 broadcastActiveState()
             }
 
             override fun windowClosed(e: WindowEvent?) {
-                logger.trace("$windowId: windowClosed")
+                logger.trace { "$windowId: windowClosed" }
                 broadcastGone()
             }
 
             override fun windowGainedFocus(e: WindowEvent?) {
-                logger.trace("$windowId: windowGainedFocus")
+                logger.trace { "$windowId: windowGainedFocus" }
                 OrchestrationMessage.ApplicationWindowGainedFocus(windowId).sendAsync()
                 super.windowGainedFocus(e)
             }
 
             override fun windowActivated(e: WindowEvent?) {
-                logger.trace("$windowId: windowActivated")
+                logger.trace { "$windowId: windowActivated" }
                 broadcastActiveState()
                 super.windowActivated(e)
             }
@@ -84,23 +85,23 @@ internal fun startWindowManager(): WindowId? {
 
         val componentListener = object : ComponentAdapter() {
             override fun componentHidden(e: ComponentEvent?) {
-                logger.trace("$windowId: componentHidden")
+                logger.trace { "$windowId: componentHidden" }
                 broadcastGone()
             }
 
 
             override fun componentShown(e: ComponentEvent?) {
-                logger.trace("$windowId: componentShown")
+                logger.trace { "$windowId: componentShown" }
                 broadcastActiveState()
             }
 
             override fun componentResized(e: ComponentEvent?) {
-                logger.trace("$windowId: componentResized")
+                logger.trace { "$windowId: componentResized" }
                 broadcastActiveState()
             }
 
             override fun componentMoved(e: ComponentEvent?) {
-                logger.trace("$windowId: componentMoved")
+                logger.trace { "$windowId: componentMoved" }
                 broadcastActiveState()
             }
         }

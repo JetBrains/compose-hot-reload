@@ -11,7 +11,9 @@ import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 
 
-public interface SendQueue<T> : Send<T>
+public interface SendQueue<T> : Send<T> {
+    public fun add(value: T)
+}
 
 public interface ReceiveQueue<T> {
     public suspend fun receive(): T
@@ -28,6 +30,17 @@ private class QueueImpl<T> : Queue<T> {
     private val senders = ArrayDeque<SuspendedSender<T>>()
     private val receivers = ArrayDeque<SuspendedReceiver<T>>()
     private val lock = ReentrantLock()
+
+    override fun add(value: T) {
+        val receiver = lock.withLock {
+            val receiver = receivers.removeFirstOrNull()
+            if (receiver != null) return@withLock receiver
+            senders.addLast(SuspendedSender(null, value))
+            null
+        }
+
+        receiver?.continuation?.resume(value)
+    }
 
     override suspend fun send(value: T) {
         val receiver = lock.withLock { receivers.removeFirstOrNull() }
@@ -61,7 +74,7 @@ private class QueueImpl<T> : Queue<T> {
         val sender = lock.withLock { senders.removeFirstOrNull() }
         /* Fast path: We have a suspended sender: Let's take the value from there */
         if (sender != null) {
-            sender.continuation.resume(Unit)
+            sender.continuation?.resume(Unit)
             return sender.value
         }
 
@@ -77,7 +90,7 @@ private class QueueImpl<T> : Queue<T> {
             }
 
             if (senderOrNull != null) {
-                senderOrNull.continuation.resume(Unit)
+                senderOrNull.continuation?.resume(Unit)
                 continuation.resume(senderOrNull.value)
             }
         }.getOrThrow()
@@ -86,7 +99,7 @@ private class QueueImpl<T> : Queue<T> {
     override fun nextOrNull(): Either<T, Nothing?> {
         val sender = lock.withLock { senders.removeFirstOrNull() }
         if (sender != null) {
-            sender.continuation.resume(Unit)
+            sender.continuation?.resume(Unit)
             return sender.value.toLeft()
         }
 
@@ -98,7 +111,7 @@ private class QueueImpl<T> : Queue<T> {
     }
 
     private class SuspendedSender<T>(
-        val continuation: Continuation<Unit>, val value: T
+        val continuation: Continuation<Unit>?, val value: T
     )
 
     private class SuspendedReceiver<T>(

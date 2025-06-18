@@ -7,7 +7,9 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.isIgnoredClassId
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
 import java.io.ByteArrayOutputStream
@@ -54,7 +56,7 @@ private object JdwpTracker : ClassFileTransformer {
                 clazz.classFile.write(daos)
                 baos.toByteArray()
             }.getOrElse { failure ->
-                logger.orchestration("Failed to transform '${className}'", failure)
+                logger.error("Failed to transform '${className}'", failure)
                 classfileBuffer
             }
 

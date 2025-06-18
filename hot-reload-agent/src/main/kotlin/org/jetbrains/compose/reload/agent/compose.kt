@@ -8,7 +8,10 @@ package org.jetbrains.compose.reload.agent
 import org.jetbrains.compose.reload.analysis.ComposeGroupKey
 import org.jetbrains.compose.reload.analysis.Ids
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.isFailure
+import org.jetbrains.compose.reload.core.warn
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.security.ProtectionDomain
@@ -62,7 +65,7 @@ private fun launchComposeGroupInvalidation() {
             .groupBy { it.group }
 
         if (invalidations.isEmpty()) {
-            logger.orchestration("All groups retained")
+            logger.info("All groups retained")
         }
 
         invalidations.forEach { group, methods ->
@@ -73,7 +76,7 @@ private fun launchComposeGroupInvalidation() {
                     "${methodId.classId}.${methodId.methodName}"
                 }
 
-            logger.orchestration("Invalidating group '${group.key}' $methods")
+            logger.info("Invalidating group '${group.key}' $methods")
             invalidateGroupsWithKey(group)
         }
     }

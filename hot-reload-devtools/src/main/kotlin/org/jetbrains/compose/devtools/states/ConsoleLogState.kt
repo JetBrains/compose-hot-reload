@@ -9,6 +9,7 @@ import io.sellmair.evas.State
 import io.sellmair.evas.launchState
 import kotlinx.coroutines.CoroutineScope
 import org.jetbrains.compose.devtools.orchestration
+import org.jetbrains.compose.reload.core.displayString
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asFlow
 import kotlin.time.Duration.Companion.milliseconds
@@ -26,7 +27,12 @@ internal fun CoroutineScope.launchConsoleLogState() = launchState(ConsoleLogStat
 
     orchestration.asFlow().collect { event ->
         if (event is OrchestrationMessage.LogMessage) {
-            logDeque.add("${event.tag} | ${event.message}")
+            logDeque.add(
+                event.displayString(
+                    useEffects = false,
+                    includeThreadName = false, includeTimestamp = false, includeEnvironment = false
+                ).removePrefix(" | ")
+            )
         }
 
         if (event is OrchestrationMessage.BuildTaskResult) {

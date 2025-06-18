@@ -16,6 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.jetbrains.compose.devtools.orchestration
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.trace
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asFlow
 
@@ -41,7 +42,7 @@ fun CoroutineScope.launchWindowsState() = launchState(WindowsState.Key) {
 
     orchestration.asFlow().collect { message ->
         if (message is OrchestrationMessage.ApplicationWindowPositioned) {
-            logger.trace("Positioned: '${message.windowId}'")
+            logger.trace { "Positioned: '${message.windowId}'" }
             val windowState = windows[message.windowId]
             if (windowState != null) {
                 windowState.placement = WindowPlacement.Floating
@@ -57,7 +58,7 @@ fun CoroutineScope.launchWindowsState() = launchState(WindowsState.Key) {
         }
 
         if (message is OrchestrationMessage.ApplicationWindowGone) {
-            logger.trace("Removed: '${message.windowId}'")
+            logger.trace { "Removed: '${message.windowId}'" }
             windows.remove(message.windowId)
             update()
         }

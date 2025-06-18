@@ -10,6 +10,7 @@ package org.jetbrains.compose.reload.test
 import org.jetbrains.compose.reload.agent.invokeAfterHotReload
 import org.jetbrains.compose.reload.agent.sendBlocking
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.isSuccess
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage

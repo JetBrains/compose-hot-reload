@@ -10,6 +10,7 @@ import com.sun.jdi.VirtualMachine
 import com.sun.jdi.connect.Connector
 import com.sun.jdi.connect.ListeningConnector
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
 import org.jetbrains.compose.reload.test.gradle.BuildMode
 import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts

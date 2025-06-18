@@ -14,6 +14,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.asFileName
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
@@ -21,19 +22,12 @@ import org.jetbrains.compose.reload.orchestration.asChannel
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeFormatterBuilder
-import java.time.temporal.ChronoField
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.Path
 import kotlin.io.path.bufferedWriter
 import kotlin.io.path.createDirectories
 import kotlin.io.path.deleteRecursively
 import kotlin.io.path.exists
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
-import kotlin.time.toJavaInstant
 
 /*
 Logging in Tests:
@@ -83,8 +77,8 @@ internal fun ExtensionContext.startOrchestrationTestLogging(server: Orchestratio
     allMessagesWriter.appendLine("<<Start>>")
 
     /* We will create a specific log file for each log tag (e.g., a logs-Compiler.txt) */
-    val taggedWriters = hashMapOf<String, BufferedWriter>()
-    fun taggedWriter(tag: String): BufferedWriter = taggedWriters.getOrPut(tag) {
+    val taggedWriters = hashMapOf<Environment?, BufferedWriter>()
+    fun taggedWriter(tag: Environment?): BufferedWriter = taggedWriters.getOrPut(tag) {
         val file = outputDirectory.resolve("logs-$tag.txt".asFileName())
         val writer = file.bufferedWriter()
         writer.appendLine("<<Start>>")
@@ -106,13 +100,13 @@ internal fun ExtensionContext.startOrchestrationTestLogging(server: Orchestratio
 
     /* We collect all messages and log them: The flow will be closed when the orchestration closes */
     server.asChannel().consumeAsFlow().collect { message ->
-        val messageString = "$currentTime: $message"
+        val messageString = message.toString()
         if (message is LogMessage) {
             allLogsWriter.appendLine(messageString)
             allLogsWriter.flush()
-            val tag = message.tag
-            if (tag != null) {
-                taggedWriter(tag).appendLine(messageString)
+            val environment = message.environment
+            if (environment != null) {
+                taggedWriter(environment).appendLine(messageString)
             }
         }
 
@@ -134,20 +128,3 @@ internal fun ExtensionContext.startOrchestrationTestLogging(server: Orchestratio
         writer.close()
     }
 }
-
-
-private val currentTimeFormat: DateTimeFormatter = DateTimeFormatterBuilder()
-    .appendValue(ChronoField.HOUR_OF_DAY, 2)
-    .appendLiteral(':')
-    .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-    .optionalStart()
-    .appendLiteral(':')
-    .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
-    .optionalStart()
-    .appendFraction(ChronoField.MILLI_OF_SECOND, 2, 2, true)
-    .toFormatter()
-
-@OptIn(ExperimentalTime::class)
-private val currentTime: String
-    get() = Clock.System.now().toJavaInstant().atZone(ZoneId.systemDefault())
-        .format(currentTimeFormat)

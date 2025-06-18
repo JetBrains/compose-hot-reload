@@ -24,6 +24,7 @@ import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.core.toRight
+import org.jetbrains.compose.reload.core.warn
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.MethodNode
 

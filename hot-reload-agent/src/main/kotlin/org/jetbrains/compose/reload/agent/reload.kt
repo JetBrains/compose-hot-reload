@@ -9,7 +9,11 @@ import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
+import org.jetbrains.compose.reload.core.error
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.mapLeft
+import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
 import java.io.ByteArrayOutputStream
@@ -17,7 +21,6 @@ import java.io.DataOutputStream
 import java.io.File
 import java.lang.instrument.ClassDefinition
 import java.lang.instrument.Instrumentation
-import java.util.UUID
 
 private val logger = createLogger()
 
@@ -76,7 +79,7 @@ internal fun reload(
                 return@mapNotNull null
             }
 
-            logger.orchestration(buildString {
+            logger.info(buildString {
                 appendLine("Reloading class: '${clazz.name}' (${change.name})")
 
                 if (originalClass.superclass?.name != clazz.superclass.name) {
@@ -103,7 +106,7 @@ internal fun reload(
             clazz.classFile.write(daos)
             baos.toByteArray()
         }.getOrElse { failure ->
-            logger.orchestration("Failed to transform '${originalClass?.name}'", failure)
+            logger.error("Failed to transform '${originalClass?.name}'", failure)
             code
         }
 

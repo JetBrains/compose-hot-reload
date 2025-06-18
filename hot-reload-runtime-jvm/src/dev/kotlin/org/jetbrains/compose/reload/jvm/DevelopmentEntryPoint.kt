@@ -23,6 +23,9 @@ import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.sendAsync
 import org.jetbrains.compose.reload.agent.sendBlocking
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.error
+import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.CleanCompositionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RetryFailedCompositionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIException
@@ -35,7 +38,7 @@ private val logger = createLogger()
 fun DevelopmentEntryPoint(child: @Composable () -> Unit) {
     /* Checking if we're currently in the stack of a hot reload */
     if (hotReloadStateLocal.current != null) {
-        logger.orchestration(
+        logger.warn(
             "Skipping 'DevelopmentEntryPoint': We're already in an entry point",
             Exception("Nested 'DevelopmentEntryPoint'")
         )
@@ -62,9 +65,9 @@ fun DevelopmentEntryPoint(child: @Composable () -> Unit) {
     val currentHotReloadState by hotReloadState.collectAsState()
 
     val intercepted: @Composable () -> Unit = {
-        logger.orchestration("Composing UI: $currentHotReloadState")
+        logger.info("Composing UI: $currentHotReloadState")
         runCatching { child() }.onFailure { exception ->
-            logger.orchestration("Failed invoking 'JvmDevelopmentEntryPoint':", exception)
+            logger.error("Failed invoking 'JvmDevelopmentEntryPoint':", exception)
             hotReloadState.update { state -> state.copy(uiError = exception) }
             UIException(
                 windowId = windowId,

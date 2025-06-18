@@ -6,6 +6,8 @@
 package org.jetbrains.compose.reload.tests.gradle
 
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileResult

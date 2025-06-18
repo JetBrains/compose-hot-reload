@@ -583,7 +583,7 @@ public final class org/jetbrains/compose/reload/test/gradle/TransactionScope : k
 	public final fun awaitReload (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getCoroutineContext ()Lkotlin/coroutines/CoroutineContext;
 	public final fun getFixture ()Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;
-	public final fun getLogger ()Lorg/slf4j/Logger;
+	public final fun getLogger ()Lorg/jetbrains/compose/reload/core/Logger;
 	public final fun getMessage ()Lkotlinx/coroutines/channels/ReceiveChannel;
 	public final fun getSharedMessages ()Lkotlinx/coroutines/flow/SharedFlow;
 	public final fun initialSourceCode (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

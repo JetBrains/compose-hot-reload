@@ -16,6 +16,7 @@ import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.HotReloadProperty
+import org.jetbrains.compose.reload.core.Logger
 import org.jetbrains.compose.reload.gradle.composeHotReloadAgentJar
 import org.jetbrains.compose.reload.gradle.core.composeReloadDevToolsEnabled
 import org.jetbrains.compose.reload.gradle.core.composeReloadDevToolsIsHeadless
@@ -24,6 +25,8 @@ import org.jetbrains.compose.reload.gradle.core.composeReloadDirtyResolveDepthLi
 import org.jetbrains.compose.reload.gradle.core.composeReloadGradleBuildContinuous
 import org.jetbrains.compose.reload.gradle.core.composeReloadIsHeadless
 import org.jetbrains.compose.reload.gradle.core.composeReloadJetBrainsRuntimeBinary
+import org.jetbrains.compose.reload.gradle.core.composeReloadLogLevelProvider
+import org.jetbrains.compose.reload.gradle.core.composeReloadLogStdoutProvider
 import org.jetbrains.compose.reload.gradle.core.composeReloadOrchestrationPort
 import org.jetbrains.compose.reload.gradle.core.composeReloadStderrFile
 import org.jetbrains.compose.reload.gradle.core.composeReloadStdinFile
@@ -180,6 +183,8 @@ private class ComposeHotReloadArgumentsBuilderImpl(
             /* Non API elements */
             virtualMethodResolveEnabled = project.composeReloadVirtualMethodResolveEnabled,
             dirtyResolveDepthLimit = project.composeReloadDirtyResolveDepthLimit,
+            logLevel = project.composeReloadLogLevelProvider,
+            logStdout = project.composeReloadLogStdoutProvider,
             stdinFile = project.composeReloadStdinFile?.toFile(),
             stdoutFile = project.composeReloadStdoutFile?.toFile(),
             stderrFile = project.composeReloadStderrFile?.toFile(),
@@ -208,6 +213,8 @@ private class ComposeHotReloadArgumentsImpl(
     /* Non API elements */
     private val virtualMethodResolveEnabled: Boolean,
     private val dirtyResolveDepthLimit: Int,
+    private val logLevel: Provider<Logger.Level>,
+    private val logStdout: Provider<Boolean>,
     private val stdinFile: File?,
     private val stdoutFile: File?,
     private val stderrFile: File?,
@@ -308,6 +315,9 @@ private class ComposeHotReloadArgumentsImpl(
 
         add("-D${HotReloadProperty.VirtualMethodResolveEnabled.key}=$virtualMethodResolveEnabled")
         add("-D${HotReloadProperty.DirtyResolveDepthLimit.key}=$dirtyResolveDepthLimit")
+
+        add("-D${HotReloadProperty.LogLevel.key}=${logLevel.get().name}")
+        add("-D${HotReloadProperty.LogStdout.key}=${logStdout.get()}")
 
         if (stdinFile != null) {
             add("-D${HotReloadProperty.StdinFile.key}=${stdinFile.absolutePath}")

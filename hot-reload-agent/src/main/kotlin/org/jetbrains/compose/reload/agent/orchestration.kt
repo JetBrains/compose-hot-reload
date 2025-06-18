@@ -6,22 +6,23 @@
 package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.core.Future
-import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.invokeOnCompletion
 import org.jetbrains.compose.reload.core.invokeOnValue
 import org.jetbrains.compose.reload.core.launchTask
+import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.core.withType
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_AGENT
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
+import org.jetbrains.compose.reload.orchestration.connectBlocking
+import org.jetbrains.compose.reload.orchestration.startBlocking
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.seconds
@@ -29,13 +30,8 @@ import kotlin.time.Duration.Companion.seconds
 private val logger = createLogger()
 
 val orchestration: OrchestrationHandle by lazy {
-    launchTask {
-        val handle = startOrchestration()
-        handle.port.awaitOrThrow()
-        handle
-    }.getBlocking(15.seconds).getOrThrow()
+    OrchestrationClient(Application) ?: OrchestrationServer()
 }
-
 
 suspend fun OrchestrationMessage.send() {
     return orchestration.send(this)
@@ -49,7 +45,9 @@ fun OrchestrationMessage.sendAsync(): Future<Unit> {
     return launchTask { send() }
 }
 
-internal fun launchOrchestration() {
+internal fun startOrchestration() {
+    val orchestration = orchestration
+
     orchestration.messages.withType<ShutdownRequest>().invokeOnValue { request ->
         /* The request provides a pidFile: We therefore only respect the request when the pidFile matches */
         if (!request.isApplicable()) {
@@ -61,39 +59,25 @@ internal fun launchOrchestration() {
         exitProcess(0)
     }
 
-
     orchestration.invokeOnCompletion {
         logger.info("Application Orchestration closed")
         exitProcess(0)
     }
-}
-
-private suspend fun startOrchestration(): OrchestrationHandle {
-    val orchestration = run {
-        /* Connecting to a server if we're instructed to */
-        OrchestrationClient(Application)?.let { client ->
-            client.connect().getOrThrow()
-
-            val message = "Agent: 'Client' mode (connected to '${client.port.awaitOrThrow()}')"
-            logger.info("Agent: 'Client' mode (connected to '${client.port.awaitOrThrow()}')")
-            client.send(LogMessage(TAG_AGENT, message))
-            return@run client
-        }
-
-        /* Otherwise, we start our own orchestration server */
-        logger.debug("Hot Reload Agent is starting in 'server' mode")
-        OrchestrationServer().also { server ->
-            server.start()
-            val message = "Agent: Server started on port '${server.port.awaitOrThrow()}'"
-            logger.info(message)
-            server.send(LogMessage(TAG_AGENT, message))
-        }
-    }
 
     Runtime.getRuntime().addShutdownHook(thread(start = false) {
-        logger.orchestration("Hot Reload Agent is shutting down")
+        logger.info("Hot Reload Agent is shutting down")
         orchestration.close()
     })
 
-    return orchestration
+    if (orchestration is OrchestrationClient) {
+        orchestration.connectBlocking()
+        logger.info("Agent: 'Client' mode (connected to '${orchestration.port.getOrNull()}')")
+    }
+
+    if (orchestration is OrchestrationServer) {
+        orchestration.startBlocking()
+        logger.info("Agent: Server started on port '${orchestration.port.getOrNull()}'")
+    }
+
+    orchestration.startDispatchingLogs()
 }

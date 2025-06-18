@@ -38,7 +38,11 @@ import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.sendAsync
 import org.jetbrains.compose.reload.core.asTemplateOrThrow
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
+import org.jetbrains.compose.reload.core.error
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.renderOrThrow
+import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest

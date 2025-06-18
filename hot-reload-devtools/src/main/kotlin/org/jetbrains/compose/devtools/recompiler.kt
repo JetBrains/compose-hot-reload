@@ -8,6 +8,7 @@ package org.jetbrains.compose.devtools
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.BuildSystem.Amper
 import org.jetbrains.compose.reload.core.BuildSystem.Gradle
+import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty
@@ -15,19 +16,20 @@ import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.BuildTool
 import org.jetbrains.compose.reload.core.LaunchMode
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.destroyWithDescendants
+import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.invokeOnCompletion
 import org.jetbrains.compose.reload.core.invokeOnError
 import org.jetbrains.compose.reload.core.invokeOnValue
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
+import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
 import org.jetbrains.compose.reload.core.withType
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_COMPILER
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage.Companion.TAG_DEVTOOLS
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
 import java.io.File
 import java.nio.file.Path
@@ -168,7 +170,7 @@ private fun takeRecompileRequests(): List<RecompileRequest> {
 }
 
 private fun ProcessBuilder.startRecompilerProcess(): Int? {
-    LogMessage(TAG_DEVTOOLS, "Starting recompiler process:\n${this.command().joinToString("        \n")}").sendAsync()
+    logger.info("Starting recompiler process:\n${this.command().joinToString("        \n")}")
 
     val process: Process = start()
     logger.debug("'Recompiler': Started (${process.pid()})")
@@ -181,10 +183,12 @@ private fun ProcessBuilder.startRecompilerProcess(): Int? {
     Runtime.getRuntime().addShutdownHook(shutdownHook)
 
     thread(name = "Recompiler Output", isDaemon = true) {
+        val recompilerLogger = createLogger("Recompiler", Environment.build)
+
         process.inputStream.bufferedReader().use { reader ->
             while (true) {
                 val nextLine = reader.readLine() ?: break
-                LogMessage(TAG_COMPILER, nextLine).sendAsync()
+                recompilerLogger.info(nextLine)
             }
         }
     }

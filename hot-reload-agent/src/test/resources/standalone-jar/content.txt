@@ -1,5 +1,6 @@
 META-INF/
 META-INF/MANIFEST.MF
+META-INF/compose.reload.env
 META-INF/hot-reload-agent.kotlin_module
 META-INF/hot-reload-analysis.kotlin_module
 META-INF/hot-reload-core.kotlin_module
@@ -10,6 +11,8 @@ META-INF/maven/org.javassist/
 META-INF/maven/org.javassist/javassist/
 META-INF/maven/org.javassist/javassist/pom.properties
 META-INF/maven/org.javassist/javassist/pom.xml
+META-INF/services/
+META-INF/services/org.jetbrains.compose.reload.core.Logger$Dispatch
 org/
 org/jetbrains/
 org/jetbrains/compose/

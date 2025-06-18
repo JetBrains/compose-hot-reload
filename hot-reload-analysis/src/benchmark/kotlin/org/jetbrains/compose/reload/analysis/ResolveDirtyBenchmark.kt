@@ -17,6 +17,7 @@ import kotlinx.benchmark.State
 import kotlinx.benchmark.TearDown
 import kotlinx.benchmark.Warmup
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
 import java.nio.file.Files
 import java.nio.file.Path

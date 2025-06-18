@@ -5,8 +5,12 @@
 
 package org.jetbrains.compose.reload.orchestration
 
+import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
+import org.jetbrains.compose.reload.core.Logger
+import org.jetbrains.compose.reload.core.Logger.Level
 import org.jetbrains.compose.reload.core.WindowId
+import org.jetbrains.compose.reload.core.displayString
 import org.jetbrains.compose.reload.core.withLinearClosure
 import java.io.File
 import java.io.Serializable
@@ -261,23 +265,25 @@ public sealed class OrchestrationMessage : OrchestrationPackage(), Serializable 
      * Can be used for very important log messages, or for testing.
      */
     public data class LogMessage(
-        val tag: String?,
-        val message: String,
-    ) : OrchestrationMessage() {
-        public constructor(message: String) : this(null, message)
+        public override val environment: Environment?,
+        public override val loggerName: String?,
+        public override val threadName: String?,
+        public override val timestamp: Long,
+        public override val level: Level,
+        public override val message: String,
+        public override val throwableClassName: String?,
+        public override val throwableMessage: String?,
+        public override val throwableStacktrace: List<StackTraceElement>?
+    ) : OrchestrationMessage(), Logger.Log {
 
         public companion object {
-            public const val TAG_COMPILER: String = "Compiler"
-            public const val TAG_AGENT: String = "Agent"
-            public const val TAG_RUNTIME: String = "Runtime"
-            public const val TAG_DEVTOOLS: String = "DevTools"
 
             @Suppress("unused")
             internal const val serialVersionUID: Long = 0L
         }
 
         override fun toString(): String {
-            return "Log [$tag] $message"
+            return displayString(useEffects = false)
         }
     }
 

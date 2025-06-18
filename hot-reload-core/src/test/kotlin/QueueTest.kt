@@ -1,6 +1,10 @@
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.reload.core.Queue
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.launchTask
+import org.jetbrains.compose.reload.core.testFixtures.runStressTest
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
@@ -39,5 +43,33 @@ class QueueTest {
                 "sending 4", "sending 5", "received 4", "received 5"
             ), events
         )
+    }
+
+    @Test
+    fun `stress test - send add receive`() = runStressTest(silenceTimeout = 2.seconds) {
+        val nextInt = AtomicInteger(0)
+        val queue = Queue<Int>()
+
+        launch(Dispatchers.Default) {
+            repeat(128) {
+                queue.send(nextInt.incrementAndGet())
+            }
+        }
+
+        launch(Dispatchers.Default) {
+            repeat(128) {
+                queue.add(nextInt.incrementAndGet())
+            }
+        }
+
+        val received = mutableListOf<Int>()
+        repeat(2 * 128) {
+            val value = queue.receive()
+            reportActivity("received: $value")
+            received.add(value)
+        }
+
+        assertEquals(2 * 128, received.size)
+        assertEquals(received.size, received.toSet().size)
     }
 }

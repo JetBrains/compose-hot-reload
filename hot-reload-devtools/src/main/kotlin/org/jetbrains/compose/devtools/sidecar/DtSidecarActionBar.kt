@@ -24,6 +24,7 @@ import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.LaunchMode
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists

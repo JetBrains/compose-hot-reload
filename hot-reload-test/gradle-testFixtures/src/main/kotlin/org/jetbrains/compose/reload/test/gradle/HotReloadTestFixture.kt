@@ -27,14 +27,18 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
+import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.withAsyncTrace
+import org.jetbrains.compose.reload.orchestration.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.asFlow
+import org.jetbrains.compose.reload.orchestration.sendAsync
+import org.jetbrains.compose.reload.orchestration.startLoggerDispatch
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.coroutines.CoroutineContext
@@ -46,7 +50,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
-private val logger = createLogger()
 
 @TransactionDslMarker
 public class HotReloadTestFixture
@@ -62,6 +65,8 @@ internal constructor(
     @PublishedApi
     internal val isDebug: Boolean,
 ) : AutoCloseable {
+
+    private val logger = createLogger("Test Fixture", dispatch = listOf(orchestration.startLoggerDispatch()))
 
     public suspend fun <T> runTransaction(
         block: suspend TransactionScope.() -> T
@@ -148,7 +153,11 @@ internal constructor(
                 val stderr = gradleRunner.stderrChannel?.receiveAsFlow() ?: emptyFlow()
                 val stdout = gradleRunner.stdoutChannel?.receiveAsFlow() ?: emptyFlow()
                 merge(stderr, stdout).collect { message ->
-                    orchestration.send(LogMessage("Gradle Test Runner", message))
+                    orchestration sendAsync LogMessage(
+                        environment = Environment.build,
+                        loggerName = "Gradle Test Runner",
+                        message = message
+                    )
                 }
             }
 

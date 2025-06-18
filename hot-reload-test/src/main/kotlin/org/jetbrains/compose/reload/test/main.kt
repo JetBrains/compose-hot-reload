@@ -10,6 +10,7 @@ package org.jetbrains.compose.reload.test
 
 import org.jetbrains.compose.reload.agent.sendBlocking
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import java.lang.reflect.InvocationTargetException

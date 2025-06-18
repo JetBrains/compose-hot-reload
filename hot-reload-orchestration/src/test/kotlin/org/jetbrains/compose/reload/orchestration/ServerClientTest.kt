@@ -39,7 +39,6 @@ import org.jetbrains.compose.reload.core.withThread
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.parallel.Execution
@@ -95,12 +94,12 @@ class ServerClientTest {
         client.connect().getOrThrow()
 
         withThread(reloadMainThread) {
-            client.send(LogMessage("A"))
-            clientChannel.consumeAsFlow().filterIsInstance<LogMessage>().first()
-            serverChannel.receiveAsFlow().filterIsInstance<LogMessage>().first()
+            client.send(TestEvent("A"))
+            clientChannel.consumeAsFlow().filterIsInstance<TestEvent>().first()
+            serverChannel.receiveAsFlow().filterIsInstance<TestEvent>().first()
 
-            assertEquals(listOf<OrchestrationMessage>(LogMessage("A")), serverReceivedMessages)
-            assertEquals(listOf<OrchestrationMessage>(LogMessage("A")), clientReceivedMessages)
+            assertEquals(listOf<OrchestrationMessage>(TestEvent("A")), serverReceivedMessages)
+            assertEquals(listOf<OrchestrationMessage>(TestEvent("A")), clientReceivedMessages)
         }
     }
 
@@ -127,14 +126,14 @@ class ServerClientTest {
         }
 
         client.use { client ->
-            client.send(LogMessage("A"))
+            client.send(TestEvent("A"))
         }
 
-        val logMessage = serverMessages.receiveAsFlow().filterIsInstance<LogMessage>().first()
-        assertEquals("A", logMessage.message)
+        val logMessage = serverMessages.receiveAsFlow().filterIsInstance<TestEvent>().first()
+        assertEquals("A", logMessage.payload)
 
         withThread(reloadMainThread) {
-            assertEquals(listOf(LogMessage("A")), serverReceivedMessages.toList())
+            assertEquals(listOf(TestEvent("A")), serverReceivedMessages.toList())
         }
     }
 
@@ -147,24 +146,24 @@ class ServerClientTest {
         val clientChannel = client.asChannel()
 
         launch {
-            val firstLog = serverChannel.receiveAsFlow().filterIsInstance<LogMessage>().first()
-            assertEquals("A", firstLog.message)
+            val firstLog = serverChannel.receiveAsFlow().filterIsInstance<TestEvent>().first()
+            assertEquals("A", firstLog.payload)
 
-            val secondLog = serverChannel.receiveAsFlow().filterIsInstance<LogMessage>().first()
-            assertEquals("B", secondLog.message)
+            val secondLog = serverChannel.receiveAsFlow().filterIsInstance<TestEvent>().first()
+            assertEquals("B", secondLog.payload)
         }
 
 
         launch {
-            val firstLog = clientChannel.receiveAsFlow().filterIsInstance<LogMessage>().first()
-            assertEquals("A", firstLog.message)
+            val firstLog = clientChannel.receiveAsFlow().filterIsInstance<TestEvent>().first()
+            assertEquals("A", firstLog.payload)
 
-            val secondLog = clientChannel.receiveAsFlow().filterIsInstance<LogMessage>().first()
-            assertEquals("B", secondLog.message)
+            val secondLog = clientChannel.receiveAsFlow().filterIsInstance<TestEvent>().first()
+            assertEquals("B", secondLog.payload)
         }
 
-        client.send(LogMessage("A"))
-        client.send(LogMessage("B"))
+        client.send(TestEvent("A"))
+        client.send(TestEvent("B"))
     }
 
 

@@ -14,6 +14,7 @@ import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.sendAsync
 import org.jetbrains.compose.reload.agent.sendBlocking
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asChannel
 
@@ -28,7 +29,7 @@ public fun sendTestEventBlocking(any: Any? = null) {
 }
 
 public fun sendLog(any: Any?) {
-    OrchestrationMessage.LogMessage("test", any.toString()).sendAsync()
+    logger.debug(any.toString())
 }
 
 @Composable

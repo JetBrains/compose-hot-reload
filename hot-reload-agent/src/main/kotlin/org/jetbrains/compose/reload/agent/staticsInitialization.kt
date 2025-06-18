@@ -10,7 +10,9 @@ import javassist.CtConstructor
 import org.jetbrains.compose.reload.analysis.classId
 import org.jetbrains.compose.reload.analysis.classInitializerMethodId
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.sortedByTopology
+import org.jetbrains.compose.reload.core.warn
 import java.lang.reflect.Modifier
 
 private val logger = createLogger()
