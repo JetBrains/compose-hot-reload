@@ -75,9 +75,60 @@ fun DtSidecarWindow(
     isAlwaysOnTop: Boolean,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    var isExpandedVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isExpanded) {
+        if (isExpanded) {
+            isExpandedVisible = true
+        } else {
+            delay(animationDuration)
+            isExpandedVisible = false
+        }
+    }
+
+    /**
+     * Minimized sidecar window
+     */
+    DtSidecarDialog(
+        windowId, windowState, isAlwaysOnTop,
+        visible = !isExpandedVisible,
+        windowSizeExpanded = false
+    ) {
+        DtMinimizedSidecarWindowContent(
+            isExpandedChanged = { isExpanded = it }
+        )
+    }
+
+    /**
+     * Expanded sidecar window
+     */
+    DtSidecarDialog(
+        windowId, windowState, isAlwaysOnTop,
+        visible = isExpandedVisible,
+        windowSizeExpanded = true
+    ) {
+        DtExpandedSidecarWindowContent(
+            isExpanded,
+            isExpandedChanged = { isExpanded = it }
+        )
+    }
+}
+
+@Composable
+private fun DtSidecarDialog(
+    windowId: WindowId,
+    windowState: WindowState,
+    isAlwaysOnTop: Boolean,
+    visible: Boolean = true,
+    windowSizeExpanded: Boolean,
+    content: @Composable () -> Unit,
+) {
     var isInitializing by remember { mutableStateOf(true) }
+    var visibility by remember { mutableStateOf(visible) }
+    val changedVisibility = visible != visibility
 
     DialogWindow(
+        visible = visible,
         onCloseRequest = {
             ShutdownRequest("Requested by user through 'devtools'").sendBlocking()
             exitProcess(0)
@@ -86,16 +137,16 @@ fun DtSidecarWindow(
         transparent = devToolsTransparencyEnabled,
         resizable = false,
         focusable = true,
-        alwaysOnTop = isAlwaysOnTop
+        alwaysOnTop = isAlwaysOnTop,
     ) {
         if (isInitializing) {
             isInitializing = false
-            val initialSize = getSideCarWindowSize(windowState, isExpanded)
+            val initialSize = getSideCarWindowSize(windowState, windowSizeExpanded)
             window.size = initialSize.toDimension()
             window.location = getSideCarWindowPosition(windowState, initialSize.width).toPoint()
         } else {
-            val newSize = animateWindowSize(windowState, isExpanded)
-            val newPosition = animateWindowPosition(windowState, newSize)
+            val newSize = animateWindowSize(windowState, windowSizeExpanded)
+            val newPosition = animateWindowPosition(windowState, newSize, changedVisibility)
             if (window.size != newSize.toDimension()) {
                 window.size = newSize.toDimension()
             }
@@ -111,16 +162,49 @@ fun DtSidecarWindow(
             }
         }
 
-        DtSidecarWindowContent(
-            isExpanded,
-            isExpandedChanged = { isExpanded = it }
-        )
+        content()
     }
 }
 
+@Composable
+internal fun DtMinimizedSidecarWindowContent(
+    isExpandedChanged: (isExpanded: Boolean) -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.End,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .dtBackground()
+                .weight(1f, fill = false)
+                .clickable { isExpandedChanged(true) }
+                .padding(DtPadding.small)
+                .animateContentSize(alignment = Alignment.TopCenter),
+        ) {
+            DtComposeLogo(
+                Modifier.size(28.dp).padding(4.dp),
+                tint = animateReloadStatusColor(
+                    idleColor = Color.White,
+                    reloadingColor = DtColors.statusColorOrange2
+                ).value
+            )
+            DtCollapsedReloadCounterStatusItem()
+        }
+
+        if (devToolsTransparencyEnabled) {
+            DtReloadStatusBanner(
+                modifier = Modifier
+                    .padding(DtPadding.small)
+            )
+        }
+    }
+}
 
 @Composable
-fun DtSidecarWindowContent(
+internal fun DtExpandedSidecarWindowContent(
     isExpanded: Boolean = true,
     isExpandedChanged: (isExpanded: Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
@@ -132,13 +216,7 @@ fun DtSidecarWindowContent(
         AnimatedContent(
             isExpanded,
             modifier = Modifier
-                .animatedReloadStatusBorder(
-                    shape = DevToolingSidecarShape,
-                    idleColor = if (isExpanded) DtColors.border else Color.Transparent
-                )
-                .clip(DevToolingSidecarShape)
-                .background(DtColors.applicationBackground)
-                .animateReloadStatusBackground(DtColors.applicationBackground)
+                .dtBackground()
                 .weight(1f, fill = false),
             transitionSpec = {
                 if (devToolsTransparencyEnabled) {
@@ -223,9 +301,21 @@ private fun animateWindowSize(
 }
 
 @Composable
+private fun Modifier.dtBackground(): Modifier = this
+    .animatedReloadStatusBorder(
+        shape = DevToolingSidecarShape,
+        idleColor = DtColors.border
+    )
+    .clip(DevToolingSidecarShape)
+    .background(DtColors.applicationBackground)
+    .animateReloadStatusBackground(DtColors.applicationBackground)
+    .background(DtColors.applicationBackground)
+
+@Composable
 private fun animateWindowPosition(
     mainWindowState: WindowState,
     windowSize: DpSize,
+    changedVisibility: Boolean,
 ): WindowPosition {
     val currentWidth = remember { mutableStateOf(windowSize.width) }
     val targetPosition = getSideCarWindowPosition(mainWindowState, windowSize.width)
@@ -234,6 +324,7 @@ private fun animateWindowPosition(
             currentWidth.value = windowSize.width
             targetPosition
         }
+        changedVisibility -> targetPosition
         else -> {
             val x by animateDpAsState(targetPosition.x, animationSpec = tween(128))
             val y by animateDpAsState(targetPosition.y, animationSpec = tween(128))

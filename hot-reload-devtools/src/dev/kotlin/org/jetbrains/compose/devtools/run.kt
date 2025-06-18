@@ -16,7 +16,7 @@ import androidx.compose.runtime.setValue
 import io.sellmair.evas.compose.installEvas
 import io.sellmair.evas.eventsOrThrow
 import io.sellmair.evas.statesOrThrow
-import org.jetbrains.compose.devtools.sidecar.DtSidecarWindowContent
+import org.jetbrains.compose.devtools.sidecar.DtExpandedSidecarWindowContent
 import org.jetbrains.compose.reload.DevelopmentEntryPoint
 
 @DevelopmentEntryPoint
@@ -28,6 +28,6 @@ fun DevToolingSidecarEntryPoint() {
 
     installEvas(applicationScope.coroutineContext.eventsOrThrow, applicationScope.coroutineContext.statesOrThrow) {
         var isExpanded by remember { mutableStateOf(true) }
-        DtSidecarWindowContent(isExpanded, isExpandedChanged = { isExpanded = it })
+        DtExpandedSidecarWindowContent(isExpanded, isExpandedChanged = { isExpanded = it })
     }
 }
