@@ -75,13 +75,20 @@ fun DtSidecarWindow(
     isAlwaysOnTop: Boolean,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-    var isExpandedVisible by remember { mutableStateOf(false) }
+
+    /**
+     * Both start visible so that the expanded window can render properly
+     */
+    var isMinimisedVisible by remember { mutableStateOf(true) }
+    var isExpandedVisible by remember { mutableStateOf(true) }
 
     LaunchedEffect(isExpanded) {
         if (isExpanded) {
+            isMinimisedVisible = false
             isExpandedVisible = true
         } else {
             delay(animationDuration)
+            isMinimisedVisible = true
             isExpandedVisible = false
         }
     }
@@ -91,7 +98,7 @@ fun DtSidecarWindow(
      */
     DtSidecarDialog(
         windowId, windowState, isAlwaysOnTop,
-        visible = !isExpandedVisible,
+        visible = isMinimisedVisible,
         windowSizeExpanded = false
     ) {
         DtMinimizedSidecarWindowContent(
