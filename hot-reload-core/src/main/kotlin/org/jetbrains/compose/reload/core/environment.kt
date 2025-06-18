@@ -15,7 +15,7 @@ public value class Environment(private val value: String) : Serializable {
     public companion object {
         public val ide: Environment = Environment("IDE")
         public val build: Environment = Environment("Build")
-        public val application: Environment = Environment("Application")
+        public val application: Environment = Environment("App")
         public val devTools: Environment = Environment("DevTools")
 
         public val current: Environment? by lazy {

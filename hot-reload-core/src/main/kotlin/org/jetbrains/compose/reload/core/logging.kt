@@ -170,7 +170,7 @@ public fun Logger.Log.displayString(
     }
 
     if(includeEnvironment) {
-        append(" | ${environment.withSize(11).withEffects(ansiCyan)}")
+        append(" | ${environment.withSize(8).withEffects(ansiCyan)}")
     }
 
     var formattedLevel = level.withSize(Level.entries.maxOf { it.name.length })
