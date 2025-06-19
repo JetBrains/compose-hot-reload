@@ -668,4 +668,75 @@ class ScreenshotTests {
         fixture.replaceSourceCodeAndReload("value: 0", "value: 1")
         fixture.checkScreenshot("2-after-value-1")
     }
+
+    @HotReloadTest
+    @TestOnlyDefaultComposeVersion
+    fun `test - 222 - isolated change in ComposableSingleton`(fixture: HotReloadTestFixture) = fixture.runTest {
+        fixture initialSourceCode """
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.runtime.*
+            import org.jetbrains.compose.reload.test.*
+            
+            fun main() = screenshotTestApplication {
+                Column {
+                    Group {
+                        var state by remember { mutableStateOf(0) }
+                        onTestEvent { value ->  if(value == "incA") state++ }
+                        TestText("A: %state")
+                    }
+                    
+                    Group {
+                        var state by remember { mutableStateOf(0) }
+                        onTestEvent { value ->  if(value == "incB") state++ }
+                        TestText("B: %state")
+                    }                    
+                }
+            }
+        
+        """.trimIndent().replace("%", "$")
+
+        checkScreenshot("0-before")
+
+        /* Send 3 increments to A and 5 increments to B */
+        repeat(3) { sendTestEvent("incA") }
+        repeat(5) { sendTestEvent("incB") }
+        checkScreenshot("1-A3-B5")
+
+        replaceSourceCodeAndReload("A: ", "A-after: ")
+        checkScreenshot("2-reloaded-A-A0-B5")
+
+    }
+
+
+    @HotReloadTest
+    @TestOnlyDefaultComposeVersion
+    fun `test - 222 - adding new ComposableSingleton lambda`(fixture: HotReloadTestFixture) = fixture.runTest {
+        fixture initialSourceCode """
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.runtime.*
+            import org.jetbrains.compose.reload.test.*
+            
+            fun main() = screenshotTestApplication {
+                Column {
+                    Group {
+                        var state by remember { mutableStateOf(0) }
+                        onTestEvent { value ->  if(value == "inc") state++ }
+                        TestText("A: %state")
+                    }              
+                }
+            }
+            
+            @Composable
+            fun Decoy() {
+                // decoy body
+            }
+        
+        """.trimIndent().replace("%", "$")
+
+        repeat(3) { sendTestEvent("inc") }
+        checkScreenshot("A3")
+
+        replaceSourceCodeAndReload("// decoy body", "Group {}")
+        checkScreenshot("A3")
+    }
 }
