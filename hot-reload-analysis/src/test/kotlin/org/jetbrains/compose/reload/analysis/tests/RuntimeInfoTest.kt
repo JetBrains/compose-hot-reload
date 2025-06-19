@@ -21,6 +21,7 @@ import org.jetbrains.compose.reload.core.withClosure
 import org.jetbrains.compose.reload.test.core.CompilerOption
 import org.jetbrains.compose.reload.test.core.TestEnvironment
 import org.jetbrains.kotlin.util.prefixIfNot
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInfo
 import kotlin.io.path.Path
@@ -28,6 +29,7 @@ import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.readText
+import kotlin.io.path.writeBytes
 import kotlin.io.path.writeText
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -211,7 +213,7 @@ class RuntimeInfoTest {
                 }
             """.trimIndent()
             )
-        ) ?: fail("Missing 'runtimeInfo'")
+        )
 
         val (_, method) = runtimeInfo.methodIndex.entries.find { (key, _) -> key.methodName == "Foo" }
             ?: fail("Missing method 'Foo'")
@@ -245,7 +247,7 @@ class RuntimeInfoTest {
                     }
                 """.trimIndent()
             )
-        ) ?: fail("Missing 'runtimeInfo'")
+        )
 
         if (SpecialComposeGroupKeys.remember !in runtimeInfo.groupIndex) {
             fail("Cannot find key for 'remember'")
@@ -291,7 +293,7 @@ class RuntimeInfoTest {
         val runtimeInfoBefore = checkRuntimeInfo(
             testInfo, compiler.withOptions(CompilerOption.OptimizeNonSkippingGroups to false),
             mapOf("Foo.kt" to code), name = "before"
-        ) ?: fail("Missing 'runtimeInfo'")
+        )
 
 
         val codeAfter = code.replace("//<foo>", "\n\n\n\n")
@@ -300,7 +302,7 @@ class RuntimeInfoTest {
         val runtimeInfoAfter = checkRuntimeInfo(
             testInfo, compiler.withOptions(CompilerOption.OptimizeNonSkippingGroups to false),
             mapOf("Foo.kt" to codeAfter), name = "after"
-        ) ?: fail("Missing 'runtimeInfo'")
+        )
 
         assertNotEquals(code, codeAfter)
 
@@ -334,7 +336,7 @@ class RuntimeInfoTest {
                 }
             """.trimIndent()
             )
-        ) ?: fail("Missing 'runtimeInfo'")
+        )
 
     }
 
@@ -357,8 +359,43 @@ class RuntimeInfoTest {
                 }
             """.trimIndent()
             )
-        ) ?: fail("Missing 'runtimeInfo'")
+        )
 
+    }
+
+    @Disabled("https://github.com/JetBrains/compose-hot-reload/issues/220")
+    @Test
+    fun `test - method hash is the same when adding a Composable function above`(
+        compiler: Compiler, testInfo: TestInfo
+    ) {
+        val baseSource = """
+            import androidx.compose.runtime.*
+            import androidx.compose.material3.Text
+                         
+            // add decoy
+          
+            @Composable
+            fun Foo() {
+                Text("Test")
+            }
+        """.trimIndent()
+
+        val baseRuntimeInfo = checkRuntimeInfo(testInfo, compiler, mapOf("Foo.kt" to baseSource), "base")
+
+        val modifiedSource = baseSource.replace(
+            "// add decoy", """
+            @Composable
+            fun Decoy() {}
+        """.trimIndent()
+        )
+        val modifiedRuntimeInfo = checkRuntimeInfo(testInfo, compiler, mapOf("Foo.kt" to modifiedSource), "modified")
+
+        assertNotEquals(baseRuntimeInfo, modifiedRuntimeInfo)
+        if (modifiedRuntimeInfo.methodIndex.none { it.key.methodName == "Decoy" }) fail("Missing Decoy function")
+
+        val baselineFoo = baseRuntimeInfo.methodIndex.entries.first { it.key.methodName == "Foo" }.value
+        val modifiedFoo = modifiedRuntimeInfo.methodIndex.entries.first { it.key.methodName == "Foo" }.value
+        assertEquals(baselineFoo.rootScope.hash, modifiedFoo.rootScope.hash)
     }
 }
 
@@ -367,7 +404,7 @@ private fun checkRuntimeInfo(
 ): RuntimeInfo {
     val runtimeInfo = TrackingRuntimeInfo()
     val output = compiler.compile(code)
-     output.values
+    output.values
         .mapNotNull { bytecode -> ClassInfo(bytecode) }
         .forEach { classInfo -> runtimeInfo.add(classInfo) }
 
@@ -395,8 +432,14 @@ private fun checkRuntimeInfo(
         .resolve(testInfo.testClass.get().name.asFileName().replace(".", "/"))
         .resolve(testInfo.testMethod.get().name.asFileName())
 
-    javap(output).forEach { (name, javap) ->
-        directory.resolve("javap").resolve(name.asFileName() + "-javap.txt").createParentDirectories().writeText(javap)
+    output.forEach { (filename, bytecode) ->
+        directory.resolve("classes").resolve(filename.asFileName() + name?.prefixIfNot("-").orEmpty() + ".class")
+            .createParentDirectories().writeBytes(bytecode)
+    }
+
+    javap(output).forEach { (filename, javap) ->
+        directory.resolve("javap").resolve(filename.asFileName() + name?.prefixIfNot("-").orEmpty() + "-javap.txt")
+            .createParentDirectories().writeText(javap)
     }
 
     val expectFile = directory.resolve("runtime-info${name?.prefixIfNot("-").orEmpty()}.txt")
