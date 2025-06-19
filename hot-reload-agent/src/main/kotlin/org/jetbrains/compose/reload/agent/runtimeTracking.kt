@@ -15,6 +15,7 @@ import org.jetbrains.compose.reload.analysis.verifyRedefinitions
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.submitSafe
+import java.io.File
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.lang.ref.WeakReference
@@ -41,11 +42,11 @@ internal fun launchRuntimeTracking(instrumentation: Instrumentation) {
     instrumentation.addTransformer(RuntimeTrackingTransformer)
 }
 
-internal fun redefineRuntimeInfo(): Future<Try<RuntimeDirtyScopes>> = runtimeAnalysisThread.submitSafe {
+internal fun redefineRuntimeInfo(changedResources: List<File> = emptyList()): Future<Try<RuntimeDirtyScopes>> = runtimeAnalysisThread.submitSafe {
     Try {
         currentRuntime.verifyRedefinitions(pendingRedefinitions)
 
-        val redefinition = currentRuntime.resolveDirtyRuntimeScopes(pendingRedefinitions)
+        val redefinition = currentRuntime.resolveDirtyRuntimeScopes(pendingRedefinitions, changedResources)
 
         /* Patch current runtime info */
         val patchDuration = measureTime {

@@ -153,6 +153,38 @@ object Ids {
             methodDescriptor = "(Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;)V"
         )
     }
+
+    object ImageResourcesKt {
+        val classId = ClassId("org/jetbrains/compose/resources/ImageResourcesKt")
+
+        val dropImageCache = MethodId(
+            classId,
+            methodName = "dropImageCache",
+            methodDescriptor = "()V"
+        )
+    }
+
+    object StringResourcesKt {
+        val classId = ClassId("org/jetbrains/compose/resources/StringResourcesKt")
+    }
+
+    object StringArrayResourcesKt {
+        val classId = ClassId("org/jetbrains/compose/resources/StringArrayResourcesKt")
+    }
+
+    object PluralStringResourcesKt {
+        val classId = ClassId("org/jetbrains/compose/resources/PluralStringResourcesKt")
+    }
+
+    object StringResourcesUtilsKt {
+        val classId = ClassId("org/jetbrains/compose/resources/StringResourcesUtilsKt")
+
+        val dropStringItemsCache = MethodId(
+            classId,
+            methodName = "dropStringItemsCache",
+            methodDescriptor = "()V"
+        )
+    }
 }
 
 val ClassId.classInitializerMethodId: MethodId
