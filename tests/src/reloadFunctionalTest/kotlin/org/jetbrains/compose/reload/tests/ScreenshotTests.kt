@@ -9,9 +9,10 @@ package org.jetbrains.compose.reload.tests
 
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.AndroidHotReloadTest
+import org.jetbrains.compose.reload.test.gradle.DisabledVersion
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.DisabledVersion
+import org.jetbrains.compose.reload.test.gradle.MinKotlinVersion
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
@@ -19,6 +20,7 @@ import org.jetbrains.compose.reload.test.gradle.replaceSourceCodeAndReload
 import org.jetbrains.compose.reload.test.gradle.sendTestEvent
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
 import org.jetbrains.compose.reload.utils.HostIntegrationTest
+import org.jetbrains.compose.reload.utils.TestOnlyDefaultComposeVersion
 
 class ScreenshotTests {
 
@@ -526,6 +528,46 @@ class ScreenshotTests {
     }
 
     @HotReloadTest
+    @MinKotlinVersion("2.2.20-Beta1") // https://github.com/JetBrains/compose-hot-reload/issues/220
+    fun `test - add decoy function above`(fixture: HotReloadTestFixture) = fixture.runTest {
+        fixture initialSourceCode """
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.runtime.*
+            import org.jetbrains.compose.reload.test.*
+            
+            // add decoy
+            
+            @Composable
+            fun Foo() {
+                var state by remember { mutableStateOf(0) }
+                onTestEvent { value ->  if(value == "inc") state++ }
+                TestText("A: %state")
+            }
+            
+            fun main() = screenshotTestApplication {
+                Foo()
+            }
+        
+        """.trimIndent().replace("%", "$")
+
+        repeat(3) { sendTestEvent("inc") }
+        checkScreenshot("3-inc")
+
+        replaceSourceCodeAndReload(
+            "// add decoy", """
+            @Composable
+            fun Decoy() {
+                TestText("Decoy")
+            }
+            """.trimIndent()
+        )
+        checkScreenshot("3-inc")
+
+        sendTestEvent("inc")
+        checkScreenshot("4-inc")
+    }
+
+    @HotReloadTest
     fun `test - if branch`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.*
@@ -667,5 +709,76 @@ class ScreenshotTests {
 
         fixture.replaceSourceCodeAndReload("value: 0", "value: 1")
         fixture.checkScreenshot("2-after-value-1")
+    }
+
+    @HotReloadTest
+    @TestOnlyDefaultComposeVersion
+    fun `test - 222 - isolated change in ComposableSingleton`(fixture: HotReloadTestFixture) = fixture.runTest {
+        fixture initialSourceCode """
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.runtime.*
+            import org.jetbrains.compose.reload.test.*
+            
+            fun main() = screenshotTestApplication {
+                Column {
+                    Group {
+                        var state by remember { mutableStateOf(0) }
+                        onTestEvent { value ->  if(value == "incA") state++ }
+                        TestText("A: %state")
+                    }
+                    
+                    Group {
+                        var state by remember { mutableStateOf(0) }
+                        onTestEvent { value ->  if(value == "incB") state++ }
+                        TestText("B: %state")
+                    }                    
+                }
+            }
+        
+        """.trimIndent().replace("%", "$")
+
+        checkScreenshot("0-before")
+
+        /* Send 3 increments to A and 5 increments to B */
+        repeat(3) { sendTestEvent("incA") }
+        repeat(5) { sendTestEvent("incB") }
+        checkScreenshot("1-A3-B5")
+
+        replaceSourceCodeAndReload("A: ", "A-after: ")
+        checkScreenshot("2-reloaded-A-A0-B5")
+
+    }
+
+
+    @HotReloadTest
+    @TestOnlyDefaultComposeVersion
+    fun `test - 222 - adding new ComposableSingleton lambda`(fixture: HotReloadTestFixture) = fixture.runTest {
+        fixture initialSourceCode """
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.runtime.*
+            import org.jetbrains.compose.reload.test.*
+            
+            fun main() = screenshotTestApplication {
+                Column {
+                    Group {
+                        var state by remember { mutableStateOf(0) }
+                        onTestEvent { value ->  if(value == "inc") state++ }
+                        TestText("A: %state")
+                    }              
+                }
+            }
+            
+            @Composable
+            fun Decoy() {
+                // decoy body
+            }
+        
+        """.trimIndent().replace("%", "$")
+
+        repeat(3) { sendTestEvent("inc") }
+        checkScreenshot("A3")
+
+        replaceSourceCodeAndReload("// decoy body", "Group {}")
+        checkScreenshot("A3")
     }
 }

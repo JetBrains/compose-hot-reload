@@ -116,7 +116,7 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
         }
 
         /* Expand Compose version */
-        if (!context.hasAnnotation<QuickTest>()) {
+        if (!context.hasAnnotation<QuickTest>() && !context.hasAnnotation<TestOnlyDefaultComposeVersion>()) {
             result += repositoryDeclaredTestDimensions.compose.map { declaredComposeVersion ->
                 baselineContext.copy {
                     composeVersion = TestedComposeVersion(declaredComposeVersion.version)
