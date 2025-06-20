@@ -127,11 +127,33 @@ AmperBuildRoot:
   key: amper.build.root
   type: string
   target: [ application, devtools ]
+  documentation: |
+    The root path to the current Amper project
+
+AmperServerCommand:
+  key: amper.server.command
+  type: string
+  target: [ application, devtools ]
+  documentation: |
+    The command to start the Amper Server
+
+AmperServerPort:
+  key: amper.server.port
+  type: int
+  target: [ application, devtools ]
+  documentation: |
+    The port to start the Amper Server on
 
 AmperBuildTask:
   key: amper.build.task
   type: string
   target: [ application, devtools ]
+  documentation: |
+    The name of the task which is supposed to be used for hot reload recompilation.
+    The difference between normal `build` and this task is that this task will also send an orchestration message with 
+    the actual changes (classes to be reloaded) reporting about successful recompilation.
+    
+    Typically for Amper this is `reloadJvm`.
 
 DevToolsEnabled:
   key: compose.reload.devToolsEnabled
