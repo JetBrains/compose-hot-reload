@@ -21,13 +21,17 @@ import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberDialogState
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.invokeWhenMessageReceived
+import org.jetbrains.compose.devtools.sendBlocking
+import org.jetbrains.compose.devtools.theme.DtTitles.DEV_TOOLS
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowGainedFocus
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import java.awt.Dimension
 import java.awt.Point
+import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.milliseconds
 
 private val logger = createLogger()
@@ -35,15 +39,21 @@ private val logger = createLogger()
 // animation time of window effects
 internal val animationDuration = 512.milliseconds
 
+/**
+ * Either windowState or initialSize and initialPosition should be specified
+ */
 @Composable
 fun DtAnimatedWindow(
-    windowId: WindowId,
-    windowState: WindowState,
+    windowId: WindowId? = null,
+    windowState: WindowState = WindowState(),
     onStateUpdate: @Composable WindowScope.() -> Pair<DpSize, WindowPosition>,
-    onCloseRequest: () -> Unit,
+    onCloseRequest: () -> Unit = {
+        ShutdownRequest("Requested by user through $DEV_TOOLS").sendBlocking()
+        exitProcess(0)
+    },
     isExpandedByDefault: Boolean,
-    initialSize: DpSize = getSideCarWindowSize(windowState, isExpandedByDefault),
-    initialPosition: WindowPosition = getSideCarWindowPosition(windowState, initialSize.width),
+    initialSize: DpSize = getSideCarWindowSize(windowState.size, isExpandedByDefault),
+    initialPosition: WindowPosition = getSideCarWindowPosition(windowState.position, initialSize.width),
     visible: Boolean = true,
     title: String = "Untitled",
     icon: Painter? = null,
@@ -93,12 +103,12 @@ fun DtAnimatedWindow(
 
 @Composable
 internal fun animateWindowSize(
-    mainWindowState: WindowState,
+    mainWindowSize: DpSize,
     isExpanded: Boolean,
 ): DpSize {
     var currentIsExpanded by remember { mutableStateOf(isExpanded) }
-    var currentSize by remember { mutableStateOf(getSideCarWindowSize(mainWindowState, isExpanded)) }
-    val targetSize = getSideCarWindowSize(mainWindowState, isExpanded)
+    var currentSize by remember { mutableStateOf(getSideCarWindowSize(mainWindowSize, isExpanded)) }
+    val targetSize = getSideCarWindowSize(mainWindowSize, isExpanded)
     /* No delay when we do not have the transparency enabled */
     if (!devToolsTransparencyEnabled) {
         currentSize = targetSize
@@ -110,7 +120,6 @@ internal fun animateWindowSize(
             delay(animationDuration)
             currentIsExpanded = false
             currentSize = targetSize
-            System.err.println("Finished")
         }
     }
 
@@ -128,11 +137,11 @@ internal fun animateWindowSize(
 
 @Composable
 internal fun animateWindowPosition(
-    mainWindowState: WindowState,
+    mainWindowPosition: WindowPosition,
     windowSize: DpSize,
 ): WindowPosition {
     val currentWidth = remember { mutableStateOf(windowSize.width) }
-    val targetPosition = getSideCarWindowPosition(mainWindowState, windowSize.width)
+    val targetPosition = getSideCarWindowPosition(mainWindowPosition, windowSize.width)
     return when {
         currentWidth.value != windowSize.width -> {
             currentWidth.value = windowSize.width
@@ -152,17 +161,17 @@ internal fun Dimension.toDpSize(): DpSize = DpSize(width.dp, height.dp)
 internal fun Point.toWindowPosition(): WindowPosition = WindowPosition(x.dp, y.dp)
 internal fun WindowPosition.toPoint(): Point = Point(x.value.toInt(), y.value.toInt())
 
-internal fun getSideCarWindowPosition(windowState: WindowState, width: Dp): WindowPosition {
-    val targetX = windowState.position.x - width - if (!devToolsTransparencyEnabled) 12.dp else 0.dp
-    val targetY = windowState.position.y
+internal fun getSideCarWindowPosition(mainWindowPosition: WindowPosition, width: Dp): WindowPosition {
+    val targetX = mainWindowPosition.x - width - if (!devToolsTransparencyEnabled) 12.dp else 0.dp
+    val targetY = mainWindowPosition.y
     return WindowPosition(targetX, targetY)
 }
 
-internal fun getSideCarWindowSize(windowState: WindowState, isExpanded: Boolean): DpSize {
+internal fun getSideCarWindowSize(mainWindowSize: DpSize, isExpanded: Boolean): DpSize {
     return DpSize(
         width = if (isExpanded) 512.dp else 32.dp + 4.dp + (12.dp.takeIf { devToolsTransparencyEnabled } ?: 0.dp),
-        height = if (isExpanded) maxOf(windowState.size.height, 512.dp)
-        else if (devToolsTransparencyEnabled) maxOf(windowState.size.height, 512.dp) else 28.dp + 4.dp,
+        height = if (isExpanded) maxOf(mainWindowSize.height, 512.dp)
+        else if (devToolsTransparencyEnabled) maxOf(mainWindowSize.height, 512.dp) else 28.dp + 4.dp,
     )
 }
 

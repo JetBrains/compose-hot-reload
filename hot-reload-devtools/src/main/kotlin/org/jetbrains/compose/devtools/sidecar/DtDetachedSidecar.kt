@@ -5,8 +5,12 @@
 
 package org.jetbrains.compose.devtools.sidecar
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,76 +18,87 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
-import kotlinx.coroutines.delay
-import org.jetbrains.compose.devtools.invokeWhenMessageReceived
 import org.jetbrains.compose.devtools.sendBlocking
+import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD
+import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
+import org.jetbrains.compose.devtools.theme.DtTitles.DEV_TOOLS
+import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
+import org.jetbrains.compose.devtools.theme.composeLogoPainter
 import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
-import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
+import org.jetbrains.compose.devtools.widgets.animateReloadStatusBackground
+import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
-import org.jetbrains.compose.reload.core.debug
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowGainedFocus
+import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
-import java.awt.Window
+import java.awt.Taskbar
 import kotlin.system.exitProcess
 
 private val logger = createLogger()
 
 @Composable
-fun DtDetachedSidecarWindow(
-    windowId: WindowId,
-    windowState: WindowState,
-    isAlwaysOnTop: Boolean,
-) {
-    var isExpanded by remember { mutableStateOf(true) }
+fun DtDetachedSidecarWindow() {
+    val defaultSize = DpSize(500.dp, 600.dp)
+    var icon by remember { mutableStateOf<Painter?>(null) }
+    val density = LocalDensity.current
 
-    DtAnimatedWindow(
-        windowId,
-        windowState,
-        isExpandedByDefault = isExpanded,
-        onCloseRequest = {
-            ShutdownRequest("Requested by user through 'devtools'").sendBlocking()
-            exitProcess(0)
-        },
-        onStateUpdate = {
-            animateSizeAndPosition(window, windowState, isExpanded)
-        },
-        title = "Compose Hot Reload Dev Tools",
-        resizable = true,
-        alwaysOnTop = isAlwaysOnTop,
-    ) {
-        invokeWhenMessageReceived<ApplicationWindowGainedFocus> { event ->
-            if (event.windowId == windowId) {
-                logger.debug("$windowId: Sidecar window 'toFront()'")
-                window.toFront()
-            }
+    // Mac OS
+    LaunchedEffect(Unit) {
+        if (!Taskbar.isTaskbarSupported()) return@LaunchedEffect
+        runCatching {
+            icon = composeLogoPainter(density).await()
+            Taskbar.getTaskbar().iconImage = icon?.toAwtImage(density, LayoutDirection.Ltr)
+        }.onFailure {
+            logger.error("Failed loading compose icon", it)
         }
-
-        DtSidecarWindowContent(
-            isExpanded = isExpanded,
-            isExpandedChanged = {
-                isExpanded = it
-            },
-            enableStatusBar = false,
-            draggableScope = { WindowDraggableArea { it() } },
-        )
     }
 
-    if (devToolsTransparencyEnabled) {
-        DtDetachedStatusBar(windowId, windowState, isAlwaysOnTop)
+    Window(
+        title = COMPOSE_HOT_RELOAD_TITLE,
+        // Windows
+        icon = icon,
+        onCloseRequest = {
+            ShutdownRequest("Requested by user through $DEV_TOOLS").sendBlocking()
+            exitProcess(0)
+        },
+    ) {
+        window.minimumSize = defaultSize.toDimension()
+        DtDetachedSidecarContent()
     }
 }
 
-// permanently set the width of the status bar window to 12.dp
-private fun DpSize.withStatusBarOffset() = copy(width = 12.dp)
-
-// permanently offset the position of the status bar to compensate for the smaller width
-private fun WindowPosition.withStatusBarOffset() = WindowPosition(x + 32.dp, y)
+@Composable
+fun DtDetachedSidecarContent(
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxSize()
+            .animatedReloadStatusBorder(
+                shape = DevToolingSidecarShape,
+                idleColor = DtColors.border
+            )
+            .clip(DevToolingSidecarShape)
+            .background(DtColors.applicationBackground)
+            .animateReloadStatusBackground(DtColors.applicationBackground),
+        horizontalArrangement = Arrangement.End,
+    ) {
+        Column {
+            DtDetachedSidecarHeaderBar()
+            DtSidecarBody(Modifier.padding(DtPadding.medium).fillMaxSize())
+        }
+    }
+}
 
 @Composable
 fun DtDetachedStatusBar(
@@ -91,25 +106,21 @@ fun DtDetachedStatusBar(
     windowState: WindowState,
     isAlwaysOnTop: Boolean,
 ) {
-    val initialSize = getSideCarWindowSize(windowState, false).withStatusBarOffset()
-    val initialPosition = getSideCarWindowPosition(windowState, initialSize.width)
+    val initialSize = getSideCarWindowSize(windowState.size, false).withStatusBarOffset()
+    val initialPosition = getSideCarWindowPosition(windowState.position, initialSize.width)
 
     DtAnimatedWindow(
-        windowId,
-        windowState,
+        windowId = windowId,
+        windowState = windowState,
         initialSize = initialSize,
         initialPosition = initialPosition,
         isExpandedByDefault = false,
         onStateUpdate = {
-            val newSize = animateWindowSize(windowState, false)
-            val newPosition = animateWindowPosition(windowState, newSize)
+            val newSize = animateWindowSize(windowState.size, false)
+            val newPosition = animateWindowPosition(windowState.position, newSize)
             newSize.withStatusBarOffset() to newPosition.withStatusBarOffset()
         },
-        onCloseRequest = {
-            ShutdownRequest("Requested by user through 'devtools'").sendBlocking()
-            exitProcess(0)
-        },
-        title = "Compose Hot Reload Status Bar",
+        title = "$COMPOSE_HOT_RELOAD Status Bar",
         alwaysOnTop = isAlwaysOnTop,
     ) {
         DtReloadStatusBanner(
@@ -119,38 +130,9 @@ fun DtDetachedStatusBar(
     }
 }
 
-@Composable
-private fun animateSizeAndPosition(
-    window: Window,
-    windowState: WindowState,
-    isExpanded: Boolean
-): Pair<DpSize, WindowPosition> {
-    var currentIsExpanded by remember { mutableStateOf(isExpanded) }
-    var currentSize = window.size.toDpSize()
-    var currentPosition = window.location.toWindowPosition()
+// permanently set the width of the status bar window to 12.dp
+private fun DpSize.withStatusBarOffset() = copy(width = 12.dp)
 
-    if (!currentIsExpanded && isExpanded) {
-        currentIsExpanded = true
-        currentSize = getSideCarWindowSize(windowState, true)
-        currentPosition = WindowPosition(
-            currentPosition.x - currentSize.width + window.size.width.dp,
-            currentPosition.y
-        )
-    }
+// permanently offset the position of the status bar to compensate for the smaller width
+private fun WindowPosition.withStatusBarOffset() = WindowPosition(x + 32.dp, y)
 
-    if (currentIsExpanded && !isExpanded) {
-        LaunchedEffect(Unit) {
-            delay(animationDuration)
-            currentIsExpanded = false
-            currentSize = getSideCarWindowSize(windowState, false)
-            currentPosition = WindowPosition(
-                currentPosition.x + window.size.width.dp - currentSize.width,
-                currentPosition.y
-            )
-            window.size = currentSize.toDimension()
-            window.location = currentPosition.toPoint()
-        }
-    }
-
-    return currentSize to currentPosition
-}

@@ -16,6 +16,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,11 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowState
-import org.jetbrains.compose.devtools.sendBlocking
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
+import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
 import org.jetbrains.compose.devtools.widgets.DtComposeLogo
 import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusBackground
@@ -44,8 +46,6 @@ import org.jetbrains.compose.devtools.widgets.animateReloadStatusColor
 import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
 import org.jetbrains.compose.reload.core.WindowId
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
-import kotlin.system.exitProcess
 
 // Modern rounded corners like JetBrains Toolbox
 internal val DevToolingSidecarShape = RoundedCornerShape(8.dp)
@@ -62,15 +62,11 @@ fun DtAttachedSidecarWindow(
         windowState,
         isExpandedByDefault = isExpanded,
         onStateUpdate = {
-            val newSize = animateWindowSize(windowState, isExpanded)
-            val newPosition = animateWindowPosition(windowState, newSize)
+            val newSize = animateWindowSize(windowState.size, isExpanded)
+            val newPosition = animateWindowPosition(windowState.position, newSize)
             newSize to newPosition
         },
-        onCloseRequest = {
-            ShutdownRequest("Requested by user through 'devtools'").sendBlocking()
-            exitProcess(0)
-        },
-        title = "Compose Hot Reload Dev Tools",
+        title = COMPOSE_HOT_RELOAD_TITLE,
         alwaysOnTop = isAlwaysOnTop,
     ) {
         DtSidecarWindowContent(
@@ -87,7 +83,6 @@ fun DtSidecarWindowContent(
     isExpanded: Boolean = true,
     isExpandedChanged: (isExpanded: Boolean) -> Unit = {},
     enableStatusBar: Boolean = true,
-    draggableScope: @Composable (@Composable () -> Unit) -> Unit = { it() },
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -122,7 +117,13 @@ fun DtSidecarWindowContent(
                         .animateEnterExit(
                             enter = if (devToolsTransparencyEnabled) fadeIn(tween(220)) else EnterTransition.None,
                             exit = if (devToolsTransparencyEnabled) fadeOut(tween(50)) else ExitTransition.None
-                        ).clickable { isExpandedChanged(true) }
+                        )
+                        .pointerInput(Unit) {
+                            detectDragGestures { change, _ ->
+                                change.consume()
+                            }
+                        }
+                        .clickable { isExpandedChanged(true) }
                         .padding(DtPadding.small)
                         .animateContentSize(alignment = Alignment.TopCenter),
                 ) {
@@ -138,9 +139,7 @@ fun DtSidecarWindowContent(
             } else {
                 // Expanded state - show the full UI
                 Column {
-                    draggableScope {
-                        DtSidecarHeaderBar({ isExpandedChanged(false) })
-                    }
+                    DtAttachedSidecarHeaderBar({ isExpandedChanged(false) })
                     DtSidecarBody(Modifier.padding(DtPadding.medium).fillMaxSize())
                 }
             }

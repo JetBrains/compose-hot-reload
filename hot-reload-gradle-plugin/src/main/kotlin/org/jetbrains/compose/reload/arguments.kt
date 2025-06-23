@@ -48,7 +48,7 @@ sealed interface ComposeHotReloadArgumentsBuilder {
     fun setDevToolsClasspath(files: FileCollection)
     fun setDevToolsHeadless(headless: Provider<Boolean>)
     fun setDevToolsTransparencyEnabled(enabled: Provider<Boolean>)
-    fun setDevToolsDetached(alwaysOnTop: Provider<Boolean>)
+    fun setDevToolsDetached(devToolsDetached: Provider<Boolean>)
     fun setReloadTaskName(name: Provider<String>)
     fun setReloadTaskName(name: String)
     fun isRecompileContinuous(isRecompileContinuous: Provider<Boolean>)
@@ -154,8 +154,8 @@ private class ComposeHotReloadArgumentsBuilderImpl(
         devToolsIsHeadless.set(headless.orElse(false))
     }
 
-    override fun setDevToolsDetached(alwaysOnTop: Provider<Boolean>) {
-        devToolsDetached.set(alwaysOnTop)
+    override fun setDevToolsDetached(devToolsDetached: Provider<Boolean>) {
+        this@ComposeHotReloadArgumentsBuilderImpl.devToolsDetached.set(devToolsDetached)
     }
 
     override fun setReloadTaskName(name: Provider<String>) {

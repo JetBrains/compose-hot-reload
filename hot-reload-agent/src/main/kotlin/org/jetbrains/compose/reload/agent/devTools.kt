@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
+import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsDetached
 import org.jetbrains.compose.reload.core.HotReloadProperty.DevToolsClasspath
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.DevTools
 import org.jetbrains.compose.reload.core.Os
@@ -31,13 +32,15 @@ internal fun launchDevtoolsApplication() {
     val classpath = HotReloadEnvironment.devToolsClasspath ?: error("Missing '${DevToolsClasspath}'")
     logger.info("Starting 'DevTools'")
 
-    val process = ProcessBuilder(
+    val devToolsArgs = listOfNotNull(
         resolveDevtoolsJavaBinary(), "-cp", classpath.joinToString(File.pathSeparator),
         *subprocessDefaultArguments(DevTools, orchestration.port.getBlocking().getOrThrow()).toTypedArray(),
         *issueNewDebugSessionJvmArguments("DevTools"),
-        "-Dapple.awt.UIElement=true",
+        if (devToolsDetached) null else "-Dapple.awt.UIElement=true",
         "org.jetbrains.compose.devtools.Main",
-    ).withHotReloadEnvironmentVariables(DevTools)
+    )
+    val process = ProcessBuilder(devToolsArgs)
+        .withHotReloadEnvironmentVariables(DevTools)
         .start()
 
     thread(name = "DevTools: Stderr", isDaemon = true) {
