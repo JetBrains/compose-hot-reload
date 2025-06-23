@@ -5,11 +5,11 @@
 
 package org.jetbrains.compose.reload.analysis
 
-import org.jetbrains.compose.reload.core.ReloadContext
+import org.jetbrains.compose.reload.core.Context
 
 interface DirtyResolver {
 
     fun resolveDirtyMethods(
-        context: ReloadContext, currentRuntime: RuntimeInfo, redefined: RuntimeInfo
+        context: Context, currentRuntime: RuntimeInfo, redefined: RuntimeInfo
     ): List<MethodInfo>
 }

@@ -11,7 +11,7 @@ import org.jetbrains.compose.reload.analysis.Ids
 import org.jetbrains.compose.reload.analysis.MethodId
 import org.jetbrains.compose.reload.analysis.MethodInfo
 import org.jetbrains.compose.reload.analysis.RuntimeInfo
-import org.jetbrains.compose.reload.core.ReloadContext
+import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
@@ -22,7 +22,7 @@ private val logger = createLogger()
 internal class ResourcesDirtyResolver : DirtyResolver {
 
     override fun resolveDirtyMethods(
-        context: ReloadContext,
+        context: Context,
         currentRuntime: RuntimeInfo,
         redefined: RuntimeInfo,
     ): List<MethodInfo> {
@@ -53,7 +53,7 @@ private fun cleanResourceCache(classId: ClassId, cleanMethod: MethodId, resource
     }
 }
 
-internal fun ReloadContext.cleanResourceCacheIfNecessary() {
+internal fun Context.cleanResourceCacheIfNecessary() {
     if (hasChangedResources()) {
         cleanResourceCache(Ids.ImageResourcesKt.classId, Ids.ImageResourcesKt.dropImageCache, "Images")
         cleanResourceCache(
@@ -64,7 +64,7 @@ internal fun ReloadContext.cleanResourceCacheIfNecessary() {
     }
 }
 
-private fun ReloadContext.hasChangedResources(): Boolean {
+private fun Context.hasChangedResources(): Boolean {
     return this[ReloadRequestContextKey]?.changedClassFiles.orEmpty().any { (file, _) ->
         file.isFile && !file.isClass()
     }

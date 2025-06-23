@@ -7,7 +7,7 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
-import org.jetbrains.compose.reload.core.ReloadContext
+import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
@@ -32,7 +32,7 @@ data class Reload(
     val dirtyRuntime: RuntimeDirtyScopes,
 )
 
-internal fun ReloadContext.reload(
+internal fun Context.reload(
     instrumentation: Instrumentation,
     reloadRequestId: OrchestrationMessageId,
     pendingChanges: Map<File, ReloadClassesRequest.ChangeType>

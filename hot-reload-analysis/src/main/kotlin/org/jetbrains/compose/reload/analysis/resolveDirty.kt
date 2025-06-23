@@ -6,13 +6,12 @@
 package org.jetbrains.compose.reload.analysis
 
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
-import org.jetbrains.compose.reload.core.ReloadContext
+import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.simpleName
 import org.jetbrains.compose.reload.core.withClosure
-import java.io.File
 import java.util.ServiceLoader
 import kotlin.time.measureTimedValue
 
@@ -25,7 +24,7 @@ data class RuntimeDirtyScopes(
     val dirtyMethodIds = dirtyScopes.groupBy { it.methodId }
 }
 
-fun ReloadContext.resolveDirtyRuntimeScopes(current: RuntimeInfo, redefined: RuntimeInfo): RuntimeDirtyScopes {
+fun Context.resolveDirtyRuntimeScopes(current: RuntimeInfo, redefined: RuntimeInfo): RuntimeDirtyScopes {
     val (redefinition, duration) = measureTimedValue {
         RuntimeDirtyScopes(
             redefinedClasses = redefined.classIndex.values.toList(),
@@ -37,7 +36,7 @@ fun ReloadContext.resolveDirtyRuntimeScopes(current: RuntimeInfo, redefined: Run
     return redefinition
 }
 
-private fun ReloadContext.resolveDirtyRuntimeScopeInfos(
+private fun Context.resolveDirtyRuntimeScopeInfos(
     current: RuntimeInfo,
     redefined: RuntimeInfo
 ): List<RuntimeScopeInfo> {
@@ -132,7 +131,7 @@ private fun resolveRemovedComposeScopes(current: RuntimeInfo, redefined: Runtime
     return result
 }
 
-private fun ReloadContext.resolveDirtyMethodsFromExtensionPoints(
+private fun Context.resolveDirtyMethodsFromExtensionPoints(
     current: RuntimeInfo, redefined: RuntimeInfo
 ): List<MethodInfo> {
     return ServiceLoader.load(DirtyResolver::class.java, ClassLoader.getSystemClassLoader()).flatMap { resolver ->

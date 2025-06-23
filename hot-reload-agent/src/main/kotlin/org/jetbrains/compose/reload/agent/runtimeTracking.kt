@@ -12,7 +12,7 @@ import org.jetbrains.compose.reload.analysis.TrackingRuntimeInfo
 import org.jetbrains.compose.reload.analysis.isIgnoredClassId
 import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
 import org.jetbrains.compose.reload.analysis.verifyRedefinitions
-import org.jetbrains.compose.reload.core.ReloadContext
+import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
@@ -45,7 +45,7 @@ internal fun launchRuntimeTracking(instrumentation: Instrumentation) {
     instrumentation.addTransformer(RuntimeTrackingTransformer)
 }
 
-internal fun ReloadContext.redefineRuntimeInfo(): Future<Try<RuntimeDirtyScopes>> = runtimeAnalysisThread.submitSafe {
+internal fun Context.redefineRuntimeInfo(): Future<Try<RuntimeDirtyScopes>> = runtimeAnalysisThread.submitSafe {
     Try {
         currentRuntime.verifyRedefinitions(pendingRedefinitions)
 

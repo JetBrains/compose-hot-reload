@@ -5,29 +5,29 @@
 
 package org.jetbrains.compose.reload.core
 
-public interface ReloadContext {
+public interface Context {
     public operator fun <T> get(key: ContextKey<T>): T
-    public fun <T> with(key: ContextKey<T>, value: T): ReloadContext
+    public fun <T> with(key: ContextKey<T>, value: T): Context
 }
 
 public interface ContextKey<T> {
     public val default: T
 }
 
-public fun Context(): ReloadContext {
+public fun Context(): Context {
     return ContextImpl.EMPTY
 }
 
 private class ContextImpl(
     private val map: Map<ContextKey<*>, Any?>
-) : ReloadContext {
+) : Context {
     override fun <T> get(key: ContextKey<T>): T {
         @Suppress("UNCHECKED_CAST")
-        if (key in map) return map[key] as T
-        else return key.default
+        return if (key in map) map[key] as T
+        else key.default
     }
 
-    override fun <T> with(key: ContextKey<T>, value: T): ReloadContext {
+    override fun <T> with(key: ContextKey<T>, value: T): Context {
         return ContextImpl(map.plus(key to value))
     }
 
