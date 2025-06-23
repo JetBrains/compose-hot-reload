@@ -375,6 +375,8 @@ private fun getSideCarWindowSize(windowState: WindowState, isExpanded: Boolean):
 }
 
 private fun opacitySupported(): Boolean = Try {
-    val devs = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
-    devs.all { it.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT) }
+    val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+    return ge.isHeadlessInstance || ge.screenDevices.all {
+        it.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT)
+    }
 }.leftOr { false }
