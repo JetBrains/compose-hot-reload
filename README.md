@@ -7,17 +7,15 @@
 [![docs](https://img.shields.io/badge/documentation-blue)](https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-hot-reload.html)
 [![Slack channel](https://img.shields.io/badge/chat-slack-green.svg?logo=slack)](https://kotlinlang.slack.com/messages/compose-desktop/)
 
-Iterate on your Compose UIs faster, and let your creativity run free when building multiplatform user interfaces.
+Iterate on your Compose UIs faster and let your creativity run free when building multiplatform UIs.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./readme-assets/banner_dark.png">
   <img alt="Text changing depending on mode. Light: 'So light!' Dark: 'So dark!'" src="./readme-assets/banner_light.png">
 </picture>
 
-Make changes to your UI code in a Compose Multiplatform application and see the results in real time. 
-No restarts required.
-Compose Hot Reload runs your application on the JetBrains Runtime 
-and intelligently reloads your code whenever it is changed.
+Compose Hot Reload lets you make UI code changes in a Compose Multiplatform app and see the results instantly, no restarts needed.
+Compose Hot Reload runs your app on the JetBrains Runtime and intelligently reloads your code whenever it changes.
 
 ## Getting Started
 
