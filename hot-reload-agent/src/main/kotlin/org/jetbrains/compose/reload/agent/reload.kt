@@ -7,14 +7,16 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
+import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.core.isClass
 import org.jetbrains.compose.reload.core.mapLeft
 import org.jetbrains.compose.reload.core.warn
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
@@ -30,15 +32,14 @@ data class Reload(
     val dirtyRuntime: RuntimeDirtyScopes,
 )
 
-private fun File.isClass() = extension == "class"
-
-internal fun reload(
+internal fun Context.reload(
     instrumentation: Instrumentation,
     reloadRequestId: OrchestrationMessageId,
-    pendingChanges: Map<File, OrchestrationMessage.ReloadClassesRequest.ChangeType>
+    pendingChanges: Map<File, ReloadClassesRequest.ChangeType>
 ): Try<Reload> = Try {
+
     val definitions = pendingChanges.mapNotNull { (file, change) ->
-        if (change == OrchestrationMessage.ReloadClassesRequest.ChangeType.Removed) {
+        if (change == ReloadClassesRequest.ChangeType.Removed) {
             logger.info("Removed: $file")
             return@mapNotNull null
         }
@@ -115,13 +116,11 @@ internal fun reload(
         ClassDefinition(originalClass, transformed)
     }
 
-    val changedResources = pendingChanges.keys.filter { !it.isClass() && it.isFile }
-
     instrumentation.redefineClasses(*definitions.toTypedArray())
-    return redefineRuntimeInfo(changedResources).get().mapLeft { redefinition ->
+    return redefineRuntimeInfo().get().mapLeft { redefinition ->
         val reload = Reload(reloadRequestId, definitions, redefinition)
         reinitializeStaticsIfNecessary(reload)
-        cleanResourceCacheIfNecessary(changedResources)
+        cleanResourceCacheIfNecessary()
         reload
     }
 }

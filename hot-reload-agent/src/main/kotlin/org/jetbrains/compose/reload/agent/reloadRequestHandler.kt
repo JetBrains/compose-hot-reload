@@ -6,6 +6,8 @@
 package org.jetbrains.compose.reload.agent
 
 
+import org.jetbrains.compose.reload.core.Context
+import org.jetbrains.compose.reload.core.ContextKey
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.exception
@@ -22,6 +24,10 @@ import java.lang.instrument.Instrumentation
 
 private val logger = createLogger()
 
+object ReloadRequestContextKey : ContextKey<ReloadClassesRequest?> {
+    override val default: ReloadClassesRequest? = null
+}
+
 internal fun launchReloadRequestHandler(instrumentation: Instrumentation) = launchTask {
     var pendingChanges = mapOf<File, ReloadClassesRequest.ChangeType>()
 
@@ -36,8 +42,10 @@ internal fun launchReloadRequestHandler(instrumentation: Instrumentation) = laun
         runOnUiThreadBlocking {
             pendingChanges = pendingChanges + request.changedClassFiles
 
+            val context = Context().with(ReloadRequestContextKey, request)
+
             executeBeforeHotReloadListeners(request.messageId)
-            val result = reload(instrumentation, request.messageId, pendingChanges)
+            val result = context.reload(instrumentation, request.messageId, pendingChanges)
 
             /*
             Yuhuu! We reloaded the classes; We can reset the 'pending changes'; No re-try necessary

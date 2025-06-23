@@ -6,12 +6,36 @@
 package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
+import org.jetbrains.compose.reload.analysis.DirtyResolver
 import org.jetbrains.compose.reload.analysis.Ids
 import org.jetbrains.compose.reload.analysis.MethodId
+import org.jetbrains.compose.reload.analysis.MethodInfo
+import org.jetbrains.compose.reload.analysis.RuntimeInfo
+import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.createLogger
-import java.io.File
+import org.jetbrains.compose.reload.core.error
+import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.core.isClass
 
 private val logger = createLogger()
+
+internal class ResourcesDirtyResolver : DirtyResolver {
+
+    override fun resolveDirtyMethods(
+        context: Context,
+        currentRuntime: RuntimeInfo,
+        redefined: RuntimeInfo,
+    ): List<MethodInfo> {
+        if (!context.hasChangedResources()) return emptyList()
+
+        return listOf(
+            Ids.ImageResourcesKt.classId,
+            Ids.StringResourcesKt.classId,
+            Ids.StringArrayResourcesKt.classId,
+            Ids.PluralStringResourcesKt.classId
+        ).flatMap { currentRuntime.classIndex[it]?.methods?.values ?: emptyList() }
+    }
+}
 
 private fun cleanResourceCache(classId: ClassId, cleanMethod: MethodId, resourceCacheType: String) {
     try {
@@ -29,9 +53,19 @@ private fun cleanResourceCache(classId: ClassId, cleanMethod: MethodId, resource
     }
 }
 
-internal fun cleanResourceCacheIfNecessary(changedResources: List<File>) {
-    if (changedResources.isNotEmpty()) {
+internal fun Context.cleanResourceCacheIfNecessary() {
+    if (hasChangedResources()) {
         cleanResourceCache(Ids.ImageResourcesKt.classId, Ids.ImageResourcesKt.dropImageCache, "Images")
-        cleanResourceCache(Ids.StringResourcesUtilsKt.classId, Ids.StringResourcesUtilsKt.dropStringItemsCache, "Strings")
+        cleanResourceCache(
+            Ids.StringResourcesUtilsKt.classId,
+            Ids.StringResourcesUtilsKt.dropStringItemsCache,
+            "Strings"
+        )
+    }
+}
+
+private fun Context.hasChangedResources(): Boolean {
+    return this[ReloadRequestContextKey]?.changedClassFiles.orEmpty().any { (file, _) ->
+        file.isFile && !file.isClass()
     }
 }
