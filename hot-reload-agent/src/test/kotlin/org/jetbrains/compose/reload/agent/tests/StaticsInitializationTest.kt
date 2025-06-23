@@ -84,7 +84,7 @@ class StaticsInitializationTest() {
         val redefineRuntimeInfo = TrackingRuntimeInfo()
         redefineRuntimeInfo.add(afterClassInfo)
 
-        val redefinition = beforeRuntimeInfo.resolveDirtyRuntimeScopes(redefineRuntimeInfo)
+        val redefinition = Context().resolveDirtyRuntimeScopes(beforeRuntimeInfo, redefineRuntimeInfo)
         if (beforeClassInfoInitializer in redefinition.dirtyMethodIds) {
             fail("Unexpected '$beforeClassInfoInitializer' in dirtyMethodIds")
         }

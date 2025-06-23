@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.core.Disposable
 import org.jetbrains.compose.reload.core.Try
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
 import java.util.UUID
 
