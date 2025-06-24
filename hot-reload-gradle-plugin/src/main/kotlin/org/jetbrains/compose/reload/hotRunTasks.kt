@@ -19,9 +19,11 @@ import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
 import org.jetbrains.compose.reload.gradle.Future
 import org.jetbrains.compose.reload.gradle.PluginStage
 import org.jetbrains.compose.reload.gradle.await
+import org.jetbrains.compose.reload.gradle.core.composeReloadIntelliJDebuggerDispatchPortProvider
 import org.jetbrains.compose.reload.gradle.forAllJvmTargets
 import org.jetbrains.compose.reload.gradle.future
 import org.jetbrains.compose.reload.gradle.futureProvider
+import org.jetbrains.compose.reload.gradle.intellijDebuggerDispatchPort
 import org.jetbrains.compose.reload.gradle.kotlinJvmOrNull
 import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
 import org.jetbrains.compose.reload.gradle.launch
@@ -123,9 +125,13 @@ internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<Ko
         processManager.pidFiles.from(pidfile)
     }
 
-    val intellijDebuggerDispatchPort = project.providers
-        .environmentVariable(HotReloadProperty.IntelliJDebuggerDispatchPort.key)
-        .orNull?.toIntOrNull()
+    project.intellijDebuggerDispatchPort.orNull?.let { debuggerDispatchPort ->
+        systemProperty(HotReloadProperty.IntelliJDebuggerDispatchPort.key, debuggerDispatchPort)
+    }
+
+    val intellijDebuggerDispatchPort = project
+        .composeReloadIntelliJDebuggerDispatchPortProvider.orNull
+
 
     val projectPath = project.path
 

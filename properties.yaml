@@ -170,7 +170,7 @@ DevToolsTransparencyEnabled:
 IntelliJDebuggerDispatchPort:
   key: compose.reload.idea.debugger.dispatch.port
   type: int
-  target: [ application, devtools ]
+  target: [ application, devtools, build ]
   documentation: |
     Note: Expected as an environment variable, as this is expected to be transitively available
     to all child processes.\n
