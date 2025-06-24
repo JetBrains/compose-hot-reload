@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.core
 
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.Continuation
@@ -42,10 +43,10 @@ public sealed interface CompletableFuture<T> : Future<T> {
     public fun completeWith(result: Try<T>): Boolean
 }
 
-public fun CompletableFuture<Unit>.complete() =
+public fun CompletableFuture<Unit>.complete(): Boolean =
     completeWith(Unit.toLeft())
 
-public fun <T> CompletableFuture<T>.complete(value: T) =
+public fun <T> CompletableFuture<T>.complete(value: T): Boolean =
     completeWith(value.toLeft())
 
 public fun <T> CompletableFuture<T>.completeWith(result: Try<T>) {
@@ -55,7 +56,7 @@ public fun <T> CompletableFuture<T>.completeWith(result: Try<T>) {
     }
 }
 
-public fun <T> CompletableFuture<T>.completeExceptionally(exception: Throwable) =
+public fun <T> CompletableFuture<T>.completeExceptionally(exception: Throwable): Boolean =
     completeWith(exception.toRight())
 
 public fun <T> Future(): CompletableFuture<T> {
@@ -198,8 +199,23 @@ public fun <T> Future<T>.getBlocking(timeout: Duration): Try<T> {
     val javaFuture = java.util.concurrent.CompletableFuture<Try<T>>()
     invokeOnCompletion { javaFuture.complete(it) }
     return try {
-        javaFuture.get(timeout.inWholeMilliseconds, java.util.concurrent.TimeUnit.MILLISECONDS)
+        javaFuture.get(timeout.inWholeMilliseconds, TimeUnit.MILLISECONDS)
     } catch (t: TimeoutException) {
         return t.toRight()
     }
+}
+
+/**
+ * Converts a [java.util.concurrent.CompletableFuture] to our async [Future] object.
+ */
+public fun <T> java.util.concurrent.CompletableFuture<T>.toFuture(): Future<T> {
+    val future = Future<T>()
+    whenComplete { value, error ->
+        if (error != null) {
+            future.completeExceptionally(error)
+        } else {
+            future.complete(value)
+        }
+    }
+    return future
 }

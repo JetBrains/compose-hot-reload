@@ -82,6 +82,7 @@ dependencies {
     reloadFunctionalTestImplementation(deps.asm.tree)
 
     reloadFunctionalTestImplementation(testFixtures(project(":hot-reload-core")))
+    reloadFunctionalTestImplementation(project(":hot-reload-devtools-api"))
 
     reloadFunctionalTestImplementation(project(":hot-reload-gradle-plugin")) {
         isTransitive = false

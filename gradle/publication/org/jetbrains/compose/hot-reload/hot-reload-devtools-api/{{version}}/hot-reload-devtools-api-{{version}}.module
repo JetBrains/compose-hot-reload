@@ -2,7 +2,7 @@
   "formatVersion": "1.1",
   "component": {
     "group": "org.jetbrains.compose.hot-reload",
-    "module": "hot-reload-devtools",
+    "module": "hot-reload-devtools-api",
     "version": "{{Hot Reload Version}}",
     "attributes": {
       "org.gradle.status": "release"
@@ -20,58 +20,12 @@
         "org.gradle.category": "library",
         "org.gradle.dependency.bundling": "external",
         "org.gradle.jvm.environment": "standard-jvm",
-        "org.gradle.jvm.version": 17,
+        "org.gradle.jvm.version": 11,
         "org.gradle.libraryelements": "jar",
         "org.gradle.usage": "java-api",
         "org.jetbrains.kotlin.platform.type": "jvm"
       },
       "dependencies": [
-        {
-          "group": "org.jetbrains.kotlin",
-          "module": "kotlin-stdlib",
-          "version": {
-            "requires": "2.1.21"
-          }
-        }
-      ],
-      "files": [
-        {
-          "name": "hot-reload-devtools-{{Hot Reload Version}}.jar",
-          "url": "hot-reload-devtools-{{Hot Reload Version}}.jar",
-          "size": {{SIZE}},
-          "sha512": "{{HASH}}",
-          "sha256": "{{HASH}}",
-          "sha1": "{{HASH}}",
-          "md5": "{{HASH}}"
-        }
-      ]
-    },
-    {
-      "name": "runtimeElements",
-      "attributes": {
-        "org.gradle.category": "library",
-        "org.gradle.dependency.bundling": "external",
-        "org.gradle.jvm.environment": "standard-jvm",
-        "org.gradle.jvm.version": 17,
-        "org.gradle.libraryelements": "jar",
-        "org.gradle.usage": "java-runtime",
-        "org.jetbrains.kotlin.platform.type": "jvm"
-      },
-      "dependencies": [
-        {
-          "group": "org.jetbrains.compose.runtime",
-          "module": "runtime",
-          "version": {
-            "requires": "1.8.2"
-          }
-        },
-        {
-          "group": "org.jetbrains.compose.hot-reload",
-          "module": "hot-reload-devtools-api",
-          "version": {
-            "requires": "{{Hot Reload Version}}"
-          }
-        },
         {
           "group": "org.jetbrains.compose.hot-reload",
           "module": "hot-reload-core",
@@ -87,73 +41,49 @@
           }
         },
         {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.21"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "hot-reload-devtools-api-{{Hot Reload Version}}.jar",
+          "url": "hot-reload-devtools-api-{{Hot Reload Version}}.jar",
+          "size": {{SIZE}},
+          "sha512": "{{HASH}}",
+          "sha256": "{{HASH}}",
+          "sha1": "{{HASH}}",
+          "md5": "{{HASH}}"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
           "group": "org.jetbrains.compose.hot-reload",
-          "module": "hot-reload-runtime-api",
+          "module": "hot-reload-core",
           "version": {
             "requires": "{{Hot Reload Version}}"
           }
         },
         {
           "group": "org.jetbrains.compose.hot-reload",
-          "module": "hot-reload-runtime-jvm",
+          "module": "hot-reload-orchestration",
           "version": {
             "requires": "{{Hot Reload Version}}"
-          }
-        },
-        {
-          "group": "org.jetbrains.compose.desktop",
-          "module": "desktop",
-          "version": {
-            "requires": "1.8.2"
-          }
-        },
-        {
-          "group": "org.jetbrains.compose.material3",
-          "module": "material3",
-          "version": {
-            "requires": "1.8.2"
-          }
-        },
-        {
-          "group": "org.jetbrains.compose.components",
-          "module": "components-resources",
-          "version": {
-            "requires": "1.8.2"
-          }
-        },
-        {
-          "group": "org.jetbrains.compose.material",
-          "module": "material-icons-core",
-          "version": {
-            "requires": "1.7.3"
-          }
-        },
-        {
-          "group": "org.jetbrains.kotlinx",
-          "module": "kotlinx-coroutines-swing",
-          "version": {
-            "requires": "1.10.2"
-          }
-        },
-        {
-          "group": "org.jetbrains.kotlinx",
-          "module": "kotlinx-datetime",
-          "version": {
-            "requires": "0.6.2"
-          }
-        },
-        {
-          "group": "io.sellmair",
-          "module": "evas",
-          "version": {
-            "requires": "1.3.0"
-          }
-        },
-        {
-          "group": "io.sellmair",
-          "module": "evas-compose",
-          "version": {
-            "requires": "1.3.0"
           }
         },
         {
@@ -166,8 +96,8 @@
       ],
       "files": [
         {
-          "name": "hot-reload-devtools-{{Hot Reload Version}}.jar",
-          "url": "hot-reload-devtools-{{Hot Reload Version}}.jar",
+          "name": "hot-reload-devtools-api-{{Hot Reload Version}}.jar",
+          "url": "hot-reload-devtools-api-{{Hot Reload Version}}.jar",
           "size": {{SIZE}},
           "sha512": "{{HASH}}",
           "sha256": "{{HASH}}",
@@ -186,8 +116,8 @@
       },
       "files": [
         {
-          "name": "hot-reload-devtools-{{Hot Reload Version}}-sources.jar",
-          "url": "hot-reload-devtools-{{Hot Reload Version}}-sources.jar",
+          "name": "hot-reload-devtools-api-{{Hot Reload Version}}-sources.jar",
+          "url": "hot-reload-devtools-api-{{Hot Reload Version}}-sources.jar",
           "size": {{SIZE}},
           "sha512": "{{HASH}}",
           "sha256": "{{HASH}}",
@@ -206,8 +136,8 @@
       },
       "files": [
         {
-          "name": "hot-reload-devtools-{{Hot Reload Version}}-javadoc.jar",
-          "url": "hot-reload-devtools-{{Hot Reload Version}}-javadoc.jar",
+          "name": "hot-reload-devtools-api-{{Hot Reload Version}}-javadoc.jar",
+          "url": "hot-reload-devtools-api-{{Hot Reload Version}}-javadoc.jar",
           "size": {{SIZE}},
           "sha512": "{{HASH}}",
           "sha256": "{{HASH}}",

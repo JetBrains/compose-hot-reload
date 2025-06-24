@@ -11,6 +11,7 @@ import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.invokeOnCompletion
+import org.jetbrains.compose.reload.core.reloadMainThread
 import org.jetbrains.compose.reload.core.warn
 import kotlin.concurrent.thread
 import kotlin.io.path.deleteIfExists
@@ -54,5 +55,6 @@ private fun setupOrchestration() {
 }
 
 internal fun shutdown(): Nothing {
+    reloadMainThread.shutdown()
     exitProcess(0)
 }
