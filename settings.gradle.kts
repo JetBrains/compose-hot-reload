@@ -61,6 +61,7 @@ dependencyResolutionManagement {
 }
 
 include(":hot-reload-core")
+include(":hot-reload-annotations")
 include(":hot-reload-analysis")
 include(":hot-reload-agent")
 include(":hot-reload-orchestration")

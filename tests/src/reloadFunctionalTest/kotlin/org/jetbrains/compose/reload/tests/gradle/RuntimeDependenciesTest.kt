@@ -150,6 +150,9 @@ class RuntimeDependenciesTest {
             PathRegex(".*/build/run/jvmDev/classpath/classes"),
             PathRegex(".*/build/run/jvmDev/classpath/hot"),
             PathRegex(".*/build/run/jvmDev/classpath/libs/opaque/.*/main.jar"), // Dependency on main compilatin output
+
+            /* Dev compilations automatically see the runtime api */
+            PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-runtime-api-jvm-$HOT_RELOAD_VERSION.jar"),
             *stdlib,
             *hotReloadAgentDependencies,
             *hotReloadRuntimeDependencies,
@@ -200,8 +203,8 @@ private val hotReloadAgentDependencies = arrayOf(
 )
 
 private val hotReloadRuntimeDependencies = arrayOf(
-    PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-runtime-api-jvm-$HOT_RELOAD_VERSION.jar"),
-    PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-runtime-jvm-$HOT_RELOAD_VERSION-dev.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-annotations-jvm-$HOT_RELOAD_VERSION.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-runtime-jvm-$HOT_RELOAD_VERSION.jar"),
 )
 
 private val testRuntimeDependencies = arrayOf(

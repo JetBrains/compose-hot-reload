@@ -18,6 +18,10 @@ plugins.withType<KotlinPluginWrapper> {
             "testImplementation"(testFixtures(project(":hot-reload-core")))
         }
 
+        if(project.name != "hot-reload-annotations") {
+            "api"(project(":hot-reload-annotations"))
+        }
+
         attributesSchema.attribute(Usage.USAGE_ATTRIBUTE)
             .compatibilityRules.add(HotReloadUsage.CompatibilityRule::class.java)
     }

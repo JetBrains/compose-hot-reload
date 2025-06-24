@@ -19,3 +19,5 @@ public actual val staticHotReloadScope: HotReloadScope = NoopHotReloadScope
 
 @Composable
 public actual fun AfterHotReloadEffect(action: () -> Unit): Unit = Unit
+
+public actual val isHotReloadActive: Boolean = false

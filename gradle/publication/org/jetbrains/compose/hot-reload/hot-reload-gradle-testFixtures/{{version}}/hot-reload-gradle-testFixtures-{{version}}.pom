@@ -51,6 +51,12 @@
   </dependencyManagement>
   <dependencies>
     <dependency>
+      <groupId>org.jetbrains.compose.hot-reload</groupId>
+      <artifactId>hot-reload-annotations-jvm</artifactId>
+      <version>{{Hot Reload Version}}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-test</artifactId>
       <scope>compile</scope>

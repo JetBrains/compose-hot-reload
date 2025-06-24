@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext

@@ -1,16 +1,11 @@
 public final class org/jetbrains/compose/reload/jvm/JvmDevelopmentEntryPoint {
-	public static final fun DevelopmentEntryPoint (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
 	public static final fun setContent (Landroidx/compose/ui/awt/ComposeDialog;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;)V
 	public static final fun setContent (Landroidx/compose/ui/awt/ComposeDialog;Lkotlin/jvm/functions/Function3;)V
 	public static final fun setContent (Landroidx/compose/ui/awt/ComposeWindow;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;)V
 	public static final fun setContent (Landroidx/compose/ui/awt/ComposeWindow;Lkotlin/jvm/functions/Function3;)V
 }
 
-public final class org/jetbrains/compose/reload/jvm/JvmInvokeAfterHotReload {
-	public static final fun invokeAfterHotReload (Lkotlin/jvm/functions/Function0;)Ljava/lang/AutoCloseable;
-}
-
-public final class org/jetbrains/compose/reload/jvm/isHotReloadActive {
-	public static final fun isHotReloadActive ()Z
+public final class org/jetbrains/compose/reload/jvm/RunHeadlessKt {
+	public static final fun runHeadlessApplication-gRj5Bb8 (JIILkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
