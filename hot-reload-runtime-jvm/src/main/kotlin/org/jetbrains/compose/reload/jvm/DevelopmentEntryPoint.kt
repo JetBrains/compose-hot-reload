@@ -9,8 +9,10 @@ package org.jetbrains.compose.reload.jvm
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.awt.ComposeDialog
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.window.DialogWindowScope
 import androidx.compose.ui.window.FrameWindowScope
 
 @Composable
@@ -46,3 +48,32 @@ internal fun ComposeWindow.setContent(
         }
     }
 }
+
+@Suppress("unused", "EXTENSION_SHADOWED_BY_MEMBER") // used by instrumentation
+@OptIn(ExperimentalComposeUiApi::class)
+@PublishedApi
+internal fun ComposeDialog.setContent(
+    onPreviewKeyEvent: (KeyEvent) -> Boolean,
+    onKeyEvent: (KeyEvent) -> Boolean,
+    content: @Composable DialogWindowScope.() -> Unit
+) {
+    setContent(onPreviewKeyEvent = onPreviewKeyEvent, onKeyEvent = onKeyEvent) {
+        DevelopmentEntryPoint {
+            content()
+        }
+    }
+}
+
+@Suppress("unused", "EXTENSION_SHADOWED_BY_MEMBER") // used by instrumentation
+@OptIn(ExperimentalComposeUiApi::class)
+@PublishedApi
+internal fun ComposeDialog.setContent(
+    content: @Composable DialogWindowScope.() -> Unit
+) {
+    setContent {
+        DevelopmentEntryPoint {
+            content()
+        }
+    }
+}
+

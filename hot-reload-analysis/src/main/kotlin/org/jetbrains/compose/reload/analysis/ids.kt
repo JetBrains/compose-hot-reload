@@ -106,6 +106,18 @@ object Ids {
         )
     }
 
+    object DialogDesktopKt {
+        val classId = ClassId("androidx/compose/ui/window/Dialog_desktopKt")
+    }
+
+    object SwingWindowDesktopKt {
+        val classId = ClassId("androidx/compose/ui/awt/SwingWindow_desktopKt")
+    }
+
+    object SwingDialogDesktopKt {
+        val classId = ClassId("androidx/compose/ui/awt/SwingDialog_desktopKt")
+    }
+
     object ApplicationDesktopKt {
         val classId = ClassId("androidx/compose/ui/window/Application_desktopKt")
 
@@ -140,6 +152,22 @@ object Ids {
 
     object ComposeWindow {
         val classId = ClassId("androidx/compose/ui/awt/ComposeWindow")
+
+        val setContent_1 = MethodId(
+            classId,
+            methodName = "setContent",
+            methodDescriptor = "(Lkotlin/jvm/functions/Function3)V"
+        )
+
+        val setContent_3 = MethodId(
+            classId,
+            methodName = "setContent",
+            methodDescriptor = "(Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;)V"
+        )
+    }
+
+    object ComposeDialog {
+        val classId = ClassId("androidx/compose/ui/awt/ComposeDialog")
 
         val setContent_1 = MethodId(
             classId,

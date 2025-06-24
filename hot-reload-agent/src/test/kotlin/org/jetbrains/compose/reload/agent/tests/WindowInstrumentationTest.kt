@@ -6,8 +6,10 @@
 package org.jetbrains.compose.reload.agent.tests
 
 import org.jetbrains.compose.reload.agent.WindowInstrumentation
+import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.ClassNode
 import org.jetbrains.compose.reload.analysis.Ids
+import org.jetbrains.compose.reload.analysis.MethodId
 import org.objectweb.asm.tree.MethodInsnNode
 import java.io.File
 import java.net.URLClassLoader
@@ -50,41 +52,47 @@ class WindowInstrumentationTest {
             }
         }
 
-        assertEquals(1, transformedClasses.size, "Expected only one class to be transformed. Found $transformedClasses")
-        val original = transformedClasses.first().first
-        val transformed = transformedClasses.first().second
+        assertEquals(2, transformedClasses.size, "Expected only one class to be transformed. Found $transformedClasses")
 
-        val originalCallFound = original.methods.any { originalMethod ->
-            originalMethod.instructions.any { originalInsn ->
-                originalInsn is MethodInsnNode && originalInsn.name == Ids.ComposeWindow.setContent_3.methodName &&
-                    originalInsn.owner == Ids.ComposeWindow.classId.value &&
-                    originalInsn.desc == Ids.ComposeWindow.setContent_3.methodDescriptor
-            }
-        }
-        if (!originalCallFound) {
-            fail("Expected original Window.setContent call to be found in ${original.name}")
-        }
-
-        transformed.methods.forEach { transformedMethod ->
-            transformedMethod.instructions.forEach { transformedInsn ->
-                if (transformedInsn is MethodInsnNode && transformedInsn.name == Ids.ComposeWindow.setContent_3.methodName &&
-                    transformedInsn.owner == Ids.ComposeWindow.classId.value &&
-                    transformedInsn.desc == Ids.ComposeWindow.setContent_3.methodDescriptor
-                ) {
-                    fail("Unexpected Window.setContent call in ${transformed.name}#${transformedMethod.name}")
+        val originalMethods = setOf(
+            Ids.ComposeWindow.setContent_3,
+            Ids.ComposeDialog.setContent_3,
+        )
+        transformedClasses.forEach { (original, transformed) ->
+            val originalCallFound = original.methods.any { originalMethod ->
+                originalMethod.instructions.any { originalInsn ->
+                    originalInsn is MethodInsnNode && originalInsn.methodId in originalMethods
                 }
             }
-        }
-
-        val interceptedCallFound = transformed.methods.any { transformedMethod ->
-            transformedMethod.instructions.any { transformedInsn ->
-                transformedInsn is MethodInsnNode && transformedInsn.name == "setContent" &&
-                    transformedInsn.owner == "org/jetbrains/compose/reload/jvm/JvmDevelopmentEntryPoint"
+            if (!originalCallFound) {
+                fail("Expected original Window.setContent call to be found in ${original.name}")
             }
-        }
 
-        if (!interceptedCallFound) {
-            fail("Expected intercepted Window.setContent call to be found in ${transformed.name}")
+            transformed.methods.forEach { transformedMethod ->
+                transformedMethod.instructions.forEach { transformedInsn ->
+                    if (transformedInsn is MethodInsnNode && transformedInsn.methodId in originalMethods) {
+                        fail("Unexpected Window.setContent call in ${transformed.name}#${transformedMethod.name}")
+                    }
+                }
+            }
+
+            val interceptedCallFound = transformed.methods.any { transformedMethod ->
+                transformedMethod.instructions.any { transformedInsn ->
+                    transformedInsn is MethodInsnNode && transformedInsn.name == "setContent" &&
+                        transformedInsn.owner == "org/jetbrains/compose/reload/jvm/JvmDevelopmentEntryPoint"
+                }
+            }
+
+            if (!interceptedCallFound) {
+                fail("Expected intercepted Window.setContent call to be found in ${transformed.name}")
+            }
         }
     }
 }
+
+private val MethodInsnNode.methodId: MethodId
+    get() = MethodId(
+        classId = ClassId(owner),
+        methodName = name,
+        methodDescriptor = desc,
+    )

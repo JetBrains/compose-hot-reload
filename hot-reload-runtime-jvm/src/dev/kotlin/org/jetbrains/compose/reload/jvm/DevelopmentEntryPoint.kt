@@ -14,8 +14,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.awt.ComposeDialog
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.window.DialogWindowScope
 import androidx.compose.ui.window.FrameWindowScope
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
@@ -113,6 +115,34 @@ internal fun ComposeWindow.setContent(
 @PublishedApi
 internal fun ComposeWindow.setContent(
     content: @Composable FrameWindowScope.() -> Unit
+) {
+    setContent {
+        DevelopmentEntryPoint {
+            content()
+        }
+    }
+}
+
+@Suppress("unused", "EXTENSION_SHADOWED_BY_MEMBER") // used by instrumentation
+@OptIn(ExperimentalComposeUiApi::class)
+@PublishedApi
+internal fun ComposeDialog.setContent(
+    onPreviewKeyEvent: (KeyEvent) -> Boolean,
+    onKeyEvent: (KeyEvent) -> Boolean,
+    content: @Composable DialogWindowScope.() -> Unit
+) {
+    setContent(onPreviewKeyEvent = onPreviewKeyEvent, onKeyEvent = onKeyEvent) {
+        DevelopmentEntryPoint {
+            content()
+        }
+    }
+}
+
+@Suppress("unused", "EXTENSION_SHADOWED_BY_MEMBER") // used by instrumentation
+@OptIn(ExperimentalComposeUiApi::class)
+@PublishedApi
+internal fun ComposeDialog.setContent(
+    content: @Composable DialogWindowScope.() -> Unit
 ) {
     setContent {
         DevelopmentEntryPoint {

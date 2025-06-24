@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.agent
 
 import javassist.expr.ExprEditor
 import javassist.expr.MethodCall
+import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.Ids
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.createLogger
@@ -33,15 +34,22 @@ internal object WindowInstrumentation : ClassFileTransformer {
         protectionDomain: ProtectionDomain?, classfileBuffer: ByteArray?
     ): ByteArray? {
         if (classfileBuffer == null) return null
-        if (className?.startsWith(Ids.WindowDesktopKt.classId.value) == true) {
-            return transformWindowKt(loader, classfileBuffer)
+        if (className == null) return null
+        if (// before CMP 1.9.0
+            className.startsWith(Ids.WindowDesktopKt.classId.value) ||
+            className.startsWith(Ids.DialogDesktopKt.classId.value) ||
+            // CMP 1.9.0+
+            className.startsWith(Ids.SwingWindowDesktopKt.classId.value) ||
+            className.startsWith(Ids.SwingDialogDesktopKt.classId.value)
+        ) {
+            return transformSetContent(loader, classfileBuffer)
         }
 
         return null
     }
 }
 
-private fun transformWindowKt(
+private fun transformSetContent(
     loader: ClassLoader?, classfileBuffer: ByteArray
 ): ByteArray? {
     val ctClass = getClassPool(loader ?: ClassLoader.getSystemClassLoader()).makeClass(classfileBuffer.inputStream())
@@ -53,41 +61,25 @@ private fun transformWindowKt(
                 try {
                     if (m.methodId == Ids.ComposeWindow.setContent_1) {
                         // Store the method parameters properly to maintain stack consistency
-                        m.replace(
-                            """
-                            {
-                                // Store parameters in local variables to maintain stack
-                                androidx.compose.ui.awt.ComposeWindow window = $0;
-                                kotlin.jvm.functions.Function3 p1= $1;
-                                
-                                // Call the development entry point with stored parameters
-                                org.jetbrains.compose.reload.jvm.JvmDevelopmentEntryPoint.setContent(
-                                    window, p1
-                                );
-                            }
-                            """.trimIndent()
-                        )
+                        m.replace(wrapSetContent1(Ids.ComposeWindow.classId))
                         transformed = true
                     }
 
                     if (m.methodId == Ids.ComposeWindow.setContent_3) {
                         // Store the method parameters properly to maintain stack consistency
-                        m.replace(
-                            """
-                            {
-                                // Store parameters in local variables to maintain stack
-                                androidx.compose.ui.awt.ComposeWindow window = $0;
-                                kotlin.jvm.functions.Function1 p1 = $1;
-                                kotlin.jvm.functions.Function1 p2 = $2;
-                                kotlin.jvm.functions.Function3 p3 = $3;
-                                
-                                // Call the development entry point with stored parameters
-                                org.jetbrains.compose.reload.jvm.JvmDevelopmentEntryPoint.setContent(
-                                    window, p1, p2, p3
-                                );
-                            }
-                            """.trimIndent()
-                        )
+                        m.replace(wrapSetContent3(Ids.ComposeWindow.classId))
+                        transformed = true
+                    }
+
+                    if (m.methodId == Ids.ComposeDialog.setContent_1) {
+                        // Store the method parameters properly to maintain stack consistency
+                        m.replace(wrapSetContent1(Ids.ComposeDialog.classId))
+                        transformed = true
+                    }
+
+                    if (m.methodId == Ids.ComposeDialog.setContent_3) {
+                        // Store the method parameters properly to maintain stack consistency
+                        m.replace(wrapSetContent3(Ids.ComposeDialog.classId))
                         transformed = true
                     }
                 } catch (t: Throwable) {
@@ -102,3 +94,31 @@ private fun transformWindowKt(
         return null
     }
 }
+
+private fun wrapSetContent1(windowClass: ClassId): String = """
+    {
+        // Store parameters in local variables to maintain stack
+        ${windowClass.toFqn()} window = $0;
+        kotlin.jvm.functions.Function3 p1= $1;
+        
+        // Call the development entry point with stored parameters
+        org.jetbrains.compose.reload.jvm.JvmDevelopmentEntryPoint.setContent(
+            window, p1
+        );
+    }
+    """.trimIndent()
+
+private fun wrapSetContent3(windowClass: ClassId): String = """
+    {
+        // Store parameters in local variables to maintain stack
+        ${windowClass.toFqn()} window = $0;
+        kotlin.jvm.functions.Function1 p1 = $1;
+        kotlin.jvm.functions.Function1 p2 = $2;
+        kotlin.jvm.functions.Function3 p3 = $3;
+        
+        // Call the development entry point with stored parameters
+        org.jetbrains.compose.reload.jvm.JvmDevelopmentEntryPoint.setContent(
+            window, p1, p2, p3
+        );
+    }
+    """.trimIndent()
