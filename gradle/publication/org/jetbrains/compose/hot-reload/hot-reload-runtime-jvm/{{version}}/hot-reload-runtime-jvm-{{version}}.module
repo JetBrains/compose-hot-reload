@@ -23,10 +23,16 @@
         "org.gradle.jvm.version": 11,
         "org.gradle.libraryelements": "jar",
         "org.gradle.usage": "java-api",
-        "org.jetbrains.compose.reload.usageType": "Main",
         "org.jetbrains.kotlin.platform.type": "jvm"
       },
       "dependencies": [
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-annotations",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        },
         {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",
@@ -55,16 +61,16 @@
         "org.gradle.jvm.environment": "standard-jvm",
         "org.gradle.jvm.version": 11,
         "org.gradle.libraryelements": "jar",
-        "org.gradle.usage": "java-runtime",
-        "org.jetbrains.compose.reload.usageType": "Main",
+        "org.gradle.usage": "compose-dev-java-runtime",
+        "org.jetbrains.compose.reload.usageType": "Dev",
         "org.jetbrains.kotlin.platform.type": "jvm"
       },
       "dependencies": [
         {
-          "group": "org.jetbrains.compose.runtime",
-          "module": "runtime",
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-annotations",
           "version": {
-            "requires": "1.8.2"
+            "requires": "{{Hot Reload Version}}"
           }
         },
         {
@@ -119,46 +125,6 @@
         {
           "name": "hot-reload-runtime-jvm-{{Hot Reload Version}}-javadoc.jar",
           "url": "hot-reload-runtime-jvm-{{Hot Reload Version}}-javadoc.jar",
-          "size": {{SIZE}},
-          "sha512": "{{HASH}}",
-          "sha256": "{{HASH}}",
-          "sha1": "{{HASH}}",
-          "md5": "{{HASH}}"
-        }
-      ]
-    },
-    {
-      "name": "{{HASH}}",
-      "attributes": {
-        "org.gradle.category": "library",
-        "org.gradle.dependency.bundling": "external",
-        "org.gradle.jvm.environment": "standard-jvm",
-        "org.gradle.jvm.version": 11,
-        "org.gradle.libraryelements": "jar",
-        "org.gradle.usage": "compose-dev-java-runtime",
-        "org.jetbrains.compose.reload.usageType": "Dev",
-        "org.jetbrains.kotlin.platform.type": "jvm"
-      },
-      "dependencies": [
-        {
-          "group": "org.jetbrains.compose.runtime",
-          "module": "runtime",
-          "version": {
-            "requires": "1.8.2"
-          }
-        },
-        {
-          "group": "org.jetbrains.kotlin",
-          "module": "kotlin-stdlib",
-          "version": {
-            "requires": "2.1.21"
-          }
-        }
-      ],
-      "files": [
-        {
-          "name": "hot-reload-runtime-jvm-{{Hot Reload Version}}-dev.jar",
-          "url": "hot-reload-runtime-jvm-{{Hot Reload Version}}-dev.jar",
           "size": {{SIZE}},
           "sha512": "{{HASH}}",
           "sha256": "{{HASH}}",

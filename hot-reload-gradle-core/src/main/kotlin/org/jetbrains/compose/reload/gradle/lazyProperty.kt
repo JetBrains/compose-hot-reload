@@ -6,13 +6,14 @@
 package org.jetbrains.compose.reload.gradle
 
 import org.gradle.api.Project
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.kotlin.tooling.core.HasMutableExtras
 import org.jetbrains.kotlin.tooling.core.extrasKeyOf
 import org.jetbrains.kotlin.tooling.core.getOrPut
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun <R : HasMutableExtras, T> lazyProperty(initializer: R.() -> T): ReadOnlyProperty<R, T> {
     return LazyProperty(initializer)
 }
@@ -34,7 +35,7 @@ internal class LazyProperty<R : HasMutableExtras, T>(
     }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun <T> lazyProjectProperty(initializer: Project.() -> T): ReadOnlyProperty<Project, T> {
     return LazyProjectProperty(initializer)
 }

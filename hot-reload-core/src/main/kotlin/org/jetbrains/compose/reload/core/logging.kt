@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.Logger.Level
 import java.io.Serializable
 import java.lang.invoke.MethodHandles

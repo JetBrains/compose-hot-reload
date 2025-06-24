@@ -27,6 +27,13 @@
       },
       "dependencies": [
         {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-annotations",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        },
+        {
           "group": "org.jetbrains.compose.material3",
           "module": "material3",
           "version": {
@@ -131,6 +138,13 @@
           "module": "components-resources",
           "version": {
             "requires": "1.8.2"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-annotations",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
           }
         },
         {

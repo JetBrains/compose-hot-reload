@@ -27,6 +27,13 @@
       },
       "dependencies": [
         {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-annotations",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        },
+        {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",
           "version": {
@@ -84,6 +91,13 @@
           "module": "javassist",
           "version": {
             "requires": "3.30.2-GA"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-annotations",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
           }
         },
         {

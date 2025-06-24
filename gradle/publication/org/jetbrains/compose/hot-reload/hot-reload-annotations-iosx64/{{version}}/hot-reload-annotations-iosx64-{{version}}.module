@@ -1,0 +1,104 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "url": "../../hot-reload-annotations/{{Hot Reload Version}}/hot-reload-annotations-{{Hot Reload Version}}.module",
+    "group": "org.jetbrains.compose.hot-reload",
+    "module": "hot-reload-annotations",
+    "version": "{{Hot Reload Version}}",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.14"
+    }
+  },
+  "variants": [
+    {
+      "name": "iosX64ApiElements-published",
+      "attributes": {
+        "artifactType": "org.jetbrains.kotlin.klib",
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-api",
+        "org.jetbrains.kotlin.native.target": "ios_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.21"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "hot-reload-annotations-iosX64Main-{{Hot Reload Version}}.klib",
+          "url": "hot-reload-annotations-iosx64-{{Hot Reload Version}}.klib",
+          "size": {{SIZE}},
+          "sha512": "{{HASH}}",
+          "sha256": "{{HASH}}",
+          "sha1": "{{HASH}}",
+          "md5": "{{HASH}}"
+        }
+      ]
+    },
+    {
+      "name": "iosX64SourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-runtime",
+        "org.jetbrains.kotlin.native.target": "ios_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "files": [
+        {
+          "name": "hot-reload-annotations-iosx64-{{Hot Reload Version}}-sources.jar",
+          "url": "hot-reload-annotations-iosx64-{{Hot Reload Version}}-sources.jar",
+          "size": {{SIZE}},
+          "sha512": "{{HASH}}",
+          "sha256": "{{HASH}}",
+          "sha1": "{{HASH}}",
+          "md5": "{{HASH}}"
+        }
+      ]
+    },
+    {
+      "name": "iosX64MetadataElements-published",
+      "attributes": {
+        "artifactType": "org.jetbrains.kotlin.klib",
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-metadata",
+        "org.jetbrains.kotlin.native.target": "ios_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.21"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "hot-reload-annotations-iosx64-{{Hot Reload Version}}-metadata.jar",
+          "url": "hot-reload-annotations-iosx64-{{Hot Reload Version}}-metadata.jar",
+          "size": {{SIZE}},
+          "sha512": "{{HASH}}",
+          "sha256": "{{HASH}}",
+          "sha1": "{{HASH}}",
+          "md5": "{{HASH}}"
+        }
+      ]
+    }
+  ]
+}

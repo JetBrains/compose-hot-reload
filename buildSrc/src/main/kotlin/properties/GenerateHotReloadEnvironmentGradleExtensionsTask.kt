@@ -32,7 +32,7 @@ open class GenerateHotReloadEnvironmentGradleExtensionsTask : DefaultTask() {
             import org.gradle.api.provider.Provider
             import org.jetbrains.compose.reload.core.HotReloadProperty
             import org.jetbrains.compose.reload.core.Os
-            import org.jetbrains.compose.reload.gradle.InternalHotReloadGradleApi
+            import org.jetbrains.compose.reload.InternalHotReloadApi
             
             {{element}}
         """.trimIndent().asTemplateOrThrow().renderOrThrow {
@@ -62,7 +62,7 @@ open class GenerateHotReloadEnvironmentGradleExtensionsTask : DefaultTask() {
                 val providerName = "${propertyName}Provider"
 
                 "element"(elementTemplate.renderOrThrow {
-                    "visibility"("@InternalHotReloadGradleApi")
+                    "visibility"("@InternalHotReloadApi")
                     "name"(property.name)
                     "propertyName"("composeReload${property.name.capitalized()}")
                     "providerName"(providerName)

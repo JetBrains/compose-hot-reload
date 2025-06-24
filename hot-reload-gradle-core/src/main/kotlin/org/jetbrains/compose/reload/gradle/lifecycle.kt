@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.gradle
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.provideDelegate
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.kotlin.gradle.plugin.HasProject
 import org.jetbrains.kotlin.tooling.core.HasMutableExtras
 import kotlin.coroutines.Continuation
@@ -19,17 +20,17 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.properties.ReadOnlyProperty
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun interface Future<T> {
     suspend fun await(): T
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun <T> Future(): CompletableFuture<T> {
     return CompletableFuture()
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 class CompletableFuture<T> : Future<T> {
     private var result: Result<T>? = null
     private val continuations = mutableListOf<Continuation<T>>()
@@ -68,40 +69,40 @@ class CompletableFuture<T> : Future<T> {
     }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun <T, R> Future<T>.map(mapper: (T) -> R): Future<R> = Future {
     mapper(await())
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun <T, R> Future<T>.flatMap(mapper: (T) -> Future<R>) = Future {
     mapper(await()).await()
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 val Project.lifecycle: Lifecycle by lazyProjectProperty { Lifecycle(this) }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun Project.launch(action: suspend () -> Unit) = lifecycle.launch(action)
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun <T> projectFuture(action: suspend Project.() -> T) = lazyProjectProperty {
     future { action() }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun <R, T> future(action: suspend R.() -> T): ReadOnlyProperty<R, Future<T>>
     where R : HasMutableExtras, R : HasProject = lazyProperty<R, Future<T>> {
     project.future { action() }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 suspend fun project(): Project {
     val lifecycle = coroutineContext[Lifecycle] ?: error("Project is not initialized yet")
     return lifecycle.project
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 inline fun <reified T> Project.futureProvider(crossinline action: suspend () -> T): Provider<T> {
     val property = objects.property(T::class.java)
     launch {
@@ -112,7 +113,7 @@ inline fun <reified T> Project.futureProvider(crossinline action: suspend () -> 
     return property
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun <T> Project.future(action: suspend () -> T): Future<T> {
     val future = Future<T>()
     launch {
@@ -125,13 +126,13 @@ fun <T> Project.future(action: suspend () -> T): Future<T> {
     return future
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 suspend fun <T> Provider<T>.await(): T? {
     PluginStage.DeferredConfiguration.await()
     return orNull
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 class Lifecycle(val project: Project) : CoroutineContext.Element {
 
     override val key: CoroutineContext.Key<*> = Key

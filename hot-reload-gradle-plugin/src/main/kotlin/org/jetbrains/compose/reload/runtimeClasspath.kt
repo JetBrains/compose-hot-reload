@@ -67,12 +67,8 @@ internal val Project.hotReloadRuntimeConfiguration: Configuration
             configuration.attributes.attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(COMPOSE_DEV_RUNTIME_USAGE))
             configuration.attributes.attribute(HotReloadUsageType.attribute, HotReloadUsageType.Dev)
 
-            /**
-             * The dev runtime should also include the 'runtime-api,' which will resolve to the dev variant,
-             * practically engaging the 'DevelopmentEntryPoint {}' transformations
-             */
             project.dependencies.add(
-                configuration.name, "org.jetbrains.compose.hot-reload:hot-reload-runtime-api:$HOT_RELOAD_VERSION"
+                configuration.name, "org.jetbrains.compose.hot-reload:hot-reload-runtime-jvm:$HOT_RELOAD_VERSION"
             )
         }
 
@@ -215,7 +211,6 @@ private open class SyncArtifactsTask : DefaultTask() {
                 val targetFileJar = targetFile.resolveSibling("${targetFile.name}.jar")
                 artifact.file.toPath().copyRecursivelyToZip(targetFileJar, false)
             }
-
         }
     }
 }

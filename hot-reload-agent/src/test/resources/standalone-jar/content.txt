@@ -3,6 +3,7 @@ META-INF/MANIFEST.MF
 META-INF/compose.reload.env
 META-INF/hot-reload-agent.kotlin_module
 META-INF/hot-reload-analysis.kotlin_module
+META-INF/hot-reload-annotations.kotlin_module
 META-INF/hot-reload-core.kotlin_module
 META-INF/hot-reload-core_kotlinxCoroutinesBridge.kotlin_module
 META-INF/hot-reload-orchestration.kotlin_module

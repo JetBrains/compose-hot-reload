@@ -21,7 +21,6 @@ import org.jetbrains.compose.reload.core.asTemplateOrThrow
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.renderOrThrow
 import org.jetbrains.compose.reload.gradle.Future
-import org.jetbrains.compose.reload.gradle.InternalHotReloadGradleApi
 import org.jetbrains.compose.reload.gradle.PluginStage
 import org.jetbrains.compose.reload.gradle.await
 import org.jetbrains.compose.reload.gradle.forAllJvmCompilations
@@ -88,7 +87,7 @@ internal val KotlinCompilation<*>.hotReloadTask: Future<TaskProvider<HotReloadTa
 
 
 @DisableCachingByDefault(because = "Should always run")
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 abstract class HotReloadTask : DefaultTask() {
     private val rootProjectDirectory = project.rootProject.layout.projectDirectory
 

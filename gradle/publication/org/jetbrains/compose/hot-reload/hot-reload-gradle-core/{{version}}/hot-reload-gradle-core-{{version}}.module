@@ -25,6 +25,15 @@
         "org.gradle.usage": "java-api",
         "org.jetbrains.kotlin.platform.type": "jvm"
       },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-annotations",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        }
+      ],
       "files": [
         {
           "name": "hot-reload-gradle-core-{{Hot Reload Version}}.jar",
@@ -56,6 +65,13 @@
         {
           "group": "org.jetbrains.compose.hot-reload",
           "module": "hot-reload-core",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-annotations",
           "version": {
             "requires": "{{Hot Reload Version}}"
           }

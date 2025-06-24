@@ -23,7 +23,6 @@ import org.gradle.work.FileChange
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import org.jetbrains.compose.reload.gradle.Future
-import org.jetbrains.compose.reload.gradle.InternalHotReloadGradleApi
 import org.jetbrains.compose.reload.gradle.forAllJvmCompilations
 import org.jetbrains.compose.reload.gradle.future
 import org.jetbrains.compose.reload.gradle.projectFuture
@@ -66,7 +65,7 @@ internal val KotlinCompilation<*>.hotSnapshotTask: Future<TaskProvider<HotSnapsh
 
 
 @DisableCachingByDefault(because = "Should always run")
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 abstract class HotSnapshotTask : DefaultTask() {
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)

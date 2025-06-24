@@ -45,7 +45,6 @@ dependencies {
     implementation(project(":hot-reload-core"))
     implementation(project(":hot-reload-orchestration"))
     implementation(project(":hot-reload-runtime-api"))
-    implementation(project(":hot-reload-runtime-jvm"))
 
     implementation(compose.desktop.common)
     implementation(compose.material3)

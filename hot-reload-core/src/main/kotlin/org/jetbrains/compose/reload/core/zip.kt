@@ -7,6 +7,7 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.nio.file.OpenOption
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption

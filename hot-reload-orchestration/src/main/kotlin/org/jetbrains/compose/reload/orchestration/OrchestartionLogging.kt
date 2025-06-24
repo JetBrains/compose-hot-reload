@@ -5,8 +5,8 @@
 
 package org.jetbrains.compose.reload.orchestration
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.Environment
-import org.jetbrains.compose.reload.core.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.Logger
 import org.jetbrains.compose.reload.core.Queue
 
