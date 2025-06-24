@@ -7,7 +7,7 @@
 [![docs](https://img.shields.io/badge/documentation-blue)](https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-hot-reload.html)
 [![Slack channel](https://img.shields.io/badge/chat-slack-green.svg?logo=slack)](https://kotlinlang.slack.com/messages/compose-desktop/)
 
-Iterate on your Compose UIs faster and let your creativity run free when building multiplatform UIs.
+Iterate on your Compose UIs faster and let your creativity flow when building multiplatform UIs.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./readme-assets/banner_dark.png">
@@ -15,15 +15,22 @@ Iterate on your Compose UIs faster and let your creativity run free when buildin
 </picture>
 
 Compose Hot Reload lets you make UI code changes in a Compose Multiplatform app and see the results instantly, no restarts needed.
-Compose Hot Reload runs your app on the JetBrains Runtime and intelligently reloads your code whenever it changes.
+Use JetBrains Runtime to intelligently reload your code whenever it changes.
 
-## Getting Started
 
-### Requirements
-- A Compose Multiplatform project with a desktop target (see [FAQ](#faq))
-- Kotlin `2.1.20` or higher
 
-### Apply the Gradle plugin to your project
+There are two ways to add Compose Hot Reload to your project:
+* Create a project from scratch in IntelliJ IDEA or Android Studio
+* Add it as a Gradle plugin to an existing project
+
+## Prerequisites
+- Kotlin 2.1.20 or higher.
+- Compose compiler 2.1.20 or higher.
+- JetBrains runtime.
+
+## Create a project from scratch
+
+## Apply the Gradle plugin to your project
 
 Add the `org.jetbrains.compose.hot-reload` Gradle plugin to your build script:
 
@@ -36,13 +43,13 @@ plugins {
 }
 ```
 
-### Run the application
-#### Multiplatform + IntelliJ
+## Run the application
+### Multiplatform + IntelliJ
 Using Kotlin Multiplatform and IntelliJ, launching your app is as simple as pressing 'run' on your main function:
 <img alt="IntelliJ Run Gutter" src="./readme-assets/run-gutter.png">
 
-#### Gradle Tasks
-**Run Tasks**
+### Gradle Tasks
+#### Run Tasks
 
 The plugin will create the following tasks to launch the application in 'hot reload mode':
 - `:hotRunJvm`: Multiplatform, async alternative (`hotRunJvmAsync`)
@@ -114,7 +121,7 @@ or provided when invoking the task
 ./gradlew hotRunJvm --mainClass com.example.MainKt
 ```
 
-### Set up automatic provisioning of the JetBrains Runtime (JBR) via Gradle
+## Set up automatic provisioning of the JetBrains Runtime (JBR) via Gradle
 
 > [!IMPORTANT]  
 > To use the full functionality of Compose Hot Reload, your project **must** run on the JetBrains Runtime (JBR, an OpenJDK fork that supports enhanced class redefinition).
