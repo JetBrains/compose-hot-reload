@@ -51,6 +51,12 @@
   </dependencyManagement>
   <dependencies>
     <dependency>
+      <groupId>org.jetbrains.compose.hot-reload</groupId>
+      <artifactId>hot-reload-annotations-jvm</artifactId>
+      <version>{{Hot Reload Version}}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.jetbrains.compose.material3</groupId>
       <artifactId>material3-desktop</artifactId>
       <version>1.8.2</version>

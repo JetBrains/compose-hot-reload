@@ -26,6 +26,13 @@
       },
       "dependencies": [
         {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-annotations",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        },
+        {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",
           "version": {
@@ -55,6 +62,13 @@
         "org.jetbrains.kotlin.wasm.target": "js"
       },
       "dependencies": [
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-annotations",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        },
         {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",
@@ -124,6 +138,13 @@
         "org.jetbrains.kotlin.wasm.target": "js"
       },
       "dependencies": [
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-annotations",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        },
         {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",

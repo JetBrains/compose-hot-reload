@@ -269,7 +269,7 @@ LogLevel:
   key: compose.reload.logLevel
   type: enum
   enumClass: org.jetbrains.compose.reload.core.Logger.Level
-  target: [application, devtools, build]
+  target: [ application, devtools, build ]
   default: "Info"
   documentation: |
     Minimum logging level
@@ -281,3 +281,12 @@ LogStdout:
   default: "false"
   documentation: |
     Enable output of all logs into the standard output
+
+IsHotReloadActive:
+  key: compose.reload.isActive
+  type: boolean
+  target: [ application ]
+  default: "false"
+  documentation: |
+    Will be set to 'true' if the application is launched with Hot Reload and therefore can be used
+    to detect if hot reload is 'active'

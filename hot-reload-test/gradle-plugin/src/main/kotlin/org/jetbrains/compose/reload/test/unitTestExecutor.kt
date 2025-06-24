@@ -134,6 +134,7 @@ internal class HotReloadUnitTestExecutor(
                 "-Dapple.awt.UIElement=true",
                 "-DapplicationClassesDir=${applicationClassesDir.absolutePathString()}",
                 "-DtestClasses=${testClasses.asPath + pathSeparator + applicationClassesDir}",
+                "-D${HotReloadProperty.IsHotReloadActive.key}=true",
                 "-D${HotReloadProperty.IsHeadless.key}=true",
                 "-D${HotReloadProperty.DevToolsEnabled.key}=false",
                 "-D${HotReloadProperty.OrchestrationPort.key}=${orchestrationServer.port.getBlocking()}",

@@ -15,12 +15,13 @@ import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.Usage
 import org.gradle.api.file.FileCollection
 import org.gradle.kotlin.dsl.named
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 private const val composeHotReloadAgentConfigurationName = "composeHotReloadAgent"
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 internal val Project.composeHotReloadAgentConfiguration: Configuration
     get() {
         configurations.findByName(composeHotReloadAgentConfigurationName)?.let { return it }

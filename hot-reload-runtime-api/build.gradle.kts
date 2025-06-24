@@ -3,8 +3,9 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
+@file:OptIn(ExperimentalKotlinGradlePluginApi::class, ExperimentalComposeLibrary::class)
 
+import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
@@ -56,6 +57,7 @@ kotlin {
     js()
 
     sourceSets.commonMain.dependencies {
+        api(project(":hot-reload-annotations"))
         implementation(compose.runtime)
         implementation(deps.coroutines.core)
     }
@@ -65,12 +67,18 @@ kotlin {
     }
 
     sourceSets.jvmMain.dependencies {
-        implementation(project(":hot-reload-runtime-jvm"))
+        compileOnly(project(":hot-reload-agent"))
+        compileOnly(project(":hot-reload-core"))
+        compileOnly(project(":hot-reload-orchestration"))
+        compileOnly(project(":hot-reload-runtime-jvm"))
     }
 
     sourceSets.jvmTest.dependencies {
         implementation(deps.junit.jupiter)
         implementation(deps.junit.jupiter.engine)
+        implementation(compose.uiTest)
+        implementation(compose.material3)
+        implementation(compose.desktop.currentOs)
     }
 }
 

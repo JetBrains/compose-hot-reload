@@ -12,8 +12,9 @@ import org.gradle.jvm.toolchain.JavaLauncher
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.jvm.toolchain.JvmVendorSpec
 import org.gradle.kotlin.dsl.support.serviceOf
+import org.jetbrains.compose.reload.InternalHotReloadApi
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun Project.jetbrainsRuntimeLauncher(): Provider<JavaLauncher> {
     return serviceOf<JavaToolchainService>().launcherFor { spec ->
         @Suppress("UnstableApiUsage")

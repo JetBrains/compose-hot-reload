@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.io.DataOutputStream
 import java.net.ServerSocket
 import java.net.Socket

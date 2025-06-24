@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment
 import org.jetbrains.compose.reload.core.HotReloadProperty.OrchestrationPort
 import org.jetbrains.compose.reload.core.HotReloadProperty.ParentPid

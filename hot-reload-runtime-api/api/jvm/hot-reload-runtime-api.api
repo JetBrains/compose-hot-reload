@@ -1,22 +1,12 @@
-public abstract interface annotation class org/jetbrains/compose/reload/DelicateHotReloadApi : java/lang/annotation/Annotation {
-}
-
-public abstract interface annotation class org/jetbrains/compose/reload/DevelopmentEntryPoint : java/lang/annotation/Annotation {
-	public abstract fun windowHeight ()I
-	public abstract fun windowWidth ()I
-}
-
 public final class org/jetbrains/compose/reload/HotReloadApi {
 	public static final fun AfterHotReloadEffect (Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
 	public static final fun DevelopmentEntryPoint (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
 	public static final fun getStaticHotReloadScope ()Lorg/jetbrains/compose/reload/HotReloadScope;
+	public static final fun isHotReloadActive ()Z
 }
 
 public abstract class org/jetbrains/compose/reload/HotReloadScope {
 	public static final field $stable I
 	public abstract fun invokeAfterHotReload (Lkotlin/jvm/functions/Function0;)Ljava/lang/AutoCloseable;
-}
-
-public abstract interface annotation class org/jetbrains/compose/reload/InternalHotReloadApi : java/lang/annotation/Annotation {
 }
 

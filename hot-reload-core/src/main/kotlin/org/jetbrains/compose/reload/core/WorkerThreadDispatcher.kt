@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.util.concurrent.RejectedExecutionException
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.ContinuationInterceptor

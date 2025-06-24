@@ -6,12 +6,13 @@
 package org.jetbrains.compose.reload.gradle
 
 import org.gradle.api.Project
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.update
 import org.jetbrains.compose.reload.gradle.PluginStage.State.Finished
 import org.jetbrains.compose.reload.gradle.PluginStage.State.Started
 import java.util.concurrent.atomic.AtomicReference
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 enum class PluginStage {
     /**
      * The plugin was applied, but we're waiting for the Kotlin entities (aka Kotlin plugin)
@@ -36,7 +37,7 @@ enum class PluginStage {
     }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 data class PluginState(
     val stage: PluginStage, val state: PluginStage.State,
 ) : Comparable<PluginState> {
@@ -61,14 +62,14 @@ private val Project.pluginStateFutures by lazyProjectProperty {
     mutableMapOf<PluginState, CompletableFuture<PluginState>>()
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 inline fun Project.runStage(stage: PluginStage, action: () -> Unit = {}) {
     start(stage)
     action()
     finish(stage)
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun Project.start(stage: PluginStage) {
     val (previous, new) = pluginState.update { PluginState(stage, Started) }
     if (new == null) throw NullPointerException("'new' state was null after update")
@@ -83,7 +84,7 @@ fun Project.start(stage: PluginStage) {
     pluginStateFuture(new).complete(new)
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun Project.finish(stage: PluginStage) {
     val (previous, new) = pluginState.update { PluginState(stage, Finished) }
     if (new == null) throw NullPointerException("'new' state was null after update")
@@ -100,22 +101,22 @@ private fun Project.pluginStateFuture(state: PluginState): CompletableFuture<Plu
     return pluginStateFutures.getOrPut(state) { CompletableFuture() }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun Project.onStartFuture(stage: PluginStage): Future<PluginState> {
     return pluginStateFuture(PluginState(stage, Started))
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun Project.onFinishFuture(stage: PluginStage): Future<PluginState> {
     return pluginStateFuture(PluginState(stage, Finished))
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 suspend fun PluginStage.await() {
     project().onStartFuture(this).await()
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 suspend fun PluginStage.awaitFinish() {
     project().onFinishFuture(this).await()
 }

@@ -11,6 +11,7 @@ import org.gradle.api.Task
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.TaskProvider
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
@@ -25,11 +26,11 @@ import kotlin.coroutines.suspendCoroutine
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 val String.capitalized
     get() = this.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 val String.decapitalized
     get() = this.replaceFirstChar { if (it.isUpperCase()) it.lowercase(Locale.getDefault()) else it.toString() }
 
@@ -37,46 +38,46 @@ val String.decapitalized
 fun camelCase(vararg nameParts: String?): String =
     nameParts.filterNotNull().filter { it.isNotBlank() }.joinToString("") { it.capitalized }.decapitalized
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 val Project.kotlinMultiplatformOrNull: KotlinMultiplatformExtension?
     get() = extensions.getByName("kotlin") as? KotlinMultiplatformExtension
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 val Project.kotlinJvmOrNull: KotlinJvmProjectExtension?
     get() = extensions.getByName("kotlin") as? KotlinJvmProjectExtension
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun Project.files(lazy: () -> Any) = files({ lazy() })
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun <T> NamedDomainObjectCollection<T>.forEachNamed(action: (name: String, provider: Provider<T>) -> Unit) {
     names.forEach { name ->
         action(name, named(name))
     }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun <T : Task> TaskCollection<T>.forEachTaskProvider(action: (provider: TaskProvider<T>) -> Unit) {
     names.forEach { name ->
         action(named(name))
     }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun Project.withComposePlugin(block: () -> Unit) {
     pluginManager.withPlugin("org.jetbrains.compose") {
         block()
     }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun Project.withComposeCompilerPlugin(block: () -> Unit) {
     pluginManager.withPlugin("org.jetbrains.kotlin.plugin.compose") {
         block()
     }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 suspend fun awaitComposeCompilerPlugin() {
     val project = project()
     suspendCoroutine { continuation ->
@@ -86,7 +87,7 @@ suspend fun awaitComposeCompilerPlugin() {
     }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun Project.withKotlinPlugin(block: () -> Unit) {
     pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
         block()
@@ -98,7 +99,7 @@ fun Project.withKotlinPlugin(block: () -> Unit) {
 }
 
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 suspend fun awaitKotlinPlugin() {
     val project = project()
     suspendCoroutine { continuation ->
@@ -108,7 +109,7 @@ suspend fun awaitKotlinPlugin() {
     }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 suspend fun <T> Project.forAllJvmCompilations(block: suspend (compilation: KotlinCompilation<*>) -> T): List<T> {
     val futures = mutableListOf<Future<T>>()
 
@@ -143,7 +144,7 @@ suspend fun <T> Project.forAllJvmTargets(block: suspend (target: KotlinTarget) -
     return futures.map { it.await() }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 inline fun <reified T : Any> Path.readObject(): T {
     return ObjectInputStream(inputStream()).use { ois ->
         @Suppress("UNCHECKED_CAST")
@@ -151,7 +152,7 @@ inline fun <reified T : Any> Path.readObject(): T {
     }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 inline fun <reified T : Serializable> Path.writeObject(value: T) {
     return ObjectOutputStream(outputStream()).use { oos ->
         oos.writeObject(value)
@@ -159,10 +160,10 @@ inline fun <reified T : Serializable> Path.writeObject(value: T) {
     }
 }
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 fun Provider<String>.string() = StringProvider(this)
 
-@InternalHotReloadGradleApi
+@InternalHotReloadApi
 class StringProvider(val property: Provider<String>) : Serializable {
     override fun toString(): String {
         return property.get()

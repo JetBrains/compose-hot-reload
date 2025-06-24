@@ -239,6 +239,8 @@ private class ComposeHotReloadArgumentsImpl(
     }
 
     override fun asArguments(): Iterable<String> = buildList {
+        /* Signal that this execution runs with Hot Reload */
+        add("-D${HotReloadProperty.IsHotReloadActive.key}=true")
 
         /* Will get us additional information at runtime */
         if (logger.isInfoEnabled) {

@@ -7,16 +7,10 @@ package org.jetbrains.compose.reload
 
 import androidx.compose.runtime.Composable
 
-@RequiresOptIn("Internal API: Do not use!", RequiresOptIn.Level.ERROR)
-public annotation class InternalHotReloadApi
-
-@RequiresOptIn("Delicate API: Only use with caution!", RequiresOptIn.Level.WARNING)
-public annotation class DelicateHotReloadApi
-
-public annotation class DevelopmentEntryPoint(
-    val windowWidth: Int = 576,
-    val windowHeight: Int = 1024,
-)
+/**
+ * Returns 'true' if the application was started with Hot Reload.
+ */
+public expect val isHotReloadActive: Boolean
 
 /**
  * Provides an "entry point" for Compose Hot Reload to reload code.

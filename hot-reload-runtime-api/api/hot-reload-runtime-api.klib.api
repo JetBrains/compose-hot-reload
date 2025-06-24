@@ -6,27 +6,12 @@
 // - Show declarations: true
 
 // Library unique name: <org.jetbrains.compose.hot-reload:hot-reload-runtime-api>
-open annotation class org.jetbrains.compose.reload/DelicateHotReloadApi : kotlin/Annotation { // org.jetbrains.compose.reload/DelicateHotReloadApi|null[0]
-    constructor <init>() // org.jetbrains.compose.reload/DelicateHotReloadApi.<init>|<init>(){}[0]
-}
-
-open annotation class org.jetbrains.compose.reload/DevelopmentEntryPoint : kotlin/Annotation { // org.jetbrains.compose.reload/DevelopmentEntryPoint|null[0]
-    constructor <init>(kotlin/Int = ..., kotlin/Int = ...) // org.jetbrains.compose.reload/DevelopmentEntryPoint.<init>|<init>(kotlin.Int;kotlin.Int){}[0]
-
-    final val windowHeight // org.jetbrains.compose.reload/DevelopmentEntryPoint.windowHeight|{}windowHeight[0]
-        final fun <get-windowHeight>(): kotlin/Int // org.jetbrains.compose.reload/DevelopmentEntryPoint.windowHeight.<get-windowHeight>|<get-windowHeight>(){}[0]
-    final val windowWidth // org.jetbrains.compose.reload/DevelopmentEntryPoint.windowWidth|{}windowWidth[0]
-        final fun <get-windowWidth>(): kotlin/Int // org.jetbrains.compose.reload/DevelopmentEntryPoint.windowWidth.<get-windowWidth>|<get-windowWidth>(){}[0]
-}
-
-open annotation class org.jetbrains.compose.reload/InternalHotReloadApi : kotlin/Annotation { // org.jetbrains.compose.reload/InternalHotReloadApi|null[0]
-    constructor <init>() // org.jetbrains.compose.reload/InternalHotReloadApi.<init>|<init>(){}[0]
-}
-
 abstract class org.jetbrains.compose.reload/HotReloadScope { // org.jetbrains.compose.reload/HotReloadScope|null[0]
     abstract fun invokeAfterHotReload(kotlin/Function0<kotlin/Unit>): kotlin/AutoCloseable // org.jetbrains.compose.reload/HotReloadScope.invokeAfterHotReload|invokeAfterHotReload(kotlin.Function0<kotlin.Unit>){}[0]
 }
 
+final val org.jetbrains.compose.reload/isHotReloadActive // org.jetbrains.compose.reload/isHotReloadActive|{}isHotReloadActive[0]
+    final fun <get-isHotReloadActive>(): kotlin/Boolean // org.jetbrains.compose.reload/isHotReloadActive.<get-isHotReloadActive>|<get-isHotReloadActive>(){}[0]
 final val org.jetbrains.compose.reload/org_jetbrains_compose_reload_HotReloadScope$stableprop // org.jetbrains.compose.reload/org_jetbrains_compose_reload_HotReloadScope$stableprop|#static{}org_jetbrains_compose_reload_HotReloadScope$stableprop[0]
 final val org.jetbrains.compose.reload/org_jetbrains_compose_reload_NoopHotReloadScope$stableprop // org.jetbrains.compose.reload/org_jetbrains_compose_reload_NoopHotReloadScope$stableprop|#static{}org_jetbrains_compose_reload_NoopHotReloadScope$stableprop[0]
 final val org.jetbrains.compose.reload/staticHotReloadScope // org.jetbrains.compose.reload/staticHotReloadScope|{}staticHotReloadScope[0]

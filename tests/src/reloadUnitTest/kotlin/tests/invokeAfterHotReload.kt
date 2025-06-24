@@ -21,7 +21,7 @@ private object Counter {
 @OptIn(DelicateHotReloadApi::class)
 @HotReloadUnitTest
 fun `test - invokeAfterHotReload`() {
-    var invocations = AtomicInteger(0)
+    val invocations = AtomicInteger(0)
 
     val registration = staticHotReloadScope.invokeAfterHotReload {
         invocations.incrementAndGet()
