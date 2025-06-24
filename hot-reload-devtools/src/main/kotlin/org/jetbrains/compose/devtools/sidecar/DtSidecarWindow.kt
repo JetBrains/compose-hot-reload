@@ -81,11 +81,8 @@ fun DtSidecarWindow(
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
-    /**
-     * Both start visible so that the expanded window can render properly
-     */
     var isMinimisedVisible by remember { mutableStateOf(true) }
-    var isExpandedVisible by remember { mutableStateOf(true) }
+    var isExpandedVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(isExpanded) {
         if (isExpanded) {
@@ -94,6 +91,9 @@ fun DtSidecarWindow(
         } else {
             delay(animationDuration)
             isMinimisedVisible = true
+            // add delay between the switch so that
+            // minimised window will definitely be visible when expanded disappears
+            delay(animationDuration / 5)
             isExpandedVisible = false
         }
     }
@@ -162,6 +162,9 @@ private fun DtSidecarDialog(
                 window.opacity = 1.0f
             }
         }
+        if (changedVisibility && visible) {
+            window.toFront()
+        }
         if (isInitializing) {
             isInitializing = false
             val initialSize = getSideCarWindowSize(windowState, windowSizeExpanded)
@@ -169,7 +172,7 @@ private fun DtSidecarDialog(
             window.location = getSideCarWindowPosition(windowState, initialSize.width).toPoint()
         } else {
             val newSize = animateWindowSize(windowState, windowSizeExpanded)
-            val newPosition = animateWindowPosition(windowState, newSize, changedVisibility)
+            val newPosition = animateWindowPosition(windowState, newSize)
             if (window.size != newSize.toDimension()) {
                 window.size = newSize.toDimension()
             }
@@ -338,7 +341,6 @@ private fun Modifier.dtBackground(): Modifier = this
 private fun animateWindowPosition(
     mainWindowState: WindowState,
     windowSize: DpSize,
-    changedVisibility: Boolean,
 ): WindowPosition {
     val currentWidth = remember { mutableStateOf(windowSize.width) }
     val targetPosition = getSideCarWindowPosition(mainWindowState, windowSize.width)
@@ -347,7 +349,6 @@ private fun animateWindowPosition(
             currentWidth.value = windowSize.width
             targetPosition
         }
-        changedVisibility -> targetPosition
         else -> {
             val x by animateDpAsState(targetPosition.x, animationSpec = tween(128))
             val y by animateDpAsState(targetPosition.y, animationSpec = tween(128))
