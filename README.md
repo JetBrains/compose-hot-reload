@@ -17,20 +17,47 @@ Iterate on your Compose UIs faster and let your creativity flow when building mu
 Compose Hot Reload lets you make UI code changes in a Compose Multiplatform app and see the results instantly, no restarts needed.
 Use JetBrains Runtime to intelligently reload your code whenever it changes.
 
-
-
-There are two ways to add Compose Hot Reload to your project:
-* Create a project from scratch in IntelliJ IDEA or Android Studio
-* Add it as a Gradle plugin to an existing project
+> [!IMPORTANT]  
+> Compose Hot Reload only works if you have a desktop target in your multiplatform project. We're exploring adding support for 
+> other targets in the future.
 
 ## Prerequisites
 - Kotlin 2.1.20 or higher.
 - Compose compiler 2.1.20 or higher.
 - JetBrains runtime.
 
-## Create a project from scratch
+## Set up your project
 
-## Apply the Gradle plugin to your project
+There are two ways to add Compose Hot Reload to your project:
+
+* Create a project from scratch in IntelliJ IDEA or Android Studio
+* Add it as a Gradle plugin to an existing project
+
+### Create a project from scratch
+
+First, set up your environment with IntelliJ IDEA or Android Studio:
+
+1. Install **IntelliJ IDEA 2025.1.1.1** or **Android Studio Narwhal 2025.1.1 RC 1**.
+2. If you have:
+   * MacOS, install the [Kotlin Multiplatform IDE plugin](https://plugins.jetbrains.com/plugin/14936-kotlin-multiplatform.).
+   * Windows or Linux, install the following plugins:
+     * [Android](https://plugins.jetbrains.com/plugin/22989-android)
+     * [Android Design Tools](https://plugins.jetbrains.com/plugin/22990-android-design-tools)
+     * [Jetpack Compose](https://plugins.jetbrains.com/plugin/18409-jetpack-compose)
+     * [Native Debugging Support](https://plugins.jetbrains.com/plugin/12775-native-debugging-support)
+     * [Compose Multiplatform for Desktop IDE Support](https://plugins.jetbrains.com/plugin/16541-compose-multiplatform-for-desktop-ide-support)
+3. If you want to create Android applications, make sure that you have the `ANDROID_HOME` variable set. For example, in Bash or Zsh:
+    ```
+    export ANDROID_HOME=~/Library/Android/sdk
+    ```
+4. If you want to create iOS applications, you need a macOS host with [Xcode](https://apps.apple.com/us/app/xcode/id497799835) installed. Your IDE runs Xcode under the hood to build the necessary iOS frameworks.
+  Make sure to launch Xcode before starting to work with your project so that it completes the initial set up.
+
+#### Create a project in IntelliJ IDEA
+
+#### Create a project in Android Studio
+
+### Apply the Gradle plugin to your project
 
 Add the `org.jetbrains.compose.hot-reload` Gradle plugin to your build script:
 
@@ -121,6 +148,22 @@ or provided when invoking the task
 ./gradlew hotRunJvm --mainClass com.example.MainKt
 ```
 
+### Optimization: Enable 'OptimizeNonSkippingGroups' (Optional):
+Note: This optimization is not required, but will lead to a better user experience.
+It is expected that the feature will be enabled by default in future versions of the compiler.
+
+Add the following to your `build.gradle.kts`:
+
+```kotlin
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
+
+// ...
+
+composeCompiler {
+    featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups)
+}
+```
+
 ## Set up automatic provisioning of the JetBrains Runtime (JBR) via Gradle
 
 > [!IMPORTANT]  
@@ -139,15 +182,9 @@ The Compose Hot Reload Gradle plugin will then use this resolver to automaticall
 
 ## FAQ
 
-### My multiplatform project doesn't have a Desktop target. Can I use Compose Hot Reload?
-
-To use Compose Hot Reload, you'll have to add a module to your project that does configure a desktop target. It's worth noting that you will only be able to hot-reload code that can be run on the desktop JVM target. A possible setup might be the following:
-- A `ui-components` module that specifies platform-agnostic UI components.
-- A `gallery` module with a configured desktop target and Compose Hot Reload.
-
 ### I am developing an Android application and am not using Kotlin Multiplatform. Can I use Compose Hot Reload?
 
-Compose Hot Reload is designed to work with Compose Multiplatform. If you'd like to use Compose Hot Reload with an Android-only project, you will have to:
+Compose Hot Reload is designed to work with Compose Multiplatform. If you'd like to use Compose Hot Reload with an Android-only project, you need to:
 
 - Switch from the Jetpack Compose plugin to the Compose Multiplatform plugin.
 - Add a separate Gradle module and configure the `desktop` target according to the instructions above.
