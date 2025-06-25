@@ -5,12 +5,14 @@
 
 package org.jetbrains.compose.reload.tests
 
+import kotlinx.coroutines.future.asDeferred
 import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
 import org.jetbrains.compose.reload.test.gradle.BuildMode
 import org.jetbrains.compose.reload.test.gradle.Headless
@@ -23,7 +25,14 @@ import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.utils.HostIntegrationTest
 import org.jetbrains.compose.reload.utils.QuickTest
 import org.junit.jupiter.api.extension.ExtensionContext
+import kotlin.io.path.exists
+import kotlin.io.path.readLines
 import kotlin.jvm.optionals.getOrNull
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import kotlin.test.fail
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 class DevtoolsIntegrationTests {
@@ -54,7 +63,7 @@ class DevtoolsIntegrationTests {
             )
 
             /* The devtools are expected to be alive very quickly. The 30s timeout is generous. */
-            skipToMessage<OrchestrationMessage.ClientConnected>(
+            skipToMessage<ClientConnected>(
                 title = "Waiting for devtools to connect",
                 timeout = 30.seconds
             ) { message ->
@@ -95,6 +104,61 @@ class DevtoolsIntegrationTests {
             skipToMessage<LogMessage>("await 'ReloadState=Ok'") { log ->
                 log.environment == Environment.devTools && log.message.startsWith("ReloadState=Ok")
             }
+        }
+    }
+
+    @HotReloadTest
+    fun `test - shutdown`(fixture: HotReloadTestFixture) = fixture.runTest {
+        val devtoolsClient = runTransaction {
+            fixture initialSourceCode """
+            import org.jetbrains.compose.reload.test.*
+            
+            fun main() {
+                screenshotTestApplication {
+                    TestText("0")
+                }
+            }
+            """
+            skipToMessage<ClientConnected> { client -> client.clientRole == OrchestrationClientRole.Tooling }
+        }
+
+        val devtoolsPid = devtoolsClient.clientPid ?: fail("Missing pid in ClientConnected message")
+        val devtoolsProcess = ProcessHandle.of(devtoolsPid).getOrNull() ?: fail("devtools process not found")
+
+        val shutdownLog = projectDir.path.resolve("build/run/jvmMain/shutdown.log")
+        assertFalse(shutdownLog.exists())
+
+        runTransaction { ShutdownRequest("Requested by test").send() }
+        devtoolsProcess.onExit().asDeferred().await()
+
+        assertTrue(shutdownLog.exists(), "Expected shutdown log to be created")
+        val reportLineRegex = Regex("""Shutdown actions completed: (?<completed>\d)+, failed: (?<failed>\d)+""")
+
+        val reportLineMatches = shutdownLog.readLines().mapNotNull { line -> reportLineRegex.matchEntire(line) }
+        if (reportLineMatches.size != 1) fail("Expected exactly one line matching the shutdown report line")
+
+        val reportLineMatch = reportLineMatches.single()
+        val completed = reportLineMatch.groups["completed"]?.value?.toIntOrNull()
+            ?: fail("Expected 'completed' group to be present")
+
+        val failed = reportLineMatch.groups["failed"]?.value?.toIntOrNull()
+            ?: fail("Expected 'failed' group to be present")
+
+        assertEquals(0, failed, "Expected no failed actions")
+        assertTrue(completed > 0, "Expected at least one completed action. Found: $completed")
+
+        val durationLineRegex = Regex("""Shutdown duration: (?<duration>.*)""")
+
+        val durationLineMatch = shutdownLog.readLines()
+            .mapNotNull { line -> durationLineRegex.matchEntire(line) }
+            .singleOrNull() ?: fail("Expected exactly one line matching the shutdown duration line")
+
+        val duration = Duration.parse(
+            durationLineMatch.groups["duration"]?.value ?: fail("Expected 'duration' group to be present")
+        )
+
+        if (duration > 5.seconds) {
+            fail("Expected shutdown duration to be less than 5 seconds, but was $duration")
         }
     }
 }

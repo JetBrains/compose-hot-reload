@@ -11,16 +11,15 @@ import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.invokeOnCompletion
-import org.jetbrains.compose.reload.core.reloadMainThread
 import org.jetbrains.compose.reload.core.warn
 import kotlin.concurrent.thread
 import kotlin.io.path.deleteIfExists
 import kotlin.jvm.optionals.getOrNull
-import kotlin.system.exitProcess
 
 private val logger = createLogger()
 
 internal fun setupDevToolsProcess() {
+    setupShutdownProcedure()
     setupOrchestration()
     bindParentProcess()
 }
@@ -52,9 +51,4 @@ private fun setupOrchestration() {
     orchestration.invokeOnCompletion {
         shutdown()
     }
-}
-
-internal fun shutdown(): Nothing {
-    reloadMainThread.shutdown()
-    exitProcess(0)
 }

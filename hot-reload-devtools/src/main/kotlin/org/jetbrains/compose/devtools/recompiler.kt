@@ -6,6 +6,7 @@
 package org.jetbrains.compose.devtools
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import org.jetbrains.compose.devtools.api.RecompilerExtension

@@ -23,6 +23,7 @@ import org.jetbrains.compose.reload.DevelopmentEntryPoint
 @Composable
 fun DevToolingSidecarEntryPoint() {
     LaunchedEffect(Unit) {
+        setupShutdownProcedure()
         applicationScope.launchApplicationStates()
     }
 

@@ -9,7 +9,8 @@ import org.jetbrains.compose.devtools.api.RecompilerContext
 import org.jetbrains.compose.reload.core.Disposable
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.Logger
-import org.jetbrains.compose.reload.core.error
+import org.jetbrains.compose.reload.core.Try
+import org.jetbrains.compose.reload.core.exceptionOrNull
 import org.jetbrains.compose.reload.core.update
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
@@ -59,14 +60,12 @@ internal class RecompilerContextImpl(
             }
         }.previous
 
-        if (previous is State.Active) {
-            previous.actions.forEach { action ->
-                try {
-                    action()
-                } catch (e: Throwable) {
-                    logger.error("Exception while disposing BuildContext", e)
-                }
-            }
+        if (previous !is State.Active) return
+        val exceptions = previous.actions.mapNotNull { action -> Try { action() }.exceptionOrNull() }
+        if (exceptions.isNotEmpty()) {
+            val exception = RecompilerContextDisposeException()
+            exceptions.forEach { exception.addSuppressed(it) }
+            throw exception
         }
     }
 
@@ -76,4 +75,8 @@ internal class RecompilerContextImpl(
         builder(processBuilder)
         return processBuilder
     }
+
 }
+
+private class RecompilerContextDisposeException :
+    Exception("Failed to dispose '${RecompilerContext::class.simpleName}'")

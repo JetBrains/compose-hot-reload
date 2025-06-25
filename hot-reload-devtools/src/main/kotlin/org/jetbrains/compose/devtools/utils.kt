@@ -39,12 +39,11 @@ internal fun <T> Flow<T>.conflateAsList(): Flow<List<T>> {
 }
 
 internal suspend fun <T> withDisposableShutdownHook(disposable: Disposable, action: suspend () -> T): T {
-    val shutdownHook = Thread { disposable.dispose() }
-    runCatching { Runtime.getRuntime().addShutdownHook(shutdownHook) }
+    val shutdownHook = invokeOnShutdown { disposable.dispose() }
     return try {
         action()
     } finally {
-        runCatching { Runtime.getRuntime().removeShutdownHook(shutdownHook) }
+        shutdownHook.dispose()
     }
 }
 

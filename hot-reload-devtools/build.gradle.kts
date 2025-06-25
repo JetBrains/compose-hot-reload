@@ -23,10 +23,6 @@ kotlin {
     jvmToolchain(21)
 }
 
-tasks.withType<JavaExec>().configureEach {
-    systemProperty("compose.reload.devToolsHeadless", "true")
-}
-
 tasks.withType<KotlinJvmCompile>().configureEach {
     compilerOptions {
         this.jvmTarget.set(JvmTarget.JVM_17)
