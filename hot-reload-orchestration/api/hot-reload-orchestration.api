@@ -161,20 +161,22 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 }
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult : org/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildEvent {
-	public fun <init> (Ljava/lang/String;ZLjava/lang/Long;Ljava/lang/Long;Ljava/util/List;)V
+	public fun <init> (Ljava/lang/String;ZZLjava/lang/Long;Ljava/lang/Long;Ljava/util/List;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Z
-	public final fun component3 ()Ljava/lang/Long;
+	public final fun component3 ()Z
 	public final fun component4 ()Ljava/lang/Long;
-	public final fun component5 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;ZLjava/lang/Long;Ljava/lang/Long;Ljava/util/List;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult;
-	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult;Ljava/lang/String;ZLjava/lang/Long;Ljava/lang/Long;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult;
+	public final fun component5 ()Ljava/lang/Long;
+	public final fun component6 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;ZZLjava/lang/Long;Ljava/lang/Long;Ljava/util/List;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult;Ljava/lang/String;ZZLjava/lang/Long;Ljava/lang/Long;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$BuildTaskResult;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getEndTime ()Ljava/lang/Long;
 	public final fun getFailures ()Ljava/util/List;
 	public final fun getStartTime ()Ljava/lang/Long;
 	public final fun getTaskId ()Ljava/lang/String;
 	public fun hashCode ()I
+	public final fun isSkipped ()Z
 	public final fun isSuccess ()Z
 	public fun toString ()Ljava/lang/String;
 }

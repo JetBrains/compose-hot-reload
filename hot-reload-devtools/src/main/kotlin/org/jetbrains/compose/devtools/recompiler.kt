@@ -9,6 +9,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import org.jetbrains.compose.devtools.api.RecompilerExtension
+import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.WorkerThread
@@ -62,7 +63,8 @@ internal fun launchRecompiler(): Future<Unit> = launchTask("Recompiler", recompi
             Collect all accumulated pending requests
              */
             val context = RecompilerContextImpl(
-                logger = logger, requests = pendingRequests, orchestration = orchestration
+                logger = createLogger(name = recompiler.name, environment = Environment.build),
+                requests = pendingRequests, orchestration = orchestration
             )
 
             val exitCode = Try {

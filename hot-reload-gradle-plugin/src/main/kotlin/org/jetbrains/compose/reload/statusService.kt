@@ -20,6 +20,7 @@ import org.gradle.tooling.events.FinishEvent
 import org.gradle.tooling.events.OperationCompletionListener
 import org.gradle.tooling.events.task.TaskFailureResult
 import org.gradle.tooling.events.task.TaskFinishEvent
+import org.gradle.tooling.events.task.TaskSkippedResult
 import org.gradle.tooling.events.task.TaskSuccessResult
 import org.gradle.util.GradleVersion
 import org.jetbrains.compose.reload.core.update
@@ -35,7 +36,6 @@ import org.jetbrains.compose.reload.orchestration.invokeOnClose
 import org.jetbrains.compose.reload.orchestration.sendAsync
 import java.lang.AutoCloseable
 import java.util.concurrent.atomic.AtomicReference
-
 
 /**
  * This [statusService] will connect to running (hot) applications and sends notifications
@@ -82,7 +82,7 @@ internal abstract class StatusService : BuildService<StatusService.Params>, Oper
 
     init {
         clients.set(parameters.ports.get().mapNotNull { port ->
-             OrchestrationClient(OrchestrationClientRole.Compiler, port).connectBlocking().leftOrNull()
+            OrchestrationClient(OrchestrationClientRole.Compiler, port).connectBlocking().leftOrNull()
         }.onEach { client ->
             client.sendAsync(OrchestrationMessage.BuildStarted())
             client.invokeOnClose {
@@ -99,6 +99,15 @@ internal abstract class StatusService : BuildService<StatusService.Params>, Oper
             is TaskSuccessResult -> BuildTaskResult(
                 taskId = event.descriptor.taskPath,
                 isSuccess = true,
+                isSkipped = false,
+                startTime = event.result.startTime,
+                endTime = event.result.endTime,
+                failures = emptyList()
+            )
+            is TaskSkippedResult -> BuildTaskResult(
+                taskId = event.descriptor.taskPath,
+                isSuccess = true,
+                isSkipped = true,
                 startTime = event.result.startTime,
                 endTime = event.result.endTime,
                 failures = emptyList()
@@ -106,6 +115,7 @@ internal abstract class StatusService : BuildService<StatusService.Params>, Oper
             is TaskFailureResult -> BuildTaskResult(
                 taskId = event.descriptor.taskPath,
                 isSuccess = false,
+                isSkipped = false,
                 startTime = event.result.startTime,
                 endTime = event.result.endTime,
                 failures = result.failures.map { failure ->

@@ -98,7 +98,7 @@ class GradleRecompilerProcessTest {
                     application = event
                 }
 
-                if (event is OrchestrationMessage.LogMessage && event.environment == Environment.devTools) {
+                if (event is OrchestrationMessage.LogMessage) {
                     recompilerPidRegex.find(event.message)?.let { match ->
                         recompiler = match.groups["pid"]?.value?.toLongOrNull() ?: error("Invalid message '$event")
                     }

@@ -174,6 +174,7 @@ public sealed class OrchestrationMessage : OrchestrationPackage(), Serializable 
     public data class BuildTaskResult(
         public val taskId: String,
         public val isSuccess: Boolean,
+        public val isSkipped: Boolean,
         public val startTime: Long?,
         public val endTime: Long?,
         public val failures: List<BuildTaskFailure>

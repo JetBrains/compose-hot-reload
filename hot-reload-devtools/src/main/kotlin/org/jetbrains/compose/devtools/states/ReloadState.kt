@@ -10,15 +10,27 @@ import io.sellmair.evas.flow
 import io.sellmair.evas.launchState
 import io.sellmair.evas.update
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import org.jetbrains.compose.devtools.orchestration
 import org.jetbrains.compose.reload.core.Environment
+import org.jetbrains.compose.reload.core.Logger
+import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.core.trace
+import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildStarted
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildTaskResult
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
 import org.jetbrains.compose.reload.orchestration.asFlow
+
+private val logger = createLogger()
 
 sealed class ReloadState : State {
 
@@ -30,12 +42,13 @@ sealed class ReloadState : State {
 
     data class Reloading(
         override val time: Instant = Clock.System.now(),
+        val request: ReloadClassesRequest? = null
     ) : ReloadState()
 
     data class Failed(
         val reason: String,
         override val time: Instant = Clock.System.now(),
-        val logs: List<OrchestrationMessage.LogMessage> = emptyList(),
+        val logs: List<LogMessage> = emptyList(),
     ) : ReloadState()
 
     companion object Key : State.Key<ReloadState> {
@@ -43,80 +56,77 @@ sealed class ReloadState : State {
     }
 }
 
-
-fun CoroutineScope.launchReloadState() = launchState(ReloadState) {
-    var currentReloadRequest: OrchestrationMessage.ReloadClassesRequest? = null
-    val collectedLogs = mutableListOf<OrchestrationMessage.LogMessage>()
+fun CoroutineScope.launchReloadState(
+    orchestration: OrchestrationHandle = org.jetbrains.compose.devtools.orchestration
+) = launchState(ReloadState) {
+    val errorLogs = mutableListOf<LogMessage>()
 
     launch {
-        ReloadCountState.flow().collectLatest { reloadCountState ->
-            collectedLogs.clear()
-            orchestration.asFlow().filterIsInstance<OrchestrationMessage.LogMessage>().collect { message ->
-                if (message.environment == Environment.application) {
-                    collectedLogs += message
+        ReloadCountState.flow().collectLatest { _ ->
+            errorLogs.clear()
+            orchestration.asFlow().filterIsInstance<LogMessage>().collect { log ->
+                if (log.level >= Logger.Level.Error) {
+                    errorLogs += log
                 }
 
-                if (message.environment == Environment.build && message.message.contains("e: ")) {
-                    collectedLogs += message
+                if (log.environment == Environment.build && log.message.contains("e: ")) {
+                    errorLogs += log
                 }
             }
         }
     }
 
+    launch {
+        ReloadState.flow().buffer(Channel.UNLIMITED).collect { state ->
+            logger.trace { "${ReloadState::class.simpleName}=$state" }
+        }
+    }
+
     orchestration.asFlow().collect { message ->
-        if (message is OrchestrationMessage.RecompileRequest) {
-            ReloadState.Reloading().emit()
+        /*
+        Handle messages indicating that a reload is active
+        (e.g. a BuildStarted event, or the execution of any task)
+         */
+        if (message is BuildStarted ||
+            message is LogMessage && message.message.contains("executing build...")
+        ) ReloadState.update { state ->
+            state as? ReloadState.Reloading ?: ReloadState.Reloading()
         }
 
-        if (message is OrchestrationMessage.BuildTaskResult && !message.isSuccess) {
-            ReloadState.Failed("Compilation Failed", logs = collectedLogs.toList()).emit()
+        /*
+        Handle the failure of any build task -> Failed to reload!
+         */
+        if (message is BuildTaskResult && !message.isSuccess) ReloadState.update {
+            val failureMessage = message.failures.mapNotNull { it.message }.joinToString(", ")
+            ReloadState.Failed(reason = failureMessage, logs = errorLogs.toList())
         }
 
-        if (message is OrchestrationMessage.BuildTaskResult && message.isSuccess) {
-            if (currentReloadRequest == null) {
-                ReloadState.Reloading().emit()
-            }
+        if (
+            message is LogMessage && message.message.contains("BUILD FAILED")
+        ) ReloadState.update { state ->
+            state as? ReloadState.Failed ?: ReloadState.Failed(reason = "Build failed", logs = errorLogs.toList())
         }
 
-        if (message is OrchestrationMessage.LogMessage && message.environment == Environment.build) {
-            if (message.message.contains("executing build...")) {
-                currentReloadRequest = null
-                ReloadState.Reloading().emit()
-            }
-
-            if (message.message.contains("BUILD FAILED")) {
-                ReloadState.Failed("Compilation Failed", logs = collectedLogs.toList()).emit()
-            }
-
-            /*
-            The build was successful, but this doesn't necessarily mean that a reload request is fired.
-            Example: Lets say some code was added, which causes a 'BUILD FAILED'.
-            Afterward, the failing code was removed again. A 'BUILD SUCCESSFUL' will be observed w/o firing
-            a reload request, because the runtime classpath is not changed to the last working state.
-
-            Because of this, we will set the state to 'OK' if the build was successful, but no
-            reload request was observed.
-             */
-            if (message.message.contains("BUILD SUCCESSFUL")) {
-                if (currentReloadRequest == null) {
-                    ReloadState.update { state -> state as? ReloadState.Ok ?: ReloadState.Ok() }
-                }
-            }
+        if (message is ReloadClassesRequest) ReloadState.update { state ->
+            val reloadingState = state as? ReloadState.Reloading ?: ReloadState.Reloading()
+            reloadingState.copy(request = message)
         }
 
-        if (message is OrchestrationMessage.ReloadClassesRequest) {
-            currentReloadRequest = message
-            ReloadState.update { state ->
-                state as? ReloadState.Reloading ?: ReloadState.Reloading(time = Clock.System.now())
-            }
+        if (message is OrchestrationMessage.BuildFinished ||
+            (message is LogMessage && message.message.contains("BUILD SUCCESSFUL"))
+        ) ReloadState.update { state ->
+            if (state !is ReloadState.Reloading) return@update state
+            if (state.request == null) return@update ReloadState.Ok()
+            state
         }
 
-        if (message is OrchestrationMessage.ReloadClassesResult) {
-            if (message.isSuccess) ReloadState.Ok(time = Clock.System.now()).emit()
-            else ReloadState.Failed(
-                "Failed reloading classes (${message.errorMessage})",
-                logs = collectedLogs.toList()
-            ).emit()
+        if (message is OrchestrationMessage.ReloadClassesResult) ReloadState.update { state ->
+            if (!message.isSuccess) return@update ReloadState.Failed(
+                reason = message.errorMessage ?: "N/A",
+                logs = errorLogs.toList()
+            )
+
+            state as? ReloadState.Ok ?: ReloadState.Ok()
         }
     }
 }

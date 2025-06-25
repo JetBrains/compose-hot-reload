@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.test.gradle
 
 import kotlinx.coroutines.channels.Channel
 import org.jetbrains.compose.reload.core.HotReloadProperty
+import org.jetbrains.compose.reload.core.Logger
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import org.junit.jupiter.api.extension.AfterEachCallback
@@ -88,6 +89,7 @@ internal class HotReloadTestFixtureExtension(
             arguments = listOf(
                 "-P${HotReloadProperty.OrchestrationPort.key}=${orchestrationServer.port.getBlocking()}",
                 "-P${HotReloadProperty.IsHeadless.key}=$isHeadless",
+                "-P${HotReloadProperty.LogLevel.key}=${Logger.Level.Trace.name}"
             ),
             stdoutChannel = Channel(),
             stderrChannel = Channel(),

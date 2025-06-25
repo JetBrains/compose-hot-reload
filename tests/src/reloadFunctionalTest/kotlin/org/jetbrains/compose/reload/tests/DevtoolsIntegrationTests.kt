@@ -5,16 +5,20 @@
 
 package org.jetbrains.compose.reload.tests
 
+import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
+import org.jetbrains.compose.reload.test.gradle.BuildMode
 import org.jetbrains.compose.reload.test.gradle.Headless
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestDimensionExtension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestInvocationContext
+import org.jetbrains.compose.reload.test.gradle.TestedBuildMode
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.utils.HostIntegrationTest
 import org.jetbrains.compose.reload.utils.QuickTest
@@ -56,6 +60,40 @@ class DevtoolsIntegrationTests {
             ) { message ->
                 logger.info("client connected: ${message.clientRole}")
                 message.clientRole == OrchestrationClientRole.Tooling
+            }
+        }
+    }
+
+    @HotReloadTest
+    @TestedBuildMode(BuildMode.Continuous)
+    @TestedBuildMode(BuildMode.Explicit)
+    fun `test - reload state`(fixture: HotReloadTestFixture) = fixture.runTest {
+        runTransaction {
+            fixture initialSourceCode """
+            import org.jetbrains.compose.reload.test.*
+            
+            fun main() {
+                screenshotTestApplication {
+                    // Foo
+                }
+            }
+            """.trimIndent()
+
+            skipToMessage<LogMessage>("initial:'ReloadState=Ok'") { log ->
+                log.environment == Environment.devTools && log.message.startsWith("ReloadState=Ok")
+            }
+
+            replaceSourceCode("// Foo", "TestText(\"Foo\")")
+            if (fixture.buildMode == BuildMode.Explicit) {
+                requestReload()
+            }
+
+            skipToMessage<LogMessage>("await 'ReloadState=Reloading'") { log ->
+                log.environment == Environment.devTools && log.message.startsWith("ReloadState=Reloading")
+            }
+
+            skipToMessage<LogMessage>("await 'ReloadState=Ok'") { log ->
+                log.environment == Environment.devTools && log.message.startsWith("ReloadState=Ok")
             }
         }
     }
