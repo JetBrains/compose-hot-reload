@@ -59,28 +59,23 @@ private fun transformSetContent(
         ctClass.instrument(object : ExprEditor() {
             override fun edit(m: MethodCall) {
                 try {
-                    if (m.methodId == Ids.ComposeWindow.setContent_1) {
-                        // Store the method parameters properly to maintain stack consistency
-                        m.replace(wrapSetContent1(Ids.ComposeWindow.classId))
-                        transformed = true
-                    }
-
-                    if (m.methodId == Ids.ComposeWindow.setContent_3) {
-                        // Store the method parameters properly to maintain stack consistency
-                        m.replace(wrapSetContent3(Ids.ComposeWindow.classId))
-                        transformed = true
-                    }
-
-                    if (m.methodId == Ids.ComposeDialog.setContent_1) {
-                        // Store the method parameters properly to maintain stack consistency
-                        m.replace(wrapSetContent1(Ids.ComposeDialog.classId))
-                        transformed = true
-                    }
-
-                    if (m.methodId == Ids.ComposeDialog.setContent_3) {
-                        // Store the method parameters properly to maintain stack consistency
-                        m.replace(wrapSetContent3(Ids.ComposeDialog.classId))
-                        transformed = true
+                    when (m.methodId) {
+                        Ids.ComposeWindow.setContent_1 ->  {
+                            m.replace(wrapSetContent1(Ids.ComposeWindow.classId))
+                            transformed = true
+                        }
+                        Ids.ComposeWindow.setContent_3 -> {
+                            m.replace(wrapSetContent3(Ids.ComposeWindow.classId))
+                            transformed = true
+                        }
+                        Ids.ComposeDialog.setContent_1 ->  {
+                            m.replace(wrapSetContent1(Ids.ComposeDialog.classId))
+                            transformed = true
+                        }
+                        Ids.ComposeDialog.setContent_3 -> {
+                            m.replace(wrapSetContent3(Ids.ComposeDialog.classId))
+                            transformed = true
+                        }
                     }
                 } catch (t: Throwable) {
                     logger.error("Failed to transform 'setContent' method", t)
