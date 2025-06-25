@@ -14,6 +14,7 @@ public class WorkerThread(
     name: String, isDaemon: Boolean = true,
 ) : Thread(name), AutoCloseable {
     private val queue = LinkedBlockingQueue<Work<*>>()
+    private val idleQueue = LinkedBlockingQueue<Work<*>>()
 
     /**
      * [Int.MIN_VALUE]: The worker thread is closed
@@ -29,7 +30,13 @@ public class WorkerThread(
         }
 
         try {
-            while (pendingDispatches.get() != Int.MIN_VALUE || queue.isNotEmpty()) {
+            while (pendingDispatches.get() != Int.MIN_VALUE || queue.isNotEmpty() || idleQueue.isNotEmpty()) run outer@{
+                if (queue.isEmpty() && idleQueue.isNotEmpty()) {
+                    val idleElement = idleQueue.poll()
+                    idleElement?.execute()
+                    return@outer
+                }
+
                 val element = queue.take()
                 element.execute()
             }
@@ -55,12 +62,30 @@ public class WorkerThread(
         shutdown()
     }
 
+    public fun <T> invokeWhenIdle(action: () -> T): Future<T> {
+        val future = enqueue(idleQueue, action)
+        queue.add(Work.empty)
+        return future
+    }
+
     /**
      * Invokes the given action on the worker thread.
      * If the thread is already shut-down, or shutting down, the [FailureFuture] might contain a [RejectedExecutionException].
      */
     public fun <T> invoke(action: () -> T): Future<T> {
+        return enqueue(queue, action)
+    }
 
+    /**
+     * Similar to the [invoke] method, but immediately calls the [action] if this method
+     * is already invoked on the correct thread.
+     */
+    public fun <T> invokeImmediate(action: () -> T): Future<T> {
+        return if (currentThread() == this) Future(Try { action() })
+        else invoke(action)
+    }
+
+    private fun <T> enqueue(queue: LinkedBlockingQueue<Work<*>>, action: () -> T): Future<T> {
         val future = Future<T>()
 
         /* Fast path: The thread is already closed for further dispatches */
@@ -80,15 +105,6 @@ public class WorkerThread(
             pendingDispatches.andDecrement
         }
         return future
-    }
-
-    /**
-     * Similar to the [invoke] method, but immediately calls the [action] if this method
-     * is already invoked on the correct thread.
-     */
-    public fun <T> invokeImmediate(action: () -> T): Future<T> {
-        return if (currentThread() == this) Future(Try { action() })
-        else invoke(action)
     }
 
     private class Work<T>(val future: CompletableFuture<T>, val action: () -> T) {

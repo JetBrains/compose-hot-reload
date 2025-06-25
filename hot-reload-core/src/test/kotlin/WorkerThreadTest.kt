@@ -1,4 +1,6 @@
+import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.WorkerThread
+import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.exceptionOrNull
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
@@ -7,6 +9,7 @@ import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.isSuccess
 import org.jetbrains.compose.reload.core.reloadMainThread
 import org.jetbrains.compose.reload.core.toLeft
+import org.jetbrains.compose.reload.core.update
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
@@ -94,6 +97,23 @@ class WorkerThreadTest {
         }
         assertTrue(thread.invoke { }.getBlocking(5.seconds).isSuccess())
         assertEquals(reloadMainThread, invocationThread.get())
+    }
+
+    @Test
+    fun `test - invokeWhenIdle`() {
+        val events = AtomicReference<List<String>>(emptyList())
+        val unleashThread = Future<Unit>()
+        thread.invoke { unleashThread.getBlocking() }
+        thread.invoke { events.update { it + "1" } }
+        thread.invokeWhenIdle { events.update { it + "A" } }
+        thread.invoke { events.update { it + "2" } }
+        thread.invoke { events.update { it + "3" } }
+        thread.invokeWhenIdle { events.update { it + "B" } }
+
+        unleashThread.complete()
+        thread.shutdown().getBlocking(5.seconds).getOrThrow()
+
+        assertEquals(listOf("1", "2", "3", "A", "B"), events.get())
     }
 
     @Test
