@@ -18,12 +18,19 @@ import org.jetbrains.compose.reload.core.LaunchMode
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.destroyWithDescendants
+import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
 import org.jetbrains.compose.reload.core.toFuture
 import org.jetbrains.compose.reload.core.warn
 import java.nio.file.Path
+import java.util.concurrent.TimeUnit
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.isRegularFile
+import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.pathString
+import kotlin.io.path.writeText
+import kotlin.jvm.optionals.getOrNull
 import kotlin.streams.asSequence
 
 internal class GradleRecompiler(
@@ -35,6 +42,18 @@ internal class GradleRecompiler(
 
     override suspend fun buildAndReload(context: RecompilerContext): ExitCode {
         val orchestrationPort = context.orchestration.port.awaitOrThrow()
+
+        /* Check if there is another known Gradle Process running */
+        val gradlePidFile = HotReloadEnvironment.pidFile?.let { pidFile ->
+            pidFile.resolveSibling("${pidFile.nameWithoutExtension}.gradle.pid")
+        }
+
+        if (gradlePidFile != null && gradlePidFile.isRegularFile()) run kill@{
+            val previousPid = gradlePidFile.toFile().readText().toLongOrNull() ?: return@kill
+            val previousProcessHandle = ProcessHandle.of(previousPid).getOrNull() ?: return@kill
+            context.logger.error("Previous Gradle process with pid '$previousPid' found; Waiting...")
+            previousProcessHandle.onExit().toFuture().await()
+        }
 
         val processBuilder = context.process {
             if (HotReloadEnvironment.gradleJavaHome == null) {
@@ -69,10 +88,12 @@ internal class GradleRecompiler(
             )
         }
 
-
         val process = processBuilder.start()
-        context.invokeOnDispose { process.destroyGradleProcess() }
+        context.invokeOnDispose { process.toHandle().destroyGradleProcess() }
         context.logger.info("'Recompiler': Started (${process.pid()})")
+
+        gradlePidFile?.writeText(process.pid().toString())
+        process.onExit().whenComplete { _, _ -> gradlePidFile?.deleteIfExists() }
 
         withContext(Dispatchers.IO) {
             process.inputStream.bufferedReader().forEachLine { line ->
@@ -93,21 +114,25 @@ internal class GradleRecompiler(
         }
     }
 
-    private fun Process.destroyGradleProcess() {
-        if (isGradleDaemon) {
-            destroyWithDescendants()
-            return
-        }
+    private fun ProcessHandle.destroyGradleProcess() {
+        try {
+            if (isGradleDaemon) {
+                destroyWithDescendants()
+                return
+            }
 
-        if (supportsNormalTermination()) {
+            if (supportsNormalTermination()) {
+                destroy()
+                return
+            }
+
+            /**
+             * If we cannot terminate gracefully, then we try to destroy direct child processes (Gradle Wrapper)
+             */
+            children().asSequence().toList().forEach { child -> child.destroy() }
             destroy()
-            return
+        } finally {
+            onExit().get(5, TimeUnit.SECONDS)
         }
-
-        /**
-         * If we cannot terminate gracefully, then we try to destroy direct child processes (Gradle Wrapper)
-         */
-        children().asSequence().toList().forEach { child -> child.destroy() }
-        destroy()
     }
 }
