@@ -371,7 +371,7 @@ private fun getSideCarWindowSize(windowState: WindowState, isExpanded: Boolean):
     return DpSize(
         width = if (isExpanded) 512.dp else 32.dp + 4.dp + (12.dp.takeIf { devToolsTransparencyEnabled } ?: 0.dp),
         height = if (isExpanded) maxOf(windowState.size.height, 512.dp)
-        else if (devToolsTransparencyEnabled) maxOf(windowState.size.height, 512.dp) else 28.dp + 4.dp,
+        else if (devToolsTransparencyEnabled) maxOf(windowState.size.height, 512.dp) else 32.dp + 4.dp,
     )
 }
 
