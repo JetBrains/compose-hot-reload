@@ -48,6 +48,11 @@ internal class GradleRecompiler(
             pidFile.resolveSibling("${pidFile.nameWithoutExtension}.gradle.pid")
         }
 
+        /*
+        If we can find another process under the previous pid file:
+        - warn the user if possible
+        - wait for the previous build to finish
+         */
         if (gradlePidFile != null && gradlePidFile.isRegularFile()) run kill@{
             val previousPid = gradlePidFile.toFile().readText().toLongOrNull() ?: return@kill
             val previousProcessHandle = ProcessHandle.of(previousPid).getOrNull() ?: return@kill
@@ -55,6 +60,9 @@ internal class GradleRecompiler(
             previousProcessHandle.onExit().toFuture().await()
         }
 
+        /*
+        Launch the build, creating a new process..
+         */
         val processBuilder = context.process {
             if (HotReloadEnvironment.gradleJavaHome == null) {
                 context.logger.warn("Missing '${HotReloadProperty.GradleJavaHome}' property. Using system java")
@@ -83,18 +91,21 @@ internal class GradleRecompiler(
 
                     /* Continuous mode arguments */
                     "-t".takeIf { HotReloadEnvironment.gradleBuildContinuous },
-                    "--no-daemon".takeIf { !isGradleDaemon },
+                    "--no-daemon".takeIf { !useGradleDaemon },
                 )
             )
         }
 
+        /* Start the process and wire up the disposal */
         val process = processBuilder.start()
         context.invokeOnDispose { process.toHandle().destroyGradleProcess() }
         context.logger.info("'Recompiler': Started (${process.pid()})")
 
+        /* Write the pid file with the new process id */
         gradlePidFile?.writeText(process.pid().toString())
         process.onExit().whenComplete { _, _ -> gradlePidFile?.deleteIfExists() }
 
+        /* Read the output of the new process and forward it as log messages */
         withContext(Dispatchers.IO) {
             process.inputStream.bufferedReader().forEachLine { line ->
                 context.logger.info(line)
@@ -104,23 +115,21 @@ internal class GradleRecompiler(
         return ExitCode(process.onExit().toFuture().awaitOrThrow().exitValue())
     }
 
-    private val isGradleDaemon = run {
-        if (HotReloadEnvironment.buildSystem != Gradle) return@run false
-        if (!HotReloadEnvironment.gradleBuildContinuous) return@run true
-        when (HotReloadEnvironment.launchMode) {
-            LaunchMode.Ide, LaunchMode.Detached -> true
-            LaunchMode.GradleBlocking -> false
-            null -> false
-        }
-    }
-
     private fun ProcessHandle.destroyGradleProcess() {
         try {
-            if (isGradleDaemon) {
+            /*
+            If we used a regular Gradle daemon, then
+            a) A daemon process was re-used and just communicated with. The daemon is not a descendant
+            b) A new daemon process was launched, this daemon is a descendant and we can safely clean it up after use.
+             */
+            if (useGradleDaemon) {
                 destroyWithDescendants()
                 return
             }
 
+            /**
+             * Fingers Crossed: We hope that the gradle wrapper is doing the cleanup job well!
+             */
             if (supportsNormalTermination()) {
                 destroy()
                 return
@@ -134,5 +143,15 @@ internal class GradleRecompiler(
         } finally {
             onExit().get(5, TimeUnit.SECONDS)
         }
+    }
+}
+
+private val useGradleDaemon = run {
+    if (HotReloadEnvironment.buildSystem != Gradle) return@run false
+    if (!HotReloadEnvironment.gradleBuildContinuous) return@run true
+    when (HotReloadEnvironment.launchMode) {
+        LaunchMode.Ide, LaunchMode.Detached -> true
+        LaunchMode.GradleBlocking -> false
+        null -> false
     }
 }
