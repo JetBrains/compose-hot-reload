@@ -160,8 +160,7 @@ DevToolsClasspath:
 DevToolsTransparencyEnabled:
   key: compose.reload.devToolsTransparencyEnabled
   type: boolean
-  default: "(Os.currentOrNull() != Os.Linux).toString()"
-  defaultIsExpression: true
+  default: "true"
   target: [ application, build, devtools ]
   documentation: |
     Some platforms might not be able to render transparency correctly (e.g. some linux environments).
