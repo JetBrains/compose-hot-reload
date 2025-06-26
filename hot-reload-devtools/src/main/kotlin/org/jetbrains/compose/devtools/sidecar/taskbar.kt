@@ -26,7 +26,6 @@ import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.warn
 import java.awt.Taskbar
 import java.awt.Toolkit
-import kotlin.math.log
 
 private val logger = createLogger()
 
@@ -71,7 +70,7 @@ private fun WindowScope.configureLinuxTaskbar() {
         val toolkit = Toolkit.getDefaultToolkit()
         val field = toolkit.javaClass.getDeclaredField("awtAppClassName")
         field.isAccessible = true
-        field[toolkit] = window.name
+        field[toolkit] = COMPOSE_HOT_RELOAD_TITLE
     } catch (_: Throwable) {
         logger.info("Could not set dev tools app name in the taskbar")
     }
