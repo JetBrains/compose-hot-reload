@@ -606,3 +606,21 @@ public final class org/jetbrains/compose/reload/test/gradle/TransactionScope : k
 	public static synthetic fun writeCode$default (Lorg/jetbrains/compose/reload/test/gradle/TransactionScope;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/nio/file/Path;
 }
 
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/WithGradleProperty : java/lang/annotation/Annotation {
+	public abstract fun key ()Ljava/lang/String;
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/WithGradleProperty$Container : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lorg/jetbrains/compose/reload/test/gradle/WithGradleProperty;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/WithHotReloadProperty : java/lang/annotation/Annotation {
+	public abstract fun property ()Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/WithHotReloadProperty$Container : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lorg/jetbrains/compose/reload/test/gradle/WithHotReloadProperty;
+}
+

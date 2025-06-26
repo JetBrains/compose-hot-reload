@@ -5,12 +5,14 @@
 
 package org.jetbrains.compose.reload.tests
 
+import org.jetbrains.compose.reload.core.HotReloadProperty.ResourcesDirtyResolverEnabled
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
 import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.ProjectMode
 import org.jetbrains.compose.reload.test.gradle.TestedProjectMode
+import org.jetbrains.compose.reload.test.gradle.WithHotReloadProperty
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.getDefaultMainKtSourceFile
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
@@ -30,6 +32,7 @@ import kotlin.io.path.name
 @QuickTest
 @TestedProjectMode(ProjectMode.Kmp)
 @ExtendBuildGradleKts(ResourcesTests.Extension::class)
+@WithHotReloadProperty(ResourcesDirtyResolverEnabled, "true")
 class ResourcesTests {
 
     private fun HotReloadTestFixture.projectName() = projectDir.path.name.replace('-', '_')
