@@ -18,6 +18,7 @@ import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
+import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
 import java.io.File
 import java.nio.file.Path
@@ -36,7 +37,7 @@ internal fun launchDevtoolsApplication() {
         resolveDevtoolsJavaBinary(), "-cp", classpath.joinToString(File.pathSeparator),
         *subprocessDefaultArguments(DevTools, orchestration.port.getBlocking().getOrThrow()).toTypedArray(),
         *issueNewDebugSessionJvmArguments("DevTools"),
-        if (devToolsDetached) null else "-Dapple.awt.UIElement=true",
+        *platformSpecificJvmArguments(),
         "org.jetbrains.compose.devtools.Main",
     )
     val process = ProcessBuilder(devToolsArgs)
@@ -65,4 +66,18 @@ private fun resolveDevtoolsJavaBinary(): String? {
     }
 
     return null
+}
+
+private fun platformSpecificJvmArguments(): Array<String> = when (Os.currentOrNull()) {
+    // Allow reflective access to X11 classes for Linux
+    // Required to properly set the app name in the taskbar
+    Os.Linux -> arrayOf("--add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED")
+    // Disable dock icon when not running in detached mode for MacOS
+    Os.MacOs -> arrayOf("-Dapple.awt.UIElement=${!devToolsDetached}")
+    // No platform-specific options for Windows
+    Os.Windows -> emptyArray()
+    else -> {
+        logger.warn("Unknown OS")
+        emptyArray()
+    }
 }
