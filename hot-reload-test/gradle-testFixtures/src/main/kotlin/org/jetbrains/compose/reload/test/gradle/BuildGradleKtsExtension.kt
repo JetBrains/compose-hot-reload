@@ -27,7 +27,7 @@ public interface BuildGradleKtsExtension {
     public fun composeCompiler(context: ExtensionContext): String? = null
     public fun footer(context: ExtensionContext): String? = null
 
-    public fun TemplateBuilder.buildTemplate(context: ExtensionContext) = Unit
+    public fun TemplateBuilder.buildTemplate(context: ExtensionContext): Unit = Unit
 }
 
 @InternalHotReloadTestApi

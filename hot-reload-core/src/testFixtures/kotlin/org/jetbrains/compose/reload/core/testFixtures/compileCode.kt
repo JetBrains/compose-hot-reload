@@ -107,8 +107,8 @@ class CompilerImpl(
             .toTypedArray()
 
         arguments.pluginOptions = listOfNotNull(
-            "plugin:androidx.compose.compiler.plugins.kotlin:featureFlag=OptimizeNonSkippingGroups"
-                .takeIf { options[CompilerOption.OptimizeNonSkippingGroups] == true },
+            "plugin:androidx.compose.compiler.plugins.kotlin:featureFlag=-OptimizeNonSkippingGroups"
+                .takeIf { options[CompilerOption.OptimizeNonSkippingGroups] == false },
             "plugin:androidx.compose.compiler.plugins.kotlin:generateFunctionKeyMetaAnnotations=true"
                 .takeIf { options[CompilerOption.GenerateFunctionKeyMetaAnnotations] == true },
         ).toTypedArray()

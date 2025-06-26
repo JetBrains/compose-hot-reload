@@ -1,7 +1,7 @@
 import androidx.compose.runtime.*
 import androidx.compose.material3.Text
 
-@Composable
+@Composable                                                 	// RestartGroup (group=ComposeGroupKey(key=-607362160))
 fun Foo() {                                                 	// Method (group=ComposeGroupKey(key=-607362160)),RestartGroup (group=ComposeGroupKey(key=-607362160))
-    Text("Hello")                                           	// RestartGroup (group=ComposeGroupKey(key=-607362160)),Method (group=ComposeGroupKey(key=-607362160))
-}                                                           	// Method (group=ComposeGroupKey(key=-607362160))
+    Text("Hello")                                           	// RestartGroup (group=ComposeGroupKey(key=-607362160))
+}                                                           	// RestartGroup (group=ComposeGroupKey(key=-607362160)),Method (group=ComposeGroupKey(key=-607362160))

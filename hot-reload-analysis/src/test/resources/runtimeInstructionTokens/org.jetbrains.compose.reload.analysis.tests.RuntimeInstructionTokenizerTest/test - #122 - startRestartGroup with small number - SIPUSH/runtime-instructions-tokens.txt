@@ -35,36 +35,48 @@ class FooKt {
         StartRestartGroup(key=ComposeGroupKey(key=-965539098))
             LdcInsnNode(-965539098) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startRestartGroup (I)Landroidx/compose/runtime/Composer;) [185]
-        BlockToken(2)
+        BlockToken(3)
             VarInsnNode [58]
-            VarInsnNode [21]
-        JumpToken(L1, opocde=154)
-            JumpInsNode(L1)) [154])
-        BlockToken(2)
             VarInsnNode [25]
-            MethodInsnNode(androidx/compose/runtime/Composer.getSkipping ()Z) [185]
-        JumpToken(L5, opocde=154)
-            JumpInsNode(L5)) [154])
+            VarInsnNode [21]
+        JumpToken(L1, opocde=153)
+            JumpInsNode(L1)) [153])
+        BlockToken(1)
+            InsnNode [4]
+        JumpToken(L2, opocde=167)
+            JumpInsNode(L2)) [GOTO])
         LabelToken(L1)
             LabelNode(L1)
         BlockToken(2)
             FrameNode [-1]
+            InsnNode [3]
+        LabelToken(L2)
+            LabelNode(L2)
+        BlockToken(5)
+            FrameNode [-1]
+            VarInsnNode [21]
+            InsnNode [4]
+            InsnNode [126]
+            MethodInsnNode(androidx/compose/runtime/Composer.shouldExecute (ZI)Z) [185]
+        JumpToken(L6, opocde=153)
+            JumpInsNode(L6)) [153])
+        BlockToken(1)
             MethodInsnNode(androidx/compose/runtime/ComposerKt.isTraceInProgress ()Z) [184]
-        JumpToken(L2, opocde=153)
-            JumpInsNode(L2)) [153])
+        JumpToken(L3, opocde=153)
+            JumpInsNode(L3)) [153])
         BlockToken(5)
             LdcInsnNode(-965539098) [18]
             VarInsnNode [21]
             InsnNode [2]
             LdcInsnNode(Foo (Foo.kt:3)) [18]
             MethodInsnNode(androidx/compose/runtime/ComposerKt.traceEventStart (IIILjava/lang/String;)V) [184]
-        LabelToken(L2)
-            LabelNode(L2)
+        LabelToken(L3)
+            LabelNode(L3)
         BlockToken(2)
             FrameNode [-1]
             VarInsnNode [25]
-        LabelToken(L3)
-            LabelNode(L3)
+        LabelToken(L4)
+            LabelNode(L4)
         BlockToken(1)
             LineNumberNode [-1]
         StartRestartGroup(key=ComposeGroupKey(key=290))
@@ -73,8 +85,8 @@ class FooKt {
         BlockToken(2)
             InsnNode [87]
             VarInsnNode [25]
-        LabelToken(L4)
-            LabelNode(L4)
+        LabelToken(L5)
+            LabelNode(L5)
         BlockToken(1)
             LineNumberNode [-1]
         EndRestartGroup()
@@ -82,48 +94,49 @@ class FooKt {
         BlockToken(2)
             InsnNode [87]
             MethodInsnNode(androidx/compose/runtime/ComposerKt.isTraceInProgress ()Z) [184]
-        JumpToken(L6, opocde=153)
-            JumpInsNode(L6)) [153])
+        JumpToken(L7, opocde=153)
+            JumpInsNode(L7)) [153])
         BlockToken(1)
             MethodInsnNode(androidx/compose/runtime/ComposerKt.traceEventEnd ()V) [184]
-        JumpToken(L6, opocde=167)
-            JumpInsNode(L6)) [GOTO])
-        LabelToken(L5)
-            LabelNode(L5)
-        BlockToken(3)
+        JumpToken(L7, opocde=167)
+            JumpInsNode(L7)) [GOTO])
+        LabelToken(L6)
+            LabelNode(L6)
+        BlockToken(4)
+            LineNumberNode [-1]
             FrameNode [-1]
             VarInsnNode [25]
             MethodInsnNode(androidx/compose/runtime/Composer.skipToGroupEnd ()V) [185]
-        LabelToken(L6)
-            LabelNode(L6)
-        BlockToken(2)
+        LabelToken(L7)
+            LabelNode(L7)
+        BlockToken(3)
+            LineNumberNode [-1]
             FrameNode [-1]
             VarInsnNode [25]
         EndRestartGroup()
             MethodInsnNode(androidx/compose/runtime/Composer.endRestartGroup ()Landroidx/compose/runtime/ScopeUpdateScope;) [185]
         BlockToken(1)
             InsnNode [89]
-        JumpToken(L7, opocde=198)
-            JumpInsNode(L7)) [198])
+        JumpToken(L8, opocde=198)
+            JumpInsNode(L8)) [198])
         BlockToken(3)
             VarInsnNode [21]
             InvokeDynamicInsnNode [186]
             MethodInsnNode(androidx/compose/runtime/ScopeUpdateScope.updateScope (Lkotlin/jvm/functions/Function2;)V) [185]
-        JumpToken(L8, opocde=167)
-            JumpInsNode(L8)) [GOTO])
-        LabelToken(L7)
-            LabelNode(L7)
-        BlockToken(2)
-            FrameNode [-1]
-            InsnNode [87]
+        JumpToken(L9, opocde=167)
+            JumpInsNode(L9)) [GOTO])
         LabelToken(L8)
             LabelNode(L8)
         BlockToken(2)
-            LineNumberNode [-1]
+            FrameNode [-1]
+            InsnNode [87]
+        LabelToken(L9)
+            LabelNode(L9)
+        BlockToken(1)
             FrameNode [-1]
         ReturnToken(returnInsn=177)
             InsnNode [177]
-        LabelToken(L9)
-            LabelNode(L9)
+        LabelToken(L10)
+            LabelNode(L10)
     }
 }

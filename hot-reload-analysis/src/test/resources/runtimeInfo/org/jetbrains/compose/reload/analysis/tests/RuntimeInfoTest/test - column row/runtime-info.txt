@@ -29,7 +29,7 @@ FooKt {
         type: Composable
         desc: (Landroidx/compose/runtime/Composer;I)V
         key: -965539098
-        codeHash: 3964433822
+        codeHash: 402583279
         methodDependencies: [
             FooKt.Foo$lambda$2 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         ]
@@ -37,7 +37,7 @@ FooKt {
     
         RestartGroup {
             key: -965539098
-            codeHash: 561184812
+            codeHash: 1156579493
             methodDependencies: []
             fieldDependencies: []
         }

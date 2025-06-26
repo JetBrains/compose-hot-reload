@@ -18,7 +18,7 @@ public interface Template {
 public interface TemplateBuilder {
     public fun push(key: String, value: Any?)
     public fun set(key: String, value: Any?)
-    public operator fun String.invoke(value: Any?) = push(this, value)
+    public operator fun String.invoke(value: Any?): Unit = push(this, value)
 }
 
 public inline fun Template.render(values: TemplateBuilder.() -> Unit): Try<String> {

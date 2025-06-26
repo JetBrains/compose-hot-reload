@@ -36,7 +36,7 @@ FooKt {
     
         RestartGroup {
             key: -965539098
-            codeHash: 2937111031
+            codeHash: 4261705019
             methodDependencies: [
                 FooKt.Bar (Landroidx/compose/runtime/Composer;I)V
             ]
@@ -56,7 +56,7 @@ FooKt {
     
         RestartGroup {
             key: -2097341767
-            codeHash: 327007150
+            codeHash: 363163885
             methodDependencies: []
             fieldDependencies: []
         }

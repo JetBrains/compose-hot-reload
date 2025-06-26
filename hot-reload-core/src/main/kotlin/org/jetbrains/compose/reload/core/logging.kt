@@ -159,7 +159,7 @@ public fun Logger.Log.displayString(
     includeThreadName: Boolean = true,
     includeStacktrace: Boolean = true,
     useEffects: Boolean = true,
-) = buildString {
+): String = buildString {
     fun Any?.withEffects(vararg effect: String) =
         if (useEffects) "${effect.joinToString("")}$this$ansiReset" else this.toString()
 

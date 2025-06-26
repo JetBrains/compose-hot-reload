@@ -15,7 +15,7 @@ public suspend fun HotReloadTestFixture.launchDevApplicationAndWait(
     projectPath: String = ":",
     className: String,
     funName: String
-) = runTransaction { launchDevApplicationAndWait(projectPath, className, funName) }
+): Unit = runTransaction { launchDevApplicationAndWait(projectPath, className, funName) }
 
 @InternalHotReloadTestApi
 public fun HotReloadTestFixture.launchDevApplication(

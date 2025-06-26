@@ -18,7 +18,7 @@ import kotlin.time.Duration.Companion.seconds
 
 private val timeout = 15.seconds
 
-public interface OrchestrationHandle : AutoCloseable, Task<Nothing> {
+public interface OrchestrationHandle : AutoCloseable, Task<Unit> {
     public val port: Future<Int>
     public val messages: Broadcast<OrchestrationMessage>
 

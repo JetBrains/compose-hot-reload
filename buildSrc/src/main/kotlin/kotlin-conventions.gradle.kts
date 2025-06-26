@@ -6,6 +6,7 @@
 import org.jetbrains.kotlin.gradle.dsl.HasConfigurableKotlinCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.plugin.KotlinBasePluginWrapper
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
@@ -20,8 +21,9 @@ plugins.withType<KotlinBasePluginWrapper> {
 
         if (this is HasConfigurableKotlinCompilerOptions<*>) {
             this.compilerOptions {
+                languageVersion = KotlinVersion.KOTLIN_2_1
+                apiVersion = KotlinVersion.KOTLIN_2_1
                 optIn.add("org.jetbrains.compose.reload.InternalHotReloadApi")
-                optIn.add("org.jetbrains.compose.reload.gradle.InternalHotReloadGradleApi")
             }
         }
     }

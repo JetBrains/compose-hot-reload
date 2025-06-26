@@ -17,7 +17,7 @@ import kotlin.coroutines.suspendCoroutine
 
 private val logger = createLogger()
 
-public interface Task<T> : Future<T>, CoroutineContext.Element {
+public interface Task<out T> : Future<T>, CoroutineContext.Element {
     public val name: String?
     public val value: Future<T>
     public val onStop: Future<Nothing>
@@ -54,7 +54,7 @@ public suspend fun Task<*>.isActive(): Boolean {
 }
 
 
-public fun Task<*>.isStopped() = onStop.isCompleted()
+public fun Task<*>.isStopped(): Boolean = onStop.isCompleted()
 
 public fun Task<*>.invokeOnStop(action: (error: Throwable) -> Unit): Disposable {
     return onStop.invokeOnCompletion { result ->

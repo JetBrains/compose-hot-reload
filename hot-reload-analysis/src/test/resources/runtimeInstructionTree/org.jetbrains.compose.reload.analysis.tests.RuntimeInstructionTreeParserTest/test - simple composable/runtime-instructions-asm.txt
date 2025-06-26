@@ -33,22 +33,30 @@ class TestKt {
             LDC -607362160
             INVOKEINTERFACE androidx/compose/runtime/Composer.startRestartGroup (I)Landroidx/compose/runtime/Composer; (itf)
             ASTORE 0
-            ILOAD 1
-            IFNE L1
             ALOAD 0
-            INVOKEINTERFACE androidx/compose/runtime/Composer.getSkipping ()Z (itf)
-            IFNE L2
+            ILOAD 1
+            IFEQ L1
+            ICONST_1
+            GOTO L2
             L1
-            FRAME SAME
-            INVOKESTATIC androidx/compose/runtime/ComposerKt.isTraceInProgress ()Z
+            FRAME SAME1 androidx/compose/runtime/Composer
+            ICONST_0
+            L2
+            FRAME FULL [androidx/compose/runtime/Composer I] [androidx/compose/runtime/Composer I]
+            ILOAD 1
+            ICONST_1
+            IAND
+            INVOKEINTERFACE androidx/compose/runtime/Composer.shouldExecute (ZI)Z (itf)
             IFEQ L3
+            INVOKESTATIC androidx/compose/runtime/ComposerKt.isTraceInProgress ()Z
+            IFEQ L4
             LDC -607362160
             ILOAD 1
             ICONST_M1
             LDC "Foo (Test.kt:4)"
             INVOKESTATIC androidx/compose/runtime/ComposerKt.traceEventStart (IIILjava/lang/String;)V
-            L3
-            LINENUMBER 6 L3
+            L4
+            LINENUMBER 6 L4
             FRAME SAME
             LDC "Hello"
             ACONST_NULL
@@ -73,20 +81,22 @@ class TestKt {
             LDC 131070
             INVOKESTATIC androidx/compose/material3/TextKt.Text--4IGK_g (Ljava/lang/String;Landroidx/compose/ui/Modifier;JJLandroidx/compose/ui/text/font/FontStyle;Landroidx/compose/ui/text/font/FontWeight;Landroidx/compose/ui/text/font/FontFamily;JLandroidx/compose/ui/text/style/TextDecoration;Landroidx/compose/ui/text/style/TextAlign;JIZIILkotlin/jvm/functions/Function1;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)V
             INVOKESTATIC androidx/compose/runtime/ComposerKt.isTraceInProgress ()Z
-            IFEQ L4
+            IFEQ L5
             INVOKESTATIC androidx/compose/runtime/ComposerKt.traceEventEnd ()V
-            GOTO L4
-            L2
+            GOTO L5
+            L3
+            LINENUMBER 4 L3
             FRAME SAME
             ALOAD 0
             INVOKEINTERFACE androidx/compose/runtime/Composer.skipToGroupEnd ()V (itf)
-            L4
+            L5
+            LINENUMBER 7 L5
             FRAME SAME
             ALOAD 0
             INVOKEINTERFACE androidx/compose/runtime/Composer.endRestartGroup ()Landroidx/compose/runtime/ScopeUpdateScope; (itf)
         Method (group=ComposeGroupKey(key=-607362160))
         DUP
-        IFNULL L5
+        IFNULL L6
         ILOAD 1
         INVOKEDYNAMIC invoke(I)Lkotlin/jvm/functions/Function2; [
               // handle kind 0x6 : INVOKESTATIC
@@ -98,15 +108,14 @@ class TestKt {
               (Landroidx/compose/runtime/Composer;Ljava/lang/Integer;)Lkotlin/Unit;
             ]
         INVOKEINTERFACE androidx/compose/runtime/ScopeUpdateScope.updateScope (Lkotlin/jvm/functions/Function2;)V (itf)
-        GOTO L6
-        L5
+        GOTO L7
+        L6
         FRAME SAME1 androidx/compose/runtime/ScopeUpdateScope
         POP
-        L6
-        LINENUMBER 7 L6
+        L7
         FRAME SAME
         RETURN
-        L7
+        L8
         }
     }
 }

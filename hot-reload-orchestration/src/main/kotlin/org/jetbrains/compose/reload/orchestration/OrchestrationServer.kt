@@ -84,7 +84,7 @@ public fun OrchestrationServer(): OrchestrationServer {
         }
     }
 
-    return object : OrchestrationServer, Task<Nothing> by task {
+    return object : OrchestrationServer, Task<Unit> by task {
         override val messages = messages
         override val port: Future<Int> = port
 

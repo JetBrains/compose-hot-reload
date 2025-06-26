@@ -20,7 +20,6 @@ import org.jetbrains.compose.reload.core.WorkerThread
 import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
 import org.jetbrains.compose.reload.core.createLogger
-import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.exceptionOrNull
 import org.jetbrains.compose.reload.core.isActive
 import org.jetbrains.compose.reload.core.isFailure
@@ -142,7 +141,7 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
         }
     }
 
-    return object : OrchestrationClient, Task<Nothing> by task {
+    return object : OrchestrationClient, Task<Unit> by task {
         override val port: Future<Int> = Future(port)
         override val clientId: OrchestrationClientId = clientId
         override val clientRole: OrchestrationClientRole = clientRole

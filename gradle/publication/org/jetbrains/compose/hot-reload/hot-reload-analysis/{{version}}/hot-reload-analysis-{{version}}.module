@@ -37,7 +37,7 @@
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",
           "version": {
-            "requires": "2.1.21"
+            "requires": "2.2.0"
           }
         }
       ],
@@ -97,7 +97,7 @@
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",
           "version": {
-            "requires": "2.1.21"
+            "requires": "2.2.0"
           }
         }
       ],
@@ -174,7 +174,7 @@
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",
           "version": {
-            "requires": "2.1.21"
+            "requires": "2.2.0"
           }
         }
       ],
@@ -249,7 +249,7 @@
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",
           "version": {
-            "requires": "2.1.21"
+            "requires": "2.2.0"
           }
         }
       ],
@@ -258,7 +258,7 @@
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-test",
           "version": {
-            "requires": "2.1.21"
+            "requires": "2.2.0"
           }
         }
       ],

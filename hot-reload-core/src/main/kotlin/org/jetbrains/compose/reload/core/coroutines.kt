@@ -28,7 +28,7 @@ public suspend fun <T> withThread(
     }.getOrThrow()
 }
 
-public suspend fun WorkerThread.awaitIdle() = invokeWhenIdle {}.await().getOrThrow()
+public suspend fun WorkerThread.awaitIdle(): Unit = invokeWhenIdle {}.await().getOrThrow()
 
 public suspend fun <T> Future<T>.awaitOrThrow(): T = await().getOrThrow()
 
