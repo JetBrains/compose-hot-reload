@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import org.intellij.lang.annotations.Language
+import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.junit.jupiter.api.TestTemplate
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.parallel.Execution
@@ -44,6 +45,14 @@ public annotation class ExtendBuildGradleKts(val extension: KClass<out BuildGrad
 @Repeatable
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 public annotation class ExtendGradleProperties(val extension: KClass<out GradlePropertiesExtension>)
+
+@Repeatable
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+public annotation class WithGradleProperty(val key: String, val value: String)
+
+@Repeatable
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+public annotation class WithHotReloadProperty(val property: HotReloadProperty, val value: String)
 
 @Repeatable
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

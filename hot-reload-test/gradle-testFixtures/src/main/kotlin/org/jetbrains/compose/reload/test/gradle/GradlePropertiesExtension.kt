@@ -6,7 +6,6 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import org.jetbrains.compose.reload.core.asTemplateOrThrow
-import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
 import org.jetbrains.compose.reload.core.renderOrThrow
 import org.junit.jupiter.api.extension.ExtensionContext
 import java.util.ServiceLoader
@@ -29,6 +28,14 @@ internal fun renderGradleProperties(context: ExtensionContext): String = gradleP
                 "gradleVersion"(context.testedGradleVersion.version)
             }
         }
+
+    context.findRepeatableAnnotations<WithGradleProperty>().forEach { annotation ->
+        propertiesKey("${annotation.key}=${annotation.value}")
+    }
+
+    context.findRepeatableAnnotations<WithHotReloadProperty>().forEach { annotation ->
+        propertiesKey("${annotation.property.key}=${annotation.value}")
+    }
 }
 
 private const val androidEnabledKey = "android.enabled"
