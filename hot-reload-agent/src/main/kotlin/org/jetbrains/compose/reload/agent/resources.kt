@@ -13,10 +13,13 @@ import org.jetbrains.compose.reload.analysis.MethodInfo
 import org.jetbrains.compose.reload.analysis.RuntimeInfo
 import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
+import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
+import org.jetbrains.compose.reload.core.exception
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.isClass
+import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
 
 private val logger = createLogger()
@@ -59,12 +62,14 @@ private fun cleanResourceCache(classId: ClassId, cleanMethod: MethodId, resource
 internal fun Context.cleanResourceCacheIfNecessary() {
     if (!hasChangedResources()) return
 
-    cleanResourceCache(Ids.ImageResourcesKt.classId, Ids.ImageResourcesKt.dropImageCache, "Images")
-    cleanResourceCache(
-        Ids.StringResourcesUtilsKt.classId,
-        Ids.StringResourcesUtilsKt.dropStringItemsCache,
-        "Strings"
-    )
+    Try {
+        cleanResourceCache(Ids.ImageResourcesKt.classId, Ids.ImageResourcesKt.dropImageCache, "Images")
+        cleanResourceCache(
+            Ids.StringResourcesUtilsKt.classId,
+            Ids.StringResourcesUtilsKt.dropStringItemsCache,
+            "Strings"
+        )
+    }.leftOr { error -> logger.error("cleanResourceCacheIfNecessary failed", error.exception) }
 }
 
 private fun Context.hasChangedResources(): Boolean {
