@@ -28,6 +28,7 @@ import org.jetbrains.compose.reload.gradle.core.composeReloadJetBrainsRuntimeBin
 import org.jetbrains.compose.reload.gradle.core.composeReloadLogLevelProvider
 import org.jetbrains.compose.reload.gradle.core.composeReloadLogStdoutProvider
 import org.jetbrains.compose.reload.gradle.core.composeReloadOrchestrationPort
+import org.jetbrains.compose.reload.gradle.core.composeReloadResourcesDirtyResolverEnabled
 import org.jetbrains.compose.reload.gradle.core.composeReloadStderrFile
 import org.jetbrains.compose.reload.gradle.core.composeReloadStdinFile
 import org.jetbrains.compose.reload.gradle.core.composeReloadStdoutFile
@@ -183,6 +184,7 @@ private class ComposeHotReloadArgumentsBuilderImpl(
             /* Non API elements */
             virtualMethodResolveEnabled = project.composeReloadVirtualMethodResolveEnabled,
             dirtyResolveDepthLimit = project.composeReloadDirtyResolveDepthLimit,
+            composeReloadResourcesDirtyResolverEnabled = project.composeReloadResourcesDirtyResolverEnabled,
             logLevel = project.composeReloadLogLevelProvider,
             logStdout = project.composeReloadLogStdoutProvider,
             stdinFile = project.composeReloadStdinFile?.toFile(),
@@ -213,6 +215,7 @@ private class ComposeHotReloadArgumentsImpl(
     /* Non API elements */
     private val virtualMethodResolveEnabled: Boolean,
     private val dirtyResolveDepthLimit: Int,
+    private val composeReloadResourcesDirtyResolverEnabled: Boolean,
     private val logLevel: Provider<Logger.Level>,
     private val logStdout: Provider<Boolean>,
     private val stdinFile: File?,
@@ -317,6 +320,7 @@ private class ComposeHotReloadArgumentsImpl(
 
         add("-D${HotReloadProperty.VirtualMethodResolveEnabled.key}=$virtualMethodResolveEnabled")
         add("-D${HotReloadProperty.DirtyResolveDepthLimit.key}=$dirtyResolveDepthLimit")
+        add("-D${HotReloadProperty.ResourcesDirtyResolverEnabled.key}=$composeReloadResourcesDirtyResolverEnabled")
 
         add("-D${HotReloadProperty.LogLevel.key}=${logLevel.get().name}")
         add("-D${HotReloadProperty.LogStdout.key}=${logStdout.get()}")
