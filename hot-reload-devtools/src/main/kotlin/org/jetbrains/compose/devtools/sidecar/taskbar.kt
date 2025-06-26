@@ -22,9 +22,11 @@ import org.jetbrains.compose.devtools.theme.composeLogoPainter
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.warn
 import java.awt.Taskbar
 import java.awt.Toolkit
+import kotlin.math.log
 
 private val logger = createLogger()
 
@@ -65,10 +67,14 @@ private fun WindowScope.configureLinuxTaskbar() {
 
     // Set name
     // This is bad, but there is no other way to access the app name in the taskbar
-    val toolkit = Toolkit.getDefaultToolkit()
-    val field = toolkit.javaClass.getDeclaredField("awtAppClassName")
-    field.isAccessible = true
-    field[toolkit] = window.name
+    try {
+        val toolkit = Toolkit.getDefaultToolkit()
+        val field = toolkit.javaClass.getDeclaredField("awtAppClassName")
+        field.isAccessible = true
+        field[toolkit] = window.name
+    } catch (_: Throwable) {
+        logger.info("Could not set dev tools app name in the taskbar")
+    }
 }
 
 @Composable
