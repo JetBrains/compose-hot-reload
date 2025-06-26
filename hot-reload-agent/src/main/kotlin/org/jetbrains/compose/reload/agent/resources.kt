@@ -12,6 +12,7 @@ import org.jetbrains.compose.reload.analysis.MethodId
 import org.jetbrains.compose.reload.analysis.MethodInfo
 import org.jetbrains.compose.reload.analysis.RuntimeInfo
 import org.jetbrains.compose.reload.core.Context
+import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
@@ -27,6 +28,7 @@ internal class ResourcesDirtyResolver : DirtyResolver {
         currentRuntime: RuntimeInfo,
         redefined: RuntimeInfo,
     ): List<MethodInfo> {
+        if (!HotReloadEnvironment.resourcesDirtyResolverEnabled) return emptyList()
         if (!context.hasChangedResources()) return emptyList()
 
         return listOf(
@@ -55,14 +57,14 @@ private fun cleanResourceCache(classId: ClassId, cleanMethod: MethodId, resource
 }
 
 internal fun Context.cleanResourceCacheIfNecessary() {
-    if (hasChangedResources()) {
-        cleanResourceCache(Ids.ImageResourcesKt.classId, Ids.ImageResourcesKt.dropImageCache, "Images")
-        cleanResourceCache(
-            Ids.StringResourcesUtilsKt.classId,
-            Ids.StringResourcesUtilsKt.dropStringItemsCache,
-            "Strings"
-        )
-    }
+    if (!hasChangedResources()) return
+
+    cleanResourceCache(Ids.ImageResourcesKt.classId, Ids.ImageResourcesKt.dropImageCache, "Images")
+    cleanResourceCache(
+        Ids.StringResourcesUtilsKt.classId,
+        Ids.StringResourcesUtilsKt.dropStringItemsCache,
+        "Strings"
+    )
 }
 
 private fun Context.hasChangedResources(): Boolean {
