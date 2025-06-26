@@ -34,10 +34,11 @@ internal fun launchDevtoolsApplication() {
     logger.info("Starting 'DevTools'")
 
     val devToolsArgs = listOfNotNull(
-        resolveDevtoolsJavaBinary(), "-cp", classpath.joinToString(File.pathSeparator),
+        resolveDevtoolsJavaBinary(),
+        *platformSpecificJvmArguments(),
+        "-cp", classpath.joinToString(File.pathSeparator),
         *subprocessDefaultArguments(DevTools, orchestration.port.getBlocking().getOrThrow()).toTypedArray(),
         *issueNewDebugSessionJvmArguments("DevTools"),
-        *platformSpecificJvmArguments(),
         "org.jetbrains.compose.devtools.Main",
     )
     val process = ProcessBuilder(devToolsArgs)
@@ -73,7 +74,10 @@ private fun platformSpecificJvmArguments(): Array<String> = when (Os.currentOrNu
     // Required to properly set the app name in the taskbar
     Os.Linux -> arrayOf("--add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED")
     // Disable dock icon when not running in detached mode for MacOS
-    Os.MacOs -> arrayOf("-Dapple.awt.UIElement=${!devToolsDetached}")
+    Os.MacOs -> arrayOf(
+        "-Dapple.awt.UIElement=${!devToolsDetached}",
+        "-Dapple.awt.application.name=Compose Hot Reload Dev Tools",
+    )
     // No platform-specific options for Windows
     Os.Windows -> emptyArray()
     else -> {
