@@ -17,10 +17,19 @@ import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.resources.decodeToImageBitmap
 import org.jetbrains.compose.resources.decodeToSvgPainter
+import java.awt.Image
 import java.lang.invoke.MethodHandles
+import javax.imageio.ImageIO
 
 internal const val COMPOSE_LOGO_SVG = "img/compose-logo.svg"
 internal const val COMPOSE_LOGO_PNG = "img/compose-logo.png"
+internal val COMPOSE_ICON_PNGS = listOf(
+    "img/compose-logo16.png",
+    "img/compose-logo32.png",
+    "img/compose-logo48.png",
+    "img/compose-logo64.png",
+    "img/compose-logo128.png",
+)
 
 private val logger = createLogger()
 private val classLoader = MethodHandles.lookup().lookupClass().classLoader
@@ -45,5 +54,13 @@ internal fun composeLogoPainter(density: Density): Deferred<Painter?> = MainScop
     }.getOrElse {
         logger.error("Failed loading compose-logo", it)
         null
+    }
+}
+
+internal fun composeIcons(): Deferred<List<Image>> = MainScope().async(Dispatchers.IO) {
+    COMPOSE_ICON_PNGS.map {
+        classLoader.getResource(COMPOSE_LOGO_PNG)!!.openStream().use { inputStream ->
+            ImageIO.read(inputStream)
+        }
     }
 }

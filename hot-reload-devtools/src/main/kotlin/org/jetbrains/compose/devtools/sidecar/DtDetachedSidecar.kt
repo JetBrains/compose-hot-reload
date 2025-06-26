@@ -34,6 +34,7 @@ import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
 import org.jetbrains.compose.devtools.theme.DtTitles.DEV_TOOLS
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
+import org.jetbrains.compose.devtools.theme.composeIcons
 import org.jetbrains.compose.devtools.theme.composeLogoPainter
 import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusBackground
@@ -73,6 +74,10 @@ fun DtDetachedSidecarWindow() {
             exitProcess(0)
         },
     ) {
+        // Linux
+        LaunchedEffect(Unit) {
+            window.iconImages = composeIcons().await()
+        }
         window.minimumSize = defaultSize.toDimension()
         DtDetachedSidecarContent()
     }
