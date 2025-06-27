@@ -97,13 +97,17 @@ internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<Ko
     val hotReloadTaskName = compilation.map { compilation -> compilation.hotReloadTaskName }
     val hotReloadLifecycleTaskName = project.futureProvider { project.hotReloadLifecycleTask.await()?.name }
 
-    withComposeHotReloadArguments {
+    withComposeHotReload {
         setMainClass(mainClass)
         setPidFile(pidfile.map { it.asFile })
         setArgFile(argfile.map { it.asFile })
-        isRecompileContinuous(isRecompileContinuous)
+        isAutoRecompileEnabled(isRecompileContinuous)
         setReloadTaskName(compilation.map { compilation -> compilation.hotReloadTaskName })
     }
+
+    /*
+    Further, project-specific capabilities such as logging or extended debugging support below
+    */
 
     project.intellijDebuggerDispatchPort.orNull?.let { debuggerDispatchPort ->
         systemProperty(HotReloadProperty.IntelliJDebuggerDispatchPort.key, debuggerDispatchPort)
@@ -111,7 +115,6 @@ internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<Ko
 
     val intellijDebuggerDispatchPort = project
         .composeReloadIntelliJDebuggerDispatchPortProvider.orNull
-
 
     val projectPath = project.path
 

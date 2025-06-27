@@ -3,13 +3,8 @@ public abstract class org/jetbrains/compose/reload/gradle/AbstractComposeHotRun 
 	public final fun getIsAutoReloadEnabled ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract interface class org/jetbrains/compose/reload/gradle/ComposeHotReloadArguments : org/gradle/process/CommandLineArgumentProvider {
-	public abstract fun applyTo (Lorg/gradle/process/JavaForkOptions;)V
-}
-
 public abstract interface class org/jetbrains/compose/reload/gradle/ComposeHotReloadArgumentsBuilder {
-	public abstract fun getProject ()Lorg/gradle/api/Project;
-	public abstract fun isRecompileContinuous (Lorg/gradle/api/provider/Provider;)V
+	public abstract fun isAutoRecompileEnabled (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setAgentJar (Lorg/gradle/api/file/FileCollection;)V
 	public abstract fun setArgFile (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setDevToolsClasspath (Lorg/gradle/api/file/FileCollection;)V
@@ -25,9 +20,8 @@ public abstract interface class org/jetbrains/compose/reload/gradle/ComposeHotRe
 }
 
 public final class org/jetbrains/compose/reload/gradle/ComposeHotReloadArgumentsKt {
-	public static final fun composeHotReloadArguments (Lorg/gradle/api/Project;Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/compose/reload/gradle/ComposeHotReloadArguments;
-	public static final fun withComposeHotReloadArguments (Lorg/gradle/api/tasks/JavaExec;Lkotlin/jvm/functions/Function1;)V
-	public static final fun withComposeHotReloadArguments (Lorg/gradle/process/JavaForkOptions;Lkotlin/jvm/functions/Function1;)V
+	public static final fun createComposeHotReloadArguments (Lorg/gradle/api/Project;Lkotlin/jvm/functions/Function1;)Lorg/gradle/process/CommandLineArgumentProvider;
+	public static final fun withComposeHotReload (Lorg/gradle/process/JavaForkOptions;Lkotlin/jvm/functions/Function1;)V
 }
 
 public class org/jetbrains/compose/reload/gradle/ComposeHotReloadExtension {

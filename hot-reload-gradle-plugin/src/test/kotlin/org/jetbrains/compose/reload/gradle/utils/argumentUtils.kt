@@ -11,12 +11,12 @@ import org.jetbrains.compose.reload.gradle.ComposeHotReloadArguments
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
-fun JavaExec.getComposeHotReloadArgumentsOrFail(): ComposeHotReloadArguments {
+internal fun JavaExec.getComposeHotReloadArgumentsOrFail(): ComposeHotReloadArguments {
     return jvmArgumentProviders.filterIsInstance<ComposeHotReloadArguments>().firstOrNull()
         ?: fail("Missing 'ComposeHotReloadArguments' argument provider of '$path'")
 }
 
-fun ComposeHotReloadArguments.getSystemPropertyOrFail(property: HotReloadProperty): String {
+internal fun ComposeHotReloadArguments.getSystemPropertyOrFail(property: HotReloadProperty): String {
     val declarations = asArguments().filter { argument -> argument.startsWith("-D${property.key}=") }
     if (declarations.isEmpty()) {
         fail("Missing '${property.key}' in arguments:\n${asArguments().joinToString("\n")}")
@@ -29,7 +29,7 @@ fun ComposeHotReloadArguments.getSystemPropertyOrFail(property: HotReloadPropert
     return declarations.first().substringAfter("=")
 }
 
-fun ComposeHotReloadArguments.assertSystemPropertyEquals(
+internal fun ComposeHotReloadArguments.assertSystemPropertyEquals(
     property: HotReloadProperty, expectedValue: String
 ) {
     val actualValue = getSystemPropertyOrFail(property)
