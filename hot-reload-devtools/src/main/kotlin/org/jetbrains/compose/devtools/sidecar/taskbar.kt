@@ -53,6 +53,9 @@ private fun WindowScope.configureMacOsTaskbar() {
             logger.error("Failed loading compose icon", it)
         }
     }
+
+    // There is no proper way to set the app name in the runtime or during launch
+    // The only way is to bundle the app, which is not really accessible to us
 }
 
 @Composable
@@ -65,12 +68,15 @@ private fun WindowScope.configureLinuxTaskbar() {
     }
 
     // Set name
-    // This is bad, but there is no other way to access the app name in the taskbar
     try {
         val toolkit = Toolkit.getDefaultToolkit()
-        val field = toolkit.javaClass.getDeclaredField("awtAppClassName")
-        field.isAccessible = true
-        field[toolkit] = COMPOSE_HOT_RELOAD_TITLE
+        // This is ugly, but there is no other way to access the app name in the taskbar
+        if (toolkit.javaClass.name == "sun.awt.X11.XToolkit") {
+            val field = toolkit.javaClass.getDeclaredField("awtAppClassName")
+            field.isAccessible = true
+            field[toolkit] = COMPOSE_HOT_RELOAD_TITLE
+            System.err.println(field[toolkit])
+        }
     } catch (_: Throwable) {
         logger.info("Could not set dev tools app name in the taskbar")
     }
