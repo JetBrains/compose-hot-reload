@@ -1,12 +1,13 @@
-public abstract class org/jetbrains/compose/reload/AbstractComposeHotRun : org/gradle/api/tasks/JavaExec {
+public abstract class org/jetbrains/compose/reload/gradle/AbstractComposeHotRun : org/gradle/api/tasks/JavaExec, org/jetbrains/compose/reload/gradle/ComposeHotReloadRunTask {
 	public final fun getCompilation ()Lorg/gradle/api/provider/Property;
+	public final fun getIsAutoReloadEnabled ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract interface class org/jetbrains/compose/reload/ComposeHotReloadArguments : org/gradle/process/CommandLineArgumentProvider {
+public abstract interface class org/jetbrains/compose/reload/gradle/ComposeHotReloadArguments : org/gradle/process/CommandLineArgumentProvider {
 	public abstract fun applyTo (Lorg/gradle/process/JavaForkOptions;)V
 }
 
-public abstract interface class org/jetbrains/compose/reload/ComposeHotReloadArgumentsBuilder {
+public abstract interface class org/jetbrains/compose/reload/gradle/ComposeHotReloadArgumentsBuilder {
 	public abstract fun getProject ()Lorg/gradle/api/Project;
 	public abstract fun isRecompileContinuous (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setAgentJar (Lorg/gradle/api/file/FileCollection;)V
@@ -23,41 +24,54 @@ public abstract interface class org/jetbrains/compose/reload/ComposeHotReloadArg
 	public abstract fun setReloadTaskName (Lorg/gradle/api/provider/Provider;)V
 }
 
-public final class org/jetbrains/compose/reload/ComposeHotReloadArgumentsKt {
-	public static final fun composeHotReloadArguments (Lorg/gradle/api/Project;Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/compose/reload/ComposeHotReloadArguments;
+public final class org/jetbrains/compose/reload/gradle/ComposeHotReloadArgumentsKt {
+	public static final fun composeHotReloadArguments (Lorg/gradle/api/Project;Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/compose/reload/gradle/ComposeHotReloadArguments;
 	public static final fun withComposeHotReloadArguments (Lorg/gradle/api/tasks/JavaExec;Lkotlin/jvm/functions/Function1;)V
 	public static final fun withComposeHotReloadArguments (Lorg/gradle/process/JavaForkOptions;Lkotlin/jvm/functions/Function1;)V
 }
 
-public class org/jetbrains/compose/reload/ComposeHotReloadExtension {
+public class org/jetbrains/compose/reload/gradle/ComposeHotReloadExtension {
 	public fun <init> (Lorg/gradle/api/Project;)V
-	public final fun getUseJetBrainsRuntime ()Lorg/gradle/api/provider/Property;
 }
 
-public final class org/jetbrains/compose/reload/ComposeHotReloadPlugin : org/gradle/api/Plugin {
+public abstract interface class org/jetbrains/compose/reload/gradle/ComposeHotReloadOtherTask : org/jetbrains/compose/reload/gradle/ComposeHotTask {
+}
+
+public final class org/jetbrains/compose/reload/gradle/ComposeHotReloadPlugin : org/gradle/api/Plugin {
 	public fun <init> ()V
 	public synthetic fun apply (Ljava/lang/Object;)V
 	public fun apply (Lorg/gradle/api/Project;)V
 }
 
-public class org/jetbrains/compose/reload/ComposeHotRun : org/jetbrains/compose/reload/AbstractComposeHotRun {
+public abstract interface class org/jetbrains/compose/reload/gradle/ComposeHotReloadRunTask : org/jetbrains/compose/reload/gradle/ComposeHotTask {
+}
+
+public class org/jetbrains/compose/reload/gradle/ComposeHotRun : org/jetbrains/compose/reload/gradle/AbstractComposeHotRun {
 	public fun <init> ()V
 }
 
-public final class org/jetbrains/compose/reload/JvmRunHijackKt$hijackJvmRunTask$2$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
+public abstract interface class org/jetbrains/compose/reload/gradle/ComposeHotTask : org/gradle/api/Task {
+	public static final field Companion Lorg/jetbrains/compose/reload/gradle/ComposeHotTask$Companion;
+}
+
+public final class org/jetbrains/compose/reload/gradle/ComposeHotTask$Companion {
+}
+
+public final class org/jetbrains/compose/reload/gradle/JvmRunHijackKt$hijackJvmRunTask$2$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
 	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	public final synthetic fun execute (Ljava/lang/Object;)V
 }
 
-public final class org/jetbrains/compose/reload/PropertiesKt {
+public final class org/jetbrains/compose/reload/gradle/PropertiesKt {
 	public static final fun isHotReloadBuild (Lorg/gradle/api/Project;)Z
 }
 
-public final class org/jetbrains/compose/reload/RuntimeClasspathKt {
-	public static final fun getHotReloadRuntimeClasspath (Lorg/gradle/api/Project;)Lorg/gradle/api/file/FileCollection;
+public final class org/jetbrains/compose/reload/gradle/RuntimeClasspathKt$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public final synthetic fun execute (Ljava/lang/Object;)V
 }
 
-public final class org/jetbrains/compose/reload/RuntimeClasspathKt$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
+public final class org/jetbrains/compose/reload/gradle/TasksBaseKt$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
 	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	public final synthetic fun execute (Ljava/lang/Object;)V
 }

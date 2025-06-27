@@ -62,8 +62,8 @@ class ArgFileTest {
         )
 
         val runTaskName = when (projectMode) {
-            ProjectMode.Kmp -> "jvmRunHot"
-            ProjectMode.Jvm -> "runHot"
+            ProjectMode.Kmp -> "hotRunJvm"
+            ProjectMode.Jvm -> "hotRun"
         }
 
         val argFileName = when (projectMode) {

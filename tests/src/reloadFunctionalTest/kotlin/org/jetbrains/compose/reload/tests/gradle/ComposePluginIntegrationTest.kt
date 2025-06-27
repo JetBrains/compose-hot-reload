@@ -69,7 +69,7 @@ class ComposePluginIntegrationTest {
         /* Check: We use the mainClass from compose.desktop.application as default */
         fixture.runTransaction {
             launch {
-                fixture.gradleRunner.buildFlow("jvmRunHot").toList().assertSuccessful()
+                fixture.gradleRunner.buildFlow("hotRunJvm").toList().assertSuccessful()
             }
             skipToMessage<TestEvent>("Waiting for application 'alive' signal") { it.payload == "Running: Main" }
             skipToMessage<ClientDisconnected> { it.clientRole == OrchestrationClientRole.Application }
@@ -79,7 +79,7 @@ class ComposePluginIntegrationTest {
         /* Check: We can provide the mainClass using a Gradle property */
         fixture.runTransaction {
             launch {
-                fixture.gradleRunner.buildFlow("jvmRunHot", "-PmainClass=my.foo.FooKt").toList().assertSuccessful()
+                fixture.gradleRunner.buildFlow("hotRunJvm", "-PmainClass=my.foo.FooKt").toList().assertSuccessful()
             }
             skipToMessage<TestEvent>("Waiting for application 'alive' signal") { it.payload == "Running: Foo" }
             skipToMessage<ClientDisconnected> { it.clientRole == OrchestrationClientRole.Application }
@@ -88,7 +88,7 @@ class ComposePluginIntegrationTest {
         /* Check: We can provide the mainClass using a System property */
         fixture.runTransaction {
             launch {
-                fixture.gradleRunner.buildFlow("jvmRunHot", "-DmainClass=my.foo.FooKt").toList().assertSuccessful()
+                fixture.gradleRunner.buildFlow("hotRunJvm", "-DmainClass=my.foo.FooKt").toList().assertSuccessful()
             }
             skipToMessage<TestEvent>("Waiting for application 'alive' signal") { it.payload == "Running: Foo" }
             skipToMessage<ClientDisconnected> { it.clientRole == OrchestrationClientRole.Application }
@@ -97,7 +97,7 @@ class ComposePluginIntegrationTest {
         /* Check: We can provide the mainClass the CLI option*/
         fixture.runTransaction {
             launch {
-                fixture.gradleRunner.buildFlow("jvmRunHot", "--mainClass=my.foo.FooKt").toList().assertSuccessful()
+                fixture.gradleRunner.buildFlow("hotRunJvm", "--mainClass=my.foo.FooKt").toList().assertSuccessful()
             }
             skipToMessage<TestEvent>("Waiting for application 'alive' signal") { it.payload == "Running: Foo" }
             skipToMessage<ClientDisconnected> { it.clientRole == OrchestrationClientRole.Application }

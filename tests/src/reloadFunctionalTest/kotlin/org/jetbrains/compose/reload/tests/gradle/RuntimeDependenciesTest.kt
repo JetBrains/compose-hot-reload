@@ -6,6 +6,8 @@
 package org.jetbrains.compose.reload.tests.gradle
 
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
+import org.jetbrains.compose.reload.core.testFixtures.PathRegex
+import org.jetbrains.compose.reload.core.testFixtures.assertMatches
 import org.jetbrains.compose.reload.core.testFixtures.repositoryRoot
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
@@ -19,9 +21,7 @@ import org.jetbrains.compose.reload.test.gradle.TestedProjectMode
 import org.jetbrains.compose.reload.test.gradle.getDefaultMainKtSourceFile
 import org.jetbrains.compose.reload.test.gradle.launchApplication
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
-import org.jetbrains.compose.reload.utils.PathRegex
 import org.jetbrains.compose.reload.utils.QuickTest
-import org.jetbrains.compose.reload.utils.assertMatches
 import java.io.File
 import kotlin.io.path.appendText
 import kotlin.io.path.createParentDirectories
