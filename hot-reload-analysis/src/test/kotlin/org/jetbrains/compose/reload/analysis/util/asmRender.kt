@@ -24,7 +24,6 @@ import org.objectweb.asm.util.Textifier
 import org.objectweb.asm.util.TraceMethodVisitor
 import java.io.PrintWriter
 import java.io.StringWriter
-import kotlin.collections.get
 
 
 internal fun renderAsmTree(bytecode: ByteArray): String {

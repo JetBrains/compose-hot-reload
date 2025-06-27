@@ -5,8 +5,6 @@
 
 package org.jetbrains.compose.reload.test
 
-import org.gradle.api.Project
-
 internal fun lowerCamelCase(vararg parts: String?): String {
     return buildString {
         parts.filterNotNull().filter { it.isNotBlank() }.forEachIndexed { i, part ->

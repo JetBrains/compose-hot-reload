@@ -25,7 +25,7 @@ open class GenerateHotReloadEnvironmentGradleExtensionsTask : DefaultTask() {
     fun generate() {
         val properties = parseHotReloadProperties(propertiesFile.asFile.get().toPath())
         val sourceCode = """
-            package org.jetbrains.compose.reload.gradle.core
+            package org.jetbrains.compose.reload.gradle
             import java.nio.file.Path
             import kotlin.io.path.Path
             import org.gradle.api.Project

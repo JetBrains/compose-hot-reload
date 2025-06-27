@@ -7,7 +7,6 @@ package org.jetbrains.compose.reload.utils
 
 import org.jetbrains.compose.reload.core.testFixtures.repositoryRoot
 import org.jetbrains.compose.reload.test.gradle.SettingsGradleKtsRepositoriesExtension
-import org.jetbrains.compose.reload.test.gradle.testedKotlinVersion
 import org.junit.jupiter.api.extension.ExtensionContext
 import kotlin.io.path.absolutePathString
 

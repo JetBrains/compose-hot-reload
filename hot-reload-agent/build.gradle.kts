@@ -1,8 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.compose.ComposePlugin
 import org.jetbrains.compose.reload.gradle.HotReloadUsage
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.compose.reload.gradle.HotReloadUsageType
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 /*
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.

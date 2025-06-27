@@ -42,8 +42,8 @@ Using Kotlin Multiplatform and IntelliJ, launching your app is as simple as pres
 **Run Tasks**
 
 The plugin will create the following tasks to launch the application in 'hot reload mode':
-- `:jvmRunHot`: Multiplatform, async alternative (`jvmRunHotAsync`)
-- `:runHot`: Kotlin/JVM, async alternative (`runHotAsync`)
+- `:hotRunJvm`: Multiplatform, async alternative (`hotRunJvmAsync`)
+- `:hotRun`: Kotlin/JVM, async alternative (`hotRunAsync`)
 - 
 ____
 **⚠️Note:**
@@ -58,9 +58,9 @@ kotlin {
 }
 ```
 
-Will lead to a task name of `desktopRunHot` which can be invoked
+Will lead to a task name of `hotRunDesktop` which can be invoked
 ```
-./gradlew :app:desktopRunHot --mainClass {{MainClass}}
+./gradlew :app:hotRunDesktop --mainClass {{MainClass}}
 ```
 ____
 
@@ -79,7 +79,7 @@ _Example: `--auto`_
 
 - `--no-autoReload` or `--no-auto`:
 Disable automatic reloading.<br>
-  _Example: `./gradlew :myApp:jvmRunHot --no-auto`_<br>
+  _Example: `./gradlew :myApp:hotRunJvm --no-auto`_<br>
 
 **Reload Task**
 
@@ -108,7 +108,7 @@ compose.desktop {
 
 or provided when invoking the task
 ```shell
-./gradlew jvmRunHot --mainClass com.example.MainKt
+./gradlew hotRunJvm --mainClass com.example.MainKt
 ```
 
 ### Set up automatic provisioning of the JetBrains Runtime (JBR) via Gradle

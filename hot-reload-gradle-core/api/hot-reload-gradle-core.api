@@ -1,6 +1,10 @@
-public final class org/jetbrains/compose/reload/gradle/AgentConfiguration {
-	public static final fun composeHotReloadAgentJar (Lorg/gradle/api/Project;)Lorg/gradle/api/file/FileCollection;
-	public static final fun composeHotReloadAgentRuntimeClasspath (Lorg/gradle/api/Project;)Lorg/gradle/api/file/FileCollection;
+public final class org/jetbrains/compose/reload/gradle/ComposeHotReloadAgent {
+	public static final fun getComposeHotReloadAgentClasspath (Lorg/gradle/api/Project;)Lorg/gradle/api/file/FileCollection;
+	public static final fun getComposeHotReloadAgentJar (Lorg/gradle/api/Project;)Lorg/gradle/api/file/FileCollection;
+}
+
+public final class org/jetbrains/compose/reload/gradle/ComposeHotReloadRuntime {
+	public static final fun getComposeHotReloadRuntimeClasspath (Lorg/gradle/api/Project;)Lorg/gradle/api/file/FileCollection;
 }
 
 public final class org/jetbrains/compose/reload/gradle/HotReloadUsage {

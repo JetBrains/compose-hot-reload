@@ -2,7 +2,7 @@
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
-@file:JvmName("AgentConfiguration")
+@file:JvmName("ComposeHotReloadAgent")
 
 package org.jetbrains.compose.reload.gradle
 
@@ -19,13 +19,11 @@ import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
-private const val composeHotReloadAgentConfigurationName = "composeHotReloadAgent"
-
 @InternalHotReloadApi
 internal val Project.composeHotReloadAgentConfiguration: Configuration
     get() {
-        configurations.findByName(composeHotReloadAgentConfigurationName)?.let { return it }
-        return configurations.create(composeHotReloadAgentConfigurationName) { configuration ->
+        configurations.findByName(HOT_RELOAD_AGENT_CONFIGURATION_NAME)?.let { return it }
+        return configurations.create(HOT_RELOAD_AGENT_CONFIGURATION_NAME) { configuration ->
             configuration.isCanBeConsumed = false
             configuration.isCanBeResolved = true
 
@@ -42,22 +40,21 @@ internal val Project.composeHotReloadAgentConfiguration: Configuration
         }
     }
 
-/** Provides the 'default' 'Compose Hot Reload' agent jar file. */
-fun Project.composeHotReloadAgentJar(): FileCollection {
-    return composeHotReloadAgentConfiguration.incoming.artifactView { view ->
+/**
+ * Provides the 'default' 'Compose Hot Reload' agent jar file.
+ */
+val Project.composeHotReloadAgentJar: FileCollection
+    get() = composeHotReloadAgentConfiguration.incoming.artifactView { view ->
         view.componentFilter { element ->
             element is ModuleComponentIdentifier &&
                 (element.group == "org.jetbrains.compose.hot-reload" && element.module == "hot-reload-agent") ||
                 (element is ProjectComponentIdentifier && element.projectPath == ":hot-reload-agent")
         }
     }.files
-}
-
 
 /**
  * Resolves the classpath required for the default 'Compose Hot Reload
  * Agent'
  */
-fun Project.composeHotReloadAgentRuntimeClasspath(): FileCollection {
-    return composeHotReloadAgentConfiguration.incoming.files
-}
+val Project.composeHotReloadAgentClasspath: FileCollection
+    get() = composeHotReloadAgentConfiguration.incoming.files

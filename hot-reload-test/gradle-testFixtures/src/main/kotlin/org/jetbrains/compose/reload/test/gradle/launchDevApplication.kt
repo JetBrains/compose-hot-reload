@@ -27,13 +27,13 @@ public fun HotReloadTestFixture.launchDevApplication(
 
         val runTask = when (projectMode) {
             ProjectMode.Kmp -> when (launchMode) {
-                ApplicationLaunchMode.GradleBlocking -> "jvmRunDev"
-                ApplicationLaunchMode.Detached -> "jvmRunDevAsync"
+                ApplicationLaunchMode.GradleBlocking -> "hotDevJvm"
+                ApplicationLaunchMode.Detached -> "hotDevJvmAsync"
             }
 
             ProjectMode.Jvm -> when (launchMode) {
-                ApplicationLaunchMode.GradleBlocking -> "runDev"
-                ApplicationLaunchMode.Detached -> "runDevAsync"
+                ApplicationLaunchMode.GradleBlocking -> "hotDev"
+                ApplicationLaunchMode.Detached -> "hotDevAsync"
             }
         }
 

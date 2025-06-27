@@ -5,7 +5,6 @@
 
 package org.jetbrains.compose.reload.tests.gradle
 
-import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application

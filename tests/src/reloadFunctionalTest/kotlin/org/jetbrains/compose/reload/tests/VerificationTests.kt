@@ -15,7 +15,6 @@ import org.jetbrains.compose.reload.utils.QuickTest
 import org.junit.jupiter.api.Disabled
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class VerificationTests {
 
