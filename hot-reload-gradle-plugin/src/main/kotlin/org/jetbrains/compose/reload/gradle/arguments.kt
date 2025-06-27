@@ -11,16 +11,22 @@ import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Classpath
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.Optional
 import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
+import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.HotReloadProperty
-import org.jetbrains.compose.reload.core.Logger
 import java.io.File
+import kotlin.io.path.absolutePathString
 
+@DelicateHotReloadApi
 sealed interface ComposeHotReloadArgumentsBuilder {
-    val project: Project
     fun setMainClass(mainClass: Provider<String>)
     fun setAgentJar(files: FileCollection)
     fun setHotClasspath(files: FileCollection)
@@ -33,76 +39,123 @@ sealed interface ComposeHotReloadArgumentsBuilder {
     fun setDevToolsTransparencyEnabled(enabled: Provider<Boolean>)
     fun setReloadTaskName(name: Provider<String>)
     fun setReloadTaskName(name: String)
-    fun isRecompileContinuous(isRecompileContinuous: Provider<Boolean>)
+    fun isAutoRecompileEnabled(isAutoRecompileEnabled: Provider<Boolean>)
 }
 
-fun <T> T.withComposeHotReloadArguments(builder: ComposeHotReloadArgumentsBuilder.() -> Unit) where T : JavaForkOptions, T : Task {
-    project.composeHotReloadArguments(builder).applyTo(this)
+@DelicateHotReloadApi
+fun <T> T.withComposeHotReload(arguments: ComposeHotReloadArgumentsBuilder.() -> Unit) where T : JavaForkOptions, T : Task {
+    val arguments = ComposeHotReloadArguments(project).also(arguments)
+    jvmArgumentProviders.add(arguments)
+
+    if (project.composeReloadJetBrainsRuntimeBinary != null) {
+        this.executable(project.composeReloadJetBrainsRuntimeBinary)
+    } else if (this is JavaExec) {
+        javaLauncher.set(project.jetbrainsRuntimeLauncher())
+    }
 }
 
-@JvmName("withComposeHotReloadArguments")
-@Deprecated(
-    message = "Use withComposeHotReloadArguments instead",
-    level = DeprecationLevel.ERROR,
-    replaceWith = ReplaceWith("withComposeHotReloadArguments(builder)")
-)
-@PublishedApi
-internal fun JavaExec.withComposeHotReloadArgumentsJavaExec(builder: ComposeHotReloadArgumentsBuilder.() -> Unit) {
-    project.composeHotReloadArguments(builder).applyTo(this)
+@DelicateHotReloadApi
+fun Project.createComposeHotReloadArguments(builder: ComposeHotReloadArgumentsBuilder.() -> Unit): CommandLineArgumentProvider {
+    return ComposeHotReloadArguments(this).also(builder)
 }
 
-sealed interface ComposeHotReloadArguments : CommandLineArgumentProvider {
-    fun applyTo(java: JavaForkOptions)
-}
+internal class ComposeHotReloadArguments(project: Project) :
+    ComposeHotReloadArgumentsBuilder,
+    CommandLineArgumentProvider {
+    private val rootProjectDir = project.rootProject.projectDir
+    private val projectPath = project.path
+    private val logger = project.logger
 
-fun Project.composeHotReloadArguments(builder: ComposeHotReloadArgumentsBuilder.() -> Unit): ComposeHotReloadArguments {
-    return ComposeHotReloadArgumentsBuilderImpl(this)
-        .also(builder)
-        .build()
-}
-
-private class ComposeHotReloadArgumentsBuilderImpl(
-    override val project: Project,
-) : ComposeHotReloadArgumentsBuilder {
-    private val mainClass: Property<String> = project.objects.property(String::class.java)
+    @get:Input
+    @get:Optional
+    val mainClass: Property<String> = project.objects.property(String::class.java)
         .convention(project.mainClassConvention)
 
-    private var agentJar: FileCollection = project.composeHotReloadAgentJar
-    private var hotClasspath: FileCollection? = null
+    @get:Classpath
+    var agentJarFiles: FileCollection = project.composeHotReloadAgentJar
 
-    private val isHeadless: Property<Boolean> = project.objects.property(Boolean::class.java)
+    @get:Optional
+    @get:Classpath
+    var hotClasspathFiles: FileCollection? = null
+
+    @Classpath
+    var devToolsClasspathFiles: FileCollection = project.composeHotReloadDevToolsConfiguration
+
+    @get:Input
+    @get:JvmName("getIsHeadless")
+    val isHeadless: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadIsHeadless)
 
-    private val pidFile: Property<File> = project.objects.property(File::class.java)
+    @get:Internal
+    val pidFile: Property<File> = project.objects.property(File::class.java)
 
-    private val argFile: Property<File> = project.objects.property(File::class.java)
+    @get:Internal
+    val argFile: Property<File> = project.objects.property(File::class.java)
 
-    private var devToolsClasspath: FileCollection = project.composeHotReloadDevToolsConfiguration
-
-    private val devToolsEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
+    @get:Input
+    val devToolsEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadDevToolsEnabled)
 
-    private val devToolsTransparencyEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
+    @get:Input
+    val devToolsTransparencyEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadDevToolsTransparencyEnabled)
 
-    private val devToolsIsHeadless: Property<Boolean> = project.objects.property(Boolean::class.java)
+    @get:Input
+    @get:Optional
+    val devToolsIsHeadless: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadDevToolsIsHeadless)
 
-    private val reloadTaskName: Property<String> = project.objects.property(String::class.java)
+    @get:Input
+    @get:Optional
+    val reloadTaskName: Property<String> = project.objects.property(String::class.java)
 
-    private val isRecompileContinues: Property<Boolean> = project.objects.property(Boolean::class.java)
+    @get:Input
+    @get:JvmName("getIsAutoRecompileEnabled")
+    val isAutoRecompileEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadGradleBuildContinuous)
+
+    @get:Input
+    @get:Optional
+    val orchestrationPort = project.composeReloadOrchestrationPort
+
+    @get:Input
+    @get:Optional
+    val javaHome: Provider<String> = project.providers.systemProperty("java.home")
+
+    @get:Input
+    val virtualMethodResolveEnabled = project.composeReloadVirtualMethodResolveEnabled
+
+    @get:Input
+    val dirtyResolveDepthLimit = project.composeReloadDirtyResolveDepthLimit
+
+    @get:Input
+    val composeReloadResourcesDirtyResolverEnabled = project.composeReloadResourcesDirtyResolverEnabled
+
+    @get:Input
+    val logLevel = project.composeReloadLogLevel
+
+    @get:Input
+    val logStdout = project.composeReloadLogStdout
+
+    @get:Internal
+    val stdinFile = project.composeReloadStdinFile
+
+    @get:Internal
+    val stdoutFile = project.composeReloadStdoutFile
+
+    @get:Internal
+    val stderrFile = project.composeReloadStderrFile
 
     override fun setMainClass(mainClass: Provider<String>) {
         this.mainClass.set(mainClass)
     }
 
     override fun setAgentJar(files: FileCollection) {
-        agentJar = files
+        agentJarFiles = files
     }
 
     override fun setHotClasspath(files: FileCollection) {
-        hotClasspath = files
+        hotClasspathFiles = files
     }
 
     override fun setIsHeadless(isHeadless: Provider<Boolean>) {
@@ -122,7 +175,7 @@ private class ComposeHotReloadArgumentsBuilderImpl(
     }
 
     override fun setDevToolsClasspath(files: FileCollection) {
-        devToolsClasspath = files
+        devToolsClasspathFiles = files
     }
 
     override fun setDevToolsTransparencyEnabled(enabled: Provider<Boolean>) {
@@ -141,97 +194,13 @@ private class ComposeHotReloadArgumentsBuilderImpl(
         reloadTaskName.set(name)
     }
 
-    override fun isRecompileContinuous(isRecompileContinuous: Provider<Boolean>) {
-        this.isRecompileContinues.set(isRecompileContinuous.orElse(true))
-    }
-
-    fun build(): ComposeHotReloadArguments {
-        return ComposeHotReloadArgumentsImpl(
-            logger = project.logger,
-            rootProjectDir = project.rootProject.projectDir,
-            projectPath = project.path,
-            javaHome = project.providers.systemProperty("java.home"),
-            mainClass = mainClass,
-            agentJar = agentJar,
-            hotClasspath = hotClasspath,
-            isHeadless = isHeadless,
-            pidFile = pidFile,
-            argFile = argFile,
-            devToolsClasspath = devToolsClasspath,
-            devToolsEnabled = devToolsEnabled,
-            devToolsTransparencyEnabled = devToolsTransparencyEnabled,
-            devToolsIsHeadless = devToolsIsHeadless,
-            reloadTaskName = reloadTaskName,
-            isRecompileContinues = isRecompileContinues,
-            orchestrationPort = project.provider { project.composeReloadOrchestrationPort },
-            /* Non API elements */
-            virtualMethodResolveEnabled = project.composeReloadVirtualMethodResolveEnabled,
-            dirtyResolveDepthLimit = project.composeReloadDirtyResolveDepthLimit,
-            composeReloadResourcesDirtyResolverEnabled = project.composeReloadResourcesDirtyResolverEnabled,
-            logLevel = project.composeReloadLogLevelProvider,
-            logStdout = project.composeReloadLogStdoutProvider,
-            stdinFile = project.composeReloadStdinFile?.toFile(),
-            stdoutFile = project.composeReloadStdoutFile?.toFile(),
-            stderrFile = project.composeReloadStderrFile?.toFile(),
-        )
-    }
-}
-
-private class ComposeHotReloadArgumentsImpl(
-    private val logger: org.gradle.api.logging.Logger,
-    private val rootProjectDir: File,
-    private val projectPath: String,
-    private val javaHome: Provider<String>,
-    private val mainClass: Property<String>,
-    private val agentJar: FileCollection,
-    private val hotClasspath: FileCollection?,
-    private val isHeadless: Provider<Boolean>,
-    private val pidFile: Provider<File>,
-    private val argFile: Provider<File>,
-    private val devToolsClasspath: FileCollection,
-    private val devToolsEnabled: Provider<Boolean>,
-    private val devToolsTransparencyEnabled: Provider<Boolean>,
-    private val devToolsIsHeadless: Provider<Boolean>,
-    private val reloadTaskName: Provider<String>,
-    private val isRecompileContinues: Provider<Boolean>,
-    private val orchestrationPort: Provider<Int>,
-    /* Non API elements */
-    private val virtualMethodResolveEnabled: Boolean,
-    private val dirtyResolveDepthLimit: Int,
-    private val composeReloadResourcesDirtyResolverEnabled: Boolean,
-    private val logLevel: Provider<Logger.Level>,
-    private val logStdout: Provider<Boolean>,
-    private val stdinFile: File?,
-    private val stdoutFile: File?,
-    private val stderrFile: File?,
-) : ComposeHotReloadArguments {
-
-    override fun applyTo(java: JavaForkOptions) {
-        java.jvmArgumentProviders.add(this)
-
-        if (java is Task) {
-            java.inputs.files(agentJar)
-
-            if (devToolsEnabled.getOrElse(true)) {
-                java.inputs.files(devToolsClasspath)
-            }
-        }
-        if (java is Task && java.project.composeReloadJetBrainsRuntimeBinary != null) {
-            java.executable(java.project.composeReloadJetBrainsRuntimeBinary)
-        } else if (java is JavaExec) {
-            java.javaLauncher.set(java.project.jetbrainsRuntimeLauncher())
-        }
-
+    override fun isAutoRecompileEnabled(isAutoRecompileEnabled: Provider<Boolean>) {
+        this.isAutoRecompileEnabled.set(isAutoRecompileEnabled.orElse(true))
     }
 
     override fun asArguments(): Iterable<String> = buildList {
         /* Signal that this execution runs with Hot Reload */
         add("-D${HotReloadProperty.IsHotReloadActive.key}=true")
-
-        /* Will get us additional information at runtime */
-        if (logger.isInfoEnabled) {
-            add("-Xlog:redefine+class*=info")
-        }
 
         /* Non JBR JVMs will hate our previous JBR specific args */
         add("-XX:+IgnoreUnrecognizedVMOptions")
@@ -244,13 +213,13 @@ private class ComposeHotReloadArgumentsImpl(
         }
 
         /* Provide agent jar */
-        val agentJar = agentJar.asPath
+        val agentJar = agentJarFiles.asPath
         if (agentJar.isNotEmpty()) {
             add("-javaagent:$agentJar")
         }
 
         /* Provide 'hot classpath' */
-        if (hotClasspath != null) {
+        hotClasspathFiles?.let { hotClasspath ->
             add("-D${HotReloadProperty.HotClasspath.key}=${hotClasspath.asPath}")
         }
 
@@ -279,7 +248,7 @@ private class ComposeHotReloadArgumentsImpl(
         add("-D${HotReloadProperty.DevToolsIsHeadless.key}=${devToolsIsHeadless.orNull ?: false}")
 
         if (isDevToolsEnabled) {
-            add("-D${HotReloadProperty.DevToolsClasspath.key}=${devToolsClasspath.asPath}")
+            add("-D${HotReloadProperty.DevToolsClasspath.key}=${devToolsClasspathFiles.asPath}")
             add("-D${HotReloadProperty.DevToolsTransparencyEnabled.key}=${devToolsTransparencyEnabled.orNull ?: true}")
         }
 
@@ -290,34 +259,34 @@ private class ComposeHotReloadArgumentsImpl(
         if (reloadTaskName.isPresent) {
             add("-D${HotReloadProperty.GradleBuildTask.key}=${reloadTaskName.get()}")
         }
-        add("-D${HotReloadProperty.GradleBuildContinuous.key}=${isRecompileContinues.getOrElse(true)}")
+        add("-D${HotReloadProperty.GradleBuildContinuous.key}=${isAutoRecompileEnabled.getOrElse(true)}")
         javaHome.orNull?.let { javaHome ->
             add("-D${HotReloadProperty.GradleJavaHome.key}=$javaHome")
         }
 
         /* Forward the orchestration port if one is explicitly requested (client mode) */
-        if (orchestrationPort.isPresent) {
-            logger.quiet("Using orchestration server port: ${orchestrationPort.get()}")
-            add("-D${HotReloadProperty.OrchestrationPort.key}=${orchestrationPort.get()}")
+        if (orchestrationPort != null) {
+            logger.quiet("Using orchestration server port: $orchestrationPort")
+            add("-D${HotReloadProperty.OrchestrationPort.key}=${orchestrationPort}")
         }
 
         add("-D${HotReloadProperty.VirtualMethodResolveEnabled.key}=$virtualMethodResolveEnabled")
         add("-D${HotReloadProperty.DirtyResolveDepthLimit.key}=$dirtyResolveDepthLimit")
         add("-D${HotReloadProperty.ResourcesDirtyResolverEnabled.key}=$composeReloadResourcesDirtyResolverEnabled")
 
-        add("-D${HotReloadProperty.LogLevel.key}=${logLevel.get().name}")
-        add("-D${HotReloadProperty.LogStdout.key}=${logStdout.get()}")
+        add("-D${HotReloadProperty.LogLevel.key}=${logLevel.name}")
+        add("-D${HotReloadProperty.LogStdout.key}=${logStdout}")
 
         if (stdinFile != null) {
-            add("-D${HotReloadProperty.StdinFile.key}=${stdinFile.absolutePath}")
+            add("-D${HotReloadProperty.StdinFile.key}=${stdinFile.absolutePathString()}")
         }
 
         if (stdoutFile != null) {
-            add("-D${HotReloadProperty.StdoutFile.key}=${stdoutFile.absolutePath}")
+            add("-D${HotReloadProperty.StdoutFile.key}=${stdoutFile.absolutePathString()}")
         }
 
         if (stderrFile != null) {
-            add("-D${HotReloadProperty.StderrFile.key}=${stderrFile.absolutePath}")
+            add("-D${HotReloadProperty.StderrFile.key}=${stderrFile.absolutePathString()}")
         }
 
     }.also { arguments ->
