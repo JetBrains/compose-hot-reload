@@ -27,8 +27,8 @@ import org.jetbrains.compose.ComposeExtension
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.gradle.HotReloadUsage
 import org.jetbrains.compose.reload.gradle.HotReloadUsageType
+import org.jetbrains.compose.reload.gradle.composeHotReloadAgentClasspath
 import org.jetbrains.compose.reload.gradle.composeHotReloadAgentJar
-import org.jetbrains.compose.reload.gradle.composeHotReloadAgentRuntimeClasspath
 import org.jetbrains.compose.reload.gradle.files
 import org.jetbrains.compose.reload.gradle.intellijDebuggerDispatchPort
 import org.jetbrains.compose.reload.gradle.jetbrainsRuntimeLauncher
@@ -54,10 +54,10 @@ open class HotReloadUnitTestTask : AbstractTestTask() {
     internal val moduleName = project.objects.property(String::class.java)
 
     @get:Classpath
-    internal val agentClasspath: FileCollection = project.composeHotReloadAgentRuntimeClasspath()
+    internal val agentClasspath: FileCollection = project.composeHotReloadAgentClasspath
 
     @get:Classpath
-    internal val agentJar: FileCollection = project.composeHotReloadAgentJar()
+    internal val agentJar: FileCollection = project.composeHotReloadAgentJar
 
     @get:Classpath
     internal val classpath: ConfigurableFileCollection = project.objects.fileCollection()

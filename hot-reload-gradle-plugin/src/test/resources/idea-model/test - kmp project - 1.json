@@ -2,8 +2,8 @@
     "version": "<HOT_RELOAD_VERSION>",
     "runTasks": [
         {
-            "taskName": "jvmRunDev",
-            "taskClass": "org.jetbrains.compose.reload.ComposeDevRun",
+            "taskName": "hotDevJvm",
+            "taskClass": "org.jetbrains.compose.reload.gradle.ComposeHotDevRun",
             "targetName": "jvm",
             "compilationName": "dev",
             "sourceSets": [
@@ -12,11 +12,11 @@
                 "commonMain"
             ],
             "argFile": "<PROJECT_DIR>/build/run/jvmDev/jvmDev.argfile",
-            "argFileTaskName": "jvmRunDevArgfile"
+            "argFileTaskName": "hotDevJvmArgfile"
         },
         {
-            "taskName": "jvmRunHot",
-            "taskClass": "org.jetbrains.compose.reload.ComposeHotRun",
+            "taskName": "hotRunJvm",
+            "taskClass": "org.jetbrains.compose.reload.gradle.ComposeHotRun",
             "targetName": "jvm",
             "compilationName": "main",
             "sourceSets": [
@@ -24,7 +24,7 @@
                 "commonMain"
             ],
             "argFile": "<PROJECT_DIR>/build/run/jvmMain/jvmMain.argfile",
-            "argFileTaskName": "jvmRunHotArgfile"
+            "argFileTaskName": "hotRunJvmArgfile"
         }
     ]
 }

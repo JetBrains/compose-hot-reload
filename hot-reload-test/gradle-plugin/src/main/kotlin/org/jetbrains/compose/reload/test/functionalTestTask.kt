@@ -21,7 +21,7 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.Os
-import org.jetbrains.compose.reload.gradle.core.composeReloadJetBrainsRuntimeBinary
+import org.jetbrains.compose.reload.gradle.composeReloadJetBrainsRuntimeBinary
 import org.jetbrains.compose.reload.gradle.files
 import org.jetbrains.compose.reload.gradle.intellijDebuggerDispatchPort
 import org.jetbrains.compose.reload.gradle.jetbrainsRuntimeLauncher

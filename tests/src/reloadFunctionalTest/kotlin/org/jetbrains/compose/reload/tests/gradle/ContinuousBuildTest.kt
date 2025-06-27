@@ -75,7 +75,7 @@ class ContinuousBuildTest {
             """.trimIndent()
         )
 
-        gradleRunner.buildFlow(":jvmRunHotAsync", "--mainClass", "MainKt", "--auto").toList()
+        gradleRunner.buildFlow(":hotRunJvmAsync", "--mainClass", "MainKt", "--auto").toList()
             .assertSuccessful()
 
         runTransaction {

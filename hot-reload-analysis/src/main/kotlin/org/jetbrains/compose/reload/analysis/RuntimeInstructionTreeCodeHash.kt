@@ -14,7 +14,6 @@ import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
 import org.objectweb.asm.tree.VarInsnNode
 import java.util.zip.CRC32
-import kotlin.collections.orEmpty
 
 @JvmInline
 value class RuntimeInstructionTreeCodeHash(val value: Long)

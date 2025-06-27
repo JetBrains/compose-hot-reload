@@ -13,7 +13,6 @@ plugins {
     `api-validation-conventions`
 }
 
-
 tasks.withType<Test>().configureEach {
     maxParallelForks = 2
     dependsOn(":publishLocally")
@@ -22,7 +21,7 @@ tasks.withType<Test>().configureEach {
 gradlePlugin {
     plugins.create("hot-reload") {
         id = "org.jetbrains.compose.hot-reload"
-        implementationClass = "org.jetbrains.compose.reload.ComposeHotReloadPlugin"
+        implementationClass = "org.jetbrains.compose.reload.gradle.ComposeHotReloadPlugin"
     }
 }
 

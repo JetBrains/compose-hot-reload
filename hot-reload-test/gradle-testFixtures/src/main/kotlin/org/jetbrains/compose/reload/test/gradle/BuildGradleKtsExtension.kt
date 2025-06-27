@@ -117,7 +117,7 @@ private val kmpBuildGradleKtsTemplate = Template(
 private val jvmBuildGradleKtsTemplate = Template(
     """
     {{$headerKey}}
-    import org.jetbrains.compose.reload.ComposeHotRun
+    import org.jetbrains.compose.reload.gradle.ComposeHotRun
     import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
     
     plugins {
