@@ -75,7 +75,6 @@ private fun WindowScope.configureLinuxTaskbar() {
             val field = toolkit.javaClass.getDeclaredField("awtAppClassName")
             field.isAccessible = true
             field[toolkit] = COMPOSE_HOT_RELOAD_TITLE
-            System.err.println(field[toolkit])
         }
     } catch (_: Throwable) {
         logger.info("Could not set dev tools app name in the taskbar")
