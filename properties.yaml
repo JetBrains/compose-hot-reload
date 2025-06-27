@@ -160,7 +160,8 @@ DevToolsClasspath:
 DevToolsTransparencyEnabled:
   key: compose.reload.devToolsTransparencyEnabled
   type: boolean
-  default: "true"
+  default: "(Os.currentOrNull() != Os.Windows).toString()"
+  defaultIsExpression: true
   target: [ application, build, devtools ]
   documentation: |
     Some platforms might not be able to render transparency correctly (e.g. some linux environments).
