@@ -51,12 +51,18 @@ import org.jetbrains.compose.devtools.widgets.animateReloadStatusBackground
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusColor
 import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
+import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
+import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.core.leftOr
+import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowGainedFocus
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import java.awt.Dimension
+import java.awt.GraphicsDevice
+import java.awt.GraphicsEnvironment
 import java.awt.Point
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.milliseconds
@@ -69,6 +75,16 @@ private val DevToolingSidecarShape = RoundedCornerShape(8.dp)
 // animation time of window effects
 private val animationDuration = 512.milliseconds
 
+// check if transparency and opacity are supported
+private val transparencySupported = transparencySupported()
+private val opacitySupported = devToolsTransparencyEnabled && transparencySupported
+
+internal val devToolsUseTransparency = (devToolsTransparencyEnabled && transparencySupported).also {
+    if (devToolsTransparencyEnabled && !transparencySupported) {
+        logger.warn("Current system does not support transparent windows, rendering dev tools with no transparency")
+    }
+}
+
 @Composable
 fun DtSidecarWindow(
     windowId: WindowId,
@@ -76,27 +92,106 @@ fun DtSidecarWindow(
     isAlwaysOnTop: Boolean,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+
+    var isMinimisedVisible by remember { mutableStateOf(true) }
+    var isExpandedVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isExpanded) {
+        if (isExpanded) {
+            isMinimisedVisible = false
+            isExpandedVisible = true
+        } else {
+            delay(animationDuration)
+            isMinimisedVisible = true
+            // add delay between the switch so that
+            // minimised window will definitely be visible when expanded disappears
+            delay(animationDuration / 5)
+            isExpandedVisible = false
+        }
+    }
+
+    /**
+     * Minimized sidecar window
+     */
+    DtSidecarDialog(
+        windowId, windowState,
+        title = "Compose Hot Reload Dev Tools (Minimised)",
+        isAlwaysOnTop = isAlwaysOnTop,
+        visible = isMinimisedVisible,
+        windowSizeExpanded = false
+    ) {
+        DtMinimizedSidecarWindowContent(
+            isExpandedChanged = { isExpanded = it }
+        )
+    }
+
+    /**
+     * Expanded sidecar window
+     */
+    DtSidecarDialog(
+        windowId, windowState,
+        title = "Compose Hot Reload Dev Tools (Expanded)",
+        isAlwaysOnTop = isAlwaysOnTop,
+        visible = isExpandedVisible,
+        windowSizeExpanded = true
+    ) {
+        DtExpandedSidecarWindowContent(
+            isExpanded,
+            isExpandedChanged = { isExpanded = it }
+        )
+    }
+}
+
+@Composable
+private fun DtSidecarDialog(
+    windowId: WindowId,
+    windowState: WindowState,
+    title: String,
+    isAlwaysOnTop: Boolean,
+    visible: Boolean = true,
+    windowSizeExpanded: Boolean,
+    content: @Composable () -> Unit,
+) {
+    logger.info("Rendering $title (visibility=$visible)")
+
     var isInitializing by remember { mutableStateOf(true) }
+    var visibilityChanged by remember { mutableStateOf(true) }
+    visibilityChanged = true
 
     DialogWindow(
+        // if opacity is not supported --- make window not visible
+        // if opacity is supported --- control the visibility through opacity
+        // this way we can be sure that the window will be animated properly
+        visible = if (opacitySupported) true else visible,
         onCloseRequest = {
             ShutdownRequest("Requested by user through 'devtools'").sendBlocking()
             exitProcess(0)
         },
+        title = title,
         undecorated = true,
-        transparent = devToolsTransparencyEnabled,
+        transparent = devToolsUseTransparency,
         resizable = false,
         focusable = true,
-        alwaysOnTop = isAlwaysOnTop
+        alwaysOnTop = isAlwaysOnTop,
     ) {
+        if (opacitySupported) {
+            if (!visible) {
+                window.opacity = 0.0f
+            } else {
+                window.opacity = 1.0f
+            }
+        }
+        if (visibilityChanged && visible) {
+            window.toFront()
+        }
         if (isInitializing) {
             isInitializing = false
-            val initialSize = getSideCarWindowSize(windowState, isExpanded)
+            val initialSize = getSideCarWindowSize(windowState, windowSizeExpanded)
             window.size = initialSize.toDimension()
             window.location = getSideCarWindowPosition(windowState, initialSize.width).toPoint()
         } else {
-            val newSize = animateWindowSize(windowState, isExpanded)
-            val newPosition = animateWindowPosition(windowState, newSize)
+            val newSize = animateWindowSize(windowState, windowSizeExpanded)
+            val newPosition = animateWindowPosition(windowState, newSize, visibilityChanged)
             if (window.size != newSize.toDimension()) {
                 window.size = newSize.toDimension()
             }
@@ -104,6 +199,7 @@ fun DtSidecarWindow(
                 window.location = newPosition.toPoint()
             }
         }
+        visibilityChanged = false
 
         invokeWhenMessageReceived<ApplicationWindowGainedFocus> { event ->
             if (event.windowId == windowId) {
@@ -112,16 +208,49 @@ fun DtSidecarWindow(
             }
         }
 
-        DtSidecarWindowContent(
-            isExpanded,
-            isExpandedChanged = { isExpanded = it }
-        )
+        content()
     }
 }
 
+@Composable
+internal fun DtMinimizedSidecarWindowContent(
+    isExpandedChanged: (isExpanded: Boolean) -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.End,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .dtBackground()
+                .weight(1f, fill = false)
+                .clickable { isExpandedChanged(true) }
+                .padding(DtPadding.small)
+                .animateContentSize(alignment = Alignment.TopCenter),
+        ) {
+            DtComposeLogo(
+                Modifier.size(28.dp).padding(4.dp),
+                tint = animateReloadStatusColor(
+                    idleColor = Color.White,
+                    reloadingColor = DtColors.statusColorOrange2
+                ).value
+            )
+            DtCollapsedReloadCounterStatusItem()
+        }
+
+        if (devToolsUseTransparency) {
+            DtReloadStatusBanner(
+                modifier = Modifier
+                    .padding(DtPadding.small)
+            )
+        }
+    }
+}
 
 @Composable
-fun DtSidecarWindowContent(
+internal fun DtExpandedSidecarWindowContent(
     isExpanded: Boolean = true,
     isExpandedChanged: (isExpanded: Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
@@ -133,16 +262,10 @@ fun DtSidecarWindowContent(
         AnimatedContent(
             isExpanded,
             modifier = Modifier
-                .animatedReloadStatusBorder(
-                    shape = DevToolingSidecarShape,
-                    idleColor = if (isExpanded) DtColors.border else Color.Transparent
-                )
-                .clip(DevToolingSidecarShape)
-                .background(DtColors.applicationBackground)
-                .animateReloadStatusBackground(DtColors.applicationBackground)
+                .dtBackground()
                 .weight(1f, fill = false),
             transitionSpec = {
-                if (devToolsTransparencyEnabled) {
+                if (devToolsUseTransparency) {
                     (fadeIn(animationSpec = tween(22, delayMillis = 128)) +
                         scaleIn(initialScale = 0.92f, animationSpec = tween(220, delayMillis = 128)))
                         .togetherWith(fadeOut(animationSpec = tween(90)))
@@ -156,8 +279,8 @@ fun DtSidecarWindowContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .animateEnterExit(
-                            enter = if (devToolsTransparencyEnabled) fadeIn(tween(220)) else EnterTransition.None,
-                            exit = if (devToolsTransparencyEnabled) fadeOut(tween(50)) else ExitTransition.None
+                            enter = if (devToolsUseTransparency) fadeIn(tween(220)) else EnterTransition.None,
+                            exit = if (devToolsUseTransparency) fadeOut(tween(50)) else ExitTransition.None
                         ).clickable { isExpandedChanged(true) }
                         .padding(DtPadding.small)
                         .animateContentSize(alignment = Alignment.TopCenter),
@@ -198,7 +321,7 @@ private fun animateWindowSize(
     var currentSize by remember { mutableStateOf(getSideCarWindowSize(mainWindowState, isExpanded)) }
     val targetSize = getSideCarWindowSize(mainWindowState, isExpanded)
     /* No delay when we do not have the transparency enabled */
-    if (!devToolsTransparencyEnabled) {
+    if (!devToolsUseTransparency) {
         currentSize = targetSize
     }
 
@@ -224,9 +347,21 @@ private fun animateWindowSize(
 }
 
 @Composable
+private fun Modifier.dtBackground(): Modifier = this
+    .animatedReloadStatusBorder(
+        shape = DevToolingSidecarShape,
+        idleColor = DtColors.border
+    )
+    .clip(DevToolingSidecarShape)
+    .background(DtColors.applicationBackground)
+    .animateReloadStatusBackground(DtColors.applicationBackground)
+    .background(DtColors.applicationBackground)
+
+@Composable
 private fun animateWindowPosition(
     mainWindowState: WindowState,
     windowSize: DpSize,
+    visibilityChanged: Boolean,
 ): WindowPosition {
     val currentWidth = remember { mutableStateOf(windowSize.width) }
     val targetPosition = getSideCarWindowPosition(mainWindowState, windowSize.width)
@@ -235,6 +370,7 @@ private fun animateWindowPosition(
             currentWidth.value = windowSize.width
             targetPosition
         }
+        visibilityChanged -> targetPosition
         else -> {
             val x by animateDpAsState(targetPosition.x, animationSpec = tween(128))
             val y by animateDpAsState(targetPosition.y, animationSpec = tween(128))
@@ -248,15 +384,22 @@ private fun DpSize.toDimension(): Dimension = Dimension(width.value.toInt(), hei
 private fun WindowPosition.toPoint(): Point = Point(x.value.toInt(), y.value.toInt())
 
 private fun getSideCarWindowPosition(windowState: WindowState, width: Dp): WindowPosition {
-    val targetX = windowState.position.x - width - if (!devToolsTransparencyEnabled) 12.dp else 0.dp
+    val targetX = windowState.position.x - width - if (!devToolsUseTransparency) 12.dp else 0.dp
     val targetY = windowState.position.y
     return WindowPosition(targetX, targetY)
 }
 
 private fun getSideCarWindowSize(windowState: WindowState, isExpanded: Boolean): DpSize {
     return DpSize(
-        width = if (isExpanded) 512.dp else 32.dp + 4.dp + (12.dp.takeIf { devToolsTransparencyEnabled } ?: 0.dp),
+        width = if (isExpanded) 512.dp else 32.dp + 4.dp + (12.dp.takeIf { devToolsUseTransparency } ?: 0.dp),
         height = if (isExpanded) maxOf(windowState.size.height, 512.dp)
-        else if (devToolsTransparencyEnabled) maxOf(windowState.size.height, 512.dp) else 28.dp + 4.dp,
+        else if (devToolsUseTransparency) maxOf(windowState.size.height, 512.dp) else 32.dp + 4.dp + 14.dp,
     )
 }
+
+private fun transparencySupported(): Boolean = Try {
+    val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+    return !ge.isHeadlessInstance && ge.screenDevices.all {
+        it.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT)
+    }
+}.leftOr { false }

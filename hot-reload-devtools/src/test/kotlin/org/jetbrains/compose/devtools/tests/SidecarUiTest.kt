@@ -19,7 +19,7 @@ import io.sellmair.evas.Events
 import io.sellmair.evas.States
 import io.sellmair.evas.compose.installEvas
 import org.jetbrains.compose.devtools.Tag
-import org.jetbrains.compose.devtools.sidecar.DtSidecarWindowContent
+import org.jetbrains.compose.devtools.sidecar.DtExpandedSidecarWindowContent
 import org.jetbrains.compose.devtools.states.ReloadCountState
 import org.jetbrains.compose.devtools.states.ReloadState
 import org.jetbrains.compose.devtools.states.UIErrorDescription
@@ -37,7 +37,7 @@ class SidecarUiTest {
     fun `test - reload counter`() = runComposeUiTest {
         setContent {
             installEvas(events, states) {
-                DtSidecarWindowContent()
+                DtExpandedSidecarWindowContent()
             }
         }
 
@@ -54,7 +54,7 @@ class SidecarUiTest {
     fun `test - reload status`() = runComposeUiTest {
         setContent {
             installEvas(events, states) {
-                DtSidecarWindowContent()
+                DtExpandedSidecarWindowContent()
             }
         }
 
@@ -75,7 +75,7 @@ class SidecarUiTest {
         assertEquals(
             onNodeWithTag(Tag.ReloadStatusSymbol.name).assertExists()
                 .fetchSemanticsNode().config.getOrNull(SemanticsProperties.ProgressBarRangeInfo),
-            ProgressBarRangeInfo.Companion.Indeterminate
+            ProgressBarRangeInfo.Indeterminate
         )
         onNodeWithTag(Tag.ReloadStatusText.name).assertExists()
             .assertTextContains("Reloading", substring = true)
@@ -86,7 +86,7 @@ class SidecarUiTest {
     fun `test - error status`() = runComposeUiTest {
         setContent {
             installEvas(events, states) {
-                DtSidecarWindowContent()
+                DtExpandedSidecarWindowContent()
             }
         }
 
@@ -96,7 +96,7 @@ class SidecarUiTest {
         states.updateState(UIErrorState.Key) {
             UIErrorState(
                 mapOf(
-                    WindowId.Companion.create() to UIErrorDescription(
+                    WindowId.create() to UIErrorDescription(
                         title = "Uh-oh", message = "Something went wrong", listOf()
                     )
                 )
