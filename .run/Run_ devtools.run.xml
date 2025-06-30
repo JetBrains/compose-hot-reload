@@ -10,7 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value=":hot-reload-devtools:runDev" />
+          <option value=":hot-reload-devtools:hotDev" />
           <option value="--auto" />
         </list>
       </option>
