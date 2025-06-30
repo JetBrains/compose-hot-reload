@@ -19,6 +19,9 @@
     {
       "version": "8.14",
       "isDefault": true
+    }, {
+      "version": "9.0.0-rc-1",
+      "isGradleIntegrationTest": true
     }
   ],
   "compose": [

@@ -38,13 +38,14 @@ import kotlin.io.path.name
 internal val KotlinCompilation<*>.composeHotReloadRuntimeClasspath: FileCollection by lazyProperty {
     val thisOutput = output.allOutputs
     val agentClasspath = project.composeHotReloadAgentClasspath
+    val currentBuild = project.currentBuild
 
     val hotLibs = composeDevRuntimeDependencies.incoming.artifactView { view ->
-        view.componentFilter { id -> id.isTrackedHot() }
+        view.componentFilter { id -> currentBuild.isTrackedHot(id) }
     }
 
     val coldLibs = composeDevRuntimeDependencies.incoming.artifactView { view ->
-        view.componentFilter { id -> !id.isTrackedHot() }
+        view.componentFilter { id -> !currentBuild.isTrackedHot(id) }
     }
 
     val classesDirectory = runBuildDirectory("classpath/classes")
@@ -83,18 +84,15 @@ internal val KotlinCompilation<*>.composeHotReloadRuntimeClasspath: FileCollecti
 }
 
 internal val KotlinCompilation<*>.hotRuntimeFiles: FileCollection by lazyProperty {
+    val currentBuild = project.currentBuild
     project.files(this.output.allOutputs, composeDevRuntimeDependencies.incoming.artifactView { view ->
-        view.componentFilter { id -> id.isTrackedHot() }
+        view.componentFilter { id -> currentBuild.isTrackedHot(id) }
     }.files)
 }
 
-private fun ComponentIdentifier.isCurrentBuild(): Boolean {
-    @Suppress("DEPRECATION") // Copy approach from KGP?
-    return this is ProjectComponentIdentifier && build.isCurrentBuild
-}
 
-private fun ComponentIdentifier.isTrackedHot(): Boolean {
-    return this.isCurrentBuild() || this is OpaqueComponentArtifactIdentifier
+private fun CurrentBuild.isTrackedHot(identifier: ComponentIdentifier): Boolean {
+    return identifier in this || identifier is OpaqueComponentArtifactIdentifier
 }
 
 @DisableCachingByDefault(because = "Not worth caching")
