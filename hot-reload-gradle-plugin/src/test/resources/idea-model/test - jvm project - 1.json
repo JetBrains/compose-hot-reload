@@ -14,9 +14,32 @@
             "argFileTaskName": "hotDevArgfile"
         },
         {
+            "taskName": "hotDev",
+            "taskClass": "org.jetbrains.compose.reload.ComposeHotDevRun",
+            "targetName": "hotDev",
+            "compilationName": "dev",
+            "sourceSets": [
+                "dev",
+                "main"
+            ],
+            "argFile": "<PROJECT_DIR>/build/run/dev/dev.argfile",
+            "argFileTaskName": "hotDevArgfile"
+        },
+        {
             "taskName": "hotRun",
             "taskClass": "org.jetbrains.compose.reload.gradle.ComposeHotRun",
             "targetName": "",
+            "compilationName": "main",
+            "sourceSets": [
+                "main"
+            ],
+            "argFile": "<PROJECT_DIR>/build/run/main/main.argfile",
+            "argFileTaskName": "hotRunArgfile"
+        },
+        {
+            "taskName": "hotRun",
+            "taskClass": "org.jetbrains.compose.reload.ComposeHotRun",
+            "targetName": "hotRun",
             "compilationName": "main",
             "sourceSets": [
                 "main"
