@@ -29,6 +29,8 @@ internal class IdeaComposeHotReloadModelBuilder : ToolingModelBuilder {
             version = HOT_RELOAD_VERSION,
             runTasks = project.tasks.withType<AbstractComposeHotRun>().mapNotNull { task ->
                 task.toIdeaModel()
+            }.flatMap { runTaskModel ->
+                listOfNotNull(runTaskModel, runTaskModel.compatVersion())
             })
     }
 }
@@ -49,5 +51,23 @@ private fun AbstractComposeHotRun.toIdeaModel(): IdeaComposeHotRunTask? {
                 .flatMap { it.allKotlinSourceSets }.map { it.name },
         argFile = argFile.orNull?.asFile?.toPath(),
         argFileTaskName = this@toIdeaModel.argFileTaskName.orNull,
+    )
+}
+
+/**
+ * Version for older IDE plugins which do not yet handle the new package (compose.reload.gradle)
+ */
+private fun IdeaComposeHotRunTask.compatVersion(): IdeaComposeHotRunTask? {
+    val compatTaskClass = taskClass?.replace("org.jetbrains.compose.reload.gradle", "org.jetbrains.compose.reload")
+    if (compatTaskClass == taskClass) return null
+
+    return IdeaComposeHotRunTask(
+        taskName = taskName,
+        taskClass = compatTaskClass,
+        targetName = taskName,
+        compilationName = compilationName,
+        sourceSets = sourceSets,
+        argFile = argFile,
+        argFileTaskName = argFileTaskName,
     )
 }
