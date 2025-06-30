@@ -9,6 +9,7 @@ package org.jetbrains.compose.reload.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.jetbrains.compose.reload.createCompatibilityTasks
 
 @Suppress("unused")
 class ComposeHotReloadPlugin : Plugin<Project> {
@@ -23,6 +24,7 @@ class ComposeHotReloadPlugin : Plugin<Project> {
             if (!target.hasKotlinPluginAccess()) return
 
             /* Launch future configurations */
+            target.launch { target.createCompatibilityTasks() }
             target.launch { target.statusService.await() }
             target.launch { target.hotRunTasks.await() }
             target.launch { target.jvmRunHijackTasks.await() }

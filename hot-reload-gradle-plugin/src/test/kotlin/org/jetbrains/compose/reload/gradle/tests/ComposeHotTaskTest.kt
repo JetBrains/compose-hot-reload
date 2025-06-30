@@ -139,6 +139,6 @@ class ComposeHotTaskTest {
 
         project.kotlinMultiplatformOrNull?.jvm()
         project.evaluate()
-        return project.tasks.filter { it.javaClass.packageName.startsWith("org.jetbrains.compose.reload") }
+        return project.tasks.filter { it.javaClass.packageName.startsWith("org.jetbrains.compose.reload.gradle") }
     }
 }

@@ -1,3 +1,7 @@
+public class org/jetbrains/compose/reload/ComposeHotRun : org/gradle/api/DefaultTask {
+	public fun <init> ()V
+}
+
 public abstract class org/jetbrains/compose/reload/gradle/AbstractComposeHotRun : org/gradle/api/tasks/JavaExec, org/jetbrains/compose/reload/gradle/ComposeHotReloadRunTask {
 	public final fun getCompilation ()Lorg/gradle/api/provider/Property;
 	public final fun getIsAutoReloadEnabled ()Lorg/gradle/api/provider/Property;
