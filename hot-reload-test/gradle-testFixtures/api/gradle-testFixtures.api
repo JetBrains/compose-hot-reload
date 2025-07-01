@@ -114,6 +114,14 @@ public abstract interface annotation class org/jetbrains/compose/reload/test/gra
 	public abstract fun value ()[Lorg/jetbrains/compose/reload/test/gradle/ExtendHotReloadTestDimension;
 }
 
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/ExtendProjectSetup : java/lang/annotation/Annotation {
+	public abstract fun extension ()Ljava/lang/Class;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/ExtendProjectSetup$Container : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lorg/jetbrains/compose/reload/test/gradle/ExtendProjectSetup;
+}
+
 public abstract class org/jetbrains/compose/reload/test/gradle/GradleBuildEvent {
 }
 
@@ -395,15 +403,7 @@ public final class org/jetbrains/compose/reload/test/gradle/ProjectModeKt {
 }
 
 public abstract interface class org/jetbrains/compose/reload/test/gradle/ProjectSetupExtension {
-	public abstract fun setupProject (Lorg/junit/jupiter/api/extension/ExtensionContext;)Lorg/jetbrains/compose/reload/test/gradle/ProjectSetupExtension$Result;
-}
-
-public final class org/jetbrains/compose/reload/test/gradle/ProjectSetupExtension$Result : java/lang/Enum {
-	public static final field Break Lorg/jetbrains/compose/reload/test/gradle/ProjectSetupExtension$Result;
-	public static final field Continue Lorg/jetbrains/compose/reload/test/gradle/ProjectSetupExtension$Result;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/test/gradle/ProjectSetupExtension$Result;
-	public static fun values ()[Lorg/jetbrains/compose/reload/test/gradle/ProjectSetupExtension$Result;
+	public abstract fun setupProject (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Lorg/junit/jupiter/api/extension/ExtensionContext;)V
 }
 
 public abstract interface class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension {

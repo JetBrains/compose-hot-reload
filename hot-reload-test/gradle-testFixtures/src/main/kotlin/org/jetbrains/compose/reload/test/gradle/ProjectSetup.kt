@@ -6,23 +6,15 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import org.junit.jupiter.api.extension.ExtensionContext
-import java.util.ServiceLoader
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.writeText
 
-public interface ProjectSetupExtension {
-    public enum class Result {
-        Continue, Break
-    }
-
-    public fun setupProject(context: ExtensionContext): Result
+public fun interface ProjectSetupExtension {
+    public fun setupProject(fixture: HotReloadTestFixture, context: ExtensionContext)
 }
 
 internal fun HotReloadTestFixture.setupProject(context: ExtensionContext) {
-    ServiceLoader.load(ProjectSetupExtension::class.java).toList().forEach { extension ->
-        if (extension.setupProject(context) == ProjectSetupExtension.Result.Break) return
-    }
 
     projectDir.settingsGradleKts.writeText(renderSettingsGradleKts(context))
 
@@ -45,5 +37,11 @@ internal fun HotReloadTestFixture.setupProject(context: ExtensionContext) {
         projectDir.resolve("src/androidMain/AndroidManifest.xml")
             .createParentDirectories()
             .writeText(renderAndroidManifest(context))
+    }
+
+    context.findRepeatableAnnotations<ExtendProjectSetup>().mapNotNull { annotation ->
+        annotation.extension.objectInstance ?: annotation.extension.java.getDeclaredConstructor().newInstance()
+    }.forEach { extension ->
+        extension.setupProject(this, context)
     }
 }
