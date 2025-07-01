@@ -6,7 +6,7 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-    kotlin("jvm")
+    `embedded-kotlin`
     `java-gradle-plugin`
     `maven-publish`
     `publishing-conventions`

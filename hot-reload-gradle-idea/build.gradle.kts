@@ -4,7 +4,7 @@
  */
 
 plugins {
-    kotlin("jvm")
+    `embedded-kotlin`
     `maven-publish`
     `publishing-conventions`
     `api-validation-conventions`
