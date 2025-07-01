@@ -7,9 +7,11 @@ package org.jetbrains.compose.reload.tests
 
 import org.jetbrains.compose.reload.core.HotReloadProperty.ResourcesDirtyResolverEnabled
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
+import org.jetbrains.compose.reload.test.gradle.DisabledVersion
 import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
+import org.jetbrains.compose.reload.test.gradle.MinComposeVersion
 import org.jetbrains.compose.reload.test.gradle.ProjectMode
 import org.jetbrains.compose.reload.test.gradle.TestedProjectMode
 import org.jetbrains.compose.reload.test.gradle.WithHotReloadProperty
@@ -29,7 +31,6 @@ import kotlin.io.path.name
 
 @HotReloadTest
 @GradleIntegrationTest
-@QuickTest
 @TestedProjectMode(ProjectMode.Kmp)
 @ExtendBuildGradleKts(ResourcesTests.Extension::class)
 @WithHotReloadProperty(ResourcesDirtyResolverEnabled, "true")
@@ -84,6 +85,7 @@ class ResourcesTests {
         }
     }
 
+    @QuickTest
     @HotReloadTest
     fun `rename resource`(fixture: HotReloadTestFixture) = fixture.runTest {
         val originalResourceName = "testDrawableResource"
@@ -107,6 +109,7 @@ class ResourcesTests {
         fixture.checkScreenshot("initial")
     }
 
+    @QuickTest
     @HotReloadTest
     fun `replace drawable resource`(fixture: HotReloadTestFixture) = fixture.runTest {
         val resourceName = "testDrawableResource"
@@ -170,6 +173,7 @@ class ResourcesTests {
         """.trimIndent()
     }
 
+    @QuickTest
     @HotReloadTest
     fun `change string resource`(fixture: HotReloadTestFixture) {
         val stringResource = fixture.testStringResourceFile()
@@ -187,6 +191,7 @@ class ResourcesTests {
         )
     }
 
+    @QuickTest
     @HotReloadTest
     fun `change plural string resource`(fixture: HotReloadTestFixture) {
         val stringResource = fixture.testStringResourceFile()
@@ -206,6 +211,7 @@ class ResourcesTests {
         )
     }
 
+    @QuickTest
     @HotReloadTest
     fun `change array string resource`(fixture: HotReloadTestFixture) {
         val stringResource = fixture.testStringResourceFile()
@@ -226,6 +232,11 @@ class ResourcesTests {
     }
 
     @HotReloadTest
+    // Unfortunately, we can not order alpha and dev compose versions, so we have to manually disable alpha versions
+    // where there was no support for font resources.
+    // TODO: set @MinComposeVersion to 1.9.0-alpha04 when it is available.
+    @DisabledVersion(compose = "1.9.0-alpha02", reason = "No support for font resources cache invalidation")
+    @MinComposeVersion("1.9.0+dev2620")
     fun `replace font resource`(fixture: HotReloadTestFixture) = fixture.runTest {
         val resourceName = "testFontResource"
 

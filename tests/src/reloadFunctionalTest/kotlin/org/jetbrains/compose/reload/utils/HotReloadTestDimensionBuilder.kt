@@ -12,6 +12,7 @@ import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.test.core.CompilerOption.IndyAllowAnnotatedLambdas
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
 import org.jetbrains.compose.reload.test.gradle.BuildMode
+import org.jetbrains.compose.reload.test.gradle.ComposeVersion
 import org.jetbrains.compose.reload.test.gradle.Headless
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestDimensionExtension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestInvocationContext
@@ -61,7 +62,7 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
         val baselineContext = HotReloadTestInvocationContext {
             kotlinVersion = TestedKotlinVersion(KotlinToolingVersion(defaultKotlinVersion.version))
             gradleVersion = TestedGradleVersion(defaultGradleVersion.version)
-            composeVersion = TestedComposeVersion(defaultComposeVersion.version)
+            composeVersion = TestedComposeVersion(ComposeVersion(defaultComposeVersion.version))
             launchMode = defaultLaunchMode
             buildMode = defaultBuildMode
         }
@@ -119,7 +120,7 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
         if (!context.hasAnnotation<QuickTest>() && !context.hasAnnotation<TestOnlyDefaultComposeVersion>()) {
             result += repositoryDeclaredTestDimensions.compose.map { declaredComposeVersion ->
                 baselineContext.copy {
-                    composeVersion = TestedComposeVersion(declaredComposeVersion.version)
+                    composeVersion = TestedComposeVersion(ComposeVersion(declaredComposeVersion.version))
                 }
             }
         }
@@ -159,7 +160,7 @@ class HotReloadTestDimensionFilter : HotReloadTestDimensionExtension {
                 context.gradleVersion.version ==
                     repositoryDeclaredTestDimensions.gradle.single { it.isDefault }.version
             }.filter { context ->
-                context.composeVersion.version ==
+                context.composeVersion.version.toString() ==
                     repositoryDeclaredTestDimensions.compose.single { it.isDefault }.version
             }.filter { context ->
                 context.compilerOptions.all { option -> option.value == option.key.default }

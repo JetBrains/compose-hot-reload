@@ -73,6 +73,39 @@ public final class org/jetbrains/compose/reload/test/gradle/CheckScreenshotKt {
 	public static final fun checkScreenshot (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class org/jetbrains/compose/reload/test/gradle/ComposeVersion : java/io/Serializable, java/lang/Comparable {
+	public fun <init> (IIILjava/lang/String;)V
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun compareTo (Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion;)I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClassifier ()Ljava/lang/String;
+	public final fun getMajor ()I
+	public final fun getMaturity ()Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion$Maturity;
+	public final fun getMinor ()I
+	public final fun getPatch ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/ComposeVersion$Maturity : java/lang/Enum {
+	public static final field ALPHA Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion$Maturity;
+	public static final field BETA Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion$Maturity;
+	public static final field DEV Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion$Maturity;
+	public static final field RC Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion$Maturity;
+	public static final field SNAPSHOT Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion$Maturity;
+	public static final field STABLE Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion$Maturity;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion$Maturity;
+	public static fun values ()[Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion$Maturity;
+}
+
+public final class org/jetbrains/compose/reload/test/gradle/ComposeVersionKt {
+	public static final fun ComposeVersion (Ljava/lang/String;)Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion;
+	public static final fun compareTo (Ljava/lang/String;Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion;)I
+	public static final fun compareTo (Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion;Ljava/lang/String;)I
+	public static final fun getClassifierNumber (Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion;)Ljava/lang/Integer;
+}
+
 public final class org/jetbrains/compose/reload/test/gradle/CopyProjectRecursivelyKt {
 	public static final fun copyProjectRecursively (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/nio/file/Path;)V
 }
@@ -358,6 +391,10 @@ public abstract interface annotation class org/jetbrains/compose/reload/test/gra
 	public abstract fun version ()Ljava/lang/String;
 }
 
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/MinComposeVersion : java/lang/annotation/Annotation {
+	public abstract fun version ()Ljava/lang/String;
+}
+
 public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/MinKotlinVersion : java/lang/annotation/Annotation {
 	public abstract fun version ()Ljava/lang/String;
 }
@@ -516,13 +553,13 @@ public final class org/jetbrains/compose/reload/test/gradle/TestedCompilerOption
 
 public final class org/jetbrains/compose/reload/test/gradle/TestedComposeVersion : org/jetbrains/compose/reload/test/gradle/HotReloadTestDimension {
 	public static final field Companion Lorg/jetbrains/compose/reload/test/gradle/TestedComposeVersion$Companion;
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lorg/jetbrains/compose/reload/test/gradle/TestedComposeVersion;
-	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/test/gradle/TestedComposeVersion;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/test/gradle/TestedComposeVersion;
+	public fun <init> (Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion;)V
+	public final fun component1 ()Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion;
+	public final fun copy (Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion;)Lorg/jetbrains/compose/reload/test/gradle/TestedComposeVersion;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/test/gradle/TestedComposeVersion;Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/test/gradle/TestedComposeVersion;
 	public fun displayName ()Ljava/lang/String;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getVersion ()Ljava/lang/String;
+	public final fun getVersion ()Lorg/jetbrains/compose/reload/test/gradle/ComposeVersion;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

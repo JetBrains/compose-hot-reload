@@ -14,7 +14,7 @@ class ComposeDevMavenRepositoryExtension : SettingsGradleKtsRepositoriesExtensio
     private val devVersionRegex = Regex(""".*\+dev\d+""")
     override fun repositories(context: ExtensionContext): String? {
         context.hotReloadTestInvocationContext ?: return null
-        val composeVersion = context.testedComposeVersion.version
+        val composeVersion = context.testedComposeVersion.version.toString()
         if (!composeVersion.matches(devVersionRegex)) {
             return null
         }

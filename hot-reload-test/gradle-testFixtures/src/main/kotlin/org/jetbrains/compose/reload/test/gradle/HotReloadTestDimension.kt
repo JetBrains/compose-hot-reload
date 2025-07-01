@@ -47,18 +47,18 @@ public data class TestedKotlinVersion(val version: KotlinToolingVersion) : HotRe
     }
 }
 
-public data class TestedComposeVersion(val version: String) : HotReloadTestDimension {
+public data class TestedComposeVersion(val version: ComposeVersion) : HotReloadTestDimension {
     override fun displayName(): String {
         return "Compose $version"
     }
 
     override fun toString(): String {
-        return version
+        return version.toString()
     }
 
     public companion object {
         internal val key = extrasKeyOf<TestedComposeVersion>()
-        public val default: TestedComposeVersion = TestedComposeVersion(HOT_RELOAD_COMPOSE_VERSION)
+        public val default: TestedComposeVersion = TestedComposeVersion(ComposeVersion(HOT_RELOAD_COMPOSE_VERSION))
     }
 }
 

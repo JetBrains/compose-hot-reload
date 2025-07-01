@@ -27,6 +27,8 @@ public annotation class MinKotlinVersion(val version: String)
 
 public annotation class MaxKotlinVersion(val version: String)
 
+public annotation class MinComposeVersion(val version: String)
+
 @Repeatable
 public annotation class BuildGradleKts(val path: String)
 

@@ -35,6 +35,11 @@ internal class HotReloadTestInvocationContextProvider : TestTemplateInvocationCo
                     return@filter false
                 }
 
+                val composeVersionMin = context.findAnnotation<MinComposeVersion>()?.version
+                if (composeVersionMin != null && invocationContext.composeVersion.version < composeVersionMin) {
+                    return@filter false
+                }
+
                 val ignored = context.findRepeatableAnnotations<DisabledVersion>()
                 ignored.forEach { ignoreVersion ->
                     if (ignoreVersion.kotlin.isNotEmpty() &&
@@ -42,7 +47,7 @@ internal class HotReloadTestInvocationContextProvider : TestTemplateInvocationCo
                     ) return@forEach
 
                     if (ignoreVersion.compose.isNotEmpty() &&
-                        ignoreVersion.compose != invocationContext.composeVersion.version
+                        ignoreVersion.compose != invocationContext.composeVersion.version.toString()
                     ) return@forEach
 
                     if (ignoreVersion.gradle.isNotEmpty() &&
