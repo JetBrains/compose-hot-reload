@@ -12,6 +12,9 @@ import kotlin.io.path.absolutePathString
 
 class LocalMavenRepositoryExtension : SettingsGradleKtsRepositoriesExtension {
     override fun repositories(context: ExtensionContext): String {
-        return "maven(file(\"${repositoryRoot.resolve("build/repo").absolutePathString().replace("\\", "\\\\")}\"))"
+        return localMaven()
     }
+
+    fun localMaven(): String =
+        "maven(file(\"${repositoryRoot.resolve("build/repo").absolutePathString().replace("\\", "\\\\")}\"))"
 }
