@@ -25,7 +25,9 @@ import org.jetbrains.compose.reload.core.toFuture
 import org.jetbrains.compose.reload.core.warn
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
+import kotlin.io.path.Path
 import kotlin.io.path.deleteIfExists
+import kotlin.io.path.exists
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.pathString
@@ -61,16 +63,24 @@ internal class GradleRecompiler(
         }
 
         /*
-        Launch the build, creating a new process..
+        Launch the build, creating a new process.
          */
         val processBuilder = context.process {
+            /* Setup JAVA_HOME: Prefer the java home of the original Gradle compilation */
             if (HotReloadEnvironment.gradleJavaHome == null) {
                 context.logger.warn("Missing '${HotReloadProperty.GradleJavaHome}' property. Using system java")
             }
 
+            val javaHome = HotReloadEnvironment.gradleJavaHome
+                ?: System.getProperty("java.home")?.let(::Path)?.takeIf { it.exists() }
+
+            if (javaHome != null) {
+                environment()["JAVA_HOME"] = javaHome.pathString
+            }
+
+            /* Setup gradle wrapper command */
             val gradleScriptCommand = if (Os.currentOrNull() == Os.Windows) arrayOf("cmd", "/c", "gradlew.bat")
             else arrayOf("./gradlew")
-
 
             val gradleTaskPath = if (buildProject == ":") ":$buildTask"
             else "$buildProject:$buildTask"
