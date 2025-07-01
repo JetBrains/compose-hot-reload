@@ -9,10 +9,14 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.property
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 
+@UntrackedTask(because = "This task should always run")
 sealed class AbstractComposeHotRun : JavaExec(), ComposeHotReloadRunTask {
     @Transient
     @get:Internal
@@ -23,6 +27,7 @@ sealed class AbstractComposeHotRun : JavaExec(), ComposeHotReloadRunTask {
         .value(compilation.flatMap { compilation -> compilation.pidFile })
 
     @get:InputFile
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
     internal val argFile = project.objects.fileProperty()
         .value(compilation.flatMap { compilation -> compilation.argFile })
 
@@ -73,6 +78,7 @@ sealed class AbstractComposeHotRun : JavaExec(), ComposeHotReloadRunTask {
  *
  * ```
  */
+@UntrackedTask(because = "This task should always run")
 open class ComposeHotRun : AbstractComposeHotRun() {
     @Suppress("unused")
     @Option(option = "mainClass", description = "Override the main class name")
@@ -85,6 +91,7 @@ open class ComposeHotRun : AbstractComposeHotRun() {
  * Default 'Dev' Run task which will use the 'DevApplication' to display a given composable
  * using the "className" and "funName" properties.
  */
+@UntrackedTask(because = "This task should always run")
 internal open class ComposeHotDevRun : AbstractComposeHotRun() {
 
     @get:Internal

@@ -13,6 +13,7 @@ import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.createParentDirectories
@@ -49,6 +50,7 @@ private fun Project.registerHotArgfileTask(
     return createArgsTask
 }
 
+@DisableCachingByDefault(because = "Not worth caching")
 internal open class ComposeHotArgFileTask : DefaultTask(), ComposeHotReloadOtherTask {
     @get:Input
     internal val arguments = project.objects.listProperty(String::class.java)

@@ -25,6 +25,10 @@ gradlePlugin {
     }
 }
 
+tasks.validatePlugins {
+    enableStricterValidation.set(true)
+}
+
 dependencies {
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())

@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.tasks.UntrackedTask
 import org.jetbrains.compose.reload.gradle.ComposeHotTask
 import org.jetbrains.compose.reload.gradle.PluginStage
 import org.jetbrains.compose.reload.gradle.await
@@ -38,4 +39,5 @@ internal fun Project.createCompatibilityTasks() = launch {
     "Use org.jetbrains.compose.reload.gradle.ComposeHotRun instead",
     ReplaceWith("ComposeHotRun", "org.jetbrains.compose.reload.gradle.ComposeHotRun")
 )
+@UntrackedTask(because = "This task should always run")
 open class ComposeHotRun : DefaultTask()

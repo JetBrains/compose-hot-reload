@@ -10,12 +10,14 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.withType
-import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.LaunchMode
 import org.jetbrains.compose.reload.core.PidFileInfo
@@ -88,9 +90,10 @@ private fun Project.registerComposeHotAsyncRunTask(
     }
 }
 
-@DisableCachingByDefault(because = "This task should always run")
+@UntrackedTask(because = "This task should always run")
 internal open class ComposeHotAsyncRun : DefaultTask(), ComposeHotReloadRunTask {
     @get:InputFile
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
     internal val argFile = project.objects.fileProperty()
 
     @get:Internal
@@ -101,6 +104,7 @@ internal open class ComposeHotAsyncRun : DefaultTask(), ComposeHotReloadRunTask 
     internal val pidFile = project.objects.fileProperty()
 
     @get:InputFile
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
     internal val javaBinary = project.objects.fileProperty()
 
     @get:Input

@@ -148,4 +148,5 @@ abstract class ComposeHotReloadTask : DefaultTask(), ComposeHotReloadOtherTask {
     }
 }
 
+@DisableCachingByDefault(because = "Lifecycle task: Not worth caching")
 internal abstract class ComposeHotReloadLifecycleTask : DefaultTask(), ComposeHotReloadOtherTask
