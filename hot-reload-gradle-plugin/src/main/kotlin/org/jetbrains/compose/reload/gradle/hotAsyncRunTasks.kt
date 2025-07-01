@@ -162,13 +162,13 @@ internal open class ComposeHotAsyncRun : DefaultTask(), ComposeHotReloadRunTask 
 
     @Option(option = "autoReload", description = "Enables automatic recompilation/reload once the source files change")
     @Suppress("unused")
-    internal fun autoRecompileOption(enabled: Boolean) {
+    internal fun autoReload(enabled: Boolean) {
         runTask?.configure { it.isAutoReloadEnabled.set(enabled) }
     }
 
     @Suppress("unused")
     @Option(option = "auto", description = "Enables automatic recompilation/reload once the source files change")
-    internal fun autoRecompileOption() {
+    internal fun auto(enabled: Boolean) {
         runTask?.configure { it.isAutoReloadEnabled.set(enabled) }
     }
 

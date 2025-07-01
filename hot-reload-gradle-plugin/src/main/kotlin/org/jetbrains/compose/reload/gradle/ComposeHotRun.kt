@@ -60,8 +60,8 @@ sealed class AbstractComposeHotRun : JavaExec(), ComposeHotReloadRunTask {
 
     @Suppress("unused")
     @Option(option = "auto", description = "Enables automatic recompilation/reload once the source files change")
-    internal fun autoReload() {
-        isAutoReloadEnabled.set(true)
+    internal fun auto(enabled: Boolean) {
+        isAutoReloadEnabled.set(enabled)
     }
 }
 
