@@ -63,10 +63,10 @@ internal val Project.hotRunTasks: Future<Collection<TaskProvider<out AbstractCom
         task.args("--className", task.className.string(), "--funName", task.funName.string())
     }
 
-    val hotRunTasks = forAllJvmTargets { target -> target.hotRunTask }
-    val devRunTasks = hotDevCompilations.await().map { compilation -> compilation.hotDevTask }
+    val hotRunTasks = tasks.withType<ComposeHotRun>().awaitDeferred()
+    val devRunTasks = hotDevCompilations.await().map { compilation -> compilation.hotDevTask }.map { it.await() }
 
-    (hotRunTasks + devRunTasks).mapNotNull { it.await() }
+    hotRunTasks + devRunTasks
 }
 
 internal val KotlinTarget.hotRunTask: Future<TaskProvider<ComposeHotRun>?> by future {

@@ -145,6 +145,12 @@ suspend fun <T> Project.forAllJvmTargets(block: suspend (target: KotlinTarget) -
 }
 
 @InternalHotReloadApi
+suspend fun <T : Task> TaskCollection<T>.awaitDeferred(): List<TaskProvider<T>> {
+    PluginStage.DeferredConfiguration.await()
+    return names.map { named(it) }
+}
+
+@InternalHotReloadApi
 inline fun <reified T : Any> Path.readObject(): T {
     return ObjectInputStream(inputStream()).use { ois ->
         @Suppress("UNCHECKED_CAST")
