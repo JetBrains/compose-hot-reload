@@ -16,9 +16,6 @@ import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import java.nio.ByteBuffer
 import java.util.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -26,42 +23,23 @@ import kotlin.io.path.Path
 import kotlin.io.path.readText
 
 fun functionalTests(): List<FunctionalTest> {
-    val json = Path("testDimensions.json")
-    val root = Json.parseToJsonElement(json.readText()) as JsonObject
-    val kotlinVersions = root.getValue("kotlin") as JsonArray
-    val composeVersions = root.getValue("compose") as JsonArray
-
-    return kotlinVersions.flatMap { kotlinVersion ->
-        composeVersions.flatMap { composeVersion ->
-            val kotlinVersionString = kotlinVersion.jsonObject.getValue("version").jsonPrimitive.content
-            val composeVersionString = composeVersion.jsonObject.getValue("version").jsonPrimitive.content
-            val isDefaultKotlinVersion = kotlinVersion.jsonObject["isDefault"]?.jsonPrimitive?.booleanOrNull == true
-            val isDefaultComposeVersion = composeVersion.jsonObject["isDefault"]?.jsonPrimitive?.booleanOrNull == true
-
-            // Create buckets
-            if (isDefaultKotlinVersion && isDefaultComposeVersion) {
-                return@flatMap listOf(
-                    FunctionalTest(kotlinVersionString, composeVersionString, bucket = 1, bucketsCount = 3),
-                    FunctionalTest(kotlinVersionString, composeVersionString, bucket = 2, bucketsCount = 3),
-                    FunctionalTest(kotlinVersionString, composeVersionString, bucket = 3, bucketsCount = 3)
-                )
-            }
-
-            listOf(FunctionalTest(kotlinVersionString, composeVersionString))
-        }
-    }
+    return listOf(
+        FunctionalTest(bucket = 1, bucketsCount = 5),
+        FunctionalTest(bucket = 2, bucketsCount = 5),
+        FunctionalTest(bucket = 3, bucketsCount = 5),
+        FunctionalTest(bucket = 4, bucketsCount = 5),
+        FunctionalTest(bucket = 5, bucketsCount = 5),
+    )
 }
 
 @OptIn(ExperimentalStdlibApi::class, ExperimentalEncodingApi::class)
 class FunctionalTest(
-    private val kotlinVersion: String?,
-    private val composeVersion: String?,
-    private val defaultCompilerOptions: Boolean = true,
     private val bucket: Int? = null,
     private val bucketsCount: Int? = null,
 ) : BuildType({
     val key = run {
-        val hash = (kotlinVersion + composeVersion + defaultCompilerOptions + bucket + bucketsCount).hashCode()
+        val hash = (bucket.toString() + bucketsCount).hashCode()
+
         val buffer = ByteBuffer.allocate(Int.SIZE_BYTES)
         buffer.putInt(hash)
         Base64.getUrlEncoder().withoutPadding().encodeToString(buffer.array()).replace("-", "_")
@@ -71,18 +49,6 @@ class FunctionalTest(
         append("Functional Test: (")
         append(
             buildList {
-                if (kotlinVersion != null) {
-                    add("Kotlin $kotlinVersion")
-                }
-
-                if (composeVersion != null) {
-                    add("Compose $composeVersion")
-                }
-
-                if (!defaultCompilerOptions) {
-                    add("Non default compiler options")
-                }
-
                 if (bucket != null && bucketsCount != null) {
                     add("($bucket/$bucketsCount)")
                 }
@@ -112,20 +78,10 @@ class FunctionalTest(
     }
 
     params {
-        if (kotlinVersion != null) {
-            param("env.TESTED_KOTLIN_VERSION", kotlinVersion)
-        }
-
-        if (composeVersion != null) {
-            param("env.TESTED_COMPOSE_VERSION", composeVersion)
-        }
-
         if (bucket != null && bucketsCount != null) {
             param("env.TESTED_BUCKET", bucket.toString())
             param("env.TESTED_BUCKETS_COUNT", bucketsCount.toString())
         }
-
-        param("env.TESTED_DEFAULT_COMPILER_OPTIONS", defaultCompilerOptions.toString())
     }
 
     steps {

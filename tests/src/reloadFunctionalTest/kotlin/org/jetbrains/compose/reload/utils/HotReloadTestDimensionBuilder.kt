@@ -143,21 +143,6 @@ class HotReloadTestDimensionFilter : HotReloadTestDimensionExtension {
     ): List<HotReloadTestInvocationContext> {
         var result = tests.toList()
 
-        System.getenv("TESTED_KOTLIN_VERSION")?.let { enforcedKotlinVersion ->
-            result = result.filter { it.kotlinVersion.version.toString() == enforcedKotlinVersion }
-        }
-
-        System.getenv("TESTED_COMPOSE_VERSION")?.let { enforcedComposeVersions ->
-            result = result.filter { it.composeVersion.version == enforcedComposeVersions }
-        }
-
-        System.getenv("TESTED_DEFAULT_COMPILER_OPTIONS")?.toBooleanStrict()?.let { onlyDefaultCompilerOptions ->
-            result = result.filter { context ->
-                val isDefaultOnly = context.compilerOptions.all { option -> option.value == option.key.default }
-                isDefaultOnly == onlyDefaultCompilerOptions
-            }
-        }
-
         if (System.getProperty("hostIntegrationTests") == "true") {
             result = result.filter { context ->
                 context.kotlinVersion.version.toString() ==
@@ -181,7 +166,7 @@ class HotReloadTestDimensionFilter : HotReloadTestDimensionExtension {
 
         val bucket = System.getenv("TESTED_BUCKET")?.toInt()
         val bucketsCount = System.getenv("TESTED_BUCKETS_COUNT")?.toInt()
-        if (bucket != null && bucketsCount != null) {
+        if (bucket != null && bucketsCount != null && context.requiredTestClass.simpleName != "Warmup") {
             result = result.filter { invocationContext ->
                 val testClassifier = "${context.requiredTestClass}.${context.requiredTestMethod.name} " +
                     "(${invocationContext.getDisplayName()})"
