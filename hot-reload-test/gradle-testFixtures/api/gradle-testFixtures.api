@@ -30,15 +30,15 @@ public abstract interface annotation class org/jetbrains/compose/reload/test/gra
 }
 
 public abstract interface class org/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension {
-	public fun buildTemplate (Lorg/jetbrains/compose/reload/core/TemplateBuilder;Lorg/junit/jupiter/api/extension/ExtensionContext;)V
-	public fun commonDependencies (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public fun composeCompiler (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public fun footer (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public fun header (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public fun javaExecConfigure (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public fun jvmMainDependencies (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public fun kotlin (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public fun plugins (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun buildTemplate (Lorg/jetbrains/compose/reload/core/TemplateBuilder;Lorg/junit/jupiter/api/extension/ExtensionContext;)V
+	public abstract fun commonDependencies (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun composeCompiler (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun footer (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun header (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun javaExecConfigure (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun jvmMainDependencies (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun kotlin (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun plugins (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 }
 
 public final class org/jetbrains/compose/reload/test/gradle/BuildGradleKtsExtension$DefaultImpls {
@@ -238,7 +238,7 @@ public abstract interface class org/jetbrains/compose/reload/test/gradle/HotRelo
 }
 
 public abstract interface class org/jetbrains/compose/reload/test/gradle/HotReloadTestDimensionExtension {
-	public fun getOrdinal ()I
+	public abstract fun getOrdinal ()I
 	public abstract fun transform (Lorg/junit/jupiter/api/extension/ExtensionContext;Ljava/util/List;)Ljava/util/List;
 }
 
@@ -407,14 +407,14 @@ public abstract interface class org/jetbrains/compose/reload/test/gradle/Project
 }
 
 public abstract interface class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension {
-	public fun dependencyResolutionManagement (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public fun dependencyResolutionManagementRepositories (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public fun footer (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public fun header (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public fun pluginManagement (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public fun pluginManagementPlugins (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public fun pluginManagementRepositories (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
-	public fun plugins (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun dependencyResolutionManagement (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun dependencyResolutionManagementRepositories (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun footer (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun header (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun pluginManagement (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun pluginManagementPlugins (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun pluginManagementRepositories (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun plugins (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 }
 
 public final class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension$DefaultImpls {
@@ -429,7 +429,7 @@ public final class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExt
 }
 
 public abstract interface class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsRepositoriesExtension {
-	public fun repositories (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
+	public abstract fun repositories (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 }
 
 public final class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsRepositoriesExtension$DefaultImpls {

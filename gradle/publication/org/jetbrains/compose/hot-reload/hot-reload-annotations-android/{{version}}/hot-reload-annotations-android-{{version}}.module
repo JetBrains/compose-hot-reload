@@ -23,15 +23,6 @@
         "org.gradle.usage": "java-api",
         "org.jetbrains.kotlin.platform.type": "androidJvm"
       },
-      "dependencies": [
-        {
-          "group": "org.jetbrains.kotlin",
-          "module": "kotlin-stdlib",
-          "version": {
-            "requires": "2.2.0"
-          }
-        }
-      ],
       "files": [
         {
           "name": "hot-reload-annotations-release.aar",
@@ -57,7 +48,7 @@
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",
           "version": {
-            "requires": "2.2.0"
+            "requires": "2.1.21"
           },
           "excludes": [
             {

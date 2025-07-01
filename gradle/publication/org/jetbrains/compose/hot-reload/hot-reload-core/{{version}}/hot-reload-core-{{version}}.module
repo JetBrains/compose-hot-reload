@@ -32,13 +32,6 @@
           "version": {
             "requires": "{{Hot Reload Version}}"
           }
-        },
-        {
-          "group": "org.jetbrains.kotlin",
-          "module": "kotlin-stdlib",
-          "version": {
-            "requires": "2.2.0"
-          }
         }
       ],
       "files": [
@@ -66,17 +59,17 @@
       },
       "dependencies": [
         {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.21"
+          }
+        },
+        {
           "group": "org.jetbrains.compose.hot-reload",
           "module": "hot-reload-annotations",
           "version": {
             "requires": "{{Hot Reload Version}}"
-          }
-        },
-        {
-          "group": "org.jetbrains.kotlin",
-          "module": "kotlin-stdlib",
-          "version": {
-            "requires": "2.2.0"
           }
         }
       ],
@@ -155,13 +148,6 @@
           "version": {
             "requires": "{{Hot Reload Version}}"
           }
-        },
-        {
-          "group": "org.jetbrains.kotlin",
-          "module": "kotlin-stdlib",
-          "version": {
-            "requires": "2.2.0"
-          }
         }
       ],
       "files": [
@@ -223,13 +209,6 @@
           "module": "hot-reload-test-core",
           "version": {
             "requires": "{{Hot Reload Version}}"
-          }
-        },
-        {
-          "group": "org.jetbrains.kotlin",
-          "module": "kotlin-stdlib",
-          "version": {
-            "requires": "2.2.0"
           }
         }
       ],
