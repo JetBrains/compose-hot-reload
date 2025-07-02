@@ -57,6 +57,7 @@ internal fun CoroutineScope.launchApplicationStates() {
 
 
 fun main() {
+    logger.info("PID: '${ProcessHandle.current().pid()}'")
     setupDevToolsProcess()
     launchRecompiler()
 
