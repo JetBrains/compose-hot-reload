@@ -17,6 +17,7 @@ import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.BuildTool
 import org.jetbrains.compose.reload.core.LaunchMode
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.awaitOrThrow
+import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
@@ -24,7 +25,6 @@ import org.jetbrains.compose.reload.core.subprocessDefaultArguments
 import org.jetbrains.compose.reload.core.toFuture
 import org.jetbrains.compose.reload.core.warn
 import java.nio.file.Path
-import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.exists
@@ -33,7 +33,6 @@ import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.pathString
 import kotlin.io.path.writeText
 import kotlin.jvm.optionals.getOrNull
-import kotlin.streams.asSequence
 
 internal class GradleRecompiler(
     private val buildRoot: Path,
@@ -41,6 +40,8 @@ internal class GradleRecompiler(
     private val buildTask: String,
 ) : Recompiler {
     override val name: String = Gradle.name
+
+    private val logger = createLogger()
 
     override suspend fun buildAndReload(context: RecompilerContext): ExitCode {
         val orchestrationPort = context.orchestration.port.awaitOrThrow()
@@ -126,32 +127,8 @@ internal class GradleRecompiler(
     }
 
     private fun ProcessHandle.destroyGradleProcess() {
-        try {
-            /*
-            If we used a regular Gradle daemon, then
-            a) A daemon process was re-used and just communicated with. The daemon is not a descendant
-            b) A new daemon process was launched, this daemon is a descendant and we can safely clean it up after use.
-             */
-            if (useGradleDaemon) {
-                destroyWithDescendants()
-                return
-            }
-
-            /**
-             * Fingers Crossed: We hope that the gradle wrapper is doing the cleanup job well!
-             */
-            if (supportsNormalTermination()) {
-                destroy()
-                return
-            }
-
-            /**
-             * If we cannot terminate gracefully, then we try to destroy direct child processes (Gradle Wrapper)
-             */
-            children().asSequence().toList().forEach { child -> child.destroy() }
-            destroy()
-        } finally {
-            onExit().get(5, TimeUnit.SECONDS)
+        if (!destroyWithDescendants()) {
+            logger.error("'Recompiler': 'destroyWithDescendants' did not finish successfully")
         }
     }
 }

@@ -5,13 +5,30 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
+import kotlin.jvm.optionals.getOrNull
 import kotlin.streams.asSequence
 
-public fun Process.destroyWithDescendants() {
-    toHandle().destroyWithDescendants()
+private val logger = createLogger()
+
+@InternalHotReloadApi
+public fun Process.destroyWithDescendants(): Boolean {
+    return toHandle().destroyWithDescendants()
 }
 
-public fun ProcessHandle.destroyWithDescendants() {
-    withClosure { handle -> handle.children().asSequence().toList() }
-        .forEach { handle -> handle.destroy() }
+@InternalHotReloadApi
+public fun ProcessHandle.destroyWithDescendants(): Boolean {
+    val exits = withClosure { handle -> handle.children().asSequence().toList() }.reversed()
+        .onEach { handle -> if (!handle.destroy()) handle.destroyForcibly() }
+        .map { it.onExit() }
+
+    try {
+        CompletableFuture.allOf(*exits.toTypedArray()).get(5, TimeUnit.SECONDS)
+        return true
+    } catch (t: Throwable) {
+        logger.error("Process '${pid()}' (${info().command().getOrNull()} was not destroyed within time", t)
+        return false
+    }
 }

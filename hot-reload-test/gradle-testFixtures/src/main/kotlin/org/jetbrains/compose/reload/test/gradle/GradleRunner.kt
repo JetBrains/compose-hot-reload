@@ -94,7 +94,9 @@ public suspend fun GradleRunner.build(
         scopeJob.invokeOnCompletion {
             if (process.isAlive) {
                 logger.info("Killing Gradle invocation at '${process.pid()}'")
-                process.destroy()
+                val success = process.destroyWithDescendants()
+                logger.info("Killing Gradle invocation at '${process.pid()}' [${if (success) "succeeded" else "failed"}]")
+
             }
         }
 
