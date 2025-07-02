@@ -10,7 +10,7 @@ import org.jetbrains.compose.reload.core.Queue
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.toMessage
 
-private val devtoolsLoggingQueue = Queue<Logger.Log>()
+internal val devtoolsLoggingQueue = Queue<Logger.Log>()
 
 internal class DevToolsLoggerDispatch : Logger.Dispatch {
     override fun add(log: Logger.Log) {
@@ -21,6 +21,12 @@ internal class DevToolsLoggerDispatch : Logger.Dispatch {
 internal fun OrchestrationHandle.startLoggingDispatch() = subtask {
     while (true) {
         val log = devtoolsLoggingQueue.receive()
-        send(log.toMessage())
+        try {
+            send(log.toMessage())
+        } catch (t: Throwable) {
+            /* Re-Dispatch log */
+            devtoolsLoggingQueue.send(log)
+            throw t
+        }
     }
 }

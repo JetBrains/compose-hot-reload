@@ -9,8 +9,10 @@ import org.jetbrains.compose.reload.core.Disposable
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.displayString
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.exception
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.isSuccess
 import org.jetbrains.compose.reload.core.launchTask
@@ -35,7 +37,7 @@ internal fun setupShutdownProcedure() {
 
     /* Log the shutdown */
     invokeOnShutdown {
-        logger.error("Shutting down...")
+        logger.info("Shutting down...")
     }
 
     /* By default, Uncaught exceptions shall result in a shutdown */
@@ -118,6 +120,13 @@ private object ShutdownThread : Thread("shutdown") {
         val duration = (endInstant - startInstant).milliseconds
         shutdownReportWriter?.appendLine("Shutdown actions completed: $totalSuccess, failed: $totalFailures")
         shutdownReportWriter?.appendLine("Shutdown duration: $duration")
+
+        /* Take all undispatched logs and append them to the shutdown logs */
+        while (true) {
+            val log = devtoolsLoggingQueue.nextOrNull().leftOrNull() ?: break
+            shutdownReportWriter?.appendLine(log.displayString(useEffects = false))
+        }
+
         shutdownReportWriter?.close()
     }
 
