@@ -12,10 +12,6 @@ plugins {
     id("org.jetbrains.compose.hot-reload")
 }
 
-composeCompiler {
-    featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups)
-}
-
 kotlin {
     jvmToolchain(21)
     jvm()
