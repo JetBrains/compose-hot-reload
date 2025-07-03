@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,9 +44,6 @@ import org.jetbrains.compose.devtools.widgets.DtComposeLogo
 import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusColor
 import org.jetbrains.compose.reload.core.WindowId
-
-// Modern rounded corners like JetBrains Toolbox
-internal val DevToolingSidecarShape = RoundedCornerShape(8.dp)
 
 @Composable
 fun DtAttachedSidecarWindow(
@@ -109,10 +105,7 @@ fun DtAttachedSidecarWindow(
         },
     ) {
         DtMinimizedSidecarWindowContent(
-            isExpandedChanged = {
-                System.err.println("(Minimised) isExpanded=$it")
-                isExpanded = it
-            }
+            isExpandedChanged = { isExpanded = it }
         )
     }
 

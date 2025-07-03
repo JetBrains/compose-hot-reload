@@ -14,15 +14,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
+import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.devtools.theme.dtVerticalPadding
 import org.jetbrains.compose.devtools.widgets.DtCode
 import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
@@ -44,7 +43,7 @@ fun DtConsole(
         modifier
             .dtVerticalPadding()
             .animatedReloadStatusBorder()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(DtShapes.RoundedCornerShape)
             .background(DtColors.surfaceConsole)
             .fillMaxSize(),
     ) {

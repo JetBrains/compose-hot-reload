@@ -22,6 +22,7 @@ import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD
 import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
 import org.jetbrains.compose.devtools.theme.DtTitles.DEV_TOOLS
 import org.jetbrains.compose.devtools.theme.DtPadding
+import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
@@ -29,8 +30,6 @@ import kotlin.system.exitProcess
 
 @Composable
 fun DtDetachedSidecarWindow() {
-    val defaultSize = DpSize(500.dp, 600.dp)
-
     Window(
         title = COMPOSE_HOT_RELOAD_TITLE,
         onCloseRequest = {
@@ -39,7 +38,6 @@ fun DtDetachedSidecarWindow() {
         },
     ) {
         configureTaskbarIcon(window)
-        window.minimumSize = defaultSize.toDimension()
         DtDetachedSidecarContent()
     }
 
@@ -53,7 +51,7 @@ fun DtDetachedSidecarContent(
 ) {
     Row(
         modifier = modifier.fillMaxSize()
-            .dtBackground(),
+            .dtBackground(shape = DtShapes.SquareCornerShape),
         horizontalArrangement = Arrangement.End,
     ) {
         Column {

@@ -14,7 +14,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -39,6 +38,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import org.jetbrains.compose.devtools.states.ReloadState
 import org.jetbrains.compose.devtools.theme.DtColors
+import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.reload.core.Update
 import kotlin.time.Duration.Companion.seconds
 
@@ -132,7 +132,7 @@ fun Modifier.animateReloadStatusBackground(idleColor: Color): Modifier {
 
 @Composable
 fun Modifier.animatedReloadStatusBorder(
-    width: Dp = 1.dp, shape: Shape = RoundedCornerShape(8.dp),
+    width: Dp = 1.dp, shape: Shape = DtShapes.RoundedCornerShape,
     idleColor: Color = Color.LightGray,
 ): Modifier {
     return border(

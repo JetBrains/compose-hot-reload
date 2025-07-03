@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.unit.Dp
@@ -26,6 +27,7 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.invokeWhenMessageReceived
 import org.jetbrains.compose.devtools.sendBlocking
 import org.jetbrains.compose.devtools.theme.DtColors
+import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.devtools.theme.DtTitles.DEV_TOOLS
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusBackground
 import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
@@ -205,12 +207,12 @@ internal fun animateWindowPosition(
 }
 
 @Composable
-internal fun Modifier.dtBackground(): Modifier = this
+internal fun Modifier.dtBackground(shape: Shape = DtShapes.RoundedCornerShape): Modifier = this
     .animatedReloadStatusBorder(
-        shape = DevToolingSidecarShape,
+        shape = shape,
         idleColor = DtColors.border
     )
-    .clip(DevToolingSidecarShape)
+    .clip(shape)
     .background(DtColors.applicationBackground)
     .animateReloadStatusBackground(DtColors.applicationBackground)
 
