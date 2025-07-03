@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.ComposeDialog
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.key.KeyEvent
@@ -35,6 +36,7 @@ import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
+import org.jetbrains.compose.reload.core.getOrNull
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowGainedFocus
@@ -127,7 +129,7 @@ fun DtAnimatedWindow(
             }
         }
         if (visibilityChanged && visible) {
-            window.toFront()
+            window.tryForceToFront()
         }
 
         if (window.size != newSize.toDimension()) {
@@ -139,8 +141,10 @@ fun DtAnimatedWindow(
 
         invokeWhenMessageReceived<ApplicationWindowGainedFocus> { event ->
             if (event.windowId == windowId && visible) {
-                logger.debug("$windowId: Sidecar window 'toFront()'")
-                window.toFront()
+                logger.debug("$windowId: $title 'toFront()'")
+                if (!window.tryForceToFront()) {
+                    logger.debug("$windowId: $title 'toFront()' failed")
+                }
             }
         }
 
@@ -245,3 +249,12 @@ private fun transparencySupported(): Boolean = Try {
         it.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT)
     }
 }.leftOr { false }
+
+private fun ComposeDialog.tryForceToFront() = Try {
+    val oldIsAlwaysOnTop = isAlwaysOnTop
+    isAlwaysOnTop = true
+    toFront()
+    isAlwaysOnTop = oldIsAlwaysOnTop
+    true
+}.getOrNull() ?: false
+
