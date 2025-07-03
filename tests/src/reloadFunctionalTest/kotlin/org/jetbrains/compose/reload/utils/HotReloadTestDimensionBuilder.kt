@@ -9,6 +9,7 @@ package org.jetbrains.compose.reload.utils
 
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.test.core.CompilerOption.IndyAllowAnnotatedLambdas
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
 import org.jetbrains.compose.reload.test.gradle.BuildMode
 import org.jetbrains.compose.reload.test.gradle.Headless
@@ -120,6 +121,13 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
                 baselineContext.copy {
                     composeVersion = TestedComposeVersion(declaredComposeVersion.version)
                 }
+            }
+        }
+
+        /* Expand testing compiler versions */
+        if (!context.hasAnnotation<QuickTest>() && !context.hasAnnotation<TestOnlyDefaultCompilerOptions>()) {
+            result += result + result.maxBy { it.kotlinVersion.version }.copy {
+                compilerOption(IndyAllowAnnotatedLambdas, !IndyAllowAnnotatedLambdas.default)
             }
         }
 

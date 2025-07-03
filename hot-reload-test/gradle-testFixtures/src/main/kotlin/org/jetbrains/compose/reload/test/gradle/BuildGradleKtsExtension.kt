@@ -24,6 +24,7 @@ public interface BuildGradleKtsExtension {
     public fun commonDependencies(context: ExtensionContext): String? = null
     public fun jvmMainDependencies(context: ExtensionContext): String? = null
     public fun javaExecConfigure(context: ExtensionContext): String? = null
+    public fun compilerOptions(context: ExtensionContext): String? = null
     public fun composeCompiler(context: ExtensionContext): String? = null
     public fun footer(context: ExtensionContext): String? = null
 
@@ -47,6 +48,7 @@ public fun renderBuildGradleKts(context: ExtensionContext): String {
             commonDependenciesKey(extension.commonDependencies(context))
             jvmMainDependenciesKey(extension.jvmMainDependencies(context))
             javaExecConfigureKey(extension.javaExecConfigure(context))
+            compilerOptionsKey(extension.compilerOptions(context))
             composeCompilerKey(extension.composeCompiler(context))
             with(extension) { buildTemplate(context) }
         }
@@ -59,6 +61,7 @@ private const val kotlinKey = "kotlin"
 private const val commonDependenciesKey = "commonMain.dependencies"
 private const val jvmMainDependenciesKey = "jvmMain.dependencies"
 private const val javaExecConfigureKey = "javaExec.configure"
+private const val compilerOptionsKey = "compilerOptions"
 private const val composeCompilerKey = "composeCompiler"
 private const val footerKey = "footer"
 private const val androidEnabledKey = "android.enabled"
@@ -82,6 +85,10 @@ private val kmpBuildGradleKtsTemplate = Template(
         
         {{$kotlinKey}}
         jvm()
+        
+        compilerOptions {
+            {{$compilerOptionsKey}}
+        }
         
         sourceSets.commonMain.dependencies {
             {{$commonDependenciesKey}}
@@ -126,6 +133,10 @@ private val jvmBuildGradleKtsTemplate = Template(
     
     kotlin {
         jvmToolchain(21)
+        
+        compilerOptions {
+            {{$compilerOptionsKey}}
+        }
     }
     
     dependencies {
@@ -136,7 +147,7 @@ private val jvmBuildGradleKtsTemplate = Template(
     tasks.withType<JavaExec>().configureEach {
         {{$javaExecConfigureKey}}
     }
-    
+
     composeCompiler {
         {{$composeCompilerKey}}
     }
@@ -187,5 +198,9 @@ internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
                 options.getValue(CompilerOption.OptimizeNonSkippingGroups)
             },
         ).joinToString(lineSeparator()).ifEmpty { return null }
+    }
+
+    override fun compilerOptions(context: ExtensionContext): String? {
+        return """freeCompilerArgs.add("-Xindy-allow-annotated-lambdas=${context.compilerOptions.getValue(CompilerOption.IndyAllowAnnotatedLambdas)}")"""
     }
 }
