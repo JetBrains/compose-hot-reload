@@ -70,7 +70,7 @@ class CompilerProvider : ParameterResolver, BeforeEachCallback, AfterEachCallbac
         return parameterContext.parameter.type == Compiler::class.java
     }
 
-    override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
+    override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Compiler {
         return CompilerImpl(extensionContext.getStore(GLOBAL).get("compilerDir", Path::class.java)!!)
     }
 }
