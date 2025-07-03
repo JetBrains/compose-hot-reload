@@ -26,9 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.window.DialogWindow
@@ -43,6 +41,7 @@ import org.jetbrains.compose.devtools.theme.DtTextStyles
 import org.jetbrains.compose.devtools.theme.dtHorizontalPadding
 import org.jetbrains.compose.devtools.theme.dtVerticalPadding
 import org.jetbrains.compose.devtools.widgets.DtCode
+import org.jetbrains.compose.devtools.widgets.DtCopyToClipboardButton
 import org.jetbrains.compose.devtools.widgets.DtHeader2
 import org.jetbrains.compose.devtools.widgets.DtText
 import org.jetbrains.compose.devtools.widgets.DtTextButton
@@ -112,13 +111,7 @@ private fun ErrorDialogWindow(
                     DtTextButton("Retry", onClick = error.recovery)
                 }
 
-                val clipboardManager = LocalClipboardManager.current
-                DtTextButton(
-                    "Copy Stacktrace",
-                    onClick = {
-                        clipboardManager.setText(AnnotatedString(error.stacktrace.joinToString("\n")))
-                    },
-                )
+                DtCopyToClipboardButton("Copy Stacktrace") { error.stacktrace.joinToString("\n") }
             }
 
             SelectionContainer(modifier = Modifier.weight(1f)) {

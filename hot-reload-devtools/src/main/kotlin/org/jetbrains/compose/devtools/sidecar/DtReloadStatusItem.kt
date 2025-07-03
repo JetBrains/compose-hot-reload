@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.progressSemantics
@@ -52,6 +53,7 @@ import org.jetbrains.compose.devtools.theme.DtTextStyles
 import org.jetbrains.compose.devtools.theme.dtHorizontalPadding
 import org.jetbrains.compose.devtools.theme.dtVerticalPadding
 import org.jetbrains.compose.devtools.widgets.DtCode
+import org.jetbrains.compose.devtools.widgets.DtCopyToClipboardButton
 import org.jetbrains.compose.devtools.widgets.DtHeader2
 import org.jetbrains.compose.devtools.widgets.DtSmallText
 import org.jetbrains.compose.devtools.widgets.DtText
@@ -185,7 +187,16 @@ private fun ErrorDialogWindow(
             Modifier.dtHorizontalPadding().dtVerticalPadding()
                 .background(DtColors.applicationBackground)
         ) {
-            DtHeader2("Reloading Code failed")
+            Row {
+                DtHeader2("Reloading Code failed")
+                Spacer(Modifier.weight(1f))
+                DtCopyToClipboardButton("Copy all") {
+                    buildString {
+                        appendLine(state.reason)
+                        append(state.logs.joinToString("\n") { it.message })
+                    }
+                }
+            }
             DtCode(state.reason)
             DtConsole(
                 logs = state.logs.map { it.message },

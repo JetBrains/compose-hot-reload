@@ -6,13 +6,17 @@
 package org.jetbrains.compose.devtools.sidecar
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import io.sellmair.evas.compose.composeValue
 import org.jetbrains.compose.devtools.states.ConsoleLogState
+import org.jetbrains.compose.devtools.widgets.DtCopyToClipboardButton
 import org.jetbrains.compose.devtools.widgets.DtHeader2
 
 @Composable
@@ -28,7 +32,13 @@ fun DtMainConsole(
     }
 
     Column(modifier = modifier) {
-        DtHeader2("Console")
+        Row(
+            verticalAlignment = Alignment.Bottom,
+        ) {
+            DtHeader2("Console")
+            Spacer(Modifier.weight(1f))
+            DtCopyToClipboardButton("Copy all") { logState.logs.joinToString("\n") }
+        }
         DtConsole(logs = logState.logs, modifier = Modifier.fillMaxSize())
     }
 }
