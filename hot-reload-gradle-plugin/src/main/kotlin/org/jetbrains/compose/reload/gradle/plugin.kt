@@ -37,6 +37,7 @@ class ComposeHotReloadPlugin : Plugin<Project> {
             target.configureComposeHotReloadTasks()
             target.configureComposeCompilerArgs()
             target.configureComposeHotReloadModelBuilder()
+            target.configureResourceAccessorsGenerationTasks()
         }
 
         target.withKotlinPlugin(target::onKotlinPluginApplied)

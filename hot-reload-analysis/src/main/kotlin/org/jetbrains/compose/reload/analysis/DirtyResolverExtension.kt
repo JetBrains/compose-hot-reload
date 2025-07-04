@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.analysis
 
 import org.jetbrains.compose.reload.core.Context
 
+@Deprecated("Unused", level = DeprecationLevel.ERROR)
 interface DirtyResolverExtension {
     fun resolveDirtyMethods(
         context: Context, currentApplication: ApplicationInfo, redefined: ApplicationInfo

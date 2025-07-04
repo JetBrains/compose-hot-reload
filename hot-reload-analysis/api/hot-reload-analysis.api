@@ -157,7 +157,9 @@ public final class org/jetbrains/compose/reload/analysis/FieldInfo : org/jetbrai
 	public final fun component1 ()Lorg/jetbrains/compose/reload/analysis/FieldId;
 	public final fun component2 ()Z
 	public final fun component3 ()Ljava/lang/Object;
+	public final fun component4 ()Ljava/lang/Integer;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAdditionalChangeIndicatorHash ()Ljava/lang/Integer;
 	public final fun getFieldId ()Lorg/jetbrains/compose/reload/analysis/FieldId;
 	public final fun getInitialValue ()Ljava/lang/Object;
 	public fun getMemberId ()Lorg/jetbrains/compose/reload/analysis/FieldId;

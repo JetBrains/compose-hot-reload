@@ -340,15 +340,3 @@ IsHotReloadActive:
   documentation: |
     Will be set to 'true' if the application is launched with Hot Reload and therefore can be used
     to detect if hot reload is 'active'
-
-ResourcesDirtyResolverEnabled:
-  key: compose.reload.resourcesDirtyResolverEnabled
-  type: boolean
-  default: "false"
-  target: [ application, build, devtools ]
-  isDelicateApi: true
-  documentation: |
-    Enables/Disables automatically re-composing scopes using resources
-    See: https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources.html
-    See: https://github.com/JetBrains/compose-hot-reload/issues/151
-    Feature is still in development and subject to change in the future.

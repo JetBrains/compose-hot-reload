@@ -16,6 +16,7 @@ import org.jetbrains.compose.reload.test.gradle.ComposeVersion
 import org.jetbrains.compose.reload.test.gradle.Headless
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestDimensionExtension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestInvocationContext
+import org.jetbrains.compose.reload.test.gradle.MinComposeVersion
 import org.jetbrains.compose.reload.test.gradle.ProjectMode
 import org.jetbrains.compose.reload.test.gradle.TestedBuildMode
 import org.jetbrains.compose.reload.test.gradle.TestedComposeVersion
@@ -121,6 +122,20 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
             result += repositoryDeclaredTestDimensions.compose.map { declaredComposeVersion ->
                 baselineContext.copy {
                     composeVersion = TestedComposeVersion(ComposeVersion(declaredComposeVersion.version))
+                }
+            }
+        }
+
+        if (context.hasAnnotation<QuickTest>() && context.hasAnnotation<MinComposeVersion>()) {
+            val minComposeVersion = ComposeVersion(context.findAnnotation<MinComposeVersion>()?.version!!)
+            if (minComposeVersion > ComposeVersion(defaultComposeVersion.version)) {
+                // add a Compose version that meets MinComposeVersion requirement
+                repositoryDeclaredTestDimensions.compose.find { declaredTestVersion ->
+                    ComposeVersion(declaredTestVersion.version) >= minComposeVersion
+                }?.let { declaredComposeVersion ->
+                    result += baselineContext.copy {
+                        composeVersion = TestedComposeVersion(ComposeVersion(declaredComposeVersion.version))
+                    }
                 }
             }
         }

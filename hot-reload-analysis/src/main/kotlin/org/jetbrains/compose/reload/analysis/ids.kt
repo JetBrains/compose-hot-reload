@@ -192,14 +192,17 @@ object Ids {
         )
     }
 
+    @Deprecated("Unused")
     object StringResourcesKt {
         val classId = ClassId("org/jetbrains/compose/resources/StringResourcesKt")
     }
 
+    @Deprecated("Unused")
     object StringArrayResourcesKt {
         val classId = ClassId("org/jetbrains/compose/resources/StringArrayResourcesKt")
     }
 
+    @Deprecated("Unused")
     object PluralStringResourcesKt {
         val classId = ClassId("org/jetbrains/compose/resources/PluralStringResourcesKt")
     }
@@ -214,6 +217,7 @@ object Ids {
         )
     }
 
+    @Deprecated("Unused")
     object FontResources_skikioKt {
         val classId = ClassId("org/jetbrains/compose/resources/FontResources_skikoKt")
     }
@@ -232,6 +236,10 @@ object Ids {
             methodName = "clearBlocking",
             methodDescriptor = "(Lorg/jetbrains/compose/resources/ResourceCaches;)V"
         )
+    }
+
+    internal object ResourceContentHash {
+        val classId = ClassId("org/jetbrains/compose/resources/ResourceContentHash")
     }
 }
 

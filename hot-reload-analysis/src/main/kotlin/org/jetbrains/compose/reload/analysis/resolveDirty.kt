@@ -12,7 +12,6 @@ import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.simpleName
 import org.jetbrains.compose.reload.core.withClosure
-import java.util.ServiceLoader
 import kotlin.time.measureTimedValue
 
 private val logger = createLogger()
@@ -43,8 +42,7 @@ private fun Context.resolveDirtyRuntimeScopeInfos(
     val dirtyComposeScopes = resolveDirtyComposeScopes(current, redefined) +
         resolveRemovedComposeScopes(current, redefined)
 
-    val dirtyMethods = resolveDirtyMethodsFromExtensionPoints(current, redefined) +
-        resolveDirtyMethods(current, redefined) +
+    val dirtyMethods = resolveDirtyMethods(current, redefined) +
         resolveRemovedMethods(current, redefined)
 
     val dirtyFields = resolveDirtyFields(current, redefined) +
@@ -85,7 +83,9 @@ private fun resolveRemovedMethods(current: ApplicationInfo, redefined: Applicati
 private fun resolveDirtyFields(current: ApplicationInfo, redefined: ApplicationInfo): List<FieldInfo> {
     return redefined.fieldIndex.mapNotNull { (fieldId, redefinedField) ->
         val previousField = current.fieldIndex[fieldId] ?: return@mapNotNull redefinedField
-        if (previousField.initialValue != redefinedField.initialValue) {
+        if (previousField.initialValue != redefinedField.initialValue ||
+            previousField.additionalChangeIndicatorHash != redefinedField.additionalChangeIndicatorHash
+        ) {
             return@mapNotNull redefinedField
         }
         null
@@ -129,15 +129,6 @@ private fun resolveRemovedComposeScopes(current: ApplicationInfo, redefined: App
         }
     }
     return result
-}
-
-private fun Context.resolveDirtyMethodsFromExtensionPoints(
-    current: ApplicationInfo, redefined: ApplicationInfo
-): List<MethodInfo> {
-    return ServiceLoader.load(DirtyResolverExtension::class.java, ClassLoader.getSystemClassLoader())
-        .flatMap { resolver ->
-            resolver.resolveDirtyMethods(this, current, redefined)
-        }
 }
 
 /**
@@ -293,7 +284,7 @@ private fun resolveTransitivelyDirty(
                 ?: current.classIndex[element.memberId.classId]
 
             classInfo?.fields?.forEach { (fieldId, field) ->
-                if (field.isStatic) {
+                if (field.isStatic && field.additionalChangeIndicatorHash == null) {
                     queue.add(Element(fieldId, depth = element.depth + 1))
                 }
             }

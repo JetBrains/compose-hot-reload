@@ -5,19 +5,17 @@
 
 package org.jetbrains.compose.reload.tests
 
-import org.jetbrains.compose.reload.core.HotReloadProperty.ResourcesDirtyResolverEnabled
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
-import org.jetbrains.compose.reload.test.gradle.DisabledVersion
 import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.MinComposeVersion
 import org.jetbrains.compose.reload.test.gradle.ProjectMode
 import org.jetbrains.compose.reload.test.gradle.TestedProjectMode
-import org.jetbrains.compose.reload.test.gradle.WithHotReloadProperty
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.getDefaultMainKtSourceFile
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
+import org.jetbrains.compose.reload.test.gradle.sendTestEvent
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
 import org.jetbrains.compose.reload.utils.QuickTest
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -33,7 +31,7 @@ import kotlin.io.path.name
 @GradleIntegrationTest
 @TestedProjectMode(ProjectMode.Kmp)
 @ExtendBuildGradleKts(ResourcesTests.Extension::class)
-@WithHotReloadProperty(ResourcesDirtyResolverEnabled, "true")
+@MinComposeVersion("1.10.0+dev2896")
 class ResourcesTests {
 
     private fun HotReloadTestFixture.projectName() = projectDir.path.name.replace('-', '_')
@@ -233,12 +231,8 @@ class ResourcesTests {
         )
     }
 
+    @QuickTest
     @HotReloadTest
-    // Unfortunately, we can not order alpha and dev compose versions, so we have to manually disable alpha versions
-    // where there was no support for font resources.
-    // TODO: set @MinComposeVersion to 1.9.0-alpha04 when it is available.
-    @DisabledVersion(compose = "1.9.0-alpha02", reason = "No support for font resources cache invalidation")
-    @MinComposeVersion("1.9.0+dev2620")
     fun `replace font resource`(fixture: HotReloadTestFixture) = fixture.runTest {
         val resourceName = "testFontResource"
 
@@ -277,6 +271,57 @@ class ResourcesTests {
             requestReload()
         }
         fixture.checkScreenshot("replaced")
+    }
+
+    @HotReloadTest
+    @QuickTest
+    fun `change text resource in inner scope`(fixture: HotReloadTestFixture) = fixture.runTest {
+        val testResource = testStringResourceFile()
+        val xmlBefore = stringsXmlResource(
+            """
+                 <string name="outer">outer</string>
+                 <string name="inner">inner before</string>
+            """
+        )
+        writeString(testResource, xmlBefore)
+
+        initialSourceCode(
+            """
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.material3.*
+            import androidx.compose.ui.unit.*
+            import androidx.compose.ui.window.*
+            import androidx.compose.runtime.*
+            import org.jetbrains.compose.reload.test.*
+            import ${projectName()}.generated.resources.*
+            import org.jetbrains.compose.resources.stringResource
+        
+            fun main() {
+                screenshotTestApplication {
+                    var state by remember { mutableStateOf(false) }
+                    onTestEvent {
+                        state = true
+                    }
+                    
+                    Column {
+                        TestText(stringResource(Res.string.outer))
+                        Group {
+                            TestText(stringResource(Res.string.inner) + " (" + state + ")")
+                        }
+                    }
+                }
+            }
+        """.trimIndent()
+        )
+        checkScreenshot("before")
+        fixture.sendTestEvent()
+        fixture.checkScreenshot("before-1")
+
+        runTransaction {
+            writeString(testResource, xmlBefore.replace("inner before", "inner after"))
+            requestReload()
+        }
+        checkScreenshot("after")
     }
 
     class Extension : BuildGradleKtsExtension {
