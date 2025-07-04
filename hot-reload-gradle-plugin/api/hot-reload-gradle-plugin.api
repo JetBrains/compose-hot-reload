@@ -56,22 +56,7 @@ public abstract interface class org/jetbrains/compose/reload/gradle/ComposeHotTa
 public final class org/jetbrains/compose/reload/gradle/ComposeHotTask$Companion {
 }
 
-public final class org/jetbrains/compose/reload/gradle/JvmRunHijackKt$hijackJvmRunTask$2$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
-	public fun <init> (Lkotlin/jvm/functions/Function1;)V
-	public final synthetic fun execute (Ljava/lang/Object;)V
-}
-
 public final class org/jetbrains/compose/reload/gradle/PropertiesKt {
 	public static final fun isHotReloadBuild (Lorg/gradle/api/Project;)Z
-}
-
-public final class org/jetbrains/compose/reload/gradle/RuntimeClasspathKt$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
-	public fun <init> (Lkotlin/jvm/functions/Function1;)V
-	public final synthetic fun execute (Ljava/lang/Object;)V
-}
-
-public final class org/jetbrains/compose/reload/gradle/TasksBaseKt$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
-	public fun <init> (Lkotlin/jvm/functions/Function1;)V
-	public final synthetic fun execute (Ljava/lang/Object;)V
 }
 
