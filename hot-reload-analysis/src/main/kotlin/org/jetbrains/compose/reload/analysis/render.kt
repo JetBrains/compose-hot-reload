@@ -10,6 +10,7 @@ import org.jetbrains.compose.reload.analysis.ScopeType.Method
 import org.jetbrains.compose.reload.analysis.ScopeType.ReplaceGroup
 import org.jetbrains.compose.reload.analysis.ScopeType.RestartGroup
 import org.jetbrains.compose.reload.analysis.ScopeType.SourceInformationMarker
+import org.jetbrains.compose.reload.core.asMap
 import org.jetbrains.compose.reload.core.leftOr
 import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes
@@ -91,6 +92,12 @@ internal fun ScopeInfo.render(): String = buildString {
             appendLine()
             appendLine(children.joinToString("\n\n") { it.render() }).trim()
             appendLine()
+        }
+
+        if (extras.asMap().isNotEmpty()) {
+            extras.asMap().forEach { (key, value) ->
+                appendLine("$key: $value")
+            }
         }
     }
 

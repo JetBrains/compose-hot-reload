@@ -599,6 +599,10 @@ public abstract interface class org/jetbrains/compose/reload/analysis/RuntimeInf
 	public abstract fun getSuperIndexInverse ()Ljava/util/Map;
 }
 
+public abstract interface class org/jetbrains/compose/reload/analysis/ScopeAnalyzerExtension {
+	public abstract fun analyze (Lorg/jetbrains/compose/reload/analysis/MethodId;Lorg/objectweb/asm/tree/MethodNode;Lorg/jetbrains/compose/reload/analysis/InstructionTree;)Lorg/jetbrains/compose/reload/core/Context;
+}
+
 public final class org/jetbrains/compose/reload/analysis/ScopeHash {
 	public static final synthetic fun box-impl (J)Lorg/jetbrains/compose/reload/analysis/ScopeHash;
 	public static fun constructor-impl (J)J
@@ -621,8 +625,10 @@ public final class org/jetbrains/compose/reload/analysis/ScopeInfo {
 	public final fun component5 ()Ljava/util/Set;
 	public final fun component6 ()Ljava/util/Set;
 	public final fun component7 ()Ljava/util/List;
+	public final fun component8 ()Lorg/jetbrains/compose/reload/core/Context;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getChildren ()Ljava/util/List;
+	public final fun getExtras ()Lorg/jetbrains/compose/reload/core/Context;
 	public final fun getFieldDependencies ()Ljava/util/Set;
 	public final fun getGroup-z2uEmV4 ()Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;
 	public final fun getMethodDependencies ()Ljava/util/Set;

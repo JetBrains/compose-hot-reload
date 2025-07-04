@@ -32,8 +32,8 @@ public fun Context(): Context {
 }
 
 public fun Context(vararg entries: ContextEntry<*>): Context {
-    if (entries.isEmpty()) return Context()
-    else return ContextImpl(entries.associate { it.key to it.value })
+    return if (entries.isEmpty()) Context()
+    else ContextImpl(entries.associate { it.key to it.value })
 }
 
 public fun Context.with(vararg entries: ContextEntry<*>): Context {
@@ -72,6 +72,8 @@ private class ContextImpl(
         else key.default
     }
 }
+
+public fun Context.asMap(): Map<Context.Key<*>, Any?> = this.map
 
 private val Context.map: Map<Context.Key<*>, Any?>
     get() = when (this) {

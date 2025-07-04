@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.analysis
 
 import org.jetbrains.compose.reload.InternalHotReloadApi
+import org.jetbrains.compose.reload.core.Context
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
 
@@ -18,6 +19,7 @@ data class ScopeInfo @InternalHotReloadApi internal constructor(
     val methodDependencies: Set<MethodId>,
     val fieldDependencies: Set<FieldId>,
     val children: List<ScopeInfo>,
+    val extras: Context
 )
 
 enum class ScopeType {
@@ -46,5 +48,6 @@ internal fun createScopeInfo(
         methodDependencies = tree.methodDependencies(),
         fieldDependencies = tree.fieldDependencies(),
         children = tree.children.map { child -> createScopeInfo(methodId, methodNode, child) },
+        extras = createScopeInfoExtras(methodId, methodNode, tree)
     )
 }

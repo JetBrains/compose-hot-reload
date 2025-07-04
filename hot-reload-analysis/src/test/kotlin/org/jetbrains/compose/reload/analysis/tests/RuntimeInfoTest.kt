@@ -6,17 +6,23 @@
 package org.jetbrains.compose.reload.analysis.tests
 
 import org.jetbrains.compose.reload.analysis.ClassInfo
+import org.jetbrains.compose.reload.analysis.InstructionTree
+import org.jetbrains.compose.reload.analysis.MethodId
 import org.jetbrains.compose.reload.analysis.RuntimeInfo
+import org.jetbrains.compose.reload.analysis.ScopeAnalyzerExtension
 import org.jetbrains.compose.reload.analysis.ScopeInfo
 import org.jetbrains.compose.reload.analysis.SpecialComposeGroupKeys
 import org.jetbrains.compose.reload.analysis.TrackingRuntimeInfo
 import org.jetbrains.compose.reload.analysis.javap
 import org.jetbrains.compose.reload.analysis.render
+import org.jetbrains.compose.reload.analysis.util.TestScopeAnalyzerExtension
+import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.asFileName
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
 import org.jetbrains.compose.reload.core.testFixtures.WithCompiler
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
 import org.jetbrains.compose.reload.core.testFixtures.withOptions
+import org.jetbrains.compose.reload.core.with
 import org.jetbrains.compose.reload.core.withClosure
 import org.jetbrains.compose.reload.test.core.CompilerOption
 import org.jetbrains.compose.reload.test.core.TestEnvironment
@@ -24,6 +30,7 @@ import org.jetbrains.kotlin.util.prefixIfNot
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInfo
+import org.objectweb.asm.tree.MethodNode
 import kotlin.io.path.Path
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
@@ -396,6 +403,38 @@ class RuntimeInfoTest {
         val baselineFoo = baseRuntimeInfo.methodIndex.entries.first { it.key.methodName == "Foo" }.value
         val modifiedFoo = modifiedRuntimeInfo.methodIndex.entries.first { it.key.methodName == "Foo" }.value
         assertEquals(baselineFoo.rootScope.scopeHash, modifiedFoo.rootScope.scopeHash)
+    }
+
+    @Test
+    fun `test - ScopeAnalyzerExtension`(
+        compiler: Compiler, testInfo: TestInfo
+    ) {
+
+        val payloadKey = object : Context.Key.Optional<Any>() {
+            override fun toString(): String = "payloadKey"
+        }
+
+        val extension = object : ScopeAnalyzerExtension {
+            override fun analyze(methodId: MethodId, methodNode: MethodNode, tree: InstructionTree): Context {
+                return Context(payloadKey with "${methodId.methodName} | ${tree.group}")
+            }
+        }
+
+        TestScopeAnalyzerExtension.with(extension) {
+            checkRuntimeInfo(
+                testInfo, compiler, mapOf(
+                    "Foo.kt" to """
+                    import androidx.compose.runtime.*
+                    import androidx.compose.material3.Text
+                                   
+                    @Composable
+                    fun Foo() {
+                        Text("Test")
+                    }
+                """.trimIndent()
+                )
+            )
+        }
     }
 }
 
