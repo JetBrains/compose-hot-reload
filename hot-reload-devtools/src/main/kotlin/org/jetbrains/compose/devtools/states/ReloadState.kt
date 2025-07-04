@@ -41,6 +41,7 @@ sealed class ReloadState : State {
 
     data class Reloading(
         override val time: Instant = Clock.System.now(),
+        val buildTool: String? = null,
         val request: ReloadClassesRequest? = null
     ) : ReloadState()
 
@@ -59,6 +60,7 @@ fun CoroutineScope.launchReloadState(
     orchestration: OrchestrationHandle = org.jetbrains.compose.devtools.orchestration
 ) = launchState(ReloadState) {
     val errorLogs = mutableListOf<LogMessage>()
+    var buildTool: String? = null
 
     launch {
         ReloadCountState.flow().collectLatest { _ ->
@@ -82,6 +84,9 @@ fun CoroutineScope.launchReloadState(
     }
 
     orchestration.asFlow().collect { message ->
+        if (message is LogMessage && message.message.contains("Recompiler: ")) {
+            buildTool = message.message.substringAfter(":").trim().removePrefix("'").removeSuffix("'")
+        }
         /*
         Handle messages indicating that a reload is active
         (e.g. a BuildStarted event, or the execution of any task)
@@ -89,7 +94,7 @@ fun CoroutineScope.launchReloadState(
         if (message is BuildStarted ||
             message is LogMessage && message.message.contains("executing build...")
         ) ReloadState.update { state ->
-            state as? ReloadState.Reloading ?: ReloadState.Reloading()
+            state as? ReloadState.Reloading ?: ReloadState.Reloading(buildTool = buildTool)
         }
 
         /*

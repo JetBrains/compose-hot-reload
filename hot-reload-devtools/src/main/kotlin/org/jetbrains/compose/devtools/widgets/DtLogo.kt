@@ -19,21 +19,47 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalDensity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.devtools.theme.composeLogoPainter
-import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.devtools.theme.DtLogos
+import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.warn
 
-@OptIn(ExperimentalResourceApi::class)
+private val logger = createLogger()
+
 @Composable
-internal fun DtComposeLogo(
-    modifier: Modifier,
-    tint: Color? = Color.White
+fun DtComposeLogo(
+    modifier: Modifier = Modifier,
+    tint: Color? = Color.White,
+) = DtLogo(
+    image = DtLogos.Image.COMPOSE_LOGO,
+    tint = tint,
+    modifier = modifier
+)
+
+@Composable
+fun DtBuildToolLogo(
+    buildTool: String?,
+    modifier: Modifier = Modifier,
+    tint: Color? = Color.White,
+) {
+    when (buildTool) {
+        "Gradle" -> DtLogo(DtLogos.Image.GRADLE_LOGO, tint = tint, modifier = modifier)
+        null -> { /* nothing */ }
+        else -> logger.warn("Unknown build tool: $buildTool")
+    }
+}
+
+@Composable
+fun DtLogo(
+    image: DtLogos.Image,
+    tint: Color? = Color.White,
+    modifier: Modifier = Modifier,
 ) {
     var painter: Painter? by remember { mutableStateOf<Painter?>(null) }
     val density = LocalDensity.current
 
     LaunchedEffect(density) {
         withContext(Dispatchers.IO) {
-            painter = composeLogoPainter(density).await()
+            painter = DtLogos.imageAsPainter(image, density).await()
         }
     }
 

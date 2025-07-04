@@ -162,7 +162,7 @@ internal fun DtMinimizedSidecarWindowContent(
                     reloadingColor = DtColors.statusColorOrange2
                 ).value
             )
-            DtCollapsedReloadCounterStatusItem()
+            DtMinimisedReloadCounterStatusItem()
         }
 
         if (devToolsUseTransparency) {
@@ -217,7 +217,7 @@ internal fun DtExpandedSidecarWindowContent(
                             reloadingColor = DtColors.statusColorOrange2
                         ).value
                     )
-                    DtCollapsedReloadCounterStatusItem()
+                    DtMinimisedReloadCounterStatusItem()
                 }
             } else {
                 // Expanded state - show the full UI
