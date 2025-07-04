@@ -147,12 +147,9 @@ public final class org/jetbrains/compose/reload/analysis/FieldId : org/jetbrains
 }
 
 public final class org/jetbrains/compose/reload/analysis/FieldInfo : org/jetbrains/compose/reload/analysis/MemberInfo {
-	public fun <init> (Lorg/jetbrains/compose/reload/analysis/FieldId;ZLjava/lang/Object;)V
 	public final fun component1 ()Lorg/jetbrains/compose/reload/analysis/FieldId;
 	public final fun component2 ()Z
 	public final fun component3 ()Ljava/lang/Object;
-	public final fun copy (Lorg/jetbrains/compose/reload/analysis/FieldId;ZLjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/FieldInfo;
-	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/FieldInfo;Lorg/jetbrains/compose/reload/analysis/FieldId;ZLjava/lang/Object;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/FieldInfo;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getFieldId ()Lorg/jetbrains/compose/reload/analysis/FieldId;
 	public final fun getInitialValue ()Ljava/lang/Object;
@@ -537,13 +534,10 @@ public final class org/jetbrains/compose/reload/analysis/MethodId : org/jetbrain
 }
 
 public final class org/jetbrains/compose/reload/analysis/MethodInfo : org/jetbrains/compose/reload/analysis/MemberInfo {
-	public fun <init> (Lorg/jetbrains/compose/reload/analysis/MethodId;Lorg/jetbrains/compose/reload/analysis/MethodType;Lorg/jetbrains/compose/reload/analysis/MethodInfo$Modality;Lorg/jetbrains/compose/reload/analysis/ScopeInfo;)V
 	public final fun component1 ()Lorg/jetbrains/compose/reload/analysis/MethodId;
 	public final fun component2 ()Lorg/jetbrains/compose/reload/analysis/MethodType;
 	public final fun component3 ()Lorg/jetbrains/compose/reload/analysis/MethodInfo$Modality;
 	public final fun component4 ()Lorg/jetbrains/compose/reload/analysis/ScopeInfo;
-	public final fun copy (Lorg/jetbrains/compose/reload/analysis/MethodId;Lorg/jetbrains/compose/reload/analysis/MethodType;Lorg/jetbrains/compose/reload/analysis/MethodInfo$Modality;Lorg/jetbrains/compose/reload/analysis/ScopeInfo;)Lorg/jetbrains/compose/reload/analysis/MethodInfo;
-	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/MethodInfo;Lorg/jetbrains/compose/reload/analysis/MethodId;Lorg/jetbrains/compose/reload/analysis/MethodType;Lorg/jetbrains/compose/reload/analysis/MethodInfo$Modality;Lorg/jetbrains/compose/reload/analysis/ScopeInfo;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/MethodInfo;
 	public fun equals (Ljava/lang/Object;)Z
 	public synthetic fun getMemberId ()Lorg/jetbrains/compose/reload/analysis/MemberId;
 	public fun getMemberId ()Lorg/jetbrains/compose/reload/analysis/MethodId;
@@ -620,7 +614,6 @@ public final class org/jetbrains/compose/reload/analysis/ScopeHash {
 }
 
 public final class org/jetbrains/compose/reload/analysis/ScopeInfo {
-	public synthetic fun <init> (Lorg/jetbrains/compose/reload/analysis/MethodId;Lorg/jetbrains/compose/reload/analysis/ScopeType;JLorg/jetbrains/compose/reload/analysis/ComposeGroupKey;Ljava/util/Set;Ljava/util/Set;Ljava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lorg/jetbrains/compose/reload/analysis/MethodId;
 	public final fun component2 ()Lorg/jetbrains/compose/reload/analysis/ScopeType;
 	public final fun component3-hC-z0cA ()J
@@ -628,8 +621,6 @@ public final class org/jetbrains/compose/reload/analysis/ScopeInfo {
 	public final fun component5 ()Ljava/util/Set;
 	public final fun component6 ()Ljava/util/Set;
 	public final fun component7 ()Ljava/util/List;
-	public final fun copy-tpEf4GQ (Lorg/jetbrains/compose/reload/analysis/MethodId;Lorg/jetbrains/compose/reload/analysis/ScopeType;JLorg/jetbrains/compose/reload/analysis/ComposeGroupKey;Ljava/util/Set;Ljava/util/Set;Ljava/util/List;)Lorg/jetbrains/compose/reload/analysis/ScopeInfo;
-	public static synthetic fun copy-tpEf4GQ$default (Lorg/jetbrains/compose/reload/analysis/ScopeInfo;Lorg/jetbrains/compose/reload/analysis/MethodId;Lorg/jetbrains/compose/reload/analysis/ScopeType;JLorg/jetbrains/compose/reload/analysis/ComposeGroupKey;Ljava/util/Set;Ljava/util/Set;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/ScopeInfo;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getChildren ()Ljava/util/List;
 	public final fun getFieldDependencies ()Ljava/util/Set;

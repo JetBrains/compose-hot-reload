@@ -5,10 +5,12 @@
 
 package org.jetbrains.compose.reload.analysis
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
 
-data class ScopeInfo(
+@ConsistentCopyVisibility
+data class ScopeInfo @InternalHotReloadApi internal constructor(
     val methodId: MethodId,
     val scopeType: ScopeType,
     val scopeHash: ScopeHash,

@@ -11,7 +11,8 @@ sealed class MemberInfo {
     abstract val memberId: MemberId
 }
 
-data class FieldInfo(
+@ConsistentCopyVisibility
+data class FieldInfo internal constructor(
     val fieldId: FieldId,
     val isStatic: Boolean,
     val initialValue: Any?,
@@ -19,7 +20,8 @@ data class FieldInfo(
     override val memberId: FieldId get() = fieldId
 }
 
-data class MethodInfo(
+@ConsistentCopyVisibility
+data class MethodInfo internal constructor(
     val methodId: MethodId,
     val methodType: MethodType,
     val modality: Modality,
