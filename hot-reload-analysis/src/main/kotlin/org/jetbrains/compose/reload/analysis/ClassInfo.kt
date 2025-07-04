@@ -6,7 +6,9 @@
 package org.jetbrains.compose.reload.analysis
 
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.tree.FieldNode
 
 @ConsistentCopyVisibility
 data class ClassInfo internal constructor(
@@ -43,7 +45,8 @@ internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
         FieldId(classNode, fieldNode) to FieldInfo(
             fieldId = FieldId(classNode, fieldNode),
             isStatic = fieldNode.access and (Opcodes.ACC_STATIC) != 0,
-            initialValue = fieldNode.value
+            initialValue = fieldNode.value,
+            resourceContentHash = getResourceContentHash(fieldNode)
         )
     }
 
@@ -56,3 +59,17 @@ internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
         flags = ClassFlags(classNode.access)
     )
 }
+
+private fun getResourceContentHash(fieldNode: FieldNode?): Int? {
+    try {
+        return fieldNode?.invisibleAnnotations?.find { isResourceContentHashAnnotation(it) }?.values[1] as Int?
+    } catch (_: Throwable) {
+        return null
+    }
+}
+
+fun isResourceContentHashAnnotation(it: AnnotationNode): Boolean =
+    it.desc == "Lorg/jetbrains/compose/resources/ResourceContentHash;"
+
+
+
