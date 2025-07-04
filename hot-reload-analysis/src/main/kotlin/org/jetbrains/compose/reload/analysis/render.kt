@@ -23,7 +23,7 @@ import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
 
 @InternalHotReloadApi
-fun RuntimeInfo.render(): String = buildString {
+fun ApplicationInfo.render(): String = buildString {
     classIndex.toSortedMap().forEach { (_, classInfo) ->
         append(classInfo.render())
         appendLine()

@@ -9,6 +9,6 @@ import org.jetbrains.compose.reload.core.Context
 
 interface DirtyResolverExtension {
     fun resolveDirtyMethods(
-        context: Context, currentRuntime: RuntimeInfo, redefined: RuntimeInfo
+        context: Context, currentApplication: ApplicationInfo, redefined: ApplicationInfo
     ): List<MethodInfo>
 }

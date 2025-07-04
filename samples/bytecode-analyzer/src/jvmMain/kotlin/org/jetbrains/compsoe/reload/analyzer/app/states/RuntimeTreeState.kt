@@ -5,6 +5,7 @@ import io.sellmair.evas.launchState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.analysis.renderInstructionTree
 import java.nio.file.Path
 import kotlin.io.path.readBytes
@@ -21,6 +22,7 @@ sealed class RuntimeTreeState : State {
     data class Result(val rendered: String) : RuntimeTreeState()
 }
 
+@OptIn(InternalHotReloadApi::class)
 fun CoroutineScope.launchRuntimeTreeState() = launchState(
     coroutineContext = Dispatchers.IO,
     keepActive = 1.minutes

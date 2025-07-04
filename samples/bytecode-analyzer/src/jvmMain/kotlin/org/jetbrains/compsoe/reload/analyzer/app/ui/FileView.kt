@@ -36,7 +36,7 @@ import kotlin.io.path.relativeTo
 fun FileView() {
     val workingDirectory = WorkingDirectoryState.composeValue().directory
     val file = OpenedFileState.composeValue() ?: return
-    var selectedTab by remember { mutableStateOf(FileViewTab.RuntimeInfo) }
+    var selectedTab by remember { mutableStateOf(FileViewTab.ApplicationInfo) }
 
     Column {
         Text(
@@ -47,10 +47,10 @@ fun FileView() {
         TabRow(FileViewTab.entries.indexOf(selectedTab), modifier = Modifier) {
 
             Text(
-                "RuntimeInfo", modifier = Modifier
+                "ApplicationInfo", modifier = Modifier
                     .selectable(
-                        selected = selectedTab == FileViewTab.RuntimeInfo,
-                        onClick = { selectedTab = FileViewTab.RuntimeInfo })
+                        selected = selectedTab == FileViewTab.ApplicationInfo,
+                        onClick = { selectedTab = FileViewTab.ApplicationInfo })
                     .padding(16.dp)
             )
 
@@ -79,7 +79,7 @@ fun FileView() {
             )
             {
                 when (selectedTab) {
-                    FileViewTab.RuntimeInfo -> RuntimeInfoView(file.path)
+                    FileViewTab.ApplicationInfo -> ApplicationInfoView(file.path)
                     FileViewTab.RuntimeTree -> RuntimeTree(file.path)
                     FileViewTab.Javap -> JavapView(file.path)
                 }
@@ -90,12 +90,12 @@ fun FileView() {
 
 
 @Composable
-fun RuntimeInfoView(file: Path) {
+fun ApplicationInfoView(file: Path) {
     val state = ClassInfoState.Key(file).composeValue() ?: return
     when (state) {
         is ClassInfoState.Error -> run {
             Column {
-                Text("Failed to parse RuntimeInfo")
+                Text("Failed to parse ApplicationInfo")
                 if (state.message != null) {
                     Text(state.message)
                 }

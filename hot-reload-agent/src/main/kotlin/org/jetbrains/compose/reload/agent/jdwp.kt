@@ -117,7 +117,7 @@ private fun issueExternalReloadRequest(definition: ClassDefinition) {
 
             val uuid = OrchestrationMessageId("external-reload-${UUID.randomUUID()}")
             logger.info("'external reload': Reloaded ${aggregate.definitions.size} classes: $uuid")
-            val redefined = Context().redefineRuntimeInfo().get().getOrThrow()
+            val redefined = Context().redefineApplicationInfo().get().getOrThrow()
             val reload = Reload(uuid, definitions = aggregate.definitions, redefined)
 
             reinitializeStaticsIfNecessary(reload)

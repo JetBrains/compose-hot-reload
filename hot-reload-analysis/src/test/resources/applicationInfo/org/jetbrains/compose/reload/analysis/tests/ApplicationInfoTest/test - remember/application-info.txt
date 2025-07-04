@@ -1,0 +1,66 @@
+/*
+ Original Code:
+*/
+
+// Foo.kt
+import androidx.compose.runtime.*
+
+@Composable
+fun Foo() {
+    remember { "Hello" }
+    remember { 1902 }
+}
+
+/*
+ Application Info:
+*/
+
+FooKt {
+    Foo {
+        desc: (Landroidx/compose/runtime/Composer;I)V
+        type: Composable
+        Method {
+            key: -965539098
+            codeHash: 3856479640
+            methodDependencies: [
+                FooKt.Foo$lambda$2 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+            ]
+            fieldDependencies: []
+    
+            RestartGroup {
+                key: -965539098
+                codeHash: 3351135034
+                methodDependencies: []
+                fieldDependencies: []
+    
+                ReplaceGroup {
+                    key: 1849434622
+                    codeHash: 1653580899
+                    methodDependencies: []
+                    fieldDependencies: []
+                }
+    
+                ReplaceGroup {
+                    key: 1849434622
+                    codeHash: 1771154441
+                    methodDependencies: []
+                    fieldDependencies: []
+                }
+            }
+        }
+    }
+    
+    
+    Foo$lambda$2 {
+        desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+        type: Composable
+        Method {
+            key: null
+            codeHash: 210770274
+            methodDependencies: [
+                FooKt.Foo (Landroidx/compose/runtime/Composer;I)V
+            ]
+            fieldDependencies: []
+        }
+    }
+}

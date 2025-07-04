@@ -8,7 +8,7 @@ package org.jetbrains.compose.reload.analysis.tests
 import org.intellij.lang.annotations.Language
 import org.jetbrains.compose.reload.analysis.ClassInfo
 import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
-import org.jetbrains.compose.reload.analysis.TrackingRuntimeInfo
+import org.jetbrains.compose.reload.analysis.MutableApplicationInfo
 import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
 import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
@@ -292,13 +292,13 @@ class ResolveDirtyTestFixtureProvider : ParameterResolver {
 class ResolveDirtyTestFixture(
     private val compiler: Compiler
 ) {
-    private val runtime = TrackingRuntimeInfo()
-    private val redefinition = TrackingRuntimeInfo()
+    private val application = MutableApplicationInfo()
+    private val redefinition = MutableApplicationInfo()
 
     fun withCode(fileName: String, @Language("kotlin") code: String) {
         compiler.compile(fileName to code).forEach { (name, bytecode) ->
             ClassInfo(bytecode) ?: error("Failed to parse class info: $name")
-            runtime.add(ClassInfo(bytecode) ?: error("Failed to parse class info: $name"))
+            application.add(ClassInfo(bytecode) ?: error("Failed to parse class info: $name"))
         }
     }
 
@@ -310,6 +310,6 @@ class ResolveDirtyTestFixture(
     }
 
     fun resolveDirty(): RuntimeDirtyScopes {
-        return Context().resolveDirtyRuntimeScopes(runtime, redefinition)
+        return Context().resolveDirtyRuntimeScopes(application, redefinition)
     }
 }

@@ -5,13 +5,17 @@
 
 package org.jetbrains.compose.reload.analysis
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
+
+@InternalHotReloadApi
 class RedefinitionVerificationException(message: String) : Throwable(message)
 
-fun RuntimeInfo.verifyRedefinitions(redefinitions: RuntimeInfo) {
+@InternalHotReloadApi
+fun ApplicationInfo.verifyRedefinitions(redefinitions: ApplicationInfo) {
     verifyMethodRedefinitions(redefinitions)
 }
 
-private fun RuntimeInfo.verifyMethodRedefinitions(redefined: RuntimeInfo) {
+private fun ApplicationInfo.verifyMethodRedefinitions(redefined: ApplicationInfo) {
     redefined.methodIndex.forEach { (methodId, redefinedMethod) ->
         val previousMethod = methodIndex[methodId] ?: return@forEach
 

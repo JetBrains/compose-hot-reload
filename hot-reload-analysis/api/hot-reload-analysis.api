@@ -1,3 +1,13 @@
+public abstract interface class org/jetbrains/compose/reload/analysis/ApplicationInfo {
+	public abstract fun getClassIndex ()Ljava/util/Map;
+	public abstract fun getDependencyIndex ()Ljava/util/Map;
+	public abstract fun getFieldIndex ()Ljava/util/Map;
+	public abstract fun getGroupIndex ()Ljava/util/Map;
+	public abstract fun getMethodIndex ()Ljava/util/Map;
+	public abstract fun getSuperIndex ()Ljava/util/Map;
+	public abstract fun getSuperIndexInverse ()Ljava/util/Map;
+}
+
 public final class org/jetbrains/compose/reload/analysis/AsmUtilsKt {
 	public static final fun ClassId (Lorg/objectweb/asm/tree/ClassNode;)Ljava/lang/String;
 }
@@ -85,15 +95,12 @@ public final class org/jetbrains/compose/reload/analysis/ClassIdKt {
 }
 
 public final class org/jetbrains/compose/reload/analysis/ClassInfo {
-	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-uSFnFHE ()Ljava/lang/String;
 	public final fun component2 ()Ljava/util/Map;
 	public final fun component3 ()Ljava/util/Map;
 	public final fun component4-ejqTZCE ()Ljava/lang/String;
 	public final fun component5 ()Ljava/util/List;
 	public final fun component6-aqB5Kkw ()I
-	public final fun copy-WXNAjgs (Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;I)Lorg/jetbrains/compose/reload/analysis/ClassInfo;
-	public static synthetic fun copy-WXNAjgs$default (Lorg/jetbrains/compose/reload/analysis/ClassInfo;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/String;Ljava/util/List;IILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/ClassInfo;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
 	public final fun getFields ()Ljava/util/Map;
@@ -128,7 +135,7 @@ public final class org/jetbrains/compose/reload/analysis/ComposeGroupKeyKt {
 }
 
 public abstract interface class org/jetbrains/compose/reload/analysis/DirtyResolverExtension {
-	public abstract fun resolveDirtyMethods (Lorg/jetbrains/compose/reload/core/Context;Lorg/jetbrains/compose/reload/analysis/RuntimeInfo;Lorg/jetbrains/compose/reload/analysis/RuntimeInfo;)Ljava/util/List;
+	public abstract fun resolveDirtyMethods (Lorg/jetbrains/compose/reload/core/Context;Lorg/jetbrains/compose/reload/analysis/ApplicationInfo;Lorg/jetbrains/compose/reload/analysis/ApplicationInfo;)Ljava/util/List;
 }
 
 public final class org/jetbrains/compose/reload/analysis/FieldId : org/jetbrains/compose/reload/analysis/MemberId {
@@ -482,14 +489,11 @@ public final class org/jetbrains/compose/reload/analysis/InstructionToken$StartR
 
 public final class org/jetbrains/compose/reload/analysis/InstructionTree {
 	public synthetic fun <init> (Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;Lorg/jetbrains/compose/reload/analysis/ScopeType;Ljava/util/List;Ljava/util/List;Lorg/jetbrains/compose/reload/core/Failure;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;Lorg/jetbrains/compose/reload/analysis/ScopeType;Ljava/util/List;Ljava/util/List;Lorg/jetbrains/compose/reload/core/Failure;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-z2uEmV4 ()Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;
 	public final fun component2 ()Lorg/jetbrains/compose/reload/analysis/ScopeType;
 	public final fun component3 ()Ljava/util/List;
 	public final fun component4 ()Ljava/util/List;
 	public final fun component5 ()Lorg/jetbrains/compose/reload/core/Failure;
-	public final fun copy-Ij5R5BA (Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;Lorg/jetbrains/compose/reload/analysis/ScopeType;Ljava/util/List;Ljava/util/List;Lorg/jetbrains/compose/reload/core/Failure;)Lorg/jetbrains/compose/reload/analysis/InstructionTree;
-	public static synthetic fun copy-Ij5R5BA$default (Lorg/jetbrains/compose/reload/analysis/InstructionTree;Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;Lorg/jetbrains/compose/reload/analysis/ScopeType;Ljava/util/List;Ljava/util/List;Lorg/jetbrains/compose/reload/core/Failure;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionTree;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getChildren ()Ljava/util/List;
 	public final fun getFailure ()Lorg/jetbrains/compose/reload/core/Failure;
@@ -567,12 +571,19 @@ public final class org/jetbrains/compose/reload/analysis/MethodType : java/lang/
 	public static fun values ()[Lorg/jetbrains/compose/reload/analysis/MethodType;
 }
 
-public final class org/jetbrains/compose/reload/analysis/RedefinitionVerificationException : java/lang/Throwable {
-	public fun <init> (Ljava/lang/String;)V
+public abstract interface class org/jetbrains/compose/reload/analysis/MutableApplicationInfo : org/jetbrains/compose/reload/analysis/ApplicationInfo {
+	public abstract fun add (Lorg/jetbrains/compose/reload/analysis/ClassInfo;)V
+	public abstract fun clear ()V
+	public abstract fun copy ()Lorg/jetbrains/compose/reload/analysis/MutableApplicationInfo;
+	public abstract fun remove-j3M2jLw (Ljava/lang/String;)V
+}
+
+public final class org/jetbrains/compose/reload/analysis/MutableApplicationInfoImplKt {
+	public static final fun MutableApplicationInfo ()Lorg/jetbrains/compose/reload/analysis/MutableApplicationInfo;
 }
 
 public final class org/jetbrains/compose/reload/analysis/ResolveDirtyKt {
-	public static final fun resolveDirtyRuntimeScopes (Lorg/jetbrains/compose/reload/core/Context;Lorg/jetbrains/compose/reload/analysis/RuntimeInfo;Lorg/jetbrains/compose/reload/analysis/RuntimeInfo;)Lorg/jetbrains/compose/reload/analysis/RuntimeDirtyScopes;
+	public static final fun resolveDirtyRuntimeScopes (Lorg/jetbrains/compose/reload/core/Context;Lorg/jetbrains/compose/reload/analysis/ApplicationInfo;Lorg/jetbrains/compose/reload/analysis/ApplicationInfo;)Lorg/jetbrains/compose/reload/analysis/RuntimeDirtyScopes;
 }
 
 public final class org/jetbrains/compose/reload/analysis/RuntimeDirtyScopes {
@@ -587,16 +598,6 @@ public final class org/jetbrains/compose/reload/analysis/RuntimeDirtyScopes {
 	public final fun getRedefinedClasses ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class org/jetbrains/compose/reload/analysis/RuntimeInfo {
-	public abstract fun getClassIndex ()Ljava/util/Map;
-	public abstract fun getDependencyIndex ()Ljava/util/Map;
-	public abstract fun getFieldIndex ()Ljava/util/Map;
-	public abstract fun getGroupIndex ()Ljava/util/Map;
-	public abstract fun getMethodIndex ()Ljava/util/Map;
-	public abstract fun getSuperIndex ()Ljava/util/Map;
-	public abstract fun getSuperIndexInverse ()Ljava/util/Map;
 }
 
 public abstract interface class org/jetbrains/compose/reload/analysis/ScopeAnalyzerExtension {
@@ -647,20 +648,5 @@ public final class org/jetbrains/compose/reload/analysis/ScopeType : java/lang/E
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/analysis/ScopeType;
 	public static fun values ()[Lorg/jetbrains/compose/reload/analysis/ScopeType;
-}
-
-public abstract interface class org/jetbrains/compose/reload/analysis/TrackingRuntimeInfo : org/jetbrains/compose/reload/analysis/RuntimeInfo {
-	public abstract fun add (Lorg/jetbrains/compose/reload/analysis/ClassInfo;)V
-	public abstract fun clear ()V
-	public abstract fun copy ()Lorg/jetbrains/compose/reload/analysis/TrackingRuntimeInfo;
-	public abstract fun remove-j3M2jLw (Ljava/lang/String;)V
-}
-
-public final class org/jetbrains/compose/reload/analysis/TrackingRuntimeInfoImplKt {
-	public static final fun TrackingRuntimeInfo ()Lorg/jetbrains/compose/reload/analysis/TrackingRuntimeInfo;
-}
-
-public final class org/jetbrains/compose/reload/analysis/VerifyRedefinitionsKt {
-	public static final fun verifyRedefinitions (Lorg/jetbrains/compose/reload/analysis/RuntimeInfo;Lorg/jetbrains/compose/reload/analysis/RuntimeInfo;)V
 }
 

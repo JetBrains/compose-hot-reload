@@ -23,6 +23,8 @@ import org.objectweb.asm.tree.LdcInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
 
+fun ClassId(node: ClassNode): ClassId = ClassId(node.name)
+
 internal fun AbstractInsnNode.intValueOrNull(): Int? {
     if (this is LdcInsnNode) return this.cst as? Int
     return when (opcode) {
@@ -75,7 +77,6 @@ fun ClassId(bytecode: ByteArray): ClassId? {
     return className?.let { name -> ClassId(name) }
 }
 
-fun ClassId(node: ClassNode): ClassId = ClassId(node.name)
 
 internal fun MethodId(classNode: ClassNode, methodNode: MethodNode): MethodId = MethodId(
     classId = ClassId(classNode),

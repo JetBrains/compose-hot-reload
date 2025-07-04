@@ -30,7 +30,8 @@ import org.objectweb.asm.tree.MethodNode
 
 private val logger = createLogger()
 
-data class InstructionTree(
+@ConsistentCopyVisibility
+data class InstructionTree internal constructor(
     val group: ComposeGroupKey?,
     val type: ScopeType,
     val tokens: List<InstructionToken>,

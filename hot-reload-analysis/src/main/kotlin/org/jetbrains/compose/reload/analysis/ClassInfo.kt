@@ -8,7 +8,8 @@ package org.jetbrains.compose.reload.analysis
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
 
-data class ClassInfo(
+@ConsistentCopyVisibility
+data class ClassInfo internal constructor(
     val classId: ClassId,
     val fields: Map<FieldId, FieldInfo>,
     val methods: Map<MethodId, MethodInfo>,
