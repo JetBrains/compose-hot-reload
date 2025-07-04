@@ -45,6 +45,7 @@ import kotlinx.datetime.format
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.devtools.Tag
+import org.jetbrains.compose.devtools.buildSystem
 import org.jetbrains.compose.devtools.states.ReloadState
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
@@ -52,6 +53,7 @@ import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtTextStyles
 import org.jetbrains.compose.devtools.theme.dtHorizontalPadding
 import org.jetbrains.compose.devtools.theme.dtVerticalPadding
+import org.jetbrains.compose.devtools.widgets.DtBuildSystemLogo
 import org.jetbrains.compose.devtools.widgets.DtCode
 import org.jetbrains.compose.devtools.widgets.DtCopyToClipboardButton
 import org.jetbrains.compose.devtools.widgets.DtHeader2
@@ -71,7 +73,10 @@ fun DtReloadStatusItem() {
                         .progressSemantics()
                 )
             },
-            content = { DtText("Reloading...", Modifier.tag(Tag.ReloadStatusText)) }
+            content = {
+                DtBuildSystemLogo(buildSystem, modifier = Modifier.padding(2.dp))
+                DtText("Reloading...", Modifier.tag(Tag.ReloadStatusText))
+            }
         )
         is ReloadState.Ok -> DtSidecarStatusItem(
             symbol = {

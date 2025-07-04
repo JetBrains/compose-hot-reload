@@ -19,21 +19,44 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalDensity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.devtools.theme.composeLogoPainter
-import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.devtools.theme.DtLogos
+import org.jetbrains.compose.reload.core.BuildSystem
+import org.jetbrains.compose.reload.core.createLogger
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
-internal fun DtComposeLogo(
-    modifier: Modifier,
-    tint: Color? = Color.White
+fun DtComposeLogo(
+    modifier: Modifier = Modifier,
+    tint: Color? = Color.White,
+) = DtLogo(
+    image = DtLogos.Image.COMPOSE_LOGO,
+    tint = tint,
+    modifier = modifier
+)
+
+@Composable
+fun DtBuildSystemLogo(
+    buildTool: BuildSystem?,
+    modifier: Modifier = Modifier,
+    tint: Color? = Color.White,
+) {
+    when (buildTool) {
+        BuildSystem.Gradle -> DtLogo(DtLogos.Image.GRADLE_LOGO, tint = tint, modifier = modifier)
+        BuildSystem.Amper -> DtLogo(DtLogos.Image.AMPER_LOGO, tint = tint, modifier = modifier)
+        null -> { /* nothing */ }
+    }
+}
+
+@Composable
+fun DtLogo(
+    image: DtLogos.Image,
+    tint: Color? = Color.White,
+    modifier: Modifier = Modifier,
 ) {
     var painter: Painter? by remember { mutableStateOf<Painter?>(null) }
-    val density = LocalDensity.current
 
-    LaunchedEffect(density) {
+    LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
-            painter = composeLogoPainter(density).await()
+            painter = DtLogos.imageAsPngPainter(image).await()
         }
     }
 

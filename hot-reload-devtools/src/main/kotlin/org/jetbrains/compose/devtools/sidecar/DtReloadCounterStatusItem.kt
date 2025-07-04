@@ -7,20 +7,28 @@ package org.jetbrains.compose.devtools.sidecar
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.progressSemantics
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.unit.dp
 import io.sellmair.evas.compose.composeValue
 import org.jetbrains.compose.devtools.Tag
+import org.jetbrains.compose.devtools.buildSystem
 import org.jetbrains.compose.devtools.states.ReloadCountState
+import org.jetbrains.compose.devtools.states.ReloadState
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtTextStyles
+import org.jetbrains.compose.devtools.widgets.DtBuildSystemLogo
 import org.jetbrains.compose.devtools.widgets.DtText
 
 @Composable
@@ -43,22 +51,41 @@ fun DtExpandedReloadCounterStatusItem() {
 }
 
 @Composable
-fun DtCollapsedReloadCounterStatusItem() {
-    val state = ReloadCountState.composeValue()
-    if (state.successfulReloads < 1) return
+fun DtMinimisedReloadCounterStatusItem() {
+    val reloadState = ReloadState.composeValue()
+    val countState = ReloadCountState.composeValue()
 
     val scale = when {
-        state.successfulReloads < 10 -> 1.0f
+        countState.successfulReloads < 10 -> 1.0f
         else -> 0.9f
     }
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.scale(scale).horizontalScroll(rememberScrollState())
-    ) {
-        DtText(
-            text = "${state.successfulReloads}",
-            modifier = Modifier.tag(Tag.ReloadCounterText),
-            style = DtTextStyles.smallSemiBold.copy(color = DtColors.text)
-        )
+
+    when (reloadState) {
+        is ReloadState.Reloading -> {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.scale(scale).horizontalScroll(rememberScrollState())
+            ) {
+                CircularProgressIndicator(
+                    strokeWidth = 4.dp, color = DtColors.statusColorOrange2,
+                    modifier = Modifier.size(10.dp).padding(2.dp).tag(Tag.ReloadStatusSymbol)
+                        .progressSemantics()
+                )
+                DtBuildSystemLogo(buildSystem, modifier = Modifier.size(20.dp).padding(2.dp))
+            }
+        }
+        else -> {
+            if (countState.successfulReloads < 1) return
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.scale(scale).horizontalScroll(rememberScrollState())
+            ) {
+                DtText(
+                    text = "${countState.successfulReloads}",
+                    modifier = Modifier.tag(Tag.ReloadCounterText),
+                    style = DtTextStyles.smallSemiBold.copy(color = DtColors.text)
+                )
+            }
+        }
     }
 }
