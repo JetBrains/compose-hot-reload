@@ -100,7 +100,7 @@ internal object RuntimeTrackingTransformer : ClassFileTransformer {
         loader: ClassLoader?, className: String?, classBeingRedefined: Class<*>?,
         protectionDomain: ProtectionDomain?, classfileBuffer: ByteArray
     ): ByteArray? {
-        if (className == null || isIgnoredClassId(className)) {
+        if (className == null || isIgnoredClassId(ClassId(className))) {
             return null
         }
 

@@ -124,17 +124,19 @@ value class ClassFlags(val value: Int) {
 
     override fun toString(): String = buildString {
         append("ClassFlags(")
-        append(listOfNotNull(
-            "synthetic".takeIf { isSynthetic },
-            "public".takeIf { isPublic },
-            "final".takeIf { isFinal },
-            "abstract".takeIf { isAbstract },
-            "interface".takeIf { isInterface },
-            "annotation".takeIf { isAnnotation },
-            "enum".takeIf { isEnum },
-            "record".takeIf { isRecord },
-            "deprecated".takeIf { isDeprecated },
-        ).joinToString(", "))
+        append(
+            listOfNotNull(
+                "synthetic".takeIf { isSynthetic },
+                "public".takeIf { isPublic },
+                "final".takeIf { isFinal },
+                "abstract".takeIf { isAbstract },
+                "interface".takeIf { isInterface },
+                "annotation".takeIf { isAnnotation },
+                "enum".takeIf { isEnum },
+                "record".takeIf { isRecord },
+                "deprecated".takeIf { isDeprecated },
+            ).joinToString(", ")
+        )
 
         append(")")
     }
@@ -168,13 +170,13 @@ fun ClassInfo(bytecode: ByteArray): ClassInfo? {
 }
 
 internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
-    if (isIgnoredClassId(classNode.name)) return null
     val classId = ClassId(classNode)
+    if (isIgnoredClassId(classId)) return null
 
     val methods = classNode.methods.mapNotNull { methodNode ->
         MethodInfo(
             methodId = MethodId(classNode, methodNode),
-            rootScope = RuntimeScopeInfo(classNode, methodNode) ?: return@mapNotNull null,
+            rootScope = RuntimeScopeInfo(classNode, methodNode),
             modality = when {
                 methodNode.access and Opcodes.ACC_FINAL != 0 -> MethodInfo.Modality.FINAL
                 methodNode.access and Opcodes.ACC_ABSTRACT != 0 -> MethodInfo.Modality.ABSTRACT

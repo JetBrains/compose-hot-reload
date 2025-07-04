@@ -5,7 +5,10 @@
 
 package org.jetbrains.compose.reload.analysis
 
-fun isIgnoredClassId(classId: String): Boolean = with(classId) {
+/*
+TODO
+ */
+fun isIgnoredClassId(classId: ClassId): Boolean = with(classId) {
     startsWith("java/") ||
         startsWith("javax/") ||
         startsWith("java/") ||

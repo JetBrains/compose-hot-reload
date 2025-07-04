@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.agent
 
+import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.isIgnoredClassId
 import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.createLogger
@@ -40,7 +41,7 @@ private object JdwpTracker : ClassFileTransformer {
         module: Module?, loader: ClassLoader?, className: String?, classBeingRedefined: Class<*>?,
         protectionDomain: ProtectionDomain?, classfileBuffer: ByteArray?
     ): ByteArray? {
-        if (className == null || isIgnoredClassId(className) ||
+        if (className == null || isIgnoredClassId(ClassId(className)) ||
             classBeingRedefined == null || classfileBuffer == null || localReloadRequest.get() != null
         ) return null
 
