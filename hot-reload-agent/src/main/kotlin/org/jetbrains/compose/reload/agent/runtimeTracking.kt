@@ -9,7 +9,7 @@ import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.ClassInfo
 import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
 import org.jetbrains.compose.reload.analysis.TrackingRuntimeInfo
-import org.jetbrains.compose.reload.analysis.isIgnoredClassId
+import org.jetbrains.compose.reload.analysis.isIgnored
 import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
 import org.jetbrains.compose.reload.analysis.verifyRedefinitions
 import org.jetbrains.compose.reload.core.Context
@@ -100,7 +100,7 @@ internal object RuntimeTrackingTransformer : ClassFileTransformer {
         loader: ClassLoader?, className: String?, classBeingRedefined: Class<*>?,
         protectionDomain: ProtectionDomain?, classfileBuffer: ByteArray
     ): ByteArray? {
-        if (className == null || isIgnoredClassId(ClassId(className))) {
+        if (className == null || ClassId(className).isIgnored) {
             return null
         }
 

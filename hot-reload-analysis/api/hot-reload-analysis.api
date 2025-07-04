@@ -289,8 +289,33 @@ public final class org/jetbrains/compose/reload/analysis/IdsKt {
 	public static final fun getClassInitializerMethodId-j3M2jLw (Ljava/lang/String;)Lorg/jetbrains/compose/reload/analysis/MethodId;
 }
 
+public abstract interface class org/jetbrains/compose/reload/analysis/Ignore {
+	public abstract fun getPrecedence ()I
+	public abstract fun ignoredClassIds ()Ljava/util/List;
+	public abstract fun ignoredPackageIds ()Ljava/util/List;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ignore$Default : org/jetbrains/compose/reload/analysis/Ignore {
+	public fun <init> ()V
+	public fun getPrecedence ()I
+	public fun ignoredClassIds ()Ljava/util/List;
+	public fun ignoredPackageIds ()Ljava/util/List;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ignore$DefaultImpls {
+	public static fun getPrecedence (Lorg/jetbrains/compose/reload/analysis/Ignore;)I
+	public static fun ignoredClassIds (Lorg/jetbrains/compose/reload/analysis/Ignore;)Ljava/util/List;
+	public static fun ignoredPackageIds (Lorg/jetbrains/compose/reload/analysis/Ignore;)Ljava/util/List;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ignore$Precedence {
+	public static final field DEFAULT I
+	public static final field HIGH I
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ignore$Precedence;
+}
+
 public final class org/jetbrains/compose/reload/analysis/IgnoreKt {
-	public static final fun isIgnoredClassId-j3M2jLw (Ljava/lang/String;)Z
+	public static final fun isIgnored-j3M2jLw (Ljava/lang/String;)Z
 }
 
 public abstract class org/jetbrains/compose/reload/analysis/InstructionToken {

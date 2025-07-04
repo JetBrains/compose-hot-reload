@@ -23,7 +23,7 @@ fun ClassInfo(bytecode: ByteArray): ClassInfo? {
 
 internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
     val classId = ClassId(classNode)
-    if (isIgnoredClassId(classId)) return null
+    if (classId.isIgnored) return null
 
     val methods = classNode.methods.mapNotNull { methodNode ->
         MethodInfo(

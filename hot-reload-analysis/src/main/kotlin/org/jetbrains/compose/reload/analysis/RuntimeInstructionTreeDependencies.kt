@@ -23,7 +23,7 @@ internal fun InstructionTree.methodDependencies(): Set<MethodId> {
                     instructionNode.opcode == Opcodes.INVOKESPECIAL ||
                     instructionNode.opcode == Opcodes.INVOKEINTERFACE)
             ) {
-                if (isIgnoredClassId(ClassId(instructionNode.owner))) return@mapNotNull null
+                if (ClassId(instructionNode.owner).isIgnored) return@mapNotNull null
                 return@mapNotNull MethodId(instructionNode)
             }
 
@@ -45,7 +45,7 @@ internal fun InstructionTree.fieldDependencies(): Set<FieldId> {
         .filterIsInstance<InstructionToken.BlockToken>()
         .flatMap { token -> token.instructions }
         .filterIsInstance<FieldInsnNode>()
-        .filter { fieldInsnNode -> !isIgnoredClassId(ClassId(fieldInsnNode.owner)) }
+        .filter { fieldInsnNode -> !ClassId(fieldInsnNode.owner).isIgnored }
         .map { fieldNode -> FieldId(fieldNode) }
         .toSet()
 }
