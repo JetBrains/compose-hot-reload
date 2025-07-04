@@ -29,7 +29,7 @@ import kotlin.io.path.writeBytes
 import kotlin.io.path.writeText
 
 @WithCompiler
-class RuntimeInstructionTokenizerTest {
+class InstructionTokenizerTest {
 
     @Test
     fun `test - simple composable`(compiler: Compiler, testInfo: TestInfo) = doTest(
@@ -126,7 +126,7 @@ class RuntimeInstructionTokenizerTest {
         compiler: Compiler, testInfo: TestInfo, code: String,
         tokenAssertions: (method: MethodNode, List<InstructionToken>) -> Unit = { _, _ -> }
     ) {
-        val directory = Path("src/test/resources/runtimeInstructionTokens")
+        val directory = Path("src/test/resources/instructionTokens")
             .resolve(testInfo.testClass.get().name.asFileName())
             .resolve(testInfo.testMethod.get().name.asFileName())
 
@@ -160,7 +160,7 @@ class RuntimeInstructionTokenizerTest {
             }
         }.sanitized()
 
-        val actualFile = directory.resolve("runtime-instructions-tokens.txt")
+        val actualFile = directory.resolve("instructions-tokens.txt")
 
         if (TestEnvironment.updateTestData) {
             actualFile.createParentDirectories().writeText(rendered)

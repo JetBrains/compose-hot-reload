@@ -25,7 +25,7 @@ import kotlin.io.path.writeBytes
 import kotlin.io.path.writeText
 
 @WithCompiler
-class RuntimeInstructionTreeParserTest {
+class InstructionTreeParserTest {
 
     @Test
     fun `test - simple composable`(compiler: Compiler, testInfo: TestInfo) = doTest(
@@ -114,7 +114,7 @@ class RuntimeInstructionTreeParserTest {
     )
 
     private fun doTest(compiler: Compiler, testInfo: TestInfo, code: String) {
-        val directory = Path("src/test/resources/runtimeInstructionTree")
+        val directory = Path("src/test/resources/instructionTree")
             .resolve(testInfo.testClass.get().name.asFileName())
             .resolve(testInfo.testMethod.get().name.asFileName())
 
@@ -154,9 +154,9 @@ class RuntimeInstructionTreeParserTest {
             current
         }.sanitized()
 
-        val expectTreeFile = directory.resolve("runtime-instructions-tree.txt")
-        val expectAsmFile = directory.resolve("runtime-instructions-asm.txt")
-        val expectSourceFile = directory.resolve("runtime-instructions-source.txt")
+        val expectTreeFile = directory.resolve("instructions-tree.txt")
+        val expectAsmFile = directory.resolve("instructions-asm.txt")
+        val expectSourceFile = directory.resolve("instructions-source.txt")
 
         val file2Render = mapOf(
             expectTreeFile to renderedTree,
