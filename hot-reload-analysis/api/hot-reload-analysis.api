@@ -583,15 +583,12 @@ public final class org/jetbrains/compose/reload/analysis/MutableApplicationInfoI
 }
 
 public final class org/jetbrains/compose/reload/analysis/ResolveDirtyKt {
-	public static final fun resolveDirtyRuntimeScopes (Lorg/jetbrains/compose/reload/core/Context;Lorg/jetbrains/compose/reload/analysis/ApplicationInfo;Lorg/jetbrains/compose/reload/analysis/ApplicationInfo;)Lorg/jetbrains/compose/reload/analysis/RuntimeDirtyScopes;
+	public static final fun resolveDirtyScopes (Lorg/jetbrains/compose/reload/core/Context;Lorg/jetbrains/compose/reload/analysis/ApplicationInfo;Lorg/jetbrains/compose/reload/analysis/ApplicationInfo;)Lorg/jetbrains/compose/reload/analysis/ResolvedDirtyScopes;
 }
 
-public final class org/jetbrains/compose/reload/analysis/RuntimeDirtyScopes {
-	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+public final class org/jetbrains/compose/reload/analysis/ResolvedDirtyScopes {
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Ljava/util/List;
-	public final fun copy (Ljava/util/List;Ljava/util/List;)Lorg/jetbrains/compose/reload/analysis/RuntimeDirtyScopes;
-	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/RuntimeDirtyScopes;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/RuntimeDirtyScopes;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDirtyMethodIds ()Ljava/util/Map;
 	public final fun getDirtyScopes ()Ljava/util/List;

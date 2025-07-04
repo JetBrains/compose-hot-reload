@@ -11,7 +11,7 @@ import org.jetbrains.compose.reload.agent.transformForStaticsInitialization
 import org.jetbrains.compose.reload.analysis.ClassInfo
 import org.jetbrains.compose.reload.analysis.MutableApplicationInfo
 import org.jetbrains.compose.reload.analysis.classInitializerMethodId
-import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
+import org.jetbrains.compose.reload.analysis.resolveDirtyScopes
 import org.jetbrains.compose.reload.analysis.testFixtures.checkJavap
 import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
@@ -85,7 +85,7 @@ class StaticsInitializationTest() {
         val afterApplicationInfo = MutableApplicationInfo()
         afterApplicationInfo.add(afterClassInfo)
 
-        val redefinition = Context().resolveDirtyRuntimeScopes(beforeApplicationInfo, afterApplicationInfo)
+        val redefinition = Context().resolveDirtyScopes(beforeApplicationInfo, afterApplicationInfo)
         if (beforeClassInfoInitializer in redefinition.dirtyMethodIds) {
             fail("Unexpected '$beforeClassInfoInitializer' in dirtyMethodIds")
         }

@@ -7,9 +7,9 @@ package org.jetbrains.compose.reload.analysis.tests
 
 import org.intellij.lang.annotations.Language
 import org.jetbrains.compose.reload.analysis.ClassInfo
-import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
+import org.jetbrains.compose.reload.analysis.ResolvedDirtyScopes
 import org.jetbrains.compose.reload.analysis.MutableApplicationInfo
-import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
+import org.jetbrains.compose.reload.analysis.resolveDirtyScopes
 import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
 import org.jetbrains.compose.reload.core.testFixtures.CompilerProvider
@@ -263,7 +263,7 @@ class ResolveDirtyTests {
             .assertDirtyMethodNames("Foo", "getXField", "setXField", "xInitial", "x", "<clinit>")
     }
 
-    private fun RuntimeDirtyScopes.assertDirtyMethodNames(vararg methodNames: String) {
+    private fun ResolvedDirtyScopes.assertDirtyMethodNames(vararg methodNames: String) {
         assertEquals(
             methodNames.toSet(), dirtyMethodIds.keys.map { it.methodName }.toSet(),
             "Dirty Method Names",
@@ -309,7 +309,7 @@ class ResolveDirtyTestFixture(
         }
     }
 
-    fun resolveDirty(): RuntimeDirtyScopes {
-        return Context().resolveDirtyRuntimeScopes(application, redefinition)
+    fun resolveDirty(): ResolvedDirtyScopes {
+        return Context().resolveDirtyScopes(application, redefinition)
     }
 }

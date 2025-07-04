@@ -7,10 +7,10 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.ClassInfo
-import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
+import org.jetbrains.compose.reload.analysis.ResolvedDirtyScopes
 import org.jetbrains.compose.reload.analysis.MutableApplicationInfo
 import org.jetbrains.compose.reload.analysis.isIgnored
-import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
+import org.jetbrains.compose.reload.analysis.resolveDirtyScopes
 import org.jetbrains.compose.reload.analysis.verifyRedefinitions
 import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.Try
@@ -45,11 +45,11 @@ internal fun launchRuntimeTracking(instrumentation: Instrumentation) {
     instrumentation.addTransformer(RuntimeTrackingTransformer)
 }
 
-internal fun Context.redefineApplicationInfo(): Future<Try<RuntimeDirtyScopes>> = runtimeAnalysisThread.submitSafe {
+internal fun Context.redefineApplicationInfo(): Future<Try<ResolvedDirtyScopes>> = runtimeAnalysisThread.submitSafe {
     Try {
         currentApplicationInfo.verifyRedefinitions(pendingRedefinitions)
 
-        val redefinition = resolveDirtyRuntimeScopes(currentApplicationInfo, pendingRedefinitions)
+        val redefinition = resolveDirtyScopes(currentApplicationInfo, pendingRedefinitions)
 
         /* Patch current runtime info */
         val patchDuration = measureTime {

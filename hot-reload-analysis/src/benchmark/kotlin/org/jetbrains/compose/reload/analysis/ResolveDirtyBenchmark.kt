@@ -107,8 +107,8 @@ open class ResolveDirtyScopesBenchmark {
     }
 
     @Benchmark
-    fun redefine(): RuntimeDirtyScopes {
-        return Context().resolveDirtyRuntimeScopes(currentApplication, pendingRedefinition)
+    fun redefine(): ResolvedDirtyScopes {
+        return Context().resolveDirtyScopes(currentApplication, pendingRedefinition)
     }
 
 }

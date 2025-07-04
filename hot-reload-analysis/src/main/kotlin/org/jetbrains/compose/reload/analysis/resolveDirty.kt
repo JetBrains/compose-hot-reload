@@ -17,22 +17,23 @@ import kotlin.time.measureTimedValue
 
 private val logger = createLogger()
 
-data class RuntimeDirtyScopes(
+@ConsistentCopyVisibility
+data class ResolvedDirtyScopes internal constructor(
     val redefinedClasses: List<ClassInfo>,
     val dirtyScopes: List<ScopeInfo>
 ) {
     val dirtyMethodIds = dirtyScopes.groupBy { it.methodId }
 }
 
-fun Context.resolveDirtyRuntimeScopes(current: ApplicationInfo, redefined: ApplicationInfo): RuntimeDirtyScopes {
+fun Context.resolveDirtyScopes(current: ApplicationInfo, redefined: ApplicationInfo): ResolvedDirtyScopes {
     val (redefinition, duration) = measureTimedValue {
-        RuntimeDirtyScopes(
+        ResolvedDirtyScopes(
             redefinedClasses = redefined.classIndex.values.toList(),
             dirtyScopes = resolveDirtyRuntimeScopeInfos(current, redefined)
         )
     }
 
-    logger.info("${simpleName<RuntimeDirtyScopes>()} resolved in [${duration}]")
+    logger.info("${simpleName<ResolvedDirtyScopes>()} resolved in [${duration}]")
     return redefinition
 }
 
@@ -133,9 +134,10 @@ private fun resolveRemovedComposeScopes(current: ApplicationInfo, redefined: App
 private fun Context.resolveDirtyMethodsFromExtensionPoints(
     current: ApplicationInfo, redefined: ApplicationInfo
 ): List<MethodInfo> {
-    return ServiceLoader.load(DirtyResolverExtension::class.java, ClassLoader.getSystemClassLoader()).flatMap { resolver ->
-        resolver.resolveDirtyMethods(this, current, redefined)
-    }
+    return ServiceLoader.load(DirtyResolverExtension::class.java, ClassLoader.getSystemClassLoader())
+        .flatMap { resolver ->
+            resolver.resolveDirtyMethods(this, current, redefined)
+        }
 }
 
 /**
