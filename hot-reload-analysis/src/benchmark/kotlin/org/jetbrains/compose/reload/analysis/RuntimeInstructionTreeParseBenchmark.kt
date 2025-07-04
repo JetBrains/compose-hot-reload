@@ -106,7 +106,7 @@ open class RuntimeInstructionTreeParseBenchmark {
     fun parse(blackhole: Blackhole) {
         baselineBytecode.forEach { (_, bytecode) ->
             ClassNode(bytecode).methods.forEach {
-                blackhole.consume(parseRuntimeInstructionTree(it))
+                blackhole.consume(parseInstructionTree(it))
             }
         }
     }

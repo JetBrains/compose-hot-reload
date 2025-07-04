@@ -5,10 +5,12 @@
 
 package org.jetbrains.compose.reload.analysis
 
-import org.jetbrains.compose.reload.analysis.RuntimeScopeType.Method
-import org.jetbrains.compose.reload.analysis.RuntimeScopeType.ReplaceGroup
-import org.jetbrains.compose.reload.analysis.RuntimeScopeType.RestartGroup
-import org.jetbrains.compose.reload.analysis.RuntimeScopeType.SourceInformationMarker
+import org.jetbrains.compose.reload.InternalHotReloadApi
+import org.jetbrains.compose.reload.analysis.ScopeType.Method
+import org.jetbrains.compose.reload.analysis.ScopeType.ReplaceGroup
+import org.jetbrains.compose.reload.analysis.ScopeType.RestartGroup
+import org.jetbrains.compose.reload.analysis.ScopeType.SourceInformationMarker
+import org.jetbrains.compose.reload.core.asMap
 import org.jetbrains.compose.reload.core.leftOr
 import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes
@@ -20,14 +22,15 @@ import org.objectweb.asm.tree.LdcInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
 
-
-fun RuntimeInfo.render(): String = buildString {
+@InternalHotReloadApi
+fun ApplicationInfo.render(): String = buildString {
     classIndex.toSortedMap().forEach { (_, classInfo) ->
         append(classInfo.render())
         appendLine()
     }
 }
 
+@InternalHotReloadApi
 fun ClassInfo.render(): String = buildString {
     appendLine("$classId {")
 
@@ -37,29 +40,34 @@ fun ClassInfo.render(): String = buildString {
     }
 
     withIndent {
-        appendLine(methods.values.joinToString("\n\n") { it.rootScope.render() })
+        appendLine(methods.values.joinToString("\n\n") { it.render() })
     }
 
 
     appendLine("}")
 }
 
-internal fun RuntimeScopeInfo.render(): String = buildString {
+internal fun MethodInfo.render(): String = buildString {
+    appendLine("${methodId.methodName} {")
+    withIndent {
+        appendLine("desc: ${methodId.methodDescriptor}")
+        appendLine("type: $methodType")
+        appendLine(rootScope.render())
+    }
+    this += "}"
+}
+
+internal fun ScopeInfo.render(): String = buildString {
     when (scopeType) {
-        Method -> appendLine("${methodId.methodName} {")
+        Method -> appendLine("Method {")
         RestartGroup -> appendLine("RestartGroup {")
         ReplaceGroup -> appendLine("ReplaceGroup {")
         SourceInformationMarker -> appendLine("SourceInformationMarker {")
     }
 
     withIndent {
-        if (scopeType == Method) {
-            appendLine("type: $methodType")
-            appendLine("desc: ${methodId.methodDescriptor}")
-        }
-
         appendLine("key: ${group?.key}")
-        appendLine("codeHash: ${hash.value}")
+        appendLine("codeHash: ${scopeHash.value}")
         if (methodDependencies.isEmpty()) {
             appendLine("methodDependencies: []")
         } else {
@@ -85,15 +93,22 @@ internal fun RuntimeScopeInfo.render(): String = buildString {
             appendLine(children.joinToString("\n\n") { it.render() }).trim()
             appendLine()
         }
+
+        if (extras.asMap().isNotEmpty()) {
+            extras.asMap().forEach { (key, value) ->
+                appendLine("$key: $value")
+            }
+        }
     }
 
     this += "}"
 }.trim()
 
+@InternalHotReloadApi
 fun FieldInfo.render(): String = "val ${fieldId.fieldName}: ${fieldId.fieldDescriptor}"
 
-
-fun MethodNode.render(tokens: List<RuntimeInstructionToken>): String = buildString {
+@InternalHotReloadApi
+fun MethodNode.render(tokens: List<InstructionToken>): String = buildString {
     appendLine("fun ${name}${desc} {")
     withIndent {
         tokens.forEach { token ->
@@ -112,10 +127,10 @@ private fun MethodNode.indexOfLabel(label: Label): Int {
     return instructions.filterIsInstance<LabelNode>().indexOfFirst { node -> node.label == label }
 }
 
-private fun MethodNode.render(token: RuntimeInstructionToken): String {
+private fun MethodNode.render(token: InstructionToken): String {
     return when (token) {
-        is RuntimeInstructionToken.LabelToken -> "LabelToken(L${indexOfLabel(token.labelInsn.label)})"
-        is RuntimeInstructionToken.JumpToken -> "JumpToken(L${indexOfLabel(token.jumpInsn.label.label)}, opocde=${token.jumpInsn.opcode})"
+        is InstructionToken.LabelToken -> "LabelToken(L${indexOfLabel(token.labelInsn.label)})"
+        is InstructionToken.JumpToken -> "JumpToken(L${indexOfLabel(token.jumpInsn.label.label)}, opocde=${token.jumpInsn.opcode})"
         else -> token.toString()
     }
 }
@@ -132,17 +147,19 @@ private fun MethodNode.render(node: AbstractInsnNode): String {
     }
 }
 
-fun renderRuntimeInstructionTree(bytecode: ByteArray): String {
-    return ClassNode(bytecode).renderRuntimeInstructionTree()
+@InternalHotReloadApi
+fun renderInstructionTree(bytecode: ByteArray): String {
+    return ClassNode(bytecode).renderInstructionTree()
 }
 
-fun ClassNode.renderRuntimeInstructionTree(): String = buildString {
+@InternalHotReloadApi
+fun ClassNode.renderInstructionTree(): String = buildString {
     appendLine("class ${name.replace("/", ".")} {")
     withIndent {
         methods.sortedBy { node -> node.name + node.desc }.forEachIndexed { index, methodNode ->
             this += "fun ${methodNode.name} ${methodNode.desc} {"
 
-            val tree = parseRuntimeInstructionTree(methodNode)
+            val tree = parseInstructionTree(methodNode)
                 .leftOr { right -> error("Failed to parse runtime instruction tree: $right") }
 
             this += methodNode.render(tree).indent()
@@ -155,7 +172,8 @@ fun ClassNode.renderRuntimeInstructionTree(): String = buildString {
     appendLine("}")
 }
 
-fun MethodNode.render(tree: RuntimeInstructionTree): String = buildString {
+@InternalHotReloadApi
+fun MethodNode.render(tree: InstructionTree): String = buildString {
     this += "${tree.type} (group=${tree.group}) {"
     this += tree.tokens.joinToString("\n") { token -> render(token).trim() }.indent()
 
@@ -168,12 +186,12 @@ fun MethodNode.render(tree: RuntimeInstructionTree): String = buildString {
 }.trim()
 
 
-operator fun StringBuilder.plusAssign(str: String) {
+internal operator fun StringBuilder.plusAssign(str: String) {
     appendLine(str)
 }
 
-fun StringBuilder.withIndent(builder: StringBuilder.() -> Unit) {
+internal fun StringBuilder.withIndent(builder: StringBuilder.() -> Unit) {
     appendLine(buildString(builder).trim().prependIndent("    "))
 }
 
-fun String.indent(n: Int = 1) = prependIndent("    ".repeat(n))
+internal fun String.indent(n: Int = 1) = prependIndent("    ".repeat(n))

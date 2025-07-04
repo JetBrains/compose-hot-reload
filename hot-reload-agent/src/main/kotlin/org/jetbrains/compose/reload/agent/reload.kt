@@ -6,7 +6,7 @@
 package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
-import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
+import org.jetbrains.compose.reload.analysis.ResolvedDirtyScopes
 import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
@@ -29,7 +29,7 @@ private val logger = createLogger()
 data class Reload(
     val reloadRequestId: OrchestrationMessageId,
     val definitions: List<ClassDefinition>,
-    val dirtyRuntime: RuntimeDirtyScopes,
+    val dirty: ResolvedDirtyScopes,
 )
 
 internal fun Context.reload(
@@ -117,7 +117,7 @@ internal fun Context.reload(
     }
 
     instrumentation.redefineClasses(*definitions.toTypedArray())
-    return redefineRuntimeInfo().get().mapLeft { redefinition ->
+    return redefineApplicationInfo().get().mapLeft { redefinition ->
         val reload = Reload(reloadRequestId, definitions, redefinition)
         reinitializeStaticsIfNecessary(reload)
         cleanResourceCacheIfNecessary()

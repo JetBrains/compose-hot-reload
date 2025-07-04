@@ -39,11 +39,11 @@ open class ResolveDirtyScopesBenchmark {
 
     @Param("1000", "10000")
     var currentRuntimeSize = 0
-    val currentRuntime = TrackingRuntimeInfo()
+    val currentApplication = MutableApplicationInfo()
 
     @Param("10", "100")
     var pendingRedefinitionSize = 0
-    val pendingRedefinition = TrackingRuntimeInfo()
+    val pendingRedefinition = MutableApplicationInfo()
 
     lateinit var workingDir: Path
 
@@ -91,7 +91,7 @@ open class ResolveDirtyScopesBenchmark {
 
         logger.info("Loading baseline classes...")
         baselineBytecode.forEach { (fileName, bytecode) ->
-            currentRuntime.add(ClassInfo(bytecode)!!)
+            currentApplication.add(ClassInfo(bytecode)!!)
         }
 
         logger.info("Loading redefine classes...")
@@ -107,8 +107,8 @@ open class ResolveDirtyScopesBenchmark {
     }
 
     @Benchmark
-    fun redefine(): RuntimeDirtyScopes {
-        return Context().resolveDirtyRuntimeScopes(currentRuntime, pendingRedefinition)
+    fun redefine(): ResolvedDirtyScopes {
+        return Context().resolveDirtyScopes(currentApplication, pendingRedefinition)
     }
 
 }

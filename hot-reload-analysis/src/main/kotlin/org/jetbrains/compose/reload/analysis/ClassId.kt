@@ -7,6 +7,15 @@ package org.jetbrains.compose.reload.analysis
 
 import kotlin.reflect.KClass
 
+/**
+ * ClassId:
+ * Note: The [value] is noted with `/` instead of `.`
+ * e.g.:
+ * `androidx/compose/runtime/Composer`
+ *
+ * Calling [toFqn] will return the name like
+ * `androidx.compose.runtime.Composer`
+ */
 @JvmInline
 value class ClassId(val value: String) : Comparable<ClassId> {
     override fun compareTo(other: ClassId): Int {
@@ -15,6 +24,11 @@ value class ClassId(val value: String) : Comparable<ClassId> {
 
     override fun toString(): String {
         return value
+    }
+
+
+    fun startsWith(prefix: String): Boolean {
+        return value.startsWith(prefix)
     }
 
     val descriptor: String get() = "L$value;"

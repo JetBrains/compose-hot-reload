@@ -1,7 +1,5 @@
 import org.jetbrains.compose.reload.core.Context
-import org.jetbrains.compose.reload.core.ContextKey
 import org.jetbrains.compose.reload.core.EmptyContext
-import org.jetbrains.compose.reload.core.OptionalContextKey
 import org.jetbrains.compose.reload.core.plus
 import org.jetbrains.compose.reload.core.with
 import kotlin.test.Test
@@ -19,14 +17,14 @@ class ContextTest {
     data class A(val id: Any)
     data class B(val id: Any)
 
-    object AKeyOptional : OptionalContextKey<A>()
-    object BKeyOptional : OptionalContextKey<B>()
+    object AKeyOptional : Context.Key.Optional<A>()
+    object BKeyOptional : Context.Key.Optional<B>()
 
-    object AKey0 : ContextKey<A> {
+    object AKey0 : Context.Key<A> {
         override val default: A get() = A(0)
     }
 
-    object BKey0 : ContextKey<B> {
+    object BKey0 : Context.Key<B> {
         override val default: B get() = B(0)
     }
 

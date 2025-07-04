@@ -9,9 +9,9 @@ import javassist.ClassPool
 import javassist.Modifier
 import org.jetbrains.compose.reload.agent.transformForStaticsInitialization
 import org.jetbrains.compose.reload.analysis.ClassInfo
-import org.jetbrains.compose.reload.analysis.TrackingRuntimeInfo
+import org.jetbrains.compose.reload.analysis.MutableApplicationInfo
 import org.jetbrains.compose.reload.analysis.classInitializerMethodId
-import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
+import org.jetbrains.compose.reload.analysis.resolveDirtyScopes
 import org.jetbrains.compose.reload.analysis.testFixtures.checkJavap
 import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
@@ -79,13 +79,13 @@ class StaticsInitializationTest() {
             ?: fail("Missing 'ClassInfo' for 'TestKt'")
 
 
-        val beforeRuntimeInfo = TrackingRuntimeInfo()
-        beforeRuntimeInfo.add(beforeClassInfo)
+        val beforeApplicationInfo = MutableApplicationInfo()
+        beforeApplicationInfo.add(beforeClassInfo)
 
-        val redefineRuntimeInfo = TrackingRuntimeInfo()
-        redefineRuntimeInfo.add(afterClassInfo)
+        val afterApplicationInfo = MutableApplicationInfo()
+        afterApplicationInfo.add(afterClassInfo)
 
-        val redefinition = Context().resolveDirtyRuntimeScopes(beforeRuntimeInfo, redefineRuntimeInfo)
+        val redefinition = Context().resolveDirtyScopes(beforeApplicationInfo, afterApplicationInfo)
         if (beforeClassInfoInitializer in redefinition.dirtyMethodIds) {
             fail("Unexpected '$beforeClassInfoInitializer' in dirtyMethodIds")
         }

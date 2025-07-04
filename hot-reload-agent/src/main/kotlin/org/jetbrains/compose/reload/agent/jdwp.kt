@@ -5,7 +5,8 @@
 
 package org.jetbrains.compose.reload.agent
 
-import org.jetbrains.compose.reload.analysis.isIgnoredClassId
+import org.jetbrains.compose.reload.analysis.ClassId
+import org.jetbrains.compose.reload.analysis.isIgnored
 import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
@@ -40,7 +41,7 @@ private object JdwpTracker : ClassFileTransformer {
         module: Module?, loader: ClassLoader?, className: String?, classBeingRedefined: Class<*>?,
         protectionDomain: ProtectionDomain?, classfileBuffer: ByteArray?
     ): ByteArray? {
-        if (className == null || isIgnoredClassId(className) ||
+        if (className == null || ClassId(className).isIgnored ||
             classBeingRedefined == null || classfileBuffer == null || localReloadRequest.get() != null
         ) return null
 
@@ -116,7 +117,7 @@ private fun issueExternalReloadRequest(definition: ClassDefinition) {
 
             val uuid = OrchestrationMessageId("external-reload-${UUID.randomUUID()}")
             logger.info("'external reload': Reloaded ${aggregate.definitions.size} classes: $uuid")
-            val redefined = Context().redefineRuntimeInfo().get().getOrThrow()
+            val redefined = Context().redefineApplicationInfo().get().getOrThrow()
             val reload = Reload(uuid, definitions = aggregate.definitions, redefined)
 
             reinitializeStaticsIfNecessary(reload)

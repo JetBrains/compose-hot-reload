@@ -51,7 +51,7 @@ internal fun reinitializeStaticsIfNecessary(reload: Reload) {
         val clazz = classDefinition.definitionClass
         val clinitMethodId = clazz.classId.classInitializerMethodId
 
-        if (clinitMethodId in reload.dirtyRuntime.dirtyMethodIds) {
+        if (clinitMethodId in reload.dirty.dirtyMethodIds) {
             return@mapNotNull clazz
         }
 
@@ -66,7 +66,7 @@ internal fun reinitializeStaticsIfNecessary(reload: Reload) {
     val dirtyClassIds = dirtyClasses.associateBy { it.classId }
 
     val classInitializerDependencies = dirtyClasses.associateWith { clazz ->
-        reload.dirtyRuntime.dirtyMethodIds[clazz.classId.classInitializerMethodId].orEmpty()
+        reload.dirty.dirtyMethodIds[clazz.classId.classInitializerMethodId].orEmpty()
             .flatMap { scope -> scope.methodDependencies }
             .mapNotNull { dependencyMethodId -> dirtyClassIds[dependencyMethodId.classId].takeIf { it != clazz } }
     }

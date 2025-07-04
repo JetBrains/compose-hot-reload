@@ -5,7 +5,8 @@ import io.sellmair.evas.launchState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import org.jetbrains.compose.reload.analysis.renderRuntimeInstructionTree
+import org.jetbrains.compose.reload.InternalHotReloadApi
+import org.jetbrains.compose.reload.analysis.renderInstructionTree
 import java.nio.file.Path
 import kotlin.io.path.readBytes
 import kotlin.time.Duration.Companion.minutes
@@ -21,6 +22,7 @@ sealed class RuntimeTreeState : State {
     data class Result(val rendered: String) : RuntimeTreeState()
 }
 
+@OptIn(InternalHotReloadApi::class)
 fun CoroutineScope.launchRuntimeTreeState() = launchState(
     coroutineContext = Dispatchers.IO,
     keepActive = 1.minutes
@@ -28,7 +30,7 @@ fun CoroutineScope.launchRuntimeTreeState() = launchState(
     RuntimeTreeState.Loading.emit()
     while (true) {
         runCatching {
-            RuntimeTreeState.Result(renderRuntimeInstructionTree(key.path.readBytes())).emit()
+            RuntimeTreeState.Result(renderInstructionTree(key.path.readBytes())).emit()
         }.onFailure { exception ->
             RuntimeTreeState.Error(exception.message ?: "Failed to parse runtime info").emit()
         }

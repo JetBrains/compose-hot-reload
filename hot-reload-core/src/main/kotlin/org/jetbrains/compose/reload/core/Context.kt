@@ -6,21 +6,21 @@
 package org.jetbrains.compose.reload.core
 
 public sealed interface Context {
-    public operator fun <T> get(key: ContextKey<T>): T
-}
+    public interface Key<out T> {
+        public abstract class Optional<T> : Key<T?> where T : Any {
+            final override val default: T? get() = null
+        }
 
-public interface ContextKey<out T> {
-    public val default: T
-}
+        public val default: T
+    }
 
-public abstract class OptionalContextKey<T> : ContextKey<T?> where T : Any {
-    final override val default: T? get() = null
+    public operator fun <T> get(key: Key<T>): T
 }
 
 public abstract class ContextElement : Context {
-    public abstract val key: ContextKey<*>
+    public abstract val key: Context.Key<*>
 
-    override fun <T> get(key: ContextKey<T>): T {
+    override fun <T> get(key: Context.Key<T>): T {
         @Suppress("UNCHECKED_CAST")
         return if (key == this.key) this as T
         else key.default
@@ -32,8 +32,8 @@ public fun Context(): Context {
 }
 
 public fun Context(vararg entries: ContextEntry<*>): Context {
-    if (entries.isEmpty()) return Context()
-    else return ContextImpl(entries.associate { it.key to it.value })
+    return if (entries.isEmpty()) Context()
+    else ContextImpl(entries.associate { it.key to it.value })
 }
 
 public fun Context.with(vararg entries: ContextEntry<*>): Context {
@@ -49,31 +49,33 @@ public operator fun Context.plus(other: Context): Context {
     return ContextImpl(thisMap + otherMap)
 }
 
-public infix fun <T> ContextKey<T>.with(value: T): ContextEntry<T> =
+public infix fun <T> Context.Key<T>.with(value: T): ContextEntry<T> =
     ContextEntry(this, value)
 
 public class ContextEntry<T>(
-    public val key: ContextKey<T>,
+    public val key: Context.Key<T>,
     public val value: T,
 )
 
 public object EmptyContext : Context {
-    override fun <T> get(key: ContextKey<T>): T {
+    override fun <T> get(key: Context.Key<T>): T {
         return key.default
     }
 }
 
 private class ContextImpl(
-    val map: Map<ContextKey<*>, Any?>
+    val map: Map<Context.Key<*>, Any?>
 ) : Context {
-    override fun <T> get(key: ContextKey<T>): T {
+    override fun <T> get(key: Context.Key<T>): T {
         @Suppress("UNCHECKED_CAST")
         return if (key in map) map[key] as T
         else key.default
     }
 }
 
-private val Context.map: Map<ContextKey<*>, Any?>
+public fun Context.asMap(): Map<Context.Key<*>, Any?> = this.map
+
+private val Context.map: Map<Context.Key<*>, Any?>
     get() = when (this) {
         is ContextImpl -> this.map
         is ContextElement -> mapOf(key to this)
