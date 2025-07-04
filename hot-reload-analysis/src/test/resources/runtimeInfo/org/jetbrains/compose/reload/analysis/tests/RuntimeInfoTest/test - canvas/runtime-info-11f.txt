@@ -35,42 +35,50 @@ fun App() {
 
 FooKt {
     App {
-        type: Composable
         desc: (Landroidx/compose/runtime/Composer;I)V
-        key: 857161579
-        codeHash: 2346738419
-        methodDependencies: [
-            FooKt.App$lambda$3 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
-        ]
-        fieldDependencies: []
-    
-        RestartGroup {
+        type: Composable
+        Method {
             key: 857161579
-            codeHash: 3902619257
+            codeHash: 2346738419
             methodDependencies: [
-                FooKt.App$lambda$2$lambda$1$lambda$0 (Landroidx/compose/ui/graphics/drawscope/DrawScope;)Lkotlin/Unit;
+                FooKt.App$lambda$3 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
             ]
+            fieldDependencies: []
+    
+            RestartGroup {
+                key: 857161579
+                codeHash: 3902619257
+                methodDependencies: [
+                    FooKt.App$lambda$2$lambda$1$lambda$0 (Landroidx/compose/ui/graphics/drawscope/DrawScope;)Lkotlin/Unit;
+                ]
+                fieldDependencies: []
+            }
+        }
+    }
+    
+    
+    App$lambda$2$lambda$1$lambda$0 {
+        desc: (Landroidx/compose/ui/graphics/drawscope/DrawScope;)Lkotlin/Unit;
+        type: Regular
+        Method {
+            key: null
+            codeHash: 4086007702
+            methodDependencies: []
             fieldDependencies: []
         }
     }
     
-    App$lambda$2$lambda$1$lambda$0 {
-        type: Regular
-        desc: (Landroidx/compose/ui/graphics/drawscope/DrawScope;)Lkotlin/Unit;
-        key: null
-        codeHash: 4086007702
-        methodDependencies: []
-        fieldDependencies: []
-    }
     
     App$lambda$3 {
-        type: Composable
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
-        key: null
-        codeHash: 1807268143
-        methodDependencies: [
-            FooKt.App (Landroidx/compose/runtime/Composer;I)V
-        ]
-        fieldDependencies: []
+        type: Composable
+        Method {
+            key: null
+            codeHash: 1807268143
+            methodDependencies: [
+                FooKt.App (Landroidx/compose/runtime/Composer;I)V
+            ]
+            fieldDependencies: []
+        }
     }
 }

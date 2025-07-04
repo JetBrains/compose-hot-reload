@@ -28,6 +28,7 @@ internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
     val methods = classNode.methods.mapNotNull { methodNode ->
         MethodInfo(
             methodId = MethodId(classNode, methodNode),
+            methodType = MethodType(methodNode),
             rootScope = ScopeInfo(classNode, methodNode),
             modality = when {
                 methodNode.access and Opcodes.ACC_FINAL != 0 -> MethodInfo.Modality.FINAL

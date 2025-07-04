@@ -10,7 +10,6 @@ import org.objectweb.asm.tree.MethodNode
 
 data class ScopeInfo(
     val methodId: MethodId,
-    val methodType: MethodType,
     val scopeType: ScopeType,
     val scopeHash: ScopeHash,
     val group: ComposeGroupKey?,
@@ -39,7 +38,6 @@ internal fun createScopeInfo(
 ): ScopeInfo {
     return ScopeInfo(
         methodId = methodId,
-        methodType = MethodType(methodNode),
         scopeType = tree.type,
         scopeHash = tree.scopeHash(methodNode),
         group = tree.group,

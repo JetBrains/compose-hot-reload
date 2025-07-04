@@ -31,40 +31,48 @@ fun Foo() {
 
 FooKt {
     Bar {
-        type: Composable
         desc: (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
-        key: 490236094
-        codeHash: 1716190341
-        methodDependencies: []
-        fieldDependencies: []
-    }
-    
-    Foo {
         type: Composable
-        desc: (Landroidx/compose/runtime/Composer;I)V
-        key: -965539098
-        codeHash: 2980351513
-        methodDependencies: [
-            FooKt.Foo$lambda$3 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
-        ]
-        fieldDependencies: []
-    
-        RestartGroup {
-            key: -965539098
-            codeHash: 1622656563
+        Method {
+            key: 490236094
+            codeHash: 1716190341
             methodDependencies: []
             fieldDependencies: []
         }
     }
     
-    Foo$lambda$3 {
+    
+    Foo {
+        desc: (Landroidx/compose/runtime/Composer;I)V
         type: Composable
+        Method {
+            key: -965539098
+            codeHash: 2980351513
+            methodDependencies: [
+                FooKt.Foo$lambda$3 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+            ]
+            fieldDependencies: []
+    
+            RestartGroup {
+                key: -965539098
+                codeHash: 1622656563
+                methodDependencies: []
+                fieldDependencies: []
+            }
+        }
+    }
+    
+    
+    Foo$lambda$3 {
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
-        key: null
-        codeHash: 210770274
-        methodDependencies: [
-            FooKt.Foo (Landroidx/compose/runtime/Composer;I)V
-        ]
-        fieldDependencies: []
+        type: Composable
+        Method {
+            key: null
+            codeHash: 210770274
+            methodDependencies: [
+                FooKt.Foo (Landroidx/compose/runtime/Composer;I)V
+            ]
+            fieldDependencies: []
+        }
     }
 }

@@ -20,66 +20,71 @@ fun Foo() {
 
 FooKt {
     Foo {
-        type: Composable
         desc: (Landroidx/compose/runtime/Composer;I)V
-        key: -965539098
-        codeHash: 1636076322
-        methodDependencies: [
-            FooKt.Foo$lambda$5 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
-        ]
-        fieldDependencies: []
-    
-        RestartGroup {
+        type: Composable
+        Method {
             key: -965539098
-            codeHash: 1961383961
-            methodDependencies: []
+            codeHash: 1636076322
+            methodDependencies: [
+                FooKt.Foo$lambda$5 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+            ]
             fieldDependencies: []
     
-            ReplaceGroup {
-                key: 1849434622
-                codeHash: 1750160353
+            RestartGroup {
+                key: -965539098
+                codeHash: 1961383961
                 methodDependencies: []
                 fieldDependencies: []
-            }
     
-            ReplaceGroup {
-                key: 5004770
-                codeHash: 116276097
-                methodDependencies: []
-                fieldDependencies: []
-            }
+                ReplaceGroup {
+                    key: 1849434622
+                    codeHash: 1750160353
+                    methodDependencies: []
+                    fieldDependencies: []
+                }
     
-            ReplaceGroup {
-                key: -1633490746
-                codeHash: 1476853512
-                methodDependencies: []
-                fieldDependencies: []
-            }
+                ReplaceGroup {
+                    key: 5004770
+                    codeHash: 116276097
+                    methodDependencies: []
+                    fieldDependencies: []
+                }
     
-            ReplaceGroup {
-                key: -1746271574
-                codeHash: 3050482382
-                methodDependencies: []
-                fieldDependencies: []
-            }
+                ReplaceGroup {
+                    key: -1633490746
+                    codeHash: 1476853512
+                    methodDependencies: []
+                    fieldDependencies: []
+                }
     
-            ReplaceGroup {
-                key: -1224400529
-                codeHash: 2177437705
-                methodDependencies: []
-                fieldDependencies: []
+                ReplaceGroup {
+                    key: -1746271574
+                    codeHash: 3050482382
+                    methodDependencies: []
+                    fieldDependencies: []
+                }
+    
+                ReplaceGroup {
+                    key: -1224400529
+                    codeHash: 2177437705
+                    methodDependencies: []
+                    fieldDependencies: []
+                }
             }
         }
     }
     
+    
     Foo$lambda$5 {
-        type: Composable
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
-        key: null
-        codeHash: 210770274
-        methodDependencies: [
-            FooKt.Foo (Landroidx/compose/runtime/Composer;I)V
-        ]
-        fieldDependencies: []
+        type: Composable
+        Method {
+            key: null
+            codeHash: 210770274
+            methodDependencies: [
+                FooKt.Foo (Landroidx/compose/runtime/Composer;I)V
+            ]
+            fieldDependencies: []
+        }
     }
 }

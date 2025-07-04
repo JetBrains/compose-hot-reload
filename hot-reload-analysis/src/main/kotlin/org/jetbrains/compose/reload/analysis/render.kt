@@ -39,27 +39,32 @@ fun ClassInfo.render(): String = buildString {
     }
 
     withIndent {
-        appendLine(methods.values.joinToString("\n\n") { it.rootScope.render() })
+        appendLine(methods.values.joinToString("\n\n") { it.render() })
     }
 
 
     appendLine("}")
 }
 
+internal fun MethodInfo.render(): String = buildString {
+    appendLine("${methodId.methodName} {")
+    withIndent {
+        appendLine("desc: ${methodId.methodDescriptor}")
+        appendLine("type: $methodType")
+        appendLine(rootScope.render())
+    }
+    this += "}"
+}
+
 internal fun ScopeInfo.render(): String = buildString {
     when (scopeType) {
-        Method -> appendLine("${methodId.methodName} {")
+        Method -> appendLine("Method {")
         RestartGroup -> appendLine("RestartGroup {")
         ReplaceGroup -> appendLine("ReplaceGroup {")
         SourceInformationMarker -> appendLine("SourceInformationMarker {")
     }
 
     withIndent {
-        if (scopeType == Method) {
-            appendLine("type: $methodType")
-            appendLine("desc: ${methodId.methodDescriptor}")
-        }
-
         appendLine("key: ${group?.key}")
         appendLine("codeHash: ${scopeHash.value}")
         if (methodDependencies.isEmpty()) {

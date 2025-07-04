@@ -21,6 +21,7 @@ data class FieldInfo(
 
 data class MethodInfo(
     val methodId: MethodId,
+    val methodType: MethodType,
     val modality: Modality,
     val rootScope: ScopeInfo,
 ) : MemberInfo() {

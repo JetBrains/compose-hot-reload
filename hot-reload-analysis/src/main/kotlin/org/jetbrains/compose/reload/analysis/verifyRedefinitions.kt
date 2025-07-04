@@ -16,7 +16,7 @@ private fun RuntimeInfo.verifyMethodRedefinitions(redefined: RuntimeInfo) {
         val previousMethod = methodIndex[methodId] ?: return@forEach
 
         if (
-            previousMethod.rootScope.methodType == MethodType.ComposeEntryPoint &&
+            previousMethod.methodType == MethodType.ComposeEntryPoint &&
             previousMethod.rootScope.scopeHash != redefinedMethod.rootScope.scopeHash
         ) {
             throw RedefinitionVerificationException(

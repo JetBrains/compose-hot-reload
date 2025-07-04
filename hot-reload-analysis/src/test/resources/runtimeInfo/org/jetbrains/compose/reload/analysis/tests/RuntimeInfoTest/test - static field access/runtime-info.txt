@@ -20,62 +20,73 @@ FooKt {
     val x: I
 
     getX {
-        type: Regular
         desc: ()I
-        key: null
-        codeHash: 3555685996
-        methodDependencies: []
-        fieldDependencies: [
-            FooKt.x I
-        ]
+        type: Regular
+        Method {
+            key: null
+            codeHash: 3555685996
+            methodDependencies: []
+            fieldDependencies: [
+                FooKt.x I
+            ]
+        }
     }
     
-    Foo {
-        type: Composable
-        desc: (Landroidx/compose/runtime/Composer;I)V
-        key: -965539098
-        codeHash: 55349878
-        methodDependencies: [
-            FooKt.Foo$lambda$1 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
-        ]
-        fieldDependencies: []
     
-        RestartGroup {
+    Foo {
+        desc: (Landroidx/compose/runtime/Composer;I)V
+        type: Composable
+        Method {
             key: -965539098
-            codeHash: 1382954003
-            methodDependencies: []
+            codeHash: 55349878
+            methodDependencies: [
+                FooKt.Foo$lambda$1 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+            ]
             fieldDependencies: []
     
-            ReplaceGroup {
-                key: 1849434622
-                codeHash: 511895841
+            RestartGroup {
+                key: -965539098
+                codeHash: 1382954003
                 methodDependencies: []
-                fieldDependencies: [
-                    FooKt.x I
-                ]
+                fieldDependencies: []
+    
+                ReplaceGroup {
+                    key: 1849434622
+                    codeHash: 511895841
+                    methodDependencies: []
+                    fieldDependencies: [
+                        FooKt.x I
+                    ]
+                }
             }
         }
     }
     
+    
     Foo$lambda$1 {
-        type: Composable
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
-        key: null
-        codeHash: 210770274
-        methodDependencies: [
-            FooKt.Foo (Landroidx/compose/runtime/Composer;I)V
-        ]
-        fieldDependencies: []
+        type: Composable
+        Method {
+            key: null
+            codeHash: 210770274
+            methodDependencies: [
+                FooKt.Foo (Landroidx/compose/runtime/Composer;I)V
+            ]
+            fieldDependencies: []
+        }
     }
     
+    
     <clinit> {
-        type: Regular
         desc: ()V
-        key: null
-        codeHash: 2373262093
-        methodDependencies: []
-        fieldDependencies: [
-            FooKt.x I
-        ]
+        type: Regular
+        Method {
+            key: null
+            codeHash: 2373262093
+            methodDependencies: []
+            fieldDependencies: [
+                FooKt.x I
+            ]
+        }
     }
 }
