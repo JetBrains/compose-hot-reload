@@ -47,7 +47,7 @@ private fun Context.resolveDirtyRuntimeScopeInfos(
         resolveRemovedMethods(current, redefined)
 
     val dirtyFields = resolveDirtyFields(current, redefined) +
-        resolveRemovedFields(current, redefined)
+        resolveRemovedFields(current, redefined) + resolveDirtyComposeResourceAccessors(current, redefined)
 
     val transitivelyDirty = resolveTransitivelyDirty(current, redefined, dirtyMethods, dirtyFields)
 
@@ -78,6 +78,16 @@ private fun resolveRemovedMethods(current: RuntimeInfo, redefined: RuntimeInfo):
             if (methodId in redefinedClass.methods) return@mapNotNull null
             else method
         }
+    }
+}
+
+private fun resolveDirtyComposeResourceAccessors(current: RuntimeInfo, redefined: RuntimeInfo): List<FieldInfo> {
+    return redefined.fieldIndex.mapNotNull { (fieldId, redefinedField) ->
+        val previousField = current.fieldIndex[fieldId] ?: return@mapNotNull redefinedField
+        if (previousField.resourceContentHash != redefinedField.resourceContentHash) {
+            return@mapNotNull redefinedField
+        }
+        null
     }
 }
 
@@ -291,7 +301,7 @@ private fun resolveTransitivelyDirty(
                 ?: current.classIndex[element.memberId.classId]
 
             classInfo?.fields?.forEach { (fieldId, field) ->
-                if (field.isStatic) {
+                if (field.isStatic && field.resourceContentHash == null) {
                     queue.add(Element(fieldId, depth = element.depth + 1))
                 }
             }

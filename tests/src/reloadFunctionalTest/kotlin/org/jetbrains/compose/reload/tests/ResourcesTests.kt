@@ -18,6 +18,7 @@ import org.jetbrains.compose.reload.test.gradle.WithHotReloadProperty
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.getDefaultMainKtSourceFile
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
+import org.jetbrains.compose.reload.test.gradle.sendTestEvent
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
 import org.jetbrains.compose.reload.utils.QuickTest
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -211,7 +212,7 @@ class ResourcesTests {
         )
     }
 
-    @QuickTest
+//    @QuickTest
     @HotReloadTest
     fun `change array string resource`(fixture: HotReloadTestFixture) {
         val stringResource = fixture.testStringResourceFile()
@@ -270,6 +271,71 @@ class ResourcesTests {
             requestReload()
         }
         fixture.checkScreenshot("replaced")
+    }
+
+    @HotReloadTest
+//    @DisabledVersion(compose = "1.9.0-alpha02", reason = "No support for font resources cache invalidation")
+//    @QuickTest
+    @MinComposeVersion("10.1.0-dev1010")
+    fun `change text resource in inner scope`(fixture: HotReloadTestFixture) = fixture.runTest {
+        val testResource = testStringResourceFile()
+        writeString(
+            testResource,
+            """
+            <?xml version="1.0" encoding="utf-8"?>
+                 <resources>
+                     <string name="outer">outer</string>
+                     <string name="inner">inner before</string>
+                 </resources>
+                """.trimIndent()
+        )
+
+        initialSourceCode(
+            """
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.material3.*
+            import androidx.compose.ui.unit.*
+            import androidx.compose.ui.window.*
+            import androidx.compose.runtime.*
+            import org.jetbrains.compose.reload.test.*
+            import ${projectName()}.generated.resources.*
+            import org.jetbrains.compose.resources.stringResource
+        
+            fun main() {
+                screenshotTestApplication {
+                    var state by remember { mutableStateOf(false) }
+                    onTestEvent {
+                        state = true
+                    }
+                    
+                    Column {
+                        TestText(stringResource(Res.string.outer))
+                        Group {
+                            TestText(stringResource(Res.string.inner) + " (" + state + ")")
+                        }
+                    }
+                }
+            }
+        """.trimIndent()
+        )
+        checkScreenshot("before")
+        fixture.sendTestEvent()
+        fixture.checkScreenshot("before-1")
+
+        runTransaction {
+            writeString(
+                testResource,
+                """
+            <?xml version="1.0" encoding="utf-8"?>
+                 <resources>
+                     <string name="outer">outer</string>
+                     <string name="inner">inner after</string>
+                 </resources>
+                """.trimIndent()
+            )
+            requestReload()
+        }
+        checkScreenshot("after")
     }
 
     class Extension : BuildGradleKtsExtension {

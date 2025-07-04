@@ -10,7 +10,9 @@ package org.jetbrains.compose.reload.analysis
 
 import org.jetbrains.compose.reload.core.withClosure
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.MethodNode
 
 sealed interface RuntimeInfo {
@@ -148,6 +150,7 @@ data class FieldInfo(
     val fieldId: FieldId,
     val isStatic: Boolean,
     val initialValue: Any?,
+    val resourceContentHash: Int? = null,
 )
 
 data class MethodInfo(
@@ -187,7 +190,8 @@ internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
         FieldId(classNode, fieldNode) to FieldInfo(
             fieldId = FieldId(classNode, fieldNode),
             isStatic = fieldNode.access and (Opcodes.ACC_STATIC) != 0,
-            initialValue = fieldNode.value
+            initialValue = fieldNode.value,
+            resourceContentHash = getResourceContentHash(fieldNode),
         )
     }
 
@@ -200,6 +204,18 @@ internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
         flags = ClassFlags(classNode.access)
     )
 }
+
+private fun getResourceContentHash(fieldNode: FieldNode?): Int? {
+    try {
+        return fieldNode?.invisibleAnnotations?.find { isResourceContentHashAnnotation(it) }?.values[1] as Int?
+    } catch (_: Throwable) {
+        return null
+    }
+}
+
+fun isResourceContentHashAnnotation(it: AnnotationNode): Boolean =
+    it.desc == "Lorg/jetbrains/compose/resources/ResourceContentHash;"
+
 
 internal fun RuntimeScopeInfo(
     classNode: ClassNode,
