@@ -22,11 +22,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.sellmair.evas.compose.composeValue
-import org.jetbrains.compose.reload.analysis.ClassInfo
 import org.jetbrains.compsoe.reload.analyzer.app.states.ClassInfoState
 import org.jetbrains.compsoe.reload.analyzer.app.states.JavapState
 import org.jetbrains.compsoe.reload.analyzer.app.states.OpenedFileState
-import org.jetbrains.compsoe.reload.analyzer.app.states.RuntimeInfoState
 import org.jetbrains.compsoe.reload.analyzer.app.states.RuntimeTreeState
 import org.jetbrains.compsoe.reload.analyzer.app.states.WorkingDirectoryState
 import java.nio.file.Path

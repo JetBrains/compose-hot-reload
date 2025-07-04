@@ -5,11 +5,11 @@
 
 package org.jetbrains.compose.reload.analysis
 
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.EndReplaceGroup
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.ReturnToken
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.StartReplaceGroup
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.StartRestartGroup
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionTokenizer.TokenizerContext
+import org.jetbrains.compose.reload.analysis.InstructionToken.EndReplaceGroup
+import org.jetbrains.compose.reload.analysis.InstructionToken.ReturnToken
+import org.jetbrains.compose.reload.analysis.InstructionToken.StartReplaceGroup
+import org.jetbrains.compose.reload.analysis.InstructionToken.StartRestartGroup
+import org.jetbrains.compose.reload.analysis.InstructionTokenizer.TokenizerContext
 import org.jetbrains.compose.reload.core.Either
 import org.jetbrains.compose.reload.core.Failure
 import org.jetbrains.compose.reload.core.leftOr
@@ -26,13 +26,13 @@ import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.VarInsnNode
 
 
-sealed class RuntimeInstructionToken {
+sealed class InstructionToken {
     abstract val instructions: List<AbstractInsnNode>
 
     data class StartRestartGroup(
         val key: ComposeGroupKey,
         override val instructions: List<AbstractInsnNode>
-    ) : RuntimeInstructionToken() {
+    ) : InstructionToken() {
         override fun toString(): String {
             return "StartRestartGroup(key=$key)"
         }
@@ -40,7 +40,7 @@ sealed class RuntimeInstructionToken {
 
     data class EndRestartGroup(
         override val instructions: List<AbstractInsnNode>
-    ) : RuntimeInstructionToken() {
+    ) : InstructionToken() {
         override fun toString(): String {
             return "EndRestartGroup()"
         }
@@ -49,7 +49,7 @@ sealed class RuntimeInstructionToken {
     data class StartReplaceGroup(
         val key: ComposeGroupKey,
         override val instructions: List<AbstractInsnNode>
-    ) : RuntimeInstructionToken() {
+    ) : InstructionToken() {
         override fun toString(): String {
             return "StartReplaceGroup(key=$key)"
         }
@@ -57,7 +57,7 @@ sealed class RuntimeInstructionToken {
 
     data class EndReplaceGroup(
         override val instructions: List<AbstractInsnNode>
-    ) : RuntimeInstructionToken() {
+    ) : InstructionToken() {
         override fun toString(): String {
             return "EndReplaceGroup()"
         }
@@ -66,7 +66,7 @@ sealed class RuntimeInstructionToken {
     data class SourceInformation(
         val sourceInformation: String,
         override val instructions: List<AbstractInsnNode>
-    ) : RuntimeInstructionToken() {
+    ) : InstructionToken() {
         override fun toString(): String {
             return "SourceInformation($sourceInformation)"
         }
@@ -76,7 +76,7 @@ sealed class RuntimeInstructionToken {
         val key: ComposeGroupKey,
         val sourceInformation: String,
         override val instructions: List<AbstractInsnNode>
-    ) : RuntimeInstructionToken() {
+    ) : InstructionToken() {
         override fun toString(): String {
             return "SourceInformationMarkerStart(key=$key, sourceInformation='$sourceInformation')"
         }
@@ -84,7 +84,7 @@ sealed class RuntimeInstructionToken {
 
     data class SourceInformationMarkerEnd(
         override val instructions: List<AbstractInsnNode>
-    ) : RuntimeInstructionToken() {
+    ) : InstructionToken() {
         override fun toString(): String {
             return "SourceInformationMarkerEnd"
         }
@@ -92,7 +92,7 @@ sealed class RuntimeInstructionToken {
 
     data class JumpToken(
         val jumpInsn: JumpInsnNode
-    ) : RuntimeInstructionToken() {
+    ) : InstructionToken() {
         override val instructions = listOf(jumpInsn)
         override fun toString(): String {
             return "JumpToken(jumpInsn=${jumpInsn.opcode})"
@@ -101,7 +101,7 @@ sealed class RuntimeInstructionToken {
 
     data class ReturnToken(
         val returnInsn: AbstractInsnNode
-    ) : RuntimeInstructionToken() {
+    ) : InstructionToken() {
         override val instructions = listOf(returnInsn)
         override fun toString(): String {
             return "ReturnToken(returnInsn=${returnInsn.opcode})"
@@ -110,7 +110,7 @@ sealed class RuntimeInstructionToken {
 
     data class LabelToken(
         val labelInsn: LabelNode
-    ) : RuntimeInstructionToken() {
+    ) : InstructionToken() {
         override val instructions: List<AbstractInsnNode> = listOf(labelInsn)
         override fun toString(): String {
             return "LabelToken(label=${labelInsn.label})"
@@ -120,7 +120,7 @@ sealed class RuntimeInstructionToken {
     data class CurrentMarkerToken(
         val variableIndex: Int,
         override val instructions: List<AbstractInsnNode>
-    ) : RuntimeInstructionToken() {
+    ) : InstructionToken() {
         override fun toString(): String {
             return "CurrentMarkerToken(index=$variableIndex)"
         }
@@ -129,7 +129,7 @@ sealed class RuntimeInstructionToken {
     data class EndToMarkerToken(
         var variableIndex: Int,
         override val instructions: List<AbstractInsnNode>
-    ) : RuntimeInstructionToken() {
+    ) : InstructionToken() {
         override fun toString(): String {
             return "EndToMarkerToken(index=$variableIndex)"
         }
@@ -137,14 +137,14 @@ sealed class RuntimeInstructionToken {
 
     data class BlockToken(
         override val instructions: List<AbstractInsnNode>
-    ) : RuntimeInstructionToken() {
+    ) : InstructionToken() {
         override fun toString(): String {
             return "BlockToken(${instructions.size})"
         }
     }
 }
 
-internal sealed class RuntimeInstructionTokenizer {
+internal sealed class InstructionTokenizer {
     data class TokenizerContext(
         val instructions: List<AbstractInsnNode>,
         val index: Int = 0,
@@ -179,24 +179,24 @@ internal sealed class RuntimeInstructionTokenizer {
         }
     }
 
-    abstract fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>?
+    abstract fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>?
 }
 
 
 private class CompositeInstructionTokenizer(
-    val children: List<RuntimeInstructionTokenizer>
-) : RuntimeInstructionTokenizer() {
-    constructor(vararg children: RuntimeInstructionTokenizer) : this(children.toList())
+    val children: List<InstructionTokenizer>
+) : InstructionTokenizer() {
+    constructor(vararg children: InstructionTokenizer) : this(children.toList())
 
-    override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
+    override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
         return children.firstNotNullOfOrNull { tokenizer -> tokenizer.nextToken(context) }
     }
 }
 
 private class SingleInstructionTokenizer(
-    private val token: (instruction: AbstractInsnNode) -> RuntimeInstructionToken?
-) : RuntimeInstructionTokenizer() {
-    override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
+    private val token: (instruction: AbstractInsnNode) -> InstructionToken?
+) : InstructionTokenizer() {
+    override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
         val instruction = context[0] ?: return null
         return (token(instruction) ?: return null).toLeft()
     }
@@ -228,13 +228,13 @@ private val tokenizer by lazy {
 
 private val LabelTokenizer = SingleInstructionTokenizer { instruction ->
     if (instruction is LabelNode) {
-        RuntimeInstructionToken.LabelToken(instruction)
+        InstructionToken.LabelToken(instruction)
     } else null
 }
 
 private val JumpTokenizer = SingleInstructionTokenizer { instruction ->
     if (instruction is JumpInsnNode) {
-        RuntimeInstructionToken.JumpToken(instruction)
+        InstructionToken.JumpToken(instruction)
     } else null
 }
 
@@ -250,8 +250,8 @@ private val ReturnTokenizer = SingleInstructionTokenizer { instruction ->
     }
 }
 
-private object StartRestartGroupTokenizer : RuntimeInstructionTokenizer() {
-    override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
+private object StartRestartGroupTokenizer : InstructionTokenizer() {
+    override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
         val expectedLdc = context[0] ?: return null
         val expectedMethodInsn = context[1] ?: return null
 
@@ -270,19 +270,19 @@ private object StartRestartGroupTokenizer : RuntimeInstructionTokenizer() {
     }
 }
 
-private object EndRestartGroupTokenizer : RuntimeInstructionTokenizer() {
-    override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
+private object EndRestartGroupTokenizer : InstructionTokenizer() {
+    override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
         val expectedMethodIns = context[0] as? MethodInsnNode ?: return null
         if (MethodId(expectedMethodIns) == Ids.Composer.endRestartGroup) {
-            return RuntimeInstructionToken.EndRestartGroup(listOf(expectedMethodIns)).toLeft()
+            return InstructionToken.EndRestartGroup(listOf(expectedMethodIns)).toLeft()
         }
 
         return null
     }
 }
 
-private object StartReplaceGroupTokenizer : RuntimeInstructionTokenizer() {
-    override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
+private object StartReplaceGroupTokenizer : InstructionTokenizer() {
+    override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
         val expectedLdc = context[0] ?: return null
         val expectedMethodInsn = context[1] ?: return null
 
@@ -301,8 +301,8 @@ private object StartReplaceGroupTokenizer : RuntimeInstructionTokenizer() {
     }
 }
 
-private object EndReplaceGroupTokenizer : RuntimeInstructionTokenizer() {
-    override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
+private object EndReplaceGroupTokenizer : InstructionTokenizer() {
+    override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
         val expectedMethodIns = context[0] as? MethodInsnNode ?: return null
         if (MethodId(expectedMethodIns) == Ids.Composer.endReplaceGroup) {
             return EndReplaceGroup(listOf(expectedMethodIns)).toLeft()
@@ -312,8 +312,8 @@ private object EndReplaceGroupTokenizer : RuntimeInstructionTokenizer() {
     }
 }
 
-private object SourceInformationTokenizer : RuntimeInstructionTokenizer() {
-    override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
+private object SourceInformationTokenizer : InstructionTokenizer() {
+    override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
         val expectedSourceInformationLoad = context[0] ?: return null
         val expectedMethodInsn = context[1] ?: return null
 
@@ -322,7 +322,7 @@ private object SourceInformationTokenizer : RuntimeInstructionTokenizer() {
                 "Failed parsing 'sourceInformation' call: expected LDC for source information"
             ).toRight()
 
-            return RuntimeInstructionToken.SourceInformation(
+            return InstructionToken.SourceInformation(
                 sourceInformationLdc.cst as? String ?: "N/A",
                 listOf(expectedSourceInformationLoad, expectedMethodInsn)
             ).toLeft()
@@ -332,8 +332,8 @@ private object SourceInformationTokenizer : RuntimeInstructionTokenizer() {
     }
 }
 
-private object SourceInformationMarkerStartTokenizer : RuntimeInstructionTokenizer() {
-    override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
+private object SourceInformationMarkerStartTokenizer : InstructionTokenizer() {
+    override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
         val consumer = context.consumer()
 
         /* Search for key */
@@ -362,7 +362,7 @@ private object SourceInformationMarkerStartTokenizer : RuntimeInstructionTokeniz
                 is LineNumberNode -> continue
                 is MethodInsnNode -> {
                     if (MethodId(next) == Ids.ComposerKt.sourceInformationMarkerStart) {
-                        return RuntimeInstructionToken.SourceInformationMarkerStart(
+                        return InstructionToken.SourceInformationMarkerStart(
                             key = ComposeGroupKey(key),
                             sourceInformation = sourceInformation,
                             instructions = consumer.allConsumedInstructions()
@@ -377,13 +377,13 @@ private object SourceInformationMarkerStartTokenizer : RuntimeInstructionTokeniz
     }
 }
 
-private object SourceInformationMarkerEndTokenizer : RuntimeInstructionTokenizer() {
-    override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
+private object SourceInformationMarkerEndTokenizer : InstructionTokenizer() {
+    override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
         val expectedMethodInsn = context[0] ?: return null
         if (expectedMethodInsn is MethodInsnNode &&
             MethodId(expectedMethodInsn) == Ids.ComposerKt.sourceInformationMarkerEnd
         ) {
-            return RuntimeInstructionToken.SourceInformationMarkerEnd(
+            return InstructionToken.SourceInformationMarkerEnd(
                 instructions = listOf(expectedMethodInsn)
             ).toLeft()
         }
@@ -391,23 +391,23 @@ private object SourceInformationMarkerEndTokenizer : RuntimeInstructionTokenizer
     }
 }
 
-private object CurrentMarkerTokenizer : RuntimeInstructionTokenizer() {
-    override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
+private object CurrentMarkerTokenizer : InstructionTokenizer() {
+    override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
         val expectedGetCurrentMarkerInvocation = context[0] ?: return null
         val expectedIStoreInsn = context[1] ?: return null
         if (expectedGetCurrentMarkerInvocation !is MethodInsnNode) return null
         if (MethodId(expectedGetCurrentMarkerInvocation) != Ids.Composer.getCurrentMarker) return null
         if (expectedIStoreInsn !is VarInsnNode) return null
         if (expectedIStoreInsn.opcode != Opcodes.ISTORE) return null
-        return RuntimeInstructionToken.CurrentMarkerToken(
+        return InstructionToken.CurrentMarkerToken(
             variableIndex = expectedIStoreInsn.`var`,
             instructions = listOf(expectedGetCurrentMarkerInvocation, expectedIStoreInsn)
         ).toLeft()
     }
 }
 
-private object EndToMarkerTokenizer : RuntimeInstructionTokenizer() {
-    override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
+private object EndToMarkerTokenizer : InstructionTokenizer() {
+    override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
         val expectedILoadInsn = context[0] ?: return null
         val expectedEndToMarkerInvocation = context[1] ?: return null
 
@@ -416,15 +416,15 @@ private object EndToMarkerTokenizer : RuntimeInstructionTokenizer() {
         if (expectedILoadInsn.opcode != Opcodes.ILOAD) return null
         if (MethodId(expectedEndToMarkerInvocation) != Ids.Composer.endToMarker) return null
 
-        return RuntimeInstructionToken.EndToMarkerToken(
+        return InstructionToken.EndToMarkerToken(
             variableIndex = expectedILoadInsn.`var`,
             instructions = listOf(expectedILoadInsn, expectedEndToMarkerInvocation)
         ).toLeft()
     }
 }
 
-private object BlockTokenizer : RuntimeInstructionTokenizer() {
-    override fun nextToken(context: TokenizerContext): Either<RuntimeInstructionToken, Failure>? {
+private object BlockTokenizer : InstructionTokenizer() {
+    override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
         val instructions = mutableListOf<AbstractInsnNode>()
         var currentContext = context
         while (true) {
@@ -433,18 +433,18 @@ private object BlockTokenizer : RuntimeInstructionTokenizer() {
             currentContext = currentContext.skip(1) ?: break
         }
         if (instructions.isEmpty()) return null
-        return RuntimeInstructionToken.BlockToken(instructions).toLeft()
+        return InstructionToken.BlockToken(instructions).toLeft()
     }
 
 }
 
-internal fun tokenizeRuntimeInstructions(
+internal fun tokenizeInstructions(
     instructions: List<AbstractInsnNode>
-): Either<List<RuntimeInstructionToken>, Failure> {
+): Either<List<InstructionToken>, Failure> {
     if (instructions.isEmpty()) return Failure("Empty list of instructions").toRight()
 
     var context = TokenizerContext(instructions)
-    val tokens = mutableListOf<RuntimeInstructionToken>()
+    val tokens = mutableListOf<InstructionToken>()
 
     while (true) {
         val nextResult = tokenizer.nextToken(context) ?: return Failure("Cannot build next token").toRight()

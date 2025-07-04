@@ -6,9 +6,9 @@
 package org.jetbrains.compose.reload.analysis.tests
 
 import org.jetbrains.compose.reload.analysis.ClassNode
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken
+import org.jetbrains.compose.reload.analysis.InstructionToken
 import org.jetbrains.compose.reload.analysis.render
-import org.jetbrains.compose.reload.analysis.tokenizeRuntimeInstructions
+import org.jetbrains.compose.reload.analysis.tokenizeInstructions
 import org.jetbrains.compose.reload.analysis.withIndent
 import org.jetbrains.compose.reload.core.asFileName
 import org.jetbrains.compose.reload.core.leftOr
@@ -98,7 +98,7 @@ class RuntimeInstructionTokenizerTest {
         """.trimIndent()
     ) { method, tokens ->
         if (method.name != "Foo") return@doTest
-        if(tokens.find { it is RuntimeInstructionToken.StartRestartGroup && it.key.key == 122 } == null) {
+        if(tokens.find { it is InstructionToken.StartRestartGroup && it.key.key == 122 } == null) {
             fail("Cannot find 'StartRestartGroup' token with key '122'")
         }
     }
@@ -117,14 +117,14 @@ class RuntimeInstructionTokenizerTest {
         """.trimIndent(),
     ) { method, tokens ->
         if (method.name != "Foo") return@doTest
-        if(tokens.find { it is RuntimeInstructionToken.StartRestartGroup && it.key.key == 0x122 } == null) {
+        if(tokens.find { it is InstructionToken.StartRestartGroup && it.key.key == 0x122 } == null) {
             fail { "Cannot find 'StartRestartGroup' token with key '0x122'" }
         }
     }
 
     private fun doTest(
         compiler: Compiler, testInfo: TestInfo, code: String,
-        tokenAssertions: (method: MethodNode, List<RuntimeInstructionToken>) -> Unit = { _, _ -> }
+        tokenAssertions: (method: MethodNode, List<InstructionToken>) -> Unit = { _, _ -> }
     ) {
         val directory = Path("src/test/resources/runtimeInstructionTokens")
             .resolve(testInfo.testClass.get().name.asFileName())
@@ -149,7 +149,7 @@ class RuntimeInstructionTokenizerTest {
                 appendLine("class ${classNode.name} {")
                 withIndent {
                     classNode.methods.sortedBy { node -> node.name + node.desc }.forEach { methodNode ->
-                        val tokens = tokenizeRuntimeInstructions(methodNode.instructions.toList())
+                        val tokens = tokenizeInstructions(methodNode.instructions.toList())
                             .leftOr { right -> error("Failed to tokenize instructions: $right") }
 
                         tokenAssertions(methodNode, tokens)

@@ -19,7 +19,7 @@ private val logger = createLogger()
 
 data class RuntimeDirtyScopes(
     val redefinedClasses: List<ClassInfo>,
-    val dirtyScopes: List<RuntimeScopeInfo>
+    val dirtyScopes: List<ScopeInfo>
 ) {
     val dirtyMethodIds = dirtyScopes.groupBy { it.methodId }
 }
@@ -38,7 +38,7 @@ fun Context.resolveDirtyRuntimeScopes(current: RuntimeInfo, redefined: RuntimeIn
 
 private fun Context.resolveDirtyRuntimeScopeInfos(
     current: RuntimeInfo, redefined: RuntimeInfo
-): List<RuntimeScopeInfo> {
+): List<ScopeInfo> {
     val dirtyComposeScopes = resolveDirtyComposeScopes(current, redefined) +
         resolveRemovedComposeScopes(current, redefined)
 
@@ -61,7 +61,7 @@ private fun Context.resolveDirtyRuntimeScopeInfos(
 private fun resolveDirtyMethods(current: RuntimeInfo, redefined: RuntimeInfo): List<MethodInfo> {
     return redefined.methodIndex.mapNotNull { (methodId, redefinedMethod) ->
         val previousMethod = current.methodIndex[methodId] ?: return@mapNotNull redefinedMethod
-        if (previousMethod.rootScope.hash != redefinedMethod.rootScope.hash) {
+        if (previousMethod.rootScope.scopeHash != redefinedMethod.rootScope.scopeHash) {
             return@mapNotNull redefinedMethod
         }
         if (previousMethod.rootScope.children.map { it.group } != redefinedMethod.rootScope.children.map { it.group }) {
@@ -101,8 +101,8 @@ private fun resolveRemovedFields(current: RuntimeInfo, redefined: RuntimeInfo): 
     }
 }
 
-private fun resolveDirtyComposeScopes(current: RuntimeInfo, redefined: RuntimeInfo): List<RuntimeScopeInfo> {
-    val result = mutableListOf<RuntimeScopeInfo>()
+private fun resolveDirtyComposeScopes(current: RuntimeInfo, redefined: RuntimeInfo): List<ScopeInfo> {
+    val result = mutableListOf<ScopeInfo>()
     redefined.groupIndex.forEach forEachGroup@{ (groupKey, redefinedGroup) ->
         if (groupKey == null) return@forEachGroup
         if (SpecialComposeGroupKeys.isRememberGroup(groupKey)) return@forEachGroup
@@ -118,8 +118,8 @@ private fun resolveDirtyComposeScopes(current: RuntimeInfo, redefined: RuntimeIn
     return result
 }
 
-private fun resolveRemovedComposeScopes(current: RuntimeInfo, redefined: RuntimeInfo): List<RuntimeScopeInfo> {
-    val result = mutableListOf<RuntimeScopeInfo>()
+private fun resolveRemovedComposeScopes(current: RuntimeInfo, redefined: RuntimeInfo): List<ScopeInfo> {
+    val result = mutableListOf<ScopeInfo>()
     redefined.methodIndex.forEach forEachMethod@{ (methodId, redefinedMethod) ->
         val previousMethod = current.methodIndex[methodId] ?: return@forEachMethod
         val redefinedScopeGroups = redefinedMethod.allScopes.map { it.group }
@@ -151,13 +151,13 @@ private fun resolveTransitivelyDirty(
     redefined: RuntimeInfo,
     dirtyMethods: List<MethodInfo>,
     dirtyFields: List<FieldInfo>,
-): List<RuntimeScopeInfo> {
+): List<ScopeInfo> {
 
-    class Element(val memberId: MemberId, val depth: Int, val scope: RuntimeScopeInfo? = null)
+    class Element(val memberId: MemberId, val depth: Int, val scope: ScopeInfo? = null)
 
     val queue = ArrayDeque<Element>()
     val visited = hashMapOf<MemberId, Element>()
-    val transitivelyDirtyScopes = mutableListOf<RuntimeScopeInfo>()
+    val transitivelyDirtyScopes = mutableListOf<ScopeInfo>()
 
     fun ClassId.isComposableSingleton(): Boolean {
         return value.contains("ComposableSingletons\$")
@@ -264,7 +264,7 @@ private fun resolveTransitivelyDirty(
         /*
         Adds the provided [scope] to the current queue
          */
-        fun enqueue(scope: RuntimeScopeInfo) {
+        fun enqueue(scope: ScopeInfo) {
             if (scope.group != null && SpecialComposeGroupKeys.isRememberGroup(scope.group)) {
                 /**
                  * If we do not have 'OptimizeNonSkippingGroups' enabled, then we should really mark
@@ -313,8 +313,8 @@ private fun resolveTransitivelyDirty(
     return transitivelyDirtyScopes
 }
 
-private fun RuntimeScopeInfo.invalidationKey(): Long {
-    var result = hash.value
+private fun ScopeInfo.invalidationKey(): Long {
+    var result = scopeHash.value
 
     fun push(value: Long) {
         result = 31L * result + value
@@ -331,19 +331,19 @@ private fun RuntimeScopeInfo.invalidationKey(): Long {
         Therefore, we push hash of those values into the invalidation key of this parent
          */
         if (SpecialComposeGroupKeys.isRememberGroup(child.group)) {
-            push(child.hash.value)
+            push(child.scopeHash.value)
         }
     }
     return result
 }
 
-private fun Iterable<RuntimeScopeInfo>.invalidationKey(): Long = fold(0L) { acc, scope ->
+private fun Iterable<ScopeInfo>.invalidationKey(): Long = fold(0L) { acc, scope ->
     31L * acc + scope.invalidationKey()
 }
 
 private fun RuntimeInfo.resolveParentRuntimeScopeInfo(
-    redefined: RuntimeInfo, scope: RuntimeScopeInfo
-): RuntimeScopeInfo? {
+    redefined: RuntimeInfo, scope: ScopeInfo
+): ScopeInfo? {
     val methodInfo = redefined.methodIndex[scope.methodId] ?: methodIndex[scope.methodId]
     if (methodInfo == null) {
         logger.error("'resolveParentScope' could not find method '${scope.methodId}'")

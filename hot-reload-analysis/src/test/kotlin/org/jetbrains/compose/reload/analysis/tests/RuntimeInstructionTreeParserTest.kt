@@ -6,7 +6,7 @@
 package org.jetbrains.compose.reload.analysis.tests
 
 import org.jetbrains.compose.reload.analysis.plusAssign
-import org.jetbrains.compose.reload.analysis.renderRuntimeInstructionTree
+import org.jetbrains.compose.reload.analysis.renderInstructionTree
 import org.jetbrains.compose.reload.analysis.util.renderAsmTree
 import org.jetbrains.compose.reload.analysis.util.renderSourceTree
 import org.jetbrains.compose.reload.core.asFileName
@@ -131,7 +131,7 @@ class RuntimeInstructionTreeParserTest {
 
             appendLine(" /* Tree */ ")
             compiled.forEach { (_, bytecode) ->
-                this += renderRuntimeInstructionTree(bytecode)
+                this += renderInstructionTree(bytecode)
             }
         }.sanitized()
 

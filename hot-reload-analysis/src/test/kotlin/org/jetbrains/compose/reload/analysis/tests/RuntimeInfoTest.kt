@@ -7,7 +7,7 @@ package org.jetbrains.compose.reload.analysis.tests
 
 import org.jetbrains.compose.reload.analysis.ClassInfo
 import org.jetbrains.compose.reload.analysis.RuntimeInfo
-import org.jetbrains.compose.reload.analysis.RuntimeScopeInfo
+import org.jetbrains.compose.reload.analysis.ScopeInfo
 import org.jetbrains.compose.reload.analysis.SpecialComposeGroupKeys
 import org.jetbrains.compose.reload.analysis.TrackingRuntimeInfo
 import org.jetbrains.compose.reload.analysis.javap
@@ -307,17 +307,17 @@ class RuntimeInfoTest {
         assertNotEquals(code, codeAfter)
 
         val beforeScopes = runtimeInfoBefore.methodIndex.values.map { it.rootScope }
-            .withClosure<RuntimeScopeInfo> { scope -> scope.children }.toList()
+            .withClosure<ScopeInfo> { scope -> scope.children }.toList()
 
         val afterScopes = runtimeInfoAfter.methodIndex.values.map { it.rootScope }
-            .withClosure<RuntimeScopeInfo> { scope -> scope.children }.toList()
+            .withClosure<ScopeInfo> { scope -> scope.children }.toList()
 
         beforeScopes.forEachIndexed { index, beforeScope ->
             val afterScope = afterScopes[index]
             assertEquals(beforeScope.group, afterScope.group)
             assertEquals(beforeScope.scopeType, afterScope.scopeType)
             assertEquals(beforeScope.methodDependencies, afterScope.methodDependencies)
-            assertEquals(beforeScope.hash, afterScope.hash)
+            assertEquals(beforeScope.scopeHash, afterScope.scopeHash)
         }
     }
 
@@ -395,7 +395,7 @@ class RuntimeInfoTest {
 
         val baselineFoo = baseRuntimeInfo.methodIndex.entries.first { it.key.methodName == "Foo" }.value
         val modifiedFoo = modifiedRuntimeInfo.methodIndex.entries.first { it.key.methodName == "Foo" }.value
-        assertEquals(baselineFoo.rootScope.hash, modifiedFoo.rootScope.hash)
+        assertEquals(baselineFoo.rootScope.scopeHash, modifiedFoo.rootScope.scopeHash)
     }
 }
 

@@ -5,19 +5,19 @@
 
 package org.jetbrains.compose.reload.analysis
 
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.BlockToken
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.CurrentMarkerToken
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.EndReplaceGroup
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.EndRestartGroup
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.EndToMarkerToken
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.JumpToken
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.LabelToken
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.ReturnToken
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.SourceInformation
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.SourceInformationMarkerEnd
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.SourceInformationMarkerStart
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.StartReplaceGroup
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken.StartRestartGroup
+import org.jetbrains.compose.reload.analysis.InstructionToken.BlockToken
+import org.jetbrains.compose.reload.analysis.InstructionToken.CurrentMarkerToken
+import org.jetbrains.compose.reload.analysis.InstructionToken.EndReplaceGroup
+import org.jetbrains.compose.reload.analysis.InstructionToken.EndRestartGroup
+import org.jetbrains.compose.reload.analysis.InstructionToken.EndToMarkerToken
+import org.jetbrains.compose.reload.analysis.InstructionToken.JumpToken
+import org.jetbrains.compose.reload.analysis.InstructionToken.LabelToken
+import org.jetbrains.compose.reload.analysis.InstructionToken.ReturnToken
+import org.jetbrains.compose.reload.analysis.InstructionToken.SourceInformation
+import org.jetbrains.compose.reload.analysis.InstructionToken.SourceInformationMarkerEnd
+import org.jetbrains.compose.reload.analysis.InstructionToken.SourceInformationMarkerStart
+import org.jetbrains.compose.reload.analysis.InstructionToken.StartReplaceGroup
+import org.jetbrains.compose.reload.analysis.InstructionToken.StartRestartGroup
 import org.jetbrains.compose.reload.core.Either
 import org.jetbrains.compose.reload.core.Failure
 import org.jetbrains.compose.reload.core.createLogger
@@ -30,11 +30,11 @@ import org.objectweb.asm.tree.MethodNode
 
 private val logger = createLogger()
 
-data class RuntimeInstructionTree(
+data class InstructionTree(
     val group: ComposeGroupKey?,
-    val type: RuntimeScopeType,
-    val tokens: List<RuntimeInstructionToken>,
-    val children: List<RuntimeInstructionTree>,
+    val type: ScopeType,
+    val tokens: List<InstructionToken>,
+    val children: List<InstructionTree>,
 
     /**
      * Indicating that this tree was built with some failure. Using this tree requires caution!
@@ -42,33 +42,33 @@ data class RuntimeInstructionTree(
     val failure: Failure? = null,
 )
 
-internal fun parseRuntimeInstructionTreeLenient(methodId: MethodId, methodNode: MethodNode): RuntimeInstructionTree {
+internal fun parseInstructionTreeLenient(methodId: MethodId, methodNode: MethodNode): InstructionTree {
     /* Handle methods w/o bodies */
     if (methodNode.instructions.size() == 0) {
-        return RuntimeInstructionTree(
-            group = methodNode.readFunctionKeyMetaAnnotation(), type = RuntimeScopeType.Method,
+        return InstructionTree(
+            group = methodNode.readFunctionKeyMetaAnnotation(), type = ScopeType.Method,
             tokens = emptyList(), children = emptyList()
         )
     }
 
-    val tokens = tokenizeRuntimeInstructions(methodNode.instructions.toList()).leftOr { right ->
+    val tokens = tokenizeInstructions(methodNode.instructions.toList()).leftOr { right ->
         /* Fallback for methods that even fail to tokenize */
-        logger.warn("'tokenizeRuntimeInstructions' failed on $methodId: $right")
+        logger.warn("'tokenizeInstructions' failed on $methodId: $right")
         val tokens = listOf(BlockToken(methodNode.instructions.toList()))
-        return RuntimeInstructionTree(
+        return InstructionTree(
             group = methodNode.readFunctionKeyMetaAnnotation(),
-            type = RuntimeScopeType.Method,
+            type = ScopeType.Method,
             tokens = tokens,
             children = emptyList(),
             failure = right.value
         )
     }
 
-    return parseRuntimeInstructionTree(methodNode, tokens).leftOr { right ->
-        logger.warn("'parseRuntimeInstructionTree' failed on $methodId: $right")
-        return RuntimeInstructionTree(
+    return parseInstructionTree(methodNode, tokens).leftOr { right ->
+        logger.warn("'parseInstructionTree' failed on $methodId: $right")
+        return InstructionTree(
             group = methodNode.readFunctionKeyMetaAnnotation(),
-            type = RuntimeScopeType.Method,
+            type = ScopeType.Method,
             tokens = tokens,
             children = emptyList(),
             failure = right.value
@@ -76,31 +76,31 @@ internal fun parseRuntimeInstructionTreeLenient(methodId: MethodId, methodNode: 
     }
 }
 
-internal fun parseRuntimeInstructionTree(methodNode: MethodNode): Either<RuntimeInstructionTree, Failure> {
-    return parseRuntimeInstructionTree(
-        methodNode, tokenizeRuntimeInstructions(methodNode.instructions.toList()).leftOr { return it }
+internal fun parseInstructionTree(methodNode: MethodNode): Either<InstructionTree, Failure> {
+    return parseInstructionTree(
+        methodNode, tokenizeInstructions(methodNode.instructions.toList()).leftOr { return it }
     )
 }
 
-internal fun parseRuntimeInstructionTree(
-    methodNode: MethodNode, tokens: List<RuntimeInstructionToken>
-): Either<RuntimeInstructionTree, Failure> {
-    return linearParseRuntimeInstructionTree(methodNode, tokens)
+internal fun parseInstructionTree(
+    methodNode: MethodNode, tokens: List<InstructionToken>
+): Either<InstructionTree, Failure> {
+    return linearParseInstructionTree(methodNode, tokens)
 }
 
 private class MutableTree(
     var group: ComposeGroupKey?,
-    var type: RuntimeScopeType,
-    val tokens: MutableList<RuntimeInstructionToken>,
+    var type: ScopeType,
+    val tokens: MutableList<InstructionToken>,
     val children: MutableList<MutableTree>,
     var parent: MutableTree? = null,
     val markers: MutableSet<Int> = mutableSetOf()
 ) {
-    fun toRuntimeInstructionTree(): RuntimeInstructionTree = RuntimeInstructionTree(
+    fun toInstructionTree(): InstructionTree = InstructionTree(
         group = this.group,
         type = this.type,
         tokens = this.tokens,
-        children = this.children.map { it.toRuntimeInstructionTree() },
+        children = this.children.map { it.toInstructionTree() },
     )
 }
 
@@ -113,15 +113,15 @@ private fun MutableList<MutableTree?>.matchToken2Tree(
     }
 }
 
-private fun linearParseRuntimeInstructionTree(
-    methodNode: MethodNode, tokens: List<RuntimeInstructionToken>
-): Either<RuntimeInstructionTree, Failure> {
+private fun linearParseInstructionTree(
+    methodNode: MethodNode, tokens: List<InstructionToken>
+): Either<InstructionTree, Failure> {
     if (tokens.isEmpty()) return Failure("empty tokens").toRight()
 
     val token2Tree = MutableList<MutableTree?>(tokens.size + 1) { null }
     val root = MutableTree(
         group = methodNode.readFunctionKeyMetaAnnotation(),
-        type = RuntimeScopeType.Method,
+        type = ScopeType.Method,
         tokens = mutableListOf(),
         children = mutableListOf(),
     )
@@ -139,7 +139,7 @@ private fun linearParseRuntimeInstructionTree(
             is StartRestartGroup -> {
                 val newNode = MutableTree(
                     group = currentToken.key,
-                    type = RuntimeScopeType.RestartGroup,
+                    type = ScopeType.RestartGroup,
                     tokens = mutableListOf(),
                     children = mutableListOf(),
                     parent = currentNode,
@@ -152,7 +152,7 @@ private fun linearParseRuntimeInstructionTree(
             }
 
             is EndRestartGroup -> {
-                if (currentNode.type != RuntimeScopeType.RestartGroup) {
+                if (currentNode.type != ScopeType.RestartGroup) {
                     return Failure("EndRestartGroup is not allowed in ${currentNode.type} scope").toRight()
                 }
                 currentNode.tokens += currentToken
@@ -162,7 +162,7 @@ private fun linearParseRuntimeInstructionTree(
             is StartReplaceGroup -> {
                 val newNode = MutableTree(
                     group = currentToken.key,
-                    type = RuntimeScopeType.ReplaceGroup,
+                    type = ScopeType.ReplaceGroup,
                     tokens = mutableListOf(),
                     children = mutableListOf(),
                     parent = currentNode
@@ -175,7 +175,7 @@ private fun linearParseRuntimeInstructionTree(
             }
 
             is EndReplaceGroup -> {
-                if (currentNode.type != RuntimeScopeType.ReplaceGroup) {
+                if (currentNode.type != ScopeType.ReplaceGroup) {
                     return Failure("EndReplaceGroup is not allowed in ${currentNode.type} scope").toRight()
                 }
                 currentNode.tokens += currentToken
@@ -201,7 +201,7 @@ private fun linearParseRuntimeInstructionTree(
             }
 
             is ReturnToken -> {
-                if (currentNode.type != RuntimeScopeType.Method) {
+                if (currentNode.type != ScopeType.Method) {
                     return Failure("ReturnToken is not allowed in ${currentNode.type} scope").toRight()
                 }
                 currentNode.tokens += currentToken
@@ -232,5 +232,5 @@ private fun linearParseRuntimeInstructionTree(
         }
     }
 
-    return root.toRuntimeInstructionTree().toLeft()
+    return root.toInstructionTree().toLeft()
 }

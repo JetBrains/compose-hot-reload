@@ -20,10 +20,10 @@ private class TrackingRuntimeInfoImpl(
     override val classIndex: MutableMap<ClassId, ClassInfo> = mutableMapOf(),
     override val methodIndex: MutableMap<MethodId, MethodInfo> = mutableMapOf(),
     override val fieldIndex: MutableMap<FieldId, FieldInfo> = mutableMapOf(),
-    override val groupIndex: MutableMap<ComposeGroupKey?, MutableSet<RuntimeScopeInfo>> = mutableMapOf(),
+    override val groupIndex: MutableMap<ComposeGroupKey?, MutableSet<ScopeInfo>> = mutableMapOf(),
     override val superIndex: MutableMap<ClassId, MutableSet<ClassId>> = mutableMapOf(),
     override val superIndexInverse: MutableMap<ClassId, MutableSet<ClassId>> = mutableMapOf(),
-    override val dependencyIndex: MutableMap<MemberId, MutableSet<RuntimeScopeInfo>> = mutableMapOf()
+    override val dependencyIndex: MutableMap<MemberId, MutableSet<ScopeInfo>> = mutableMapOf()
 ) : TrackingRuntimeInfo {
 
     override fun copy(): TrackingRuntimeInfo {
@@ -55,7 +55,7 @@ private class TrackingRuntimeInfoImpl(
         fieldIndex.putAll(info.fields)
 
         val allScopes = info.methods.values.map { it.rootScope }
-            .withClosure<RuntimeScopeInfo> { scope -> scope.children }
+            .withClosure<ScopeInfo> { scope -> scope.children }
 
         /* Fill groupIndex */
         allScopes.forEach { scope ->
@@ -93,7 +93,7 @@ private class TrackingRuntimeInfoImpl(
         }
 
         val previousAllScopes = previousClassInfo.methods.values.map { it.rootScope }
-            .withClosure<RuntimeScopeInfo> { scope -> scope.children }
+            .withClosure<ScopeInfo> { scope -> scope.children }
 
         previousAllScopes.forEach { scope ->
             groupIndex[scope.group]?.apply {

@@ -17,7 +17,7 @@ private fun RuntimeInfo.verifyMethodRedefinitions(redefined: RuntimeInfo) {
 
         if (
             previousMethod.rootScope.methodType == MethodType.ComposeEntryPoint &&
-            previousMethod.rootScope.hash != redefinedMethod.rootScope.hash
+            previousMethod.rootScope.scopeHash != redefinedMethod.rootScope.scopeHash
         ) {
             throw RedefinitionVerificationException(
                 "Compose Hot Reload does not support the redefinition of the Compose entry method." +

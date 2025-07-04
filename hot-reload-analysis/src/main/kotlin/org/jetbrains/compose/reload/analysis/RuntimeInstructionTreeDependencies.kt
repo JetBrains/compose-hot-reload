@@ -14,8 +14,8 @@ import org.objectweb.asm.tree.MethodInsnNode
 private const val lambdaMetaFactoryClassId = "java/lang/invoke/LambdaMetafactory"
 private const val metafactoryMethodName = "metafactory"
 
-internal fun RuntimeInstructionTree.methodDependencies(): Set<MethodId> {
-    return tokens.filterIsInstance<RuntimeInstructionToken.BlockToken>().flatMapTo(mutableSetOf()) { block ->
+internal fun InstructionTree.methodDependencies(): Set<MethodId> {
+    return tokens.filterIsInstance<InstructionToken.BlockToken>().flatMapTo(mutableSetOf()) { block ->
         block.instructions.mapNotNull { instructionNode ->
             if (instructionNode is MethodInsnNode &&
                 (instructionNode.opcode == Opcodes.INVOKESTATIC ||
@@ -40,9 +40,9 @@ internal fun RuntimeInstructionTree.methodDependencies(): Set<MethodId> {
     }
 }
 
-internal fun RuntimeInstructionTree.fieldDependencies(): Set<FieldId> {
+internal fun InstructionTree.fieldDependencies(): Set<FieldId> {
     return tokens
-        .filterIsInstance<RuntimeInstructionToken.BlockToken>()
+        .filterIsInstance<InstructionToken.BlockToken>()
         .flatMap { token -> token.instructions }
         .filterIsInstance<FieldInsnNode>()
         .filter { fieldInsnNode -> !isIgnoredClassId(ClassId(fieldInsnNode.owner)) }

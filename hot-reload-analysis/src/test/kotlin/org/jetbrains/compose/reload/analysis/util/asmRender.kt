@@ -6,12 +6,12 @@
 package org.jetbrains.compose.reload.analysis.util
 
 import org.jetbrains.compose.reload.analysis.ClassNode
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionToken
-import org.jetbrains.compose.reload.analysis.RuntimeInstructionTree
+import org.jetbrains.compose.reload.analysis.InstructionToken
+import org.jetbrains.compose.reload.analysis.InstructionTree
 import org.jetbrains.compose.reload.analysis.indent
-import org.jetbrains.compose.reload.analysis.parseRuntimeInstructionTree
+import org.jetbrains.compose.reload.analysis.parseInstructionTree
 import org.jetbrains.compose.reload.analysis.plusAssign
-import org.jetbrains.compose.reload.analysis.tokenizeRuntimeInstructions
+import org.jetbrains.compose.reload.analysis.tokenizeInstructions
 import org.jetbrains.compose.reload.analysis.withIndent
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.withClosure
@@ -34,9 +34,9 @@ internal fun ClassNode.renderAsmTree(): String = buildString {
     appendLine("class ${name.replace("/", ".")} {")
     withIndent {
         methods.sortedBy { node -> node.name + node.desc }.forEachIndexed { index, methodNode ->
-            val methodTokens = tokenizeRuntimeInstructions(methodNode.instructions.toList())
+            val methodTokens = tokenizeInstructions(methodNode.instructions.toList())
                 .leftOr { error("Failed to tokenize a method: $it") }
-            val tree = parseRuntimeInstructionTree(methodNode, methodTokens)
+            val tree = parseInstructionTree(methodNode, methodTokens)
                 .leftOr { error("Failed to parse runtime instruction tree: $it") }
 
             methodNode.verifyTree(methodTokens, tree)
@@ -52,12 +52,12 @@ internal fun ClassNode.renderAsmTree(): String = buildString {
     appendLine("}")
 }
 
-internal fun MethodNode.verifyTree(methodTokens: List<RuntimeInstructionToken>, methodTree: RuntimeInstructionTree) {
+internal fun MethodNode.verifyTree(methodTokens: List<InstructionToken>, methodTree: InstructionTree) {
     val treeNodes = methodTree.withClosure { it.children }
 
     val treeTokens = treeNodes.flatMapTo(mutableSetOf()) { it.tokens }
     // labels after last 'return' instruction are not part of the tree
-    for (token in methodTokens.dropLastWhile { it is RuntimeInstructionToken.LabelToken }) {
+    for (token in methodTokens.dropLastWhile { it is InstructionToken.LabelToken }) {
         if (token !in treeTokens) {
             error("Token $token is not a part of the final instruction tree")
         }
@@ -72,9 +72,9 @@ internal fun MethodNode.verifyTree(methodTokens: List<RuntimeInstructionToken>, 
     }
 }
 
-internal fun RuntimeInstructionTree.inst2TreeMapping(): Map<AbstractInsnNode, RuntimeInstructionTree> {
+internal fun InstructionTree.inst2TreeMapping(): Map<AbstractInsnNode, InstructionTree> {
     val treeNodes = this.withClosure { it.children }
-    val inst2Tree = mutableMapOf<AbstractInsnNode, RuntimeInstructionTree>()
+    val inst2Tree = mutableMapOf<AbstractInsnNode, InstructionTree>()
     treeNodes.forEach { node ->
         node.tokens.forEach { token ->
             token.instructions.forEach { inst ->
@@ -85,11 +85,11 @@ internal fun RuntimeInstructionTree.inst2TreeMapping(): Map<AbstractInsnNode, Ru
     return inst2Tree
 }
 
-internal fun RuntimeInstructionTree.tree2IndentMapping(): Map<RuntimeInstructionTree, Int> {
-    val treeIndent = mutableMapOf<RuntimeInstructionTree, Int>()
+internal fun InstructionTree.tree2IndentMapping(): Map<InstructionTree, Int> {
+    val treeIndent = mutableMapOf<InstructionTree, Int>()
     treeIndent[this] = 0
 
-    val queue = ArrayDeque<RuntimeInstructionTree>()
+    val queue = ArrayDeque<InstructionTree>()
     queue.addLast(this)
     while (queue.isNotEmpty()) {
         val current = queue.removeLast()
@@ -102,7 +102,7 @@ internal fun RuntimeInstructionTree.tree2IndentMapping(): Map<RuntimeInstruction
     return treeIndent
 }
 
-internal fun MethodNode.renderAsm(tree: RuntimeInstructionTree) = buildString {
+internal fun MethodNode.renderAsm(tree: InstructionTree) = buildString {
     val inst2Tree = tree.inst2TreeMapping()
     val treeIndent = tree.tree2IndentMapping()
 
@@ -111,7 +111,7 @@ internal fun MethodNode.renderAsm(tree: RuntimeInstructionTree) = buildString {
 
     this += tree.render()
 
-    var prevTree: RuntimeInstructionTree? = tree
+    var prevTree: InstructionTree? = tree
     for (inst in instructions) {
         val currentTree = inst2Tree[inst]
         val indent = treeIndent[currentTree] ?: 0
@@ -134,4 +134,4 @@ internal fun AbstractInsnNode.print(printer: Textifier, mp: TraceMethodVisitor):
     return sw.toString().trim()
 }
 
-internal fun RuntimeInstructionTree.render(): String = "$type (group=${group})"
+internal fun InstructionTree.render(): String = "$type (group=${group})"

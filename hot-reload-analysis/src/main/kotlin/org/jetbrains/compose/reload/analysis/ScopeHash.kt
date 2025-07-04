@@ -16,15 +16,15 @@ import org.objectweb.asm.tree.VarInsnNode
 import java.util.zip.CRC32
 
 @JvmInline
-value class RuntimeInstructionTreeCodeHash(val value: Long)
+value class ScopeHash(val value: Long)
 
-internal fun RuntimeInstructionTree.codeHash(methodNode: MethodNode): RuntimeInstructionTreeCodeHash {
+internal fun InstructionTree.scopeHash(methodNode: MethodNode): ScopeHash {
     val crc = CRCHasher()
 
     tokens.forEach token@{ token ->
-        if (token is RuntimeInstructionToken.SourceInformation ||
-            token is RuntimeInstructionToken.SourceInformationMarkerStart ||
-            token is RuntimeInstructionToken.SourceInformationMarkerEnd
+        if (token is InstructionToken.SourceInformation ||
+            token is InstructionToken.SourceInformationMarkerStart ||
+            token is InstructionToken.SourceInformationMarkerEnd
         ) {
             return@token
         }
@@ -102,7 +102,7 @@ internal fun RuntimeInstructionTree.codeHash(methodNode: MethodNode): RuntimeIns
         crc.pushHash(localVariable.desc)
     }
 
-    return RuntimeInstructionTreeCodeHash(crc.value)
+    return ScopeHash(crc.value)
 }
 
 internal class CRCHasher() {
