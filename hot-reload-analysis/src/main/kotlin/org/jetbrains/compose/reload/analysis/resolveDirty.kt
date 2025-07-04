@@ -133,7 +133,7 @@ private fun resolveRemovedComposeScopes(current: RuntimeInfo, redefined: Runtime
 private fun Context.resolveDirtyMethodsFromExtensionPoints(
     current: RuntimeInfo, redefined: RuntimeInfo
 ): List<MethodInfo> {
-    return ServiceLoader.load(DirtyResolver::class.java, ClassLoader.getSystemClassLoader()).flatMap { resolver ->
+    return ServiceLoader.load(DirtyResolverExtension::class.java, ClassLoader.getSystemClassLoader()).flatMap { resolver ->
         resolver.resolveDirtyMethods(this, current, redefined)
     }
 }

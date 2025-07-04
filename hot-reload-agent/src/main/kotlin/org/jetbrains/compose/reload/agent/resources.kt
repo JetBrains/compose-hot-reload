@@ -6,7 +6,7 @@
 package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
-import org.jetbrains.compose.reload.analysis.DirtyResolver
+import org.jetbrains.compose.reload.analysis.DirtyResolverExtension
 import org.jetbrains.compose.reload.analysis.Ids
 import org.jetbrains.compose.reload.analysis.MethodId
 import org.jetbrains.compose.reload.analysis.MethodInfo
@@ -21,7 +21,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadCla
 
 private val logger = createLogger()
 
-internal class ResourcesDirtyResolver : DirtyResolver {
+internal class ResourcesDirtyResolverExtension : DirtyResolverExtension {
 
     override fun resolveDirtyMethods(
         context: Context,

@@ -127,7 +127,7 @@ public final class org/jetbrains/compose/reload/analysis/ComposeGroupKeyKt {
 	public static final fun ComposeGroupKey (Ljava/lang/Integer;)Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;
 }
 
-public abstract interface class org/jetbrains/compose/reload/analysis/DirtyResolver {
+public abstract interface class org/jetbrains/compose/reload/analysis/DirtyResolverExtension {
 	public abstract fun resolveDirtyMethods (Lorg/jetbrains/compose/reload/core/Context;Lorg/jetbrains/compose/reload/analysis/RuntimeInfo;Lorg/jetbrains/compose/reload/analysis/RuntimeInfo;)Ljava/util/List;
 }
 

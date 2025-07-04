@@ -7,8 +7,7 @@ package org.jetbrains.compose.reload.analysis
 
 import org.jetbrains.compose.reload.core.Context
 
-interface DirtyResolver {
-
+interface DirtyResolverExtension {
     fun resolveDirtyMethods(
         context: Context, currentRuntime: RuntimeInfo, redefined: RuntimeInfo
     ): List<MethodInfo>
