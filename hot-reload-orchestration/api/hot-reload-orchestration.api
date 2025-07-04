@@ -309,7 +309,7 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 	public static fun values ()[Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$ReloadClassesRequest$ChangeType;
 }
 
-public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ReloadClassesRequest$Key : org/jetbrains/compose/reload/core/OptionalContextKey {
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ReloadClassesRequest$Key : org/jetbrains/compose/reload/core/Context$Key$Optional {
 }
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ReloadClassesResult : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {

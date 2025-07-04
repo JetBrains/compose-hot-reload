@@ -1,0 +1,97 @@
+/*
+ Original Code:
+*/
+
+// Foo.kt
+import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+    
+@Composable
+fun Foo() {
+    //<foo>
+    Text("Foo")
+    Bar()
+}
+
+@Composable
+fun Bar() {
+    //<bar>
+    Text("Bar")
+}
+
+/*
+ Application Info:
+*/
+
+FooKt {
+    Foo {
+        desc: (Landroidx/compose/runtime/Composer;I)V
+        type: Composable
+        Method {
+            key: -965539098
+            codeHash: 3924881808
+            methodDependencies: [
+                FooKt.Foo$lambda$0 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+            ]
+            fieldDependencies: []
+    
+            RestartGroup {
+                key: -965539098
+                codeHash: 4261705019
+                methodDependencies: [
+                    FooKt.Bar (Landroidx/compose/runtime/Composer;I)V
+                ]
+                fieldDependencies: []
+            }
+        }
+    }
+    
+    
+    Bar {
+        desc: (Landroidx/compose/runtime/Composer;I)V
+        type: Composable
+        Method {
+            key: -2097341767
+            codeHash: 420905608
+            methodDependencies: [
+                FooKt.Bar$lambda$1 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+            ]
+            fieldDependencies: []
+    
+            RestartGroup {
+                key: -2097341767
+                codeHash: 363163885
+                methodDependencies: []
+                fieldDependencies: []
+            }
+        }
+    }
+    
+    
+    Foo$lambda$0 {
+        desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+        type: Composable
+        Method {
+            key: null
+            codeHash: 210770274
+            methodDependencies: [
+                FooKt.Foo (Landroidx/compose/runtime/Composer;I)V
+            ]
+            fieldDependencies: []
+        }
+    }
+    
+    
+    Bar$lambda$1 {
+        desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+        type: Composable
+        Method {
+            key: null
+            codeHash: 2483986227
+            methodDependencies: [
+                FooKt.Bar (Landroidx/compose/runtime/Composer;I)V
+            ]
+            fieldDependencies: []
+        }
+    }
+}

@@ -1,0 +1,144 @@
+/*
+ Original Code:
+*/
+
+// Foo.kt
+import androidx.compose.runtime.*
+
+class Bar {
+    val x = 42
+}
+
+val bar = Bar()
+
+@Composable
+fun Foo() {
+    remember { bar.x }
+}
+
+/*
+ Application Info:
+*/
+
+Bar {
+    val x: I
+    val $stable: I
+
+    <init> {
+        desc: ()V
+        type: Regular
+        Method {
+            key: null
+            codeHash: 2910389127
+            methodDependencies: []
+            fieldDependencies: [
+                Bar.x I
+            ]
+        }
+    }
+    
+    
+    getX {
+        desc: ()I
+        type: Regular
+        Method {
+            key: null
+            codeHash: 1184042145
+            methodDependencies: []
+            fieldDependencies: [
+                Bar.x I
+            ]
+        }
+    }
+    
+    
+    <clinit> {
+        desc: ()V
+        type: Regular
+        Method {
+            key: null
+            codeHash: 2636274694
+            methodDependencies: []
+            fieldDependencies: []
+        }
+    }
+}
+
+FooKt {
+    val bar: LBar;
+
+    getBar {
+        desc: ()LBar;
+        type: Regular
+        Method {
+            key: null
+            codeHash: 886555225
+            methodDependencies: []
+            fieldDependencies: [
+                FooKt.bar LBar;
+            ]
+        }
+    }
+    
+    
+    Foo {
+        desc: (Landroidx/compose/runtime/Composer;I)V
+        type: Composable
+        Method {
+            key: -965539098
+            codeHash: 55349878
+            methodDependencies: [
+                FooKt.Foo$lambda$1 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+            ]
+            fieldDependencies: []
+    
+            RestartGroup {
+                key: -965539098
+                codeHash: 1382954003
+                methodDependencies: []
+                fieldDependencies: []
+    
+                ReplaceGroup {
+                    key: 1849434622
+                    codeHash: 3843380681
+                    methodDependencies: [
+                        Bar.getX ()I
+                    ]
+                    fieldDependencies: [
+                        FooKt.bar LBar;
+                    ]
+                }
+            }
+        }
+    }
+    
+    
+    Foo$lambda$1 {
+        desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+        type: Composable
+        Method {
+            key: null
+            codeHash: 210770274
+            methodDependencies: [
+                FooKt.Foo (Landroidx/compose/runtime/Composer;I)V
+            ]
+            fieldDependencies: []
+        }
+    }
+    
+    
+    <clinit> {
+        desc: ()V
+        type: Regular
+        Method {
+            key: null
+            codeHash: 1891533309
+            methodDependencies: [
+                Bar.<init> ()V
+            ]
+            fieldDependencies: [
+                FooKt.bar LBar;
+            ]
+        }
+    }
+}

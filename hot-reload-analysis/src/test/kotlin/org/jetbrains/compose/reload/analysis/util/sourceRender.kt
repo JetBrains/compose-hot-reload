@@ -6,8 +6,8 @@
 package org.jetbrains.compose.reload.analysis.util
 
 import org.jetbrains.compose.reload.analysis.ClassNode
-import org.jetbrains.compose.reload.analysis.parseRuntimeInstructionTree
-import org.jetbrains.compose.reload.analysis.tokenizeRuntimeInstructions
+import org.jetbrains.compose.reload.analysis.parseInstructionTree
+import org.jetbrains.compose.reload.analysis.tokenizeInstructions
 import org.jetbrains.compose.reload.core.leftOr
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.LineNumberNode
@@ -24,9 +24,9 @@ internal fun ClassNode.renderSourceTree(
     val line2Tree = MutableList(sourceLines.size) { linkedSetOf<String>() }
 
     methods.sortedBy { node -> node.name + node.desc }.forEachIndexed { index, methodNode ->
-        val methodTokens = tokenizeRuntimeInstructions(methodNode.instructions.toList())
+        val methodTokens = tokenizeInstructions(methodNode.instructions.toList())
             .leftOr { error("Failed to tokenize a method: $it") }
-        val tree = parseRuntimeInstructionTree(methodNode, methodTokens)
+        val tree = parseInstructionTree(methodNode, methodTokens)
             .leftOr { error("Failed to parse runtime instruction tree: $it") }
 
         methodNode.verifyTree(methodTokens, tree)

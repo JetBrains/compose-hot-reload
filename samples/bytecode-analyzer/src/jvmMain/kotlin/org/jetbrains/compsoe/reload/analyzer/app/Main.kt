@@ -41,7 +41,7 @@ private val applicationScope = CoroutineScope(
 fun main() {
     applicationScope.launchFileTreeState()
     applicationScope.launchJavapState()
-    applicationScope.launchRuntimeInfoState()
+    applicationScope.launchApplicationInfoState()
     applicationScope.launchRuntimeTreeState()
     applicationScope.launchClassInfoState()
 

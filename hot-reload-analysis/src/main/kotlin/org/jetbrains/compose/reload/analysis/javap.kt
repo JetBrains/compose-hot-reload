@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.analysis
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.nio.file.Files
@@ -13,6 +14,7 @@ import java.util.spi.ToolProvider
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.writeBytes
 
+@InternalHotReloadApi
 @Suppress("unused") // Debugging utility!
 fun javap(bytecode: ByteArray): String {
     val javap = ToolProvider.findFirst("javap").orElseThrow()
@@ -28,6 +30,7 @@ fun javap(bytecode: ByteArray): String {
     return out.toString() + err.toString()
 }
 
+@InternalHotReloadApi
 fun javap(path: Path): String {
     val javap = ToolProvider.findFirst("javap").orElseThrow()
     val out = StringWriter()
@@ -37,6 +40,7 @@ fun javap(path: Path): String {
     return out.toString() + err.toString()
 }
 
+@InternalHotReloadApi
 @Suppress("unused") // Debugging utility!
 fun javap(code: Map<String, ByteArray>): Map<String, String> {
     return code.mapValues { javap(it.value) }

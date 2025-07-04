@@ -5,8 +5,12 @@ import io.sellmair.evas.launchState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import org.jetbrains.compose.reload.analysis.javap
+import java.io.PrintWriter
+import java.io.StringWriter
+import java.nio.file.Files
 import java.nio.file.Path
+import java.util.spi.ToolProvider
+import kotlin.io.path.absolutePathString
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
@@ -31,4 +35,13 @@ fun CoroutineScope.launchJavapState() = launchState(
         JavapState.Result(javap(key.path)).emit()
         delay(5.seconds)
     }
+}
+
+private fun javap(path: Path): String {
+    val javap = ToolProvider.findFirst("javap").orElseThrow()
+    val out = StringWriter()
+    val err = StringWriter()
+
+    javap.run(PrintWriter(out), PrintWriter(err), "-v", "-p", path.absolutePathString())
+    return out.toString() + err.toString()
 }

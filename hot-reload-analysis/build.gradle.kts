@@ -15,6 +15,7 @@ plugins {
     `tests-with-compiler`
     `java-test-fixtures`
     org.jetbrains.kotlinx.benchmark
+    `api-validation-conventions`
 }
 
 kotlin.compilerOptions {

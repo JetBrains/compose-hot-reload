@@ -7,10 +7,10 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.ClassInfo
-import org.jetbrains.compose.reload.analysis.RuntimeDirtyScopes
-import org.jetbrains.compose.reload.analysis.TrackingRuntimeInfo
-import org.jetbrains.compose.reload.analysis.isIgnoredClassId
-import org.jetbrains.compose.reload.analysis.resolveDirtyRuntimeScopes
+import org.jetbrains.compose.reload.analysis.ResolvedDirtyScopes
+import org.jetbrains.compose.reload.analysis.MutableApplicationInfo
+import org.jetbrains.compose.reload.analysis.isIgnored
+import org.jetbrains.compose.reload.analysis.resolveDirtyScopes
 import org.jetbrains.compose.reload.analysis.verifyRedefinitions
 import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.Try
@@ -34,8 +34,8 @@ private val runtimeAnalysisThread = Executors.newSingleThreadExecutor { r ->
     thread(start = false, isDaemon = true, name = "Compose Runtime Analyzer", block = r::run)
 }
 
-private val currentRuntime = TrackingRuntimeInfo()
-private val pendingRedefinitions = TrackingRuntimeInfo()
+private val currentApplicationInfo = MutableApplicationInfo()
+private val pendingRedefinitions = MutableApplicationInfo()
 private val classLoaders = hashMapOf<ClassId, WeakReference<ClassLoader>>()
 
 internal fun launchRuntimeTracking(instrumentation: Instrumentation) {
@@ -45,22 +45,22 @@ internal fun launchRuntimeTracking(instrumentation: Instrumentation) {
     instrumentation.addTransformer(RuntimeTrackingTransformer)
 }
 
-internal fun Context.redefineRuntimeInfo(): Future<Try<RuntimeDirtyScopes>> = runtimeAnalysisThread.submitSafe {
+internal fun Context.redefineApplicationInfo(): Future<Try<ResolvedDirtyScopes>> = runtimeAnalysisThread.submitSafe {
     Try {
-        currentRuntime.verifyRedefinitions(pendingRedefinitions)
+        currentApplicationInfo.verifyRedefinitions(pendingRedefinitions)
 
-        val redefinition = resolveDirtyRuntimeScopes(currentRuntime, pendingRedefinitions)
+        val redefinition = resolveDirtyScopes(currentApplicationInfo, pendingRedefinitions)
 
         /* Patch current runtime info */
         val patchDuration = measureTime {
             pendingRedefinitions.classIndex.forEach { (classId, classInfo) ->
-                currentRuntime.remove(classId)
-                currentRuntime.add(classInfo)
+                currentApplicationInfo.remove(classId)
+                currentApplicationInfo.add(classInfo)
             }
             pendingRedefinitions.clear()
         }
 
-        logger.debug("Applied redefined 'RuntimeInfo' in [$patchDuration]")
+        logger.debug("Applied redefined 'ApplicationInfo' in [$patchDuration]")
         redefinition
     }
 }
@@ -77,16 +77,16 @@ internal fun enqueueRuntimeAnalysis(
         classLoaders[classInfo.classId] = WeakReference(loader)
 
         if (classBeingRedefined == null) {
-            logger.trace { "Parsed 'RuntimeInfo' for '$className'" }
-            currentRuntime.add(classInfo)
+            logger.trace { "Parsed 'ClassInfo' for '$className'" }
+            currentApplicationInfo.add(classInfo)
         } else {
-            logger.trace { "Parsed 'RuntimeInfo' for '$className' (redefined)" }
+            logger.trace { "Parsed 'ClassInfo' for '$className' (redefined)" }
 
             pendingRedefinitions.add(classInfo)
         }
 
     } catch (t: Throwable) {
-        logger.error("Failed parsing 'RuntimeInfo' for '$className'", t)
+        logger.error("Failed parsing 'ClassInfo' for '$className'", t)
     }
 }
 
@@ -100,7 +100,7 @@ internal object RuntimeTrackingTransformer : ClassFileTransformer {
         loader: ClassLoader?, className: String?, classBeingRedefined: Class<*>?,
         protectionDomain: ProtectionDomain?, classfileBuffer: ByteArray
     ): ByteArray? {
-        if (className == null || isIgnoredClassId(className)) {
+        if (className == null || ClassId(className).isIgnored) {
             return null
         }
 

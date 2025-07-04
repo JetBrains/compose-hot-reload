@@ -1,0 +1,90 @@
+/*
+ Original Code:
+*/
+
+// Foo.kt
+import androidx.compose.runtime.*
+
+@Composable
+fun Foo() {
+    val overload0 = remember { "Hello" }
+    val overload1 = remember(1) { 1602 }
+    val overload2 = remember(1, 2) { 1602 }
+    val overload3 = remember(1, 2, 3) { 1602 }
+    val overload4 = remember(1, 2, 3, 4) { 1602 }
+}
+
+/*
+ Application Info:
+*/
+
+FooKt {
+    Foo {
+        desc: (Landroidx/compose/runtime/Composer;I)V
+        type: Composable
+        Method {
+            key: -965539098
+            codeHash: 1636076322
+            methodDependencies: [
+                FooKt.Foo$lambda$5 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+            ]
+            fieldDependencies: []
+    
+            RestartGroup {
+                key: -965539098
+                codeHash: 1961383961
+                methodDependencies: []
+                fieldDependencies: []
+    
+                ReplaceGroup {
+                    key: 1849434622
+                    codeHash: 1750160353
+                    methodDependencies: []
+                    fieldDependencies: []
+                }
+    
+                ReplaceGroup {
+                    key: 5004770
+                    codeHash: 116276097
+                    methodDependencies: []
+                    fieldDependencies: []
+                }
+    
+                ReplaceGroup {
+                    key: -1633490746
+                    codeHash: 1476853512
+                    methodDependencies: []
+                    fieldDependencies: []
+                }
+    
+                ReplaceGroup {
+                    key: -1746271574
+                    codeHash: 3050482382
+                    methodDependencies: []
+                    fieldDependencies: []
+                }
+    
+                ReplaceGroup {
+                    key: -1224400529
+                    codeHash: 2177437705
+                    methodDependencies: []
+                    fieldDependencies: []
+                }
+            }
+        }
+    }
+    
+    
+    Foo$lambda$5 {
+        desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+        type: Composable
+        Method {
+            key: null
+            codeHash: 210770274
+            methodDependencies: [
+                FooKt.Foo (Landroidx/compose/runtime/Composer;I)V
+            ]
+            fieldDependencies: []
+        }
+    }
+}

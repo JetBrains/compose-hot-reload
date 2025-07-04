@@ -1,0 +1,92 @@
+/*
+ Original Code:
+*/
+
+// Foo.kt
+import androidx.compose.runtime.*
+
+val x = 42
+
+@Composable
+fun Foo() {
+    remember { x }
+}
+
+/*
+ Application Info:
+*/
+
+FooKt {
+    val x: I
+
+    getX {
+        desc: ()I
+        type: Regular
+        Method {
+            key: null
+            codeHash: 3555685996
+            methodDependencies: []
+            fieldDependencies: [
+                FooKt.x I
+            ]
+        }
+    }
+    
+    
+    Foo {
+        desc: (Landroidx/compose/runtime/Composer;I)V
+        type: Composable
+        Method {
+            key: -965539098
+            codeHash: 55349878
+            methodDependencies: [
+                FooKt.Foo$lambda$1 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+            ]
+            fieldDependencies: []
+    
+            RestartGroup {
+                key: -965539098
+                codeHash: 1382954003
+                methodDependencies: []
+                fieldDependencies: []
+    
+                ReplaceGroup {
+                    key: 1849434622
+                    codeHash: 511895841
+                    methodDependencies: []
+                    fieldDependencies: [
+                        FooKt.x I
+                    ]
+                }
+            }
+        }
+    }
+    
+    
+    Foo$lambda$1 {
+        desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+        type: Composable
+        Method {
+            key: null
+            codeHash: 210770274
+            methodDependencies: [
+                FooKt.Foo (Landroidx/compose/runtime/Composer;I)V
+            ]
+            fieldDependencies: []
+        }
+    }
+    
+    
+    <clinit> {
+        desc: ()V
+        type: Regular
+        Method {
+            key: null
+            codeHash: 2373262093
+            methodDependencies: []
+            fieldDependencies: [
+                FooKt.x I
+            ]
+        }
+    }
+}

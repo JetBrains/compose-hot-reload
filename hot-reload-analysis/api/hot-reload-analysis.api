@@ -1,0 +1,666 @@
+public abstract interface class org/jetbrains/compose/reload/analysis/ApplicationInfo {
+	public abstract fun getClassIndex ()Ljava/util/Map;
+	public abstract fun getDependencyIndex ()Ljava/util/Map;
+	public abstract fun getFieldIndex ()Ljava/util/Map;
+	public abstract fun getGroupIndex ()Ljava/util/Map;
+	public abstract fun getMethodIndex ()Ljava/util/Map;
+	public abstract fun getSuperIndex ()Ljava/util/Map;
+	public abstract fun getSuperIndexInverse ()Ljava/util/Map;
+}
+
+public final class org/jetbrains/compose/reload/analysis/AsmUtilsKt {
+	public static final fun ClassId (Lorg/objectweb/asm/tree/ClassNode;)Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/ClassFlags {
+	public static final field Companion Lorg/jetbrains/compose/reload/analysis/ClassFlags$Companion;
+	public static final synthetic fun box-impl (I)Lorg/jetbrains/compose/reload/analysis/ClassFlags;
+	public static fun constructor-impl (I)I
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (ILjava/lang/Object;)Z
+	public static final fun equals-impl0 (II)Z
+	public final fun getValue ()I
+	public fun hashCode ()I
+	public static fun hashCode-impl (I)I
+	public static final fun isAbstract-impl (I)Z
+	public static final fun isAnnotation-impl (I)Z
+	public static final fun isDeprecated-impl (I)Z
+	public static final fun isEnum-impl (I)Z
+	public static final fun isFinal-impl (I)Z
+	public static final fun isInterface-impl (I)Z
+	public static final fun isProtected-impl (I)Z
+	public static final fun isPublic-impl (I)Z
+	public static final fun isRecord-impl (I)Z
+	public static final fun isSynthetic-impl (I)Z
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (I)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()I
+	public static final fun withAbstract-iyh5qK8 (IZ)I
+	public static synthetic fun withAbstract-iyh5qK8$default (IZILjava/lang/Object;)I
+	public static final fun withAnnotation-iyh5qK8 (IZ)I
+	public static synthetic fun withAnnotation-iyh5qK8$default (IZILjava/lang/Object;)I
+	public static final fun withDeprecated-iyh5qK8 (IZ)I
+	public static synthetic fun withDeprecated-iyh5qK8$default (IZILjava/lang/Object;)I
+	public static final fun withEnum-iyh5qK8 (IZ)I
+	public static synthetic fun withEnum-iyh5qK8$default (IZILjava/lang/Object;)I
+	public static final fun withFinal-iyh5qK8 (IZ)I
+	public static synthetic fun withFinal-iyh5qK8$default (IZILjava/lang/Object;)I
+	public static final fun withInterface-iyh5qK8 (IZ)I
+	public static synthetic fun withInterface-iyh5qK8$default (IZILjava/lang/Object;)I
+	public static final fun withProtected-iyh5qK8 (IZ)I
+	public static synthetic fun withProtected-iyh5qK8$default (IZILjava/lang/Object;)I
+	public static final fun withPublic-iyh5qK8 (IZ)I
+	public static synthetic fun withPublic-iyh5qK8$default (IZILjava/lang/Object;)I
+	public static final fun withRecord-iyh5qK8 (IZ)I
+	public static synthetic fun withRecord-iyh5qK8$default (IZILjava/lang/Object;)I
+	public static final fun withSynthetic-iyh5qK8 (IZ)I
+	public static synthetic fun withSynthetic-iyh5qK8$default (IZILjava/lang/Object;)I
+}
+
+public final class org/jetbrains/compose/reload/analysis/ClassFlags$Companion {
+	public final fun getEmpty-aqB5Kkw ()I
+}
+
+public final class org/jetbrains/compose/reload/analysis/ClassId : java/lang/Comparable {
+	public static final field Companion Lorg/jetbrains/compose/reload/analysis/ClassId$Companion;
+	public static final synthetic fun box-impl (Ljava/lang/String;)Lorg/jetbrains/compose/reload/analysis/ClassId;
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun compareTo-j3M2jLw (Ljava/lang/String;)I
+	public static fun compareTo-j3M2jLw (Ljava/lang/String;Ljava/lang/String;)I
+	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
+	public static final fun getDescriptor-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ljava/lang/String;)I
+	public static final fun startsWith-impl (Ljava/lang/String;Ljava/lang/String;)Z
+	public static final fun toFqn-impl (Ljava/lang/String;)Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/ClassId$Companion {
+	public final fun fromDesc-DRMJc_0 (Ljava/lang/String;)Ljava/lang/String;
+	public final fun fromFqn-DRMJc_0 (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/ClassIdKt {
+	public static final fun ClassId (Ljava/lang/Class;)Ljava/lang/String;
+	public static final fun ClassId (Lkotlin/reflect/KClass;)Ljava/lang/String;
+	public static final fun getClassId (Ljava/lang/Class;)Ljava/lang/String;
+	public static final fun getClassId (Lkotlin/reflect/KClass;)Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/ClassInfo {
+	public final fun component1-uSFnFHE ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun component3 ()Ljava/util/Map;
+	public final fun component4-ejqTZCE ()Ljava/lang/String;
+	public final fun component5 ()Ljava/util/List;
+	public final fun component6-aqB5Kkw ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+	public final fun getFields ()Ljava/util/Map;
+	public final fun getFlags-aqB5Kkw ()I
+	public final fun getMethods ()Ljava/util/Map;
+	public final fun getSuperClass-ejqTZCE ()Ljava/lang/String;
+	public final fun getSuperInterfaces ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/ClassInfoKt {
+	public static final fun ClassInfo ([B)Lorg/jetbrains/compose/reload/analysis/ClassInfo;
+}
+
+public final class org/jetbrains/compose/reload/analysis/ComposeGroupKey {
+	public static final synthetic fun box-impl (I)Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;
+	public static fun constructor-impl (I)I
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (ILjava/lang/Object;)Z
+	public static final fun equals-impl0 (II)Z
+	public final fun getKey ()I
+	public fun hashCode ()I
+	public static fun hashCode-impl (I)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (I)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()I
+}
+
+public final class org/jetbrains/compose/reload/analysis/ComposeGroupKeyKt {
+	public static final fun ComposeGroupKey (Ljava/lang/Integer;)Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;
+}
+
+public abstract interface class org/jetbrains/compose/reload/analysis/DirtyResolverExtension {
+	public abstract fun resolveDirtyMethods (Lorg/jetbrains/compose/reload/core/Context;Lorg/jetbrains/compose/reload/analysis/ApplicationInfo;Lorg/jetbrains/compose/reload/analysis/ApplicationInfo;)Ljava/util/List;
+}
+
+public final class org/jetbrains/compose/reload/analysis/FieldId : org/jetbrains/compose/reload/analysis/MemberId {
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-uSFnFHE ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy-uEB1Bto (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/compose/reload/analysis/FieldId;
+	public static synthetic fun copy-uEB1Bto$default (Lorg/jetbrains/compose/reload/analysis/FieldId;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/FieldId;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getClassId-uSFnFHE ()Ljava/lang/String;
+	public final fun getFieldDescriptor ()Ljava/lang/String;
+	public final fun getFieldName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/FieldInfo : org/jetbrains/compose/reload/analysis/MemberInfo {
+	public final fun component1 ()Lorg/jetbrains/compose/reload/analysis/FieldId;
+	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/Object;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFieldId ()Lorg/jetbrains/compose/reload/analysis/FieldId;
+	public final fun getInitialValue ()Ljava/lang/Object;
+	public fun getMemberId ()Lorg/jetbrains/compose/reload/analysis/FieldId;
+	public synthetic fun getMemberId ()Lorg/jetbrains/compose/reload/analysis/MemberId;
+	public fun hashCode ()I
+	public final fun isStatic ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$ApplicationDesktopKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$ApplicationDesktopKt;
+	public final fun getApplication ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getApplication_default ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$Composable {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$Composable;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$ComposeDialog {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$ComposeDialog;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+	public final fun getSetContent_1 ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getSetContent_3 ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$ComposeWindow {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$ComposeWindow;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+	public final fun getSetContent_1 ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getSetContent_3 ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$Composer {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$Composer;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+	public final fun getEndReplaceGroup ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getEndRestartGroup ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getEndToMarker ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getGetCurrentMarker ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getStartReplaceGroup ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getStartRestartGroup ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$ComposerKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$ComposerKt;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+	public final fun getSourceInformation ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getSourceInformationMarkerEnd ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getSourceInformationMarkerStart ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getTraceEventStart ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$DialogDesktopKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$DialogDesktopKt;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$FontResources_skikioKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$FontResources_skikioKt;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$FunctionKeyMeta {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$FunctionKeyMeta;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$ImageResourcesKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$ImageResourcesKt;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+	public final fun getDropImageCache ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$PluralStringResourcesKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$PluralStringResourcesKt;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$Recomposer {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$Recomposer;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+	public final fun getCompanion ()Lorg/jetbrains/compose/reload/analysis/FieldId;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$Recomposer$Companion {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$Recomposer$Companion;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$ResourceCaches {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$ResourceCaches;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+	public final fun getInstance ()Lorg/jetbrains/compose/reload/analysis/FieldId;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$ResourceCaches_desktopKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$ResourceCaches_desktopKt;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+	public final fun getClearBlocking ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$ScreenshotTestApplicationKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$ScreenshotTestApplicationKt;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+	public final fun getScreenshotTestApplication ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getScreenshotTestApplication_default ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$StringArrayResourcesKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$StringArrayResourcesKt;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$StringResourcesKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$StringResourcesKt;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$StringResourcesUtilsKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$StringResourcesUtilsKt;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+	public final fun getDropStringItemsCache ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$SwingDialogDesktopKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$SwingDialogDesktopKt;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$SwingWindowDesktopKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$SwingWindowDesktopKt;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ids$WindowDesktopKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$WindowDesktopKt;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+	public final fun getSingleWindowApplication ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getSingleWindowApplication_default ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+}
+
+public final class org/jetbrains/compose/reload/analysis/IdsKt {
+	public static final fun getClassInitializerMethodId-j3M2jLw (Ljava/lang/String;)Lorg/jetbrains/compose/reload/analysis/MethodId;
+}
+
+public abstract interface class org/jetbrains/compose/reload/analysis/Ignore {
+	public abstract fun getPrecedence ()I
+	public abstract fun ignoredClassIds ()Ljava/util/List;
+	public abstract fun ignoredPackageIds ()Ljava/util/List;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ignore$Default : org/jetbrains/compose/reload/analysis/Ignore {
+	public fun <init> ()V
+	public fun getPrecedence ()I
+	public fun ignoredClassIds ()Ljava/util/List;
+	public fun ignoredPackageIds ()Ljava/util/List;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ignore$DefaultImpls {
+	public static fun getPrecedence (Lorg/jetbrains/compose/reload/analysis/Ignore;)I
+	public static fun ignoredClassIds (Lorg/jetbrains/compose/reload/analysis/Ignore;)Ljava/util/List;
+	public static fun ignoredPackageIds (Lorg/jetbrains/compose/reload/analysis/Ignore;)Ljava/util/List;
+}
+
+public final class org/jetbrains/compose/reload/analysis/Ignore$Precedence {
+	public static final field DEFAULT I
+	public static final field HIGH I
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ignore$Precedence;
+}
+
+public final class org/jetbrains/compose/reload/analysis/IgnoreKt {
+	public static final fun isIgnored-j3M2jLw (Ljava/lang/String;)Z
+}
+
+public abstract class org/jetbrains/compose/reload/analysis/InstructionToken {
+	public abstract fun getInstructions ()Ljava/util/List;
+}
+
+public final class org/jetbrains/compose/reload/analysis/InstructionToken$BlockToken : org/jetbrains/compose/reload/analysis/InstructionToken {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$BlockToken;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$BlockToken;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$BlockToken;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getInstructions ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/InstructionToken$CurrentMarkerToken : org/jetbrains/compose/reload/analysis/InstructionToken {
+	public fun <init> (ILjava/util/List;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (ILjava/util/List;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$CurrentMarkerToken;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$CurrentMarkerToken;ILjava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$CurrentMarkerToken;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getInstructions ()Ljava/util/List;
+	public final fun getVariableIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/InstructionToken$EndReplaceGroup : org/jetbrains/compose/reload/analysis/InstructionToken {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$EndReplaceGroup;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$EndReplaceGroup;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$EndReplaceGroup;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getInstructions ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/InstructionToken$EndRestartGroup : org/jetbrains/compose/reload/analysis/InstructionToken {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$EndRestartGroup;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$EndRestartGroup;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$EndRestartGroup;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getInstructions ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/InstructionToken$EndToMarkerToken : org/jetbrains/compose/reload/analysis/InstructionToken {
+	public fun <init> (ILjava/util/List;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (ILjava/util/List;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$EndToMarkerToken;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$EndToMarkerToken;ILjava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$EndToMarkerToken;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getInstructions ()Ljava/util/List;
+	public final fun getVariableIndex ()I
+	public fun hashCode ()I
+	public final fun setVariableIndex (I)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/InstructionToken$JumpToken : org/jetbrains/compose/reload/analysis/InstructionToken {
+	public fun <init> (Lorg/objectweb/asm/tree/JumpInsnNode;)V
+	public final fun component1 ()Lorg/objectweb/asm/tree/JumpInsnNode;
+	public final fun copy (Lorg/objectweb/asm/tree/JumpInsnNode;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$JumpToken;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$JumpToken;Lorg/objectweb/asm/tree/JumpInsnNode;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$JumpToken;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getInstructions ()Ljava/util/List;
+	public final fun getJumpInsn ()Lorg/objectweb/asm/tree/JumpInsnNode;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/InstructionToken$LabelToken : org/jetbrains/compose/reload/analysis/InstructionToken {
+	public fun <init> (Lorg/objectweb/asm/tree/LabelNode;)V
+	public final fun component1 ()Lorg/objectweb/asm/tree/LabelNode;
+	public final fun copy (Lorg/objectweb/asm/tree/LabelNode;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$LabelToken;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$LabelToken;Lorg/objectweb/asm/tree/LabelNode;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$LabelToken;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getInstructions ()Ljava/util/List;
+	public final fun getLabelInsn ()Lorg/objectweb/asm/tree/LabelNode;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/InstructionToken$ReturnToken : org/jetbrains/compose/reload/analysis/InstructionToken {
+	public fun <init> (Lorg/objectweb/asm/tree/AbstractInsnNode;)V
+	public final fun component1 ()Lorg/objectweb/asm/tree/AbstractInsnNode;
+	public final fun copy (Lorg/objectweb/asm/tree/AbstractInsnNode;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$ReturnToken;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$ReturnToken;Lorg/objectweb/asm/tree/AbstractInsnNode;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$ReturnToken;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getInstructions ()Ljava/util/List;
+	public final fun getReturnInsn ()Lorg/objectweb/asm/tree/AbstractInsnNode;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/InstructionToken$SourceInformation : org/jetbrains/compose/reload/analysis/InstructionToken {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$SourceInformation;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$SourceInformation;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$SourceInformation;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getInstructions ()Ljava/util/List;
+	public final fun getSourceInformation ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/InstructionToken$SourceInformationMarkerEnd : org/jetbrains/compose/reload/analysis/InstructionToken {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$SourceInformationMarkerEnd;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$SourceInformationMarkerEnd;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$SourceInformationMarkerEnd;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getInstructions ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/InstructionToken$SourceInformationMarkerStart : org/jetbrains/compose/reload/analysis/InstructionToken {
+	public synthetic fun <init> (ILjava/lang/String;Ljava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-Fxwnibg ()I
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy-7zvGUPw (ILjava/lang/String;Ljava/util/List;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$SourceInformationMarkerStart;
+	public static synthetic fun copy-7zvGUPw$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$SourceInformationMarkerStart;ILjava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$SourceInformationMarkerStart;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getInstructions ()Ljava/util/List;
+	public final fun getKey-Fxwnibg ()I
+	public final fun getSourceInformation ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/InstructionToken$StartReplaceGroup : org/jetbrains/compose/reload/analysis/InstructionToken {
+	public synthetic fun <init> (ILjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-Fxwnibg ()I
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy-Zm8y5HE (ILjava/util/List;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$StartReplaceGroup;
+	public static synthetic fun copy-Zm8y5HE$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$StartReplaceGroup;ILjava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$StartReplaceGroup;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getInstructions ()Ljava/util/List;
+	public final fun getKey-Fxwnibg ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/InstructionToken$StartRestartGroup : org/jetbrains/compose/reload/analysis/InstructionToken {
+	public synthetic fun <init> (ILjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-Fxwnibg ()I
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy-Zm8y5HE (ILjava/util/List;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$StartRestartGroup;
+	public static synthetic fun copy-Zm8y5HE$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$StartRestartGroup;ILjava/util/List;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$StartRestartGroup;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getInstructions ()Ljava/util/List;
+	public final fun getKey-Fxwnibg ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/InstructionTree {
+	public synthetic fun <init> (Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;Lorg/jetbrains/compose/reload/analysis/ScopeType;Ljava/util/List;Ljava/util/List;Lorg/jetbrains/compose/reload/core/Failure;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-z2uEmV4 ()Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;
+	public final fun component2 ()Lorg/jetbrains/compose/reload/analysis/ScopeType;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Lorg/jetbrains/compose/reload/core/Failure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChildren ()Ljava/util/List;
+	public final fun getFailure ()Lorg/jetbrains/compose/reload/core/Failure;
+	public final fun getGroup-z2uEmV4 ()Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;
+	public final fun getTokens ()Ljava/util/List;
+	public final fun getType ()Lorg/jetbrains/compose/reload/analysis/ScopeType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class org/jetbrains/compose/reload/analysis/MemberId {
+	public abstract fun getClassId-uSFnFHE ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/MemberIdKt {
+	public static final fun getMethodId (Ljava/lang/reflect/Method;)Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public static final fun isClassInitializer (Lorg/jetbrains/compose/reload/analysis/MethodId;)Z
+	public static final fun isConstructor (Lorg/jetbrains/compose/reload/analysis/MethodId;)Z
+}
+
+public abstract class org/jetbrains/compose/reload/analysis/MemberInfo {
+	public abstract fun getMemberId ()Lorg/jetbrains/compose/reload/analysis/MemberId;
+}
+
+public final class org/jetbrains/compose/reload/analysis/MemberInfoKt {
+	public static final fun getAllScopes (Lorg/jetbrains/compose/reload/analysis/MethodInfo;)Ljava/util/Set;
+}
+
+public final class org/jetbrains/compose/reload/analysis/MethodId : org/jetbrains/compose/reload/analysis/MemberId {
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-uSFnFHE ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy-uEB1Bto (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public static synthetic fun copy-uEB1Bto$default (Lorg/jetbrains/compose/reload/analysis/MethodId;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getClassId-uSFnFHE ()Ljava/lang/String;
+	public final fun getMethodDescriptor ()Ljava/lang/String;
+	public final fun getMethodName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/MethodInfo : org/jetbrains/compose/reload/analysis/MemberInfo {
+	public final fun component1 ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun component2 ()Lorg/jetbrains/compose/reload/analysis/MethodType;
+	public final fun component3 ()Lorg/jetbrains/compose/reload/analysis/MethodInfo$Modality;
+	public final fun component4 ()Lorg/jetbrains/compose/reload/analysis/ScopeInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public synthetic fun getMemberId ()Lorg/jetbrains/compose/reload/analysis/MemberId;
+	public fun getMemberId ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getMethodId ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getMethodType ()Lorg/jetbrains/compose/reload/analysis/MethodType;
+	public final fun getModality ()Lorg/jetbrains/compose/reload/analysis/MethodInfo$Modality;
+	public final fun getRootScope ()Lorg/jetbrains/compose/reload/analysis/ScopeInfo;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/MethodInfo$Modality : java/lang/Enum {
+	public static final field ABSTRACT Lorg/jetbrains/compose/reload/analysis/MethodInfo$Modality;
+	public static final field FINAL Lorg/jetbrains/compose/reload/analysis/MethodInfo$Modality;
+	public static final field OPEN Lorg/jetbrains/compose/reload/analysis/MethodInfo$Modality;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/analysis/MethodInfo$Modality;
+	public static fun values ()[Lorg/jetbrains/compose/reload/analysis/MethodInfo$Modality;
+}
+
+public final class org/jetbrains/compose/reload/analysis/MethodType : java/lang/Enum {
+	public static final field Composable Lorg/jetbrains/compose/reload/analysis/MethodType;
+	public static final field ComposeEntryPoint Lorg/jetbrains/compose/reload/analysis/MethodType;
+	public static final field Regular Lorg/jetbrains/compose/reload/analysis/MethodType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/analysis/MethodType;
+	public static fun values ()[Lorg/jetbrains/compose/reload/analysis/MethodType;
+}
+
+public abstract interface class org/jetbrains/compose/reload/analysis/MutableApplicationInfo : org/jetbrains/compose/reload/analysis/ApplicationInfo {
+	public abstract fun add (Lorg/jetbrains/compose/reload/analysis/ClassInfo;)V
+	public abstract fun clear ()V
+	public abstract fun copy ()Lorg/jetbrains/compose/reload/analysis/MutableApplicationInfo;
+	public abstract fun remove-j3M2jLw (Ljava/lang/String;)V
+}
+
+public final class org/jetbrains/compose/reload/analysis/MutableApplicationInfoImplKt {
+	public static final fun MutableApplicationInfo ()Lorg/jetbrains/compose/reload/analysis/MutableApplicationInfo;
+}
+
+public final class org/jetbrains/compose/reload/analysis/ResolveDirtyKt {
+	public static final fun resolveDirtyScopes (Lorg/jetbrains/compose/reload/core/Context;Lorg/jetbrains/compose/reload/analysis/ApplicationInfo;Lorg/jetbrains/compose/reload/analysis/ApplicationInfo;)Lorg/jetbrains/compose/reload/analysis/ResolvedDirtyScopes;
+}
+
+public final class org/jetbrains/compose/reload/analysis/ResolvedDirtyScopes {
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDirtyMethodIds ()Ljava/util/Map;
+	public final fun getDirtyScopes ()Ljava/util/List;
+	public final fun getRedefinedClasses ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class org/jetbrains/compose/reload/analysis/ScopeAnalyzerExtension {
+	public abstract fun analyze (Lorg/jetbrains/compose/reload/analysis/MethodId;Lorg/objectweb/asm/tree/MethodNode;Lorg/jetbrains/compose/reload/analysis/InstructionTree;)Lorg/jetbrains/compose/reload/core/Context;
+}
+
+public final class org/jetbrains/compose/reload/analysis/ScopeHash {
+	public static final synthetic fun box-impl (J)Lorg/jetbrains/compose/reload/analysis/ScopeHash;
+	public static fun constructor-impl (J)J
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (JLjava/lang/Object;)Z
+	public static final fun equals-impl0 (JJ)Z
+	public final fun getValue ()J
+	public fun hashCode ()I
+	public static fun hashCode-impl (J)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (J)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()J
+}
+
+public final class org/jetbrains/compose/reload/analysis/ScopeInfo {
+	public final fun component1 ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun component2 ()Lorg/jetbrains/compose/reload/analysis/ScopeType;
+	public final fun component3-hC-z0cA ()J
+	public final fun component4-z2uEmV4 ()Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;
+	public final fun component5 ()Ljava/util/Set;
+	public final fun component6 ()Ljava/util/Set;
+	public final fun component7 ()Ljava/util/List;
+	public final fun component8 ()Lorg/jetbrains/compose/reload/core/Context;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChildren ()Ljava/util/List;
+	public final fun getExtras ()Lorg/jetbrains/compose/reload/core/Context;
+	public final fun getFieldDependencies ()Ljava/util/Set;
+	public final fun getGroup-z2uEmV4 ()Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;
+	public final fun getMethodDependencies ()Ljava/util/Set;
+	public final fun getMethodId ()Lorg/jetbrains/compose/reload/analysis/MethodId;
+	public final fun getScopeHash-hC-z0cA ()J
+	public final fun getScopeType ()Lorg/jetbrains/compose/reload/analysis/ScopeType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/ScopeType : java/lang/Enum {
+	public static final field Method Lorg/jetbrains/compose/reload/analysis/ScopeType;
+	public static final field ReplaceGroup Lorg/jetbrains/compose/reload/analysis/ScopeType;
+	public static final field RestartGroup Lorg/jetbrains/compose/reload/analysis/ScopeType;
+	public static final field SourceInformationMarker Lorg/jetbrains/compose/reload/analysis/ScopeType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/analysis/ScopeType;
+	public static fun values ()[Lorg/jetbrains/compose/reload/analysis/ScopeType;
+}
+

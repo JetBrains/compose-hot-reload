@@ -17,28 +17,29 @@ import kotlin.time.measureTimedValue
 
 private val logger = createLogger()
 
-data class RuntimeDirtyScopes(
+@ConsistentCopyVisibility
+data class ResolvedDirtyScopes internal constructor(
     val redefinedClasses: List<ClassInfo>,
-    val dirtyScopes: List<RuntimeScopeInfo>
+    val dirtyScopes: List<ScopeInfo>
 ) {
     val dirtyMethodIds = dirtyScopes.groupBy { it.methodId }
 }
 
-fun Context.resolveDirtyRuntimeScopes(current: RuntimeInfo, redefined: RuntimeInfo): RuntimeDirtyScopes {
+fun Context.resolveDirtyScopes(current: ApplicationInfo, redefined: ApplicationInfo): ResolvedDirtyScopes {
     val (redefinition, duration) = measureTimedValue {
-        RuntimeDirtyScopes(
+        ResolvedDirtyScopes(
             redefinedClasses = redefined.classIndex.values.toList(),
             dirtyScopes = resolveDirtyRuntimeScopeInfos(current, redefined)
         )
     }
 
-    logger.info("${simpleName<RuntimeDirtyScopes>()} resolved in [${duration}]")
+    logger.info("${simpleName<ResolvedDirtyScopes>()} resolved in [${duration}]")
     return redefinition
 }
 
 private fun Context.resolveDirtyRuntimeScopeInfos(
-    current: RuntimeInfo, redefined: RuntimeInfo
-): List<RuntimeScopeInfo> {
+    current: ApplicationInfo, redefined: ApplicationInfo
+): List<ScopeInfo> {
     val dirtyComposeScopes = resolveDirtyComposeScopes(current, redefined) +
         resolveRemovedComposeScopes(current, redefined)
 
@@ -58,10 +59,10 @@ private fun Context.resolveDirtyRuntimeScopeInfos(
     }.toList()
 }
 
-private fun resolveDirtyMethods(current: RuntimeInfo, redefined: RuntimeInfo): List<MethodInfo> {
+private fun resolveDirtyMethods(current: ApplicationInfo, redefined: ApplicationInfo): List<MethodInfo> {
     return redefined.methodIndex.mapNotNull { (methodId, redefinedMethod) ->
         val previousMethod = current.methodIndex[methodId] ?: return@mapNotNull redefinedMethod
-        if (previousMethod.rootScope.hash != redefinedMethod.rootScope.hash) {
+        if (previousMethod.rootScope.scopeHash != redefinedMethod.rootScope.scopeHash) {
             return@mapNotNull redefinedMethod
         }
         if (previousMethod.rootScope.children.map { it.group } != redefinedMethod.rootScope.children.map { it.group }) {
@@ -71,7 +72,7 @@ private fun resolveDirtyMethods(current: RuntimeInfo, redefined: RuntimeInfo): L
     }
 }
 
-private fun resolveRemovedMethods(current: RuntimeInfo, redefined: RuntimeInfo): List<MethodInfo> {
+private fun resolveRemovedMethods(current: ApplicationInfo, redefined: ApplicationInfo): List<MethodInfo> {
     return redefined.classIndex.flatMap { (classId, redefinedClass) ->
         val previousClass = current.classIndex[classId] ?: return@flatMap emptyList()
         previousClass.methods.mapNotNull { (methodId, method) ->
@@ -81,7 +82,7 @@ private fun resolveRemovedMethods(current: RuntimeInfo, redefined: RuntimeInfo):
     }
 }
 
-private fun resolveDirtyFields(current: RuntimeInfo, redefined: RuntimeInfo): List<FieldInfo> {
+private fun resolveDirtyFields(current: ApplicationInfo, redefined: ApplicationInfo): List<FieldInfo> {
     return redefined.fieldIndex.mapNotNull { (fieldId, redefinedField) ->
         val previousField = current.fieldIndex[fieldId] ?: return@mapNotNull redefinedField
         if (previousField.initialValue != redefinedField.initialValue) {
@@ -91,7 +92,7 @@ private fun resolveDirtyFields(current: RuntimeInfo, redefined: RuntimeInfo): Li
     }
 }
 
-private fun resolveRemovedFields(current: RuntimeInfo, redefined: RuntimeInfo): List<FieldInfo> {
+private fun resolveRemovedFields(current: ApplicationInfo, redefined: ApplicationInfo): List<FieldInfo> {
     return redefined.classIndex.flatMap { (classId, redefinedClass) ->
         val previousClass = current.classIndex[classId] ?: return@flatMap emptyList()
         previousClass.fields.mapNotNull { (fieldId, field) ->
@@ -101,8 +102,8 @@ private fun resolveRemovedFields(current: RuntimeInfo, redefined: RuntimeInfo): 
     }
 }
 
-private fun resolveDirtyComposeScopes(current: RuntimeInfo, redefined: RuntimeInfo): List<RuntimeScopeInfo> {
-    val result = mutableListOf<RuntimeScopeInfo>()
+private fun resolveDirtyComposeScopes(current: ApplicationInfo, redefined: ApplicationInfo): List<ScopeInfo> {
+    val result = mutableListOf<ScopeInfo>()
     redefined.groupIndex.forEach forEachGroup@{ (groupKey, redefinedGroup) ->
         if (groupKey == null) return@forEachGroup
         if (SpecialComposeGroupKeys.isRememberGroup(groupKey)) return@forEachGroup
@@ -118,8 +119,8 @@ private fun resolveDirtyComposeScopes(current: RuntimeInfo, redefined: RuntimeIn
     return result
 }
 
-private fun resolveRemovedComposeScopes(current: RuntimeInfo, redefined: RuntimeInfo): List<RuntimeScopeInfo> {
-    val result = mutableListOf<RuntimeScopeInfo>()
+private fun resolveRemovedComposeScopes(current: ApplicationInfo, redefined: ApplicationInfo): List<ScopeInfo> {
+    val result = mutableListOf<ScopeInfo>()
     redefined.methodIndex.forEach forEachMethod@{ (methodId, redefinedMethod) ->
         val previousMethod = current.methodIndex[methodId] ?: return@forEachMethod
         val redefinedScopeGroups = redefinedMethod.allScopes.map { it.group }
@@ -131,33 +132,34 @@ private fun resolveRemovedComposeScopes(current: RuntimeInfo, redefined: Runtime
 }
 
 private fun Context.resolveDirtyMethodsFromExtensionPoints(
-    current: RuntimeInfo, redefined: RuntimeInfo
+    current: ApplicationInfo, redefined: ApplicationInfo
 ): List<MethodInfo> {
-    return ServiceLoader.load(DirtyResolver::class.java, ClassLoader.getSystemClassLoader()).flatMap { resolver ->
-        resolver.resolveDirtyMethods(this, current, redefined)
-    }
+    return ServiceLoader.load(DirtyResolverExtension::class.java, ClassLoader.getSystemClassLoader())
+        .flatMap { resolver ->
+            resolver.resolveDirtyMethods(this, current, redefined)
+        }
 }
 
 /**
  * This method will start at the [dirtyFields] and [dirtyMethods] provided by it and
- * walks the dependency graph in [RuntimeInfo] (e.g. [RuntimeInfo.dependencyIndex] or [RuntimeInfo.superIndex]).
+ * walks the dependency graph in [ApplicationInfo] (e.g. [ApplicationInfo.dependencyIndex] or [ApplicationInfo.superIndex]).
  * Visited elements therefore depend on dirty scopes and are therefore also marked as dirty.
  *
  * This algorithm is configured to only search the graph using a maximum depth
  * (configured by [org.jetbrains.compose.reload.core.HotReloadProperty.DirtyResolveDepthLimit]).
  */
 private fun resolveTransitivelyDirty(
-    current: RuntimeInfo,
-    redefined: RuntimeInfo,
+    current: ApplicationInfo,
+    redefined: ApplicationInfo,
     dirtyMethods: List<MethodInfo>,
     dirtyFields: List<FieldInfo>,
-): List<RuntimeScopeInfo> {
+): List<ScopeInfo> {
 
-    class Element(val memberId: MemberId, val depth: Int, val scope: RuntimeScopeInfo? = null)
+    class Element(val memberId: MemberId, val depth: Int, val scope: ScopeInfo? = null)
 
     val queue = ArrayDeque<Element>()
     val visited = hashMapOf<MemberId, Element>()
-    val transitivelyDirtyScopes = mutableListOf<RuntimeScopeInfo>()
+    val transitivelyDirtyScopes = mutableListOf<ScopeInfo>()
 
     fun ClassId.isComposableSingleton(): Boolean {
         return value.contains("ComposableSingletons\$")
@@ -264,7 +266,7 @@ private fun resolveTransitivelyDirty(
         /*
         Adds the provided [scope] to the current queue
          */
-        fun enqueue(scope: RuntimeScopeInfo) {
+        fun enqueue(scope: ScopeInfo) {
             if (scope.group != null && SpecialComposeGroupKeys.isRememberGroup(scope.group)) {
                 /**
                  * If we do not have 'OptimizeNonSkippingGroups' enabled, then we should really mark
@@ -313,8 +315,8 @@ private fun resolveTransitivelyDirty(
     return transitivelyDirtyScopes
 }
 
-private fun RuntimeScopeInfo.invalidationKey(): Long {
-    var result = hash.value
+private fun ScopeInfo.invalidationKey(): Long {
+    var result = scopeHash.value
 
     fun push(value: Long) {
         result = 31L * result + value
@@ -331,19 +333,19 @@ private fun RuntimeScopeInfo.invalidationKey(): Long {
         Therefore, we push hash of those values into the invalidation key of this parent
          */
         if (SpecialComposeGroupKeys.isRememberGroup(child.group)) {
-            push(child.hash.value)
+            push(child.scopeHash.value)
         }
     }
     return result
 }
 
-private fun Iterable<RuntimeScopeInfo>.invalidationKey(): Long = fold(0L) { acc, scope ->
+private fun Iterable<ScopeInfo>.invalidationKey(): Long = fold(0L) { acc, scope ->
     31L * acc + scope.invalidationKey()
 }
 
-private fun RuntimeInfo.resolveParentRuntimeScopeInfo(
-    redefined: RuntimeInfo, scope: RuntimeScopeInfo
-): RuntimeScopeInfo? {
+private fun ApplicationInfo.resolveParentRuntimeScopeInfo(
+    redefined: ApplicationInfo, scope: ScopeInfo
+): ScopeInfo? {
     val methodInfo = redefined.methodIndex[scope.methodId] ?: methodIndex[scope.methodId]
     if (methodInfo == null) {
         logger.error("'resolveParentScope' could not find method '${scope.methodId}'")

@@ -60,7 +60,7 @@ private fun launchComposeGroupInvalidation() {
     invokeAfterHotReload { reloadRequestId, result ->
         if (result.isFailure()) return@invokeAfterHotReload
 
-        val invalidations = result.value.dirtyRuntime.dirtyScopes
+        val invalidations = result.value.dirty.dirtyScopes
             .filter { scope -> scope.group != null }
             .groupBy { it.group }
 

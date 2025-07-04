@@ -1,0 +1,84 @@
+/*
+ Original Code:
+*/
+
+// Foo.kt
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun App() {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        Canvas(Modifier.size(200.dp, 200.dp)) {
+
+            drawLine(
+                color = Color.Blue,
+                Offset(0f, 0f),
+                Offset(300f, 200f),
+                10f,
+            )
+        }
+    }
+}
+
+/*
+ Application Info:
+*/
+
+FooKt {
+    App {
+        desc: (Landroidx/compose/runtime/Composer;I)V
+        type: Composable
+        Method {
+            key: 857161579
+            codeHash: 2346738419
+            methodDependencies: [
+                FooKt.App$lambda$3 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+            ]
+            fieldDependencies: []
+    
+            RestartGroup {
+                key: 857161579
+                codeHash: 3902619257
+                methodDependencies: [
+                    FooKt.App$lambda$2$lambda$1$lambda$0 (Landroidx/compose/ui/graphics/drawscope/DrawScope;)Lkotlin/Unit;
+                ]
+                fieldDependencies: []
+            }
+        }
+    }
+    
+    
+    App$lambda$2$lambda$1$lambda$0 {
+        desc: (Landroidx/compose/ui/graphics/drawscope/DrawScope;)Lkotlin/Unit;
+        type: Regular
+        Method {
+            key: null
+            codeHash: 1840110727
+            methodDependencies: []
+            fieldDependencies: []
+        }
+    }
+    
+    
+    App$lambda$3 {
+        desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+        type: Composable
+        Method {
+            key: null
+            codeHash: 1807268143
+            methodDependencies: [
+                FooKt.App (Landroidx/compose/runtime/Composer;I)V
+            ]
+            fieldDependencies: []
+        }
+    }
+}

@@ -6,11 +6,11 @@
 package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
-import org.jetbrains.compose.reload.analysis.DirtyResolver
+import org.jetbrains.compose.reload.analysis.DirtyResolverExtension
 import org.jetbrains.compose.reload.analysis.Ids
 import org.jetbrains.compose.reload.analysis.MethodId
 import org.jetbrains.compose.reload.analysis.MethodInfo
-import org.jetbrains.compose.reload.analysis.RuntimeInfo
+import org.jetbrains.compose.reload.analysis.ApplicationInfo
 import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.createLogger
@@ -21,12 +21,12 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadCla
 
 private val logger = createLogger()
 
-internal class ResourcesDirtyResolver : DirtyResolver {
+internal class ResourcesDirtyResolverExtension : DirtyResolverExtension {
 
     override fun resolveDirtyMethods(
         context: Context,
-        currentRuntime: RuntimeInfo,
-        redefined: RuntimeInfo,
+        currentApplication: ApplicationInfo,
+        redefined: ApplicationInfo,
     ): List<MethodInfo> {
         if (!HotReloadEnvironment.resourcesDirtyResolverEnabled) return emptyList()
         if (!context.hasChangedResources()) return emptyList()
@@ -37,7 +37,7 @@ internal class ResourcesDirtyResolver : DirtyResolver {
             Ids.StringArrayResourcesKt.classId,
             Ids.PluralStringResourcesKt.classId,
             Ids.FontResources_skikioKt.classId
-        ).flatMap { currentRuntime.classIndex[it]?.methods?.values ?: emptyList() }
+        ).flatMap { currentApplication.classIndex[it]?.methods?.values ?: emptyList() }
     }
 }
 

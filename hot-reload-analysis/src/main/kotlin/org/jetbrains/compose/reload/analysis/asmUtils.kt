@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.analysis
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassReader.SKIP_CODE
 import org.objectweb.asm.ClassReader.SKIP_FRAMES
@@ -21,6 +22,8 @@ import org.objectweb.asm.tree.IntInsnNode
 import org.objectweb.asm.tree.LdcInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
+
+fun ClassId(node: ClassNode): ClassId = ClassId(node.name)
 
 internal fun AbstractInsnNode.intValueOrNull(): Int? {
     if (this is LdcInsnNode) return this.cst as? Int
@@ -50,6 +53,7 @@ internal fun MethodNode.readFunctionKeyMetaAnnotation(): ComposeGroupKey? {
     return null
 }
 
+@InternalHotReloadApi
 fun ClassNode(bytecode: ByteArray): ClassNode {
     val reader = ClassReader(bytecode)
     val node = ClassNode(ASM9)
@@ -57,6 +61,7 @@ fun ClassNode(bytecode: ByteArray): ClassNode {
     return node
 }
 
+@InternalHotReloadApi
 fun ClassId(bytecode: ByteArray): ClassId? {
     var className: String? = null
     val reader = ClassReader(bytecode)
@@ -72,7 +77,6 @@ fun ClassId(bytecode: ByteArray): ClassId? {
     return className?.let { name -> ClassId(name) }
 }
 
-fun ClassId(node: ClassNode): ClassId = ClassId(node.name)
 
 internal fun MethodId(classNode: ClassNode, methodNode: MethodNode): MethodId = MethodId(
     classId = ClassId(classNode),
