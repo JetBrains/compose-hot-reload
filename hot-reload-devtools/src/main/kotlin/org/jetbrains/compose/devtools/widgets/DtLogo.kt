@@ -16,12 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalDensity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.devtools.Tag
+import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtLogos
 import org.jetbrains.compose.reload.core.BuildSystem
-import org.jetbrains.compose.reload.core.createLogger
 
 @Composable
 fun DtComposeLogo(
@@ -30,20 +30,20 @@ fun DtComposeLogo(
 ) = DtLogo(
     image = DtLogos.Image.COMPOSE_LOGO,
     tint = tint,
-    modifier = modifier
+    modifier = modifier.tag(Tag.HotReloadLogo)
 )
 
 @Composable
 fun DtBuildSystemLogo(
-    buildTool: BuildSystem?,
+    buildTool: BuildSystem,
     modifier: Modifier = Modifier,
     tint: Color? = Color.White,
 ) {
-    when (buildTool) {
-        BuildSystem.Gradle -> DtLogo(DtLogos.Image.GRADLE_LOGO, tint = tint, modifier = modifier)
-        BuildSystem.Amper -> DtLogo(DtLogos.Image.AMPER_LOGO, tint = tint, modifier = modifier)
-        null -> { /* nothing */ }
+    val logo = when (buildTool) {
+        BuildSystem.Gradle -> DtLogos.Image.GRADLE_LOGO
+        BuildSystem.Amper -> DtLogos.Image.AMPER_LOGO
     }
+    DtLogo(logo, tint = tint, modifier = modifier.tag(Tag.BuildSystemLogo))
 }
 
 @Composable
@@ -62,7 +62,7 @@ fun DtLogo(
 
     painter?.let { painter ->
         Image(
-            painter, "Compose Logo",
+            painter, image.name,
             colorFilter = tint?.let { tint -> ColorFilter.tint(tint) },
             modifier = modifier
         )

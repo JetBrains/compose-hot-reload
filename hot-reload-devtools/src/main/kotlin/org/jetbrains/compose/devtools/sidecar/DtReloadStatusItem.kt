@@ -45,7 +45,7 @@ import kotlinx.datetime.format
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.devtools.Tag
-import org.jetbrains.compose.devtools.buildSystem
+import org.jetbrains.compose.devtools.states.BuildSystemState
 import org.jetbrains.compose.devtools.states.ReloadState
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
@@ -62,6 +62,7 @@ import org.jetbrains.compose.devtools.widgets.DtText
 
 @Composable
 fun DtReloadStatusItem() {
+    val buildSystemState = BuildSystemState.composeValue()
     val reloadState = ReloadState.composeValue()
 
     when (reloadState) {
@@ -74,7 +75,9 @@ fun DtReloadStatusItem() {
                 )
             },
             content = {
-                DtBuildSystemLogo(buildSystem, modifier = Modifier.padding(2.dp))
+                if (buildSystemState is BuildSystemState.Initialised) {
+                    DtBuildSystemLogo(buildSystemState.buildSystem, modifier = Modifier.padding(2.dp))
+                }
                 DtText("Reloading...", Modifier.tag(Tag.ReloadStatusText))
             }
         )

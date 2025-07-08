@@ -37,6 +37,8 @@ import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowState
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.devtools.Tag
+import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
@@ -151,6 +153,7 @@ internal fun DtMinimizedSidecarWindowContent(
                 /* Hack for macOS to save from phantom clicks */
                 .onPointerEvent(PointerEventType.Enter) { inFocus = true }
                 .onPointerEvent(PointerEventType.Exit) { inFocus = false }
+                .tag(Tag.ExpandMinimiseButton)
                 .clickable(enabled = inFocus) { isExpandedChanged(true) }
                 .padding(DtPadding.small)
                 .animateContentSize(alignment = Alignment.TopCenter),
@@ -206,7 +209,9 @@ internal fun DtExpandedSidecarWindowContent(
                         .animateEnterExit(
                             enter = if (devToolsUseTransparency) fadeIn(tween(220)) else EnterTransition.None,
                             exit = if (devToolsUseTransparency) fadeOut(tween(50)) else ExitTransition.None
-                        ).clickable { isExpandedChanged(true) }
+                        )
+                        .tag(Tag.ExpandMinimiseButton)
+                        .clickable { isExpandedChanged(true) }
                         .padding(DtPadding.small)
                         .animateContentSize(alignment = Alignment.TopCenter),
                 ) {

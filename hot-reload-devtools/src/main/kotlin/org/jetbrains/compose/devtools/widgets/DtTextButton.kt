@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.theme.DtPadding
 
 /**
@@ -26,12 +27,14 @@ import org.jetbrains.compose.devtools.theme.DtPadding
 fun DtTextButton(
     text: String,
     modifier: Modifier = Modifier,
+    tag: Tag? = null,
     icon: ImageVector? = null,
     onClick: () -> Unit = {}
 ) {
     DtButton(
         onClick = onClick,
-        modifier = modifier
+        modifier = modifier,
+        tag = tag,
     ) { buttonState ->
         Row(
             verticalAlignment = Alignment.CenterVertically,

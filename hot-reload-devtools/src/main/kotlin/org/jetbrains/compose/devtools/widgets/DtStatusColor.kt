@@ -82,7 +82,7 @@ fun animatedReloadStatusBrush(
     errorColor: Color = DtColors.statusColorError,
     idleColor: Color = Color.LightGray,
 ): Brush {
-    val state = ReloadState.Key.composeValue()
+    val state = ReloadState.composeValue()
     var isIdle by remember { mutableStateOf(true) }
 
     LaunchedEffect(state) {

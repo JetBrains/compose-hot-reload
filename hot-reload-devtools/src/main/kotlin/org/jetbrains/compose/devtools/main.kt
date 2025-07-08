@@ -27,6 +27,7 @@ import org.jetbrains.compose.devtools.sidecar.DtAttachedSidecarWindow
 import org.jetbrains.compose.devtools.sidecar.DtDetachedStatusBar
 import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.states.WindowsState
+import org.jetbrains.compose.devtools.states.launchBuildSystemState
 import org.jetbrains.compose.devtools.states.launchConsoleLogState
 import org.jetbrains.compose.devtools.states.launchReloadCountState
 import org.jetbrains.compose.devtools.states.launchReloadState
@@ -48,6 +49,7 @@ private val logger = createLogger()
 internal val targetApplicationWindowStateLocal = staticCompositionLocalOf<WindowState?> { null }
 
 internal fun CoroutineScope.launchApplicationStates() {
+    launchBuildSystemState()
     launchConsoleLogState()
     launchWindowsState()
     launchUIErrorState()
@@ -59,9 +61,10 @@ internal fun CoroutineScope.launchApplicationStates() {
 fun main() {
     logger.info("PID: '${ProcessHandle.current().pid()}'")
     setupDevToolsProcess()
-    launchRecompiler()
 
     applicationScope.launchApplicationStates()
+
+    launchRecompiler()
 
     if (
         HotReloadEnvironment.isHeadless ||

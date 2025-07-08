@@ -28,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.devtools.Tag
+import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
 
@@ -41,6 +43,7 @@ data class DtButtonState(
 fun DtButton(
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier,
+    tag: Tag? = null,
     contentPadding: PaddingValues = DtPadding.buttonPadding,
     content: @Composable (state: DtButtonState) -> Unit = { _ -> },
 ) {
@@ -80,6 +83,7 @@ fun DtButton(
     ) {
         Box(
             modifier = Modifier
+                .tag(tag)
                 .clickable(interactionSource, ripple(bounded = true), onClick = onClick)
                 .padding(contentPadding),
             contentAlignment = Alignment.Center

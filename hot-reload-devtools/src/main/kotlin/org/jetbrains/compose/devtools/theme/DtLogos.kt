@@ -45,6 +45,7 @@ object DtLogos {
         val png: String get() = "img/$resource.png"
         val svg: String get() = "img/$resource.svg"
     }
+
     val COMPOSE_ICON_PNGS = listOf(
         Image.COMPOSE_LOGO16,
         Image.COMPOSE_LOGO32,
@@ -61,15 +62,20 @@ object DtLogos {
         }
     }
 
+    private val resource2ByteArrayCache = mutableMapOf<String, ByteArray>()
+    private val pngPainters = mutableMapOf<Image, Deferred<Painter?>>()
+
+    private fun resource2ByteArray(resource: String): ByteArray = resource2ByteArrayCache.getOrPut(resource) {
+        classLoader.getResource(resource)!!.openStream().buffered().use { it.readBytes() }
+    }
+
     fun imageAsPainter(image: Image, density: Density): Deferred<Painter?> = MainScope().async(Dispatchers.IO) {
         runCatching {
             /* Fix for Compose 1.8.0 not rendering svgs correctly on linux */
             if (Os.currentOrNull() != Os.Linux) {
-                classLoader.getResource(image.png)!!.openStream()
-                    .buffered().use { it.readBytes().decodeToImageBitmap() }.let { BitmapPainter(it) }
+                BitmapPainter(resource2ByteArray(image.png).decodeToImageBitmap())
             } else {
-                classLoader.getResource(image.svg)!!.openStream()
-                    .buffered().use { it.readBytes() }.decodeToSvgPainter(density)
+                resource2ByteArray(image.svg).decodeToSvgPainter(density)
             }
         }.getOrElse {
             logger.error("Failed to load image $image")
@@ -77,13 +83,14 @@ object DtLogos {
         }
     }
 
-    fun imageAsPngPainter(image: Image): Deferred<Painter?> = MainScope().async(Dispatchers.IO) {
-        runCatching {
-            classLoader.getResource(image.png)!!.openStream()
-                .buffered().use { it.readBytes().decodeToImageBitmap() }.let { BitmapPainter(it) }
-        }.getOrElse {
-            logger.error("Failed to load image $image")
-            null
+    fun imageAsPngPainter(image: Image): Deferred<Painter?> = pngPainters.getOrPut(image) {
+        MainScope().async(Dispatchers.IO) {
+            runCatching {
+                BitmapPainter(resource2ByteArray(image.png).decodeToImageBitmap())
+            }.getOrElse {
+                logger.error("Failed to load image $image")
+                null
+            }
         }
     }
 }

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.sellmair.evas.compose.EvasLaunching
+import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.send
 import org.jetbrains.compose.devtools.sendAsync
 import org.jetbrains.compose.devtools.theme.DtPadding
@@ -45,6 +46,7 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
             DtTextButton(
                 text = "Reload",
                 icon = Icons.Filled.Refresh,
+                tag = Tag.ActionButton,
                 onClick = {
                     OrchestrationMessage.RecompileRequest().sendAsync()
                 }
@@ -54,6 +56,7 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
         DtTextButton(
             text = "Retry Failed Compositions",
             icon = Icons.Filled.Refresh,
+            tag = Tag.ActionButton,
             onClick = {
                 OrchestrationMessage.RetryFailedCompositionRequest().sendAsync()
             }
@@ -66,6 +69,7 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
             DtTextButton(
                 text = "Restart",
                 icon = Icons.Filled.Refresh,
+                tag = Tag.ActionButton,
                 onClick = EvasLaunching {
                 logger.info("Restarting...")
 
@@ -100,6 +104,7 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
         DtTextButton(
             text = "Clean Composition",
             icon = Icons.Filled.Delete,
+            tag = Tag.ActionButton,
             onClick = {
                 OrchestrationMessage.CleanCompositionRequest().sendAsync()
             }
@@ -108,6 +113,7 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
         DtTextButton(
             text = "Exit",
             icon = Icons.Filled.Close,
+            tag = Tag.ActionButton,
             onClick = {
                 OrchestrationMessage.ShutdownRequest("Requested by user through 'devtools'").sendAsync()
             }

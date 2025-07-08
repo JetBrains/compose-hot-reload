@@ -9,7 +9,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import org.jetbrains.compose.devtools.api.RecompilerExtension
-import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.Try
@@ -25,8 +24,6 @@ import org.jetbrains.compose.reload.core.invokeOnFinish
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.isSuccess
 import org.jetbrains.compose.reload.core.launchTask
-import org.jetbrains.compose.reload.core.leftOr
-import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileResult
 import org.jetbrains.compose.reload.orchestration.asChannel
@@ -35,8 +32,6 @@ import java.util.ServiceLoader
 private val logger = createLogger()
 
 private val recompilerThread = WorkerThread("Recompiler", isDaemon = false)
-internal var buildSystem: BuildSystem? = null
-    private set
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun launchRecompiler(): Future<Unit> = launchTask("Recompiler", recompilerThread.dispatcher) task@{
@@ -58,15 +53,7 @@ internal fun launchRecompiler(): Future<Unit> = launchTask("Recompiler", recompi
         return@task
     }
 
-
-    logger.info("Recompiler: '${recompiler.name}'")
-    buildSystem = Try {
-        BuildSystem.valueOf(recompiler.name)
-    }.leftOr {
-        logger.warn("Unknown build system name: '${recompiler.name}'")
-        null
-    }
-
+    logger.info("Recompiler created: '${recompiler.name}'")
     messages.consumeAsFlow().filterIsInstance<RecompileRequest>().conflateAsList()
         .collect recompile@{ pendingRequests ->
             logger.info("Running Recompiler on '${pendingRequests.map { it.messageId }}'")

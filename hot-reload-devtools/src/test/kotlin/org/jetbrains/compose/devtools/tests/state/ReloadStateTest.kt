@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.jetbrains.compose.devtools.tests
+package org.jetbrains.compose.devtools.tests.state
 
 import io.sellmair.evas.Events
 import io.sellmair.evas.States
@@ -140,7 +140,7 @@ class ReloadStateTest {
     }
 }
 
-private suspend infix fun OrchestrationHandle.sendAndWait(message: OrchestrationMessage) {
+internal suspend infix fun OrchestrationHandle.sendAndWait(message: OrchestrationMessage) {
     val future = Future()
     val disposable = messages.invokeOnValue { incoming ->
         if (incoming.messageId == message.messageId) {

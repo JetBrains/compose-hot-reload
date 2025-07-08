@@ -19,6 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.devtools.Tag
+import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TOOLING
 import org.jetbrains.compose.devtools.widgets.DtButton
@@ -43,7 +45,8 @@ internal fun DtAttachedSidecarHeaderBar(
             onClick = onClose,
             modifier = Modifier
                 .padding(2.dp)
-                .size(28.dp)
+                .size(28.dp),
+            tag = Tag.ExpandMinimiseButton,
         ) {
             Icon(
                 Icons.Default.Close,

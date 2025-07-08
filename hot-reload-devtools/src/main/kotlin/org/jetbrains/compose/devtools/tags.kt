@@ -16,6 +16,14 @@ enum class Tag {
 
     RuntimeErrorSymbol,
     RuntimeErrorText,
+
+    HotReloadLogo,
+    BuildSystemLogo,
+
+    ActionButton,
+    ExpandMinimiseButton,
+
+    Console,
 }
 
-internal fun Modifier.tag(tags: Tag) = testTag(tags.name)
+internal fun Modifier.tag(tags: Tag?): Modifier = tags?.let { testTag(it.name) } ?: this

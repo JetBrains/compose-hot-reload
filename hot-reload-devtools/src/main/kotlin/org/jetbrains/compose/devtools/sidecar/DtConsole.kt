@@ -19,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import org.jetbrains.compose.devtools.Tag
+import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtShapes
@@ -41,6 +43,7 @@ fun DtConsole(
 
     Box(
         modifier
+            .tag(Tag.Console)
             .dtVerticalPadding()
             .animatedReloadStatusBorder()
             .clip(DtShapes.RoundedCornerShape)

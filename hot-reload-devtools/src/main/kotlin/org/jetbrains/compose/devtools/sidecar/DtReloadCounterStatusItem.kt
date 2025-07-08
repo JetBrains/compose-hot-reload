@@ -22,7 +22,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import io.sellmair.evas.compose.composeValue
 import org.jetbrains.compose.devtools.Tag
-import org.jetbrains.compose.devtools.buildSystem
+import org.jetbrains.compose.devtools.states.BuildSystemState
 import org.jetbrains.compose.devtools.states.ReloadCountState
 import org.jetbrains.compose.devtools.states.ReloadState
 import org.jetbrains.compose.devtools.tag
@@ -52,6 +52,7 @@ fun DtExpandedReloadCounterStatusItem() {
 
 @Composable
 fun DtMinimisedReloadCounterStatusItem() {
+    val buildSystemState = BuildSystemState.composeValue()
     val reloadState = ReloadState.composeValue()
     val countState = ReloadCountState.composeValue()
 
@@ -71,7 +72,9 @@ fun DtMinimisedReloadCounterStatusItem() {
                     modifier = Modifier.size(10.dp).padding(2.dp).tag(Tag.ReloadStatusSymbol)
                         .progressSemantics()
                 )
-                DtBuildSystemLogo(buildSystem, modifier = Modifier.size(20.dp).padding(2.dp))
+                if (buildSystemState is BuildSystemState.Initialised) {
+                    DtBuildSystemLogo(buildSystemState.buildSystem, modifier = Modifier.size(20.dp).padding(2.dp))
+                }
             }
         }
         else -> {
