@@ -109,9 +109,9 @@ internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<Ko
     Further, project-specific capabilities such as logging or extended debugging support below
     */
 
-    project.intellijDebuggerDispatchPort.orNull?.let { debuggerDispatchPort ->
-        systemProperty(HotReloadProperty.IntelliJDebuggerDispatchPort.key, debuggerDispatchPort)
-    }
+//    project.intellijDebuggerDispatchPort.orNull?.let { debuggerDispatchPort ->
+//        systemProperty(HotReloadProperty.IntelliJDebuggerDispatchPort.key, debuggerDispatchPort)
+//    }
 
     val intellijDebuggerDispatchPort = project
         .composeReloadIntelliJDebuggerDispatchPortProvider.orNull
