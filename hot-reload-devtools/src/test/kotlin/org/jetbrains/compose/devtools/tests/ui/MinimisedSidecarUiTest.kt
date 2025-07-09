@@ -25,6 +25,7 @@ import org.jetbrains.compose.devtools.states.ReloadState
 import org.jetbrains.compose.devtools.theme.DtLogos
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.junit.jupiter.api.Test
+import kotlin.time.Duration.Companion.seconds
 
 class MinimisedSidecarUiTest : SidecarBodyUiTest() {
 
@@ -62,19 +63,22 @@ class MinimisedSidecarUiTest : SidecarBodyUiTest() {
         states.updateState(ReloadState.Key) { ReloadState.Reloading() }
         onNodeWithTag(Tag.BuildSystemLogo.name).assertDoesNotExist()
 
-        runTest {
-            // preload logos so that the UI will not spend time waiting for them
-            DtLogos.imageAsPngPainter(DtLogos.Image.GRADLE_LOGO).await()
+        // give 10 second timeout to load the image and display it
+        runTest(timeout = 10.seconds) {
             states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Gradle) }
+
+            awaitNodeWithTag(Tag.BuildSystemLogo, useUnmergedTree = true)
+
             onNodeWithTag(Tag.BuildSystemLogo.name, useUnmergedTree = true)
                 .assertExists()
                 .assertContentDescriptionContains(DtLogos.Image.GRADLE_LOGO.name)
         }
 
-        runTest {
-            // preload logos so that the UI will not spend time waiting for them
-            DtLogos.imageAsPngPainter(DtLogos.Image.AMPER_LOGO).await()!!
+        runTest(timeout = 10.seconds) {
             states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Amper) }
+
+            awaitNodeWithTag(Tag.BuildSystemLogo, useUnmergedTree = true)
+
             onNodeWithTag(Tag.BuildSystemLogo.name, useUnmergedTree = true)
                 .assertExists()
                 .assertContentDescriptionContains(DtLogos.Image.AMPER_LOGO.name)

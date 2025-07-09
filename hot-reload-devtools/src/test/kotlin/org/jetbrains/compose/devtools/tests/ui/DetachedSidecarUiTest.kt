@@ -35,6 +35,7 @@ import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.WindowId
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.seconds
 
 class DetachedSidecarUiTest : SidecarBodyUiTest() {
     @Composable
@@ -86,19 +87,22 @@ class DetachedSidecarUiTest : SidecarBodyUiTest() {
 
         onNodeWithTag(Tag.BuildSystemLogo.name).assertDoesNotExist()
 
-        runTest {
-            // preload logos so that the UI will not spend time waiting for them
-            DtLogos.imageAsPngPainter(DtLogos.Image.GRADLE_LOGO).await()
+        // give 10 second timeout to load the image and display it
+        runTest(timeout = 10.seconds) {
             states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Gradle) }
+
+            awaitNodeWithTag(Tag.BuildSystemLogo)
+
             onNodeWithTag(Tag.BuildSystemLogo.name)
                 .assertExists()
                 .assertContentDescriptionContains(DtLogos.Image.GRADLE_LOGO.name)
         }
 
-        runTest {
-            // preload logos so that the UI will not spend time waiting for them
-            DtLogos.imageAsPngPainter(DtLogos.Image.AMPER_LOGO).await()!!
+        runTest(timeout = 10.seconds) {
             states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Amper) }
+
+            awaitNodeWithTag(Tag.BuildSystemLogo)
+
             onNodeWithTag(Tag.BuildSystemLogo.name)
                 .assertExists()
                 .assertContentDescriptionContains(DtLogos.Image.AMPER_LOGO.name)

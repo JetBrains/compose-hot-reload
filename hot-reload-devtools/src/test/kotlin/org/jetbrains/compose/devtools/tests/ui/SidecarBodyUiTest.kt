@@ -44,9 +44,10 @@ abstract class SidecarBodyUiTest {
     protected suspend fun ComposeUiTest.awaitNodeWithTag(
         tag: Tag,
         delay: Duration = 200.milliseconds,
+        useUnmergedTree: Boolean = false,
     ) {
         launchTask {
-            while (onAllNodesWithTag(tag.name).fetchSemanticsNodes().isEmpty()) {
+            while (onAllNodesWithTag(tag.name, useUnmergedTree).fetchSemanticsNodes().isEmpty()) {
                 delay(delay)
             }
         }.await()
