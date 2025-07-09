@@ -73,6 +73,7 @@ public suspend fun GradleRunner.build(
         "--console=plain",
         "--configuration-cache",
         "--configuration-cache-problems=warn",
+        "-Dorg.gradle.daemon.idletimeout=10000",
         "-Dorg.gradle.jvmargs=-Xmx1G -XX:+UseParallelGC " +
             issueNewDebugSessionJvmArguments("Gradle (${args.joinToString(" ")})").joinToString(" "),
         *arguments.toTypedArray(),
@@ -96,7 +97,6 @@ public suspend fun GradleRunner.build(
                 logger.info("Killing Gradle invocation at '${process.pid()}'")
                 val success = process.destroyWithDescendants()
                 logger.info("Killing Gradle invocation at '${process.pid()}' [${if (success) "succeeded" else "failed"}]")
-
             }
         }
 
@@ -105,7 +105,7 @@ public suspend fun GradleRunner.build(
                 while (true) {
                     val stdoutLine = reader.readLine() ?: break
                     stdout?.trySendBlocking(stdoutLine)
-                    this.stderrChannel?.trySendBlocking(stdoutLine)
+                    this.stdoutChannel?.trySendBlocking(stdoutLine)
                 }
             }
         }
@@ -134,14 +134,14 @@ public suspend fun GradleRunner.build(
             exitCode.complete(ExitCode(rawCode))
         } catch (_: InterruptedException) {
             exitCode.complete(null)
-            process.destroy()
+            process.destroyWithDescendants()
         }
 
         runCatching { Runtime.getRuntime().removeShutdownHook(shutdownHook) }
     }
 
     scopeJob.invokeOnCompletion {
-        if (!exitCode.isActive) {
+        if (exitCode.isActive) {
             logger.debug("Interrupting Gradle Runner thread")
             gradleRunnerThread.interrupt()
         }

@@ -77,8 +77,8 @@ internal fun describeDifference(
     maxDiffValue: Float = 0.01f,
     blur: Int = 3
 ): List<String> {
-    val expectedImage = ImageIO.read(expected.inputStream())
-    val actualImage = ImageIO.read(actual.inputStream())
+    val expectedImage = expected.inputStream().use { ImageIO.read(it) }
+    val actualImage = actual.inputStream().use { ImageIO.read(it) }
     val diffs = mutableListOf<String>()
 
     if (expectedImage.width != actualImage.width) {
@@ -107,15 +107,15 @@ internal fun describeDifference(
             }
 
             val expectedAverageColor = Color(
-                expectedColors.map { it.red }.average().roundToInt(),
-                expectedColors.map { it.green }.average().roundToInt(),
-                expectedColors.map { it.blue }.average().roundToInt()
+                expectedColors.averageBy { it.red }.roundToInt(),
+                expectedColors.averageBy { it.green }.roundToInt(),
+                expectedColors.averageBy { it.blue }.roundToInt()
             )
 
             val actualAverageColor = Color(
-                actualColors.map { it.red }.average().roundToInt(),
-                actualColors.map { it.green }.average().roundToInt(),
-                actualColors.map { it.blue }.average().roundToInt()
+                actualColors.averageBy { it.red }.roundToInt(),
+                actualColors.averageBy { it.green }.roundToInt(),
+                actualColors.averageBy { it.blue }.roundToInt()
             )
 
             if (expectedAverageColor == backgroundColor && actualAverageColor == backgroundColor) {
@@ -154,4 +154,15 @@ internal fun describeDifference(
     }
 
     return diffs
+}
+
+
+private fun <T> Collection<T>.averageBy(selector: (T) -> Int): Double {
+    var sum = 0.0
+    var count = 0
+    for (element in this) {
+        sum += selector(element)
+        ++count
+    }
+    return if (count == 0) Double.NaN else sum / count
 }

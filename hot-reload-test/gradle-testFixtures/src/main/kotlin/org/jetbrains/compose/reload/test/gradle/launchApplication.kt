@@ -41,7 +41,7 @@ public fun HotReloadTestFixture.launchApplication(
         val additionalArguments = buildList {
             add("-DmainClass=$mainClass")
 
-            /* Detached launches will create one more process: We create a pipe file to foward the output */
+            /* Detached launches will create one more process: We create a pipe file to forward the output */
             if (launchMode == ApplicationLaunchMode.Detached && Os.current() in listOf(Os.Linux, Os.MacOs)) {
                 val socketFile = generateSequence(0) { it + 1 }
                     .map { projectDir.resolve("$it.sock") }
