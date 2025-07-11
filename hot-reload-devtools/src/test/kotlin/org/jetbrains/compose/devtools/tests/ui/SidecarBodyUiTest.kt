@@ -9,16 +9,21 @@ package org.jetbrains.compose.devtools.tests.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.runComposeUiTest
 import io.sellmair.evas.Events
 import io.sellmair.evas.States
 import io.sellmair.evas.compose.installEvas
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.Tag
+import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.launchTask
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 abstract class SidecarBodyUiTest {
     protected val events = Events()
@@ -40,16 +45,15 @@ abstract class SidecarBodyUiTest {
         block()
     }
 
-    @OptIn(ExperimentalTestApi::class)
-    protected suspend fun ComposeUiTest.awaitNodeWithTag(
+    protected fun ComposeUiTest.awaitNodeWithTag(
         tag: Tag,
-        delay: Duration = 200.milliseconds,
         useUnmergedTree: Boolean = false,
-    ) {
-        launchTask {
-            while (onAllNodesWithTag(tag.name, useUnmergedTree).fetchSemanticsNodes().isEmpty()) {
-                delay(delay)
-            }
-        }.await()
-    }
+        timeout: Duration = 10.seconds,
+        pollingInterval: Duration = 200.milliseconds,
+    ): SemanticsNodeInteraction = launchTask {
+        while (onAllNodesWithTag(tag.name, useUnmergedTree).fetchSemanticsNodes().isEmpty()) {
+            delay(pollingInterval)
+        }
+        onNodeWithTag(tag.name, useUnmergedTree)
+    }.getBlocking(timeout = timeout).getOrThrow()
 }

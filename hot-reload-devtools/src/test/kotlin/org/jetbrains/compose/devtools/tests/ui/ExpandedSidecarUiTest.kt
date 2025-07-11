@@ -26,7 +26,6 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import kotlinx.coroutines.test.runTest
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.sidecar.DtExpandedSidecarWindowContent
 import org.jetbrains.compose.devtools.states.BuildSystemState
@@ -39,7 +38,6 @@ import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.WindowId
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
-import kotlin.time.Duration.Companion.seconds
 
 class ExpandedSidecarUiTest : SidecarBodyUiTest() {
 
@@ -54,7 +52,9 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
 
     @Test
     fun `test - logo clickable`() = runSidecarUiTest {
-        onNodeWithTag(Tag.HotReloadLogo.name, useUnmergedTree = true)
+        // images are loaded asynchronously, so it may not be loaded at the start of the test
+        // wait fot node to be loaded before performing checks
+        awaitNodeWithTag(Tag.HotReloadLogo, useUnmergedTree = true)
             .assertExists()
             .assertHasNoClickAction()
     }
@@ -96,26 +96,15 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
 
         onNodeWithTag(Tag.BuildSystemLogo.name).assertDoesNotExist()
 
-        // give 10 second timeout to load the image and display it
-        runTest(timeout = 10.seconds) {
-            states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Gradle) }
+        states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Gradle) }
+        awaitNodeWithTag(Tag.BuildSystemLogo)
+            .assertExists()
+            .assertContentDescriptionContains(DtLogos.Image.GRADLE_LOGO.name)
 
-            awaitNodeWithTag(Tag.BuildSystemLogo)
-
-            onNodeWithTag(Tag.BuildSystemLogo.name)
-                .assertExists()
-                .assertContentDescriptionContains(DtLogos.Image.GRADLE_LOGO.name)
-        }
-
-        runTest(timeout = 10.seconds) {
-            states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Amper) }
-
-            awaitNodeWithTag(Tag.BuildSystemLogo)
-
-            onNodeWithTag(Tag.BuildSystemLogo.name)
-                .assertExists()
-                .assertContentDescriptionContains(DtLogos.Image.AMPER_LOGO.name)
-        }
+        states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Amper) }
+        awaitNodeWithTag(Tag.BuildSystemLogo)
+            .assertExists()
+            .assertContentDescriptionContains(DtLogos.Image.AMPER_LOGO.name)
 
     }
 

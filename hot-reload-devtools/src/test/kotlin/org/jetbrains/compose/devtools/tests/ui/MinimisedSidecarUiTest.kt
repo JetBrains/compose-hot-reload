@@ -16,7 +16,6 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onParent
-import kotlinx.coroutines.test.runTest
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.sidecar.DtMinimizedSidecarWindowContent
 import org.jetbrains.compose.devtools.states.BuildSystemState
@@ -25,7 +24,6 @@ import org.jetbrains.compose.devtools.states.ReloadState
 import org.jetbrains.compose.devtools.theme.DtLogos
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.junit.jupiter.api.Test
-import kotlin.time.Duration.Companion.seconds
 
 class MinimisedSidecarUiTest : SidecarBodyUiTest() {
 
@@ -36,7 +34,7 @@ class MinimisedSidecarUiTest : SidecarBodyUiTest() {
 
     @Test
     fun `test - logo clickable`() = runSidecarUiTest {
-        onNodeWithTag(Tag.HotReloadLogo.name, useUnmergedTree = true)
+        awaitNodeWithTag(Tag.HotReloadLogo, useUnmergedTree = true)
             .assertExists()
             .onParent()
             .assertHasClickAction()
@@ -63,25 +61,14 @@ class MinimisedSidecarUiTest : SidecarBodyUiTest() {
         states.updateState(ReloadState.Key) { ReloadState.Reloading() }
         onNodeWithTag(Tag.BuildSystemLogo.name).assertDoesNotExist()
 
-        // give 10 second timeout to load the image and display it
-        runTest(timeout = 10.seconds) {
-            states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Gradle) }
+        states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Gradle) }
+        awaitNodeWithTag(Tag.BuildSystemLogo, useUnmergedTree = true)
+            .assertExists()
+            .assertContentDescriptionContains(DtLogos.Image.GRADLE_LOGO.name)
 
-            awaitNodeWithTag(Tag.BuildSystemLogo, useUnmergedTree = true)
-
-            onNodeWithTag(Tag.BuildSystemLogo.name, useUnmergedTree = true)
-                .assertExists()
-                .assertContentDescriptionContains(DtLogos.Image.GRADLE_LOGO.name)
-        }
-
-        runTest(timeout = 10.seconds) {
-            states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Amper) }
-
-            awaitNodeWithTag(Tag.BuildSystemLogo, useUnmergedTree = true)
-
-            onNodeWithTag(Tag.BuildSystemLogo.name, useUnmergedTree = true)
-                .assertExists()
-                .assertContentDescriptionContains(DtLogos.Image.AMPER_LOGO.name)
-        }
+        states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Amper) }
+        awaitNodeWithTag(Tag.BuildSystemLogo, useUnmergedTree = true)
+            .assertExists()
+            .assertContentDescriptionContains(DtLogos.Image.AMPER_LOGO.name)
     }
 }
