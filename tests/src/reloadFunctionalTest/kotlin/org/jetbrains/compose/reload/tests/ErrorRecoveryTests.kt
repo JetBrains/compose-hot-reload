@@ -50,6 +50,41 @@ class ErrorRecoveryTests {
 
     @HotReloadTest
     @QuickTest
+    fun `good - bad - good - good`(fixture: HotReloadTestFixture) = fixture.runTest {
+        val code = fixture.initialSourceCode(
+            """
+            import org.jetbrains.compose.reload.test.*
+            
+            fun main() {
+                screenshotTestApplication {
+                    TestText("Hello")
+                }
+            }
+        """.trimIndent()
+        )
+
+        fixture.checkScreenshot("0-initial")
+        fixture.runTransaction {
+            code.replaceText("""TestText("Hello")""", """error("Foo")""")
+            requestReload()
+            assertEquals("Foo", skipToMessage<OrchestrationMessage.UIException>().message)
+        }
+
+        fixture.runTransaction {
+            code.replaceText("""error("Foo")""", """TestText("Recovered")""")
+            requestAndAwaitReload()
+            fixture.checkScreenshot("1-recovered")
+        }
+
+        fixture.runTransaction {
+            code.replaceText("""TestText("Recovered")""", """TestText("Update after recovered")""")
+            requestAndAwaitReload()
+            fixture.checkScreenshot("2-after-recovered")
+        }
+    }
+
+    @HotReloadTest
+    @QuickTest
     fun `illegal code change - with recovery`(fixture: HotReloadTestFixture) = fixture.runTest {
         val d = "$"
         val code = fixture.initialSourceCode(
