@@ -8,6 +8,8 @@ plugins {
     `maven-publish`
     `kotlin-conventions`
     `publishing-conventions`
+    `tests-with-compiler`
+    org.jetbrains.kotlinx.benchmark
 }
 
 kotlin {
@@ -15,6 +17,28 @@ kotlin {
 
     compilerOptions {
         optIn.add("org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi")
+    }
+
+    target.compilations.create("benchmark") {
+        associateWith(target.compilations.getByName("main"))
+        defaultSourceSet {
+            dependencies {
+                implementation(kotlin("compiler-embeddable"))
+                implementation(deps.benchmark.runtime)
+                implementation(project.dependencies.testFixtures(project(":hot-reload-core")))
+            }
+        }
+    }
+}
+
+benchmark {
+    targets.register("benchmark")
+}
+
+tasks.named { it == "benchmarkBenchmark" }.configureEach {
+    this as JavaExec
+    testWithCompiler {
+        tasks.add(this@configureEach)
     }
 }
 
