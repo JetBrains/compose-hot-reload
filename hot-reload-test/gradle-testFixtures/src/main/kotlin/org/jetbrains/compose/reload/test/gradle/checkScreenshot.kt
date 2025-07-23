@@ -81,6 +81,8 @@ internal fun describeImageDifferences(
         add("Expected height '${expectedImage.height}', found '${actualImage.height}'")
     }
 
+    if (isNotEmpty()) return@buildList
+
     val diff = averagePixelValueDiff(expectedImage, actualImage)
     if (diff > maxDifferenceValue) {
         add("Image difference value is ${diff.toString().take(5)}")
@@ -109,9 +111,7 @@ internal fun averagePixelValueDiff(
     require(expectedImage.height == actualImage.height)
     val boundingBox = getBoundingBox(expectedImage, actualImage, backgroundColor)
         .extendBy(pixels = blur / 2, bounds = 0..<expectedImage.width)
-    val surroundingBoxCoordinates = computeSurroundingBox(blur / 2)
-    val penaltyThresholds = intArrayOf(10, 20, 100, 150, 200)
-    val penalties = doubleArrayOf(0.0, 0.5, 1.0, 3.0, 20.0)
+    val blurBox = blurBox(blur / 2)
 
     var diff = 0.0
     var countingPixels = 0
@@ -125,7 +125,7 @@ internal fun averagePixelValueDiff(
             var actualBlue = 0
             var count = 0
 
-            for ((dx, dy) in surroundingBoxCoordinates) {
+            for ((dx, dy) in blurBox) {
                 if (x + dx < 0 || x + dx >= expectedImage.width || y + dy < 0 || y + dy >= expectedImage.height) continue
                 val expectedRgb = expectedImage.getRGB(x + dx, y + dy)
                 val actualRgb = actualImage.getRGB(x + dx, y + dy)
@@ -150,20 +150,6 @@ internal fun averagePixelValueDiff(
 
             countingPixels++
 
-            /*
-            Jeez, I should slow down a little:
-            This is a very lazy implementation of a penalty score which will "downplay" small diffs as
-            we know that most of our images will use black on white. Therefore, small diffs most likely
-            are just some antialiasing artifacts.
-             */
-            fun penaltyScore(expected: Int, actual: Int): Double {
-                val raw = (expected - actual).absoluteValue
-                for ((index, threshold) in penaltyThresholds.withIndex()) {
-                    if (raw < threshold) return penalties[index]
-                }
-                return raw.toDouble()
-            }
-
             diff += penaltyScore(expectedAverageColor.red, actualAverageColor.red)
             diff += penaltyScore(expectedAverageColor.green, actualAverageColor.green)
             diff += penaltyScore(expectedAverageColor.blue, actualAverageColor.blue)
@@ -173,16 +159,26 @@ internal fun averagePixelValueDiff(
     return diff / (countingPixels * 256 * 3).toFloat()
 }
 
+/*
+This is a very lazy implementation of a penalty score which will "downplay" small diffs as
+we know that most of our images will use black on white. Therefore, small diffs most likely
+are just some antialiasing artifacts.
+ */
+private fun penaltyScore(expected: Int, actual: Int): Double {
+    val raw = (expected - actual).absoluteValue
+    return when {
+        raw < 10 -> 0.0
+        raw < 20 -> 0.5
+        raw < 100 -> 1.0
+        raw < 150 -> 3.0
+        raw < 200 -> 20.0
+        else -> raw.toDouble()
+    }
+}
+
 private data class BoundingBox(val x: Int, val y: Int, val width: Int, val height: Int) {
     val xRange: IntRange get() = x until (x + width)
     val yRange: IntRange get() = y until (y + height)
-
-    fun merge(other: BoundingBox): BoundingBox = BoundingBox(
-        x = minOf(x, other.x),
-        y = minOf(y, other.y),
-        width = maxOf(width, other.width),
-        height = maxOf(height, other.height),
-    )
 
     fun extendBy(pixels: Int, bounds: IntRange): BoundingBox = BoundingBox(
         x = maxOf(x - pixels, bounds.first),
@@ -192,10 +188,14 @@ private data class BoundingBox(val x: Int, val y: Int, val width: Int, val heigh
     )
 }
 
-private fun computeSurroundingBox(r: Int): List<Pair<Int, Int>> = buildList {
-    for (x in -r..r) {
-        for (y in -r..r) {
-            add(x to y)
+private val r1Box = listOf(-1 to -1, -1 to 0, -1 to 1, 0 to -1, 0 to 1, 1 to -1, 1 to 0, 1 to 1)
+private fun blurBox(r: Int): List<Pair<Int, Int>> = when (r) {
+    1 -> r1Box
+    else -> buildList {
+        for (x in -r..r) {
+            for (y in -r..r) {
+                add(x to y)
+            }
         }
     }
 }
