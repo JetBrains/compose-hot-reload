@@ -195,6 +195,16 @@ IntelliJDebuggerDispatchPort:
     Launching the final application will respect this port, if present and provision a debugging session.
     This will allow a test to be deeply debuggable by just pressing 'Debug'
 
+SubprocessDebuggingEnabled:
+  key: compose.reload.subprocessDebuggingEnabled
+  type: boolean
+  default: "false"
+  target: [ build ]
+  documentation: |
+    Enable this property to allow propagating the 'idea.debugger.dispatch.port' to all subprocesses.
+    This is useful when debugging dev tools. Note: this may break the debugging of the user application if IJ is
+    not configured to accept multiple debugging sessions.
+
 JetBrainsRuntimeBinary:
   key: compose.reload.jbr.binary
   type: file
