@@ -51,7 +51,7 @@ fun DtExpandedReloadCounterStatusItem() {
 }
 
 @Composable
-fun DtMinimisedReloadCounterStatusItem() {
+fun DtMinimisedReloadCounterStatusItem(showDefaultValue: Boolean = false) {
     val buildSystemState = BuildSystemState.composeValue()
     val reloadState = ReloadState.composeValue()
     val countState = ReloadCountState.composeValue()
@@ -78,7 +78,7 @@ fun DtMinimisedReloadCounterStatusItem() {
             }
         }
         else -> {
-            if (countState.successfulReloads < 1) return
+            if (countState.successfulReloads < 1 && !showDefaultValue) return
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.scale(scale).horizontalScroll(rememberScrollState())

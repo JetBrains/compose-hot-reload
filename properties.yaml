@@ -175,6 +175,15 @@ DevToolsDetached:
   documentation: |
     If enabled, dev tools window will be detached from the main application
 
+DevToolsAnimationsEnabled:
+  key: compose.reload.devToolsAnimationsEnabled
+  type: boolean
+  default: "true"
+  target: [ application, build, devtools ]
+  documentation: |
+    If disabled, dev tools will not use window animations when switching between expanded/minimised states. 
+    Note: window contents will still be animated.
+
 IntelliJDebuggerDispatchPort:
   key: compose.reload.idea.debugger.dispatch.port
   type: int

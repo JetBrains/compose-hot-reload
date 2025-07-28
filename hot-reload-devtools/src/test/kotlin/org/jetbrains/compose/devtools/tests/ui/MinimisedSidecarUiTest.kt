@@ -18,6 +18,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onParent
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.sidecar.DtMinimizedSidecarWindowContent
+import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.states.BuildSystemState
 import org.jetbrains.compose.devtools.states.ReloadCountState
 import org.jetbrains.compose.devtools.states.ReloadState
@@ -47,7 +48,11 @@ class MinimisedSidecarUiTest : SidecarBodyUiTest() {
 
     @Test
     fun `test - reload counter`() = runSidecarUiTest {
-        onNodeWithTag(Tag.ReloadCounterText.name, useUnmergedTree = true).assertDoesNotExist()
+        if (devToolsUseTransparency) {
+            onNodeWithTag(Tag.ReloadCounterText.name, useUnmergedTree = true).assertDoesNotExist()
+        } else {
+            onNodeWithTag(Tag.ReloadCounterText.name, useUnmergedTree = true).assertTextContains("0", substring = true)
+        }
 
         states.updateState(ReloadCountState.Key) { ReloadCountState(1) }
         onNodeWithTag(Tag.ReloadCounterText.name, useUnmergedTree = true).assertTextContains("1", substring = true)

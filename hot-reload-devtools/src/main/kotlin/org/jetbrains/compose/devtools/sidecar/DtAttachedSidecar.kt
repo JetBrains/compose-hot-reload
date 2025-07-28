@@ -41,11 +41,16 @@ import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
+import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
 import org.jetbrains.compose.devtools.widgets.DtComposeLogo
 import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusColor
+import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsAnimationsEnabled
 import org.jetbrains.compose.reload.core.WindowId
+
+private val cornerShape = if (devToolsUseTransparency) DtShapes.RoundedCornerShape else DtShapes.SquareCornerShape
+private val useAnimatedTransitions = devToolsUseTransparency && devToolsAnimationsEnabled
 
 @Composable
 fun DtAttachedSidecarWindow(
@@ -148,7 +153,7 @@ internal fun DtMinimizedSidecarWindowContent(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .dtBackground()
+                .dtBackground(cornerShape)
                 .weight(1f, fill = false)
                 /* Hack for macOS to save from phantom clicks */
                 .onPointerEvent(PointerEventType.Enter) { inFocus = true }
@@ -165,7 +170,7 @@ internal fun DtMinimizedSidecarWindowContent(
                     reloadingColor = DtColors.statusColorOrange2
                 ).value
             )
-            DtMinimisedReloadCounterStatusItem()
+            DtMinimisedReloadCounterStatusItem(showDefaultValue = !devToolsUseTransparency)
         }
 
         if (devToolsUseTransparency) {
@@ -190,10 +195,10 @@ internal fun DtExpandedSidecarWindowContent(
         AnimatedContent(
             isExpanded,
             modifier = Modifier
-                .dtBackground()
+                .dtBackground(cornerShape)
                 .weight(1f, fill = false),
             transitionSpec = {
-                if (devToolsUseTransparency) {
+                if (useAnimatedTransitions) {
                     (fadeIn(animationSpec = tween(22, delayMillis = 128)) +
                         scaleIn(initialScale = 0.92f, animationSpec = tween(220, delayMillis = 128)))
                         .togetherWith(fadeOut(animationSpec = tween(90)))
@@ -207,8 +212,8 @@ internal fun DtExpandedSidecarWindowContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .animateEnterExit(
-                            enter = if (devToolsUseTransparency) fadeIn(tween(220)) else EnterTransition.None,
-                            exit = if (devToolsUseTransparency) fadeOut(tween(50)) else ExitTransition.None
+                            enter = if (useAnimatedTransitions) fadeIn(tween(220)) else EnterTransition.None,
+                            exit = if (useAnimatedTransitions) fadeOut(tween(50)) else ExitTransition.None
                         )
                         .tag(Tag.ExpandMinimiseButton)
                         .clickable { isExpandedChanged(true) }
@@ -222,7 +227,7 @@ internal fun DtExpandedSidecarWindowContent(
                             reloadingColor = DtColors.statusColorOrange2
                         ).value
                     )
-                    DtMinimisedReloadCounterStatusItem()
+                    DtMinimisedReloadCounterStatusItem(showDefaultValue = !devToolsUseTransparency)
                 }
             } else {
                 // Expanded state - show the full UI

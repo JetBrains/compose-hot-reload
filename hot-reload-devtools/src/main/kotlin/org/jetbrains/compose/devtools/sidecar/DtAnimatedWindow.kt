@@ -32,6 +32,7 @@ import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.devtools.theme.DtTitles.DEV_TOOLS
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusBackground
 import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
+import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsAnimationsEnabled
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.Try
@@ -53,7 +54,8 @@ import kotlin.time.Duration.Companion.milliseconds
 private val logger = createLogger()
 
 // animation time of window effects
-internal val animationDuration = 512.milliseconds
+internal val animationDuration =
+    if (devToolsAnimationsEnabled) 512.milliseconds else 10.milliseconds
 
 // check if transparency and opacity are supported
 private val transparencySupported = transparencySupported()
@@ -233,12 +235,16 @@ internal fun getSideCarWindowPosition(mainWindowPosition: WindowPosition, width:
 }
 
 internal fun getSideCarWindowSize(mainWindowSize: DpSize, isExpanded: Boolean): DpSize {
-    return DpSize(
-        width = if (isExpanded) 512.dp else 32.dp + 4.dp + (12.dp.takeIf { devToolsUseTransparency } ?: 0.dp),
-        height = if (isExpanded) maxOf(mainWindowSize.height, 512.dp)
-        else if (devToolsUseTransparency) maxOf(mainWindowSize.height, 512.dp) else 44.dp + 4.dp,
-    )
+    return when {
+        isExpanded -> DpSize(512.dp, maxOf(mainWindowSize.height, 512.dp))
+        else -> DpSize(
+            width = 32.dp + 4.dp + if (devToolsUseTransparency) 12.dp else 0.dp,
+            height = if (devToolsUseTransparency) maxOf(mainWindowSize.height, 512.dp)
+            else 44.dp + 4.dp + if (Os.current() == Os.Windows) 2.dp else 0.dp
+        )
+    }
 }
+
 
 internal operator fun Point.plus(other: Point): Point = Point(x + other.x, y + other.y)
 
