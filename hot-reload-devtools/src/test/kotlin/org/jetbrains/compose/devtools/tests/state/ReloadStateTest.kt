@@ -13,6 +13,8 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.job
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Clock
+import org.jetbrains.compose.devtools.now
 import org.jetbrains.compose.devtools.states.ReloadState
 import org.jetbrains.compose.devtools.states.launchReloadState
 import org.jetbrains.compose.reload.core.Future
@@ -104,7 +106,7 @@ class ReloadStateTest {
         testScheduler.advanceUntilIdle()
 
         val request = ReloadClassesRequest()
-        ReloadState.set(ReloadState.Reloading(request = request))
+        ReloadState.set(ReloadState.Reloading(request = request, time = Clock.System.now()))
 
         /* Send failed 'Reload Result' -> Expect 'Failed' */
         orchestration sendAndWait ReloadClassesResult(
@@ -125,7 +127,7 @@ class ReloadStateTest {
         launchReloadState(orchestration)
         testScheduler.advanceUntilIdle()
 
-        ReloadState.set(ReloadState.Reloading())
+        ReloadState.set(ReloadState.Reloading(now()))
 
         orchestration sendAndWait OrchestrationMessage.BuildTaskResult(
             taskId = ":test", isSuccess = false, isSkipped = false,

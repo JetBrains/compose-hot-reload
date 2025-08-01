@@ -5,6 +5,8 @@
 
 package org.jetbrains.compose.reload.test.gradle
 
+import org.jetbrains.compose.reload.core.testFixtures.findAnnotation
+import org.jetbrains.compose.reload.core.testFixtures.findRepeatableAnnotations
 import org.jetbrains.kotlin.tooling.core.compareTo
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.extension.ExtensionContext

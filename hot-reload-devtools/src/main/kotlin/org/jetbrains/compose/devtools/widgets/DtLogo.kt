@@ -8,6 +8,7 @@ package org.jetbrains.compose.devtools.widgets
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.currentComposer
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.semantics.SemanticsNode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.devtools.Tag
@@ -59,6 +61,7 @@ fun DtLogo(
             painter = DtLogos.imageAsPngPainter(image).await()
         }
     }
+
 
     painter?.let { painter ->
         Image(

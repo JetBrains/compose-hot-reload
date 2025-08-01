@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.jetbrains.compose.reload.test.gradle
+package org.jetbrains.compose.reload.core
 
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.BenchmarkMode
@@ -17,8 +17,8 @@ import kotlinx.benchmark.Setup
 import kotlinx.benchmark.State
 import kotlinx.benchmark.TearDown
 import kotlinx.benchmark.Warmup
+import org.jetbrains.compose.reload.core.testFixtures.averagePixelValueDiff
 import java.awt.image.BufferedImage
-import java.awt.image.BufferedImage.TYPE_INT_RGB
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.random.Random
@@ -35,7 +35,7 @@ open class CheckScreenshotBenchmark {
 
     @Param("500")
     var numberOfImages = 0
-    
+
     @Param("25", "50", "100")
     var imageProportion = 0
 
@@ -45,13 +45,13 @@ open class CheckScreenshotBenchmark {
     @Setup
     fun generateImages() {
         fun generateImage(random: Random, size: Int, imageProportion: Int = 100): BufferedImage {
-            val image = BufferedImage(size, size, TYPE_INT_RGB)
-            
+            val image = BufferedImage(size, size, BufferedImage.TYPE_INT_RGB)
+
             val imageArea = when (imageProportion) {
                 100 -> size
                 else -> (size * (imageProportion.toFloat() / 100)).toInt()
             }
-            
+
             for (x in 0 ..< size) {
                 for (y in 0 ..< size) {
                     val rgb = if (x < imageArea && y < imageArea) {

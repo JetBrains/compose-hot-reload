@@ -24,13 +24,14 @@ import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.devtools.widgets.DtHeader2
 import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
+import org.jetbrains.compose.devtools.withSystemContext
 
 @Composable
-fun DtSidecarStatusSection() {
+fun DtSidecarStatusSection() = withSystemContext {
     Column(verticalArrangement = Arrangement.spacedBy(DtPadding.medium)) {
         // Modern header with proper spacing
         DtHeader2(
-            "Status", 
+            "Status",
             modifier = Modifier.padding(vertical = DtPadding.small)
         )
 
@@ -72,8 +73,8 @@ fun DtSidecarStatusItem(
         Box(
             modifier = Modifier.size(20.dp),
             contentAlignment = Alignment.Center
-        ) { 
-            symbol() 
+        ) {
+            symbol()
         }
 
         // Content (usually text)

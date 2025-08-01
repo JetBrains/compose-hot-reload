@@ -9,6 +9,9 @@ import kotlinx.coroutines.channels.Channel
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.Logger
 import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.testFixtures.findAnnotation
+import org.jetbrains.compose.reload.core.testFixtures.hasAnnotation
+import org.jetbrains.compose.reload.core.testFixtures.namespace
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback

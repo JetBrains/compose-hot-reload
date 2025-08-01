@@ -44,6 +44,7 @@ tasks.named { it == "benchmarkBenchmark" }.configureEach {
 
 dependencies {
     implementation(project(":hot-reload-core"))
+    implementation(testFixtures(project(":hot-reload-core")))
     implementation(project(":hot-reload-test:core"))
     implementation(project(":hot-reload-orchestration"))
     implementation(kotlin("reflect"))

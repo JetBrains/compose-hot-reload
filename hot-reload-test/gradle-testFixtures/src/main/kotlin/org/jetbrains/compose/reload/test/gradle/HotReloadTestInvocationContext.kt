@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.test.gradle
 
+import org.jetbrains.compose.reload.core.testFixtures.extensionContextProperty
 import org.jetbrains.compose.reload.test.core.CompilerOption
 import org.jetbrains.kotlin.tooling.core.Extras
 import org.jetbrains.kotlin.tooling.core.HasExtras

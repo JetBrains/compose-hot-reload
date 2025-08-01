@@ -55,6 +55,7 @@ fun animateReloadStatusColor(
     LaunchedEffect(idleColor, reloadingColor, okColor, errorColor) {
         state.changes().collectLatest { (_, state) ->
             when (state) {
+                null -> Unit
                 is ReloadState.Reloading -> {
                     color.animateTo(reloadingColor)
                 }
@@ -96,7 +97,7 @@ fun animatedReloadStatusBrush(
 
     val movingColorA by animateColorAsState(
         when (state) {
-            is ReloadState.Ok -> if (isIdle) idleColor else okColor
+            is ReloadState.Ok, null -> if (isIdle) idleColor else okColor
             is ReloadState.Failed -> errorColor
             is ReloadState.Reloading -> DtColors.statusColorOrange1
         }
@@ -104,7 +105,7 @@ fun animatedReloadStatusBrush(
 
     val movingColorB by animateColorAsState(
         when (state) {
-            is ReloadState.Ok -> if (isIdle) idleColor else okColor
+            is ReloadState.Ok, null -> if (isIdle) idleColor else okColor
             is ReloadState.Failed -> errorColor
             is ReloadState.Reloading -> DtColors.statusColorOrange2
         }

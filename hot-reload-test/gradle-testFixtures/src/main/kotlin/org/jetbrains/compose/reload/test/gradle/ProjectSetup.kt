@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.test.gradle
 
+import org.jetbrains.compose.reload.core.testFixtures.findRepeatableAnnotations
 import org.junit.jupiter.api.extension.ExtensionContext
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createParentDirectories

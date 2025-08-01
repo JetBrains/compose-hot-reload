@@ -38,13 +38,13 @@ import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import io.sellmair.evas.compose.composeValue
 import kotlinx.coroutines.delay
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.devtools.Tag
+import org.jetbrains.compose.devtools.now
 import org.jetbrains.compose.devtools.states.BuildSystemState
 import org.jetbrains.compose.devtools.states.ReloadState
 import org.jetbrains.compose.devtools.tag
@@ -59,13 +59,14 @@ import org.jetbrains.compose.devtools.widgets.DtCopyToClipboardButton
 import org.jetbrains.compose.devtools.widgets.DtHeader2
 import org.jetbrains.compose.devtools.widgets.DtSmallText
 import org.jetbrains.compose.devtools.widgets.DtText
+import org.jetbrains.compose.reload.core.Context
 
 @Composable
+context(system: Context)
 fun DtReloadStatusItem() {
     val buildSystemState = BuildSystemState.composeValue()
-    val reloadState = ReloadState.composeValue()
-
-    when (reloadState) {
+    when (val reloadState = ReloadState.composeValue()) {
+        null -> Unit
         is ReloadState.Reloading -> DtSidecarStatusItem(
             symbol = {
                 CircularProgressIndicator(
@@ -107,12 +108,14 @@ fun DtReloadStatusItem() {
 }
 
 @Composable
+context(system: Context)
 private fun ResultContent(state: ReloadState) {
     var durationText by remember { mutableStateOf("") }
 
     LaunchedEffect(state) {
         while (true) {
-            val duration = Clock.System.now() - state.time
+            // issue
+            val duration = now() - state.time
             duration.toComponents { hours, minutes, seconds, _ ->
                 durationText = when {
                     hours > 0 -> "$hours hours"

@@ -6,7 +6,9 @@
 @file:OptIn(ExperimentalComposeLibrary::class)
 
 import org.jetbrains.compose.ExperimentalComposeLibrary
+import org.jetbrains.compose.reload.gradle.HotReloadUsage
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
@@ -14,6 +16,7 @@ plugins {
     kotlin("plugin.compose")
     id("org.jetbrains.compose")
     id("org.jetbrains.compose.hot-reload")
+    id("org.jetbrains.compose.hot-reload.test")
     `maven-publish`
     `bootstrap-conventions`
     `publishing-conventions`
@@ -21,11 +24,18 @@ plugins {
 
 kotlin {
     jvmToolchain(21)
+
+    compilerOptions {
+        languageVersion = KOTLIN_2_2
+        apiVersion = KOTLIN_2_2
+        freeCompilerArgs.add("-Xcontext-parameters")
+    }
 }
 
 tasks.withType<KotlinJvmCompile>().configureEach {
     compilerOptions {
-        this.jvmTarget.set(JvmTarget.JVM_17)
+        jvmTarget.set(JvmTarget.JVM_17)
+        optIn.add("org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi")
     }
 }
 
@@ -35,6 +45,7 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 dependencies {
+    implementation(kotlin("stdlib"))
     implementation(compose.runtime)
     implementation(project(":hot-reload-devtools-api"))
 
@@ -52,6 +63,7 @@ dependencies {
     implementation(deps.evas)
     implementation(deps.evas.compose)
 
+    testImplementation(project(":hot-reload-runtime-jvm"))
     testImplementation(kotlin("test"))
     testImplementation(kotlin("reflect"))
     testImplementation(deps.junit.jupiter)
@@ -64,4 +76,21 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+}
+
+open class ComposeDevRuntimeCompatibilityRule : AttributeCompatibilityRule<Usage> {
+    override fun execute(details: CompatibilityCheckDetails<Usage>) {
+        if (details.consumerValue?.name == Usage.JAVA_RUNTIME &&
+            details.producerValue?.name == HotReloadUsage.COMPOSE_DEV_RUNTIME_USAGE
+        ) {
+            details.compatible()
+        } else {
+            details.incompatible()
+        }
+    }
+
+}
+
+dependencies {
+    attributesSchema.attribute(Usage.USAGE_ATTRIBUTE).compatibilityRules.add(ComposeDevRuntimeCompatibilityRule::class.java)
 }

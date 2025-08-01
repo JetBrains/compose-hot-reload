@@ -16,7 +16,10 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onParent
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.jetbrains.compose.devtools.Tag
+import org.jetbrains.compose.devtools.now
 import org.jetbrains.compose.devtools.sidecar.DtMinimizedSidecarWindowContent
 import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.states.BuildSystemState
@@ -63,7 +66,7 @@ class MinimisedSidecarUiTest : SidecarBodyUiTest() {
 
     @Test
     fun `test - reload status`() = runSidecarUiTest {
-        states.updateState(ReloadState.Key) { ReloadState.Reloading() }
+        states.updateState(ReloadState.Key) { ReloadState.Reloading(now()) }
         onNodeWithTag(Tag.BuildSystemLogo.name).assertDoesNotExist()
 
         states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Gradle) }
@@ -76,4 +79,6 @@ class MinimisedSidecarUiTest : SidecarBodyUiTest() {
             .assertExists()
             .assertContentDescriptionContains(DtLogos.Image.AMPER_LOGO.name)
     }
+
+    fun now(): Instant = Clock.System.now()
 }

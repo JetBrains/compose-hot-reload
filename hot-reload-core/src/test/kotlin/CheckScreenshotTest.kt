@@ -3,8 +3,9 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.jetbrains.compose.reload.test.gradle
-
+import org.jetbrains.compose.reload.core.testFixtures.PIXEL_DIFF_SIMILARITY_THRESHOLD
+import org.jetbrains.compose.reload.core.testFixtures.averagePixelValueDiff
+import org.junit.jupiter.api.Assertions.assertEquals
 import java.awt.image.BufferedImage
 import java.nio.file.Path
 import javax.imageio.ImageIO

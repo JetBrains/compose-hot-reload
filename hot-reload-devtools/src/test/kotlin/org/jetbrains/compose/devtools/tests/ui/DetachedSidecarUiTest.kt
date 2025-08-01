@@ -20,6 +20,8 @@ import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.sidecar.DtDetachedSidecarContent
 import org.jetbrains.compose.devtools.states.BuildSystemState
@@ -61,20 +63,20 @@ class DetachedSidecarUiTest : SidecarBodyUiTest() {
 
     @Test
     fun `test - reload status`() = runSidecarUiTest {
-        states.updateState(ReloadState.Key) { ReloadState.Ok() }
+        states.updateState(ReloadState.Key) { ReloadState.Ok(now()) }
         onNodeWithTag(Tag.ReloadStatusSymbol.name).assertExists()
             .assertContentDescriptionContains("Success")
         onNodeWithTag(Tag.ReloadStatusText.name).assertExists()
             .assertTextContains("Success", substring = true)
 
-        states.updateState(ReloadState.Key) { ReloadState.Failed("Oh-oh") }
+        states.updateState(ReloadState.Key) { ReloadState.Failed("Oh-oh", now()) }
         onNodeWithTag(Tag.ReloadStatusSymbol.name).assertExists().assertContentDescriptionContains("Error")
         onNodeWithTag(Tag.ReloadStatusText.name).assertExists()
             .assertTextContains("Failed", substring = true)
             .assertTextContains("Oh-oh", substring = true)
 
 
-        states.updateState(ReloadState.Key) { ReloadState.Reloading() }
+        states.updateState(ReloadState.Key) { ReloadState.Reloading(now()) }
         assertEquals(
             onNodeWithTag(Tag.ReloadStatusSymbol.name).assertExists()
                 .fetchSemanticsNode().config.getOrNull(SemanticsProperties.ProgressBarRangeInfo),
@@ -132,4 +134,6 @@ class DetachedSidecarUiTest : SidecarBodyUiTest() {
         onNodeWithTag(Tag.ExpandMinimiseButton.name, useUnmergedTree = true)
             .assertDoesNotExist()
     }
+
+    private fun now(): Instant = Clock.System.now()
 }

@@ -23,9 +23,9 @@ import org.jetbrains.compose.reload.test.gradle.TestedGradleVersion
 import org.jetbrains.compose.reload.test.gradle.TestedKotlinVersion
 import org.jetbrains.compose.reload.test.gradle.TestedLaunchMode
 import org.jetbrains.compose.reload.test.gradle.copy
-import org.jetbrains.compose.reload.test.gradle.findAnnotation
-import org.jetbrains.compose.reload.test.gradle.findRepeatableAnnotations
-import org.jetbrains.compose.reload.test.gradle.hasAnnotation
+import org.jetbrains.compose.reload.core.testFixtures.findAnnotation
+import org.jetbrains.compose.reload.core.testFixtures.findRepeatableAnnotations
+import org.jetbrains.compose.reload.core.testFixtures.hasAnnotation
 import org.jetbrains.kotlin.tooling.core.KotlinToolingVersion
 import org.junit.jupiter.api.extension.ExtensionContext
 import java.awt.GraphicsEnvironment

@@ -9,7 +9,7 @@ import org.jetbrains.compose.reload.test.gradle.HotReloadTestDimension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestDimensionExtension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestInvocationContext
 import org.jetbrains.compose.reload.test.gradle.copy
-import org.jetbrains.compose.reload.test.gradle.findAnnotation
+import org.jetbrains.compose.reload.core.testFixtures.findAnnotation
 import org.jetbrains.kotlin.tooling.core.extrasKeyOf
 import org.junit.jupiter.api.extension.ExtensionContext
 

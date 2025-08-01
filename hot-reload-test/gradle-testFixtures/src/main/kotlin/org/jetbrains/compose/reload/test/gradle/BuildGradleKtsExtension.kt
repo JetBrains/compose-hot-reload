@@ -11,6 +11,7 @@ import org.jetbrains.compose.reload.core.TemplateBuilder
 import org.jetbrains.compose.reload.core.asTemplateOrThrow
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.renderOrThrow
+import org.jetbrains.compose.reload.core.testFixtures.findRepeatableAnnotations
 import org.jetbrains.compose.reload.test.core.CompilerOption
 import org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi
 import org.junit.jupiter.api.extension.ExtensionContext

@@ -14,16 +14,17 @@ import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import io.sellmair.evas.Events
 import io.sellmair.evas.States
+import io.sellmair.evas.compose.LocalEvents
+import io.sellmair.evas.compose.LocalStates
 import io.sellmair.evas.compose.composeValue
-import io.sellmair.evas.compose.installEvas
 import io.sellmair.evas.eventsOrThrow
 import io.sellmair.evas.statesOrThrow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.jetbrains.compose.devtools.errorOverlay.DevToolingErrorOverlay
-import org.jetbrains.compose.devtools.sidecar.DtDetachedSidecarWindow
 import org.jetbrains.compose.devtools.sidecar.DtAttachedSidecarWindow
+import org.jetbrains.compose.devtools.sidecar.DtDetachedSidecarWindow
 import org.jetbrains.compose.devtools.sidecar.DtDetachedStatusBar
 import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.states.WindowsState
@@ -33,12 +34,17 @@ import org.jetbrains.compose.devtools.states.launchReloadCountState
 import org.jetbrains.compose.devtools.states.launchReloadState
 import org.jetbrains.compose.devtools.states.launchUIErrorState
 import org.jetbrains.compose.devtools.states.launchWindowsState
+import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsDetached
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.info
 
-internal val applicationScope = CoroutineScope(Dispatchers.Main + SupervisorJob() + Events() + States())
+private val systemContext = Context()
+
+internal val applicationScope = CoroutineScope(
+    Dispatchers.Main + SupervisorJob() + Events() + States() + SystemContext(systemContext)
+)
 
 private val logger = createLogger()
 
@@ -48,13 +54,14 @@ private val logger = createLogger()
  */
 internal val targetApplicationWindowStateLocal = staticCompositionLocalOf<WindowState?> { null }
 
-internal fun CoroutineScope.launchApplicationStates() {
-    launchBuildSystemState()
-    launchConsoleLogState()
-    launchWindowsState()
-    launchUIErrorState()
-    launchReloadState()
-    launchReloadCountState()
+
+internal fun CoroutineScope.launchApplicationStates() = context(systemContext) {
+    applicationScope.launchBuildSystemState()
+    applicationScope.launchConsoleLogState()
+    applicationScope.launchWindowsState()
+    applicationScope.launchUIErrorState()
+    applicationScope.launchReloadState()
+    applicationScope.launchReloadCountState()
 }
 
 
@@ -76,9 +83,10 @@ fun main() {
     }
 
     application(exitProcessOnExit = false) {
-        installEvas(
-            applicationScope.coroutineContext.eventsOrThrow,
-            applicationScope.coroutineContext.statesOrThrow
+        CompositionLocalProvider(
+            LocalEvents provides applicationScope.coroutineContext.eventsOrThrow,
+            LocalStates provides applicationScope.coroutineContext.statesOrThrow,
+            LocalSystemContext provides systemContext
         ) {
             val windowsState = WindowsState.composeValue()
             if (devToolsDetached) {
