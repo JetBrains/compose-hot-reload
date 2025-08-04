@@ -76,6 +76,11 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    this.testLogging {
+        this.showStandardStreams = true
+    }
+
+    systemProperty("compose.reload.logLevel", "Trace")
 }
 
 open class ComposeDevRuntimeCompatibilityRule : AttributeCompatibilityRule<Usage> {

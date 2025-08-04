@@ -18,10 +18,13 @@ import org.jetbrains.compose.devtools.utils.ScreenshotTest
 import org.jetbrains.compose.devtools.utils.checkScreenshot
 import org.jetbrains.compose.devtools.utils.runScreenshotTest
 import org.jetbrains.compose.devtools.utils.set
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
 import kotlin.time.Duration.Companion.seconds
 
 
 @OptIn(ExperimentalTestApi::class)
+@Execution(ExecutionMode.SAME_THREAD)
 class DevToolsScreenshotTest : ScreenshotTest {
 
     @DtScreenshotTest

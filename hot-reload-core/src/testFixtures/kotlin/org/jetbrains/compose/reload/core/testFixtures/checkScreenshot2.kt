@@ -6,55 +6,63 @@
 package org.jetbrains.compose.reload.core.testFixtures
 
 import org.intellij.lang.annotations.Language
+import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.core.trace
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Canvas
+import org.jetbrains.skia.Color
 import org.jetbrains.skia.Image
-import org.jetbrains.skia.ImageFilter
 import org.jetbrains.skia.Paint
 import org.jetbrains.skia.RuntimeEffect
 import org.jetbrains.skia.RuntimeShaderBuilder
-import org.jetbrains.skiko.toBufferedImage
+import kotlin.math.max
 
-@JvmInline
-value class ImageDiff(val value: Float) {
+private val logger = createLogger()
+
+class ImageDiff(
+    val value: Float, val diff: Image
+) {
     init {
         require(value in 0f..1f)
-    }
-
-    companion object {
-        val zero = ImageDiff(0f)
-        val full = ImageDiff(1f)
     }
 
     operator fun compareTo(other: ImageDiff): Int = value.compareTo(other.value)
 }
 
 fun imageDiff(expect: Image, actual: Image): ImageDiff {
+    logger.info("Comparing image")
     val width = expect.width
-    if (actual.width != width) return ImageDiff.full
+    if (actual.width != width) throw IllegalArgumentException("Expected width: $width, actual: $actual")
 
     val height = expect.height
-    if (actual.height != height) return ImageDiff.full
+    if (actual.height != height) throw IllegalArgumentException("Expected height: $height, actual: $actual")
 
-    return colorValueDiff(expect, actual)
-}
+    fun Image.preprocess(): Image {
+        return this.blurred(1f)
+    }
 
-private fun colorValueDiff(expect: Image, actual: Image): ImageDiff {
-    val expectRed = expect.redChannel()
-    val expectGreen = expect.greenChannel()
-    val expectBlue = expect.blueChannel()
+    logger.trace { "Preprocessing image: $width x $height" }
+    val expectProcessed = expect.preprocess()
+    val actualProcessed = actual.preprocess()
 
-    val actualRed = actual.redChannel()
-    val actualGreen = actual.greenChannel()
-    val actualBlue = actual.blueChannel()
+    logger.trace { "Extracting channels" }
+    val expectRed = expectProcessed.redChannel()
+    val expectGreen = expectProcessed.greenChannel()
+    val expectBlue = expectProcessed.blueChannel()
 
-    val expectRedDerivation = expectRed.derivative(3)
-    val expectGreenDerivation = expectGreen.derivative(3)
-    val expectBlueDerivation = expectBlue.derivative(3)
+    val actualRed = actualProcessed.redChannel()
+    val actualGreen = actualProcessed.greenChannel()
+    val actualBlue = actualProcessed.blueChannel()
 
-    val actualRedDerivation = actualRed.derivative(3)
-    val actualGreenDerivation = actualGreen.derivative(3)
-    val actualBlueDerivation = actualBlue.derivative(3)
+    logger.trace { "Calculating derivatives" }
+    val expectRedDerivation = expectRed.derivative(2)
+    val expectGreenDerivation = expectGreen.derivative(2)
+    val expectBlueDerivation = expectBlue.derivative(2)
+
+    val actualRedDerivation = actualRed.derivative(2)
+    val actualGreenDerivation = actualGreen.derivative(2)
+    val actualBlueDerivation = actualBlue.derivative(2)
 
     @Language("GLSL")
     val diffShader = """
@@ -69,47 +77,52 @@ private fun colorValueDiff(expect: Image, actual: Image): ImageDiff {
         uniform shader dgActual;
         uniform shader dbActual;
         
-        half4 main(float2 coord) {
+        float getChannel(half4 color, int index) {
+            return index == 0 ? color.r :
+                   index == 1 ? color.g :
+                   index == 2 ? color.b :
+                                color.a;
+        }
+        
+        float channel(float2 coord, int channel) {
             half4 expectColor = expect.eval(coord);
             half4 actualColor = actual.eval(coord);
             
             // red 
-            float eR = expectColor.r;
-            float aR = actualColor.r;
-            float diffR = abs(eR - aR);
+            float expectValue = getChannel(expectColor, channel);
+            float actualValue = getChannel(actualColor, channel);
+            float diffValue = abs(expectValue - actualValue);
             
-            half4 drE = drExpect.eval(coord);
-            float drEHorizontal = drE.r - 0.5;
-            float drEVertical = drE.g - 0.5;
+            half4 dExpect = drExpect.eval(coord);
+            float dExpectHorizontal = getChannel(dExpect, 0) - 0.5;
+            float dExpectVertical = getChannel(dExpect, 1) - 0.5;
             
-            half4 drA = drActual.eval(coord);
-            float drAHorizontal = drA.r - 0.5;
-            float drAVertical = drA.g - 0.-5;
+            half4 dActual = drActual.eval(coord);
+            float dActualHorizontal = getChannel(dActual, 0) - 0.5;
+            float dActualVertical = getChannel(dActual, 1) - 0.-5;
             
              
-            float diffDRHorizontal = abs(drEHorizontal - drAHorizontal);
-            float diffDRVertical = abs(drEVertical - drAVertical);
+            float diffDHorizontal = abs(dExpectHorizontal - dActualHorizontal);
+            float diffDRVertical = abs(dExpectVertical - dActualVertical);
             
             // Inverted Exponential Decay 
             // https://www.desmos.com/calculator/9dxbfv1olz
-            float redValue = 1 - exp(-12 *(diffDRHorizontal + diffDRVertical) * diffR);
-            
-          
-            return half4(redValue, 0.0, 0.0, 1.0);
-            
-            
-            // green
-            
-            
-            // blue
+            return 1 - exp(-4 *(diffDHorizontal + diffDRVertical) * diffValue);
         }
         
+        half4 main(float2 coord) {
+            float red = channel(coord, 0);
+            float green = channel(coord, 1);
+            float blue = channel(coord, 2);
+            return half4(red, green, blue, 1.0);
+        }
  
     """.trimIndent()
 
+    logger.trace { "Calculating diff image" }
     val shader = RuntimeShaderBuilder(RuntimeEffect.makeForShader(diffShader)).apply {
-        child("expect", expect.makeShader())
-        child("actual", actual.makeShader())
+        child("expect", expectProcessed.makeShader())
+        child("actual", actualProcessed.makeShader())
         child("drExpect", expectRedDerivation.makeShader())
         child("dgExpect", expectGreenDerivation.makeShader())
         child("dbExpect", expectBlueDerivation.makeShader())
@@ -127,41 +140,16 @@ private fun colorValueDiff(expect: Image, actual: Image): ImageDiff {
     val canvas = Canvas(bitmap)
     canvas.drawPaint(paint)
 
-    val diffImage = bitmap.toBufferedImage()
-    println(diffImage)
-    return ImageDiff.zero
-}
+    logger.trace { "Finding 'maxValue'" }
+    var maxValue = 0
+    for (x in 0 until expect.width) {
+        for (y in 0 until expect.height) {
+            val color = bitmap.getColor(x, y)
+            maxValue = max(maxValue, Color.getR(color))
+            maxValue = max(maxValue, Color.getG(color))
+            maxValue = max(maxValue, Color.getB(color))
+        }
+    }
 
-fun integrateDiff(diffImage: Image): Image {
-    @Language("GLSL")
-    val integrateShader = """
-        uniform shader content;
-        
-        half4 main(float2 coord) {
-            half4 sum = half4(0.0, 0.0, 0.0, 1.0);
-            for(int x = -2; x <= 2; x++) {
-                for(int y = -2; y <= 2; y++) {
-                    sum += content.eval(coord + half2(x, y));
-                }
-            }
-        return sum;   
-}
-    """.trimIndent()
-
-
-    val resultBitmap = Bitmap()
-    resultBitmap.allocN32Pixels(diffImage.width, diffImage.height)
-    val resultCanvas = Canvas(resultBitmap)
-
-    val paint = Paint()
-    paint.imageFilter = ImageFilter.makeRuntimeShader(
-        runtimeShaderBuilder = RuntimeShaderBuilder(
-            RuntimeEffect.makeForShader(integrateShader)
-        ), "content", null
-    )
-
-    resultCanvas.drawImage(diffImage, 0f, 0f, paint)
-    resultCanvas.close()
-
-    return Image.makeFromBitmap(resultBitmap)
+    return ImageDiff(maxValue / 255f, Image.makeFromBitmap(bitmap))
 }

@@ -66,11 +66,11 @@ fun Image.withPaint(paint: Paint): Image {
 fun Image.withPaint(paint: Paint.() -> Unit): Image =
     withPaint(Paint().apply(paint))
 
-private fun Image.blurred(radius: Float): Image = withPaint {
+fun Image.blurred(radius: Float): Image = withPaint {
     imageFilter = ImageFilter.makeBlur(radius, radius, mode = FilterTileMode.CLAMP)
 }
 
-private fun Image.scaled(factor: Float): Image {
+fun Image.scaled(factor: Float): Image {
     val newWidth = (width * factor).roundToInt()
     val newHeight = (height * factor).roundToInt()
 
