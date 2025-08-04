@@ -5,20 +5,15 @@
 
 package org.jetbrains.compose.reload.core.testFixtures
 
+import org.intellij.lang.annotations.Language
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Canvas
-import org.jetbrains.skia.Color
-import org.jetbrains.skia.FilterTileMode
 import org.jetbrains.skia.Image
 import org.jetbrains.skia.ImageFilter
-import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skia.Paint
-import org.jetbrains.skia.Rect
-import org.jetbrains.skia.SamplingMode
+import org.jetbrains.skia.RuntimeEffect
+import org.jetbrains.skia.RuntimeShaderBuilder
 import org.jetbrains.skiko.toBufferedImage
-import java.awt.image.BufferedImage
-import kotlin.math.absoluteValue
-import kotlin.math.roundToInt
 
 @JvmInline
 value class ImageDiff(val value: Float) {
@@ -45,126 +40,128 @@ fun imageDiff(expect: Image, actual: Image): ImageDiff {
 }
 
 private fun colorValueDiff(expect: Image, actual: Image): ImageDiff {
-    fun preprocess(image: Image): Image {
-        return image.blurred(9f).scaled(.3f)
-    }
+    val expectRed = expect.redChannel()
+    val expectGreen = expect.greenChannel()
+    val expectBlue = expect.blueChannel()
 
-    val expectProcessed = preprocess(expect)
-    val actualProcessed = preprocess(actual)
+    val actualRed = actual.redChannel()
+    val actualGreen = actual.greenChannel()
+    val actualBlue = actual.blueChannel()
 
-    val diffImage = valueDiffImage(expectProcessed, actualProcessed)
-    val diffImageIntegrated = diffImage.kernelIntegrate(3)
+    val expectRedDerivation = expectRed.derivative(3)
+    val expectGreenDerivation = expectGreen.derivative(3)
+    val expectBlueDerivation = expectBlue.derivative(3)
 
-    var maxDiff = 0f
-    for (x in 0 until diffImageIntegrated.width) {
-        for (y in 0 until diffImageIntegrated.height) {
-            val pixel = diffImageIntegrated.getColor(x, y)
-            maxDiff = maxOf(maxDiff, Color.getR(pixel) / 255f)
-            maxDiff = maxOf(maxDiff, Color.getG(pixel) / 255f)
-            maxDiff = maxOf(maxDiff, Color.getB(pixel) / 255f)
+    val actualRedDerivation = actualRed.derivative(3)
+    val actualGreenDerivation = actualGreen.derivative(3)
+    val actualBlueDerivation = actualBlue.derivative(3)
+
+    @Language("GLSL")
+    val diffShader = """
+        uniform shader expect;
+        uniform shader actual;
+        
+        uniform shader drExpect;
+        uniform shader dgExpect;
+        uniform shader dbExpect;
+        
+        uniform shader drActual;
+        uniform shader dgActual;
+        uniform shader dbActual;
+        
+        half4 main(float2 coord) {
+            half4 expectColor = expect.eval(coord);
+            half4 actualColor = actual.eval(coord);
+            
+            // red 
+            float eR = expectColor.r;
+            float aR = actualColor.r;
+            float diffR = abs(eR - aR);
+            
+            half4 drE = drExpect.eval(coord);
+            float drEHorizontal = drE.r - 0.5;
+            float drEVertical = drE.g - 0.5;
+            
+            half4 drA = drActual.eval(coord);
+            float drAHorizontal = drA.r - 0.5;
+            float drAVertical = drA.g - 0.-5;
+            
+             
+            float diffDRHorizontal = abs(drEHorizontal - drAHorizontal);
+            float diffDRVertical = abs(drEVertical - drAVertical);
+            
+            // Inverted Exponential Decay 
+            // https://www.desmos.com/calculator/9dxbfv1olz
+            float redValue = 1 - exp(-12 *(diffDRHorizontal + diffDRVertical) * diffR);
+            
+          
+            return half4(redValue, 0.0, 0.0, 1.0);
+            
+            
+            // green
+            
+            
+            // blue
         }
+        
+ 
+    """.trimIndent()
+
+    val shader = RuntimeShaderBuilder(RuntimeEffect.makeForShader(diffShader)).apply {
+        child("expect", expect.makeShader())
+        child("actual", actual.makeShader())
+        child("drExpect", expectRedDerivation.makeShader())
+        child("dgExpect", expectGreenDerivation.makeShader())
+        child("dbExpect", expectBlueDerivation.makeShader())
+        child("drActual", actualRedDerivation.makeShader())
+        child("dgActual", actualGreenDerivation.makeShader())
+        child("dbActual", actualBlueDerivation.makeShader())
     }
 
-    return ImageDiff(maxDiff)
-}
+    val paint = Paint()
+    paint.shader = shader.makeShader()
 
-private fun edgeValueDiff(expect: Image, actual: Image): ImageDiff {
+    val bitmap = Bitmap()
+    bitmap.allocN32Pixels(expect.width, expect.height)
+
+    val canvas = Canvas(bitmap)
+    canvas.drawPaint(paint)
+
+    val diffImage = bitmap.toBufferedImage()
+    println(diffImage)
     return ImageDiff.zero
 }
 
+fun integrateDiff(diffImage: Image): Image {
+    @Language("GLSL")
+    val integrateShader = """
+        uniform shader content;
+        
+        half4 main(float2 coord) {
+            half4 sum = half4(0.0, 0.0, 0.0, 1.0);
+            for(int x = -2; x <= 2; x++) {
+                for(int y = -2; y <= 2; y++) {
+                    sum += content.eval(coord + half2(x, y));
+                }
+            }
+        return sum;   
+}
+    """.trimIndent()
 
-private fun Image.blurred(radius: Float): Image {
-    val blur = ImageFilter.makeBlur(radius, radius, mode = FilterTileMode.CLAMP)
-    val result = Bitmap()
-    result.allocPixels(ImageInfo.makeN32Premul(width, height))
-    val canvas = Canvas(result)
+
+    val resultBitmap = Bitmap()
+    resultBitmap.allocN32Pixels(diffImage.width, diffImage.height)
+    val resultCanvas = Canvas(resultBitmap)
+
     val paint = Paint()
-    paint.imageFilter = blur
-    canvas.drawImage(this, 0f, 0f, paint)
-    canvas.close()
-    return Image.makeFromBitmap(result)
-}
-
-
-private fun Image.scaled(factor: Float): Image {
-    val newWidth = (width * factor).roundToInt()
-    val newHeight = (height * factor).roundToInt()
-
-    val resultBitmap = Bitmap()
-    resultBitmap.allocPixels(ImageInfo.makeN32Premul(newWidth, newHeight))
-    val resultCanvas = Canvas(resultBitmap)
-
-    resultCanvas.drawImageRect(
-        image = this,
-        src = Rect.makeWH(width.toFloat(), height.toFloat()),
-        dst = Rect.makeWH(newWidth.toFloat(), newHeight.toFloat()),
-        samplingMode = SamplingMode.LINEAR,
-        paint = Paint(),
-        strict = false
+    paint.imageFilter = ImageFilter.makeRuntimeShader(
+        runtimeShaderBuilder = RuntimeShaderBuilder(
+            RuntimeEffect.makeForShader(integrateShader)
+        ), "content", null
     )
 
+    resultCanvas.drawImage(diffImage, 0f, 0f, paint)
     resultCanvas.close()
+
     return Image.makeFromBitmap(resultBitmap)
-}
-
-private fun valueDiffImage(a: Image, b: Image): Image {
-    require(a.width == b.width && a.height == b.height) { "Images must have the same dimensions" }
-
-    val resultData = ByteArray(a.width * a.height * 4)
-    val resultBitmap = Bitmap()
-    resultBitmap.allocN32Pixels(a.width, a.height)
-
-    val aBitmap = Bitmap.makeFromImage(a)
-    val bBitmap = Bitmap.makeFromImage(b)
-
-    for (x in 0 until a.width) {
-        for (y in 0 until a.height) {
-            val aPixel = aBitmap.getColor(x, y)
-            val bPixel = bBitmap.getColor(x, y)
-
-            val red = (Color.getR(aPixel) - Color.getR(bPixel)).absoluteValue
-            val green = (Color.getG(aPixel) - Color.getG(bPixel)).absoluteValue
-            val blue = (Color.getB(aPixel) - Color.getB(bPixel)).absoluteValue
-
-            val pixelIndex = (y * a.width + x) * 4
-            resultData[pixelIndex + 3] = 255.toByte()
-            resultData[pixelIndex + 2] = red.toByte()
-            resultData[pixelIndex + 1] = green.toByte()
-            resultData[pixelIndex] = blue.toByte()
-        }
-    }
-
-    resultBitmap.installPixels(resultData)
-    return Image.makeFromBitmap(resultBitmap)
-}
-
-
-private fun Image.kernelIntegrate(size: Int): Bitmap {
-    val resultBitmap = Bitmap()
-    resultBitmap.allocN32Pixels(width, height)
-    val resultCanvas = Canvas(resultBitmap)
-
-    val convolution = ImageFilter.makeMatrixConvolution(
-        kernelW = size, kernelH = size,
-        kernel = FloatArray(size * size) { 1f },
-        gain = 1f / size.toFloat(), bias = 0f,
-        offsetX = size / 2, offsetY = size / 2,
-        tileMode = FilterTileMode.CLAMP,
-        convolveAlpha = false,
-        input = null,
-        crop = null,
-    )
-
-    resultCanvas.drawImage(this, 0f, 0f, Paint().apply {
-        imageFilter = convolution
-    })
-
-    resultCanvas.close()
-    return resultBitmap
-}
-
-
-@Suppress("unused") // debugging utility!
-private fun Image.toBufferedImage() : BufferedImage {
-    return Bitmap.makeFromImage(this).toBufferedImage()
 }
