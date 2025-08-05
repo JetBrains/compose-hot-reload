@@ -76,8 +76,8 @@ class DevToolsScreenshotTest : ScreenshotTest {
 
         ConsoleLogState set ConsoleLogState(
             listOf(
-                //"Harry Potter is best watched through a Coldmirror",
-                //"No this is Patrick!"
+                "Harry Potter is best watched through a Coldmirror",
+                "No this is Patrick!"
             )
         )
 

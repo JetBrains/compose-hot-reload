@@ -7,20 +7,14 @@ package org.jetbrains.compose.devtools.utils
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import org.jetbrains.compose.reload.core.asFileName
-import org.jetbrains.compose.reload.core.testFixtures.describeImageDifferences
 import org.jetbrains.compose.reload.core.testFixtures.imageDiff
+import org.jetbrains.compose.reload.core.testFixtures.readImage
 import org.jetbrains.compose.reload.test.core.TestEnvironment
-import org.jetbrains.skia.Image
-import org.jetbrains.skiko.toBitmap
-import org.jetbrains.skiko.toBufferedImage
-import org.jetbrains.skiko.toImage
 import org.junit.jupiter.api.fail
-import javax.imageio.ImageIO
 import kotlin.io.path.Path
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.nameWithoutExtension
-import kotlin.io.path.readBytes
 import kotlin.io.path.writeBytes
 
 
@@ -43,38 +37,24 @@ internal fun checkScreenshot(name: String) {
         fail("Expected screenshot file does not exist; Generated: ${expectFile.toUri()}")
     }
 
-    val expectImage = ImageIO.read(expectFile.toFile()).toImage()
+    val expectImage = expectFile.readImage()
 
     if (expectImage.width != actualImage.width || expectImage.height != actualImage.height) fail {
         "Screenshot: $name has different size than expected. " +
             "Expected: ${expectImage.width}x${expectImage.height}, got: ${actualImage.width}x${actualImage.height}"
     }
 
-    imageDiff(expectImage, actualImage)
-
-    /*
-    These, more complex, screenshots will be compared in 32x32 chunks.
-     */
-    /*val boxSize = 32
-    val horizontalSplits = expectImage.width / boxSize
-    val verticalSplits = expectImage.height / boxSize
-
-    for (horizontalSplit in 0 until horizontalSplits) {
-        for (verticalSplit in 0 until verticalSplits) {
-            val x = boxSize * horizontalSplit
-            val y = boxSize * verticalSplit
-            val width = if (horizontalSplit == horizontalSplits - 1) expectImage.width - x else boxSize
-            val height = if (verticalSplit == verticalSplits - 1) expectImage.height - y else boxSize
-
-            val actualSubimage = actualImage.getSubimage(x, y, width, height)
-            val expectSubimage = expectImage.getSubimage(x, y, width, height)
-            val difference = describeImageDifferences(expectSubimage, actualSubimage)
-
-            if (difference.isNotEmpty()) {
-                val actualFile = expectFile.resolveSibling("${expectFile.nameWithoutExtension}-actual.png")
-                ImageIO.write(actualImage, "png", actualFile.toFile())
-                fail("Screenshot: $name does not match\nGenerated: ${actualFile.toUri()}")
-            }
-        }
-    }*/
+    val diff = imageDiff(expectImage, actualImage)
+    if (diff.isDifferent()) {
+        val actualFile = expectFile.resolveSibling(expectFile.nameWithoutExtension + "-actual.png")
+        val diffFile = expectFile.resolveSibling(expectFile.nameWithoutExtension + "-diff.png")
+        actualFile.writeBytes(actualImage.encodeToData()!!.bytes)
+        diffFile.writeBytes(diff.diffImage.encodeToData()!!.bytes)
+        fail(
+            "Actual and diff images are not equal (score=${diff.score})\n" +
+                "Expected: ${expectFile.toUri()}\n" +
+                "Generated: ${actualFile.toUri()}\n" +
+                "Diff: ${diffFile.toUri()}"
+        )
+    }
 }

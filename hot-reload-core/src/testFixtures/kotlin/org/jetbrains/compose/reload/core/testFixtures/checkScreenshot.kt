@@ -45,7 +45,7 @@ fun describeImageDifferences(
     }
 }
 
-internal const val PIXEL_DIFF_SIMILARITY_THRESHOLD = 0.05
+internal const val PIXEL_DIFF_SIMILARITY_THRESHOLD = 0.5
 
 /**
  * @param expectedImage The binary representation of the expected image
@@ -63,7 +63,7 @@ internal fun averagePixelValueDiff(
     backgroundColor: Color = Color.WHITE,
     blur: Int = 3
 ): Double {
-    if (true) return imageDiff(expectedImage.toImage(), actualImage.toImage()).value.toDouble()
+    if (true) return imageDiff(expectedImage.toImage(), actualImage.toImage()).score.toDouble()
 
     require(expectedImage.width == actualImage.width)
     require(expectedImage.height == actualImage.height)
