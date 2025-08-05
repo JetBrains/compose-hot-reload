@@ -20,7 +20,7 @@
       "version": "8.14.3",
       "isDefault": true
     }, {
-      "version": "9.0.0-rc-3",
+      "version": "9.0.0",
       "isGradleIntegrationTest": true
     }
   ],
