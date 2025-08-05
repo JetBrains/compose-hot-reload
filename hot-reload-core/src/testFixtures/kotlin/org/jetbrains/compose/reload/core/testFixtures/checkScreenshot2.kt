@@ -114,7 +114,10 @@ fun imageDiff(expect: Image, actual: Image): ImageDiff {
             float diffDHorizontal = abs(dExpectHorizontal - dActualHorizontal);
             float diffDVertical = abs(dExpectVertical - dActualVertical);
             
-            // Logistic Function for high penalty of diffD
+            // The penalty function can be played around with here:
+            // https://www.desmos.com/calculator/lh6rdljul0
+            
+            // Logistic Function for high penalty of diffD (pivot point is 0.2)
             float horizontalK = 1/(1 + exp(-12 *(diffDHorizontal - 0.2)));
             float verticalK = 1/(1 + exp(-12 *(diffDVertical - 0.2)));
             
