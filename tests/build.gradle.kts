@@ -80,6 +80,7 @@ dependencies {
     reloadFunctionalTestImplementation(deps.junit.jupiter.engine)
     reloadFunctionalTestImplementation(deps.asm)
     reloadFunctionalTestImplementation(deps.asm.tree)
+    reloadFunctionalTestRuntimeOnly(skikoCurrentOs())
 
     reloadFunctionalTestImplementation(testFixtures(project(":hot-reload-core")))
     reloadFunctionalTestImplementation(project(":hot-reload-devtools-api"))

@@ -5,10 +5,8 @@
 
 package org.jetbrains.compose.reload.test.gradle
 
-import java.awt.image.BufferedImage
+import org.jetbrains.skia.Image
 import java.nio.file.Path
-import javax.imageio.ImageIO
-import kotlin.io.path.inputStream
 import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,20 +23,19 @@ class CheckScreenshotTest {
         }
     }
 
-    private inline fun onSimilarImages(body: (Map<String, BufferedImage>) -> Unit) {
+    private inline fun onSimilarImages(body: (Map<String, Image>) -> Unit) {
         Path.of(screenshotsDir).resolve("similar").listDirectoryEntries()
             .forEach { onImages(it, body) }
     }
 
-    private inline fun onDifferentImages(body: (Map<String, BufferedImage>) -> Unit) {
+    private inline fun onDifferentImages(body: (Map<String, Image>) -> Unit) {
         Path.of(screenshotsDir).resolve("different").listDirectoryEntries()
             .forEach { onImages(it, body) }
     }
 
-    private inline fun onImages(folder: Path, body: (Map<String, BufferedImage>) -> Unit) {
+    private inline fun onImages(folder: Path, body: (Map<String, Image>) -> Unit) {
         val images = folder.listDirectoryEntries().associate { path ->
-            path.toString().split('/').takeLast(2).joinToString("/") to path.inputStream()
-                .use { reader -> ImageIO.read(reader) }
+            path.toString().split('/').takeLast(2).joinToString("/") to path.readImage()
         }
         body(images)
     }
@@ -48,19 +45,17 @@ class CheckScreenshotTest {
         onSimilarImages { images ->
             for ((file1, file2) in images.uniquePairs()) {
                 assertEquals(
-                    0.0,
-                    averagePixelValueDiff(images[file1]!!, images[file1]!!),
+                    0, countBadPixels(images[file1]!!, images[file1]!!),
                     "Screenshot '$file1' is not identical to itself"
                 )
                 assertEquals(
-                    0.0,
-                    averagePixelValueDiff(images[file2]!!, images[file2]!!),
+                    0, countBadPixels(images[file2]!!, images[file2]!!),
                     "Screenshot '$file2' is not identical to itself"
                 )
-                val pixelDiff = averagePixelValueDiff(images[file1]!!, images[file2]!!)
-                assertTrue(
-                    pixelDiff <= PIXEL_DIFF_SIMILARITY_THRESHOLD,
-                    """Screenshots '$file1' and '$file2' should be similar, but marked different with value $pixelDiff"""
+                val badPixels = countBadPixels(images[file1]!!, images[file2]!!)
+                assertEquals(
+                    0, badPixels,
+                    "Screenshots '$file1' and '$file2' should be similar, but marked different with value '$badPixels' bad pixels"
                 )
             }
         }
@@ -68,19 +63,17 @@ class CheckScreenshotTest {
         onDifferentImages { images ->
             for ((file1, file2) in images.uniquePairs()) {
                 assertEquals(
-                    0.0,
-                    averagePixelValueDiff(images[file1]!!, images[file1]!!),
+                    0, countBadPixels(images[file1]!!, images[file1]!!),
                     "Screenshot '$file1' is not identical to itself"
                 )
                 assertEquals(
-                    0.0,
-                    averagePixelValueDiff(images[file2]!!, images[file2]!!),
+                    0, countBadPixels(images[file2]!!, images[file2]!!),
                     "Screenshot '$file2' is not identical to itself"
                 )
-                val pixelDiff = averagePixelValueDiff(images[file1]!!, images[file2]!!)
+                val badPixels = countBadPixels(images[file1]!!, images[file2]!!)
                 assertTrue(
-                    pixelDiff > PIXEL_DIFF_SIMILARITY_THRESHOLD,
-                    """Screenshots '$file1' and '$file2' should be different, but marked similar with difference $pixelDiff"""
+                    badPixels > 0,
+                    "Screenshots '$file1' and '$file2' should be different, but marked similar with $badPixels bad pixels"
                 )
             }
         }

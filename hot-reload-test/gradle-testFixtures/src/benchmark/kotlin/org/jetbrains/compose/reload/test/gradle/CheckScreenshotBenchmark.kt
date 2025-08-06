@@ -17,6 +17,8 @@ import kotlinx.benchmark.Setup
 import kotlinx.benchmark.State
 import kotlinx.benchmark.TearDown
 import kotlinx.benchmark.Warmup
+import org.jetbrains.skia.Image
+import org.jetbrains.skiko.toImage
 import java.awt.image.BufferedImage
 import java.awt.image.BufferedImage.TYPE_INT_RGB
 import java.util.concurrent.TimeUnit
@@ -39,12 +41,12 @@ open class CheckScreenshotBenchmark {
     @Param("25", "50", "100")
     var imageProportion = 0
 
-    val expectedImages = mutableListOf<BufferedImage>()
-    val actualImages = mutableListOf<BufferedImage>()
+    val expectedImages = mutableListOf<Image>()
+    val actualImages = mutableListOf<Image>()
 
     @Setup
     fun generateImages() {
-        fun generateImage(random: Random, size: Int, imageProportion: Int = 100): BufferedImage {
+        fun generateImage(random: Random, size: Int, imageProportion: Int = 100): Image {
             val image = BufferedImage(size, size, TYPE_INT_RGB)
             
             val imageArea = when (imageProportion) {
@@ -64,7 +66,7 @@ open class CheckScreenshotBenchmark {
                     image.setRGB(x, y, rgb)
                 }
             }
-            return image
+            return image.toImage()
         }
 
         val random = Random(0x123)
@@ -81,7 +83,7 @@ open class CheckScreenshotBenchmark {
     @Benchmark
     fun pixelAverage(blackhole: Blackhole) {
         repeat(numberOfImages) {
-            blackhole.consume(averagePixelValueDiff(expectedImages[it], actualImages[it]))
+            blackhole.consume(countBadPixels(expectedImages[it], actualImages[it]))
         }
     }
 

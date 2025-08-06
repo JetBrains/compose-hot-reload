@@ -25,6 +25,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("compiler-embeddable"))
                 implementation(deps.benchmark.runtime)
+                implementation(skikoCurrentOs())
                 implementation(project.dependencies.testFixtures(project(":hot-reload-core")))
             }
         }
@@ -52,6 +53,9 @@ dependencies {
     api(deps.junit.jupiter)
     api(deps.coroutines.test)
     implementation(deps.junit.jupiter.engine)
+
+    compileOnly(deps.skiko.awt)
+    testImplementation(skikoCurrentOs())
 }
 
 publishingConventions {

@@ -475,6 +475,17 @@ public final class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsRep
 	public static fun repositories (Lorg/jetbrains/compose/reload/test/gradle/SettingsGradleKtsRepositoriesExtension;Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 }
 
+public final class org/jetbrains/compose/reload/test/gradle/SkikoUtilsKt {
+	public static final fun compare (Lorg/jetbrains/skia/Image;Lorg/jetbrains/skia/Image;FI)Lorg/jetbrains/skia/Image;
+	public static synthetic fun compare$default (Lorg/jetbrains/skia/Image;Lorg/jetbrains/skia/Image;FIILjava/lang/Object;)Lorg/jetbrains/skia/Image;
+	public static final fun diff (Lorg/jetbrains/skia/Image;Lorg/jetbrains/skia/Image;)Lorg/jetbrains/skia/Image;
+	public static final fun readImage (Ljava/nio/file/Path;)Lorg/jetbrains/skia/Image;
+	public static final fun readImage ([B)Lorg/jetbrains/skia/Image;
+	public static final fun withPaint (Lorg/jetbrains/skia/Image;Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/skia/Image;
+	public static final fun withPaint (Lorg/jetbrains/skia/Image;Lorg/jetbrains/skia/Paint;)Lorg/jetbrains/skia/Image;
+	public static final fun writeImage (Ljava/nio/file/Path;Lorg/jetbrains/skia/Image;)V
+}
+
 public final class org/jetbrains/compose/reload/test/gradle/TestedAndroidVersion : org/jetbrains/compose/reload/test/gradle/HotReloadTestDimension {
 	public static final field Companion Lorg/jetbrains/compose/reload/test/gradle/TestedAndroidVersion$Companion;
 	public fun <init> (Ljava/lang/String;)V
