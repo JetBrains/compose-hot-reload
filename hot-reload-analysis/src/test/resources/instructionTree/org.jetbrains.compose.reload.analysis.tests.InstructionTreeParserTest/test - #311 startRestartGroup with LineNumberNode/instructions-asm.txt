@@ -1,0 +1,168 @@
+/* Code */
+import androidx.compose.runtime.*
+
+@Composable
+fun Foot(param: String): String {
+    return key(param) {
+        if (param.isEmpty()) {
+            "Empty"
+        } else {
+            val state = remember { mutableStateOf("") }
+            state.value
+        }
+    }
+}
+
+ /* Tree */ 
+class TestKt {
+    fun Foot (Ljava/lang/String;Landroidx/compose/runtime/Composer;I)Ljava/lang/String; {
+        Method (group=ComposeGroupKey(key=-227918768))
+        L0
+        ALOAD 0
+        LDC "param"
+        INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+        INVOKESTATIC androidx/compose/runtime/ComposerKt.isTraceInProgress ()Z
+        IFEQ L1
+        LDC -227918768
+        ILOAD 2
+        ICONST_M1
+        LDC "Foot (Test.kt:3)"
+        INVOKESTATIC androidx/compose/runtime/ComposerKt.traceEventStart (IIILjava/lang/String;)V
+        L1
+        FRAME SAME
+        ALOAD 1
+        LDC 13398048
+        L2
+        LINENUMBER 5 L2
+        ALOAD 0
+        INVOKEINTERFACE androidx/compose/runtime/Composer.startMovableGroup (ILjava/lang/Object;)V (itf)
+        L3
+        LINENUMBER 6 L3
+        ALOAD 0
+        CHECKCAST java/lang/CharSequence
+        INVOKEINTERFACE java/lang/CharSequence.length ()I (itf)
+        IFNE L4
+        ICONST_1
+        GOTO L5
+        L4
+        FRAME SAME
+        ICONST_0
+        L5
+        LINENUMBER 6 L5
+        FRAME SAME1 I
+        IFEQ L6
+        ALOAD 1
+            ReplaceGroup (group=ComposeGroupKey(key=415376659))
+            LDC 415376659
+            INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
+            ALOAD 1
+            INVOKEINTERFACE androidx/compose/runtime/Composer.endReplaceGroup ()V (itf)
+        Method (group=ComposeGroupKey(key=-227918768))
+        L7
+        LINENUMBER 7 L7
+        LDC "Empty"
+        GOTO L8
+        L6
+        FRAME SAME
+        ALOAD 1
+            ReplaceGroup (group=ComposeGroupKey(key=415415223))
+            LDC 415415223
+            L9
+            LINENUMBER 8 L9
+            INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
+            ALOAD 1
+            ASTORE 7
+            ICONST_0
+            ISTORE 8
+            L10
+            LINENUMBER 9 L10
+            NOP
+            L11
+            ICONST_0
+            ISTORE 9
+            L12
+            LINENUMBER 14 L12
+            ALOAD 7
+            INVOKEINTERFACE androidx/compose/runtime/Composer.rememberedValue ()Ljava/lang/Object; (itf)
+            ASTORE 10
+            L13
+            ICONST_0
+            ISTORE 11
+            L14
+            LINENUMBER 15 L14
+            ALOAD 10
+            GETSTATIC androidx/compose/runtime/Composer.Companion : Landroidx/compose/runtime/Composer$Companion;
+            INVOKEVIRTUAL androidx/compose/runtime/Composer$Companion.getEmpty ()Ljava/lang/Object;
+            IF_ACMPNE L15
+            L16
+            LINENUMBER 16 L16
+            ICONST_0
+            ISTORE 12
+            L17
+            LINENUMBER 9 L17
+            LDC ""
+            ACONST_NULL
+            ICONST_2
+            ACONST_NULL
+            INVOKESTATIC androidx/compose/runtime/SnapshotStateKt.mutableStateOf$default (Ljava/lang/Object;Landroidx/compose/runtime/SnapshotMutationPolicy;ILjava/lang/Object;)Landroidx/compose/runtime/MutableState;
+            L18
+            LINENUMBER 16 L18
+            ASTORE 12
+            L19
+            LINENUMBER 17 L19
+            ALOAD 7
+            ALOAD 12
+            INVOKEINTERFACE androidx/compose/runtime/Composer.updateRememberedValue (Ljava/lang/Object;)V (itf)
+            L20
+            LINENUMBER 18 L20
+            ALOAD 12
+            L21
+            GOTO L22
+            L15
+            LINENUMBER 19 L15
+            FRAME FULL [java/lang/String androidx/compose/runtime/Composer I T T T T androidx/compose/runtime/Composer I I java/lang/Object I] []
+            ALOAD 10
+            L22
+            LINENUMBER 14 L22
+            FRAME SAME1 java/lang/Object
+            NOP
+            L23
+            LINENUMBER 14 L23
+            NOP
+            L24
+            LINENUMBER 9 L24
+            CHECKCAST androidx/compose/runtime/MutableState
+            ASTORE 6
+            L25
+            LINENUMBER 10 L25
+            ALOAD 6
+            INVOKEINTERFACE androidx/compose/runtime/MutableState.getValue ()Ljava/lang/Object; (itf)
+            L26
+            LINENUMBER 8 L26
+            CHECKCAST java/lang/String
+            ASTORE 5
+            ALOAD 1
+            INVOKEINTERFACE androidx/compose/runtime/Composer.endReplaceGroup ()V (itf)
+        Method (group=ComposeGroupKey(key=-227918768))
+        ALOAD 5
+        L8
+        LINENUMBER 6 L8
+        FRAME FULL [java/lang/String androidx/compose/runtime/Composer I] [java/lang/String]
+        ASTORE 4
+        ALOAD 1
+        INVOKEINTERFACE androidx/compose/runtime/Composer.endMovableGroup ()V (itf)
+        ALOAD 4
+        L27
+        LINENUMBER 5 L27
+        ASTORE 3
+        INVOKESTATIC androidx/compose/runtime/ComposerKt.isTraceInProgress ()Z
+        IFEQ L28
+        INVOKESTATIC androidx/compose/runtime/ComposerKt.traceEventEnd ()V
+        L28
+        FRAME APPEND [java/lang/String java/lang/String]
+        ALOAD 3
+        ARETURN
+        L29
+        }
+    }
+}

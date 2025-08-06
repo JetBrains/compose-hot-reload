@@ -25,7 +25,6 @@ import org.objectweb.asm.tree.LineNumberNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.VarInsnNode
 
-
 sealed class InstructionToken {
     abstract val instructions: List<AbstractInsnNode>
 
@@ -161,6 +160,16 @@ internal sealed class InstructionTokenizer {
 
         inner class Consumer(private var nextIndex: Int) : Iterator<AbstractInsnNode> {
 
+            inline fun <T : Any> find(search: (AbstractInsnNode) -> T?): T? {
+                var value: T? = null
+                while (hasNext()) {
+                    val next = next()
+                    value = search(next)
+                    if (value != null) break
+                }
+                return value
+            }
+
             /**
              * Returns all consumed nodes
              */
@@ -252,18 +261,12 @@ private val ReturnTokenizer = SingleInstructionTokenizer { instruction ->
 
 private object StartRestartGroupTokenizer : InstructionTokenizer() {
     override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
-        val expectedLdc = context[0] ?: return null
-        val expectedMethodInsn = context[1] ?: return null
+        val consumer = context.consumer()
+        val expectedKeyValue = consumer.nextOrNull()?.intValueOrNull() ?: return null
+        val expectedMethodInsn = consumer.nextMethodInsn() ?: return null
 
-        if (expectedMethodInsn is MethodInsnNode &&
-            MethodId(expectedMethodInsn) == Ids.Composer.startRestartGroup
-        ) {
-            val keyValue = expectedLdc.intValueOrNull() ?: return Failure(
-                "Failed parsing startRestartGroup token: expected key value"
-            ).toRight()
-
-            return StartRestartGroup(ComposeGroupKey(keyValue), listOf(expectedLdc, expectedMethodInsn)).toLeft()
-
+        if (MethodId(expectedMethodInsn) == Ids.Composer.startRestartGroup) {
+            return StartRestartGroup(ComposeGroupKey(expectedKeyValue), consumer.allConsumedInstructions()).toLeft()
         }
 
         return null
@@ -283,18 +286,12 @@ private object EndRestartGroupTokenizer : InstructionTokenizer() {
 
 private object StartReplaceGroupTokenizer : InstructionTokenizer() {
     override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
-        val expectedLdc = context[0] ?: return null
-        val expectedMethodInsn = context[1] ?: return null
+        val consumer = context.consumer()
+        val expectedKeyValue = consumer.nextOrNull()?.intValueOrNull() ?: return null
+        val expectedMethodInsn = consumer.nextMethodInsn() ?: return null
 
-        if (expectedMethodInsn is MethodInsnNode &&
-            MethodId(expectedMethodInsn) == Ids.Composer.startReplaceGroup
-        ) {
-            val keyValue = expectedLdc.intValueOrNull() ?: return Failure(
-                "Failed parsing startReplaceGroup token: expected key value"
-            ).toRight()
-
-            return StartReplaceGroup(ComposeGroupKey(keyValue), listOf(expectedLdc, expectedMethodInsn)).toLeft()
-
+        if (MethodId(expectedMethodInsn) == Ids.Composer.startReplaceGroup) {
+            return StartReplaceGroup(ComposeGroupKey(expectedKeyValue), consumer.allConsumedInstructions()).toLeft()
         }
 
         return null
@@ -314,17 +311,19 @@ private object EndReplaceGroupTokenizer : InstructionTokenizer() {
 
 private object SourceInformationTokenizer : InstructionTokenizer() {
     override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
-        val expectedSourceInformationLoad = context[0] ?: return null
-        val expectedMethodInsn = context[1] ?: return null
+        val consumer = context.consumer()
 
-        if (expectedMethodInsn is MethodInsnNode && MethodId(expectedMethodInsn) == Ids.ComposerKt.sourceInformation) {
+        val expectedSourceInformationLoad = consumer.nextOrNull() ?: return null
+        val expectedMethodInsn = consumer.nextMethodInsn() ?: return null
+
+        if (MethodId(expectedMethodInsn) == Ids.ComposerKt.sourceInformation) {
             val sourceInformationLdc = expectedSourceInformationLoad as? LdcInsnNode ?: return Failure(
                 "Failed parsing 'sourceInformation' call: expected LDC for source information"
             ).toRight()
 
             return InstructionToken.SourceInformation(
                 sourceInformationLdc.cst as? String ?: "N/A",
-                listOf(expectedSourceInformationLoad, expectedMethodInsn)
+                consumer.allConsumedInstructions()
             ).toLeft()
         }
 
@@ -341,25 +340,20 @@ private object SourceInformationMarkerStartTokenizer : InstructionTokenizer() {
         val key = expectedKeyLoad.intValueOrNull() ?: return null
 
         /* search for source information */
-        val sourceInformation: String = run sourceInformation@{
-            while (consumer.hasNext()) {
-                when (val next = consumer.next()) {
-                    is LabelNode -> continue
-                    is LineNumberNode -> continue
-                    is LdcInsnNode -> {
-                        return@sourceInformation next.cst as? String ?: "N/A"
-                    }
-                    else -> return null
-                }
+        val sourceInformation: String = consumer.find { next ->
+            when (next) {
+                is LabelNode -> null
+                is LineNumberNode -> null
+                is LdcInsnNode -> next.cst as? String ?: "N/A"
+                else -> return null
             }
-            return null
-        }
+        } ?: return null
 
         /* search for sourceInformationMarkerStart call */
-        while (consumer.hasNext()) {
-            when (val next = consumer.next()) {
-                is LabelNode -> continue
-                is LineNumberNode -> continue
+        consumer.find { next ->
+            when (next) {
+                is LabelNode -> null
+                is LineNumberNode -> null
                 is MethodInsnNode -> {
                     if (MethodId(next) == Ids.ComposerKt.sourceInformationMarkerStart) {
                         return InstructionToken.SourceInformationMarkerStart(
@@ -372,7 +366,6 @@ private object SourceInformationMarkerStartTokenizer : InstructionTokenizer() {
                 else -> return null
             }
         }
-
         return null
     }
 }
@@ -408,17 +401,16 @@ private object CurrentMarkerTokenizer : InstructionTokenizer() {
 
 private object EndToMarkerTokenizer : InstructionTokenizer() {
     override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
-        val expectedILoadInsn = context[0] ?: return null
-        val expectedEndToMarkerInvocation = context[1] ?: return null
+        val consumer = context.consumer()
+        val expectedILoadInsn = consumer.nextOrNull() as? VarInsnNode ?: return null
+        val expectedEndToMarkerInvocation = consumer.nextMethodInsn() ?: return null
 
-        if (expectedILoadInsn !is VarInsnNode) return null
-        if (expectedEndToMarkerInvocation !is MethodInsnNode) return null
         if (expectedILoadInsn.opcode != Opcodes.ILOAD) return null
         if (MethodId(expectedEndToMarkerInvocation) != Ids.Composer.endToMarker) return null
 
         return InstructionToken.EndToMarkerToken(
             variableIndex = expectedILoadInsn.`var`,
-            instructions = listOf(expectedILoadInsn, expectedEndToMarkerInvocation)
+            instructions = consumer.allConsumedInstructions()
         ).toLeft()
     }
 }
@@ -435,7 +427,6 @@ private object BlockTokenizer : InstructionTokenizer() {
         if (instructions.isEmpty()) return null
         return InstructionToken.BlockToken(instructions).toLeft()
     }
-
 }
 
 internal fun tokenizeInstructions(
@@ -454,4 +445,18 @@ internal fun tokenizeInstructions(
     }
 
     return tokens.toLeft()
+}
+
+/**
+ * Consumes [LabelNode] and [LineNumberNode] nodes until a [MethodInsnNode] is found.
+ * If any other, semantically important node is encountered, the method returns `null`.
+ */
+private fun TokenizerContext.Consumer.nextMethodInsn(): MethodInsnNode? {
+    return find { node ->
+        when (node) {
+            is MethodInsnNode -> node
+            is LabelNode, is LineNumberNode -> null
+            else -> return null
+        }
+    }
 }

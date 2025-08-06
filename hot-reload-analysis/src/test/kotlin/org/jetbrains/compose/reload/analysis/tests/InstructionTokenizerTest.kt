@@ -15,6 +15,7 @@ import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.testFixtures.Compiler
 import org.jetbrains.compose.reload.core.testFixtures.WithCompiler
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
+import org.jetbrains.compose.reload.test.core.CompilerOption
 import org.jetbrains.compose.reload.test.core.TestEnvironment
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInfo
@@ -86,6 +87,28 @@ class InstructionTokenizerTest {
     )
 
     @Test
+    fun `test - #152 - composable with eager return`(compiler: Compiler, testInfo: TestInfo) = doTest(
+        compiler, testInfo, """
+            import androidx.compose.runtime.*
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.material3.Text
+                         
+            @Composable
+            fun Value(): String? {
+                return "value: 0"
+            }
+          
+            @Composable
+            fun Foo() {
+                val value = Value() ?: return
+                Column {
+                    Text(value)
+                }
+            }
+    """.trimIndent()
+    )
+
+    @Test
     fun `test - #122 - startRestartGroup with small number - BIPUSH`(compiler: Compiler, testInfo: TestInfo) = doTest(
         compiler, testInfo, """
             import androidx.compose.runtime.*
@@ -98,7 +121,7 @@ class InstructionTokenizerTest {
         """.trimIndent()
     ) { method, tokens ->
         if (method.name != "Foo") return@doTest
-        if(tokens.find { it is InstructionToken.StartRestartGroup && it.key.key == 122 } == null) {
+        if (tokens.find { it is InstructionToken.StartRestartGroup && it.key.key == 122 } == null) {
             fail("Cannot find 'StartRestartGroup' token with key '122'")
         }
     }
@@ -117,10 +140,30 @@ class InstructionTokenizerTest {
         """.trimIndent(),
     ) { method, tokens ->
         if (method.name != "Foo") return@doTest
-        if(tokens.find { it is InstructionToken.StartRestartGroup && it.key.key == 0x122 } == null) {
+        if (tokens.find { it is InstructionToken.StartRestartGroup && it.key.key == 0x122 } == null) {
             fail { "Cannot find 'StartRestartGroup' token with key '0x122'" }
         }
     }
+
+    @Test
+    fun `test - #311 startRestartGroup with LineNumberNode`(compiler: Compiler, testInfo: TestInfo) = doTest(
+        compiler, testInfo,
+        """
+            import androidx.compose.runtime.*
+            
+            @Composable
+            fun Foot(param: String): String {
+                return key(param) {
+                    if (param.isEmpty()) {
+                        "Empty"
+                    } else {
+                        val state = remember { mutableStateOf("") }
+                        state.value
+                    }
+                }
+            }
+        """.trimIndent(),
+    )
 
     private fun doTest(
         compiler: Compiler, testInfo: TestInfo, code: String,

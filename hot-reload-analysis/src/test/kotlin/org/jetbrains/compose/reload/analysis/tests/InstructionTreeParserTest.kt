@@ -113,6 +113,25 @@ class InstructionTreeParserTest {
     """.trimIndent()
     )
 
+    @Test
+    fun `test - #311 startRestartGroup with LineNumberNode`(compiler: Compiler, testInfo: TestInfo) = doTest(
+        compiler, testInfo, """
+            import androidx.compose.runtime.*
+            
+            @Composable
+            fun Foot(param: String): String {
+                return key(param) {
+                    if (param.isEmpty()) {
+                        "Empty"
+                    } else {
+                        val state = remember { mutableStateOf("") }
+                        state.value
+                    }
+                }
+            }
+        """.trimIndent(),
+    )
+
     private fun doTest(compiler: Compiler, testInfo: TestInfo, code: String) {
         val directory = Path("src/test/resources/instructionTree")
             .resolve(testInfo.testClass.get().name.asFileName())
