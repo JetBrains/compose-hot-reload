@@ -45,15 +45,27 @@ abstract class SidecarBodyUiTest {
         block()
     }
 
+    // wrappers for onNodeWithTag that change the default value for `useUnmergedTree`
+    // we need `useUnmergedTree = true` to prevent flakiness in tests
+    protected fun ComposeUiTest.onNodeWithTag(
+        tag: Tag,
+        useUnmergedTree: Boolean = true,
+    ) = onNodeWithTag(tag.name, useUnmergedTree = useUnmergedTree)
+
+    protected fun ComposeUiTest.onAllNodesWithTag(
+        tag: Tag,
+        useUnmergedTree: Boolean = true,
+    ) = onAllNodesWithTag(tag.name, useUnmergedTree = useUnmergedTree)
+
     protected fun ComposeUiTest.awaitNodeWithTag(
         tag: Tag,
-        useUnmergedTree: Boolean = false,
+        useUnmergedTree: Boolean = true,
         timeout: Duration = 10.seconds,
         pollingInterval: Duration = 200.milliseconds,
     ): SemanticsNodeInteraction = launchTask {
         while (onAllNodesWithTag(tag.name, useUnmergedTree).fetchSemanticsNodes().isEmpty()) {
             delay(pollingInterval)
         }
-        onNodeWithTag(tag.name, useUnmergedTree)
+        onNodeWithTag(tag, useUnmergedTree)
     }.getBlocking(timeout = timeout).getOrThrow()
 }

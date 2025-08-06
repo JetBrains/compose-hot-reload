@@ -12,9 +12,7 @@ import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onParent
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.sidecar.DtMinimizedSidecarWindowContent
@@ -35,12 +33,12 @@ class MinimisedSidecarUiTest : SidecarBodyUiTest() {
 
     @Test
     fun `test - logo clickable`() = runSidecarUiTest {
-        awaitNodeWithTag(Tag.HotReloadLogo, useUnmergedTree = true)
+        awaitNodeWithTag(Tag.HotReloadLogo)
             .assertExists()
             .onParent()
             .assertHasClickAction()
 
-        onAllNodesWithTag(Tag.ExpandMinimiseButton.name, useUnmergedTree = true)
+        onAllNodesWithTag(Tag.ExpandMinimiseButton)
             .assertCountEquals(1)
             .onFirst()
             .assertHasClickAction()
@@ -49,30 +47,30 @@ class MinimisedSidecarUiTest : SidecarBodyUiTest() {
     @Test
     fun `test - reload counter`() = runSidecarUiTest {
         if (devToolsUseTransparency) {
-            onNodeWithTag(Tag.ReloadCounterText.name, useUnmergedTree = true).assertDoesNotExist()
+            onNodeWithTag(Tag.ReloadCounterText).assertDoesNotExist()
         } else {
-            onNodeWithTag(Tag.ReloadCounterText.name, useUnmergedTree = true).assertTextContains("0", substring = true)
+            onNodeWithTag(Tag.ReloadCounterText).assertTextContains("0", substring = true)
         }
 
         states.updateState(ReloadCountState.Key) { ReloadCountState(1) }
-        onNodeWithTag(Tag.ReloadCounterText.name, useUnmergedTree = true).assertTextContains("1", substring = true)
+        onNodeWithTag(Tag.ReloadCounterText).assertTextContains("1", substring = true)
 
         states.updateState(ReloadCountState.Key) { ReloadCountState(2) }
-        onNodeWithTag(Tag.ReloadCounterText.name, useUnmergedTree = true).assertTextContains("2", substring = true)
+        onNodeWithTag(Tag.ReloadCounterText).assertTextContains("2", substring = true)
     }
 
     @Test
     fun `test - reload status`() = runSidecarUiTest {
         states.updateState(ReloadState.Key) { ReloadState.Reloading() }
-        onNodeWithTag(Tag.BuildSystemLogo.name).assertDoesNotExist()
+        onNodeWithTag(Tag.BuildSystemLogo).assertDoesNotExist()
 
         states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Gradle) }
-        awaitNodeWithTag(Tag.BuildSystemLogo, useUnmergedTree = true)
+        awaitNodeWithTag(Tag.BuildSystemLogo)
             .assertExists()
             .assertContentDescriptionContains(DtLogos.Image.GRADLE_LOGO.name)
 
         states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Amper) }
-        awaitNodeWithTag(Tag.BuildSystemLogo, useUnmergedTree = true)
+        awaitNodeWithTag(Tag.BuildSystemLogo)
             .assertExists()
             .assertContentDescriptionContains(DtLogos.Image.AMPER_LOGO.name)
     }

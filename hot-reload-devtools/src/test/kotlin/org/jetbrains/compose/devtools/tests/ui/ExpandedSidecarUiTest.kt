@@ -22,12 +22,11 @@ import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.sidecar.DtExpandedSidecarWindowContent
+import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.states.BuildSystemState
 import org.jetbrains.compose.devtools.states.ReloadCountState
 import org.jetbrains.compose.devtools.states.ReloadState
@@ -53,48 +52,49 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
     @Test
     fun `test - logo clickable`() = runSidecarUiTest {
         // images are loaded asynchronously, so it may not be loaded at the start of the test
-        // wait fot node to be loaded before performing checks
-        awaitNodeWithTag(Tag.HotReloadLogo, useUnmergedTree = true)
+        // wait for the node to be loaded before performing checks
+        awaitNodeWithTag(Tag.HotReloadLogo)
             .assertExists()
             .assertHasNoClickAction()
     }
 
     @Test
     fun `test - reload counter`() = runSidecarUiTest {
-        onNodeWithTag(Tag.ReloadCounterText.name).assertDoesNotExist()
+        onNodeWithTag(Tag.ReloadCounterText).assertDoesNotExist()
 
         states.updateState(ReloadCountState.Key) { ReloadCountState(1) }
-        onNodeWithTag(Tag.ReloadCounterText.name).assertTextContains("1", substring = true)
+        onNodeWithTag(Tag.ReloadCounterText).assertTextContains("1", substring = true)
 
         states.updateState(ReloadCountState.Key) { ReloadCountState(2) }
-        onNodeWithTag(Tag.ReloadCounterText.name).assertTextContains("2", substring = true)
+        onNodeWithTag(Tag.ReloadCounterText).assertTextContains("2", substring = true)
     }
 
     @Test
     fun `test - reload status`() = runSidecarUiTest {
         states.updateState(ReloadState.Key) { ReloadState.Ok() }
-        onNodeWithTag(Tag.ReloadStatusSymbol.name).assertExists()
+        onNodeWithTag(Tag.ReloadStatusSymbol).assertExists()
             .assertContentDescriptionContains("Success")
-        onNodeWithTag(Tag.ReloadStatusText.name).assertExists()
+        onNodeWithTag(Tag.ReloadStatusText).assertExists()
             .assertTextContains("Success", substring = true)
 
         states.updateState(ReloadState.Key) { ReloadState.Failed("Oh-oh") }
-        onNodeWithTag(Tag.ReloadStatusSymbol.name).assertExists().assertContentDescriptionContains("Error")
-        onNodeWithTag(Tag.ReloadStatusText.name).assertExists()
+        onNodeWithTag(Tag.ReloadStatusSymbol).assertExists()
+            .assertContentDescriptionContains("Error")
+        onNodeWithTag(Tag.ReloadStatusText).assertExists()
             .assertTextContains("Failed", substring = true)
             .assertTextContains("Oh-oh", substring = true)
 
 
         states.updateState(ReloadState.Key) { ReloadState.Reloading() }
         assertEquals(
-            onNodeWithTag(Tag.ReloadStatusSymbol.name).assertExists()
+            onNodeWithTag(Tag.ReloadStatusSymbol).assertExists()
                 .fetchSemanticsNode().config.getOrNull(SemanticsProperties.ProgressBarRangeInfo),
             ProgressBarRangeInfo.Indeterminate
         )
-        onNodeWithTag(Tag.ReloadStatusText.name).assertExists()
+        onNodeWithTag(Tag.ReloadStatusText).assertExists()
             .assertTextContains("Reloading", substring = true)
 
-        onNodeWithTag(Tag.BuildSystemLogo.name).assertDoesNotExist()
+        onNodeWithTag(Tag.BuildSystemLogo).assertDoesNotExist()
 
         states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Gradle) }
         awaitNodeWithTag(Tag.BuildSystemLogo)
@@ -110,8 +110,8 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
 
     @Test
     fun `test - error status`() = runSidecarUiTest {
-        onNodeWithTag(Tag.RuntimeErrorSymbol.name).assertDoesNotExist()
-        onNodeWithTag(Tag.RuntimeErrorText.name).assertDoesNotExist()
+        onNodeWithTag(Tag.RuntimeErrorSymbol).assertDoesNotExist()
+        onNodeWithTag(Tag.RuntimeErrorText).assertDoesNotExist()
 
         states.updateState(UIErrorState.Key) {
             UIErrorState(
@@ -123,17 +123,17 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
             )
         }
 
-        onNodeWithTag(Tag.RuntimeErrorSymbol.name).assertExists()
-        onNodeWithTag(Tag.RuntimeErrorText.name).assertExists()
+        onNodeWithTag(Tag.RuntimeErrorSymbol).assertExists()
+        onNodeWithTag(Tag.RuntimeErrorText).assertExists()
             .assertTextContains("Uh-oh", substring = true)
             .assertTextContains("Something went wrong", substring = true)
 
-        onNodeWithTag(Tag.RuntimeErrorText.name).assertHasClickAction()
+        onNodeWithTag(Tag.RuntimeErrorText).assertHasClickAction()
     }
 
     @Test
     fun `test - actions`() = runSidecarUiTest {
-        onAllNodesWithTag(Tag.ActionButton.name)
+        onAllNodesWithTag(Tag.ActionButton)
             .assertCountEquals(4)
             .filter(hasClickAction())
             .assertCountEquals(4)
@@ -142,38 +142,43 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
     @Test
     fun `test - expand minimise`() = runSidecarUiTest {
         // minimise the window
-        onAllNodesWithTag(Tag.ExpandMinimiseButton.name)
+        onAllNodesWithTag(Tag.ExpandMinimiseButton)
             .assertCountEquals(1)
             .onFirst()
             .assertHasClickAction()
             .performClick()
 
         // assert that the expanded UI elements are not visible
-        onAllNodesWithTag(Tag.ActionButton.name)
+        onAllNodesWithTag(Tag.ActionButton)
             .assertCountEquals(0)
 
-        onNodeWithTag(Tag.Console.name)
+        onNodeWithTag(Tag.Console)
             .assertDoesNotExist()
 
-        onNodeWithTag(Tag.ReloadCounterText.name)
-            .assertDoesNotExist()
+        if (devToolsUseTransparency) {
+            onNodeWithTag(Tag.ReloadCounterText)
+                .assertDoesNotExist()
+        } else {
+            onNodeWithTag(Tag.ReloadCounterText)
+                .assertTextContains("0", substring = true)
+        }
 
-        onNodeWithTag(Tag.ReloadStatusText.name)
+        onNodeWithTag(Tag.ReloadStatusText)
             .assertDoesNotExist()
 
         states.updateState(ReloadCountState.Key) { ReloadCountState(1) }
 
-        onNodeWithTag(Tag.ReloadCounterText.name, useUnmergedTree = true)
+        onNodeWithTag(Tag.ReloadCounterText)
             .assertTextContains("1", substring = true)
 
         // maximise the window
-        onAllNodesWithTag(Tag.ExpandMinimiseButton.name)
+        onAllNodesWithTag(Tag.ExpandMinimiseButton)
             .assertCountEquals(1)
             .onFirst()
             .assertHasClickAction()
             .performClick()
 
-        onNodeWithTag(Tag.ReloadCounterText.name)
+        onNodeWithTag(Tag.ReloadCounterText)
             .assertTextContains("1", substring = true)
     }
 }
