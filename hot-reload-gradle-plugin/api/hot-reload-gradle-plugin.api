@@ -9,6 +9,7 @@ public abstract class org/jetbrains/compose/reload/gradle/AbstractComposeHotRun 
 
 public abstract interface class org/jetbrains/compose/reload/gradle/ComposeHotReloadArgumentsBuilder {
 	public abstract fun isAutoRecompileEnabled (Lorg/gradle/api/provider/Provider;)V
+	public abstract fun isRecompilerWarmupEnabled (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setAgentJar (Lorg/gradle/api/file/FileCollection;)V
 	public abstract fun setArgFile (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setDevToolsClasspath (Lorg/gradle/api/file/FileCollection;)V

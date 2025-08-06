@@ -41,6 +41,7 @@ sealed interface ComposeHotReloadArgumentsBuilder {
     fun setReloadTaskName(name: Provider<String>)
     fun setReloadTaskName(name: String)
     fun isAutoRecompileEnabled(isAutoRecompileEnabled: Provider<Boolean>)
+    fun isRecompilerWarmupEnabled(isRecompilerWarmupEnabled: Provider<Boolean>)
 }
 
 @DelicateHotReloadApi
@@ -118,6 +119,12 @@ internal class ComposeHotReloadArguments(project: Project) :
     @get:JvmName("getIsAutoRecompileEnabled")
     val isAutoRecompileEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadGradleBuildContinuous)
+
+    @get:Input
+    @get:JvmName("getIsRecompilerWarmupEnabled")
+    val isRecompilerWarmupEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .value(project.composeReloadGradleWarmupEnabled)
+
 
     @get:Input
     @get:Optional
@@ -207,6 +214,10 @@ internal class ComposeHotReloadArguments(project: Project) :
         this.isAutoRecompileEnabled.set(isAutoRecompileEnabled.orElse(true))
     }
 
+    override fun isRecompilerWarmupEnabled(isRecompilerWarmupEnabled: Provider<Boolean>) {
+        this.isRecompilerWarmupEnabled.set(isRecompilerWarmupEnabled.orElse(false))
+    }
+
     override fun asArguments(): Iterable<String> = buildList {
         /* Signal that this execution runs with Hot Reload */
         add("-D${HotReloadProperty.IsHotReloadActive.key}=true")
@@ -270,6 +281,7 @@ internal class ComposeHotReloadArguments(project: Project) :
             add("-D${HotReloadProperty.GradleBuildTask.key}=${reloadTaskName.get()}")
         }
         add("-D${HotReloadProperty.GradleBuildContinuous.key}=${isAutoRecompileEnabled.getOrElse(true)}")
+        add("-D${HotReloadProperty.GradleWarmupEnabled.key}=${isRecompilerWarmupEnabled.getOrElse(false)}")
         javaHome.orNull?.let { javaHome ->
             add("-D${HotReloadProperty.GradleJavaHome.key}=$javaHome")
         }

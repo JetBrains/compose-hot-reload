@@ -125,6 +125,17 @@ GradleBuildContinuous:
     - false: The user is expected to rebuild/reload manually by launching a task (or using tooling)
     Continuous mode is subject to change and might be removed in the future.
 
+GradleWarmupEnabled:
+  key: compose.reload.build.warmup
+  type: boolean
+  default: "false"
+  target: [ application, devtools, build ]
+  isDelicateApi: true
+  documentation: |
+    - true: Compose Hot Reload will launch a warmup recompile request when the application is started, to ensure that
+    the recompiler Gradle daemon is running and ready to handle requests
+    - false: No warmup request will be sent, first reload request may take longer time
+
 AmperBuildRoot:
   key: amper.build.root
   type: string

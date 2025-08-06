@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import org.jetbrains.compose.devtools.sendAsync
 import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.Logger
 import org.jetbrains.compose.reload.core.createLogger
@@ -26,6 +27,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildStarted
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildTaskResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
 import org.jetbrains.compose.reload.orchestration.asFlow
 
@@ -83,10 +85,13 @@ fun CoroutineScope.launchReloadState(
 
     orchestration.asFlow().collect { message ->
         /*
-        Handle messages indicating that a reload is active
-        (e.g. a BuildStarted event, or the execution of any task)
+        Handle messages indicating that a reload is requested or active, e.g.:
+            * BuildStarted event
+            * RecompileRequest
+            * execution of any task
          */
-        if (message is BuildStarted ||
+        if (message is RecompileRequest ||
+            message is BuildStarted ||
             message is LogMessage && message.message.contains("executing build...")
         ) ReloadState.update { state ->
             state as? ReloadState.Reloading ?: ReloadState.Reloading()
