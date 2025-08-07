@@ -84,12 +84,12 @@ class DetachedSidecarUiTest : SidecarBodyUiTest() {
 
         onNodeWithTag(Tag.BuildSystemLogo).assertDoesNotExist()
 
-        states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Gradle) }
+        states.updateState(BuildSystemState.Key) { BuildSystemState(BuildSystem.Gradle) }
         awaitNodeWithTag(Tag.BuildSystemLogo)
             .assertExists()
             .assertContentDescriptionContains(DtLogos.Image.GRADLE_LOGO.name)
 
-        states.updateState(BuildSystemState.Key) { BuildSystemState.Initialised(BuildSystem.Amper) }
+        states.updateState(BuildSystemState.Key) { BuildSystemState(BuildSystem.Amper) }
         awaitNodeWithTag(Tag.BuildSystemLogo)
             .assertExists()
             .assertContentDescriptionContains(DtLogos.Image.AMPER_LOGO.name)

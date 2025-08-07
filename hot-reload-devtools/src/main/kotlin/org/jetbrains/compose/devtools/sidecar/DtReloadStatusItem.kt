@@ -62,7 +62,6 @@ import org.jetbrains.compose.devtools.widgets.DtText
 
 @Composable
 fun DtReloadStatusItem() {
-    val buildSystemState = BuildSystemState.composeValue()
     val reloadState = ReloadState.composeValue()
 
     when (reloadState) {
@@ -75,8 +74,9 @@ fun DtReloadStatusItem() {
                 )
             },
             content = {
-                if (buildSystemState is BuildSystemState.Initialised) {
-                    DtBuildSystemLogo(buildSystemState.buildSystem, modifier = Modifier.padding(2.dp))
+                val buildSystem = BuildSystemState.composeValue()?.buildSystem
+                if (buildSystem != null) {
+                    DtBuildSystemLogo(buildSystem, modifier = Modifier.padding(2.dp))
                 }
                 DtText("Reloading...", Modifier.tag(Tag.ReloadStatusText))
             }

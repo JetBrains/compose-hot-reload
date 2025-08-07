@@ -52,7 +52,6 @@ fun DtExpandedReloadCounterStatusItem() {
 
 @Composable
 fun DtMinimisedReloadCounterStatusItem(showDefaultValue: Boolean = false) {
-    val buildSystemState = BuildSystemState.composeValue()
     val reloadState = ReloadState.composeValue()
     val countState = ReloadCountState.composeValue()
 
@@ -72,8 +71,10 @@ fun DtMinimisedReloadCounterStatusItem(showDefaultValue: Boolean = false) {
                     modifier = Modifier.size(10.dp).padding(2.dp).tag(Tag.ReloadStatusSymbol)
                         .progressSemantics()
                 )
-                if (buildSystemState is BuildSystemState.Initialised) {
-                    DtBuildSystemLogo(buildSystemState.buildSystem, modifier = Modifier.size(20.dp).padding(2.dp))
+
+                val buildSystem = BuildSystemState.composeValue()?.buildSystem
+                if (buildSystem != null) {
+                    DtBuildSystemLogo(buildSystem, modifier = Modifier.size(20.dp).padding(2.dp))
                 }
             }
         }
