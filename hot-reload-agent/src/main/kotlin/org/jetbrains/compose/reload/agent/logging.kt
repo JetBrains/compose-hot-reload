@@ -16,6 +16,7 @@ import org.jetbrains.compose.reload.core.invokeOnFinish
 import org.jetbrains.compose.reload.core.invokeOnStop
 import org.jetbrains.compose.reload.core.invokeOnValue
 import org.jetbrains.compose.reload.core.launchTask
+import org.jetbrains.compose.reload.core.withThread
 import org.jetbrains.compose.reload.core.withType
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.CriticalException
@@ -82,7 +83,7 @@ internal fun startLogging() = launchTask task@{
             logger.info("$key = $value")
         }
 
-    with(loggerThread) {
+    withThread(loggerThread) {
         val pidFile = HotReloadEnvironment.pidFile
         val logFile = pidFile?.resolveSibling(pidFile.nameWithoutExtension + ".chr.log")
         val logFileWriter = logFile?.createParentDirectories()?.outputStream()?.bufferedWriter()
