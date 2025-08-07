@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.agent
 
+import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.ComposeGroupKey
 import org.jetbrains.compose.reload.analysis.Ids
 import org.jetbrains.compose.reload.core.createLogger
@@ -34,8 +35,11 @@ private object ComposeTransformer : ClassFileTransformer {
         loader: ClassLoader?, className: String?,
         classBeingRedefined: Class<*>?, protectionDomain: ProtectionDomain?, classfileBuffer: ByteArray?
     ): ByteArray? {
-        if (className != Ids.Recomposer.classId.value &&
-            className != Ids.Composer.classId.value
+        val classId = ClassId(className ?: return null)
+        if (!classId.isTransformAllowed()) return null
+
+        if (classId != Ids.Recomposer.classId &&
+            classId != Ids.Composer.classId
         ) return null
 
         composeClassLoadersLock.withLock {

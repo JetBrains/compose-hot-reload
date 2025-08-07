@@ -7,8 +7,8 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.ClassInfo
-import org.jetbrains.compose.reload.analysis.ResolvedDirtyScopes
 import org.jetbrains.compose.reload.analysis.MutableApplicationInfo
+import org.jetbrains.compose.reload.analysis.ResolvedDirtyScopes
 import org.jetbrains.compose.reload.analysis.isIgnored
 import org.jetbrains.compose.reload.analysis.resolveDirtyScopes
 import org.jetbrains.compose.reload.analysis.verifyRedefinitions
@@ -100,9 +100,9 @@ internal object RuntimeTrackingTransformer : ClassFileTransformer {
         loader: ClassLoader?, className: String?, classBeingRedefined: Class<*>?,
         protectionDomain: ProtectionDomain?, classfileBuffer: ByteArray
     ): ByteArray? {
-        if (className == null || ClassId(className).isIgnored) {
-            return null
-        }
+        val classId = ClassId(className ?: return null)
+        if (!classId.isTransformAllowed()) return null
+        if (classId.isIgnored) return null
 
         enqueueRuntimeAnalysis(
             loader ?: ClassLoader.getSystemClassLoader(),

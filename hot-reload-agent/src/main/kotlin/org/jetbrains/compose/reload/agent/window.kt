@@ -33,14 +33,16 @@ internal object WindowInstrumentation : ClassFileTransformer {
         classBeingRedefined: Class<*>?,
         protectionDomain: ProtectionDomain?, classfileBuffer: ByteArray?
     ): ByteArray? {
+        val classId = ClassId(className ?: return null)
+        if (!classId.isTransformAllowed()) return null
         if (classfileBuffer == null) return null
-        if (className == null) return null
+
         if (// before CMP 1.9.0
-            className.startsWith(Ids.WindowDesktopKt.classId.value) ||
-            className.startsWith(Ids.DialogDesktopKt.classId.value) ||
+            classId.startsWith(Ids.WindowDesktopKt.classId.value) ||
+            classId.startsWith(Ids.DialogDesktopKt.classId.value) ||
             // CMP 1.9.0+
-            className.startsWith(Ids.SwingWindowDesktopKt.classId.value) ||
-            className.startsWith(Ids.SwingDialogDesktopKt.classId.value)
+            classId.startsWith(Ids.SwingWindowDesktopKt.classId.value) ||
+            classId.startsWith(Ids.SwingDialogDesktopKt.classId.value)
         ) {
             return transformSetContent(loader, classfileBuffer)
         }
@@ -60,7 +62,7 @@ private fun transformSetContent(
             override fun edit(m: MethodCall) {
                 try {
                     when (m.methodId) {
-                        Ids.ComposeWindow.setContent_1 ->  {
+                        Ids.ComposeWindow.setContent_1 -> {
                             m.replace(wrapSetContent1(Ids.ComposeWindow.classId))
                             transformed = true
                         }
@@ -68,7 +70,7 @@ private fun transformSetContent(
                             m.replace(wrapSetContent3(Ids.ComposeWindow.classId))
                             transformed = true
                         }
-                        Ids.ComposeDialog.setContent_1 ->  {
+                        Ids.ComposeDialog.setContent_1 -> {
                             m.replace(wrapSetContent1(Ids.ComposeDialog.classId))
                             transformed = true
                         }

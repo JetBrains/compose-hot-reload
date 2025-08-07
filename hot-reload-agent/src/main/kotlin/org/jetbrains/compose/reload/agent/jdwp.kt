@@ -41,9 +41,12 @@ private object JdwpTracker : ClassFileTransformer {
         module: Module?, loader: ClassLoader?, className: String?, classBeingRedefined: Class<*>?,
         protectionDomain: ProtectionDomain?, classfileBuffer: ByteArray?
     ): ByteArray? {
-        if (className == null || ClassId(className).isIgnored ||
-            classBeingRedefined == null || classfileBuffer == null || localReloadRequest.get() != null
-        ) return null
+        val classId = ClassId(className ?: return null)
+        if (!classId.isTransformAllowed()) return null
+        if (classId.isIgnored) return null
+        if (classBeingRedefined == null) return null
+        if (classfileBuffer == null) return null
+        if (localReloadRequest.get() != null) return null
 
         return try {
             transformLock.lock()
