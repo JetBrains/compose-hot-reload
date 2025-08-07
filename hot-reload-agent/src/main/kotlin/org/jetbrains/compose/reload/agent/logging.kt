@@ -14,7 +14,6 @@ import org.jetbrains.compose.reload.core.displayString
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.invokeOnFinish
 import org.jetbrains.compose.reload.core.invokeOnStop
-import org.jetbrains.compose.reload.core.invokeOnValue
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.withThread
 import org.jetbrains.compose.reload.core.withType
@@ -41,34 +40,40 @@ internal class AgentLoggerDispatch : Logger.Dispatch {
     }
 }
 
-internal fun OrchestrationHandle.startDispatchingLogs() = subtask {
-    while (true) {
-        val log = outgoingLoggingQueue.receive()
-        send(log.toMessage())
+internal fun OrchestrationHandle.startDispatchingLogs() {
+    subtask {
+        orchestration.messages.withType<CriticalException>().collect { exception ->
+            val message = LogMessage(
+                environment = null,
+                loggerName = "<<CRITICAL>>",
+                threadName = "<<UNKNOWN>>",
+                timestamp = System.currentTimeMillis(),
+                level = Logger.Level.Error,
+                message = "Received critical exception: ${exception.message}",
+                throwableClassName = exception.exceptionClassName,
+                throwableMessage = exception.message,
+                throwableStacktrace = exception.stacktrace.toList()
+            )
+
+            incomingLoggingQueue.add(message)
+        }
+    }
+
+    subtask {
+        orchestration.messages.withType<LogMessage>().collect { message ->
+            incomingLoggingQueue.add(message)
+        }
+    }
+
+    subtask {
+        while (true) {
+            val log = outgoingLoggingQueue.receive()
+            send(log.toMessage())
+        }
     }
 }
 
-internal fun startLogging() = launchTask task@{
-    orchestration.messages.withType<LogMessage>().invokeOnValue { message ->
-        incomingLoggingQueue.add(message)
-    }
-
-    orchestration.messages.withType<CriticalException>().invokeOnValue { exception ->
-        val message = LogMessage(
-            environment = null,
-            loggerName = "<<CRITICAL>>",
-            threadName = "<<UNKNOWN>>",
-            timestamp = System.currentTimeMillis(),
-            level = Logger.Level.Error,
-            message = "Received critical exception: ${exception.message}",
-            throwableClassName = exception.exceptionClassName,
-            throwableMessage = exception.message,
-            throwableStacktrace = exception.stacktrace.toList()
-        )
-
-        incomingLoggingQueue.add(message)
-    }
-
+internal fun startWritingLogs() = launchTask task@{
     /* Create 'Hello' statements */
     logger.info("Compose Hot Reload: Run at ${LocalDateTime.now()}")
     logger.info("Compose Hot Reload: PID: ${ProcessHandle.current().pid()}")

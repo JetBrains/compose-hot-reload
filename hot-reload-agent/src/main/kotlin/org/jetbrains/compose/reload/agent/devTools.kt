@@ -8,13 +8,11 @@ package org.jetbrains.compose.reload.agent
 import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsDetached
-import org.jetbrains.compose.reload.core.HotReloadProperty.DevToolsClasspath
+import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.DevTools
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
-import org.jetbrains.compose.reload.core.getBlocking
-import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
@@ -27,16 +25,28 @@ import kotlin.io.path.absolutePathString
 
 private val logger = createLogger()
 
-internal fun launchDevtoolsApplication() {
-    if (!HotReloadEnvironment.devToolsEnabled) return
-    val classpath = HotReloadEnvironment.devToolsClasspath ?: error("Missing '${DevToolsClasspath}'")
+internal class DevToolsHandle(
+    val orchestrationPort: Int,
+)
+
+internal val devTools: DevToolsHandle? by lazy {
+    tryStartDevToolsProcess()
+}
+
+internal fun startDevTools() {
+    devTools
+}
+
+private fun tryStartDevToolsProcess(): DevToolsHandle? {
+    if (!HotReloadEnvironment.devToolsEnabled) return null
+    val classpath = HotReloadEnvironment.devToolsClasspath ?: return null
     logger.info("Starting 'DevTools'")
 
     val process = ProcessBuilder(
         resolveDevtoolsJavaBinary(),
         *platformSpecificJvmArguments(),
         "-cp", classpath.joinToString(File.pathSeparator),
-        *subprocessDefaultArguments(DevTools, orchestration.port.getBlocking().getOrThrow()).toTypedArray(),
+        *subprocessDefaultArguments(DevTools).toTypedArray(),
         *issueNewDebugSessionJvmArguments("DevTools"),
         "org.jetbrains.compose.devtools.Main",
     )
@@ -49,6 +59,17 @@ internal fun launchDevtoolsApplication() {
             stderrLogger.error(line)
         }
     }
+
+    /*
+    Receive the orchestration port from the devtools process.
+    Usually, the devtools is hosting the orchestration server, sending the port through stdout as
+    'compose.reload.orchestration.port=2411'
+     */
+    val orchestrationPort = process.inputStream.bufferedReader().lineSequence()
+        .filter { it.startsWith(HotReloadProperty.OrchestrationPort.key) }
+        .first().substringAfter("=").trim().toInt()
+
+    return DevToolsHandle(orchestrationPort)
 }
 
 private fun resolveDevtoolsJavaBinary(): String? {

@@ -10,14 +10,14 @@ package org.jetbrains.compose.reload.agent
 import java.lang.instrument.Instrumentation
 
 fun premain(@Suppress("unused") args: String?, instrumentation: Instrumentation) {
-    startLogging()
+    startDevTools()
     startOrchestration()
-
     createPidfile()
+    startWritingLogs()
+
     launchWindowInstrumentation(instrumentation)
     launchComposeInstrumentation(instrumentation)
     launchRuntimeTracking(instrumentation)
     launchReloadRequestHandler(instrumentation)
     launchJdwpTracker(instrumentation)
-    launchDevtoolsApplication()
 }

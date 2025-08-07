@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.core.Future
+import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
@@ -30,7 +31,27 @@ import kotlin.time.Duration.Companion.seconds
 private val logger = createLogger()
 
 val orchestration: OrchestrationHandle by lazy {
-    OrchestrationClient(Application) ?: OrchestrationServer()
+
+    /**
+     * If there is a port provided by the environment, then we connect to this port directly.
+     */
+    HotReloadEnvironment.orchestrationPort?.let { port ->
+        return@lazy OrchestrationClient(Application, port)
+    }
+
+    /**
+     * If there exists a [devTools] process, then we use the orchestration provided by this process.
+     * DevTools hosting the orchestration server is preferred over the user application hosting it, as
+     * the user application may stop all threads (e.g., by debugger) which might cause the orchestration to timeout.
+     */
+    devTools?.orchestrationPort?.let { port ->
+        return@lazy OrchestrationClient(Application, port)
+    }
+
+    /**
+     * If nobody 'external' is hosting the server, then the application will start the server itself.
+     */
+    OrchestrationServer()
 }
 
 suspend fun OrchestrationMessage.send() {

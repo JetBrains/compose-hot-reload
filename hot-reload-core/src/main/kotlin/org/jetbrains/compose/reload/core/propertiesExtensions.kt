@@ -12,10 +12,12 @@ import org.jetbrains.compose.reload.core.HotReloadProperty.ParentPid
 import java.lang.System.getProperty
 
 @InternalHotReloadApi
-public fun subprocessDefaultArguments(environment: Environment, orchestrationPort: Int): List<String> {
+public fun subprocessDefaultArguments(
+    environment: Environment, orchestrationPort: Int? = null
+): List<String> {
     val systemProperties = HotReloadProperty.entries.mapNotNull map@{ property ->
         when {
-            property == OrchestrationPort -> "-D${OrchestrationPort.key}=$orchestrationPort"
+            property == OrchestrationPort && orchestrationPort != null -> "-D${OrchestrationPort.key}=$orchestrationPort"
             property == ParentPid -> "-D${ParentPid.key}=${ProcessHandle.current().pid()}"
             environment in property.targets -> "-D${property.key}=${getProperty(property.key) ?: return@map null}"
             else -> null
