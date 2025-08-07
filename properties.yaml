@@ -100,7 +100,7 @@ GradleBuildRoot:
 GradleBuildProject:
   key: gradle.build.project
   type: string
-  target: [ application,devtools ]
+  target: [ application, devtools ]
   documentation: |
     The gradle 'path' to the 'project' which is currently executed and needs recompiling.
     e.g. ':app:' or ':' or ':someModule:composeApp'
@@ -118,10 +118,12 @@ GradleBuildContinuous:
   type: boolean
   default: "false"
   target: [ application, devtools, build ]
+  isDelicateApi: true
   documentation: |
     - true: Compose Hot Reload will start a recompiler Gradle Daemon, which will continuously rebuilt/reload the project
     by watching all  inputs to the build
     - false: The user is expected to rebuild/reload manually by launching a task (or using tooling)
+    Continuous mode is subject to change and might be removed in the future.
 
 AmperBuildRoot:
   key: amper.build.root
@@ -163,9 +165,11 @@ DevToolsTransparencyEnabled:
   default: "(Os.currentOrNull() != Os.Linux).toString()"
   defaultIsExpression: true
   target: [ application, build, devtools ]
+  isDelicateApi: true
   documentation: |
     Some platforms might not be able to render transparency correctly (e.g. some linux environments).
-    This property will allow such platforms to disable/enable transparency
+    This property will allow such platforms to disable/enable transparency. This property is subject to change
+    if the issues with transparency rendering are resolved..
 
 DevToolsDetached:
   key: compose.reload.devToolsDetached
@@ -180,9 +184,11 @@ DevToolsAnimationsEnabled:
   type: boolean
   default: "true"
   target: [ application, build, devtools ]
+  isDelicateApi: true
   documentation: |
     If disabled, dev tools will not use window animations when switching between expanded/minimised states. 
-    Note: window contents will still be animated.
+    Note: window contents will still be animated. This property is present because of some platform-specific issues with
+    window management. Subject to change and might be removed in the future, if the current issues are resolved.
 
 IntelliJDebuggerDispatchPort:
   key: compose.reload.idea.debugger.dispatch.port
@@ -209,10 +215,11 @@ SubprocessDebuggingEnabled:
   type: boolean
   default: "false"
   target: [ build ]
+  isDelicateApi: true
   documentation: |
     Enable this property to allow propagating the 'idea.debugger.dispatch.port' to all subprocesses.
     This is useful when debugging dev tools. Note: this may break the debugging of the user application if IJ is
-    not configured to accept multiple debugging sessions.
+    not configured to accept multiple debugging sessions. Not recommended to use outside of hot reload debugging.
 
 JetBrainsRuntimeBinary:
   key: compose.reload.jbr.binary
@@ -244,7 +251,6 @@ IdeaComposeHotReloadSupportVersion:
   key: idea.compose.hot-reload.version
   type: int
   target: [ build, application, devtools ]
-
   documentation: |
     Set by IntelliJ during builds to convey its 'support level' for hot reload.
     Not Present, but 'idea.compose.hot-reload' being set: Supports running hot run tasks
@@ -255,25 +261,31 @@ StdinFile:
   key: compose.reload.stdinFile
   type: file
   target: [ build, application, devtools ]
+  isDelicateApi: true
   documentation: |
     Used by 'async'/'non-blocking' launches of the application.
     Will point to the stdin file (can be pipe)
+    'async'/'non-blocking' mode is subject to change and might be removed in the future.
 
 StdoutFile:
   key: compose.reload.stdoutFile
   type: file
   target: [ build, application, devtools ]
+  isDelicateApi: true
   documentation: |
     Used by 'async'/'non-blocking' launches of the application.
     Will point to a file where the stdout is supposed to be written to.
+    'async'/'non-blocking' mode is subject to change and might be removed in the future.
 
 StderrFile:
   key: compose.reload.stderrFile
   type: file
   target: [ build, application, devtools ]
+  isDelicateApi: true
   documentation: |
     Used by 'async'/'non-blocking' launches of the application.
     Will point to a file where the stderr is supposed to be written to.
+    'async'/'non-blocking' mode is subject to change and might be removed in the future.
 
 ParentPid:
   key: compose.reload.parentPid
@@ -323,7 +335,9 @@ ResourcesDirtyResolverEnabled:
   type: boolean
   default: "false"
   target: [application, build, devtools]
+  isDelicateApi: true
   documentation: |
     Enables/Disables automatically re-composing scopes using resources
     See: https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources.html
     See: https://github.com/JetBrains/compose-hot-reload/issues/151
+    Feature is still in development and subject to change in the future.

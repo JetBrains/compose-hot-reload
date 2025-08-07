@@ -65,7 +65,7 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
         val caseTemplate = """
             /**
             * {{documentation}}
-            */
+            */{{delicateApi}}
             {{name}}(
                 "{{key}}",
                 type = {{type}},
@@ -82,6 +82,10 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
                     if (property.default != null) {
                         "documentation"("- default: '${property.default}'")
                     }
+                    "delicateApi"(
+                        "\n@org.jetbrains.compose.reload.DelicateHotReloadApi"
+                            .takeIf { property.isDelicateApi } ?: ""
+                    )
                     "name"(property.name)
                     "key"(property.key)
                     "default"(if (property.default != null) property.renderDefault() else """"null"""")

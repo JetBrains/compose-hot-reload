@@ -45,7 +45,8 @@ private fun parseHotReloadProperty(
             DeclaredHotReloadProperty.Target.values().firstOrNull { it.name.equals(declaredTarget, ignoreCase = true) }
                 ?: error("Property '$name' has invalid 'target' field: $declaredTarget")
         },
-        documentation = node.getScalar("documentation")?.content
+        isDelicateApi = node.getScalar("isDelicateApi")?.content?.toBooleanStrict() == true,
+        documentation = node.getScalar("documentation")?.content,
     )
 }
 
@@ -57,7 +58,8 @@ internal class DeclaredHotReloadProperty(
     val type: Type,
     val enumClass: String?,
     val targets: List<Target>,
-    val documentation: String?
+    val isDelicateApi: Boolean,
+    val documentation: String?,
 ) {
     enum class Type {
         String, Boolean, Int, Long, File, Files, Enum
