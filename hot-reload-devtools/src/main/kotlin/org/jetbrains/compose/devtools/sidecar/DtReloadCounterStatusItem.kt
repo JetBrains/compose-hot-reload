@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.sellmair.evas.compose.composeValue
 import org.jetbrains.compose.devtools.Tag
@@ -30,6 +31,8 @@ import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtTextStyles
 import org.jetbrains.compose.devtools.widgets.DtBuildSystemLogo
 import org.jetbrains.compose.devtools.widgets.DtText
+import org.jetbrains.compose.devtools.widgets.bouncing
+import org.jetbrains.compose.devtools.widgets.shaking
 
 @Composable
 fun DtExpandedReloadCounterStatusItem() {
@@ -66,15 +69,22 @@ fun DtMinimisedReloadCounterStatusItem(showDefaultValue: Boolean = false) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.scale(scale).horizontalScroll(rememberScrollState())
             ) {
-                CircularProgressIndicator(
-                    strokeWidth = 4.dp, color = DtColors.statusColorOrange2,
-                    modifier = Modifier.size(10.dp).padding(2.dp).tag(Tag.ReloadStatusSymbol)
-                        .progressSemantics()
-                )
-
                 val buildSystem = BuildSystemState.composeValue()?.buildSystem
+
+                if (buildSystem == null)
+                    CircularProgressIndicator(
+                        strokeWidth = 4.dp, color = DtColors.statusColorOrange2,
+                        modifier = Modifier.size(10.dp).padding(2.dp).tag(Tag.ReloadStatusSymbol)
+                            .progressSemantics()
+                    )
+
                 if (buildSystem != null) {
-                    DtBuildSystemLogo(buildSystem, modifier = Modifier.size(20.dp).padding(2.dp))
+                    DtBuildSystemLogo(
+                        buildSystem,
+                        modifier = Modifier.size(20.dp).padding(2.dp)
+                            .bouncing(min = 0.9f, max = 1.10f, 250)
+                            .shaking(min = -5f, max = 5f, 128)
+                    )
                 }
             }
         }
@@ -87,7 +97,7 @@ fun DtMinimisedReloadCounterStatusItem(showDefaultValue: Boolean = false) {
                 DtText(
                     text = "${countState.successfulReloads}",
                     modifier = Modifier.tag(Tag.ReloadCounterText),
-                    style = DtTextStyles.smallSemiBold.copy(color = DtColors.text)
+                    style = DtTextStyles.smallSemiBold.copy(color = DtColors.text).copy(fontWeight = FontWeight.Bold)
                 )
             }
         }
