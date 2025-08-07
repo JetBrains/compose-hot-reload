@@ -121,9 +121,9 @@ class DetachedSidecarUiTest : SidecarBodyUiTest() {
     @Test
     fun `test - actions`() = runSidecarUiTest {
         onAllNodesWithTag(Tag.ActionButton)
-            .assertCountEquals(4)
+            .assertCountEquals(3)
             .filter(hasClickAction())
-            .assertCountEquals(4)
+            .assertCountEquals(3)
     }
 
     @Test

@@ -44,12 +44,13 @@ import org.jetbrains.compose.devtools.sendAsync
 import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.states.UIErrorDescription
 import org.jetbrains.compose.devtools.states.UIErrorState
+import org.jetbrains.compose.devtools.widgets.restartAction
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 
 @Composable
 internal fun ApplicationScope.DevToolingErrorOverlay(windowId: WindowId, windowState: WindowState) {
-    val uiExceptionState by UIErrorState.Key.composeFlow()
+    val uiExceptionState by UIErrorState.composeFlow()
         .map { value -> value.errors[windowId] }
         .collectAsState(initial = null)
 
@@ -102,13 +103,11 @@ private fun DevToolingErrorOverlay(error: UIErrorDescription) {
                 elevation = CardDefaults.elevatedCardElevation()
             ) {
                 Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (error.recovery != null) {
-                        Button(
-                            onClick = { error.recovery.invoke() },
-                            colors = ButtonDefaults.textButtonColors()
-                        ) {
-                            Text("Retry")
-                        }
+                    Button(
+                        onClick = restartAction(),
+                        colors = ButtonDefaults.textButtonColors()
+                    ) {
+                        Text("Restart")
                     }
 
                     Button(

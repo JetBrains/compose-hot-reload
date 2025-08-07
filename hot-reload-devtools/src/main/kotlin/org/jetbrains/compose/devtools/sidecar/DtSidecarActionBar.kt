@@ -15,23 +15,15 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import io.sellmair.evas.compose.EvasLaunching
 import org.jetbrains.compose.devtools.Tag
-import org.jetbrains.compose.devtools.send
 import org.jetbrains.compose.devtools.sendAsync
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.widgets.DtTextButton
+import org.jetbrains.compose.devtools.widgets.restartAction
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
-import org.jetbrains.compose.reload.core.HotReloadProperty
-import org.jetbrains.compose.reload.core.LaunchMode
-import org.jetbrains.compose.reload.core.createLogger
-import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
 
-
-private val logger = createLogger()
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -53,15 +45,6 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
             )
         }
 
-        DtTextButton(
-            text = "Retry Failed Compositions",
-            icon = Icons.Filled.Refresh,
-            tag = Tag.ActionButton,
-            onClick = {
-                OrchestrationMessage.RetryFailedCompositionRequest().sendAsync()
-            }
-        )
-
         if (
             (HotReloadEnvironment.argFile?.exists() == true &&
                 HotReloadEnvironment.mainClass != null)
@@ -70,39 +53,13 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
                 text = "Restart",
                 icon = Icons.Filled.Refresh,
                 tag = Tag.ActionButton,
-                onClick = EvasLaunching {
-                logger.info("Restarting...")
-
-                val processBuilder = ProcessBuilder(
-                    System.getProperty("java.home") + "/bin/java",
-                    "@" + (HotReloadEnvironment.argFile?.absolutePathString() ?: return@EvasLaunching),
-                    "-D${HotReloadProperty.LaunchMode.key}=${LaunchMode.Detached.name}",
-                    HotReloadEnvironment.mainClass ?: return@EvasLaunching,
-                )
-
-                HotReloadEnvironment.stdinFile?.let { file ->
-                    processBuilder.redirectInput(file.toFile())
-                }
-
-                HotReloadEnvironment.stdoutFile?.let { file ->
-                    processBuilder.redirectOutput(file.toFile())
-                }
-
-                HotReloadEnvironment.stderrFile?.let { file ->
-                    processBuilder.redirectError(file.toFile())
-                }
-
-                logger.info("Restarting: ${processBuilder.command()}")
-                processBuilder.start()
-
-                logger.info("New process started; Exiting")
-                OrchestrationMessage.ShutdownRequest("Requested by user through 'devtools'").send()
-            })
+                onClick = restartAction()
+            )
         }
 
 
         DtTextButton(
-            text = "Clean Composition",
+            text = "Reset Composition",
             icon = Icons.Filled.Delete,
             tag = Tag.ActionButton,
             onClick = {

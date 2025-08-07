@@ -32,7 +32,7 @@ public actual fun DevelopmentEntryPoint(child: @Composable () -> Unit) {
     }
 
     /* Forward the call to the runtime-jvm module */
-    org.jetbrains.compose.reload.jvm.DevelopmentEntryPoint(child)
+    org.jetbrains.compose.reload.jvm.DevelopmentEntryPoint(child = child)
 }
 
 @DelicateHotReloadApi

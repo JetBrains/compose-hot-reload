@@ -23,6 +23,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowPositioned
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.asFlow
+import java.awt.Window
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 import java.awt.event.WindowAdapter
@@ -32,9 +33,7 @@ import java.awt.event.WindowEvent
 private val logger = createLogger()
 
 @Composable
-@Suppress("INVISIBLE_REFERENCE")
-internal fun startWindowManager(): WindowId? {
-    val window = androidx.compose.ui.window.LocalWindow.current ?: return null
+internal fun startWindowManager(window: Window): WindowId {
     val windowId = remember { WindowId.create() }
 
     LaunchedEffect(windowId) {

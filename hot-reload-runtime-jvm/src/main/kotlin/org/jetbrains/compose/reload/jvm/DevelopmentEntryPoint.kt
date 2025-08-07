@@ -34,12 +34,16 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RetryFail
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIException
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIRendered
 import org.jetbrains.compose.reload.orchestration.asFlow
+import java.awt.Window
 
 private val logger = createLogger()
 
 @Composable
 @InternalHotReloadApi
-public fun DevelopmentEntryPoint(child: @Composable () -> Unit) {
+public fun DevelopmentEntryPoint(
+    window: Window? = null,
+    child: @Composable () -> Unit
+) {
 
     /* Checking if we're currently in the stack of a hot reload */
     if (hotReloadStateLocal.current != null) {
@@ -51,17 +55,17 @@ public fun DevelopmentEntryPoint(child: @Composable () -> Unit) {
         return
     }
 
-    val windowId = startWindowManager()
+    val windowId = window?.let { startWindowManager(window) }
 
     LaunchedEffect(Unit) {
         orchestration.asFlow().filterIsInstance<CleanCompositionRequest>().collect { value ->
-            cleanComposition()
+            resetComposition()
         }
     }
 
     LaunchedEffect(Unit) {
         orchestration.asFlow().filterIsInstance<RetryFailedCompositionRequest>().collect {
-            retryFailedCompositions()
+            resetComposition()
         }
     }
 
@@ -105,7 +109,7 @@ internal fun ComposeWindow.setContent(
     content: @Composable FrameWindowScope.() -> Unit
 ) {
     setContent(onPreviewKeyEvent = onPreviewKeyEvent, onKeyEvent = onKeyEvent) {
-        DevelopmentEntryPoint {
+        DevelopmentEntryPoint(window = window) {
             content()
         }
     }
@@ -118,7 +122,7 @@ internal fun ComposeWindow.setContent(
     content: @Composable FrameWindowScope.() -> Unit
 ) {
     setContent {
-        DevelopmentEntryPoint {
+        DevelopmentEntryPoint(window = window) {
             content()
         }
     }
@@ -133,7 +137,7 @@ internal fun ComposeDialog.setContent(
     content: @Composable DialogWindowScope.() -> Unit
 ) {
     setContent(onPreviewKeyEvent = onPreviewKeyEvent, onKeyEvent = onKeyEvent) {
-        DevelopmentEntryPoint {
+        DevelopmentEntryPoint(window = window) {
             content()
         }
     }
@@ -146,7 +150,7 @@ internal fun ComposeDialog.setContent(
     content: @Composable DialogWindowScope.() -> Unit
 ) {
     setContent {
-        DevelopmentEntryPoint {
+        DevelopmentEntryPoint(window = window) {
             content()
         }
     }
