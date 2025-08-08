@@ -23,7 +23,7 @@ import org.jetbrains.compose.devtools.widgets.DtHeader2
 fun DtMainConsole(
     modifier: Modifier = Modifier
 ) {
-    val logState = ConsoleLogState.Key.composeValue()
+    val logState = ConsoleLogState.composeValue()
     val scroll = rememberScrollState(0)
 
     LaunchedEffect(scroll.maxValue) {
