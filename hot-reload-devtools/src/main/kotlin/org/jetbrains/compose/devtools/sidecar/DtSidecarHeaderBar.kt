@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.theme.DtLogos
 import org.jetbrains.compose.devtools.theme.DtPadding
-import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TOOLING
+import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
 import org.jetbrains.compose.devtools.widgets.DtButton
 import org.jetbrains.compose.devtools.widgets.DtComposeLogo
 import org.jetbrains.compose.devtools.widgets.DtHeader1
@@ -37,7 +37,7 @@ internal fun DtAttachedSidecarHeaderBar(
     ) {
         DtComposeLogo(modifier = Modifier.size(24.dp))
         Spacer(Modifier.width(DtPadding.medium))
-        DtHeader1(COMPOSE_HOT_RELOAD_TOOLING)
+        DtHeader1(COMPOSE_HOT_RELOAD_TITLE)
         Spacer(Modifier.weight(1f))
         DtButton(
             onClick = onClose,
@@ -67,6 +67,6 @@ internal fun DtDetachedSidecarHeaderBar(
     ) {
         DtComposeLogo(modifier = Modifier.size(24.dp))
         Spacer(Modifier.width(DtPadding.medium))
-        DtHeader1(COMPOSE_HOT_RELOAD_TOOLING)
+        DtHeader1(COMPOSE_HOT_RELOAD_TITLE)
     }
 }

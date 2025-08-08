@@ -24,6 +24,7 @@ import org.jetbrains.compose.devtools.theme.DtTitles.DEV_TOOLS
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
+import org.jetbrains.compose.devtools.widgets.dtBackground
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import kotlin.system.exitProcess

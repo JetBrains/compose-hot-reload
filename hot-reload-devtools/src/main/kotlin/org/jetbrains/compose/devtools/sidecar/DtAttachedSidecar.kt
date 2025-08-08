@@ -46,6 +46,7 @@ import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
 import org.jetbrains.compose.devtools.widgets.DtComposeLogo
 import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusColor
+import org.jetbrains.compose.devtools.widgets.dtBackground
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsAnimationsEnabled
 import org.jetbrains.compose.reload.core.WindowId
 

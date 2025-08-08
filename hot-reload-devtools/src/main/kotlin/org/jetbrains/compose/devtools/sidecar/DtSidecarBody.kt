@@ -27,12 +27,6 @@ internal fun DtSidecarBody(modifier: Modifier = Modifier) {
         // Action bar with controls
         DtSidecarActionBar()
 
-        // Subtle divider with animated color
-        Divider(
-            modifier = Modifier.height(1.dp),
-            color = animateReloadStatusColor(DtColors.border).value
-        )
-
         // Status section showing the current state
         DtSidecarStatusSection()
 

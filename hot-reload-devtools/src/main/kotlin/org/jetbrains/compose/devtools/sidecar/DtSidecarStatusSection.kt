@@ -24,6 +24,7 @@ import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.devtools.widgets.DtHeader2
 import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
+import org.jetbrains.compose.devtools.widgets.dtBorder
 
 @Composable
 fun DtSidecarStatusSection() {
@@ -36,11 +37,11 @@ fun DtSidecarStatusSection() {
 
         // Status card with rounded corners and modern styling
         Surface(
-            color = DtColors.surface,
+            color = DtColors.applicationBackground,
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(DtShapes.RoundedCornerShape)
-                .animatedReloadStatusBorder(shape = DtShapes.RoundedCornerShape)
+                .dtBorder()
         ) {
             Column(
                 modifier = Modifier.padding(DtPadding.medium),

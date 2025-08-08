@@ -30,6 +30,7 @@ import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.devtools.theme.dtVerticalPadding
 import org.jetbrains.compose.devtools.widgets.DtCode
 import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
+import org.jetbrains.compose.devtools.widgets.dtBorder
 
 @Composable
 fun DtConsole(
@@ -49,7 +50,7 @@ fun DtConsole(
         modifier
             .tag(Tag.Console)
             .dtVerticalPadding()
-            .animatedReloadStatusBorder()
+            .dtBorder()
             .clip(DtShapes.RoundedCornerShape)
             .background(DtColors.surfaceConsole)
             .fillMaxSize(),

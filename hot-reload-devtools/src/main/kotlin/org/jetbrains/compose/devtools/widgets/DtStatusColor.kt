@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -138,6 +139,27 @@ fun Modifier.animatedReloadStatusBorder(
     return border(
         width = width,
         brush = animatedReloadStatusBrush(idleColor = idleColor),
+        shape = shape
+    )
+}
+
+@Composable
+internal fun Modifier.dtBackground(shape: Shape = DtShapes.RoundedCornerShape): Modifier = this
+    .animatedReloadStatusBorder(
+        shape = shape,
+        idleColor = DtColors.border
+    )
+    .clip(shape)
+    .background(DtColors.applicationBackground)
+    .animateReloadStatusBackground(DtColors.applicationBackground)
+
+fun Modifier.dtBorder(
+    width: Dp = 1.dp, shape: Shape = DtShapes.RoundedCornerShape,
+    idleColor: Color = Color.Gray,
+): Modifier {
+    return border(
+        width = width,
+        color = idleColor,
         shape = shape
     )
 }

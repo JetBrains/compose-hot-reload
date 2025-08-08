@@ -2,17 +2,13 @@ package org.jetbrains.compose.devtools.sidecar
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeDialog
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.unit.Dp
@@ -27,11 +23,7 @@ import androidx.compose.ui.window.rememberDialogState
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.invokeWhenMessageReceived
 import org.jetbrains.compose.devtools.sendBlocking
-import org.jetbrains.compose.devtools.theme.DtColors
-import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.devtools.theme.DtTitles.DEV_TOOLS
-import org.jetbrains.compose.devtools.widgets.animateReloadStatusBackground
-import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsAnimationsEnabled
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
 import org.jetbrains.compose.reload.core.Os
@@ -211,16 +203,6 @@ internal fun animateWindowPosition(
         }
     }
 }
-
-@Composable
-internal fun Modifier.dtBackground(shape: Shape = DtShapes.RoundedCornerShape): Modifier = this
-    .animatedReloadStatusBorder(
-        shape = shape,
-        idleColor = DtColors.border
-    )
-    .clip(shape)
-    .background(DtColors.applicationBackground)
-    .animateReloadStatusBackground(DtColors.applicationBackground)
 
 internal fun DpSize.toDimension(): Dimension = Dimension(width.value.toInt(), height.value.toInt())
 internal fun Dimension.toDpSize(): DpSize = DpSize(width.dp, height.dp)
