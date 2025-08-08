@@ -7,23 +7,19 @@ package org.jetbrains.compose.devtools.sidecar
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.devtools.Tag
-import org.jetbrains.compose.devtools.theme.DtLogos
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
-import org.jetbrains.compose.devtools.widgets.DtButton
+import org.jetbrains.compose.devtools.widgets.DtCloseButton
 import org.jetbrains.compose.devtools.widgets.DtComposeLogo
 import org.jetbrains.compose.devtools.widgets.DtHeader1
-import org.jetbrains.compose.devtools.widgets.DtImage
 
 @Composable
 internal fun DtAttachedSidecarHeaderBar(
@@ -39,19 +35,13 @@ internal fun DtAttachedSidecarHeaderBar(
         Spacer(Modifier.width(DtPadding.medium))
         DtHeader1(COMPOSE_HOT_RELOAD_TITLE)
         Spacer(Modifier.weight(1f))
-        DtButton(
+        DtCloseButton(
             onClick = onClose,
             modifier = Modifier
                 .padding(2.dp)
                 .size(28.dp),
             tag = Tag.ExpandMinimiseButton,
-        ) {
-            DtImage(
-                DtLogos.Image.CLOSE_ICON,
-                modifier = Modifier.fillMaxSize(),
-                tint = Color.White
-            )
-        }
+        )
     }
 }
 

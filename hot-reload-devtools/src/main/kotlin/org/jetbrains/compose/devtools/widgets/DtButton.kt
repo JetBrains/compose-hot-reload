@@ -16,6 +16,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
@@ -27,10 +28,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
+import org.jetbrains.compose.devtools.theme.DtLogos
 import org.jetbrains.compose.devtools.theme.DtPadding
 
 @Immutable
@@ -38,6 +41,65 @@ data class DtButtonState(
     val isHovered: Boolean,
     val isPressed: Boolean,
 )
+
+
+@Composable
+fun DtCloseButton(
+    onClick: () -> Unit = {},
+    modifier: Modifier = Modifier,
+    tag: Tag? = null,
+    contentPadding: PaddingValues = DtPadding.buttonPadding,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    // More subtle animations for a modern feel
+    val scale by animateFloatAsState(
+        targetValue = when {
+            isPressed -> 0.96f
+            isHovered -> 0.98f
+            else -> 1f
+        },
+        animationSpec = tween(durationMillis = 150)
+    )
+
+    // Colors based on state and type
+    val backgroundColor = when {
+        else -> if (isHovered) DtColors.defaultActive else DtColors.applicationBackground
+    }
+
+    val elevation = when {
+        isHovered -> 1.dp
+        else -> 0.5.dp
+    }
+
+    Surface(
+        modifier = modifier
+            .scale(scale)
+            .hoverable(interactionSource)
+            .defaultMinSize(minWidth = 24.dp, minHeight = 24.dp),
+        shadowElevation = elevation,
+        color = backgroundColor,
+        shape = RoundedCornerShape(6.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .tag(tag)
+                .clickable(interactionSource, ripple(bounded = true), onClick = onClick)
+                .padding(contentPadding),
+            contentAlignment = Alignment.Center
+        ) {
+            DtImage(
+                DtLogos.Image.CLOSE_ICON,
+                modifier = Modifier.fillMaxSize(),
+                tint = Color.White
+            )
+        }
+    }
+}
+
+
 
 @Composable
 fun DtButton(
