@@ -6,8 +6,6 @@
 package org.jetbrains.compose.devtools.widgets
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,17 +13,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
-import org.jetbrains.compose.devtools.sidecar.dtBackground
-import org.jetbrains.compose.devtools.theme.DtPadding
-import org.jetbrains.compose.devtools.theme.DtTextStyles
+import org.jetbrains.compose.devtools.theme.DtImages
 import java.awt.datatransfer.StringSelection
 
 
 @Composable
 fun DtCopyToClipboardButton(
-    text: String,
     content: () -> String,
 ) {
     val clipboard = LocalClipboard.current
@@ -37,12 +33,9 @@ fun DtCopyToClipboardButton(
         }
     }
 
-    BasicText(
-        text = text,
-        style = DtTextStyles.small,
-        modifier = Modifier
-            .dtBackground()
-            .padding(horizontal = DtPadding.medium, vertical = DtPadding.small)
-            .clickable { copyAll = true }
+    DtImage(
+        DtImages.Image.COPY_ICON,
+        tint = Color.White,
+        modifier = Modifier.clickable { copyAll = true }
     )
 }

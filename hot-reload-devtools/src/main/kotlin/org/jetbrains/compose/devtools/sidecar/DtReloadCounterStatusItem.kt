@@ -11,9 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.progressSemantics
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,8 +25,10 @@ import org.jetbrains.compose.devtools.states.ReloadCountState
 import org.jetbrains.compose.devtools.states.ReloadState
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
+import org.jetbrains.compose.devtools.theme.DtImages
 import org.jetbrains.compose.devtools.theme.DtTextStyles
 import org.jetbrains.compose.devtools.widgets.DtBuildSystemLogo
+import org.jetbrains.compose.devtools.widgets.DtImage
 import org.jetbrains.compose.devtools.widgets.DtText
 import org.jetbrains.compose.devtools.widgets.bouncing
 import org.jetbrains.compose.devtools.widgets.shaking
@@ -41,7 +40,7 @@ fun DtExpandedReloadCounterStatusItem() {
     if (state.successfulReloads > 0) {
         DtSidecarStatusItem(
             symbol = {
-                Icon(Icons.Filled.Refresh, "Reload", tint = DtColors.text)
+                DtImage(DtImages.Image.RESTART_ICON, tint = DtColors.text)
             },
             content = {
                 DtText(

@@ -2,17 +2,13 @@ package org.jetbrains.compose.devtools.sidecar
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeDialog
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.unit.Dp
@@ -27,11 +23,9 @@ import androidx.compose.ui.window.rememberDialogState
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.invokeWhenMessageReceived
 import org.jetbrains.compose.devtools.sendBlocking
-import org.jetbrains.compose.devtools.theme.DtColors
-import org.jetbrains.compose.devtools.theme.DtShapes
+import org.jetbrains.compose.devtools.theme.DtPadding
+import org.jetbrains.compose.devtools.theme.DtSizes
 import org.jetbrains.compose.devtools.theme.DtTitles.DEV_TOOLS
-import org.jetbrains.compose.devtools.widgets.animateReloadStatusBackground
-import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsAnimationsEnabled
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsTransparencyEnabled
 import org.jetbrains.compose.reload.core.Os
@@ -102,7 +96,7 @@ fun DtAnimatedWindow(
 
     DialogWindow(
         onCloseRequest = onCloseRequest,
-        // if opacity is not supported --- make window not visible
+        // if opacity is not supported --- make the window not visible
         // if opacity is supported --- control the visibility through opacity
         // this way we can be sure that the window will be animated properly
         visible = if (opacitySupported) true else visible,
@@ -119,7 +113,7 @@ fun DtAnimatedWindow(
         onKeyEvent = onKeyEvent,
     ) {
         // if opacity is not supported, we hide the window by setting `visibility = false`
-        // while the window is not visible it does not render, so all the animations are saved
+        // while the window is not visible, it does not render, so all the animations are saved
         // when the window changes its visibility --- all the animations are triggered
         // we need to skip them and render the window in its correct location straight away
         val skipAnimation = !opacitySupported && visibilityChanged
@@ -212,39 +206,25 @@ internal fun animateWindowPosition(
     }
 }
 
-@Composable
-internal fun Modifier.dtBackground(shape: Shape = DtShapes.RoundedCornerShape): Modifier = this
-    .animatedReloadStatusBorder(
-        shape = shape,
-        idleColor = DtColors.border
-    )
-    .clip(shape)
-    .background(DtColors.applicationBackground)
-    .animateReloadStatusBackground(DtColors.applicationBackground)
-
 internal fun DpSize.toDimension(): Dimension = Dimension(width.value.toInt(), height.value.toInt())
-internal fun Dimension.toDpSize(): DpSize = DpSize(width.dp, height.dp)
-
-internal fun Point.toWindowPosition(): WindowPosition = WindowPosition(x.dp, y.dp)
 internal fun WindowPosition.toPoint(): Point = Point(x.value.toInt(), y.value.toInt())
 
 internal fun getSideCarWindowPosition(mainWindowPosition: WindowPosition, width: Dp): WindowPosition {
-    val targetX = mainWindowPosition.x - width - if (!devToolsUseTransparency) 12.dp else 0.dp
+    val targetX = mainWindowPosition.x - width - if (!devToolsUseTransparency) DtPadding.small * 3 else 0.dp
     val targetY = mainWindowPosition.y
     return WindowPosition(targetX, targetY)
 }
 
 internal fun getSideCarWindowSize(mainWindowSize: DpSize, isExpanded: Boolean): DpSize {
     return when {
-        isExpanded -> DpSize(512.dp, maxOf(mainWindowSize.height, 512.dp))
+        isExpanded -> DpSize(DtSizes.sidecarWidth, maxOf(mainWindowSize.height, DtSizes.minSidecarHeight))
         else -> DpSize(
-            width = 32.dp + 4.dp + if (devToolsUseTransparency) 12.dp else 0.dp,
-            height = if (devToolsUseTransparency) maxOf(mainWindowSize.height, 512.dp)
-            else 44.dp + 4.dp + if (Os.current() == Os.Windows) 2.dp else 0.dp
+            width = DtSizes.largeLogoSize + DtPadding.small * 2 + if (devToolsUseTransparency) DtPadding.small * 3 else 0.dp,
+            height = if (devToolsUseTransparency) maxOf(mainWindowSize.height, DtSizes.minSidecarHeight)
+            else DtSizes.largeLogoSize + DtPadding.small * 2 + 12.dp + if (Os.current() == Os.Windows) 2.dp else 0.dp
         )
     }
 }
-
 
 internal operator fun Point.plus(other: Point): Point = Point(x + other.x, y + other.y)
 

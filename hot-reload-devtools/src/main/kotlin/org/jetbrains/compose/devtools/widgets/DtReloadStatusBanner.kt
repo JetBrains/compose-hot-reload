@@ -30,11 +30,12 @@ import io.sellmair.evas.compose.composeValue
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.states.ReloadState
 import org.jetbrains.compose.devtools.targetApplicationWindowStateLocal
+import org.jetbrains.compose.devtools.theme.DtSizes
 
 
 @Composable
 internal fun DtReloadStatusBanner(modifier: Modifier = Modifier) {
-    val state = ReloadState.Key.composeValue()
+    val state = ReloadState.composeValue()
     val targetApplicationWindowState = targetApplicationWindowStateLocal.current ?: return
 
     Box(modifier = modifier.heightIn(max = targetApplicationWindowState.size.height).fillMaxHeight()) {
@@ -49,7 +50,7 @@ internal fun DtReloadStatusBanner(modifier: Modifier = Modifier) {
         }
 
         Box(
-            modifier = Modifier.width(4.dp),
+            modifier = Modifier.width(DtSizes.small),
         ) {
             AnimatedVisibility(
                 visible = visibilityState,
