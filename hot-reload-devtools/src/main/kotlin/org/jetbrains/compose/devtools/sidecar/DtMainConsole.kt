@@ -37,7 +37,7 @@ fun DtMainConsole(
         ) {
             DtHeader2("Console")
             Spacer(Modifier.weight(1f))
-            DtCopyToClipboardButton("Copy all") { logState.logs.joinToString("\n") }
+            DtCopyToClipboardButton { logState.logs.joinToString("\n") }
         }
         DtConsole(logs = logState.logs, modifier = Modifier.fillMaxSize())
     }

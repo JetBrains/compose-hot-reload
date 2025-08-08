@@ -34,7 +34,7 @@ fun DtTextButton(
         onClick = onClick,
         modifier = modifier,
         tag = tag,
-    ) { buttonState ->
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(horizontal = DtPadding.medium, vertical = DtPadding.small)

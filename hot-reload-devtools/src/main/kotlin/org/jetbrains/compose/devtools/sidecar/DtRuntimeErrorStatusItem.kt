@@ -110,7 +110,7 @@ private fun ErrorDialogWindow(
                     DtTextButton("Retry", onClick = error.recovery)
                 }
 
-                DtCopyToClipboardButton("Copy Stacktrace") { error.stacktrace.joinToString("\n") }
+                DtCopyToClipboardButton { error.stacktrace.joinToString("\n") }
             }
 
             SelectionContainer(modifier = Modifier.weight(1f)) {

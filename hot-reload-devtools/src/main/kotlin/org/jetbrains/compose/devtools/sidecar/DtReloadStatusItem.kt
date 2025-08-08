@@ -192,7 +192,7 @@ private fun ErrorDialogWindow(
             Row {
                 DtHeader2("Reloading Code failed")
                 Spacer(Modifier.weight(1f))
-                DtCopyToClipboardButton("Copy all") {
+                DtCopyToClipboardButton {
                     buildString {
                         appendLine(state.reason)
                         append(state.logs.joinToString("\n") { it.message })
