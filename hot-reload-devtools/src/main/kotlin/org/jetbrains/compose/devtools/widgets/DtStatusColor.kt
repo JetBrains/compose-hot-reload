@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -49,7 +50,12 @@ fun animateReloadStatusColor(
     okColor: Color = DtColors.statusColorOk,
     errorColor: Color = DtColors.statusColorError,
 ): State<Color> {
-    val color = remember { Animatable(idleColor) }
+    val initialColor = when (ReloadState.composeValue()) {
+        is ReloadState.Reloading -> reloadingColor
+        is ReloadState.Failed -> errorColor
+        else -> idleColor
+    }
+    val color = remember { Animatable(initialColor) }
     val state = ReloadState.composeFlow()
 
     LaunchedEffect(idleColor, reloadingColor, okColor, errorColor) {
@@ -81,12 +87,13 @@ fun animatedReloadStatusBrush(
     okColor: Color = DtColors.statusColorOk,
     errorColor: Color = DtColors.statusColorError,
     idleColor: Color = Color.LightGray,
+    resetErrorState: Boolean = false,
 ): Brush {
     val state = ReloadState.composeValue()
     var isIdle by remember { mutableStateOf(true) }
 
     LaunchedEffect(state) {
-        if (state is ReloadState.Ok) {
+        if (state is ReloadState.Ok || state is ReloadState.Failed) {
             delay(1.seconds)
             isIdle = true
         } else {
@@ -97,7 +104,7 @@ fun animatedReloadStatusBrush(
     val movingColorA by animateColorAsState(
         when (state) {
             is ReloadState.Ok -> if (isIdle) idleColor else okColor
-            is ReloadState.Failed -> errorColor
+            is ReloadState.Failed -> if (isIdle && resetErrorState) idleColor else errorColor
             is ReloadState.Reloading -> DtColors.statusColorOrange1
         }
     )
@@ -105,7 +112,7 @@ fun animatedReloadStatusBrush(
     val movingColorB by animateColorAsState(
         when (state) {
             is ReloadState.Ok -> if (isIdle) idleColor else okColor
-            is ReloadState.Failed -> errorColor
+            is ReloadState.Failed -> if (isIdle && resetErrorState) idleColor else errorColor
             is ReloadState.Reloading -> DtColors.statusColorOrange2
         }
     )
@@ -132,12 +139,35 @@ fun Modifier.animateReloadStatusBackground(idleColor: Color): Modifier {
 
 @Composable
 fun Modifier.animatedReloadStatusBorder(
-    width: Dp = 1.dp, shape: Shape = DtShapes.RoundedCornerShape,
+    width: Dp = 1.dp,
+    shape: Shape = DtShapes.RoundedCornerShape,
     idleColor: Color = Color.LightGray,
+    resetErrorState: Boolean = false,
 ): Modifier {
     return border(
         width = width,
-        brush = animatedReloadStatusBrush(idleColor = idleColor),
+        brush = animatedReloadStatusBrush(idleColor = idleColor, resetErrorState = resetErrorState),
+        shape = shape
+    )
+}
+
+@Composable
+internal fun Modifier.dtBackground(shape: Shape = DtShapes.RoundedCornerShape): Modifier = this
+    .animatedReloadStatusBorder(
+        shape = shape,
+        idleColor = DtColors.border
+    )
+    .clip(shape)
+    .background(DtColors.applicationBackground)
+    .animateReloadStatusBackground(DtColors.applicationBackground)
+
+fun Modifier.dtBorder(
+    width: Dp = 1.dp, shape: Shape = DtShapes.RoundedCornerShape,
+    idleColor: Color = Color.Gray,
+): Modifier {
+    return border(
+        width = width,
+        color = idleColor,
         shape = shape
     )
 }

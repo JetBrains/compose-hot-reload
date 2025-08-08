@@ -5,7 +5,6 @@
 
 package org.jetbrains.compose.devtools.sidecar
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,17 +16,23 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.HorizontalScrollbar
+import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.ScrollbarStyle
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtShapes
-import org.jetbrains.compose.devtools.theme.dtVerticalPadding
+import org.jetbrains.compose.devtools.theme.DtSizes
 import org.jetbrains.compose.devtools.widgets.DtCode
 import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
 
@@ -35,12 +40,13 @@ import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
 fun DtConsole(
     logs: List<String>,
     modifier: Modifier = Modifier,
+    scrollToBottom: Boolean = true,
 ) {
     val verticalScrollState = rememberLazyListState()
     val horizontalScrollState = rememberScrollState()
 
     LaunchedEffect(logs.size) {
-        if (logs.isNotEmpty()) {
+        if (logs.isNotEmpty() && scrollToBottom) {
             verticalScrollState.animateScrollToItem(logs.lastIndex)
         }
     }
@@ -48,18 +54,16 @@ fun DtConsole(
     Box(
         modifier
             .tag(Tag.Console)
-            .dtVerticalPadding()
-            .animatedReloadStatusBorder()
+            .animatedReloadStatusBorder(idleColor = Color.Gray, resetErrorState = true)
             .clip(DtShapes.RoundedCornerShape)
-            .background(DtColors.surfaceConsole)
             .fillMaxSize(),
     ) {
-        SelectionContainer(modifier = Modifier.dtVerticalPadding()) {
+        SelectionContainer {
             LazyColumn(
                 state = verticalScrollState,
                 contentPadding = PaddingValues(
-                    horizontal = DtPadding.horizontal,
-                    vertical = DtPadding.vertical
+                    horizontal = DtPadding.smallElementPadding,
+                    vertical = DtPadding.smallElementPadding,
                 ),
                 modifier = Modifier.horizontalScroll(horizontalScrollState),
             ) {
@@ -68,9 +72,23 @@ fun DtConsole(
                 }
             }
         }
+        VerticalScrollbar(
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+            adapter = rememberScrollbarAdapter(verticalScrollState),
+            style = scrollbarStyle(),
+        )
         HorizontalScrollbar(
-            modifier = Modifier.align(Alignment.BottomCenter),
-            adapter = rememberScrollbarAdapter(horizontalScrollState)
+            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+            adapter = rememberScrollbarAdapter(horizontalScrollState),
+            style = scrollbarStyle(),
         )
     }
 }
+
+
+@Composable
+private fun scrollbarStyle(): ScrollbarStyle = LocalScrollbarStyle.current.copy(
+    hoverColor = DtColors.scrollbar.copy(alpha = 0.5f),
+    unhoverColor = DtColors.scrollbar.copy(alpha = 0.2f),
+    minimalHeight = DtSizes.scrollbarSize,
+)

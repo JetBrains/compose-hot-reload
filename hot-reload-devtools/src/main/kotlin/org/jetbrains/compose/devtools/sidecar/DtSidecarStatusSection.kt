@@ -13,38 +13,31 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.devtools.theme.DtColors
+import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtShapes
+import org.jetbrains.compose.devtools.theme.DtSizes
 import org.jetbrains.compose.devtools.widgets.DtHeader2
 import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
 
 @Composable
 fun DtSidecarStatusSection() {
-    Column(verticalArrangement = Arrangement.spacedBy(DtPadding.medium)) {
-        // Modern header with proper spacing
-        DtHeader2(
-            "Status", 
-            modifier = Modifier.padding(vertical = DtPadding.small)
-        )
+    Column(verticalArrangement = Arrangement.spacedBy(DtPadding.smallElementPadding)) {
+        DtHeader2("Status")
 
-        // Status card with rounded corners and modern styling
-        Surface(
-            color = DtColors.surface,
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(DtShapes.RoundedCornerShape)
-                .animatedReloadStatusBorder(shape = DtShapes.RoundedCornerShape)
+                .animatedReloadStatusBorder(idleColor = Color.Gray, resetErrorState = true)
         ) {
             Column(
-                modifier = Modifier.padding(DtPadding.medium),
-                verticalArrangement = Arrangement.spacedBy(DtPadding.small)
+                modifier = Modifier.padding(DtPadding.mediumElementPadding),
+                verticalArrangement = Arrangement.spacedBy(DtPadding.smallElementPadding)
             ) {
                 DtReloadStatusItem()
                 DtExpandedReloadCounterStatusItem()
@@ -64,13 +57,12 @@ fun DtSidecarStatusItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(28.dp)
-            .padding(vertical = DtPadding.small),
+            .height(DtSizes.statusItemSize),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(DtPadding.medium)
+        horizontalArrangement = Arrangement.spacedBy(DtPadding.smallElementPadding)
     ) {
         Box(
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(DtSizes.statusItemSize),
             contentAlignment = Alignment.Center
         ) { 
             symbol() 
