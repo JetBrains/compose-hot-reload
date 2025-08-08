@@ -67,7 +67,7 @@ fun DtReloadStatusItem() {
             symbol = {
                 CircularProgressIndicator(
                     strokeWidth = 2.dp, color = DtColors.statusColorOrange2,
-                    modifier = Modifier.padding(4.dp).tag(Tag.ReloadStatusSymbol)
+                    modifier = Modifier.tag(Tag.ReloadStatusSymbol)
                         .progressSemantics()
                 )
             },
@@ -118,9 +118,12 @@ private fun ResultContent(state: ReloadState) {
         }
     }
 
-    Row(verticalAlignment = CenterVertically, horizontalArrangement = Arrangement.spacedBy(DtPadding.arrangement)) {
-        StatusText(state, Modifier.weight(1f))
-        DtSmallText("(${durationText} ago)")
+    Row(
+        verticalAlignment = CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(DtPadding.mediumElementPadding)
+    ) {
+        StatusText(state)
+        DtSmallText("$durationText ago")
     }
 }
 

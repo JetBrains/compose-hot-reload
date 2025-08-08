@@ -35,6 +35,7 @@ import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtLogos
 import org.jetbrains.compose.devtools.theme.DtPadding
+import org.jetbrains.compose.devtools.theme.DtSize
 
 @Immutable
 data class DtButtonState(
@@ -48,7 +49,6 @@ fun DtCloseButton(
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     tag: Tag? = null,
-    contentPadding: PaddingValues = DtPadding.buttonPadding,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -78,16 +78,16 @@ fun DtCloseButton(
         modifier = modifier
             .scale(scale)
             .hoverable(interactionSource)
-            .defaultMinSize(minWidth = 24.dp, minHeight = 24.dp),
+            .padding(bottom = DtPadding.medium, start = DtPadding.medium)
+            .defaultMinSize(minWidth = DtSize.logoSize, minHeight = DtSize.logoSize),
         shadowElevation = elevation,
         color = backgroundColor,
-        shape = RoundedCornerShape(6.dp),
     ) {
         Box(
             modifier = Modifier
                 .tag(tag)
-                .clickable(interactionSource, ripple(bounded = true), onClick = onClick)
-                .padding(contentPadding),
+                .animateReloadStatusBackground(DtColors.applicationBackground)
+                .clickable(interactionSource, ripple(bounded = true), onClick = onClick),
             contentAlignment = Alignment.Center
         ) {
             DtImage(

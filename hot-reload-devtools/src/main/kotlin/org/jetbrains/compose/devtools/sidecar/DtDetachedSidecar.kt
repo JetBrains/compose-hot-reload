@@ -6,7 +6,6 @@
 package org.jetbrains.compose.devtools.sidecar
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -55,10 +54,7 @@ fun DtDetachedSidecarContent(
             .dtBackground(shape = DtShapes.SquareCornerShape),
         horizontalArrangement = Arrangement.End,
     ) {
-        Column {
-            DtDetachedSidecarHeaderBar()
-            DtSidecarBody(Modifier.padding(DtPadding.medium).fillMaxSize())
-        }
+        DtDetachedSidecarBody(Modifier.padding(DtPadding.medium).fillMaxSize())
     }
 }
 

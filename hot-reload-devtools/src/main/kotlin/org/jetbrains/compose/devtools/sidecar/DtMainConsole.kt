@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.devtools.sidecar
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import io.sellmair.evas.compose.composeValue
 import org.jetbrains.compose.devtools.states.ConsoleLogState
+import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.widgets.DtCopyToClipboardButton
 import org.jetbrains.compose.devtools.widgets.DtHeader2
 
@@ -32,8 +34,8 @@ fun DtMainConsole(
     }
 
     Column(
-
-        modifier = modifier
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(DtPadding.smallElementPadding)
     ) {
         Row(
             verticalAlignment = Alignment.Bottom,

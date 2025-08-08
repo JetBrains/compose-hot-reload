@@ -26,8 +26,8 @@ import kotlin.io.path.exists
 fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
     FlowRow(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(DtPadding.buttonGap),
-        verticalArrangement = Arrangement.spacedBy(DtPadding.buttonGap)
+        horizontalArrangement = Arrangement.spacedBy(DtPadding.mediumElementPadding),
+        verticalArrangement = Arrangement.spacedBy(DtPadding.mediumElementPadding)
     ) {
 
         if (!HotReloadEnvironment.gradleBuildContinuous) {

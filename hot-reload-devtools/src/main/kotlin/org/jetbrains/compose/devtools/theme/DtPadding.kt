@@ -17,8 +17,10 @@ object DtPadding {
     val large = 16.dp
 
 
-    val buttonGap = 12.dp
-    val largeElementGap = 24.dp
+    val smallElementPadding = 8.dp
+    val mediumElementPadding = 12.dp
+    val largeElementPadding = 24.dp
+
     val borderPadding = 20.dp
 
     // Standard paddings

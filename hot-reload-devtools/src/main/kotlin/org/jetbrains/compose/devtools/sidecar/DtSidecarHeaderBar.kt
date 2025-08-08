@@ -5,17 +5,16 @@
 
 package org.jetbrains.compose.devtools.sidecar
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.theme.DtPadding
+import org.jetbrains.compose.devtools.theme.DtSize
 import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
 import org.jetbrains.compose.devtools.widgets.DtCloseButton
 import org.jetbrains.compose.devtools.widgets.DtComposeLogo
@@ -27,18 +26,18 @@ internal fun DtAttachedSidecarHeaderBar(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier.padding(DtPadding.borderPadding),
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(
+            DtPadding.mediumElementPadding
+        ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        DtComposeLogo(modifier = Modifier.size(24.dp))
-        Spacer(Modifier.width(DtPadding.medium))
+        DtComposeLogo(modifier = Modifier.size(DtSize.logoSize))
         DtHeader1(COMPOSE_HOT_RELOAD_TITLE)
         Spacer(Modifier.weight(1f))
         DtCloseButton(
             onClick = onClose,
-            modifier = Modifier
-                .padding(2.dp)
-                .size(28.dp),
+            modifier = Modifier.size(DtSize.logoSize),
             tag = Tag.ExpandMinimiseButton,
         )
     }
@@ -50,11 +49,13 @@ internal fun DtDetachedSidecarHeaderBar(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier.padding(DtPadding.borderPadding),
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(
+            DtPadding.mediumElementPadding
+        ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        DtComposeLogo(modifier = Modifier.size(24.dp))
-        Spacer(Modifier.width(DtPadding.medium))
+        DtComposeLogo(modifier = Modifier.size(DtSize.logoSize))
         DtHeader1(COMPOSE_HOT_RELOAD_TITLE)
     }
 }

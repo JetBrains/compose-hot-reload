@@ -17,6 +17,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.HorizontalScrollbar
+import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.ScrollbarStyle
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,6 +30,7 @@ import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtShapes
+import org.jetbrains.compose.devtools.theme.DtSize
 import org.jetbrains.compose.devtools.theme.dtVerticalPadding
 import org.jetbrains.compose.devtools.widgets.DtCode
 import org.jetbrains.compose.devtools.widgets.dtBorder
@@ -48,7 +52,6 @@ fun DtConsole(
     Box(
         modifier
             .tag(Tag.Console)
-            .dtVerticalPadding()
             .dtBorder()
             .clip(DtShapes.RoundedCornerShape)
             .background(DtColors.surfaceConsole)
@@ -68,9 +71,23 @@ fun DtConsole(
                 }
             }
         }
+        VerticalScrollbar(
+            modifier = Modifier.align(Alignment.CenterEnd),
+            adapter = rememberScrollbarAdapter(verticalScrollState),
+            style = scrollbarStyle(),
+        )
         HorizontalScrollbar(
             modifier = Modifier.align(Alignment.BottomCenter),
-            adapter = rememberScrollbarAdapter(horizontalScrollState)
+            adapter = rememberScrollbarAdapter(horizontalScrollState),
+            style = scrollbarStyle(),
         )
     }
 }
+
+
+@Composable
+private fun scrollbarStyle(): ScrollbarStyle = LocalScrollbarStyle.current.copy(
+    hoverColor = DtColors.scrollbar.copy(alpha = 0.5f),
+    unhoverColor = DtColors.scrollbar.copy(alpha = 0.2f),
+    minimalHeight = DtSize.scrollbarSize,
+)

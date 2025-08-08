@@ -27,4 +27,5 @@ object DtColors {
     val textSecondary = Color(0xFFBBBBBB)
     val border = Color(0xFF5E6060)
 
+    val scrollbar = Color(0xFF898989)
 }
