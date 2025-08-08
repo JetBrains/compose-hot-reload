@@ -14,11 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.progressSemantics
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,6 +45,7 @@ import org.jetbrains.compose.devtools.states.BuildSystemState
 import org.jetbrains.compose.devtools.states.ReloadState
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
+import org.jetbrains.compose.devtools.theme.DtLogos
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtTextStyles
 import org.jetbrains.compose.devtools.theme.dtHorizontalPadding
@@ -57,6 +54,7 @@ import org.jetbrains.compose.devtools.widgets.DtBuildSystemLogo
 import org.jetbrains.compose.devtools.widgets.DtCode
 import org.jetbrains.compose.devtools.widgets.DtCopyToClipboardButton
 import org.jetbrains.compose.devtools.widgets.DtHeader2
+import org.jetbrains.compose.devtools.widgets.DtImage
 import org.jetbrains.compose.devtools.widgets.DtSmallText
 import org.jetbrains.compose.devtools.widgets.DtText
 
@@ -83,10 +81,8 @@ fun DtReloadStatusItem() {
         )
         is ReloadState.Ok -> DtSidecarStatusItem(
             symbol = {
-                Icon(
-                    Icons.Default.Check,
-                    "Success",
-                    tint = DtColors.statusColorOk,
+                DtImage(
+                    DtLogos.Image.GREEN_CHECKMARK_ICON,
                     modifier = Modifier.tag(Tag.ReloadStatusSymbol)
                 )
             },
@@ -94,10 +90,8 @@ fun DtReloadStatusItem() {
         )
         is ReloadState.Failed -> DtSidecarStatusItem(
             symbol = {
-                Icon(
-                    Icons.Default.Close,
-                    "Error",
-                    tint = DtColors.statusColorError,
+                DtImage(
+                    DtLogos.Image.ERROR_ICON,
                     modifier = Modifier.tag(Tag.ReloadStatusSymbol)
                 )
             },

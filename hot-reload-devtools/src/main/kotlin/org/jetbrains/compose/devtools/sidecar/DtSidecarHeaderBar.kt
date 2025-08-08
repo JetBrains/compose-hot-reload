@@ -11,21 +11,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.devtools.Tag
-import org.jetbrains.compose.devtools.tag
+import org.jetbrains.compose.devtools.theme.DtLogos
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TOOLING
 import org.jetbrains.compose.devtools.widgets.DtButton
 import org.jetbrains.compose.devtools.widgets.DtComposeLogo
 import org.jetbrains.compose.devtools.widgets.DtHeader1
+import org.jetbrains.compose.devtools.widgets.DtImage
 
 @Composable
 internal fun DtAttachedSidecarHeaderBar(
@@ -48,9 +46,8 @@ internal fun DtAttachedSidecarHeaderBar(
                 .size(28.dp),
             tag = Tag.ExpandMinimiseButton,
         ) {
-            Icon(
-                Icons.Default.Close,
-                contentDescription = "Close",
+            DtImage(
+                DtLogos.Image.CLOSE_ICON,
                 modifier = Modifier.fillMaxSize(),
                 tint = Color.White
             )

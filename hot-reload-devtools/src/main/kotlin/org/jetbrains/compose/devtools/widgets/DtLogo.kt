@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalDensity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.devtools.Tag
@@ -27,7 +28,7 @@ import org.jetbrains.compose.reload.core.BuildSystem
 fun DtComposeLogo(
     modifier: Modifier = Modifier,
     tint: Color? = Color.White,
-) = DtLogo(
+) = DtImage(
     image = DtLogos.Image.COMPOSE_LOGO,
     tint = tint,
     modifier = modifier.tag(Tag.HotReloadLogo)
@@ -43,20 +44,21 @@ fun DtBuildSystemLogo(
         BuildSystem.Gradle -> DtLogos.Image.GRADLE_LOGO
         BuildSystem.Amper -> DtLogos.Image.AMPER_LOGO
     }
-    DtLogo(logo, tint = tint, modifier = modifier.tag(Tag.BuildSystemLogo))
+    DtImage(logo, tint = tint, modifier = modifier.tag(Tag.BuildSystemLogo))
 }
 
 @Composable
-fun DtLogo(
+fun DtImage(
     image: DtLogos.Image,
-    tint: Color? = Color.White,
+    tint: Color? = null,
     modifier: Modifier = Modifier,
 ) {
     var painter: Painter? by remember { mutableStateOf<Painter?>(null) }
+    val density = LocalDensity.current
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
-            painter = DtLogos.imageAsPngPainter(image).await()
+            painter = DtLogos.imageAsSvgPainter(image, density).await()
         }
     }
 
