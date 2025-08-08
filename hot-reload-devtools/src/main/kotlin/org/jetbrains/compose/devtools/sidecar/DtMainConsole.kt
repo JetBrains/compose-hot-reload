@@ -31,7 +31,10 @@ fun DtMainConsole(
         scroll.scrollTo(scroll.maxValue)
     }
 
-    Column(modifier = modifier) {
+    Column(
+
+        modifier = modifier
+    ) {
         Row(
             verticalAlignment = Alignment.Bottom,
         ) {

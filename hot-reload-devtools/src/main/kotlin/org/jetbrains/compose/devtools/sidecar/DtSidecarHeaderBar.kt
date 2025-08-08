@@ -27,8 +27,7 @@ internal fun DtAttachedSidecarHeaderBar(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
-            .padding(horizontal = DtPadding.large, vertical = DtPadding.small),
+        modifier = modifier.padding(DtPadding.borderPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         DtComposeLogo(modifier = Modifier.size(24.dp))
@@ -51,8 +50,7 @@ internal fun DtDetachedSidecarHeaderBar(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
-            .padding(horizontal = DtPadding.large, vertical = DtPadding.small),
+        modifier = modifier.padding(DtPadding.borderPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         DtComposeLogo(modifier = Modifier.size(24.dp))

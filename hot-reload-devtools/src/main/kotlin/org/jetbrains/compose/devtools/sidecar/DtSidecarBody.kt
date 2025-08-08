@@ -16,8 +16,8 @@ import org.jetbrains.compose.devtools.theme.DtPadding
 @Composable
 internal fun DtSidecarBody(modifier: Modifier = Modifier) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(DtPadding.large),
-        modifier = modifier.fillMaxSize().padding(horizontal = DtPadding.medium)
+        verticalArrangement = Arrangement.spacedBy(DtPadding.largeElementGap),
+        modifier = modifier.fillMaxSize().padding(horizontal = DtPadding.borderPadding),
     ) {
         // Action bar with controls
         DtSidecarActionBar()

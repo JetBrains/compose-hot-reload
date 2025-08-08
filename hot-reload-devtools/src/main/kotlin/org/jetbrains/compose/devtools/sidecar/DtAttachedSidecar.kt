@@ -233,8 +233,10 @@ internal fun DtExpandedSidecarWindowContent(
             } else {
                 // Expanded state - show the full UI
                 Column {
-                    DtAttachedSidecarHeaderBar({ isExpandedChanged(false) })
-                    DtSidecarBody(Modifier.padding(DtPadding.medium).fillMaxSize())
+                    DtAttachedSidecarHeaderBar(
+                        onClose = { isExpandedChanged(false) },
+                    )
+                    DtSidecarBody(Modifier.fillMaxSize())
                 }
             }
         }

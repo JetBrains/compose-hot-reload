@@ -8,7 +8,6 @@ package org.jetbrains.compose.devtools.sidecar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.devtools.Tag
@@ -26,9 +25,9 @@ import kotlin.io.path.exists
 @Composable
 fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
     FlowRow(
-        modifier = modifier.padding(vertical = DtPadding.medium),
-        horizontalArrangement = Arrangement.spacedBy(DtPadding.medium),
-        verticalArrangement = Arrangement.spacedBy(DtPadding.medium)
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(DtPadding.buttonGap),
+        verticalArrangement = Arrangement.spacedBy(DtPadding.buttonGap)
     ) {
 
         if (!HotReloadEnvironment.gradleBuildContinuous) {
