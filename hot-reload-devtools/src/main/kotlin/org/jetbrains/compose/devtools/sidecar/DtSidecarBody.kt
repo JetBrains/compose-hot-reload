@@ -8,15 +8,10 @@ package org.jetbrains.compose.devtools.sidecar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
-import org.jetbrains.compose.devtools.widgets.animateReloadStatusColor
 
 @Composable
 internal fun DtSidecarBody(modifier: Modifier = Modifier) {

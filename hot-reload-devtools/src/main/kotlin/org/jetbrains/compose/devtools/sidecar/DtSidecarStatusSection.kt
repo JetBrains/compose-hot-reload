@@ -23,7 +23,6 @@ import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.devtools.widgets.DtHeader2
-import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
 import org.jetbrains.compose.devtools.widgets.dtBorder
 
 @Composable
