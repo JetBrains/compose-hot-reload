@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.LayoutDirection
-import org.jetbrains.compose.devtools.theme.DtLogos
+import org.jetbrains.compose.devtools.theme.DtImages
 import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.createLogger
@@ -57,7 +57,7 @@ private fun configureMacOsTaskbarIcon(window: ComposeWindow) {
     LaunchedEffect(Unit) {
         if (!Taskbar.isTaskbarSupported()) return@LaunchedEffect
         runCatching {
-            icon = DtLogos.imageAsPainter(DtLogos.Image.COMPOSE_LOGO, density).await()
+            icon = DtImages.imageAsPainter(DtImages.Image.COMPOSE_LOGO, density).await()
             Taskbar.getTaskbar().iconImage = icon?.toAwtImage(density, LayoutDirection.Ltr)
         }.onFailure {
             logger.error("Failed loading compose icon", it)
@@ -71,7 +71,7 @@ private fun configureLinuxTaskbarIcon(window: ComposeWindow) {
 
     // Set icon
     LaunchedEffect(Unit) {
-        window.iconImages = DtLogos.composeIcons.await()
+        window.iconImages = DtImages.composeIcons.await()
     }
 }
 
@@ -80,7 +80,7 @@ private fun configureWindowsTaskbarIcon(window: ComposeWindow) {
     require(Os.currentOrNull() == Os.Windows)
 
     LaunchedEffect(Unit) {
-        window.iconImages = DtLogos.composeIcons.await()
+        window.iconImages = DtImages.composeIcons.await()
     }
 }
 

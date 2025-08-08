@@ -5,20 +5,13 @@
 
 package org.jetbrains.compose.devtools.sidecar
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.progressSemantics
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,10 +25,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.rememberDialogState
 import io.sellmair.evas.compose.composeValue
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
@@ -49,14 +39,12 @@ import org.jetbrains.compose.devtools.states.BuildSystemState
 import org.jetbrains.compose.devtools.states.ReloadState
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
+import org.jetbrains.compose.devtools.theme.DtImages
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtTextStyles
-import org.jetbrains.compose.devtools.theme.dtHorizontalPadding
-import org.jetbrains.compose.devtools.theme.dtVerticalPadding
 import org.jetbrains.compose.devtools.widgets.DtBuildSystemLogo
-import org.jetbrains.compose.devtools.widgets.DtCode
-import org.jetbrains.compose.devtools.widgets.DtCopyToClipboardButton
-import org.jetbrains.compose.devtools.widgets.DtHeader2
+import org.jetbrains.compose.devtools.widgets.DtErrorDialogWindow
+import org.jetbrains.compose.devtools.widgets.DtImage
 import org.jetbrains.compose.devtools.widgets.DtSmallText
 import org.jetbrains.compose.devtools.widgets.DtText
 
@@ -69,7 +57,7 @@ fun DtReloadStatusItem() {
             symbol = {
                 CircularProgressIndicator(
                     strokeWidth = 2.dp, color = DtColors.statusColorOrange2,
-                    modifier = Modifier.padding(4.dp).tag(Tag.ReloadStatusSymbol)
+                    modifier = Modifier.tag(Tag.ReloadStatusSymbol)
                         .progressSemantics()
                 )
             },
@@ -83,10 +71,9 @@ fun DtReloadStatusItem() {
         )
         is ReloadState.Ok -> DtSidecarStatusItem(
             symbol = {
-                Icon(
-                    Icons.Default.Check,
-                    "Success",
-                    tint = DtColors.statusColorOk,
+                DtImage(
+                    DtImages.Image.GREEN_CHECKMARK_ICON,
+                    contentDescription = "Success",
                     modifier = Modifier.tag(Tag.ReloadStatusSymbol)
                 )
             },
@@ -94,10 +81,9 @@ fun DtReloadStatusItem() {
         )
         is ReloadState.Failed -> DtSidecarStatusItem(
             symbol = {
-                Icon(
-                    Icons.Default.Close,
-                    "Error",
-                    tint = DtColors.statusColorError,
+                DtImage(
+                    DtImages.Image.ERROR_ICON,
+                    contentDescription = "Error",
                     modifier = Modifier.tag(Tag.ReloadStatusSymbol)
                 )
             },
@@ -124,9 +110,12 @@ private fun ResultContent(state: ReloadState) {
         }
     }
 
-    Row(verticalAlignment = CenterVertically, horizontalArrangement = Arrangement.spacedBy(DtPadding.arrangement)) {
-        StatusText(state, Modifier.weight(1f))
-        DtSmallText("(${durationText} ago)")
+    Row(
+        verticalAlignment = CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(DtPadding.mediumElementPadding)
+    ) {
+        StatusText(state)
+        DtSmallText("$durationText ago")
     }
 }
 
@@ -156,7 +145,8 @@ private fun FailedStatusText(state: ReloadState.Failed, modifier: Modifier) {
         "Failed:${if (state.reason.isNotEmpty()) " ${state.reason}: " else ""} ${state.formattedTime()}",
         modifier = modifier.tag(Tag.ReloadStatusText)
             .pointerHoverIcon(PointerIcon.Hand)
-            .clickable(role = Role.Button) { isDialogVisible = !isDialogVisible },
+            .clickable(role = Role.Button) { isDialogVisible = !isDialogVisible }
+            .widthIn(max = 350.dp),
         maxLines = 1, overflow = TextOverflow.Ellipsis,
         style = DtTextStyles.code.copy(
             textDecoration = TextDecoration.Underline
@@ -164,7 +154,12 @@ private fun FailedStatusText(state: ReloadState.Failed, modifier: Modifier) {
     )
 
     if (isDialogVisible) {
-        ErrorDialogWindow(state, onCloseRequest = { isDialogVisible = false })
+        DtErrorDialogWindow(
+            title = "Reloading Code failed",
+            message = state.reason,
+            logs = state.logs.map { it.message },
+            onCloseRequest = { isDialogVisible = false }
+        )
     }
 }
 
@@ -178,38 +173,4 @@ private fun ReloadState.formattedTime(): String {
         char(':')
         second()
     })
-}
-
-@Composable
-private fun ErrorDialogWindow(
-    state: ReloadState.Failed,
-    onCloseRequest: () -> Unit
-) {
-    DialogWindow(
-        onCloseRequest = onCloseRequest,
-        state = rememberDialogState(size = DpSize(512.dp, 512.dp)),
-        alwaysOnTop = true,
-        title = state.reason,
-    ) {
-        Column(
-            Modifier.dtHorizontalPadding().dtVerticalPadding()
-                .background(DtColors.applicationBackground)
-        ) {
-            Row {
-                DtHeader2("Reloading Code failed")
-                Spacer(Modifier.weight(1f))
-                DtCopyToClipboardButton("Copy all") {
-                    buildString {
-                        appendLine(state.reason)
-                        append(state.logs.joinToString("\n") { it.message })
-                    }
-                }
-            }
-            DtCode(state.reason)
-            DtConsole(
-                logs = state.logs.map { it.message },
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-    }
 }

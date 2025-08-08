@@ -8,15 +8,11 @@ package org.jetbrains.compose.devtools.sidecar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.sendAsync
+import org.jetbrains.compose.devtools.theme.DtImages
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.widgets.DtTextButton
 import org.jetbrains.compose.devtools.widgets.restartAction
@@ -29,15 +25,15 @@ import kotlin.io.path.exists
 @Composable
 fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
     FlowRow(
-        modifier = modifier.padding(vertical = DtPadding.medium),
-        horizontalArrangement = Arrangement.spacedBy(DtPadding.medium),
-        verticalArrangement = Arrangement.spacedBy(DtPadding.medium)
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(DtPadding.mediumElementPadding),
+        verticalArrangement = Arrangement.spacedBy(DtPadding.mediumElementPadding)
     ) {
 
         if (!HotReloadEnvironment.gradleBuildContinuous) {
             DtTextButton(
                 text = "Reload",
-                icon = Icons.Filled.Refresh,
+                icon = DtImages.Image.RESTART_ICON,
                 tag = Tag.ActionButton,
                 onClick = {
                     OrchestrationMessage.RecompileRequest().sendAsync()
@@ -51,7 +47,7 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
         ) {
             DtTextButton(
                 text = "Restart",
-                icon = Icons.Filled.Refresh,
+                icon = DtImages.Image.RESTART_ICON,
                 tag = Tag.ActionButton,
                 onClick = restartAction()
             )
@@ -60,7 +56,7 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
 
         DtTextButton(
             text = "Reset Composition",
-            icon = Icons.Filled.Delete,
+            icon = DtImages.Image.DELETE_ICON,
             tag = Tag.ActionButton,
             onClick = {
                 OrchestrationMessage.CleanCompositionRequest().sendAsync()
@@ -69,7 +65,7 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
 
         DtTextButton(
             text = "Exit",
-            icon = Icons.Filled.Close,
+            icon = DtImages.Image.CLOSE_ICON,
             tag = Tag.ActionButton,
             onClick = {
                 OrchestrationMessage.ShutdownRequest("Requested by user through 'devtools'").sendAsync()

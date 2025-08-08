@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowState
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.Tag
@@ -42,10 +41,12 @@ import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtShapes
+import org.jetbrains.compose.devtools.theme.DtSizes
 import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
 import org.jetbrains.compose.devtools.widgets.DtComposeLogo
 import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusColor
+import org.jetbrains.compose.devtools.widgets.dtBackground
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsAnimationsEnabled
 import org.jetbrains.compose.reload.core.WindowId
 
@@ -76,7 +77,7 @@ fun DtAttachedSidecarWindow(
             isMinimisedVisible = true
             minimisedVisibilityChanged = true
             // add delay between the switch so that
-            // minimised window will definitely be visible when expanded disappears
+            // the minimised window will definitely be visible when expanded disappears
             delay(animationDuration / 5)
             isExpandedVisible = false
             expandedVisibilityChanged = true
@@ -164,10 +165,9 @@ internal fun DtMinimizedSidecarWindowContent(
                 .animateContentSize(alignment = Alignment.TopCenter),
         ) {
             DtComposeLogo(
-                Modifier.size(28.dp).padding(4.dp),
+                Modifier.size(DtSizes.largeLogoSize).padding(DtPadding.small),
                 tint = animateReloadStatusColor(
                     idleColor = Color.White,
-                    reloadingColor = DtColors.statusColorOrange2
                 ).value
             )
             DtMinimisedReloadCounterStatusItem(showDefaultValue = !devToolsUseTransparency)
@@ -221,7 +221,7 @@ internal fun DtExpandedSidecarWindowContent(
                         .animateContentSize(alignment = Alignment.TopCenter),
                 ) {
                     DtComposeLogo(
-                        Modifier.size(28.dp).padding(4.dp),
+                        Modifier.size(DtSizes.largeLogoSize).padding(DtPadding.small),
                         tint = animateReloadStatusColor(
                             idleColor = Color.White,
                             reloadingColor = DtColors.statusColorOrange2
@@ -231,10 +231,7 @@ internal fun DtExpandedSidecarWindowContent(
                 }
             } else {
                 // Expanded state - show the full UI
-                Column {
-                    DtAttachedSidecarHeaderBar({ isExpandedChanged(false) })
-                    DtSidecarBody(Modifier.padding(DtPadding.medium).fillMaxSize())
-                }
+                DtAttachedSidecarBody(Modifier.fillMaxSize()) { isExpandedChanged(false) }
             }
         }
 

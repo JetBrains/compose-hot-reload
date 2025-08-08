@@ -6,14 +6,12 @@
 package org.jetbrains.compose.devtools.sidecar
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
@@ -23,7 +21,9 @@ import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
 import org.jetbrains.compose.devtools.theme.DtTitles.DEV_TOOLS
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtShapes
+import org.jetbrains.compose.devtools.theme.DtSizes
 import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
+import org.jetbrains.compose.devtools.widgets.dtBackground
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import kotlin.system.exitProcess
@@ -54,10 +54,7 @@ fun DtDetachedSidecarContent(
             .dtBackground(shape = DtShapes.SquareCornerShape),
         horizontalArrangement = Arrangement.End,
     ) {
-        Column {
-            DtDetachedSidecarHeaderBar()
-            DtSidecarBody(Modifier.padding(DtPadding.medium).fillMaxSize())
-        }
+        DtDetachedSidecarBody(Modifier.fillMaxSize())
     }
 }
 
@@ -92,8 +89,8 @@ fun DtDetachedStatusBar(
 }
 
 // permanently set the width of the status bar window to 12.dp
-private fun DpSize.withStatusBarOffset() = copy(width = 12.dp)
+private fun DpSize.withStatusBarOffset() = copy(width = DtPadding.small * 3)
 
 // permanently offset the position of the status bar to compensate for the smaller width
-private fun WindowPosition.withStatusBarOffset() = WindowPosition(x + 32.dp, y)
+private fun WindowPosition.withStatusBarOffset() = WindowPosition(x + DtSizes.largeLogoSize + DtPadding.small, y)
 

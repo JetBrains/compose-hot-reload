@@ -24,7 +24,7 @@ import javax.imageio.ImageIO
 private val logger = createLogger()
 private val classLoader = MethodHandles.lookup().lookupClass().classLoader
 
-object DtLogos {
+object DtImages {
     enum class Image(
         private val resource: String
     ) {
@@ -40,7 +40,17 @@ object DtLogos {
 
         // Build tool logos
         GRADLE_LOGO("gradle-logo"),
-        AMPER_LOGO("amper-logo");
+        AMPER_LOGO("amper-logo"),
+
+        // icons
+        CLOSE_ICON("close"),
+        COPY_ICON("copy"),
+        DELETE_ICON("delete"),
+        ERROR_ICON("error"),
+        GREEN_CHECKMARK_ICON("greenCheckmark"),
+        RESTART_ICON("restart"),
+        WARNING_ICON("warning"),
+        ;
 
         val png: String get() = "img/$resource.png"
         val svg: String get() = "img/$resource.svg"
@@ -64,6 +74,7 @@ object DtLogos {
 
     private val resource2ByteArrayCache = mutableMapOf<String, ByteArray>()
     private val pngPainters = mutableMapOf<Image, Deferred<Painter?>>()
+    private val svgPainters = mutableMapOf<Image, Deferred<Painter?>>()
 
     private fun resource2ByteArray(resource: String): ByteArray = resource2ByteArrayCache.getOrPut(resource) {
         classLoader.getResource(resource)!!.openStream().buffered().use { it.readBytes() }
@@ -89,6 +100,17 @@ object DtLogos {
                 BitmapPainter(resource2ByteArray(image.png).decodeToImageBitmap())
             }.getOrElse {
                 logger.error("Failed to load image $image")
+                null
+            }
+        }
+    }
+
+    fun imageAsSvgPainter(image: Image, density: Density): Deferred<Painter?> = svgPainters.getOrPut(image) {
+        MainScope().async(Dispatchers.IO) {
+            runCatching {
+                resource2ByteArray(image.svg).decodeToSvgPainter(density)
+            }.getOrElse {
+                logger.error("Failed to load image $image", it)
                 null
             }
         }

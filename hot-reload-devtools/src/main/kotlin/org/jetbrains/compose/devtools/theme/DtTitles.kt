@@ -8,6 +8,5 @@ package org.jetbrains.compose.devtools.theme
 internal object DtTitles {
     const val COMPOSE_HOT_RELOAD = "Compose Hot Reload"
     const val DEV_TOOLS = "Dev Tools"
-    const val COMPOSE_HOT_RELOAD_TITLE = "$COMPOSE_HOT_RELOAD $DEV_TOOLS"
-    const val COMPOSE_HOT_RELOAD_TOOLING = "$COMPOSE_HOT_RELOAD Tooling"
+    const val COMPOSE_HOT_RELOAD_TITLE = COMPOSE_HOT_RELOAD
 }

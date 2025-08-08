@@ -20,7 +20,7 @@ import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.states.BuildSystemState
 import org.jetbrains.compose.devtools.states.ReloadCountState
 import org.jetbrains.compose.devtools.states.ReloadState
-import org.jetbrains.compose.devtools.theme.DtLogos
+import org.jetbrains.compose.devtools.theme.DtImages
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.junit.jupiter.api.Test
 
@@ -67,11 +67,11 @@ class MinimisedSidecarUiTest : SidecarBodyUiTest() {
         states.updateState(BuildSystemState.Key) { BuildSystemState(BuildSystem.Gradle) }
         awaitNodeWithTag(Tag.BuildSystemLogo)
             .assertExists()
-            .assertContentDescriptionContains(DtLogos.Image.GRADLE_LOGO.name)
+            .assertContentDescriptionContains(DtImages.Image.GRADLE_LOGO.name)
 
         states.updateState(BuildSystemState.Key) { BuildSystemState(BuildSystem.Amper) }
         awaitNodeWithTag(Tag.BuildSystemLogo)
             .assertExists()
-            .assertContentDescriptionContains(DtLogos.Image.AMPER_LOGO.name)
+            .assertContentDescriptionContains(DtImages.Image.AMPER_LOGO.name)
     }
 }
