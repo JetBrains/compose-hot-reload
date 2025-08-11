@@ -8,27 +8,32 @@ package org.jetbrains.compose.reload.agent
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.PidFileInfo
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.deleteMyPidFileIfExists
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.core.runDirectoryLockFile
 import org.jetbrains.compose.reload.core.writePidFile
 import kotlin.io.path.createParentDirectories
-import kotlin.io.path.deleteIfExists
 
 private val logger = createLogger()
 
 internal fun createPidfile() {
     val pidFile = HotReloadEnvironment.pidFile ?: return
 
-    pidFile.createParentDirectories().writePidFile(
-        PidFileInfo(
-            pid = ProcessHandle.current().pid(),
-            orchestrationPort = orchestration.port.getBlocking().getOrThrow()
-        )
+    val myPidFileInfo = PidFileInfo(
+        pid = ProcessHandle.current().pid(),
+        orchestrationPort = orchestration.port.getBlocking().getOrThrow()
     )
 
-    logger.info("Created pid file: ${pidFile.toUri()}")
+    runDirectoryLockFile?.withLock {
+        pidFile.createParentDirectories().writePidFile(myPidFileInfo)
+        logger.info("Created pid file: ${pidFile.toUri()}")
+    }
+
     Runtime.getRuntime().addShutdownHook(Thread {
-        pidFile.deleteIfExists()
+        runDirectoryLockFile?.withLock {
+            pidFile.deleteMyPidFileIfExists(myPidFileInfo)
+        }
     })
 }

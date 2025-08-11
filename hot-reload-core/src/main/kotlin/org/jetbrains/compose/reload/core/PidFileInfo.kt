@@ -8,7 +8,9 @@ package org.jetbrains.compose.reload.core
 import java.io.ByteArrayOutputStream
 import java.nio.file.Path
 import java.util.Properties
+import kotlin.io.path.deleteIfExists
 import kotlin.io.path.inputStream
+import kotlin.io.path.isRegularFile
 import kotlin.io.path.outputStream
 
 public fun PidFileInfo(path: Path): Try<PidFileInfo> = Try {
@@ -55,4 +57,14 @@ public fun Path.writePidFile(pidFileInfo: PidFileInfo) {
     outputStream().buffered().use { output ->
         pidFileInfo.toProperties().store(output, null)
     }
+}
+
+
+/**
+ * Deletes the pid file if its content matches the given [expected] [PidFileInfo]
+ */
+public fun Path.deleteMyPidFileIfExists(expected: PidFileInfo): Boolean {
+    if (!this.isRegularFile()) return false
+    if (PidFileInfo(this).getOrNull() != expected) return false
+    return deleteIfExists()
 }
