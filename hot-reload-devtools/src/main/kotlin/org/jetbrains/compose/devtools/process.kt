@@ -7,13 +7,15 @@ package org.jetbrains.compose.devtools
 
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty
+import org.jetbrains.compose.reload.core.PidFileInfo
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.deleteMyPidFileIfExists
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.invokeOnCompletion
+import org.jetbrains.compose.reload.core.runDirectoryLockFile
 import org.jetbrains.compose.reload.core.warn
 import kotlin.concurrent.thread
-import kotlin.io.path.deleteIfExists
 import kotlin.jvm.optionals.getOrNull
 
 private val logger = createLogger()
@@ -42,7 +44,13 @@ private fun bindParentProcess() {
     thread {
         process.onExit().get()
         logger.info("parentPid: Parent process with pid=$pid exited")
-        runCatching { HotReloadEnvironment.pidFile?.deleteIfExists() }
+        runCatching {
+            runDirectoryLockFile?.withLock {
+                HotReloadEnvironment.pidFile?.deleteMyPidFileIfExists(
+                    PidFileInfo(pid = pid, orchestrationPort = orchestration.port.getOrNull()?.leftOrNull())
+                )
+            }
+        }
         shutdown()
     }
 }

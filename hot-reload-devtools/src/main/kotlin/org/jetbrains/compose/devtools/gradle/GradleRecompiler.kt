@@ -21,6 +21,7 @@ import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.core.runDirectoryLockFile
 import org.jetbrains.compose.reload.core.subprocessDefaultArguments
 import org.jetbrains.compose.reload.core.toFuture
 import org.jetbrains.compose.reload.core.warn
@@ -57,7 +58,9 @@ internal class GradleRecompiler(
         - wait for the previous build to finish
          */
         if (gradlePidFile != null && gradlePidFile.isRegularFile()) run kill@{
-            val previousPid = gradlePidFile.toFile().readText().toLongOrNull() ?: return@kill
+            val previousPid = runDirectoryLockFile?.withLock {
+                gradlePidFile.toFile().readText().toLongOrNull()
+            } ?: return@kill
             val previousProcessHandle = ProcessHandle.of(previousPid).getOrNull() ?: return@kill
             context.logger.error("Previous Gradle process with pid '$previousPid' found; Waiting...")
             previousProcessHandle.onExit().toFuture().await()
@@ -113,7 +116,10 @@ internal class GradleRecompiler(
         context.logger.info("'Recompiler': Started (${process.pid()})")
 
         /* Write the pid file with the new process id */
-        gradlePidFile?.writeText(process.pid().toString())
+        runDirectoryLockFile?.withLock {
+            gradlePidFile?.writeText(process.pid().toString())
+        }
+
         process.onExit().whenComplete { _, _ -> gradlePidFile?.deleteIfExists() }
 
         /* Read the output of the new process and forward it as log messages */

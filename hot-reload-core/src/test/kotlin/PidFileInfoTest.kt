@@ -1,12 +1,17 @@
 import org.jetbrains.compose.reload.core.PidFileInfo
+import org.jetbrains.compose.reload.core.deleteMyPidFileIfExists
 import org.jetbrains.compose.reload.core.exceptionOrNull
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.writePidFile
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.util.Properties
+import kotlin.io.path.exists
+import kotlin.io.path.isRegularFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlin.test.fail
 
 /*
@@ -41,5 +46,19 @@ class PidFileInfoTest {
     fun `test - read on missing file`(@TempDir tempDir: Path) {
         val file = tempDir.resolve("test.properties")
         PidFileInfo(file).exceptionOrNull() ?: fail("Expected exception thrown")
+    }
+
+    @Test
+    fun `test - deleteMyPidFileIfExists`(@TempDir tempDir: Path) {
+        val file = tempDir.resolve("test.properties")
+        val source = PidFileInfo(pid = 42, 69)
+        file.writePidFile(source)
+
+        assertFalse(file.deleteMyPidFileIfExists(source.copy(pid = 43)))
+        assertTrue(file.isRegularFile())
+        assertEquals(source, PidFileInfo(file).getOrThrow())
+
+        assertTrue(file.deleteMyPidFileIfExists(source.copy()))
+        assertFalse(file.exists())
     }
 }
