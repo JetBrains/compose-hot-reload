@@ -36,8 +36,9 @@ sealed interface ComposeHotReloadArgumentsBuilder {
     fun setDevToolsClasspath(files: FileCollection)
     fun setDevToolsHeadless(headless: Provider<Boolean>)
     fun setDevToolsTransparencyEnabled(enabled: Provider<Boolean>)
-
     fun setDevToolsDetached(detached: Provider<Boolean>)
+    fun setDevToolsAnimationsEnabled(enabled: Provider<Boolean>)
+
     fun setReloadTaskName(name: Provider<String>)
     fun setReloadTaskName(name: String)
     fun isAutoRecompileEnabled(isAutoRecompileEnabled: Provider<Boolean>)
@@ -105,6 +106,10 @@ internal class ComposeHotReloadArguments(project: Project) :
     @get:Input
     val devToolsDetached: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadDevToolsDetached)
+
+    @get:Input
+    val devToolsAnimationsEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .value(project.composeReloadDevToolsAnimationsEnabled)
 
     @get:Input
     @get:Optional
@@ -195,7 +200,11 @@ internal class ComposeHotReloadArguments(project: Project) :
     }
 
     override fun setDevToolsDetached(detached: Provider<Boolean>) {
-        devToolsDetached.set(devToolsDetached)
+        devToolsDetached.set(detached)
+    }
+
+    override fun setDevToolsAnimationsEnabled(enabled: Provider<Boolean>) {
+        devToolsAnimationsEnabled.set(enabled)
     }
 
     override fun setDevToolsHeadless(headless: Provider<Boolean>) {
@@ -271,6 +280,7 @@ internal class ComposeHotReloadArguments(project: Project) :
             add("-D${HotReloadProperty.DevToolsClasspath.key}=${devToolsClasspathFiles.asPath}")
             add("-D${HotReloadProperty.DevToolsTransparencyEnabled.key}=${devToolsTransparencyEnabled.orNull ?: true}")
             add("-D${HotReloadProperty.DevToolsDetached.key}=${devToolsDetached.orNull ?: false}")
+            add("-D${HotReloadProperty.DevToolsAnimationsEnabled.key}=${devToolsAnimationsEnabled.orNull ?: true}")
         }
 
         /* Provide "recompiler" properties */
