@@ -28,6 +28,38 @@ class StateTest {
     }
 
     @Test
+    fun `test - compareAndSet`() {
+        val state = MutableState(0)
+        state.compareAndSet(0, 1)
+        assertEquals(1, state.value)
+
+        state.compareAndSet(0, 2)
+        assertEquals(1, state.value)
+
+        state.compareAndSet(1, 3)
+        assertEquals(3, state.value)
+    }
+
+    @Test
+    fun `test - compareAndSet - nullable`() {
+        val state = MutableState<Int?>(null)
+        state.compareAndSet(null, 1)
+        assertEquals(1, state.value)
+
+        state.compareAndSet(1, null)
+        assertEquals(null, state.value)
+
+        state.compareAndSet(10, 12)
+        assertEquals(null, state.value)
+
+        state.compareAndSet(null, 10)
+        assertEquals(10, state.value)
+
+        state.compareAndSet(10, 12)
+        assertEquals(12, state.value)
+    }
+
+    @Test
     fun `test - collecting state`() {
         val state = MutableState(0)
         state.update { it + 1 }

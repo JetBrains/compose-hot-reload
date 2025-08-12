@@ -68,7 +68,7 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
     val isConnected = Future<Unit>()
 
     val clientId = OrchestrationClientId.random()
-    val sendActor = Actor<OrchestrationMessage, Unit>()
+    val sendActor = Actor<OrchestrationPackage, Unit>()
     val receiveBroadcast = Bus<OrchestrationMessage>()
     val ackQueue = Queue<OrchestrationPackage.Ack>()
 

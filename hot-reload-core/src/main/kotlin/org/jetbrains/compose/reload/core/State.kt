@@ -23,6 +23,17 @@ public class MutableState<T>(initialValue: T) : State<T> {
         return Update(previous.value, updated.value)
     }
 
+    public fun compareAndSet(expected: T, newValue: T): Boolean {
+        val currentState = _value.get()
+        if (currentState.value != expected) return false
+        if (_value.compareAndSet(currentState, State(newValue))) {
+            currentState.nextState.complete(newValue)
+            return true
+        }
+
+        return false
+    }
+
     override suspend fun collect(collector: suspend (T) -> Unit) {
         var lastEmittedValue: T? = null
 
@@ -37,4 +48,12 @@ public class MutableState<T>(initialValue: T) : State<T> {
     }
 
     internal data class State<T>(val value: T, val nextState: CompletableFuture<T> = Future<T>())
+}
+
+public fun <T, R> State<T>.map(transform: (T) -> R): State<R> = object : State<R> {
+    override val value: R get() = transform(this@map.value)
+
+    override suspend fun collect(collector: suspend (R) -> Unit) {
+        this@map.collect { value -> collector(transform(value)) }
+    }
 }
