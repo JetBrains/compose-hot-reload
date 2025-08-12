@@ -49,14 +49,14 @@ class MinimisedSidecarUiTest : SidecarBodyUiTest() {
         if (devToolsUseTransparency) {
             onNodeWithTag(Tag.ReloadCounterText).assertDoesNotExist()
         } else {
-            onNodeWithTag(Tag.ReloadCounterText).assertTextContains("0", substring = true)
+            awaitNodeWithTag(Tag.ReloadCounterText).assertTextContains("0", substring = true)
         }
 
         states.updateState(ReloadCountState.Key) { ReloadCountState(1) }
-        onNodeWithTag(Tag.ReloadCounterText).assertTextContains("1", substring = true)
+        awaitNodeWithTag(Tag.ReloadCounterText).assertTextContains("1", substring = true)
 
         states.updateState(ReloadCountState.Key) { ReloadCountState(2) }
-        onNodeWithTag(Tag.ReloadCounterText).assertTextContains("2", substring = true)
+        awaitNodeWithTag(Tag.ReloadCounterText).assertTextContains("2", substring = true)
     }
 
     @Test

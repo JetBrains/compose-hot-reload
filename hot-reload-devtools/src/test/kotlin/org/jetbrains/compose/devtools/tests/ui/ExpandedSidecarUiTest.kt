@@ -63,35 +63,35 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
         onNodeWithTag(Tag.ReloadCounterText).assertDoesNotExist()
 
         states.updateState(ReloadCountState.Key) { ReloadCountState(1) }
-        onNodeWithTag(Tag.ReloadCounterText).assertTextContains("1", substring = true)
+        awaitNodeWithTag(Tag.ReloadCounterText).assertTextContains("1", substring = true)
 
         states.updateState(ReloadCountState.Key) { ReloadCountState(2) }
-        onNodeWithTag(Tag.ReloadCounterText).assertTextContains("2", substring = true)
+        awaitNodeWithTag(Tag.ReloadCounterText).assertTextContains("2", substring = true)
     }
 
     @Test
     fun `test - reload status`() = runSidecarUiTest {
         states.updateState(ReloadState.Key) { ReloadState.Ok() }
-        onNodeWithTag(Tag.ReloadStatusSymbol).assertExists()
+        awaitNodeWithTag(Tag.ReloadStatusSymbol).assertExists()
             .assertContentDescriptionContains("Success")
-        onNodeWithTag(Tag.ReloadStatusText).assertExists()
+        awaitNodeWithTag(Tag.ReloadStatusText).assertExists()
             .assertTextContains("Success", substring = true)
 
         states.updateState(ReloadState.Key) { ReloadState.Failed("Oh-oh") }
-        onNodeWithTag(Tag.ReloadStatusSymbol).assertExists()
+        awaitNodeWithTag(Tag.ReloadStatusSymbol).assertExists()
             .assertContentDescriptionContains("Error")
-        onNodeWithTag(Tag.ReloadStatusText).assertExists()
+        awaitNodeWithTag(Tag.ReloadStatusText).assertExists()
             .assertTextContains("Failed", substring = true)
             .assertTextContains("Oh-oh", substring = true)
 
 
         states.updateState(ReloadState.Key) { ReloadState.Reloading() }
         assertEquals(
-            onNodeWithTag(Tag.ReloadStatusSymbol).assertExists()
+            awaitNodeWithTag(Tag.ReloadStatusSymbol).assertExists()
                 .fetchSemanticsNode().config.getOrNull(SemanticsProperties.ProgressBarRangeInfo),
             ProgressBarRangeInfo.Indeterminate
         )
-        onNodeWithTag(Tag.ReloadStatusText).assertExists()
+        awaitNodeWithTag(Tag.ReloadStatusText).assertExists()
             .assertTextContains("Reloading", substring = true)
 
         onNodeWithTag(Tag.BuildSystemLogo).assertDoesNotExist()
@@ -123,8 +123,8 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
             )
         }
 
-        onNodeWithTag(Tag.RuntimeErrorSymbol).assertExists()
-        onNodeWithTag(Tag.RuntimeErrorText).assertExists()
+        awaitNodeWithTag(Tag.RuntimeErrorSymbol).assertExists()
+        awaitNodeWithTag(Tag.RuntimeErrorText).assertExists()
             .assertTextContains("Uh-oh", substring = true)
             .assertTextContains("Something went wrong", substring = true)
     }
@@ -157,7 +157,7 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
             onNodeWithTag(Tag.ReloadCounterText)
                 .assertDoesNotExist()
         } else {
-            onNodeWithTag(Tag.ReloadCounterText)
+            awaitNodeWithTag(Tag.ReloadCounterText)
                 .assertTextContains("0", substring = true)
         }
 
@@ -166,7 +166,7 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
 
         states.updateState(ReloadCountState.Key) { ReloadCountState(1) }
 
-        onNodeWithTag(Tag.ReloadCounterText)
+        awaitNodeWithTag(Tag.ReloadCounterText)
             .assertTextContains("1", substring = true)
 
         // maximise the window
@@ -176,7 +176,7 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
             .assertHasClickAction()
             .performClick()
 
-        onNodeWithTag(Tag.ReloadCounterText)
+        awaitNodeWithTag(Tag.ReloadCounterText)
             .assertTextContains("1", substring = true)
     }
 }
