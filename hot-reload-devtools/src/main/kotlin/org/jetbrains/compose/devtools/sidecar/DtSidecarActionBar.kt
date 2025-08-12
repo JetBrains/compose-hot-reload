@@ -42,7 +42,7 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
         }
 
         DtTextButton(
-            text = "Reset",
+            text = "Reset UI",
             icon = DtImages.Image.DELETE_ICON,
             tag = Tag.ActionButton,
             onClick = {
