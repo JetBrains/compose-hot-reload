@@ -41,6 +41,15 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
             )
         }
 
+        DtTextButton(
+            text = "Reset",
+            icon = DtImages.Image.DELETE_ICON,
+            tag = Tag.ActionButton,
+            onClick = {
+                OrchestrationMessage.CleanCompositionRequest().sendAsync()
+            }
+        )
+
         if (
             (HotReloadEnvironment.argFile?.exists() == true &&
                 HotReloadEnvironment.mainClass != null)
@@ -52,16 +61,6 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
                 onClick = restartAction()
             )
         }
-
-
-        DtTextButton(
-            text = "Reset Composition",
-            icon = DtImages.Image.DELETE_ICON,
-            tag = Tag.ActionButton,
-            onClick = {
-                OrchestrationMessage.CleanCompositionRequest().sendAsync()
-            }
-        )
 
         DtTextButton(
             text = "Exit",
