@@ -192,18 +192,6 @@ object Ids {
         )
     }
 
-    object StringResourcesKt {
-        val classId = ClassId("org/jetbrains/compose/resources/StringResourcesKt")
-    }
-
-    object StringArrayResourcesKt {
-        val classId = ClassId("org/jetbrains/compose/resources/StringArrayResourcesKt")
-    }
-
-    object PluralStringResourcesKt {
-        val classId = ClassId("org/jetbrains/compose/resources/PluralStringResourcesKt")
-    }
-
     object StringResourcesUtilsKt {
         val classId = ClassId("org/jetbrains/compose/resources/StringResourcesUtilsKt")
 
@@ -212,10 +200,6 @@ object Ids {
             methodName = "dropStringItemsCache",
             methodDescriptor = "()V"
         )
-    }
-
-    object FontResources_skikioKt {
-        val classId = ClassId("org/jetbrains/compose/resources/FontResources_skikoKt")
     }
 
     object ResourceCaches {
