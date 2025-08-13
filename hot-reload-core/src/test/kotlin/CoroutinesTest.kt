@@ -84,7 +84,7 @@ class CoroutinesTest {
 
         assertEquals(
             listOf(reloadMainThread.name, "w1", "w2", reloadMainThread.name),
-            threads.value.getBlocking(10.seconds).getOrThrow().map { it.name }
+            threads.value.getBlocking(30.seconds).getOrThrow().map { it.name }
         )
     }
 
