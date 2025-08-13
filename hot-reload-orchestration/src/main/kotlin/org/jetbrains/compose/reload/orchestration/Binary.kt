@@ -5,9 +5,9 @@
 
 package org.jetbrains.compose.reload.orchestration
 
-internal fun Binary(bytes: ByteArray?): Binary? = bytes?.let(::Binary)
+import java.io.Serializable
 
-internal class Binary(val bytes: ByteArray) {
+internal class Binary(val bytes: ByteArray) : Serializable {
     val hashCode: Int = bytes.contentHashCode()
 
     override fun hashCode(): Int {

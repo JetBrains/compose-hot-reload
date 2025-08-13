@@ -26,6 +26,26 @@ internal fun OrchestrationPackage.encodeToFrame(): OrchestrationFrame {
         is OrchestrationMessage -> encodeToFrame()
         is Introduction -> encodeToFrame()
         is OrchestrationPackage.Ack -> encodeToFrame()
+
+        is OrchestrationStateRequest -> OrchestrationFrame(
+            type = OrchestrationPackageType.JavaSerializableStateRequest,
+            data = encodeSerializableObject()
+        )
+
+        is OrchestrationStateUpdate -> OrchestrationFrame(
+            type = OrchestrationPackageType.JavaSerializableStateUpdate,
+            data = encodeSerializableObject()
+        )
+
+        is OrchestrationStateUpdate.Response -> OrchestrationFrame(
+            type = OrchestrationPackageType.JavaSerializableStateUpdateResponse,
+            data = encodeSerializableObject()
+        )
+
+        is OrchestrationStateValue -> OrchestrationFrame(
+            type = OrchestrationPackageType.JavaSerializableStateValue,
+            data = encodeSerializableObject()
+        )
     }
 }
 
@@ -55,12 +75,20 @@ internal fun OrchestrationFrame.decodePackage(): OrchestrationPackage {
         OrchestrationPackageType.JavaSerializableMessage -> data.decodeSerializableObject() as OrchestrationMessage
         OrchestrationPackageType.JavaSerializableClientIntroduction -> data.decodeSerializableObject() as Introduction
         OrchestrationPackageType.Ack -> data.decodeAck()
+        OrchestrationPackageType.JavaSerializableStateRequest -> data.decodeSerializableObject() as OrchestrationStateRequest
+        OrchestrationPackageType.JavaSerializableStateUpdate -> data.decodeSerializableObject() as OrchestrationStateUpdate
+        OrchestrationPackageType.JavaSerializableStateUpdateResponse -> data.decodeSerializableObject() as OrchestrationStateUpdate.Response
+        OrchestrationPackageType.JavaSerializableStateValue -> data.decodeSerializableObject() as OrchestrationStateValue
     }
 }
 
 internal enum class OrchestrationPackageType(val intValue: Int) {
     JavaSerializableMessage(0),
     JavaSerializableClientIntroduction(1),
+    JavaSerializableStateRequest(2),
+    JavaSerializableStateUpdate(3),
+    JavaSerializableStateUpdateResponse(4),
+    JavaSerializableStateValue(5),
 
     Ack(128);
 

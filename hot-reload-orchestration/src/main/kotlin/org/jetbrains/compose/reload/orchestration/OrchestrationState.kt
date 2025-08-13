@@ -5,13 +5,16 @@
 
 package org.jetbrains.compose.reload.orchestration
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.Try
+import java.io.Serializable
+import java.util.ServiceLoader
 
 public interface OrchestrationState
 
 public data class OrchestrationStateId<T : OrchestrationState?>(
     val type: Type<T>, private val name: String? = null
-) {
+) : Serializable {
     override fun toString(): String {
         return buildString {
             append(type.signature)
@@ -25,7 +28,6 @@ public data class OrchestrationStateId<T : OrchestrationState?>(
 public data class OrchestrationStateKey<T : OrchestrationState?>(
     val id: OrchestrationStateId<T>, val default: T
 )
-
 
 public inline fun <reified T> Type(): Type<T> {
     return Type.create()
@@ -43,60 +45,56 @@ public value class Type<@Suppress("unused") T> @PublishedApi internal constructo
     }
 
     public val isNullable: Boolean get() = signature.endsWith("?")
+
+    override fun toString(): String {
+        return signature
+    }
 }
 
 internal data class OrchestrationStateUpdate(
     val id: OrchestrationStateId<*>,
-    val expectedValue: ByteArray?,
-    val newValue: ByteArray
-) : OrchestrationPackage() {
-
-    data class Response(
-        val accepted: Boolean
-    ) : OrchestrationPackage()
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is OrchestrationStateUpdate) return false
-        if (other.id != id) return false
-        if (!other.expectedValue.contentEquals(expectedValue)) return false
-        if (!other.newValue.contentEquals(newValue)) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = id.hashCode()
-        result = 31 * result + expectedValue.contentHashCode()
-        result = 31 * result + newValue.contentHashCode()
-        return result
-    }
+    val expectedValue: Binary?,
+    val newValue: Binary
+) : OrchestrationPackage(), Serializable {
+    data class Response(val accepted: Boolean) : OrchestrationPackage()
 }
 
-public data class OrchestrationStateValue(
-    val id: OrchestrationStateId<*>,
-    val value: ByteArray
-) : OrchestrationPackage() {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is OrchestrationStateValue) return false
-        if (other.id != id) return false
-        if (!other.value.contentEquals(value)) return false
-        return true
-    }
+internal data class OrchestrationStateRequest(
+    val stateId: OrchestrationStateId<*>
+) : OrchestrationPackage(), Serializable
 
-    override fun hashCode(): Int {
-        var result = id.hashCode()
-        result = 31 * result + value.contentHashCode()
-        return result
-    }
-}
+internal data class OrchestrationStateValue(
+    val id: OrchestrationStateId<*>, val value: Binary?
+) : OrchestrationPackage(), Serializable
 
-public data class OrchestrationStateRequest(
-    public val id: OrchestrationStateId<*>
-) : OrchestrationPackage()
 
 public interface OrchestrationStateEncoder<T> {
     public val type: Type<T>
     public fun encode(state: T): ByteArray
     public fun decode(data: ByteArray): Try<T>
 }
+
+private val encoders: Map<Type<*>, OrchestrationStateEncoder<*>> by lazy {
+    ServiceLoader.load(
+        OrchestrationStateEncoder::class.java,
+        OrchestrationStateEncoder::class.java.classLoader
+    ).associateBy { it.type }
+}
+
+@InternalHotReloadApi
+@Suppress("UNCHECKED_CAST")
+public fun <T : OrchestrationState?> encoderOfOrThrow(type: Type<T>): OrchestrationStateEncoder<T> =
+    (encoders[type] ?: error("No encoder for '${type.signature}'")) as OrchestrationStateEncoder<T>
+
+@InternalHotReloadApi
+@Suppress("UNCHECKED_CAST")
+public fun <T : OrchestrationState?> encoderOf(type: Type<T>): OrchestrationStateEncoder<T>? =
+    encoders[type]?.let { it as OrchestrationStateEncoder<T> }
+
+@InternalHotReloadApi
+public inline fun <reified T : OrchestrationState?> encoderOf(): OrchestrationStateEncoder<T>? =
+    encoderOf(Type<T>())
+
+@InternalHotReloadApi
+public inline fun <reified T : OrchestrationState?> encoderOfOrThrow(): OrchestrationStateEncoder<T> =
+    encoderOfOrThrow(Type<T>())

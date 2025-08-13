@@ -35,11 +35,12 @@ public class MutableState<T>(initialValue: T) : State<T> {
     }
 
     override suspend fun collect(collector: suspend (T) -> Unit) {
-        var lastEmittedValue: T? = null
+        val none = Any()
+        var lastEmittedValue: Any? = none
 
-        while (isActive()) {
+        while (isActive()) { // Note: this 'isActive' won't bridge well (TODO NOW!)
             val state = _value.get()
-            if (lastEmittedValue != state.value) {
+            if (none == lastEmittedValue || lastEmittedValue != state.value) {
                 lastEmittedValue = state.value
                 collector(state.value)
             }

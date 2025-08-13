@@ -11,7 +11,6 @@ import org.jetbrains.compose.reload.core.StoppedException
 import org.jetbrains.compose.reload.core.Task
 import org.jetbrains.compose.reload.core.Update
 import org.jetbrains.compose.reload.core.WorkerThread
-import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
 import org.jetbrains.compose.reload.core.createLogger
@@ -27,7 +26,6 @@ import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.stopNow
 import org.jetbrains.compose.reload.core.trace
 import org.jetbrains.compose.reload.core.withThread
-import org.jetbrains.compose.reload.core.withType
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationPackage.Ack
@@ -57,8 +55,8 @@ public fun OrchestrationServer(): OrchestrationServer {
     val port = Future<Int>()
 
     val start = Future<Unit>()
-    val broadcast = Bus<OrchestrationPackage>()
-    val states = OrchestrationStatesOwner()
+    val bus = Bus<OrchestrationMessage>()
+    val states = OrchestrationServerStates()
 
     val task = launchTask("OrchestrationServer") {
         invokeOnFinish { bind.completeExceptionally(it.exceptionOrNull() ?: StoppedException()) }
@@ -66,7 +64,6 @@ public fun OrchestrationServer(): OrchestrationServer {
 
         val serverThread = WorkerThread("Orchestration Server")
         launchOnFinish { serverThread.shutdown().await() }
-
 
         withThread(serverThread, true) {
             val serverSocket = ServerSocket()
@@ -81,27 +78,25 @@ public fun OrchestrationServer(): OrchestrationServer {
                 val clientSocket = serverSocket.accept()
                 clientSocket.setOrchestrationDefaults()
 
-                val client = launchClient(clientSocket, broadcast, states)
+                val client = launchClient(clientSocket, bus, states)
                 invokeOnFinish { client.stop() }
             }
         }
     }
 
     return object : OrchestrationServer, Task<Unit> by task {
-        override val messages = broadcast.withType<OrchestrationMessage>()
+        override val messages = bus
         override val port: Future<Int> = port
         override val states = states
 
         override suspend fun send(message: OrchestrationMessage) {
-            broadcast.send(message)
+            bus.send(message)
         }
 
         override suspend fun <T : OrchestrationState?> update(
             key: OrchestrationStateKey<T>, update: (T) -> T
         ): Update<T> {
-            val update = states.update(key, update).awaitOrThrow()
-            broadcast.send(OrchestrationStateValue(key.id, update.updatedStateEncoded.bytes))
-            return Update(update.previousState, update.updatedState)
+            return states.update(key, update)
         }
 
         override suspend fun bind() {
@@ -118,8 +113,8 @@ public fun OrchestrationServer(): OrchestrationServer {
 
 private fun launchClient(
     socket: Socket,
-    broadcast: Bus<OrchestrationPackage>,
-    encodedStates: OrchestrationStatesOwner,
+    broadcast: Bus<OrchestrationMessage>,
+    states: OrchestrationServerStates,
 ): Task<*> = launchTask("Client Connection") {
     val logger = createLogger()
     val writer = WorkerThread("Orchestration Server: Writer")
@@ -162,10 +157,24 @@ private fun launchClient(
         broadcast send ClientDisconnected(connected.clientId, connected.clientRole)
     }
 
+    /* State streaming: If requested, all updates to a given state will be sent to the client */
+    val launchedStateStreams = hashSetOf<OrchestrationStateId<*>>()
+
+    fun launchStateStreaming(id: OrchestrationStateId<*>) = subtask("State Stream: '$id'") {
+        states.getEncodedState(id).collect { value ->
+            io writePackage OrchestrationStateValue(id, value)
+        }
+    }
+
+    fun launchStateStreamingIfNecessary(id: OrchestrationStateId<*>) {
+        if (!launchedStateStreams.add(id)) return
+        launchStateStreaming(id)
+    }
+
     /* Writer loop: Take elements from the bus and write them to the OrchestrationIO */
     subtask("Writer") {
         broadcast.collect { pkg ->
-            io.writePackage(pkg)
+            io writePackage pkg
         }
     }
 
@@ -174,10 +183,11 @@ private fun launchClient(
         while (isActive()) {
             val pkg = io.readPackage() ?: stopNow()
             when (pkg) {
-                is OrchestrationStateUpdate -> {
-                    val accepted = encodedStates.update(pkg.id, pkg.expectedValue, pkg.newValue).awaitOrThrow()
-                    io.writePackage(OrchestrationStateUpdate.Response(accepted))
-                    if (accepted) broadcast.send(OrchestrationStateValue(pkg.id, pkg.newValue))
+                is OrchestrationStateRequest -> launchStateStreamingIfNecessary(pkg.stateId)
+
+                is OrchestrationStateUpdate -> states.withLock {
+                    val accepted = states.update(pkg.id, pkg.expectedValue, pkg.newValue)
+                    io writePackage OrchestrationStateUpdate.Response(accepted)
                 }
 
                 is OrchestrationMessage -> {

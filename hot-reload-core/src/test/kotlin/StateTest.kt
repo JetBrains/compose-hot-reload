@@ -89,6 +89,21 @@ class StateTest {
     }
 
     @Test
+    fun `test - empty state`() {
+        val state = MutableState<Int?>(null)
+        val received = Queue<Int?>()
+
+        val receiver = launchTask("receiver") {
+            state.collect { received.add(it) }
+        }
+
+        launchTask("controller") {
+            assertEquals(null, received.receive())
+            receiver.stop()
+        }.getBlocking(5.seconds).getOrThrow()
+    }
+
+    @Test
     fun `test - conflation`() {
         val state = MutableState(0)
 

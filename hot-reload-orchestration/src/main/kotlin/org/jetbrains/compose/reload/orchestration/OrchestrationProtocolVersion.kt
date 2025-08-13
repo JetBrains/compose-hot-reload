@@ -10,12 +10,13 @@ import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.core.toRight
 
 public enum class OrchestrationProtocolVersion(public val intValue: Int) {
-    V1(1);
+    V1(1),
+    V1_1(2);
 
     public companion object {
         internal const val serialVersionUID: Long = 0L
 
-        public val current: OrchestrationProtocolVersion get() = V1
+        public val current: OrchestrationProtocolVersion get() = V1_1
 
         public fun from(intValue: Int): Try<OrchestrationProtocolVersion> {
             entries.firstOrNull { it.intValue == intValue }?.let { return it.toLeft() }
