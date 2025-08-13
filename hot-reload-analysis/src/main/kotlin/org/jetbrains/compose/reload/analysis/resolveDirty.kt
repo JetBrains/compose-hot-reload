@@ -43,8 +43,7 @@ private fun Context.resolveDirtyRuntimeScopeInfos(
     val dirtyComposeScopes = resolveDirtyComposeScopes(current, redefined) +
         resolveRemovedComposeScopes(current, redefined)
 
-    val dirtyMethods = resolveDirtyMethodsFromExtensionPoints(current, redefined) +
-        resolveDirtyMethods(current, redefined) +
+    val dirtyMethods = resolveDirtyMethods(current, redefined) +
         resolveRemovedMethods(current, redefined)
 
     val dirtyFields = resolveDirtyFields(current, redefined) +
@@ -146,15 +145,6 @@ private fun resolveRemovedComposeScopes(current: ApplicationInfo, redefined: App
         }
     }
     return result
-}
-
-private fun Context.resolveDirtyMethodsFromExtensionPoints(
-    current: ApplicationInfo, redefined: ApplicationInfo
-): List<MethodInfo> {
-    return ServiceLoader.load(DirtyResolverExtension::class.java, ClassLoader.getSystemClassLoader())
-        .flatMap { resolver ->
-            resolver.resolveDirtyMethods(this, current, redefined)
-        }
 }
 
 /**
