@@ -86,7 +86,7 @@ fun CoroutineScope.launchIsolate(
         "-Xmx64M", "-Xms64M",
         *issueNewDebugSessionJvmArguments("isolate"),
         IsolateRunner::class.java.name, clazz.name,
-    ).redirectError(ProcessBuilder.Redirect.INHERIT).start()
+    ).start()
 
     coroutineContext.job.invokeOnCompletion { process.destroyWithDescendants() }
 
@@ -113,6 +113,11 @@ fun CoroutineScope.launchIsolate(
             }
             process.onExit().await()
             exitCode.complete(process.exitValue())
+        }
+
+        /* Forward logs */
+        launch {
+            process.errorStream.copyTo(System.out)
         }
 
         /* Read incoming messages */

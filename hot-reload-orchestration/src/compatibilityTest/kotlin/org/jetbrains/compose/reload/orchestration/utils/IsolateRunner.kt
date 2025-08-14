@@ -32,7 +32,6 @@ object IsolateRunner {
             val incomingMessages = Queue<IsolateMessage>()
             val outgoingMessages = Queue<IsolateMessage>()
 
-
             val logger: Logger = createLogger("$className(Isolate)")
             val writer = WorkerThread("writer")
             val reader = WorkerThread("reader")
@@ -79,6 +78,7 @@ object IsolateRunner {
                         exitProcess(0)
                     }
                 }.apply {
+                    log("Starting Isolate (${currentJar.fileName})")
                     instance.run()
                 }
 

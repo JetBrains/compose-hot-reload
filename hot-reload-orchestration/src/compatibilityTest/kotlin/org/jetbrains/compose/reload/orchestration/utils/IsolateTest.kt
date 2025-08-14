@@ -105,6 +105,11 @@ class IsolateTestContext(
     val coroutineScope: CoroutineScope,
 )
 
+context(ctx: IsolateTestContext)
+fun launch(action: suspend CoroutineScope.() -> Unit): Job {
+    return ctx.coroutineScope.launch { action() }
+}
+
 context(_: IsolateTestContext)
 suspend fun await(title: String, timeout: Duration = 5.seconds, action: suspend () -> Unit) {
     try {

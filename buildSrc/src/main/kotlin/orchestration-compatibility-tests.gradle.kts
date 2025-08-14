@@ -1,15 +1,5 @@
 @file:OptIn(InternalHotReloadApi::class)
 
-import org.gradle.api.attributes.Category
-import org.gradle.api.attributes.Usage
-import org.gradle.api.tasks.ClasspathNormalizer
-import org.gradle.api.tasks.testing.Test
-import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.getByType
-import org.gradle.kotlin.dsl.kotlin
-import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.register
-import org.gradle.kotlin.dsl.withNormalizer
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.gradle.intellijDebuggerDispatchPort
@@ -20,7 +10,10 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmExtension
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-val testedVersions = listOf("1.0.0-beta03", "1.0.0-beta04", "1.0.0-beta05")
+val testedVersions = listOf(
+    "1.0.0-beta03", "1.0.0-beta04", "1.0.0-beta05",
+    project.providers.gradleProperty("bootstrap.version").get()
+)
 
 val kotlin = extensions.getByType<KotlinJvmExtension>()
 
@@ -49,12 +42,6 @@ project.dependencies {
     compatibilityTestCompilation.implementationConfigurationName(kotlin("test"))
     compatibilityTestCompilation.implementationConfigurationName(kotlin("test-junit5"))
     compatibilityTestCompilation.implementationConfigurationName(kotlin("reflect"))
-
-    /*
-    compatibilityTestCompilation.implementationConfigurationName(deps.coroutines.test)
-    compatibilityTestCompilation.implementationConfigurationName(deps.junit.jupiter)
-    compatibilityTestCompilation.implementationConfigurationName(deps.junit.jupiter.engine)
-     */
 }
 
 tasks.register<Test>("compatibilityTest") {
