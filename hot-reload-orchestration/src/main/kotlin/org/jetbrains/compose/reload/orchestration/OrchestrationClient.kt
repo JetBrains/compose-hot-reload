@@ -24,6 +24,7 @@ import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.exceptionOrNull
+import org.jetbrains.compose.reload.core.invokeOnError
 import org.jetbrains.compose.reload.core.isActive
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.launchOnFinish
@@ -82,6 +83,7 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
 
     val task = launchTask<Unit>("OrchestrationClient($clientRole, $port)") {
         connect.await()
+        invokeOnError { isConnected.completeExceptionally(it) }
 
         val writer = WorkerThread("Orchestration IO: Writer")
         val reader = WorkerThread("Orchestration IO: Reader")
@@ -171,7 +173,12 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
                     is OrchestrationStateValue -> states.update(pkg)
                     is OrchestrationStateUpdate.Response -> {
                         val pendingUpdate = pendingUpdate ?: error("No pending state update")
-                        if (pkg.accepted) states.update(OrchestrationStateValue(pendingUpdate.id, pendingUpdate.newValue))
+                        if (pkg.accepted) states.update(
+                            OrchestrationStateValue(
+                                pendingUpdate.id,
+                                pendingUpdate.newValue
+                            )
+                        )
                         pendingUpdateAccepted?.complete(pkg.accepted)
                     }
 

@@ -1,0 +1,133 @@
+/*
+ * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ */
+
+package org.jetbrains.compose.reload.orchestration.utils
+
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
+import org.jetbrains.compose.reload.core.Version
+import org.jetbrains.compose.reload.core.getOrThrow
+import org.junit.jupiter.api.TestTemplate
+import org.junit.jupiter.api.extension.AfterEachCallback
+import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.Extension
+import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.api.extension.ParameterContext
+import org.junit.jupiter.api.extension.TestTemplateInvocationContext
+import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider
+import org.junit.jupiter.api.extension.support.TypeBasedParameterResolver
+import java.io.File
+import java.nio.file.Path
+import java.util.concurrent.TimeoutException
+import java.util.stream.Stream
+import kotlin.reflect.KClass
+import kotlin.streams.asStream
+import kotlin.test.assertEquals
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+
+private val testVersions by lazy {
+    System.getProperty("testedVersions").split(';').map { Version(it) }
+}
+
+@TestTemplate
+@ExtendWith(IsolateTestInvocationContextProvider::class)
+annotation class IsolateTest(val isolate: KClass<out Isolate>)
+
+annotation class MinSupportedVersion(val version: String)
+
+class IsolateTestInvocationContext(
+    val isolateClass: KClass<out Isolate>,
+    val testedVersion: Version,
+    val testedClasspath: List<Path>,
+) : TestTemplateInvocationContext {
+
+    private val coroutineScope = CoroutineScope(Dispatchers.Default + Job() + CoroutineName("IsolateTest"))
+    private val isolates = mutableListOf<IsolateContext>()
+
+    override fun getAdditionalExtensions(): List<Extension?> {
+        return listOf(object : TypeBasedParameterResolver<IsolateHandle>() {
+            override fun resolveParameter(
+                parameterContext: ParameterContext?, extensionContext: ExtensionContext?
+            ): IsolateHandle {
+                val isolate = coroutineScope.launchIsolate(isolateClass.java, testedClasspath)
+                isolates.add(isolate)
+                return isolate
+            }
+        }, object : AfterEachCallback {
+            override fun afterEach(context: ExtensionContext) {
+                runBlocking {
+                    isolates.forEach { isolate ->
+                        launch { isolate.stop() }
+                    }
+                }
+                coroutineScope.cancel()
+            }
+        })
+    }
+
+    override fun getDisplayName(invocationIndex: Int): String {
+        return "v$testedVersion"
+    }
+}
+
+class IsolateTestInvocationContextProvider : TestTemplateInvocationContextProvider {
+    override fun supportsTestTemplate(context: ExtensionContext): Boolean {
+        return context.requiredTestMethod.isAnnotationPresent(IsolateTest::class.java)
+    }
+
+    override fun provideTestTemplateInvocationContexts(context: ExtensionContext): Stream<TestTemplateInvocationContext> {
+        return testVersions.asSequence()
+            .filter { version ->
+                val minSupportedVersionAnnotation =
+                    context.requiredTestMethod.getAnnotation(MinSupportedVersion::class.java) ?: return@filter true
+                val minSupportedVersion = Version(minSupportedVersionAnnotation.version)
+                version >= minSupportedVersion
+            }
+            .map { version ->
+                val isolateClass = context.requiredTestMethod.getAnnotation(IsolateTest::class.java).isolate
+                val classpath = System.getProperty("classpathV$version").split(File.pathSeparator).map { Path.of(it) }
+                IsolateTestInvocationContext(isolateClass, version, classpath)
+            }.asStream()
+    }
+}
+
+class IsolateTestContext(
+    val coroutineScope: CoroutineScope,
+)
+
+context(_: IsolateTestContext)
+suspend fun await(title: String, timeout: Duration = 5.seconds, action: suspend () -> Unit) {
+    try {
+        withTimeout(timeout) {
+            action()
+        }
+    } catch (_: TimeoutCancellationException) {
+        throw TimeoutException("Timeout waiting for $title ($timeout)")
+    }
+}
+
+context(ctx: IsolateHandle)
+fun runIsolateTest(test: suspend context(IsolateTestContext) () -> Unit) = runBlocking(Dispatchers.Default) {
+
+    val isolateMonitoring = launch {
+        assertEquals(0, ctx.exitCode.await().getOrThrow(), "Isolate exited with non-zero code")
+    }
+
+    try {
+        withTimeout(15.seconds) {
+            with(IsolateTestContext(this)) { test() }
+        }
+    } finally {
+        isolateMonitoring.cancel()
+    }
+}
