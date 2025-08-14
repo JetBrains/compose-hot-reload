@@ -135,7 +135,7 @@ private fun launchClient(
 
     /* Write protocol magic number and the servers protocol version */
     io writeInt ORCHESTRATION_PROTOCOL_MAGIC_NUMBER
-    io writeInt OrchestrationProtocolVersion.current.intValue
+    io writeInt OrchestrationVersion.current.intValue
 
     /* We expect any given client to start with a proper introduction */
     val clientIntroduction = io.readPackage()

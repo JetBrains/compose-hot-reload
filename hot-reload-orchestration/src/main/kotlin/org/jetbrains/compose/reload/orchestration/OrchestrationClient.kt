@@ -33,6 +33,7 @@ import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.stopNow
 import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.core.trace
+import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.core.withThread
 import org.jetbrains.compose.reload.orchestration.OrchestrationPackage.Introduction
 import java.io.Serializable
@@ -107,12 +108,12 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
         launchOnFinish { io.close() }
 
         io.writeInt(ORCHESTRATION_PROTOCOL_MAGIC_NUMBER) /* Magic Number */
-        io.writeInt(OrchestrationProtocolVersion.current.intValue) /* Protocol Version */
+        io.writeInt(OrchestrationVersion.current.intValue) /* Protocol Version */
 
         /* Check protocol magic number */
         checkMagicNumberOrThrow(io.readInt())
 
-        val serverProtocolVersion = io.readInt()
+        val serverProtocolVersion = OrchestrationVersion(io.readInt())
         logger.trace { "OrchestrationServer protocol version: $serverProtocolVersion" }
 
         /* Send Handshake, expect 'ClientConnected' response */
@@ -128,6 +129,13 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
         subtask("Request States") {
             while (isActive()) {
                 val stateRequest = stateRequests.receive()
+                /* We return 'null' as state if the server does not support state sync */
+                if (!serverProtocolVersion.supportsStates) {
+                    logger.warn("The server does not support state hosting ($serverProtocolVersion)")
+                    states.update(OrchestrationStateValue(stateRequest.stateId, null))
+                    return@subtask
+                }
+
                 io writePackage stateRequest
             }
         }
@@ -136,6 +144,13 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
         var pendingUpdateAccepted: CompletableFuture<Boolean>? = null
         subtask("Update States") {
             stateUpdatesActor.process { update ->
+                /* We accept any state update if the server does not support states*/
+                if (!serverProtocolVersion.supportsStates) {
+                    logger.warn("The server does not support state hosting ($serverProtocolVersion)")
+                    states.update(update.id, update.newValue)
+                    return@process true
+                }
+
                 try {
                     pendingUpdate = update
                     pendingUpdateAccepted = Future<Boolean>()

@@ -80,10 +80,12 @@ object IsolateRunner {
                 }.apply {
                     log("Starting Isolate (${currentJar.fileName})")
                     instance.run()
+                    log("Isolate finished successfully")
                 }
 
             }.getBlocking(10.seconds).getOrThrow()
         } catch (t: Throwable) {
+            createLogger().error("Isolate failed ${t.message}", t)
             throw t
         }
     }

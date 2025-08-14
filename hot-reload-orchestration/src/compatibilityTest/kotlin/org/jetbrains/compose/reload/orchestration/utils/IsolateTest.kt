@@ -16,6 +16,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.jetbrains.compose.reload.core.Version
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.reloadMainDispatcher
 import org.junit.jupiter.api.TestTemplate
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.ExtendWith
@@ -45,6 +46,15 @@ annotation class IsolateTest(val isolate: KClass<out Isolate>)
 
 annotation class MinSupportedVersion(val version: String)
 
+class IsolateTestFixture(
+    val context: IsolateTestInvocationContext,
+    val isolateHandle: IsolateHandle,
+) : IsolateHandle by isolateHandle
+
+context(ctx: IsolateTestFixture)
+val testedVersion: Version get() = ctx.context.testedVersion
+
+
 class IsolateTestInvocationContext(
     val isolateClass: KClass<out Isolate>,
     val testedVersion: Version,
@@ -55,13 +65,13 @@ class IsolateTestInvocationContext(
     private val isolates = mutableListOf<IsolateContext>()
 
     override fun getAdditionalExtensions(): List<Extension?> {
-        return listOf(object : TypeBasedParameterResolver<IsolateHandle>() {
+        return listOf(object : TypeBasedParameterResolver<IsolateTestFixture>() {
             override fun resolveParameter(
                 parameterContext: ParameterContext?, extensionContext: ExtensionContext?
-            ): IsolateHandle {
+            ): IsolateTestFixture {
                 val isolate = coroutineScope.launchIsolate(isolateClass.java, testedClasspath)
                 isolates.add(isolate)
-                return isolate
+                return IsolateTestFixture(this@IsolateTestInvocationContext, isolate)
             }
         }, object : AfterEachCallback {
             override fun afterEach(context: ExtensionContext) {
@@ -110,8 +120,9 @@ fun launch(action: suspend CoroutineScope.() -> Unit): Job {
     return ctx.coroutineScope.launch { action() }
 }
 
-context(_: IsolateTestContext)
+context(_: IsolateTestContext, _: IsolateHandle)
 suspend fun await(title: String, timeout: Duration = 5.seconds, action: suspend () -> Unit) {
+    log("awaiting: '$title'")
     try {
         withTimeout(timeout) {
             action()
@@ -121,9 +132,8 @@ suspend fun await(title: String, timeout: Duration = 5.seconds, action: suspend 
     }
 }
 
-context(ctx: IsolateHandle)
-fun runIsolateTest(test: suspend context(IsolateTestContext) () -> Unit) = runBlocking(Dispatchers.Default) {
-
+context(ctx: IsolateTestFixture)
+fun runIsolateTest(test: suspend context(IsolateTestContext) () -> Unit) = runBlocking(reloadMainDispatcher) {
     val isolateMonitoring = launch {
         assertEquals(0, ctx.exitCode.await().getOrThrow(), "Isolate exited with non-zero code")
     }

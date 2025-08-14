@@ -7,25 +7,33 @@ package org.jetbrains.compose.reload.orchestration.tests
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.test.runTest
+import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
+import org.jetbrains.compose.reload.orchestration.OrchestrationStateId
+import org.jetbrains.compose.reload.orchestration.OrchestrationStateKey
+import org.jetbrains.compose.reload.orchestration.Type
 import org.jetbrains.compose.reload.orchestration.asChannel
+import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
 import org.jetbrains.compose.reload.orchestration.tests.ServerForwardCompatibilityTest.StartServer.ServerPort
 import org.jetbrains.compose.reload.orchestration.utils.Isolate
 import org.jetbrains.compose.reload.orchestration.utils.IsolateContext
-import org.jetbrains.compose.reload.orchestration.utils.IsolateHandle
 import org.jetbrains.compose.reload.orchestration.utils.IsolateMessage
 import org.jetbrains.compose.reload.orchestration.utils.IsolateTest
+import org.jetbrains.compose.reload.orchestration.utils.IsolateTestFixture
+import org.jetbrains.compose.reload.orchestration.utils.MinSupportedVersion
+import org.jetbrains.compose.reload.orchestration.utils.TestOrchestrationState
 import org.jetbrains.compose.reload.orchestration.utils.await
 import org.jetbrains.compose.reload.orchestration.utils.currentJar
 import org.jetbrains.compose.reload.orchestration.utils.log
 import org.jetbrains.compose.reload.orchestration.utils.receiveAs
 import org.jetbrains.compose.reload.orchestration.utils.runIsolateTest
 import org.jetbrains.compose.reload.orchestration.utils.send
+import org.jetbrains.compose.reload.orchestration.utils.stateKey
+import kotlin.test.assertEquals
 
 
 /**
@@ -51,7 +59,7 @@ class ServerForwardCompatibilityTest {
     }
 
     @IsolateTest(StartServer::class)
-    context(_: IsolateHandle)
+    context(_: IsolateTestFixture)
     fun `test - send and receive TestEvent`() = runIsolateTest {
         val port = receiveAs<ServerPort>().port
 
@@ -67,7 +75,7 @@ class ServerForwardCompatibilityTest {
 
 
     @IsolateTest(StartServer::class)
-    context(_: IsolateHandle)
+    context(_: IsolateTestFixture)
     fun `test - send message across two clients`() = runIsolateTest {
         val port = receiveAs<ServerPort>().port
         val clientA = OrchestrationClient(Unknown, port)
@@ -85,5 +93,54 @@ class ServerForwardCompatibilityTest {
         clientB.send(TestEvent("World"))
         messagesA.receiveAsFlow().first { it is TestEvent && it.payload == "World" }
         messagesB.receiveAsFlow().first { it is TestEvent && it.payload == "World" }
+    }
+
+    @IsolateTest(StartServer::class)
+    context(_: IsolateTestFixture)
+    fun `test - update a state`() = runIsolateTest {
+        val port = receiveAs<ServerPort>().port
+        val client = connectOrchestrationClient(Unknown, port).getOrThrow()
+        log("Client connected '${client.port.awaitOrThrow()}'")
+
+        val stateKey = OrchestrationStateKey(
+            OrchestrationStateId(Type<TestOrchestrationState>()),
+            default = TestOrchestrationState(0),
+        )
+
+        await("Requesting state") {
+            assertEquals(stateKey.default, client.states.get(stateKey).value)
+        }
+
+        await("Updating state") {
+            client.update(stateKey) { current -> TestOrchestrationState(current.payload + 1) }
+        }
+        assertEquals(1, client.states.get(stateKey).value.payload)
+    }
+
+    @IsolateTest(StartServer::class)
+    @MinSupportedVersion("1.0.0-rc01")
+    context(_: IsolateTestFixture)
+    fun `test - sync state across two clients`() = runIsolateTest {
+        val port = receiveAs<ServerPort>().port
+        val clientA = OrchestrationClient(Unknown, port)
+        val clientB = OrchestrationClient(Unknown, port)
+        clientA.connect().getOrThrow()
+        clientB.connect().getOrThrow()
+
+
+
+        await("update states") {
+            clientA.update(stateKey) { current -> TestOrchestrationState(current.payload + 1) }
+            clientB.update(stateKey) { current -> TestOrchestrationState(current.payload + 1) }
+        }
+
+        /* Enforce sync */
+        await("sync states") {
+            clientA.update(stateKey) { current -> current }
+            clientB.update(stateKey) { current -> current }
+        }
+
+        assertEquals(2, clientA.states.get(stateKey).value.payload)
+        assertEquals(2, clientB.states.get(stateKey).value.payload)
     }
 }
