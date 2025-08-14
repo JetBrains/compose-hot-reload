@@ -22,7 +22,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
-import org.jetbrains.compose.reload.orchestration.tests.ClientForwardCompatibilityTest.SingleClientSingleEvent.ServerPort
+import org.jetbrains.compose.reload.orchestration.tests.ServerBackwardCompatibilityTest.SingleClientSingleEvent.ServerPort
 import org.jetbrains.compose.reload.orchestration.utils.Isolate
 import org.jetbrains.compose.reload.orchestration.utils.IsolateContext
 import org.jetbrains.compose.reload.orchestration.utils.IsolateMessage
@@ -43,7 +43,7 @@ import org.junit.jupiter.api.parallel.ExecutionMode
 import kotlin.test.assertEquals
 
 @Execution(ExecutionMode.SAME_THREAD)
-class ClientForwardCompatibilityTest {
+class ServerBackwardCompatibilityTest {
     class SingleClientSingleEvent : Isolate {
         class ServerPort(val port: Int) : IsolateMessage
 

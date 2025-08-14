@@ -20,7 +20,6 @@ import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.invokeOnFinish
 import org.jetbrains.compose.reload.core.invokeOnStop
 import org.jetbrains.compose.reload.core.isActive
-import org.jetbrains.compose.reload.core.launchOnError
 import org.jetbrains.compose.reload.core.launchOnFinish
 import org.jetbrains.compose.reload.core.launchOnStop
 import org.jetbrains.compose.reload.core.launchTask
@@ -187,7 +186,7 @@ private fun launchClient(
                 is OrchestrationStateRequest -> launchStateStreamingIfNecessary(pkg.stateId)
 
                 is OrchestrationStateUpdate -> states.withLock {
-                    val accepted = states.update(pkg.id, pkg.expectedValue, pkg.newValue)
+                    val accepted = states.update(pkg.stateId, pkg.expectedValue, pkg.updatedValue)
                     io writePackage OrchestrationStateUpdate.Response(accepted)
                 }
 

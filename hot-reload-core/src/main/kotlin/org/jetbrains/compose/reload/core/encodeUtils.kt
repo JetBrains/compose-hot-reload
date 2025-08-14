@@ -1,0 +1,25 @@
+/*
+ * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ */
+
+package org.jetbrains.compose.reload.core
+
+import org.jetbrains.compose.reload.InternalHotReloadApi
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.DataInputStream
+import java.io.DataOutputStream
+
+@InternalHotReloadApi
+public fun encode(encode: DataOutputStream.() -> Unit): ByteArray {
+    val baos = ByteArrayOutputStream()
+    val daos = DataOutputStream(baos)
+    daos.encode()
+    return baos.toByteArray()
+}
+
+@InternalHotReloadApi
+public fun <T> ByteArray.decode(decode: DataInputStream.() -> T): T {
+    return DataInputStream(ByteArrayInputStream(this)).decode()
+}

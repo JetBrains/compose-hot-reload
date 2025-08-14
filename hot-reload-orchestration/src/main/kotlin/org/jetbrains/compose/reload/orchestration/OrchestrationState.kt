@@ -7,6 +7,8 @@ package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.Try
+import org.jetbrains.compose.reload.core.decode
+import org.jetbrains.compose.reload.core.encode
 import java.io.Serializable
 import java.util.ServiceLoader
 
@@ -23,7 +25,32 @@ public data class OrchestrationStateId<T : OrchestrationState?>(
             }
         }
     }
+
+    internal fun encodeToByteArray(): ByteArray = encode {
+        val encodedType = type.signature.encodeToByteArray()
+        writeInt(encodedType.size)
+        write(encodedType)
+
+        val encodedName = name?.encodeToByteArray() ?: byteArrayOf()
+        writeInt(encodedName.size)
+        write(encodedName)
+    }
 }
+
+internal fun ByteArray.decodeOrchestrationStateId(): Try<OrchestrationStateId<*>> = Try {
+    decode {
+        val encodedTypeLength = readInt()
+        if (encodedTypeLength !in 0..256) error("Invalid type length: $encodedTypeLength")
+        val decodedType = readNBytes(encodedTypeLength).decodeToString()
+
+        val decodedNameLength = readInt()
+        if (decodedNameLength !in 0..128) error("Invalid name length: $decodedNameLength")
+        val decodedName = if (decodedNameLength == 0) null else readNBytes(decodedNameLength).decodeToString()
+
+        OrchestrationStateId(Type(decodedType), decodedName)
+    }
+}
+
 
 public data class OrchestrationStateKey<T : OrchestrationState?>(
     val id: OrchestrationStateId<T>, val default: T
@@ -52,9 +79,9 @@ public value class Type<@Suppress("unused") T> @PublishedApi internal constructo
 }
 
 internal data class OrchestrationStateUpdate(
-    val id: OrchestrationStateId<*>,
+    val stateId: OrchestrationStateId<*>,
     val expectedValue: Binary?,
-    val newValue: Binary
+    val updatedValue: Binary
 ) : OrchestrationPackage(), Serializable {
     data class Response(val accepted: Boolean) : OrchestrationPackage()
 }
@@ -64,7 +91,7 @@ internal data class OrchestrationStateRequest(
 ) : OrchestrationPackage(), Serializable
 
 internal data class OrchestrationStateValue(
-    val id: OrchestrationStateId<*>, val value: Binary?
+    val stateId: OrchestrationStateId<*>, val value: Binary?
 ) : OrchestrationPackage(), Serializable
 
 

@@ -113,6 +113,4 @@ class SerialVersionUIDTest {
             fail("${expectFile.toUri().toURL()} did not match\n${actualFile.toUri().toURL()}")
         }
     }
-
-
 }

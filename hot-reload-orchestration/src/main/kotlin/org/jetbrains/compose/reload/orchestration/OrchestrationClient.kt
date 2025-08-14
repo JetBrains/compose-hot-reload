@@ -147,7 +147,7 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
                 /* We accept any state update if the server does not support states*/
                 if (!serverProtocolVersion.supportsStates) {
                     logger.warn("The server does not support state hosting ($serverProtocolVersion)")
-                    states.update(update.id, update.newValue)
+                    states.update(update.stateId, update.updatedValue)
                     return@process true
                 }
 
@@ -190,8 +190,8 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
                         val pendingUpdate = pendingUpdate ?: error("No pending state update")
                         if (pkg.accepted) states.update(
                             OrchestrationStateValue(
-                                pendingUpdate.id,
-                                pendingUpdate.newValue
+                                pendingUpdate.stateId,
+                                pendingUpdate.updatedValue
                             )
                         )
                         pendingUpdateAccepted?.complete(pkg.accepted)

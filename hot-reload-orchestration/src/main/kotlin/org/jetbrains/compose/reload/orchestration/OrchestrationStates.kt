@@ -18,7 +18,6 @@ import org.jetbrains.compose.reload.core.exception
 import org.jetbrains.compose.reload.core.isSuccess
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.map
-import java.util.ServiceLoader
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -123,7 +122,7 @@ internal class OrchestrationClientStates(
 
 
     fun update(update: OrchestrationStateValue): Unit = lock.withLock {
-        update(update.id, update.value)
+        update(update.stateId, update.value)
     }
 
     fun update(id: OrchestrationStateId<*>, encoded: Binary?) = lock.withLock {
