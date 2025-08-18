@@ -470,4 +470,10 @@ public data class OrchestrationMessageId(internal val value: String) : Serializa
     override fun toString(): String {
         return value
     }
+
+    public fun encodeToByteArray(): ByteArray = value.encodeToByteArray()
+}
+
+public fun OrchestrationMessageId(encoded: ByteArray): OrchestrationMessageId {
+    return OrchestrationMessageId(encoded.decodeToString())
 }

@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.core
 
 import kotlinx.benchmark.*
+import kotlinx.benchmark.State
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
