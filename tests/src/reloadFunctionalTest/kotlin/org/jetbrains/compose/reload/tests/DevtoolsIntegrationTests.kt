@@ -6,13 +6,16 @@
 package org.jetbrains.compose.reload.tests
 
 import kotlinx.coroutines.future.asDeferred
-import org.jetbrains.compose.reload.core.Environment
+import kotlinx.coroutines.isActive
+import org.jetbrains.compose.devtools.api.ReloadState
+import org.jetbrains.compose.reload.core.asChannel
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.core.withAsyncTrace
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
+import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
 import org.jetbrains.compose.reload.test.gradle.BuildMode
 import org.jetbrains.compose.reload.test.gradle.Headless
@@ -30,6 +33,7 @@ import kotlin.io.path.readLines
 import kotlin.jvm.optionals.getOrNull
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlin.test.fail
 import kotlin.time.Duration
@@ -77,6 +81,9 @@ class DevtoolsIntegrationTests {
     @TestedBuildMode(BuildMode.Continuous)
     @TestedBuildMode(BuildMode.Explicit)
     fun `test - reload state`(fixture: HotReloadTestFixture) = fixture.runTest {
+        val reloadState = orchestration.states.get(ReloadState)
+        val reloadStateChannel = reloadState.asChannel()
+
         runTransaction {
             fixture initialSourceCode """
             import org.jetbrains.compose.reload.test.*
@@ -88,21 +95,23 @@ class DevtoolsIntegrationTests {
             }
             """.trimIndent()
 
-            skipToMessage<LogMessage>("initial:'ReloadState=Ok'") { log ->
-                log.environment == Environment.devTools && log.message.startsWith("ReloadState=Ok")
-            }
+            assertIs<ReloadState.Ok>(reloadState.value)
 
             replaceSourceCode("// Foo", "TestText(\"Foo\")")
             if (fixture.buildMode == BuildMode.Explicit) {
                 requestReload()
             }
 
-            skipToMessage<LogMessage>("await 'ReloadState=Reloading'") { log ->
-                log.environment == Environment.devTools && log.message.startsWith("ReloadState=Reloading")
+            withAsyncTrace("Waiting for ReloadState: 'Reloading'") {
+                while (isActive) {
+                    if (reloadStateChannel.receive() is ReloadState.Reloading) break
+                }
             }
 
-            skipToMessage<LogMessage>("await 'ReloadState=Ok'") { log ->
-                log.environment == Environment.devTools && log.message.startsWith("ReloadState=Ok")
+            withAsyncTrace("Waiting for ReloadState: 'Ok'") {
+                while (isActive) {
+                    if (reloadStateChannel.receive() is ReloadState.Ok) break
+                }
             }
         }
     }

@@ -206,6 +206,7 @@ private val hotReloadAgentDependencies = arrayOf(
 private val hotReloadRuntimeDependencies = arrayOf(
     PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-annotations-jvm-${HOT_RELOAD_VERSION.regexEscaped}.jar"),
     PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-runtime-jvm-${HOT_RELOAD_VERSION.regexEscaped}.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-devtools-api-${HOT_RELOAD_VERSION.regexEscaped}.jar"),
 )
 
 private val testRuntimeDependencies = arrayOf(
