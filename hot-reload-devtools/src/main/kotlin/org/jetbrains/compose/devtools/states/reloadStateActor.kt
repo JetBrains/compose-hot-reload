@@ -13,9 +13,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.devtools.api.ReloadState
-import org.jetbrains.compose.devtools.orchestration
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.trace
+import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildStarted
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.BuildTaskResult
@@ -27,10 +27,12 @@ import kotlin.time.ExperimentalTime
 
 private val logger = createLogger()
 
-fun CoroutineScope.launchReloadStateActor() = launch {
+fun CoroutineScope.launchReloadStateActor(
+    orchestration: OrchestrationHandle = org.jetbrains.compose.devtools.orchestration
+) = launch {
 
     suspend fun update(update: (current: ReloadState) -> ReloadState) =
-        orchestration.update(ReloadState.key, update)
+        orchestration.update(ReloadState, update)
 
     launch {
         ReloadUIState.flow().buffer(Channel.UNLIMITED).collect { state ->

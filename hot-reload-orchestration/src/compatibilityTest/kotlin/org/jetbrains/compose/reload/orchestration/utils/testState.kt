@@ -6,11 +6,10 @@
 package org.jetbrains.compose.reload.orchestration.utils
 
 import org.jetbrains.compose.reload.core.Try
+import org.jetbrains.compose.reload.core.type
 import org.jetbrains.compose.reload.orchestration.OrchestrationState
 import org.jetbrains.compose.reload.orchestration.OrchestrationStateEncoder
-import org.jetbrains.compose.reload.orchestration.OrchestrationStateId
-import org.jetbrains.compose.reload.orchestration.OrchestrationStateKey
-import org.jetbrains.compose.reload.core.type
+import org.jetbrains.compose.reload.orchestration.stateKey
 import java.io.Serializable
 import java.nio.ByteBuffer
 
@@ -28,7 +27,6 @@ class TestOrchestrationStateEncoder : OrchestrationStateEncoder<TestOrchestratio
     }
 }
 
-val stateKey = OrchestrationStateKey(
-    OrchestrationStateId(type<TestOrchestrationState>()),
-    default = TestOrchestrationState(0),
+val stateKey = stateKey<TestOrchestrationState>(
+    default = TestOrchestrationState(0)
 )

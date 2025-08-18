@@ -19,8 +19,9 @@ import org.jetbrains.compose.reload.core.writeString
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
 import org.jetbrains.compose.reload.orchestration.OrchestrationState
 import org.jetbrains.compose.reload.orchestration.OrchestrationStateEncoder
+import org.jetbrains.compose.reload.orchestration.OrchestrationStateId
 import org.jetbrains.compose.reload.orchestration.OrchestrationStateKey
-import org.jetbrains.compose.reload.orchestration.stateKey
+import org.jetbrains.compose.reload.orchestration.stateId
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -42,10 +43,10 @@ public sealed class ReloadState : OrchestrationState {
         override val time: Instant = Clock.System.now(), val reason: String,
     ) : ReloadState()
 
-    public companion object {
-        public val key: OrchestrationStateKey<ReloadState> = stateKey(
-            default = Ok()
-        )
+    public companion object Key : OrchestrationStateKey<ReloadState>() {
+        override val id: OrchestrationStateId<ReloadState> = stateId()
+        override val default: ReloadState = Ok()
+
     }
 }
 

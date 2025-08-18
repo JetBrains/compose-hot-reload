@@ -40,7 +40,7 @@ internal fun startWindowManager(window: Window): WindowId {
         /* Synchronize windows state with orchestration */
         launch {
             windowState.collect { state ->
-                orchestration.update(WindowsState.key) { current ->
+                orchestration.update(WindowsState) { current ->
                     val windows = if (state == null) current.windows - windowId
                     else current.windows + (windowId to state)
                     current.copy(windows = windows)

@@ -39,6 +39,10 @@ public data class OrchestrationStateId<T : OrchestrationState?>(
         writeInt(encodedName.size)
         write(encodedName)
     }
+
+    internal companion object {
+        const val serialVersionUID: Long = 0L
+    }
 }
 
 internal fun ByteArray.decodeOrchestrationStateId(): Try<OrchestrationStateId<*>> = Try {
@@ -56,9 +60,19 @@ internal fun ByteArray.decodeOrchestrationStateId(): Try<OrchestrationStateId<*>
 }
 
 public inline fun <reified T : OrchestrationState?> stateKey(default: T): OrchestrationStateKey<T> {
-    return OrchestrationStateKey(stateId<T>(), default)
+    return OrchestrationStateKeyImpl(stateId<T>(), default)
 }
 
-public data class OrchestrationStateKey<T : OrchestrationState?>(
-    val id: OrchestrationStateId<T>, val default: T
-)
+public inline fun <reified T : OrchestrationState?> stateKey(name: String, default: T): OrchestrationStateKey<T> {
+    return OrchestrationStateKeyImpl(stateId<T>(name), default)
+}
+
+public abstract class OrchestrationStateKey<T : OrchestrationState?> {
+    public abstract val id: OrchestrationStateId<T>
+    public abstract val default: T
+}
+
+@PublishedApi
+internal data class OrchestrationStateKeyImpl<T : OrchestrationState?>(
+    override val id: OrchestrationStateId<T>, override val default: T
+) : OrchestrationStateKey<T>()

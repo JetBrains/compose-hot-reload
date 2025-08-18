@@ -97,7 +97,9 @@ public suspend fun launchOnStop(action: suspend Task<*>.(error: Throwable) -> Un
     return currentTask().launchOnStop("${task.name}.launchOnStop", action)
 }
 
-public suspend fun isActive(): Boolean = coroutineContext[Task]?.isActive() ?: false
+public suspend fun isActive(): Boolean = coroutineContext.isActive()
+
+public suspend fun CoroutineContext.isActive(): Boolean = this[Task]?.isActive() ?: hasActiveJob()
 
 public fun <T> Continuation<T>.resumeWith(result: Try<T>) {
     resumeWith(result.toResult())

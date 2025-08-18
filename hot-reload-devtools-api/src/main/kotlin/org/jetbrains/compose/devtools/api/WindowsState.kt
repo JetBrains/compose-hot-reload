@@ -16,8 +16,9 @@ import org.jetbrains.compose.reload.core.type
 import org.jetbrains.compose.reload.core.writeString
 import org.jetbrains.compose.reload.orchestration.OrchestrationState
 import org.jetbrains.compose.reload.orchestration.OrchestrationStateEncoder
+import org.jetbrains.compose.reload.orchestration.OrchestrationStateId
 import org.jetbrains.compose.reload.orchestration.OrchestrationStateKey
-import org.jetbrains.compose.reload.orchestration.stateKey
+import org.jetbrains.compose.reload.orchestration.stateId
 
 public data class WindowsState(
     val windows: Map<WindowId, WindowState>
@@ -31,8 +32,9 @@ public data class WindowsState(
         val isAlwaysOnTop: Boolean
     )
 
-    public companion object {
-        public val key: OrchestrationStateKey<WindowsState> = stateKey(WindowsState(emptyMap()))
+    public companion object Key : OrchestrationStateKey<WindowsState>() {
+        override val id: OrchestrationStateId<WindowsState> = stateId()
+        override val default: WindowsState = WindowsState(emptyMap())
     }
 }
 

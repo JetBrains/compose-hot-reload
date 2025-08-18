@@ -23,6 +23,7 @@ import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.currentCoroutineContext
 import org.jetbrains.compose.reload.core.exceptionOrNull
 import org.jetbrains.compose.reload.core.invokeOnError
 import org.jetbrains.compose.reload.core.isActive
@@ -222,10 +223,12 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
         override suspend fun <T : OrchestrationState?> update(
             key: OrchestrationStateKey<T>, update: (T) -> T
         ): Update<T> {
-            while (true) {
+            while (currentCoroutineContext().isActive()) {
                 val update = tryUpdate(key, update)
                 if (update != null) return update
             }
+
+            throw StoppedException()
         }
 
         override suspend fun <T : OrchestrationState?> tryUpdate(

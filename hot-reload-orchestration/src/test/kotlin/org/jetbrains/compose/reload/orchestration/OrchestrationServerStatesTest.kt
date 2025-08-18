@@ -6,20 +6,17 @@
 package org.jetbrains.compose.reload.orchestration
 
 import kotlinx.coroutines.test.runTest
-import org.jetbrains.compose.reload.core.type
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class OrchestrationServerStatesTest {
 
-    private val keyA = OrchestrationStateKey(
-        id = OrchestrationStateId(type<TestOrchestrationState>(), "a"),
-        default = TestOrchestrationState(0)
+    private val keyA = stateKey<TestOrchestrationState>(
+        "a", default = TestOrchestrationState(0)
     )
 
-    private val keyB = OrchestrationStateKey(
-        id = OrchestrationStateId(type<TestOrchestrationState>(), "b"),
-        default = TestOrchestrationState(0)
+    private val keyB = stateKey(
+        "b", default = TestOrchestrationState(0)
     )
 
     @Test

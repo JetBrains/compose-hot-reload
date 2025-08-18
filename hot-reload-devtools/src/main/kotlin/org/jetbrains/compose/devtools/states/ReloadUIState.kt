@@ -21,7 +21,7 @@ import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.Logger
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
 import org.jetbrains.compose.reload.orchestration.asFlow
 import kotlin.time.ExperimentalTime
 
@@ -36,7 +36,7 @@ sealed class ReloadUIState : State {
 
     data class Reloading(
         override val time: Instant = Clock.System.now(),
-        val request: ReloadClassesRequest? = null
+        val reloadRequestId: OrchestrationMessageId? = null
     ) : ReloadUIState()
 
     data class Failed(
@@ -58,12 +58,12 @@ fun CoroutineScope.launchReloadUIState(
 
 
     launch {
-        orchestration.states.get(ReloadState.key).collect { state ->
+        orchestration.states.get(ReloadState).collect { state ->
             val time = Instant.fromEpochMilliseconds(state.time.toEpochMilliseconds())
             when (state) {
                 is ReloadState.Ok -> ReloadUIState.Ok(time)
                 is ReloadState.Failed -> ReloadUIState.Failed(reason = state.reason, time = time, logs = errorLogs)
-                is ReloadState.Reloading -> ReloadUIState.Reloading(time)
+                is ReloadState.Reloading -> ReloadUIState.Reloading(time, state.reloadRequestId)
             }.emit()
         }
     }

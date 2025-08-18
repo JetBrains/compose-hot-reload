@@ -48,7 +48,7 @@ fun CoroutineScope.launchWindowsUIState() = launchState(WindowsUIState.Key) {
         return target
     }
 
-    orchestration.states.get(WindowsState.key).collect { state ->
+    orchestration.states.get(WindowsState).collect { state ->
         WindowsUIState(
             windows = state.windows.mapValues { (windowId, windowState) ->
                 getTargetWindowState(windowId, windowState)

@@ -9,15 +9,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.getOrThrow
-import org.jetbrains.compose.reload.core.type
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
-import org.jetbrains.compose.reload.orchestration.OrchestrationStateId
-import org.jetbrains.compose.reload.orchestration.OrchestrationStateKey
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
+import org.jetbrains.compose.reload.orchestration.stateKey
 import org.jetbrains.compose.reload.orchestration.tests.ServerForwardCompatibilityTest.StartServer.ServerPort
 import org.jetbrains.compose.reload.orchestration.utils.Isolate
 import org.jetbrains.compose.reload.orchestration.utils.IsolateContext
@@ -33,6 +31,8 @@ import org.jetbrains.compose.reload.orchestration.utils.receiveAs
 import org.jetbrains.compose.reload.orchestration.utils.runIsolateTest
 import org.jetbrains.compose.reload.orchestration.utils.send
 import org.jetbrains.compose.reload.orchestration.utils.stateKey
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
 import kotlin.test.assertEquals
 
 
@@ -40,6 +40,7 @@ import kotlin.test.assertEquals
  * Tests if an old server version is happy to accept connections from the current client version
  * (hence, if the old server is forward compatible with the new client)
  */
+@Execution(ExecutionMode.SAME_THREAD)
 class ServerForwardCompatibilityTest {
 
     class StartServer : Isolate {
@@ -102,10 +103,7 @@ class ServerForwardCompatibilityTest {
         val client = connectOrchestrationClient(Unknown, port).getOrThrow()
         log("Client connected '${client.port.awaitOrThrow()}'")
 
-        val stateKey = OrchestrationStateKey(
-            OrchestrationStateId(type<TestOrchestrationState>()),
-            default = TestOrchestrationState(0),
-        )
+        val stateKey = stateKey<TestOrchestrationState>(TestOrchestrationState(0))
 
         await("Requesting state") {
             assertEquals(stateKey.default, client.states.get(stateKey).value)

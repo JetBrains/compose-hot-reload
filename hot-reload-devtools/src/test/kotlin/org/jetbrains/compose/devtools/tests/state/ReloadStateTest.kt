@@ -9,11 +9,15 @@ import io.sellmair.evas.Events
 import io.sellmair.evas.States
 import io.sellmair.evas.set
 import io.sellmair.evas.value
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.job
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.devtools.states.ReloadUIState
+import org.jetbrains.compose.devtools.states.launchReloadStateActor
 import org.jetbrains.compose.devtools.states.launchReloadUIState
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.awaitIdle
@@ -28,6 +32,7 @@ import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.time.Duration.Companion.seconds
 
 class ReloadStateTest {
 
@@ -36,6 +41,7 @@ class ReloadStateTest {
         val orchestration = startOrchestrationServer()
 
         currentCoroutineContext().job.invokeOnCompletion { orchestration.close() }
+        launchReloadStateActor(orchestration)
         launchReloadUIState(orchestration)
         testScheduler.advanceUntilIdle()
 
@@ -51,6 +57,7 @@ class ReloadStateTest {
         testScheduler.advanceUntilIdle()
         assertIs<ReloadUIState.Ok>(ReloadUIState.value())
 
+        orchestration.stop()
         currentCoroutineContext().job.cancelChildren()
     }
 
@@ -58,6 +65,7 @@ class ReloadStateTest {
     fun `test - build started  - reload request - build finished - reload result`() = runTest(States() + Events()) {
         val orchestration = startOrchestrationServer()
         currentCoroutineContext().job.invokeOnCompletion { orchestration.close() }
+        launchReloadStateActor(orchestration)
         launchReloadUIState(orchestration)
         testScheduler.advanceUntilIdle()
 
@@ -72,17 +80,18 @@ class ReloadStateTest {
         /* Send 'Reload Request' -> Expect 'Reloading' with retained request */
         val reloadRequest = ReloadClassesRequest()
         orchestration.send(reloadRequest)
+
         reloadMainThread.awaitIdle()
         testScheduler.advanceUntilIdle()
         val reloadingState = assertIs<ReloadUIState.Reloading>(ReloadUIState.value())
-        assertEquals(reloadRequest, reloadingState.request)
+        assertEquals(reloadRequest.messageId, reloadingState.reloadRequestId)
         assertEquals(initialReloading.time, reloadingState.time)
 
         /* Send 'Build Finished' -> Still expect 'Reloading' as we're waiting for the 'Reload Result' now */
         orchestration sendAndWait OrchestrationMessage.BuildFinished()
         reloadMainThread.awaitIdle()
         testScheduler.advanceUntilIdle()
-        assertEquals(reloadRequest, assertIs<ReloadUIState.Reloading>(ReloadUIState.value()).request)
+        assertEquals(reloadRequest.messageId, assertIs<ReloadUIState.Reloading>(ReloadUIState.value()).reloadRequestId)
 
         /* Send 'ReloadClassesResult' -> Expect 'Ok' */
         orchestration sendAndWait ReloadClassesResult(
@@ -100,16 +109,16 @@ class ReloadStateTest {
     fun `test - failed reload result`() = runTest(States() + Events()) {
         val orchestration = startOrchestrationServer()
         currentCoroutineContext().job.invokeOnCompletion { orchestration.close() }
+        launchReloadStateActor(orchestration)
         launchReloadUIState(orchestration)
         testScheduler.advanceUntilIdle()
 
         val request = ReloadClassesRequest()
-        ReloadUIState.set(ReloadUIState.Reloading(request = request))
+        ReloadUIState.set(ReloadUIState.Reloading(reloadRequestId = request.messageId))
 
         /* Send failed 'Reload Result' -> Expect 'Failed' */
         orchestration sendAndWait ReloadClassesResult(
-            reloadRequestId = request.messageId,
-            isSuccess = false,
+            reloadRequestId = request.messageId, isSuccess = false,
         )
         reloadMainThread.awaitIdle()
         testScheduler.advanceUntilIdle()
@@ -122,6 +131,7 @@ class ReloadStateTest {
     fun `test - build task failure`() = runTest(States() + Events()) {
         val orchestration = startOrchestrationServer()
         currentCoroutineContext().job.invokeOnCompletion { orchestration.close() }
+        launchReloadStateActor(orchestration)
         launchReloadUIState(orchestration)
         testScheduler.advanceUntilIdle()
 

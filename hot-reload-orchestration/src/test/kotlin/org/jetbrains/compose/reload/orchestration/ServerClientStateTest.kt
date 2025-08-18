@@ -23,14 +23,12 @@ class ServerClientStateTest {
         use(server)
         use(client)
 
-        val stateA = OrchestrationStateKey(
-            id = stateId<TestOrchestrationState>("a"),
-            default = TestOrchestrationState(0)
+        val stateA = stateKey(
+            name = "a", default = TestOrchestrationState(0)
         )
 
-        val stateB = OrchestrationStateKey(
-            id = stateId<TestOrchestrationState>("b"),
-            default = TestOrchestrationState(0)
+        val stateB = stateKey(
+            name = "b", default = TestOrchestrationState(0)
         )
 
         client.update(stateA) { current ->
@@ -55,14 +53,12 @@ class ServerClientStateTest {
         use(server)
         use(client)
 
-        val stateA = OrchestrationStateKey(
-            id = stateId<TestOrchestrationState>("a"),
-            default = TestOrchestrationState(0)
+        val stateA = stateKey(
+            name = "a", default = TestOrchestrationState(0)
         )
 
-        val stateB = OrchestrationStateKey(
-            id = stateId<TestOrchestrationState>("b"),
-            default = TestOrchestrationState(0)
+        val stateB = stateKey(
+            name = "b", default = TestOrchestrationState(0)
         )
 
         server.update(stateA) { current ->
@@ -91,10 +87,7 @@ class ServerClientStateTest {
         use(server)
         use(client)
 
-        val stateKey = OrchestrationStateKey(
-            id = stateId<TestOrchestrationState?>(),
-            default = null
-        )
+        val stateKey = stateKey<TestOrchestrationState?>(default = null)
 
         assertEquals(client.states.get(stateKey).value, null)
         assertEquals(server.states.get(stateKey).value, null)
@@ -116,8 +109,7 @@ class ServerClientStateTest {
         use(server)
         use(client)
 
-        val stateKey = OrchestrationStateKey(
-            id = stateId<TestOrchestrationState>(),
+        val stateKey = stateKey(
             default = TestOrchestrationState(0)
         )
 

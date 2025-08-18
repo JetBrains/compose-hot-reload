@@ -20,4 +20,8 @@ internal class Binary(val bytes: ByteArray) : Serializable {
         if (other.hashCode != hashCode) return false
         return bytes.contentEquals(other.bytes)
     }
+
+    companion object {
+        const val serialVersionUID: Long = 0L
+    }
 }

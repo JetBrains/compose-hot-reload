@@ -22,7 +22,7 @@ data class ReloadCountUIState(
 }
 
 internal fun CoroutineScope.launchReloadCountUIState() = launchState(ReloadCountUIState.Key) {
-    ReloadCountState.key.asFlow().collectLatest { state ->
+    ReloadCountState.asFlow().collectLatest { state ->
         ReloadCountUIState(state.successfulReloads, state.failedReloads).emit()
     }
 }

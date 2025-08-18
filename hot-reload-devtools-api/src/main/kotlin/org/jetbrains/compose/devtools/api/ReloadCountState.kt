@@ -11,18 +11,18 @@ import org.jetbrains.compose.reload.core.tryDecode
 import org.jetbrains.compose.reload.core.type
 import org.jetbrains.compose.reload.orchestration.OrchestrationState
 import org.jetbrains.compose.reload.orchestration.OrchestrationStateEncoder
+import org.jetbrains.compose.reload.orchestration.OrchestrationStateId
 import org.jetbrains.compose.reload.orchestration.OrchestrationStateKey
-import org.jetbrains.compose.reload.orchestration.stateKey
+import org.jetbrains.compose.reload.orchestration.stateId
 
 public data class ReloadCountState(
     val successfulReloads: Int = 0,
     val failedReloads: Int = 0
 ) : OrchestrationState {
 
-    public companion object {
-        public val key: OrchestrationStateKey<ReloadCountState> = stateKey(
-            default = ReloadCountState()
-        )
+    public companion object Key : OrchestrationStateKey<ReloadCountState>() {
+        override val id: OrchestrationStateId<ReloadCountState> = stateId()
+        override val default: ReloadCountState = ReloadCountState()
     }
 }
 

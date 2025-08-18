@@ -182,13 +182,28 @@ internal data class OrchestrationStateUpdate(
     val expectedValue: Binary?,
     val updatedValue: Binary
 ) : OrchestrationPackage(), Serializable {
-    data class Response(val accepted: Boolean) : OrchestrationPackage()
+    companion object {
+        const val serialVersionUID: Long = 0L
+    }
+    data class Response(val accepted: Boolean) : OrchestrationPackage() {
+        companion object {
+            const val serialVersionUID: Long = 0L
+        }
+    }
 }
 
 internal data class OrchestrationStateRequest(
     val stateId: OrchestrationStateId<*>
-) : OrchestrationPackage(), Serializable
+) : OrchestrationPackage(), Serializable {
+    companion object {
+        const val serialVersionUID: Long = 0L
+    }
+}
 
 internal data class OrchestrationStateValue(
     val stateId: OrchestrationStateId<*>, val value: Binary?
-) : OrchestrationPackage(), Serializable
+) : OrchestrationPackage(), Serializable {
+    companion object {
+        const val serialVersionUID: Long = 0L
+    }
+}
