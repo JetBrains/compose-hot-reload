@@ -6,6 +6,7 @@ META-INF/hot-reload-analysis.kotlin_module
 META-INF/hot-reload-annotations.kotlin_module
 META-INF/hot-reload-core.kotlin_module
 META-INF/hot-reload-core_kotlinxCoroutinesBridge.kotlin_module
+META-INF/hot-reload-core_kotlinxCoroutinesExtensions.kotlin_module
 META-INF/hot-reload-orchestration.kotlin_module
 META-INF/maven/
 META-INF/maven/org.javassist/
