@@ -12,7 +12,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 
 @InternalHotReloadApi
-public fun encode(encode: DataOutputStream.() -> Unit): ByteArray {
+public fun encodeByteArray(encode: DataOutputStream.() -> Unit): ByteArray {
     val baos = ByteArrayOutputStream()
     val daos = DataOutputStream(baos)
     daos.encode()
@@ -22,6 +22,11 @@ public fun encode(encode: DataOutputStream.() -> Unit): ByteArray {
 @InternalHotReloadApi
 public fun <T> ByteArray.decode(decode: DataInputStream.() -> T): T {
     return DataInputStream(ByteArrayInputStream(this)).decode()
+}
+
+@InternalHotReloadApi
+public fun <T> ByteArray.tryDecode(decode: DataInputStream.() -> T): Try<T> = Try {
+    decode(decode)
 }
 
 @InternalHotReloadApi

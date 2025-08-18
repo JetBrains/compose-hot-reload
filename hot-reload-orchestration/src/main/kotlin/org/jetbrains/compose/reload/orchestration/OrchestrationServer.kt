@@ -99,6 +99,11 @@ public fun OrchestrationServer(): OrchestrationServer {
             return states.update(key, update)
         }
 
+        /* Server will always be able to update the state, as owner */
+        override suspend fun <T : OrchestrationState?> tryUpdate(
+            key: OrchestrationStateKey<T>, update: (T) -> T
+        ): Update<T> = update(key, update)
+
         override suspend fun bind() {
             bind.complete(Unit)
             port.await()

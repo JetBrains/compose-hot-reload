@@ -9,9 +9,10 @@ package org.jetbrains.compose.devtools.api
 
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.Type
-import org.jetbrains.compose.reload.core.decode
+import org.jetbrains.compose.reload.core.encodeByteArray
 import org.jetbrains.compose.reload.core.readOptionalFrame
 import org.jetbrains.compose.reload.core.readString
+import org.jetbrains.compose.reload.core.tryDecode
 import org.jetbrains.compose.reload.core.type
 import org.jetbrains.compose.reload.core.writeOptionalFrame
 import org.jetbrains.compose.reload.core.writeString
@@ -58,35 +59,33 @@ internal class ReloadStateEncoder : OrchestrationStateEncoder<ReloadState> {
     }
 
     override fun encode(state: ReloadState): ByteArray = when (state) {
-        is ReloadState.Ok -> org.jetbrains.compose.reload.core.encode {
+        is ReloadState.Ok -> encodeByteArray {
             writeByte(TYPE_OK)
             writeLong(state.time.toEpochMilliseconds())
         }
 
-        is ReloadState.Failed -> org.jetbrains.compose.reload.core.encode {
+        is ReloadState.Failed -> encodeByteArray {
             writeByte(TYPE_FAILED)
             writeLong(state.time.toEpochMilliseconds())
             writeString(state.reason)
         }
 
-        is ReloadState.Reloading -> org.jetbrains.compose.reload.core.encode {
+        is ReloadState.Reloading -> encodeByteArray {
             writeByte(TYPE_RELOADING)
             writeLong(state.time.toEpochMilliseconds())
             writeOptionalFrame(state.reloadRequestId?.encodeToByteArray())
         }
     }
 
-    override fun decode(data: ByteArray): Try<ReloadState> = Try {
-        data.decode {
-            when (readByte().toInt()) {
-                TYPE_OK -> ReloadState.Ok(Instant.fromEpochMilliseconds(readLong()))
-                TYPE_RELOADING -> ReloadState.Reloading(
-                    time = Instant.fromEpochMilliseconds(readLong()),
-                    reloadRequestId = readOptionalFrame()?.let(::OrchestrationMessageId)
-                )
-                TYPE_FAILED -> ReloadState.Failed(Instant.fromEpochMilliseconds(readLong()), readString())
-                else -> throw IllegalArgumentException("Unknown type: $type")
-            }
+    override fun decode(data: ByteArray): Try<ReloadState> = data.tryDecode {
+        when (readByte().toInt()) {
+            TYPE_OK -> ReloadState.Ok(Instant.fromEpochMilliseconds(readLong()))
+            TYPE_RELOADING -> ReloadState.Reloading(
+                time = Instant.fromEpochMilliseconds(readLong()),
+                reloadRequestId = readOptionalFrame()?.let(::OrchestrationMessageId)
+            )
+            TYPE_FAILED -> ReloadState.Failed(Instant.fromEpochMilliseconds(readLong()), readString())
+            else -> throw IllegalArgumentException("Unknown type: $type")
         }
     }
 }

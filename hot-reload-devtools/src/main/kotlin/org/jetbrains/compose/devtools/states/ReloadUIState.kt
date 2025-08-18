@@ -69,7 +69,7 @@ fun CoroutineScope.launchReloadUIState(
     }
 
     launch {
-        ReloadCountState.flow().collectLatest { _ ->
+        ReloadCountUIState.flow().collectLatest { _ ->
             errorLogs.clear()
             orchestration.asFlow().filterIsInstance<LogMessage>().collect { log ->
                 if (log.environment != Environment.devTools && log.level >= Logger.Level.Error) {

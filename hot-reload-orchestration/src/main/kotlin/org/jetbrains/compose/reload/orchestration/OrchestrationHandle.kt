@@ -26,6 +26,7 @@ public interface OrchestrationHandle : AutoCloseable, Task<Unit> {
 
     public suspend infix fun send(message: OrchestrationMessage)
     public suspend fun <T : OrchestrationState?> update(key: OrchestrationStateKey<T>, update: (T) -> T): Update<T>
+    public suspend fun <T : OrchestrationState?> tryUpdate(key: OrchestrationStateKey<T>, update: (T) -> T): Update<T>?
 
     override fun close() {
         stop()

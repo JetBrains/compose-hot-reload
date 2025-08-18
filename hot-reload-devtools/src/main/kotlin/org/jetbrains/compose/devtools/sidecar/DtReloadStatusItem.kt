@@ -35,7 +35,7 @@ import kotlinx.datetime.format
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.devtools.Tag
-import org.jetbrains.compose.devtools.states.BuildSystemState
+import org.jetbrains.compose.devtools.states.BuildSystemUIState
 import org.jetbrains.compose.devtools.states.ReloadUIState
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
@@ -62,7 +62,7 @@ fun DtReloadStatusItem() {
                 )
             },
             content = {
-                val buildSystem = BuildSystemState.composeValue()?.buildSystem
+                val buildSystem = BuildSystemUIState.composeValue()?.buildSystem
                 if (buildSystem != null) {
                     DtBuildSystemLogo(buildSystem, modifier = Modifier.padding(2.dp))
                 }

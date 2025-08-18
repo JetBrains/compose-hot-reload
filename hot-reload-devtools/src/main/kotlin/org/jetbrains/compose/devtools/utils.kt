@@ -10,10 +10,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.reload.core.Disposable
 import org.jetbrains.compose.reload.core.invokeOnStop
+import org.jetbrains.compose.reload.orchestration.OrchestrationState
+import org.jetbrains.compose.reload.orchestration.OrchestrationStateKey
 
 @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
 internal fun <T> Flow<T>.conflateAsList(): Flow<List<T>> {
@@ -55,4 +58,8 @@ internal suspend fun <T> useDisposableStoppable(disposable: Disposable, action: 
         disposable.dispose()
         stop.dispose()
     }
+}
+
+fun <T : OrchestrationState?> OrchestrationStateKey<T>.asFlow(): Flow<T> = channelFlow {
+    orchestration.states.get(this@asFlow).collect { send(it) }
 }

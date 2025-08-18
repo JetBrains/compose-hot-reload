@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.sellmair.evas.compose.composeValue
 import org.jetbrains.compose.devtools.Tag
-import org.jetbrains.compose.devtools.states.UIErrorState
+import org.jetbrains.compose.devtools.states.ErrorUIState
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtImages
 import org.jetbrains.compose.devtools.theme.DtTextStyles
@@ -33,7 +33,7 @@ import org.jetbrains.compose.devtools.widgets.DtText
 
 @Composable
 fun DtRuntimeErrorStatusItem() {
-    val error = UIErrorState.composeValue()
+    val error = ErrorUIState.composeValue()
 
     error.errors.forEach { error ->
         var isDialogVisible by remember { mutableStateOf(false) }

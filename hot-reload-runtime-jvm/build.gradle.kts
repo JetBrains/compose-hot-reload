@@ -35,6 +35,8 @@ dependencies {
     compileOnly(compose.runtime)
     compileOnly(compose.desktop.common)
 
+    implementation(project(":hot-reload-devtools-api"))
+
     compileOnly(project(":hot-reload-core"))
     compileOnly(project(":hot-reload-agent"))
     compileOnly(project(":hot-reload-orchestration"))

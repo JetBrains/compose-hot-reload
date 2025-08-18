@@ -8,7 +8,7 @@ package org.jetbrains.compose.reload.orchestration
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.Type
 import org.jetbrains.compose.reload.core.decode
-import org.jetbrains.compose.reload.core.encode
+import org.jetbrains.compose.reload.core.encodeByteArray
 import org.jetbrains.compose.reload.core.type
 import java.io.Serializable
 
@@ -30,7 +30,7 @@ public data class OrchestrationStateId<T : OrchestrationState?>(
         }
     }
 
-    internal fun encodeToByteArray(): ByteArray = encode {
+    internal fun encodeToByteArray(): ByteArray = encodeByteArray {
         val encodedType = type.signature.encodeToByteArray()
         writeInt(encodedType.size)
         write(encodedType)

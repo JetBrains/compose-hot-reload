@@ -14,15 +14,15 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asFlow
 import kotlin.time.Duration.Companion.milliseconds
 
-data class ConsoleLogState(val logs: List<String>) : State {
-    companion object Key : State.Key<ConsoleLogState> {
-        override val default: ConsoleLogState = ConsoleLogState(emptyList())
+data class ConsoleLogUIState(val logs: List<String>) : State {
+    companion object Key : State.Key<ConsoleLogUIState> {
+        override val default: ConsoleLogUIState = ConsoleLogUIState(emptyList())
         const val LIMIT = 4096
     }
 
 }
 
-internal fun CoroutineScope.launchConsoleLogState() = launchState(ConsoleLogState) {
+internal fun CoroutineScope.launchConsoleLogUIState() = launchState(ConsoleLogUIState) {
     val logDeque = ArrayDeque<String>()
 
     orchestration.asFlow().collect { event ->
@@ -39,8 +39,8 @@ internal fun CoroutineScope.launchConsoleLogState() = launchState(ConsoleLogStat
             logDeque.add(event.toLog())
         }
 
-        if (logDeque.size > ConsoleLogState.LIMIT) logDeque.removeFirst()
-        ConsoleLogState(logs = logDeque.toList()).emit()
+        if (logDeque.size > ConsoleLogUIState.LIMIT) logDeque.removeFirst()
+        ConsoleLogUIState(logs = logDeque.toList()).emit()
     }
 }
 

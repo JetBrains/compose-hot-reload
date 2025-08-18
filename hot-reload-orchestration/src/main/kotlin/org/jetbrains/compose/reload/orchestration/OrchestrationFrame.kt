@@ -10,7 +10,7 @@ package org.jetbrains.compose.reload.orchestration
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.decode
 import org.jetbrains.compose.reload.core.decodeSerializableObject
-import org.jetbrains.compose.reload.core.encode
+import org.jetbrains.compose.reload.core.encodeByteArray
 import org.jetbrains.compose.reload.core.encodeSerializableObject
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.toLeft
@@ -68,7 +68,7 @@ internal fun ByteArray.decodeStateRequest(): OrchestrationStateRequest = Orchest
 
 internal fun OrchestrationStateUpdate.encodeToFrame() = OrchestrationFrame(
     type = OrchestrationPackageType.StateUpdate,
-    data = encode {
+    data = encodeByteArray {
         val encodedStateId = stateId.encodeToByteArray()
         writeInt(encodedStateId.size)
         write(encodedStateId)
@@ -96,7 +96,7 @@ internal fun ByteArray.decodeStateUpdate(): OrchestrationStateUpdate = decode {
 
 internal fun OrchestrationStateUpdate.Response.encodeToFrame() = OrchestrationFrame(
     type = OrchestrationPackageType.StateUpdateResponse,
-    data = encode { writeBoolean(accepted) }
+    data = encodeByteArray { writeBoolean(accepted) }
 )
 
 internal fun ByteArray.decodeStateUpdateResponse() = OrchestrationStateUpdate.Response(
@@ -105,7 +105,7 @@ internal fun ByteArray.decodeStateUpdateResponse() = OrchestrationStateUpdate.Re
 
 internal fun OrchestrationStateValue.encodeToFrame() = OrchestrationFrame(
     type = OrchestrationPackageType.StateValue,
-    data = encode {
+    data = encodeByteArray {
         val encodedStateId = stateId.encodeToByteArray()
         writeInt(encodedStateId.size)
         write(encodedStateId)

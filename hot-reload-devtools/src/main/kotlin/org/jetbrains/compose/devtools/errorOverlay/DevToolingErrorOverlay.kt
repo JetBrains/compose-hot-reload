@@ -45,7 +45,7 @@ import org.jetbrains.compose.devtools.sendAsync
 import org.jetbrains.compose.devtools.sidecar.DtConsole
 import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.states.UIErrorDescription
-import org.jetbrains.compose.devtools.states.UIErrorState
+import org.jetbrains.compose.devtools.states.ErrorUIState
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtImages
@@ -63,7 +63,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownR
 
 @Composable
 internal fun ApplicationScope.DevToolingErrorOverlay(windowId: WindowId, windowState: WindowState) {
-    val uiExceptionState by UIErrorState.composeFlow()
+    val uiExceptionState by ErrorUIState.composeFlow()
         .map { value -> value.errors[windowId] }
         .collectAsState(initial = null)
 

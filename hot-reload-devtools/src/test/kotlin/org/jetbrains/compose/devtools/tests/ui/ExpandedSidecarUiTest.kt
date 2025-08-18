@@ -27,11 +27,11 @@ import androidx.compose.ui.test.performClick
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.sidecar.DtExpandedSidecarWindowContent
 import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
-import org.jetbrains.compose.devtools.states.BuildSystemState
-import org.jetbrains.compose.devtools.states.ReloadCountState
+import org.jetbrains.compose.devtools.states.BuildSystemUIState
+import org.jetbrains.compose.devtools.states.ReloadCountUIState
 import org.jetbrains.compose.devtools.states.ReloadUIState
 import org.jetbrains.compose.devtools.states.UIErrorDescription
-import org.jetbrains.compose.devtools.states.UIErrorState
+import org.jetbrains.compose.devtools.states.ErrorUIState
 import org.jetbrains.compose.devtools.theme.DtImages
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.WindowId
@@ -62,10 +62,10 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
     fun `test - reload counter`() = runSidecarUiTest {
         onNodeWithTag(Tag.ReloadCounterText).assertDoesNotExist()
 
-        states.updateState(ReloadCountState.Key) { ReloadCountState(1) }
+        states.updateState(ReloadCountUIState.Key) { ReloadCountUIState(1) }
         awaitNodeWithTag(Tag.ReloadCounterText).assertTextContains("1", substring = true)
 
-        states.updateState(ReloadCountState.Key) { ReloadCountState(2) }
+        states.updateState(ReloadCountUIState.Key) { ReloadCountUIState(2) }
         awaitNodeWithTag(Tag.ReloadCounterText).assertTextContains("2", substring = true)
     }
 
@@ -96,12 +96,12 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
 
         onNodeWithTag(Tag.BuildSystemLogo).assertDoesNotExist()
 
-        states.updateState(BuildSystemState.Key) { BuildSystemState(BuildSystem.Gradle) }
+        states.updateState(BuildSystemUIState.Key) { BuildSystemUIState(BuildSystem.Gradle) }
         awaitNodeWithTag(Tag.BuildSystemLogo)
             .assertExists()
             .assertContentDescriptionContains(DtImages.Image.GRADLE_LOGO.name)
 
-        states.updateState(BuildSystemState.Key) { BuildSystemState(BuildSystem.Amper) }
+        states.updateState(BuildSystemUIState.Key) { BuildSystemUIState(BuildSystem.Amper) }
         awaitNodeWithTag(Tag.BuildSystemLogo)
             .assertExists()
             .assertContentDescriptionContains(DtImages.Image.AMPER_LOGO.name)
@@ -113,8 +113,8 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
         onNodeWithTag(Tag.RuntimeErrorSymbol).assertDoesNotExist()
         onNodeWithTag(Tag.RuntimeErrorText).assertDoesNotExist()
 
-        states.updateState(UIErrorState.Key) {
-            UIErrorState(
+        states.updateState(ErrorUIState.Key) {
+            ErrorUIState(
                 mapOf(
                     WindowId.create() to UIErrorDescription(
                         title = "Uh-oh", message = "Something went wrong", listOf()
@@ -164,7 +164,7 @@ class ExpandedSidecarUiTest : SidecarBodyUiTest() {
         onNodeWithTag(Tag.ReloadStatusText)
             .assertDoesNotExist()
 
-        states.updateState(ReloadCountState.Key) { ReloadCountState(1) }
+        states.updateState(ReloadCountUIState.Key) { ReloadCountUIState(1) }
 
         awaitNodeWithTag(Tag.ReloadCounterText)
             .assertTextContains("1", substring = true)

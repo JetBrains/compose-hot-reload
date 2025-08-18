@@ -223,11 +223,18 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
             key: OrchestrationStateKey<T>, update: (T) -> T
         ): Update<T> {
             while (true) {
-                val encodedUpdate = states.encodeUpdate(key, update)
-                if (stateUpdatesActor(encodedUpdate.encoded)) {
-                    return Update(encodedUpdate.previousState, encodedUpdate.updatedState)
-                }
+                val update = tryUpdate(key, update)
+                if (update != null) return update
             }
+        }
+
+        override suspend fun <T : OrchestrationState?> tryUpdate(
+            key: OrchestrationStateKey<T>, update: (T) -> T
+        ): Update<T>? {
+            val encodedUpdate = states.encodeUpdate(key, update)
+            return if (stateUpdatesActor(encodedUpdate.encoded)) {
+                Update(encodedUpdate.previousState, encodedUpdate.updatedState)
+            } else null
         }
     }
 }
