@@ -15,8 +15,9 @@ plugins {
 }
 
 kotlin {
+    explicitApi()
+
     compilerOptions {
-        explicitApi()
         compilerOptions {
             optIn.add("org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi")
         }
@@ -35,7 +36,7 @@ dependencies {
 }
 
 kotlin {
-    target.compilations.create("benchmark") {
+    target.compilations.create("benchmark").apply {
         associateWith(target.compilations.getByName("main"))
         defaultSourceSet {
             dependencies {
@@ -50,7 +51,7 @@ kotlin {
     Those classes will be included in the main jar and regular sources can compile against the
     API of this bridge.
     */
-    target.compilations.create("kotlinxCoroutinesBridge") {
+    target.compilations.create("kotlinxCoroutinesBridge").apply {
         val kotlinxBridgeClasses = output.classesDirs
 
         project.dependencies {
@@ -69,7 +70,23 @@ kotlin {
 
         /* Include bridges in the main jar */
         tasks.jar.configure {
-            from(this@create.output.allOutputs)
+            from(this@apply.output.allOutputs)
+        }
+    }
+
+    /*
+    Create a compilation which contains extensions for kotlinx.coroutines.
+    These sources are compiled in isolation and later packaged into the main jar, effectively
+    being available to everyone depending on the core module.
+     */
+    target.compilations.create("kotlinxCoroutinesExtensions").apply {
+        project.dependencies {
+            configurations.compileOnlyConfiguration(deps.coroutines.core)
+            configurations.compileOnlyConfiguration(target.compilations.getByName("main").output.allOutputs)
+        }
+
+        tasks.jar.configure {
+            from(this@apply.output.allOutputs)
         }
     }
 }
