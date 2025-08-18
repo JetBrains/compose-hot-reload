@@ -22,7 +22,7 @@ import io.sellmair.evas.compose.composeValue
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.states.BuildSystemState
 import org.jetbrains.compose.devtools.states.ReloadCountState
-import org.jetbrains.compose.devtools.states.ReloadState
+import org.jetbrains.compose.devtools.states.ReloadUIState
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtImages
@@ -54,7 +54,7 @@ fun DtExpandedReloadCounterStatusItem() {
 
 @Composable
 fun DtMinimisedReloadCounterStatusItem(showDefaultValue: Boolean = false) {
-    val reloadState = ReloadState.composeValue()
+    val reloadState = ReloadUIState.composeValue()
     val countState = ReloadCountState.composeValue()
 
     val scale = when {
@@ -63,7 +63,7 @@ fun DtMinimisedReloadCounterStatusItem(showDefaultValue: Boolean = false) {
     }
 
     when (reloadState) {
-        is ReloadState.Reloading -> {
+        is ReloadUIState.Reloading -> {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.scale(scale).horizontalScroll(rememberScrollState())

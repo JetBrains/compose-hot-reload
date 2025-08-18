@@ -116,7 +116,6 @@ internal class OrchestrationClientStates(
 
     private val decodedStates = hashMapOf<OrchestrationStateId<*>, MutableState<Any?>>()
 
-
     fun update(update: OrchestrationStateValue): Unit = lock.withLock {
         update(update.stateId, update.value)
     }

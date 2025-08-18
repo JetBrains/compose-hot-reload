@@ -37,7 +37,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
-import org.jetbrains.compose.devtools.states.ReloadState
+import org.jetbrains.compose.devtools.states.ReloadUIState
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.reload.core.Update
@@ -50,26 +50,26 @@ fun animateReloadStatusColor(
     okColor: Color = DtColors.statusColorOk,
     errorColor: Color = DtColors.statusColorError,
 ): State<Color> {
-    val initialColor = when (ReloadState.composeValue()) {
-        is ReloadState.Reloading -> reloadingColor
-        is ReloadState.Failed -> errorColor
+    val initialColor = when (ReloadUIState.composeValue()) {
+        is ReloadUIState.Reloading -> reloadingColor
+        is ReloadUIState.Failed -> errorColor
         else -> idleColor
     }
     val color = remember { Animatable(initialColor) }
-    val state = ReloadState.composeFlow()
+    val state = ReloadUIState.composeFlow()
 
     LaunchedEffect(idleColor, reloadingColor, okColor, errorColor) {
         state.changes().collectLatest { (_, state) ->
             when (state) {
-                is ReloadState.Reloading -> {
+                is ReloadUIState.Reloading -> {
                     color.animateTo(reloadingColor)
                 }
 
-                is ReloadState.Failed -> {
+                is ReloadUIState.Failed -> {
                     color.animateTo(errorColor)
                 }
 
-                is ReloadState.Ok -> {
+                is ReloadUIState.Ok -> {
                     color.animateTo(okColor)
                     delay(1.seconds)
                     color.animateTo(idleColor)
@@ -89,11 +89,11 @@ fun animatedReloadStatusBrush(
     idleColor: Color = Color.LightGray,
     resetErrorState: Boolean = false,
 ): Brush {
-    val state = ReloadState.composeValue()
+    val state = ReloadUIState.composeValue()
     var isIdle by remember { mutableStateOf(true) }
 
     LaunchedEffect(state) {
-        if (state is ReloadState.Ok || state is ReloadState.Failed) {
+        if (state is ReloadUIState.Ok || state is ReloadUIState.Failed) {
             delay(1.seconds)
             isIdle = true
         } else {
@@ -103,17 +103,17 @@ fun animatedReloadStatusBrush(
 
     val movingColorA by animateColorAsState(
         when (state) {
-            is ReloadState.Ok -> if (isIdle) idleColor else okColor
-            is ReloadState.Failed -> if (isIdle && resetErrorState) idleColor else errorColor
-            is ReloadState.Reloading -> DtColors.statusColorOrange1
+            is ReloadUIState.Ok -> if (isIdle) idleColor else okColor
+            is ReloadUIState.Failed -> if (isIdle && resetErrorState) idleColor else errorColor
+            is ReloadUIState.Reloading -> DtColors.statusColorOrange1
         }
     )
 
     val movingColorB by animateColorAsState(
         when (state) {
-            is ReloadState.Ok -> if (isIdle) idleColor else okColor
-            is ReloadState.Failed -> if (isIdle && resetErrorState) idleColor else errorColor
-            is ReloadState.Reloading -> DtColors.statusColorOrange2
+            is ReloadUIState.Ok -> if (isIdle) idleColor else okColor
+            is ReloadUIState.Failed -> if (isIdle && resetErrorState) idleColor else errorColor
+            is ReloadUIState.Reloading -> DtColors.statusColorOrange2
         }
     )
 

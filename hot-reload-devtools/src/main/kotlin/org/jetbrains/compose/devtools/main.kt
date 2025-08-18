@@ -29,7 +29,8 @@ import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.states.WindowsState
 import org.jetbrains.compose.devtools.states.launchConsoleLogState
 import org.jetbrains.compose.devtools.states.launchReloadCountState
-import org.jetbrains.compose.devtools.states.launchReloadState
+import org.jetbrains.compose.devtools.states.launchReloadStateActor
+import org.jetbrains.compose.devtools.states.launchReloadUIState
 import org.jetbrains.compose.devtools.states.launchUIErrorState
 import org.jetbrains.compose.devtools.states.launchWindowsState
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
@@ -51,8 +52,9 @@ internal fun CoroutineScope.launchApplicationStates() {
     launchConsoleLogState()
     launchWindowsState()
     launchUIErrorState()
-    launchReloadState()
     launchReloadCountState()
+    launchReloadUIState()
+    launchReloadStateActor()
 }
 
 

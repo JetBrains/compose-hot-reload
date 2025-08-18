@@ -35,9 +35,9 @@ data class ReloadCountState(
 
 
 internal fun CoroutineScope.launchReloadCountState() = launchState(ReloadCountState.Key) {
-    ReloadState.flow().buffer().distinctUntilChanged().onEach { reloadState ->
+    ReloadUIState.flow().buffer().distinctUntilChanged().onEach { reloadState ->
         when (reloadState) {
-            is ReloadState.Failed -> ReloadCountState.update { count ->
+            is ReloadUIState.Failed -> ReloadCountState.update { count ->
                 count.copy(failedReloads = count.failedReloads + 1)
             }
             else -> Unit

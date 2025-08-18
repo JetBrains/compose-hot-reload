@@ -19,7 +19,7 @@ import org.jetbrains.compose.devtools.sidecar.DtMinimizedSidecarWindowContent
 import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.states.BuildSystemState
 import org.jetbrains.compose.devtools.states.ReloadCountState
-import org.jetbrains.compose.devtools.states.ReloadState
+import org.jetbrains.compose.devtools.states.ReloadUIState
 import org.jetbrains.compose.devtools.theme.DtImages
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.junit.jupiter.api.Test
@@ -61,7 +61,7 @@ class MinimisedSidecarUiTest : SidecarBodyUiTest() {
 
     @Test
     fun `test - reload status`() = runSidecarUiTest {
-        states.updateState(ReloadState.Key) { ReloadState.Reloading() }
+        states.updateState(ReloadUIState.Key) { ReloadUIState.Reloading() }
         onNodeWithTag(Tag.BuildSystemLogo).assertDoesNotExist()
 
         states.updateState(BuildSystemState.Key) { BuildSystemState(BuildSystem.Gradle) }

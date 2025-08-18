@@ -45,3 +45,19 @@ public fun DataInputStream.readFrame(): ByteArray {
     val size = readInt()
     return readNBytes(size)
 }
+
+public fun DataOutputStream.writeOptionalFrame(bytes: ByteArray?) {
+    if (bytes == null) {
+        writeInt(-1)
+        return
+    }
+
+    writeFrame(bytes)
+}
+
+@InternalHotReloadApi
+public fun DataInputStream.readOptionalFrame(): ByteArray? {
+    val size = readInt()
+    if (size < 0) return null
+    return readNBytes(size)
+}

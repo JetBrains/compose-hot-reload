@@ -21,7 +21,7 @@ import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.sidecar.DtDetachedSidecarContent
 import org.jetbrains.compose.devtools.states.BuildSystemState
 import org.jetbrains.compose.devtools.states.ReloadCountState
-import org.jetbrains.compose.devtools.states.ReloadState
+import org.jetbrains.compose.devtools.states.ReloadUIState
 import org.jetbrains.compose.devtools.states.UIErrorDescription
 import org.jetbrains.compose.devtools.states.UIErrorState
 import org.jetbrains.compose.devtools.theme.DtImages
@@ -58,13 +58,13 @@ class DetachedSidecarUiTest : SidecarBodyUiTest() {
 
     @Test
     fun `test - reload status`() = runSidecarUiTest {
-        states.updateState(ReloadState.Key) { ReloadState.Ok() }
+        states.updateState(ReloadUIState.Key) { ReloadUIState.Ok() }
         awaitNodeWithTag(Tag.ReloadStatusSymbol).assertExists()
             .assertContentDescriptionContains("Success")
         awaitNodeWithTag(Tag.ReloadStatusText).assertExists()
             .assertTextContains("Success", substring = true)
 
-        states.updateState(ReloadState.Key) { ReloadState.Failed("Oh-oh") }
+        states.updateState(ReloadUIState.Key) { ReloadUIState.Failed("Oh-oh") }
         awaitNodeWithTag(Tag.ReloadStatusSymbol).assertExists()
             .assertContentDescriptionContains("Error")
         awaitNodeWithTag(Tag.ReloadStatusText).assertExists()
@@ -72,7 +72,7 @@ class DetachedSidecarUiTest : SidecarBodyUiTest() {
             .assertTextContains("Oh-oh", substring = true)
 
 
-        states.updateState(ReloadState.Key) { ReloadState.Reloading() }
+        states.updateState(ReloadUIState.Key) { ReloadUIState.Reloading() }
         assertEquals(
             awaitNodeWithTag(Tag.ReloadStatusSymbol).assertExists()
                 .fetchSemanticsNode().config.getOrNull(SemanticsProperties.ProgressBarRangeInfo),
