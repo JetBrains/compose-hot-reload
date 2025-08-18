@@ -9,6 +9,7 @@ import org.jetbrains.compose.reload.core.Broadcast
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.Task
 import org.jetbrains.compose.reload.core.Try
+import org.jetbrains.compose.reload.core.Update
 import org.jetbrains.compose.reload.core.flatten
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.invokeOnCompletion
@@ -21,8 +22,11 @@ private val timeout = 15.seconds
 public interface OrchestrationHandle : AutoCloseable, Task<Unit> {
     public val port: Future<Int>
     public val messages: Broadcast<OrchestrationMessage>
+    public val states: OrchestrationStates
 
     public suspend infix fun send(message: OrchestrationMessage)
+    public suspend fun <T : OrchestrationState?> update(key: OrchestrationStateKey<T>, update: (T) -> T): Update<T>
+    public suspend fun <T : OrchestrationState?> tryUpdate(key: OrchestrationStateKey<T>, update: (T) -> T): Update<T>?
 
     override fun close() {
         stop()

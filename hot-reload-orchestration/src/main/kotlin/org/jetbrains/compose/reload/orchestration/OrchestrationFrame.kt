@@ -8,8 +8,11 @@
 package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.Try
+import org.jetbrains.compose.reload.core.decode
 import org.jetbrains.compose.reload.core.decodeSerializableObject
+import org.jetbrains.compose.reload.core.encodeByteArray
 import org.jetbrains.compose.reload.core.encodeSerializableObject
+import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.core.toRight
 import org.jetbrains.compose.reload.orchestration.OrchestrationPackage.Introduction
@@ -26,6 +29,10 @@ internal fun OrchestrationPackage.encodeToFrame(): OrchestrationFrame {
         is OrchestrationMessage -> encodeToFrame()
         is Introduction -> encodeToFrame()
         is OrchestrationPackage.Ack -> encodeToFrame()
+        is OrchestrationStateRequest -> encodeToFrame()
+        is OrchestrationStateUpdate -> encodeToFrame()
+        is OrchestrationStateUpdate.Response -> encodeToFrame()
+        is OrchestrationStateValue -> encodeToFrame()
     }
 }
 
@@ -50,17 +57,93 @@ internal fun ByteArray.decodeAck(): OrchestrationPackage.Ack {
     )
 }
 
+internal fun OrchestrationStateRequest.encodeToFrame() = OrchestrationFrame(
+    type = OrchestrationPackageType.StateRequest,
+    data = stateId.encodeToByteArray()
+)
+
+internal fun ByteArray.decodeStateRequest(): OrchestrationStateRequest = OrchestrationStateRequest(
+    decodeOrchestrationStateId().getOrThrow()
+)
+
+internal fun OrchestrationStateUpdate.encodeToFrame() = OrchestrationFrame(
+    type = OrchestrationPackageType.StateUpdate,
+    data = encodeByteArray {
+        val encodedStateId = stateId.encodeToByteArray()
+        writeInt(encodedStateId.size)
+        write(encodedStateId)
+
+        writeInt(expectedValue?.bytes?.size ?: -1)
+        expectedValue?.bytes?.let { write(it) }
+
+        writeInt(updatedValue.bytes.size)
+        write(updatedValue.bytes)
+    }
+)
+
+internal fun ByteArray.decodeStateUpdate(): OrchestrationStateUpdate = decode {
+    val stateIdSize = readInt()
+    val stateId = readNBytes(stateIdSize).decodeOrchestrationStateId().getOrThrow()
+
+    val expectedValueSize = readInt()
+    val expectedValue = if (expectedValueSize == -1) null else readNBytes(expectedValueSize)
+
+    val updatedValueSize = readInt()
+    val updatedValue = readNBytes(updatedValueSize)
+
+    OrchestrationStateUpdate(stateId, expectedValue = expectedValue?.let(::Binary), Binary(updatedValue))
+}
+
+internal fun OrchestrationStateUpdate.Response.encodeToFrame() = OrchestrationFrame(
+    type = OrchestrationPackageType.StateUpdateResponse,
+    data = encodeByteArray { writeBoolean(accepted) }
+)
+
+internal fun ByteArray.decodeStateUpdateResponse() = OrchestrationStateUpdate.Response(
+    accepted = decode { readBoolean() }
+)
+
+internal fun OrchestrationStateValue.encodeToFrame() = OrchestrationFrame(
+    type = OrchestrationPackageType.StateValue,
+    data = encodeByteArray {
+        val encodedStateId = stateId.encodeToByteArray()
+        writeInt(encodedStateId.size)
+        write(encodedStateId)
+
+        writeInt(value?.bytes?.size ?: -1)
+        value?.bytes?.let { write(it) }
+    }
+)
+
+internal fun ByteArray.decodeStateValue(): OrchestrationStateValue = decode {
+    val stateIdSize = readInt()
+    val stateId = readNBytes(stateIdSize).decodeOrchestrationStateId().getOrThrow()
+
+    val valueSize = readInt()
+    val value = if (valueSize == -1) null else readNBytes(valueSize)
+    OrchestrationStateValue(stateId, value?.let(::Binary))
+}
+
+
 internal fun OrchestrationFrame.decodePackage(): OrchestrationPackage {
     return when (type) {
         OrchestrationPackageType.JavaSerializableMessage -> data.decodeSerializableObject() as OrchestrationMessage
         OrchestrationPackageType.JavaSerializableClientIntroduction -> data.decodeSerializableObject() as Introduction
         OrchestrationPackageType.Ack -> data.decodeAck()
+        OrchestrationPackageType.StateRequest -> data.decodeStateRequest()
+        OrchestrationPackageType.StateUpdate -> data.decodeStateUpdate()
+        OrchestrationPackageType.StateUpdateResponse -> data.decodeStateUpdateResponse()
+        OrchestrationPackageType.StateValue -> data.decodeStateValue()
     }
 }
 
 internal enum class OrchestrationPackageType(val intValue: Int) {
     JavaSerializableMessage(0),
     JavaSerializableClientIntroduction(1),
+    StateRequest(2),
+    StateUpdate(3),
+    StateUpdateResponse(4),
+    StateValue(5),
 
     Ack(128);
 
@@ -91,5 +174,36 @@ public sealed class OrchestrationPackage : Serializable {
         companion object {
             const val serialVersionUID: Long = 0L
         }
+    }
+}
+
+internal data class OrchestrationStateUpdate(
+    val stateId: OrchestrationStateId<*>,
+    val expectedValue: Binary?,
+    val updatedValue: Binary
+) : OrchestrationPackage(), Serializable {
+    companion object {
+        const val serialVersionUID: Long = 0L
+    }
+    data class Response(val accepted: Boolean) : OrchestrationPackage() {
+        companion object {
+            const val serialVersionUID: Long = 0L
+        }
+    }
+}
+
+internal data class OrchestrationStateRequest(
+    val stateId: OrchestrationStateId<*>
+) : OrchestrationPackage(), Serializable {
+    companion object {
+        const val serialVersionUID: Long = 0L
+    }
+}
+
+internal data class OrchestrationStateValue(
+    val stateId: OrchestrationStateId<*>, val value: Binary?
+) : OrchestrationPackage(), Serializable {
+    companion object {
+        const val serialVersionUID: Long = 0L
     }
 }
