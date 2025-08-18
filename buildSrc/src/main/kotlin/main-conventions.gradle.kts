@@ -18,7 +18,7 @@ plugins.withType<KotlinPluginWrapper> {
             "testImplementation"(testFixtures(project(":hot-reload-core")))
         }
 
-        if(project.name != "hot-reload-annotations") {
+        if (project.name != "hot-reload-annotations") {
             "api"(project(":hot-reload-annotations"))
         }
 
@@ -52,4 +52,8 @@ tasks.register("resolveDependencies") {
 
 tasks.register("compile") {
     dependsOn(tasks.withType<AbstractCompile>())
+}
+
+tasks.check.configure {
+    dependsOn(tasks.withType<AbstractTestTask>())
 }
