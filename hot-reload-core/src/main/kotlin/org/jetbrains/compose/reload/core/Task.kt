@@ -258,11 +258,11 @@ private class TaskImpl<T>(
     override fun getOrNull(): Try<T>? = value.getOrNull()
     override suspend fun await(): Try<T> = value.await()
     override fun awaitWith(continuation: Continuation<T>): Disposable = value.awaitWith(continuation)
-}
 
-private sealed class State<out T> {
-    data object Idle : State<Nothing>()
-    data class Running(val children: List<Task<*>>) : State<Nothing>()
-    data class Stopping(val children: List<Task<*>>, val exception: Throwable) : State<Nothing>()
-    data class Finished<T>(val result: Try<T>) : State<T>()
+    private sealed class State<out T> {
+        data object Idle : State<Nothing>()
+        data class Running(val children: List<Task<*>>) : State<Nothing>()
+        data class Stopping(val children: List<Task<*>>, val exception: Throwable) : State<Nothing>()
+        data class Finished<T>(val result: Try<T>) : State<T>()
+    }
 }

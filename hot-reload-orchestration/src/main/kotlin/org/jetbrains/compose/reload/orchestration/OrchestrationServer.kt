@@ -9,6 +9,7 @@ import org.jetbrains.compose.reload.core.Bus
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.StoppedException
 import org.jetbrains.compose.reload.core.Task
+import org.jetbrains.compose.reload.core.Update
 import org.jetbrains.compose.reload.core.WorkerThread
 import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
@@ -49,14 +50,13 @@ public interface OrchestrationServer : OrchestrationHandle {
     public suspend fun start()
 }
 
-
 public fun OrchestrationServer(): OrchestrationServer {
     val bind = Future<Unit>()
     val port = Future<Int>()
 
     val start = Future<Unit>()
-
     val messages = Bus<OrchestrationMessage>()
+    val states = OrchestrationServerStates()
 
     val task = launchTask("OrchestrationServer") {
         invokeOnFinish { bind.completeExceptionally(it.exceptionOrNull() ?: StoppedException()) }
@@ -78,7 +78,7 @@ public fun OrchestrationServer(): OrchestrationServer {
                 val clientSocket = serverSocket.accept()
                 clientSocket.setOrchestrationDefaults()
 
-                val client = launchClient(clientSocket, messages)
+                val client = launchClient(clientSocket, messages, states)
                 invokeOnFinish { client.stop() }
             }
         }
@@ -87,11 +87,22 @@ public fun OrchestrationServer(): OrchestrationServer {
     return object : OrchestrationServer, Task<Unit> by task {
         override val messages = messages
         override val port: Future<Int> = port
+        override val states = states
 
         override suspend fun send(message: OrchestrationMessage) {
             messages.send(message)
         }
 
+        override suspend fun <T : OrchestrationState?> update(
+            key: OrchestrationStateKey<T>, update: (T) -> T
+        ): Update<T> {
+            return states.update(key, update)
+        }
+
+        /* Server will always be able to update the state, as owner */
+        override suspend fun <T : OrchestrationState?> tryUpdate(
+            key: OrchestrationStateKey<T>, update: (T) -> T
+        ): Update<T> = update(key, update)
 
         override suspend fun bind() {
             bind.complete(Unit)
@@ -106,7 +117,9 @@ public fun OrchestrationServer(): OrchestrationServer {
 }
 
 private fun launchClient(
-    socket: Socket, messages: Bus<OrchestrationMessage>,
+    socket: Socket,
+    messages: Bus<OrchestrationMessage>,
+    states: OrchestrationServerStates,
 ): Task<*> = launchTask("Client Connection") {
     val logger = createLogger()
     val writer = WorkerThread("Orchestration Server: Writer")
@@ -126,7 +139,7 @@ private fun launchClient(
 
     /* Write protocol magic number and the servers protocol version */
     io writeInt ORCHESTRATION_PROTOCOL_MAGIC_NUMBER
-    io writeInt OrchestrationProtocolVersion.current.intValue
+    io writeInt OrchestrationVersion.current.intValue
 
     /* We expect any given client to start with a proper introduction */
     val clientIntroduction = io.readPackage()
@@ -149,10 +162,24 @@ private fun launchClient(
         messages send ClientDisconnected(connected.clientId, connected.clientRole)
     }
 
+    /* State streaming: If requested, all updates to a given state will be sent to the client */
+    val launchedStateStreams = hashSetOf<OrchestrationStateId<*>>()
+
+    fun launchStateStreaming(id: OrchestrationStateId<*>) = subtask("State Stream: '$id'") {
+        states.getEncodedState(id).collect { value ->
+            io writePackage OrchestrationStateValue(id, value)
+        }
+    }
+
+    fun launchStateStreamingIfNecessary(id: OrchestrationStateId<*>) {
+        if (!launchedStateStreams.add(id)) return
+        launchStateStreaming(id)
+    }
+
     /* Writer loop: Take elements from the bus and write them to the OrchestrationIO */
     subtask("Writer") {
         messages.collect { pkg ->
-            io.writePackage(pkg)
+            io writePackage pkg
         }
     }
 
@@ -160,9 +187,21 @@ private fun launchClient(
     subtask("Reader") {
         while (isActive()) {
             val pkg = io.readPackage() ?: stopNow()
-            if (pkg !is OrchestrationMessage) continue
-            messages.send(pkg)
-            io.writePackage(Ack(pkg.messageId))
+            when (pkg) {
+                is OrchestrationStateRequest -> launchStateStreamingIfNecessary(pkg.stateId)
+
+                is OrchestrationStateUpdate -> states.withLock {
+                    val accepted = states.update(pkg.stateId, pkg.expectedValue, pkg.updatedValue)
+                    io writePackage OrchestrationStateUpdate.Response(accepted)
+                }
+
+                is OrchestrationMessage -> {
+                    messages.send(pkg)
+                    io.writePackage(Ack(pkg.messageId))
+                }
+
+                else -> continue
+            }
         }
     }
 }
