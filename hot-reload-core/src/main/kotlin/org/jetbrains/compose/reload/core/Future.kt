@@ -89,7 +89,7 @@ internal fun FailureFuture(result: Throwable): Future<Nothing> {
 
 internal class FutureImpl<T> : CompletableFuture<T> {
 
-    private val state = AtomicReference<State<T>>(State.Waiting<T>(emptyList()))
+    val state = AtomicReference<State<T>>(State.Waiting<T>(emptyList()))
 
     override fun isCompleted(): Boolean = state.get() is State.Completed<T>
 
@@ -121,7 +121,7 @@ internal class FutureImpl<T> : CompletableFuture<T> {
             state.update { currentState ->
                 when (currentState) {
                     is State.Completed<*> -> return@Disposable
-                    is State.Waiting<T> -> currentState.copy(currentState.waiting - continuation)
+                    is State.Waiting<T> -> currentState.copy(waiting = currentState.waiting - continuation)
                 }
             }
         }
@@ -130,8 +130,13 @@ internal class FutureImpl<T> : CompletableFuture<T> {
     override suspend fun await(): Try<T> {
         /* Fast path: Already completed */
         (state.get() as? State.Completed<T>)?.result?.let { return it }
-        return suspendStoppableCoroutine { continuation ->
-            awaitWith(continuation)
+        var disposable: Disposable? = null
+        return try {
+            suspendStoppableCoroutine { continuation ->
+                disposable = awaitWith(continuation)
+            }
+        } finally {
+            disposable?.dispose()
         }
     }
 

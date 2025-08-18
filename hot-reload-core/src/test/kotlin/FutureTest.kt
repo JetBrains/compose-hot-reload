@@ -1,11 +1,20 @@
 import org.jetbrains.compose.reload.core.Future
+import org.jetbrains.compose.reload.core.FutureImpl
+import org.jetbrains.compose.reload.core.awaitIdle
 import org.jetbrains.compose.reload.core.complete
+import org.jetbrains.compose.reload.core.getBlocking
+import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.launchTask
+import org.jetbrains.compose.reload.core.reloadMainThread
+import org.jetbrains.compose.reload.core.withAsyncTrace
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.time.Duration.Companion.seconds
 
 /*
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
@@ -49,5 +58,30 @@ class FutureTest {
 
         future.awaitWith(continuation).dispose()
         future.complete(123)
+    }
+
+    @Test
+    fun `test - stop`() {
+        val future = Future<Int>() as FutureImpl<Int>
+
+        val myTask = launchTask {
+            future.await()
+        }
+
+        launchTask {
+            withAsyncTrace("Check 'myTask' is waiting for the future") {
+                reloadMainThread.awaitIdle()
+                val current = future.state.get()
+                assertEquals(1, assertIs<FutureImpl.State.Waiting<*>>(current).waiting.size)
+            }
+
+
+            withAsyncTrace("Check stopped task is properly cleaned up") {
+                myTask.stop()
+                reloadMainThread.awaitIdle()
+                assertEquals(0, assertIs<FutureImpl.State.Waiting<*>>(future.state.get()).waiting.size)
+            }
+
+        }.getBlocking(5.seconds).getOrThrow()
     }
 }
