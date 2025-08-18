@@ -66,3 +66,39 @@ public fun DataInputStream.readOptionalFrame(): ByteArray? {
     if (size < 0) return null
     return readNBytes(size)
 }
+
+@InternalHotReloadApi
+public fun DataOutputStream.writeField(name: String, value: ByteArray?) {
+    writeString(name)
+    writeOptionalFrame(value)
+}
+
+@InternalHotReloadApi
+public fun DataInputStream.readField(): Pair<String, ByteArray?> {
+    return readString() to readOptionalFrame()
+}
+
+
+@InternalHotReloadApi
+public fun DataOutputStream.writeFields(fields: Map<String, ByteArray?>) {
+    writeInt(fields.size)
+    for ((key, value) in fields) {
+        writeField(key, value)
+    }
+}
+
+@InternalHotReloadApi
+public fun DataOutputStream.writeFields(vararg fields: Pair<String, ByteArray?>) {
+    writeFields(fields.toMap())
+}
+
+@InternalHotReloadApi
+public fun DataInputStream.readFields(): Map<String, ByteArray?> {
+    val size = readInt()
+    return buildMap {
+        repeat(size) {
+            val (name, bytes) = readField()
+            put(name, bytes)
+        }
+    }
+}

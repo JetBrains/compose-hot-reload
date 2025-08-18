@@ -26,12 +26,14 @@ import org.jetbrains.compose.devtools.sidecar.DtAttachedSidecarWindow
 import org.jetbrains.compose.devtools.sidecar.DtDetachedSidecarWindow
 import org.jetbrains.compose.devtools.sidecar.DtDetachedStatusBar
 import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
-import org.jetbrains.compose.devtools.states.WindowsState
-import org.jetbrains.compose.devtools.states.launchConsoleLogState
-import org.jetbrains.compose.devtools.states.launchReloadCountState
-import org.jetbrains.compose.devtools.states.launchReloadState
-import org.jetbrains.compose.devtools.states.launchUIErrorState
-import org.jetbrains.compose.devtools.states.launchWindowsState
+import org.jetbrains.compose.devtools.states.WindowsUIState
+import org.jetbrains.compose.devtools.states.launchConsoleLogUIState
+import org.jetbrains.compose.devtools.states.launchReloadCountStateActor
+import org.jetbrains.compose.devtools.states.launchReloadCountUIState
+import org.jetbrains.compose.devtools.states.launchReloadStateActor
+import org.jetbrains.compose.devtools.states.launchReloadUIState
+import org.jetbrains.compose.devtools.states.launchErrorUIState
+import org.jetbrains.compose.devtools.states.launchWindowsUIState
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsDetached
 import org.jetbrains.compose.reload.core.createLogger
@@ -48,11 +50,15 @@ private val logger = createLogger()
 internal val targetApplicationWindowStateLocal = staticCompositionLocalOf<WindowState?> { null }
 
 internal fun CoroutineScope.launchApplicationStates() {
-    launchConsoleLogState()
-    launchWindowsState()
-    launchUIErrorState()
-    launchReloadState()
-    launchReloadCountState()
+    launchConsoleLogUIState()
+    launchWindowsUIState()
+    launchErrorUIState()
+
+    launchReloadCountStateActor()
+    launchReloadCountUIState()
+
+    launchReloadStateActor()
+    launchReloadUIState()
 }
 
 
@@ -78,7 +84,7 @@ fun main() {
             applicationScope.coroutineContext.eventsOrThrow,
             applicationScope.coroutineContext.statesOrThrow
         ) {
-            val windowsState = WindowsState.composeValue()
+            val windowsState = WindowsUIState.composeValue()
             if (devToolsDetached) {
                 DtDetachedSidecarWindow()
             }

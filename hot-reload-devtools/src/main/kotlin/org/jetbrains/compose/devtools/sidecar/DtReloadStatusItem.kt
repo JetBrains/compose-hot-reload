@@ -35,8 +35,8 @@ import kotlinx.datetime.format
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.devtools.Tag
-import org.jetbrains.compose.devtools.states.BuildSystemState
-import org.jetbrains.compose.devtools.states.ReloadState
+import org.jetbrains.compose.devtools.states.BuildSystemUIState
+import org.jetbrains.compose.devtools.states.ReloadUIState
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtImages
@@ -50,10 +50,10 @@ import org.jetbrains.compose.devtools.widgets.DtText
 
 @Composable
 fun DtReloadStatusItem() {
-    val reloadState = ReloadState.composeValue()
+    val reloadState = ReloadUIState.composeValue()
 
     when (reloadState) {
-        is ReloadState.Reloading -> DtSidecarStatusItem(
+        is ReloadUIState.Reloading -> DtSidecarStatusItem(
             symbol = {
                 CircularProgressIndicator(
                     strokeWidth = 2.dp, color = DtColors.statusColorOrange2,
@@ -62,14 +62,14 @@ fun DtReloadStatusItem() {
                 )
             },
             content = {
-                val buildSystem = BuildSystemState.composeValue()?.buildSystem
+                val buildSystem = BuildSystemUIState.composeValue()?.buildSystem
                 if (buildSystem != null) {
                     DtBuildSystemLogo(buildSystem, modifier = Modifier.padding(2.dp))
                 }
                 DtText("Reloading...", Modifier.tag(Tag.ReloadStatusText))
             }
         )
-        is ReloadState.Ok -> DtSidecarStatusItem(
+        is ReloadUIState.Ok -> DtSidecarStatusItem(
             symbol = {
                 DtImage(
                     DtImages.Image.GREEN_CHECKMARK_ICON,
@@ -79,7 +79,7 @@ fun DtReloadStatusItem() {
             },
             content = { ResultContent(reloadState) }
         )
-        is ReloadState.Failed -> DtSidecarStatusItem(
+        is ReloadUIState.Failed -> DtSidecarStatusItem(
             symbol = {
                 DtImage(
                     DtImages.Image.ERROR_ICON,
@@ -93,7 +93,7 @@ fun DtReloadStatusItem() {
 }
 
 @Composable
-private fun ResultContent(state: ReloadState) {
+private fun ResultContent(state: ReloadUIState) {
     var durationText by remember { mutableStateOf("") }
 
     LaunchedEffect(state) {
@@ -120,16 +120,16 @@ private fun ResultContent(state: ReloadState) {
 }
 
 @Composable
-private fun StatusText(state: ReloadState, modifier: Modifier = Modifier) {
+private fun StatusText(state: ReloadUIState, modifier: Modifier = Modifier) {
     when (state) {
-        is ReloadState.Failed -> FailedStatusText(state, modifier)
-        is ReloadState.Ok -> SuccessStatusText(state, modifier)
-        is ReloadState.Reloading -> Unit
+        is ReloadUIState.Failed -> FailedStatusText(state, modifier)
+        is ReloadUIState.Ok -> SuccessStatusText(state, modifier)
+        is ReloadUIState.Reloading -> Unit
     }
 }
 
 @Composable
-private fun SuccessStatusText(state: ReloadState.Ok, modifier: Modifier = Modifier) {
+private fun SuccessStatusText(state: ReloadUIState.Ok, modifier: Modifier = Modifier) {
     DtText(
         "Success: Last reload: ${state.formattedTime()}",
         modifier = modifier.tag(Tag.ReloadStatusText),
@@ -138,7 +138,7 @@ private fun SuccessStatusText(state: ReloadState.Ok, modifier: Modifier = Modifi
 }
 
 @Composable
-private fun FailedStatusText(state: ReloadState.Failed, modifier: Modifier) {
+private fun FailedStatusText(state: ReloadUIState.Failed, modifier: Modifier) {
     var isDialogVisible by remember { mutableStateOf(false) }
 
     DtText(
@@ -164,7 +164,7 @@ private fun FailedStatusText(state: ReloadState.Failed, modifier: Modifier) {
 }
 
 
-private fun ReloadState.formattedTime(): String {
+private fun ReloadUIState.formattedTime(): String {
     val localTime = time.toLocalDateTime(TimeZone.currentSystemDefault()).time
     return localTime.format(LocalTime.Format {
         hour()
