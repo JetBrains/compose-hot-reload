@@ -430,6 +430,7 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationPacka
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion : java/lang/Enum {
 	public static final field Companion Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion$Companion;
 	public static final field V1 Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
+	public static final field V1_1 Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getIntValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
@@ -458,5 +459,25 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationServe
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationServerKt {
 	public static final fun OrchestrationServer ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationServer;
 	public static final fun startOrchestrationServer ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationServer;
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationVersion : java/lang/Comparable {
+	public static final field Companion Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion$Companion;
+	public fun <init> (I)V
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun compareTo (Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;)I
+	public final fun component1 ()I
+	public final fun copy (I)Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;IILjava/lang/Object;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIntValue ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationVersion$Companion {
+	public final fun getCurrent ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
+	public final fun getV1 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
+	public final fun getV1_1 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 }
 
