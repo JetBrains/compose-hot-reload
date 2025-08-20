@@ -56,6 +56,31 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationClien
 	public static fun values ()[Lorg/jetbrains/compose/reload/orchestration/OrchestrationClientRole;
 }
 
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationConnectionsState : org/jetbrains/compose/reload/orchestration/OrchestrationState {
+	public static final field Key Lorg/jetbrains/compose/reload/orchestration/OrchestrationConnectionsState$Key;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConnections ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationConnectionsState$Connection {
+	public fun <init> (Lorg/jetbrains/compose/reload/orchestration/OrchestrationClientId;Lorg/jetbrains/compose/reload/orchestration/OrchestrationClientRole;Ljava/lang/Long;)V
+	public synthetic fun <init> (Lorg/jetbrains/compose/reload/orchestration/OrchestrationClientId;Lorg/jetbrains/compose/reload/orchestration/OrchestrationClientRole;Ljava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClientId ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationClientId;
+	public final fun getClientPid ()Ljava/lang/Long;
+	public final fun getClientRole ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationClientRole;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationConnectionsState$Key : org/jetbrains/compose/reload/orchestration/OrchestrationStateKey {
+	public fun getDefault ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationConnectionsState;
+	public synthetic fun getDefault ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationState;
+	public fun getId ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationStateId;
+}
+
 public abstract interface class org/jetbrains/compose/reload/orchestration/OrchestrationHandle : java/lang/AutoCloseable, org/jetbrains/compose/reload/core/Task {
 	public abstract fun close ()V
 	public abstract fun getMessages ()Lorg/jetbrains/compose/reload/core/Broadcast;

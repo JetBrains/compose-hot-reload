@@ -204,4 +204,15 @@ private fun launchClient(
             }
         }
     }
+
+    /* Update the client connections state */
+    states.update(OrchestrationConnectionsState) { state ->
+        state.withConnection(connected.clientId, connected.clientRole, connected.clientPid)
+    }
+
+    invokeOnFinish {
+        states.update(OrchestrationConnectionsState) { state ->
+            state.withoutConnection(connected.clientId)
+        }
+    }
 }
