@@ -6,7 +6,10 @@
 package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.WorkerThread
+import org.jetbrains.compose.reload.core.awaitOrThrow
+import org.jetbrains.compose.reload.core.getOrNull
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.invokeOnCompletion
 import org.jetbrains.compose.reload.core.withThread
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -30,43 +33,49 @@ internal interface OrchestrationIO {
 
     fun isClosed(): Boolean
     suspend fun close()
+
+    companion object {
+        fun newWriterThread() = WorkerThread("Orchestration IO: Writer")
+        fun newReaderThread() = WorkerThread("Orchestration IO: Reader")
+    }
 }
 
-
-internal suspend fun OrchestrationIO(
-    socket: Socket, writer: WorkerThread, reader: WorkerThread
+internal fun OrchestrationIO(
+    socket: Socket,
+    writer: WorkerThread = OrchestrationIO.newWriterThread(),
+    reader: WorkerThread = OrchestrationIO.newReaderThread()
 ): OrchestrationIO {
-    val outputStream = withThread(writer) { DataOutputStream(socket.outputStream.buffered()) }
-    val inputStream = withThread(reader) { DataInputStream(socket.inputStream.buffered()) }
-    return OrchestrationIOImpl(socket, reader, writer, outputStream, inputStream)
+    return OrchestrationIOImpl(socket, writer = writer, reader = reader)
 }
 
 internal class OrchestrationIOImpl(
-    private val socket: Socket,
-    private val reader: WorkerThread,
-    private val writer: WorkerThread,
-    private val output: DataOutputStream,
-    private val input: DataInputStream
+    private val socket: Socket, private val writer: WorkerThread, private val reader: WorkerThread,
 ) : OrchestrationIO {
 
     private val isClosed = AtomicBoolean(false)
+    private val output = writer.invoke { DataOutputStream(socket.outputStream.buffered()) }
+    private val input = reader.invoke { DataInputStream(socket.inputStream.buffered()) }
 
     override suspend fun writeInt(value: Int) = withThread(writer) {
+        val output = output.awaitOrThrow()
         output.writeInt(value)
         output.flush()
     }
 
     override suspend fun writeShort(value: Short) = withThread(writer) {
+        val output = output.awaitOrThrow()
         output.writeShort(value.toInt())
         output.flush()
     }
 
     override suspend fun writeByte(value: Byte) = withThread(writer) {
+        val output = output.awaitOrThrow()
         output.writeByte(value.toInt())
         output.flush()
     }
 
     override suspend fun writePackage(pkg: OrchestrationPackage) = withThread(writer) {
+        val output = output.awaitOrThrow()
         val frame = pkg.encodeToFrame()
         output.writeInt(frame.type.intValue)
         output.writeInt(frame.data.size)
@@ -75,18 +84,19 @@ internal class OrchestrationIOImpl(
     }
 
     override suspend fun readInt(): Int = withThread(reader) {
-        input.readInt()
+        input.awaitOrThrow().readInt()
     }
 
     override suspend fun readShort(): Short = withThread(reader) {
-        input.readShort()
+        input.awaitOrThrow().readShort()
     }
 
     override suspend fun readByte(): Byte = withThread(reader) {
-        input.readByte()
+        input.awaitOrThrow().readByte()
     }
 
     override suspend fun readPackage(): OrchestrationPackage? = withThread(reader) {
+        val input = input.awaitOrThrow()
         try {
             val pkgType = OrchestrationPackageType.from(input.readInt()).getOrThrow()
             val pkgSize = input.readInt()
@@ -106,8 +116,8 @@ internal class OrchestrationIOImpl(
     override suspend fun close() {
         if (!isClosed.getAndSet(true)) return
         writer.shutdown().await()
-        input.close()
-        output.close()
+        input.invokeOnCompletion { value -> value.getOrNull()?.close() }
+        output.invokeOnCompletion { value -> value.getOrNull()?.close() }
         reader.shutdown().await()
         socket.close()
     }

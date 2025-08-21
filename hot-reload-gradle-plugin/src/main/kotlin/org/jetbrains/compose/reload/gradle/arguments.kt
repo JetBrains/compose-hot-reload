@@ -21,6 +21,7 @@ import org.gradle.process.JavaForkOptions
 import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.HotReloadProperty
+import org.jetbrains.compose.reload.orchestration.OrchestrationClientPortPropertyPrefix
 import java.io.File
 import kotlin.io.path.absolutePathString
 
@@ -134,6 +135,14 @@ internal class ComposeHotReloadArguments(project: Project) :
     @get:Input
     @get:Optional
     val orchestrationPort = project.composeReloadOrchestrationPort
+
+    @get:Input
+    @get:Optional
+    val orchestrationClientPorts: Provider<Map<String, String>> = project.provider {
+        project.providers.environmentVariablesPrefixedBy(OrchestrationClientPortPropertyPrefix).get() +
+            project.providers.systemPropertiesPrefixedBy(OrchestrationClientPortPropertyPrefix).get() +
+            project.providers.gradlePropertiesPrefixedBy(OrchestrationClientPortPropertyPrefix).get()
+    }
 
     @get:Input
     @get:Optional
@@ -300,6 +309,10 @@ internal class ComposeHotReloadArguments(project: Project) :
         if (orchestrationPort != null) {
             logger.quiet("Using orchestration server port: $orchestrationPort")
             add("-D${HotReloadProperty.OrchestrationPort.key}=${orchestrationPort}")
+        }
+
+        orchestrationClientPorts.orNull.orEmpty().forEach { (property, value) ->
+            add("-D$property=$value")
         }
 
         add("-D${HotReloadProperty.VirtualMethodResolveEnabled.key}=$virtualMethodResolveEnabled")

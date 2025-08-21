@@ -15,7 +15,7 @@ import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
-import org.jetbrains.compose.reload.core.subprocessDefaultArguments
+import org.jetbrains.compose.reload.core.subprocessSystemProperties
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
 import java.io.File
 import java.nio.file.Path
@@ -46,7 +46,7 @@ private fun tryStartDevToolsProcess(): DevToolsHandle? {
         resolveDevtoolsJavaBinary(),
         *platformSpecificJvmArguments(),
         "-cp", classpath.joinToString(File.pathSeparator),
-        *subprocessDefaultArguments(DevTools).toTypedArray(),
+        *subprocessSystemProperties(DevTools).toTypedArray(),
         *issueNewDebugSessionJvmArguments("DevTools"),
         "org.jetbrains.compose.devtools.Main",
     )
