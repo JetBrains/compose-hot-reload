@@ -5,6 +5,9 @@
 
 package org.jetbrains.compose.devtools
 
+import io.sellmair.evas.statesOrNull
+import io.sellmair.evas.statesOrThrow
+import org.jetbrains.compose.devtools.states.DtLifecycleState
 import org.jetbrains.compose.reload.core.Disposable
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.Try
@@ -58,6 +61,7 @@ internal fun setupShutdownProcedure() {
 }
 
 internal fun shutdown(): Nothing {
+    applicationScope.coroutineContext.statesOrNull?.setState(DtLifecycleState.Key, DtLifecycleState(isActive = false))
     exitProcess(0)
 }
 

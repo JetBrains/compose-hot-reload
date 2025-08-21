@@ -26,6 +26,7 @@ import org.jetbrains.compose.devtools.sidecar.DtAttachedSidecarWindow
 import org.jetbrains.compose.devtools.sidecar.DtDetachedSidecarWindow
 import org.jetbrains.compose.devtools.sidecar.DtDetachedStatusBar
 import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
+import org.jetbrains.compose.devtools.states.DtLifecycleState
 import org.jetbrains.compose.devtools.states.WindowsState
 import org.jetbrains.compose.devtools.states.launchConsoleLogState
 import org.jetbrains.compose.devtools.states.launchReloadCountState
@@ -79,6 +80,13 @@ fun main() {
             applicationScope.coroutineContext.statesOrThrow
         ) {
             val windowsState = WindowsState.composeValue()
+            val lifecycleState = DtLifecycleState.composeValue()
+
+            if (!lifecycleState.isActive) {
+                logger.info("DevTools UI is shutting down")
+                return@installEvas
+            }
+
             if (devToolsDetached) {
                 DtDetachedSidecarWindow()
             }
