@@ -10,19 +10,23 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.isActive
+import org.jetbrains.compose.reload.core.await
 import org.jetbrains.compose.reload.core.awaitIdle
 import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.currentTask
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.isActive
 import org.jetbrains.compose.reload.core.reloadMainThread
 import org.jetbrains.compose.reload.core.withType
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
+import org.jetbrains.compose.reload.orchestration.OrchestrationConnectionsState
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
+import org.jetbrains.compose.reload.orchestration.startOrchestrationListener
 import org.jetbrains.compose.reload.orchestration.tests.ServerBackwardCompatibilityTest.SingleClientSingleEvent.ServerPort
 import org.jetbrains.compose.reload.orchestration.utils.Isolate
 import org.jetbrains.compose.reload.orchestration.utils.IsolateContext
@@ -42,6 +46,7 @@ import org.jetbrains.compose.reload.orchestration.utils.stateKey
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @Execution(ExecutionMode.SAME_THREAD)
 class ServerBackwardCompatibilityTest {
@@ -271,6 +276,43 @@ class ServerBackwardCompatibilityTest {
                 TestOrchestrationState(2),
                 messages.receiveAsFlow().filterIsInstance<TestEvent>().first().payload
             )
+        }
+    }
+
+    class OrchestrationListenerIsolate : Isolate {
+        class ClientPort(val port: Int) : IsolateMessage
+
+        context(ctx: IsolateContext)
+        override suspend fun run() {
+            val awaitingClient = startOrchestrationListener(Unknown)
+            ClientPort(awaitingClient.port.await().getOrThrow()).send()
+
+            while(isActive()) {
+                val client = awaitingClient.connections.receive().getOrThrow()
+                client.send(TestEvent("Hello"))
+                client.await()
+            }
+        }
+    }
+
+    @IsolateTest(OrchestrationListenerIsolate::class)
+    @MinSupportedVersion("1.0.0-rc01")
+    context(_: IsolateTestFixture)
+    fun `test - orchestration listener`() = runIsolateTest {
+        val clientPort = receiveAs<OrchestrationListenerIsolate.ClientPort>().port
+        val server = OrchestrationServer()
+        server.start()
+
+        val messages = server.asChannel()
+
+        assertTrue(server.connectClient(clientPort))
+
+        await("client connected") {
+            server.states.get(OrchestrationConnectionsState).await { it.connections.isNotEmpty() }
+        }
+
+        await("client sent message") {
+            messages.receiveAsFlow().filterIsInstance<TestEvent>().first().payload == "Hello"
         }
     }
 }

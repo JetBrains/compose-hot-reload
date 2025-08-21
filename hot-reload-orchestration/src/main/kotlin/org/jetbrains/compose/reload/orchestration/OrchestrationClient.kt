@@ -18,7 +18,6 @@ import org.jetbrains.compose.reload.core.StoppedException
 import org.jetbrains.compose.reload.core.Task
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.Update
-import org.jetbrains.compose.reload.core.WorkerThread
 import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
@@ -35,10 +34,9 @@ import org.jetbrains.compose.reload.core.stopNow
 import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.core.trace
 import org.jetbrains.compose.reload.core.warn
-import org.jetbrains.compose.reload.core.withThread
+import org.jetbrains.compose.reload.orchestration.OrchestrationClientConnector.ConnectToServer
 import org.jetbrains.compose.reload.orchestration.OrchestrationPackage.Introduction
 import java.io.Serializable
-import java.net.Socket
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
 
@@ -68,7 +66,13 @@ public data class OrchestrationClientId(val value: String) : Serializable {
 }
 
 public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): OrchestrationClient {
-    val logger = createLogger("OrchestrationClient($clientRole, $port)")
+    return OrchestrationClient(clientRole, ConnectToServer(port))
+}
+
+internal fun OrchestrationClient(
+    clientRole: OrchestrationClientRole, connector: OrchestrationClientConnector
+): OrchestrationClient {
+    val logger = createLogger("OrchestrationClient($clientRole)")
 
     val connect = Future<Unit>()
     val isConnected = Future<Unit>()
@@ -83,28 +87,16 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
     val receiveBroadcast = Bus<OrchestrationMessage>()
     val ackQueue = Queue<OrchestrationPackage.Ack>()
 
-    val task = launchTask<Unit>("OrchestrationClient($clientRole, $port)") {
+    val task = launchTask<Unit>("OrchestrationClient($clientRole)") {
         connect.await()
         invokeOnError { isConnected.completeExceptionally(it) }
-
-        val writer = WorkerThread("Orchestration IO: Writer")
-        val reader = WorkerThread("Orchestration IO: Reader")
 
         launchOnFinish { result ->
             sendActor.close(result.exceptionOrNull())
             isConnected.completeExceptionally(result.exceptionOrNull() ?: StoppedException())
-
-            writer.shutdown().await()
-            reader.shutdown().await()
         }
 
-        val socket = withThread(writer) {
-            val socket = Socket("127.0.0.1", port)
-            socket.setOrchestrationDefaults()
-            socket
-        }
-
-        val io = OrchestrationIO(socket, writer, reader)
+        val io = connector.connect()
         launchOnStop { io.close() }
         launchOnFinish { io.close() }
 
@@ -205,7 +197,7 @@ public fun OrchestrationClient(clientRole: OrchestrationClientRole, port: Int): 
     }
 
     return object : OrchestrationClient, Task<Unit> by task {
-        override val port: Future<Int> = Future(port)
+        override val port: Future<Int> = connector.port
         override val clientId: OrchestrationClientId = clientId
         override val clientRole: OrchestrationClientRole = clientRole
         override val messages: Broadcast<OrchestrationMessage> = receiveBroadcast

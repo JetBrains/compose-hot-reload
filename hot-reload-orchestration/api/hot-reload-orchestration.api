@@ -478,6 +478,7 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationProto
 
 public abstract interface class org/jetbrains/compose/reload/orchestration/OrchestrationServer : org/jetbrains/compose/reload/orchestration/OrchestrationHandle {
 	public abstract fun bind (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun connectClient (ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun start (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 

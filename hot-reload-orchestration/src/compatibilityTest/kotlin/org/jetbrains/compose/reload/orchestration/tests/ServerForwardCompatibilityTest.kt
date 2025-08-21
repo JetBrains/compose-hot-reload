@@ -7,8 +7,11 @@ package org.jetbrains.compose.reload.orchestration.tests
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.job
+import org.jetbrains.compose.reload.core.await
 import org.jetbrains.compose.reload.core.awaitIdle
 import org.jetbrains.compose.reload.core.awaitOrThrow
+import org.jetbrains.compose.reload.core.currentCoroutineContext
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.reloadMainThread
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
@@ -17,6 +20,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
+import org.jetbrains.compose.reload.orchestration.startOrchestrationListener
 import org.jetbrains.compose.reload.orchestration.stateKey
 import org.jetbrains.compose.reload.orchestration.tests.ServerForwardCompatibilityTest.StartServer.ServerPort
 import org.jetbrains.compose.reload.orchestration.utils.Isolate
@@ -176,5 +180,42 @@ class ServerForwardCompatibilityTest {
 
         assertEquals(2, clientA.states.get(stateKey).value.payload)
         assertEquals(2, clientB.states.get(stateKey).value.payload)
+    }
+
+    class ConnectClientServerIsolate : Isolate {
+        data class ClientPort(val port: Int) : IsolateMessage
+
+        context(ctx: IsolateContext)
+        override suspend fun run() {
+            val server = OrchestrationServer()
+            server.start()
+
+            val awaitingClientPort = receiveAs<ClientPort>()
+            if (!server.connectClient(awaitingClientPort.port))
+                throw IllegalStateException("Failed to connect to awaiting client")
+
+            server.update(stateKey) { TestOrchestrationState(42) }
+            server.await()
+        }
+    }
+
+    @IsolateTest(ConnectClientServerIsolate::class)
+    @MinSupportedVersion("1.0.0-rc01")
+    context(_: IsolateTestFixture)
+    fun `test - orchestration listener`() = runIsolateTest {
+        val orchestrationListener = startOrchestrationListener(Unknown)
+        currentCoroutineContext().job.invokeOnCompletion {
+            orchestrationListener.close()
+        }
+
+        ConnectClientServerIsolate.ClientPort(orchestrationListener.port.awaitOrThrow()).send()
+
+        val client = await("client connected") {
+            orchestrationListener.connections.receive().getOrThrow()
+        }
+
+        await("state received") {
+            client.states.get(stateKey).await { it.payload == 42 }
+        }
     }
 }

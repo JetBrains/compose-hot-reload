@@ -112,11 +112,14 @@ internal fun ExtensionContext.startOrchestrationTestLogging(server: Orchestratio
             allLogsWriter.flush()
             val environment = message.environment
             if (environment != null) {
-                taggedWriter(environment).appendLine(messageString)
+                val writer = taggedWriter(environment)
+                writer.appendLine(messageString)
+                writer.flush()
             }
         }
 
         allMessagesWriter.appendLine(messageString)
+        allMessagesWriter.flush()
     }
 
     /* Flush and close all writers */

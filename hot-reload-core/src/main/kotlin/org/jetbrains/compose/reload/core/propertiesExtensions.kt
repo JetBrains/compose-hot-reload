@@ -9,22 +9,24 @@ import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment
 import org.jetbrains.compose.reload.core.HotReloadProperty.OrchestrationPort
 import org.jetbrains.compose.reload.core.HotReloadProperty.ParentPid
-import java.lang.System.getProperty
 
 @InternalHotReloadApi
-public fun subprocessDefaultArguments(
+public fun subprocessSystemProperties(
     environment: Environment, orchestrationPort: Int? = null
 ): List<String> {
-    val systemProperties = HotReloadProperty.entries.mapNotNull map@{ property ->
-        when {
-            property == OrchestrationPort && orchestrationPort != null -> "-D${OrchestrationPort.key}=$orchestrationPort"
-            property == ParentPid -> "-D${ParentPid.key}=${ProcessHandle.current().pid()}"
-            environment in property.targets -> "-D${property.key}=${getProperty(property.key) ?: return@map null}"
-            else -> null
+    val hotReloadProperties = HotReloadProperty.entries.associateBy { it.key }
+    val targetProperties = System.getProperties().mapNotNull map@{ (key, value) ->
+        if (key !is String) return@map null
+        if (value !is String) return@map null
+        when (val hotReloadProperty = hotReloadProperties[key]) {
+            OrchestrationPort -> key to (orchestrationPort ?: value)
+            ParentPid -> key to ProcessHandle.current().pid().toString()
+            null -> if (key.startsWith("compose.reload")) key to value else null
+            else -> if (environment in hotReloadProperty.targets) key to value else null
         }
     }
 
-    return systemProperties
+    return targetProperties.map { (key, value) -> "-D$key=$value" }
 }
 
 @InternalHotReloadApi

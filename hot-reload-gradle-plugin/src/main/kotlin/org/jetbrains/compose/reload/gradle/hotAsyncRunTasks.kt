@@ -130,6 +130,14 @@ internal open class ComposeHotAsyncRun : DefaultTask(), ComposeHotReloadRunTask 
         .environmentVariable(HotReloadProperty.IntelliJDebuggerDispatchPort.key)
         .orNull?.toIntOrNull()
 
+    @get:Internal
+    internal val orchestrationListenerPortSystemProperties =
+        project.orchestrationListenerPortSystemProperties()
+
+    @get:Internal
+    internal val orchestrationListenerPortEnvironmentVariables =
+        project.orchestrationListenerPortEnvironmentVariables()
+
     @Suppress("unused")
     @Option(option = "mainClass", description = "Override the main class name")
     fun mainClas(mainClass: String) {
@@ -197,7 +205,9 @@ internal open class ComposeHotAsyncRun : DefaultTask(), ComposeHotReloadRunTask 
             "-D${HotReloadProperty.StderrFile.key}=${stderrFile.get().asFile.absolutePath}",
             "-D${HotReloadProperty.LaunchMode.key}=${LaunchMode.Detached.name}",
             "-D${HotReloadProperty.MainClass.key}=${mainClass.get()}",
-        ).toTypedArray()
+        ) + orchestrationListenerPortSystemProperties.orNull.orEmpty()
+            .map { (key, value) -> "-D$key=$value" }
+
 
         val additionalArguments = listOfNotNull(
             *className.orNull?.let { className -> arrayOf("--className", className) }.orEmpty(),
@@ -208,10 +218,10 @@ internal open class ComposeHotAsyncRun : DefaultTask(), ComposeHotReloadRunTask 
             javaBinary.get().asFile.absolutePath,
             *issueNewDebugSessionJvmArguments(name, intellijDebuggerDispatchPort),
             "@${argFile.asFile.get().absolutePath}",
-            *additionalJvmArguments,
+            *additionalJvmArguments.toTypedArray(),
             mainClass.get(),
             *additionalArguments
-        )
+        ).apply { environment().putAll(orchestrationListenerPortEnvironmentVariables.orNull.orEmpty()) }
             .redirectOutput(stdoutFile.get().asFile)
             .redirectError(stderrFile.get().asFile)
 

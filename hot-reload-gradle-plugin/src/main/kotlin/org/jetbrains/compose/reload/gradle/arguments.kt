@@ -21,6 +21,7 @@ import org.gradle.process.JavaForkOptions
 import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.HotReloadProperty
+import org.jetbrains.compose.reload.orchestration.OrchestrationListenerPortPropertyPrefix
 import java.io.File
 import kotlin.io.path.absolutePathString
 
@@ -50,11 +51,36 @@ fun <T> T.withComposeHotReload(arguments: ComposeHotReloadArgumentsBuilder.() ->
     val arguments = ComposeHotReloadArguments(project).also(arguments)
     jvmArgumentProviders.add(arguments)
 
+    /* Ensure the task is launched with a proper JetBrains Runtime */
     if (project.composeReloadJetBrainsRuntimeBinary != null) {
         this.executable(project.composeReloadJetBrainsRuntimeBinary)
     } else if (this is JavaExec) {
         javaLauncher.set(project.jetbrainsRuntimeLauncher())
     }
+
+    /**
+     * Wire up the orchestration listener ports:
+     * Note: This is not done in the [ComposeHotReloadArguments] as these properties can change frequently and
+     * the [ComposeHotReloadArguments] is used at configuration time.
+     *
+     * To be compliant with Gradle's configuration cache, we read such 'ephemeral' properties
+     * here as [org.gradle.api.provider.ValueSource] and only use them during task execution.
+     */
+    val orchestrationListenerPortSystemProperties = project.orchestrationListenerPortSystemProperties()
+    val orchestrationListenerPortEnvironmentVariables = project.orchestrationListenerPortEnvironmentVariables()
+
+    doFirst {
+        systemProperties(orchestrationListenerPortSystemProperties.orNull.orEmpty())
+        environment(orchestrationListenerPortEnvironmentVariables.orNull.orEmpty())
+    }
+}
+
+internal fun Project.orchestrationListenerPortSystemProperties(): Provider<Map<String, String>> {
+    return project.providers.systemPropertiesPrefixedBy(OrchestrationListenerPortPropertyPrefix)
+}
+
+internal fun Project.orchestrationListenerPortEnvironmentVariables(): Provider<Map<String, String>> {
+    return project.providers.environmentVariablesPrefixedBy(OrchestrationListenerPortPropertyPrefix)
 }
 
 @DelicateHotReloadApi

@@ -7,7 +7,7 @@ package org.jetbrains.compose.reload.gradle.tests
 
 import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.compose.reload.gradle.ComposeHotReloadArguments
-import org.jetbrains.compose.reload.gradle.composeReloadOrchestrationPort
+import org.jetbrains.compose.reload.gradle.composeReloadDirtyResolveDepthLimit
 import org.jetbrains.compose.reload.gradle.createComposeHotReloadArguments
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,7 +17,7 @@ class CreateComposeHotReloadArgumentsTest {
     fun `test - defaults`() {
         val project = ProjectBuilder.builder().build()
         val arguments = project.createComposeHotReloadArguments { } as ComposeHotReloadArguments
-        assertEquals(project.composeReloadOrchestrationPort, arguments.orchestrationPort)
+        assertEquals(project.composeReloadDirtyResolveDepthLimit, arguments.dirtyResolveDepthLimit)
         assertEquals(System.getProperty("java.home"), arguments.javaHome.orNull)
     }
 

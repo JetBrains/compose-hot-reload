@@ -24,7 +24,9 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asFlow
+import org.jetbrains.compose.reload.orchestration.connectAllOrchestrationListeners
 import org.jetbrains.compose.reload.orchestration.connectBlocking
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import java.util.ServiceLoader
@@ -67,6 +69,11 @@ internal val orchestration: OrchestrationHandle = run {
     }
 
     logger.info("Connected 'orchestration'")
+
+    /* Ensure we connect all deferred clients */
+    if (handle is OrchestrationServer) {
+        handle.connectAllOrchestrationListeners()
+    }
 
     /* Communicate the orchestration port back to the parent process */
     handle.subtask {
