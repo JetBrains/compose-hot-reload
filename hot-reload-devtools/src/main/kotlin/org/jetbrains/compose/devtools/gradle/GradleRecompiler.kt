@@ -22,7 +22,7 @@ import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.runDirectoryLockFile
-import org.jetbrains.compose.reload.core.subprocessDefaultArguments
+import org.jetbrains.compose.reload.core.subprocessSystemProperties
 import org.jetbrains.compose.reload.core.toFuture
 import org.jetbrains.compose.reload.core.warn
 import java.nio.file.Path
@@ -99,7 +99,7 @@ internal class GradleRecompiler(
 
                     "-D${HotReloadProperty.IsHotReloadBuild.key}=true",
                     "-P${HotReloadProperty.IsHotReloadBuild.key}=true",
-                    *subprocessDefaultArguments(BuildTool, orchestrationPort).toTypedArray(),
+                    *subprocessSystemProperties(BuildTool, orchestrationPort).toTypedArray(),
                     "-D${HotReloadProperty.GradleJavaHome.key}=${HotReloadEnvironment.gradleJavaHome?.pathString}"
                         .takeIf { HotReloadEnvironment.gradleJavaHome != null },
 
