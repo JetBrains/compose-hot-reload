@@ -31,7 +31,7 @@ import kotlin.test.fail
 
 private val logger = createLogger()
 
-public class GradleRunner @InternalHotReloadTestApi constructor(
+public data class GradleRunner @InternalHotReloadTestApi constructor(
     public val projectRoot: Path,
     public val gradleVersion: String,
     public val arguments: List<String> = emptyList(),

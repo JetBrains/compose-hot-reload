@@ -345,7 +345,7 @@ ResourcesDirtyResolverEnabled:
   key: compose.reload.resourcesDirtyResolverEnabled
   type: boolean
   default: "false"
-  target: [application, build, devtools]
+  target: [ application, build, devtools ]
   isDelicateApi: true
   documentation: |
     Enables/Disables automatically re-composing scopes using resources
