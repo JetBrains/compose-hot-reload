@@ -16,7 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import io.sellmair.evas.compose.composeValue
-import org.jetbrains.compose.devtools.states.ConsoleLogState
+import org.jetbrains.compose.devtools.states.ConsoleLogUIState
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.widgets.DtCopyToClipboardButton
 import org.jetbrains.compose.devtools.widgets.DtHeader2
@@ -25,7 +25,7 @@ import org.jetbrains.compose.devtools.widgets.DtHeader2
 fun DtMainConsole(
     modifier: Modifier = Modifier
 ) {
-    val logState = ConsoleLogState.composeValue()
+    val logState = ConsoleLogUIState.composeValue()
     val scroll = rememberScrollState(0)
 
     LaunchedEffect(scroll.maxValue) {

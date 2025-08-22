@@ -1,13 +1,10 @@
 /*
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
- * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.jetbrains.compose.devtools.states
 
-import io.sellmair.evas.State
-import io.sellmair.evas.flow
-import io.sellmair.evas.launchState
 import io.sellmair.evas.update
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.buffer
@@ -18,26 +15,19 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.devtools.api.ReloadState
+import org.jetbrains.compose.devtools.asFlow
 import org.jetbrains.compose.devtools.orchestration
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesResult
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.asFlow
 
-data class ReloadCountState(
-    val successfulReloads: Int = 0,
-    val failedReloads: Int = 0
-) : State {
-    companion object Key : State.Key<ReloadCountState> {
-        override val default: ReloadCountState = ReloadCountState()
-    }
-}
-
-
-internal fun CoroutineScope.launchReloadCountState() = launchState(ReloadCountState.Key) {
-    ReloadState.flow().buffer().distinctUntilChanged().onEach { reloadState ->
+fun CoroutineScope.launchReloadCountStateActor() = launch {
+    ReloadState.asFlow().buffer().distinctUntilChanged().onEach { reloadState ->
         when (reloadState) {
-            is ReloadState.Failed -> ReloadCountState.update { count ->
+            is ReloadState.Failed -> ReloadCountUIState.update { count ->
                 count.copy(failedReloads = count.failedReloads + 1)
             }
             else -> Unit
@@ -49,7 +39,7 @@ internal fun CoroutineScope.launchReloadCountState() = launchState(ReloadCountSt
             result.reloadRequestId == request.messageId
         }
 
-        if (result.isSuccess && request.changedClassFiles.isNotEmpty()) ReloadCountState.update { count ->
+        if (result.isSuccess && request.changedClassFiles.isNotEmpty()) ReloadCountUIState.update { count ->
             count.copy(successfulReloads = count.successfulReloads + 1)
         }
     }

@@ -11,15 +11,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.devtools.orchestration
-import org.jetbrains.compose.devtools.send
 import org.jetbrains.compose.devtools.sendAsync
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asFlow
 
-data class UIErrorState(val errors: Map<WindowId, UIErrorDescription>) : State {
-    companion object Key : State.Key<UIErrorState> {
-        override val default: UIErrorState = UIErrorState(emptyMap())
+data class ErrorUIState(val errors: Map<WindowId, UIErrorDescription>) : State {
+    companion object Key : State.Key<ErrorUIState> {
+        override val default: ErrorUIState = ErrorUIState(emptyMap())
     }
 }
 
@@ -30,11 +29,11 @@ data class UIErrorDescription(
     val recovery: (() -> Unit)? = null
 )
 
-fun CoroutineScope.launchUIErrorState() = launchState(UIErrorState) {
+fun CoroutineScope.launchErrorUIState() = launchState(ErrorUIState) {
     val errors = mutableMapOf<WindowId, UIErrorDescription>()
 
     suspend fun update() {
-        UIErrorState(errors = errors.toMap()).emit()
+        ErrorUIState(errors = errors.toMap()).emit()
     }
 
     launch {

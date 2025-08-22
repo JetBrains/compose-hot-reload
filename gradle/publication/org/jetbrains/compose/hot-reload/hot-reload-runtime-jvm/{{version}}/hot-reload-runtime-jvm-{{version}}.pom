@@ -43,5 +43,11 @@
       <version>2.1.21</version>
       <scope>runtime</scope>
     </dependency>
+    <dependency>
+      <groupId>org.jetbrains.compose.hot-reload</groupId>
+      <artifactId>hot-reload-devtools-api</artifactId>
+      <version>{{Hot Reload Version}}</version>
+      <scope>runtime</scope>
+    </dependency>
   </dependencies>
 </project>

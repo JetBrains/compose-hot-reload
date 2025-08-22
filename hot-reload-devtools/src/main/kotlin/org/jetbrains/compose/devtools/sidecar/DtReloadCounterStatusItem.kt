@@ -20,9 +20,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.sellmair.evas.compose.composeValue
 import org.jetbrains.compose.devtools.Tag
-import org.jetbrains.compose.devtools.states.BuildSystemState
-import org.jetbrains.compose.devtools.states.ReloadCountState
-import org.jetbrains.compose.devtools.states.ReloadState
+import org.jetbrains.compose.devtools.states.BuildSystemUIState
+import org.jetbrains.compose.devtools.states.ReloadCountUIState
+import org.jetbrains.compose.devtools.states.ReloadUIState
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtImages
@@ -35,7 +35,7 @@ import org.jetbrains.compose.devtools.widgets.shaking
 
 @Composable
 fun DtExpandedReloadCounterStatusItem() {
-    val state = ReloadCountState.composeValue()
+    val state = ReloadCountUIState.composeValue()
 
     if (state.successfulReloads > 0) {
         DtSidecarStatusItem(
@@ -54,8 +54,8 @@ fun DtExpandedReloadCounterStatusItem() {
 
 @Composable
 fun DtMinimisedReloadCounterStatusItem(showDefaultValue: Boolean = false) {
-    val reloadState = ReloadState.composeValue()
-    val countState = ReloadCountState.composeValue()
+    val reloadState = ReloadUIState.composeValue()
+    val countState = ReloadCountUIState.composeValue()
 
     val scale = when {
         countState.successfulReloads < 10 -> 1.0f
@@ -63,12 +63,12 @@ fun DtMinimisedReloadCounterStatusItem(showDefaultValue: Boolean = false) {
     }
 
     when (reloadState) {
-        is ReloadState.Reloading -> {
+        is ReloadUIState.Reloading -> {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.scale(scale).horizontalScroll(rememberScrollState())
             ) {
-                val buildSystem = BuildSystemState.composeValue()?.buildSystem
+                val buildSystem = BuildSystemUIState.composeValue()?.buildSystem
 
                 if (buildSystem == null)
                     CircularProgressIndicator(
