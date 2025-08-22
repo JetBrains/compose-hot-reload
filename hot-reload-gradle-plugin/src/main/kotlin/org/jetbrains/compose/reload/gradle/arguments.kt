@@ -146,9 +146,6 @@ internal class ComposeHotReloadArguments(project: Project) :
     val dirtyResolveDepthLimit = project.composeReloadDirtyResolveDepthLimit
 
     @get:Input
-    val composeReloadResourcesDirtyResolverEnabled = project.composeReloadResourcesDirtyResolverEnabled
-
-    @get:Input
     val logLevel = project.composeReloadLogLevel
 
     @get:Input
@@ -304,7 +301,6 @@ internal class ComposeHotReloadArguments(project: Project) :
 
         add("-D${HotReloadProperty.VirtualMethodResolveEnabled.key}=$virtualMethodResolveEnabled")
         add("-D${HotReloadProperty.DirtyResolveDepthLimit.key}=$dirtyResolveDepthLimit")
-        add("-D${HotReloadProperty.ResourcesDirtyResolverEnabled.key}=$composeReloadResourcesDirtyResolverEnabled")
 
         add("-D${HotReloadProperty.LogLevel.key}=${logLevel.name}")
         add("-D${HotReloadProperty.LogStdout.key}=${logStdout}")

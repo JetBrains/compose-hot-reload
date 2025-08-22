@@ -43,11 +43,11 @@ private fun Context.resolveDirtyRuntimeScopeInfos(
     val dirtyComposeScopes = resolveDirtyComposeScopes(current, redefined) +
         resolveRemovedComposeScopes(current, redefined)
 
-    val dirtyMethods = resolveDirtyMethodsFromExtensionPoints(current, redefined) +
-        resolveDirtyMethods(current, redefined) +
+    val dirtyMethods = resolveDirtyMethods(current, redefined) +
         resolveRemovedMethods(current, redefined)
 
     val dirtyFields = resolveDirtyFields(current, redefined) +
+        resolveDirtyComposeResourceAccessors(current, redefined) +
         resolveRemovedFields(current, redefined)
 
     val transitivelyDirty = resolveTransitivelyDirty(current, redefined, dirtyMethods, dirtyFields)
@@ -82,15 +82,31 @@ private fun resolveRemovedMethods(current: ApplicationInfo, redefined: Applicati
     }
 }
 
-private fun resolveDirtyFields(current: ApplicationInfo, redefined: ApplicationInfo): List<FieldInfo> {
+private fun resolveDirtyFields(
+    current: ApplicationInfo, redefined: ApplicationInfo,
+    predicate: (FieldInfo, FieldInfo) -> Boolean
+): List<FieldInfo> {
     return redefined.fieldIndex.mapNotNull { (fieldId, redefinedField) ->
         val previousField = current.fieldIndex[fieldId] ?: return@mapNotNull redefinedField
-        if (previousField.initialValue != redefinedField.initialValue) {
+        if (predicate(previousField, redefinedField)) {
             return@mapNotNull redefinedField
         }
         null
     }
 }
+
+private fun resolveDirtyFields(current: ApplicationInfo, redefined: ApplicationInfo): List<FieldInfo> =
+    resolveDirtyFields(current, redefined) { previousField, redefinedField ->
+        previousField.initialValue != redefinedField.initialValue
+    }
+
+private fun resolveDirtyComposeResourceAccessors(
+    current: ApplicationInfo,
+    redefined: ApplicationInfo
+): List<FieldInfo> =
+    resolveDirtyFields(current, redefined) { previousField, redefinedField ->
+        previousField.resourceContentHash != redefinedField.resourceContentHash
+    }
 
 private fun resolveRemovedFields(current: ApplicationInfo, redefined: ApplicationInfo): List<FieldInfo> {
     return redefined.classIndex.flatMap { (classId, redefinedClass) ->
@@ -129,15 +145,6 @@ private fun resolveRemovedComposeScopes(current: ApplicationInfo, redefined: App
         }
     }
     return result
-}
-
-private fun Context.resolveDirtyMethodsFromExtensionPoints(
-    current: ApplicationInfo, redefined: ApplicationInfo
-): List<MethodInfo> {
-    return ServiceLoader.load(DirtyResolverExtension::class.java, ClassLoader.getSystemClassLoader())
-        .flatMap { resolver ->
-            resolver.resolveDirtyMethods(this, current, redefined)
-        }
 }
 
 /**
@@ -293,7 +300,7 @@ private fun resolveTransitivelyDirty(
                 ?: current.classIndex[element.memberId.classId]
 
             classInfo?.fields?.forEach { (fieldId, field) ->
-                if (field.isStatic) {
+                if (field.isStatic && field.resourceContentHash == null) {
                     queue.add(Element(fieldId, depth = element.depth + 1))
                 }
             }
