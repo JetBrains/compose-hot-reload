@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.Bus
 import org.jetbrains.compose.reload.core.Future
+import org.jetbrains.compose.reload.core.Queue
 import org.jetbrains.compose.reload.core.StoppedException
 import org.jetbrains.compose.reload.core.Task
 import org.jetbrains.compose.reload.core.Update
@@ -147,21 +148,6 @@ private fun launchClient(
         throw OrchestrationIOException("Unexpected introduction: $clientIntroduction")
     }
 
-    /* The introduction was successful, the client is connected */
-    val connected = ClientConnected(
-        clientId = clientIntroduction.clientId,
-        clientRole = clientIntroduction.clientRole,
-        clientPid = clientIntroduction.clientPid
-    )
-
-    /* Write the 'client connected' message into the bus and to the client as well */
-    messages.send(connected)
-    io writePackage connected
-
-    launchOnFinish {
-        messages send ClientDisconnected(connected.clientId, connected.clientRole)
-    }
-
     /* State streaming: If requested, all updates to a given state will be sent to the client */
     val launchedStateStreams = hashSetOf<OrchestrationStateId<*>>()
 
@@ -178,8 +164,64 @@ private fun launchClient(
 
     /* Writer loop: Take elements from the bus and write them to the OrchestrationIO */
     subtask("Writer") {
+        val queue = Queue<OrchestrationPackage>()
+
+        subtask {
+            val clientConnected = ClientConnected(
+                clientId = clientIntroduction.clientId,
+                clientRole = clientIntroduction.clientRole,
+                clientPid = clientIntroduction.clientPid
+            )
+
+            /**
+             * We consider the client to be connected precisely at this moment, where
+             * we know that the 'queue' above is wired-up and each message from [messages] will be received.
+             * We know that a subtask will be dispatched to the end of the [org.jetbrains.compose.reload.core.reloadMainThread],
+             * which ensures that the 'messages.collect {}' below is active already
+             */
+            messages.send(clientConnected)
+
+            /**
+             * Cleanup: Since we announced the [clientConnected] state, we have to make sure that the 'disconnect' is
+             * sent on finish.
+             */
+            launchOnFinish {
+                messages send ClientDisconnected(clientConnected.clientId, clientConnected.clientRole)
+            }
+
+
+            /* Update the client connections state */
+            states.update(OrchestrationConnectionsState) { state ->
+                state.withConnection(clientConnected.clientId, clientConnected.clientRole, clientConnected.clientPid)
+            }
+
+            /**
+             * Cleanup: Remove the client from the [OrchestrationConnectionsState] once this task finishes
+             */
+            invokeOnFinish {
+                states.update(OrchestrationConnectionsState) { state ->
+                    state.withoutConnection(clientConnected.clientId)
+                }
+            }
+
+            /**
+             * We enqueued the [clientConnected] message; the new client's stream will start exactly with this [clientConnected]
+             * message. Messages prior to [clientConnected] are supposed to be ignored.
+             */
+            while (isActive()) {
+                if (queue.receive() == clientConnected) {
+                    io.writePackage(clientConnected)
+                    break
+                }
+            }
+
+            while (isActive()) {
+                io writePackage queue.receive()
+            }
+        }
+
         messages.collect { pkg ->
-            io writePackage pkg
+            queue.send(pkg)
         }
     }
 
@@ -202,17 +244,6 @@ private fun launchClient(
 
                 else -> continue
             }
-        }
-    }
-
-    /* Update the client connections state */
-    states.update(OrchestrationConnectionsState) { state ->
-        state.withConnection(connected.clientId, connected.clientRole, connected.clientPid)
-    }
-
-    invokeOnFinish {
-        states.update(OrchestrationConnectionsState) { state ->
-            state.withoutConnection(connected.clientId)
         }
     }
 }
