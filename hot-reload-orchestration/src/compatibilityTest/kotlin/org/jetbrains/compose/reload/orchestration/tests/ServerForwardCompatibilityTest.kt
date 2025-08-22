@@ -7,12 +7,14 @@ package org.jetbrains.compose.reload.orchestration.tests
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
+import org.jetbrains.compose.reload.core.await
 import org.jetbrains.compose.reload.core.awaitIdle
 import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.reloadMainThread
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
+import org.jetbrains.compose.reload.orchestration.OrchestrationConnectionsState
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
@@ -86,19 +88,38 @@ class ServerForwardCompatibilityTest {
         val messagesA = clientA.asChannel()
         val messagesB = clientB.asChannel()
 
-        clientA.connect().getOrThrow()
-        clientB.connect().getOrThrow()
-        log("clientA & clientB connected")
+        await("clientA & clientB connected") {
+            clientA.connect().getOrThrow()
+            clientB.connect().getOrThrow()
+            log("clientA & clientB connected")
+        }
 
         reloadMainThread.awaitIdle()
+
+        /* Send a message from client A */
         clientA.send(TestEvent("Hello"))
-        messagesA.receiveAsFlow().first { it is TestEvent && it.payload == "Hello" }
-        messagesB.receiveAsFlow().first { it is TestEvent && it.payload == "Hello" }
+
+        await("clientA received 'Hello'") {
+            messagesA.receiveAsFlow().first { it is TestEvent && it.payload == "Hello" }
+        }
+
+        await("clientB received 'Hello'") {
+            messagesB.receiveAsFlow().first { it is TestEvent && it.payload == "Hello" }
+        }
+
         log("clientA & clientB received 'Hello'")
 
+        /* Send a message from client B */
         clientB.send(TestEvent("World"))
-        messagesA.receiveAsFlow().first { it is TestEvent && it.payload == "World" }
-        messagesB.receiveAsFlow().first { it is TestEvent && it.payload == "World" }
+
+        await("clientA received 'World'") {
+            messagesA.receiveAsFlow().first { it is TestEvent && it.payload == "World" }
+        }
+
+        await("clientB received 'World'") {
+            messagesB.receiveAsFlow().first { it is TestEvent && it.payload == "World" }
+        }
+
         log("clientA & clientB received 'World'")
     }
 
