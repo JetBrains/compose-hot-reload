@@ -16,6 +16,7 @@ import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.LaunchMode
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
+import org.jetbrains.compose.reload.orchestration.OrchestrationClientPortPropertyPrefix
 import org.jetbrains.kotlin.gradle.InternalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
@@ -118,6 +119,14 @@ internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<Ko
     val intellijDebuggerDispatchPort = project
         .composeReloadIntelliJDebuggerDispatchPortProvider.orNull
 
+    /*
+    This property is special as it is volatile (changes with every invocation from the IDE).
+    Therefore, we capture the gcc compatible value source here and manually provide it to the 'jvmArgs' in
+    the task action (to be gcc compliant)
+     */
+    val awaitingOrchestrationClientPorts =
+        project.providers.systemPropertiesPrefixedBy(OrchestrationClientPortPropertyPrefix)
+
     val projectPath = project.path
 
     doFirst {
@@ -132,6 +141,15 @@ internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<Ko
             Since we would like to debug our hot reload agent, we ensure that the debug agent is listed first.
              */
             jvmArgs = issueNewDebugSessionJvmArguments(name, intellijDebuggerDispatchPort).toList() + jvmArgs.orEmpty()
+        }
+
+        /**
+         * Forwarding the waiting orchestration ports.
+         * See [org.jetbrains.compose.reload.orchestration.OrchestrationAwaitingClient] for further details:
+         * There, usually, is the IDE waiting for the process to start up.
+         */
+        awaitingOrchestrationClientPorts.orNull?.takeIf { it.isNotEmpty() }?.let { awaitingClientPort ->
+            jvmArgs = jvmArgs.orEmpty() + awaitingClientPort.map { (key, value) -> "-D$key=$value" }
         }
 
         /*

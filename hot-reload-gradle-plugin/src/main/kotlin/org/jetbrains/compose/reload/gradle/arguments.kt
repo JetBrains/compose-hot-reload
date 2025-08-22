@@ -138,14 +138,6 @@ internal class ComposeHotReloadArguments(project: Project) :
 
     @get:Input
     @get:Optional
-    val orchestrationClientPorts: Provider<Map<String, String>> = project.provider {
-        project.providers.environmentVariablesPrefixedBy(OrchestrationClientPortPropertyPrefix).get() +
-            project.providers.systemPropertiesPrefixedBy(OrchestrationClientPortPropertyPrefix).get() +
-            project.providers.gradlePropertiesPrefixedBy(OrchestrationClientPortPropertyPrefix).get()
-    }
-
-    @get:Input
-    @get:Optional
     val javaHome: Provider<String> = project.providers.systemProperty("java.home")
 
     @get:Input
@@ -309,10 +301,6 @@ internal class ComposeHotReloadArguments(project: Project) :
         if (orchestrationPort != null) {
             logger.quiet("Using orchestration server port: $orchestrationPort")
             add("-D${HotReloadProperty.OrchestrationPort.key}=${orchestrationPort}")
-        }
-
-        orchestrationClientPorts.orNull.orEmpty().forEach { (property, value) ->
-            add("-D$property=$value")
         }
 
         add("-D${HotReloadProperty.VirtualMethodResolveEnabled.key}=$virtualMethodResolveEnabled")
