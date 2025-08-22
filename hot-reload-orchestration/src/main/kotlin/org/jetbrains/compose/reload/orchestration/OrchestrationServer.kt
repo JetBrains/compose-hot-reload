@@ -11,7 +11,6 @@ import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.Queue
 import org.jetbrains.compose.reload.core.StoppedException
 import org.jetbrains.compose.reload.core.Task
-import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.Update
 import org.jetbrains.compose.reload.core.WorkerThread
 import org.jetbrains.compose.reload.core.awaitOrThrow
@@ -19,9 +18,11 @@ import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.dispatcherImmediate
+import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.exceptionOrNull
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.invokeOnFinish
 import org.jetbrains.compose.reload.core.invokeOnStop
 import org.jetbrains.compose.reload.core.isActive
@@ -38,6 +39,9 @@ import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
 import kotlin.time.Duration.Companion.seconds
+
+
+private val logger = createLogger<OrchestrationServer>()
 
 public fun startOrchestrationServer(): OrchestrationServer {
     val server = OrchestrationServer()
@@ -60,7 +64,7 @@ public interface OrchestrationServer : OrchestrationHandle {
      * This might be useful when tools want to be connected to the orchestration as client, before
      * the orchestration is even started (e.g. an IDE).
      */
-    public suspend fun connectAwaitingClient(clientPort: Int): Try<Unit>
+    public suspend fun connectAwaitingClient(clientPort: Int): Boolean
 }
 
 public fun OrchestrationServer(): OrchestrationServer {
@@ -74,7 +78,7 @@ public fun OrchestrationServer(): OrchestrationServer {
     /**
      * Represents an actor who attempts to connect to clients listening at a given port.
      */
-    val connectActor = Actor</* Port */ Int, Unit>()
+    val connectActor = Actor</* Port */ Int, Boolean>()
 
     val task = launchTask<Unit>("OrchestrationServer") {
         invokeOnFinish { bind.completeExceptionally(it.exceptionOrNull() ?: StoppedException()) }
@@ -105,6 +109,7 @@ public fun OrchestrationServer(): OrchestrationServer {
             val serverPort = port.awaitOrThrow()
 
             connectActor.process { port ->
+                logger.info("Connecting to client on port '$port'")
                 val reader = OrchestrationIO.newReaderThread()
                 val writer = OrchestrationIO.newWriterThread()
                 try {
@@ -119,11 +124,13 @@ public fun OrchestrationServer(): OrchestrationServer {
 
                         val client = launchClient(io, messages, states)
                         invokeOnFinish { client.stop() }
+                        true
                     }
                 } catch (t: Throwable) {
+                    logger.error("Failed to connect to client on port '$port'", t)
                     reader.close()
                     writer.close()
-                    throw t
+                    false
                 }
             }
         }
@@ -134,8 +141,8 @@ public fun OrchestrationServer(): OrchestrationServer {
         override val port: Future<Int> = port
         override val states = states
 
-        override suspend fun connectAwaitingClient(clientPort: Int): Try<Unit> {
-            return Try { connectActor(clientPort) }
+        override suspend fun connectAwaitingClient(clientPort: Int): Boolean {
+            return connectActor(clientPort)
         }
 
         override suspend fun send(message: OrchestrationMessage) {

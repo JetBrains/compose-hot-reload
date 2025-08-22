@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty
+import org.jetbrains.compose.reload.core.await
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.exception
@@ -22,6 +23,7 @@ import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
+import org.jetbrains.compose.reload.orchestration.OrchestrationConnectionsState
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
@@ -82,7 +84,14 @@ internal val orchestration: OrchestrationHandle = run {
         System.setProperty(HotReloadProperty.OrchestrationPort.key, orchestrationPort.toString())
     }
 
-    handle.startLoggingDispatch()
+    /* Await main application before dispatching logs */
+    handle.subtask {
+        handle.states.get(OrchestrationConnectionsState).await { state ->
+            OrchestrationClientRole.Application in state.connections.map { it.clientRole }
+        }
+        handle.startLoggingDispatch()
+    }
+
     handle
 }
 

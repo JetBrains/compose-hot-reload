@@ -15,13 +15,11 @@ import org.jetbrains.compose.reload.core.completeExceptionally
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.dispatcher
 import org.jetbrains.compose.reload.core.error
-import org.jetbrains.compose.reload.core.exception
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.invokeOnFinish
 import org.jetbrains.compose.reload.core.invokeOnStop
-import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientConnector.AwaitServerConnection
 import java.net.InetSocketAddress
@@ -102,24 +100,28 @@ public suspend fun OrchestrationAwaitingClient.toJvmArg(): String {
  */
 @InternalHotReloadApi
 public fun OrchestrationServer.connectAllAwaitingClients() {
-    System.getProperties().forEach { (key, value) ->
-        if (key !is String) return@forEach
-        if (value !is String) return@forEach
-        if (!key.startsWith(OrchestrationClientPortPropertyPrefix)) return@forEach
-        val port = key.removePrefix(OrchestrationClientPortPropertyPrefix).toIntOrNull() ?: return@forEach
-        val suspend = value.toBooleanStrictOrNull() ?: return@forEach
+    try {
+        System.getProperties().forEach { (key, value) ->
+            if (key !is String) return@forEach
+            if (value !is String) return@forEach
+            if (!key.startsWith(OrchestrationClientPortPropertyPrefix)) return@forEach
+            val port = key.removePrefix(OrchestrationClientPortPropertyPrefix).toIntOrNull() ?: return@forEach
+            val suspend = value.toBooleanStrictOrNull() ?: return@forEach
 
-        val task = launchTask {
-            logger.info("Connecting to deferred client on port $port, suspend=$suspend")
-            val result = connectAwaitingClient(port)
-            if (result.isFailure()) {
-                logger.error("Failed to connect to deferred client on port $port", result.exception)
+
+            val task = launchTask {
+                logger.info("Connecting to deferred client on port $port, suspend=$suspend")
+                if (!connectAwaitingClient(port)) {
+                    logger.error("Failed to connect to deferred client on port $port")
+                }
+            }
+
+            if (suspend) {
+                task.getBlocking(15.seconds)
             }
         }
-
-        if (suspend) {
-            task.getBlocking(15.seconds)
-        }
+    } catch (t: Throwable) {
+        logger.error("Failed to connect to deferred clients", t)
     }
 }
 
