@@ -9,8 +9,8 @@ import io.sellmair.evas.State
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 
-data class BuildSystemState(val buildSystem: BuildSystem) : State {
-    companion object Key : State.Key<BuildSystemState?> {
-        override val default = HotReloadEnvironment.buildSystem?.let(::BuildSystemState)
+data class BuildSystemUIState(val buildSystem: BuildSystem) : State {
+    companion object Key : State.Key<BuildSystemUIState?> {
+        override val default = HotReloadEnvironment.buildSystem?.let(::BuildSystemUIState)
     }
 }

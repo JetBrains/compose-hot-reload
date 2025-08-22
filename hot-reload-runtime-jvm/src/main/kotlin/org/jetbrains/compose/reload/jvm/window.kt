@@ -10,19 +10,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.devtools.api.WindowsState
 import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.sendAsync
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.trace
-import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowPositioned
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
-import org.jetbrains.compose.reload.orchestration.asFlow
 import java.awt.Window
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
@@ -37,17 +35,32 @@ internal fun startWindowManager(window: Window): WindowId {
     val windowId = remember { WindowId.create() }
 
     LaunchedEffect(windowId) {
-        var isActive = true
+        val windowState = MutableStateFlow<WindowsState.WindowState?>(null)
+
+        /* Synchronize windows state with orchestration */
+        launch {
+            windowState.collect { state ->
+                orchestration.update(WindowsState) { current ->
+                    val windows = if (state == null) current.windows - windowId
+                    else current.windows + (windowId to state)
+                    WindowsState(windows)
+                }
+            }
+        }
 
         fun broadcastActiveState() {
-            isActive = true
+            windowState.value = WindowsState.WindowState(
+                x = window.x, y = window.y, width = window.width, height = window.height,
+                isAlwaysOnTop = window.isAlwaysOnTop
+            )
+
             ApplicationWindowPositioned(
                 windowId, window.x, window.y, window.width, window.height, isAlwaysOnTop = window.isAlwaysOnTop
             ).sendAsync()
         }
 
         fun broadcastGone() {
-            isActive = false
+            windowState.value = null
             OrchestrationMessage.ApplicationWindowGone(windowId).sendAsync()
         }
 
@@ -109,14 +122,6 @@ internal fun startWindowManager(window: Window): WindowId {
         window.addWindowStateListener(windowListener)
         window.addWindowFocusListener(windowListener)
         window.addComponentListener(componentListener)
-
-        launch {
-            orchestration.asFlow().filterIsInstance<ClientConnected>().collect { message ->
-                if (message.clientRole == OrchestrationClientRole.Tooling && isActive) {
-                    broadcastActiveState()
-                }
-            }
-        }
 
         currentCoroutineContext().job.invokeOnCompletion {
             window.removeWindowListener(windowListener)

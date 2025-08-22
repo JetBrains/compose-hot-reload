@@ -28,20 +28,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import io.sellmair.evas.compose.composeValue
 import kotlinx.coroutines.delay
-import org.jetbrains.compose.devtools.states.ReloadState
+import org.jetbrains.compose.devtools.states.ReloadUIState
 import org.jetbrains.compose.devtools.targetApplicationWindowStateLocal
 import org.jetbrains.compose.devtools.theme.DtSizes
 
 
 @Composable
 internal fun DtReloadStatusBanner(modifier: Modifier = Modifier) {
-    val state = ReloadState.composeValue()
+    val state = ReloadUIState.composeValue()
     val targetApplicationWindowState = targetApplicationWindowStateLocal.current ?: return
 
     Box(modifier = modifier.heightIn(max = targetApplicationWindowState.size.height).fillMaxHeight()) {
         var visibilityState by remember { mutableStateOf(false) }
         LaunchedEffect(state) {
-            if (state is ReloadState.Ok) {
+            if (state is ReloadUIState.Ok) {
                 delay(1000)
                 visibilityState = false
             } else {

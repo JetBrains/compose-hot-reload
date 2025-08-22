@@ -5,10 +5,15 @@
 
 package org.jetbrains.compose.reload.tests
 
+import kotlinx.coroutines.channels.consume
+import org.jetbrains.compose.devtools.api.WindowsState
+import org.jetbrains.compose.reload.core.asChannel
+import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.launchTask
+import org.jetbrains.compose.reload.core.withAsyncTrace
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Tooling
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowPositioned
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.test.gradle.Headless
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
@@ -19,6 +24,8 @@ import kotlin.jvm.optionals.getOrNull
 import kotlin.test.fail
 
 class DevelopmentEntryPointIntegrationTest {
+
+    private val logger = createLogger()
 
     /**
      * These tests, annoyingly, run non-headless. This might also lead to CI agents not being
@@ -102,6 +109,7 @@ class DevelopmentEntryPointIntegrationTest {
         fixture: HotReloadTestFixture,
         content: String,
     ) = fixture.runTest {
+        val windowsState = fixture.orchestration.states.get(WindowsState)
         /*
         This test does not run the underlying screenshot test application.
         Therefore, we'll manually send back ACK messages
@@ -115,8 +123,16 @@ class DevelopmentEntryPointIntegrationTest {
         }
 
         val devtools = fixture.initialSourceCode(content) {
-            skipToMessage<ClientConnected> { client -> client.clientRole == Tooling }.apply {
-                skipToMessage<ApplicationWindowPositioned>("Waiting for 'WindowPositioned' message")
+            skipToMessage<ClientConnected> { client -> client.clientRole == Tooling }
+        }
+
+        withAsyncTrace("Await one window") {
+            windowsState.asChannel().consume {
+                while (true) {
+                    val state = receive()
+                    if (state.windows.size == 1) break
+                    else logger.info("Waiting for exactly one window: ${state.windows.size}")
+                }
             }
         }
 
