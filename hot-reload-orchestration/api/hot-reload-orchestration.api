@@ -2,6 +2,7 @@ public final class org/jetbrains/compose/reload/orchestration/CoroutineExtension
 	public static final fun asBlockingQueue (Lorg/jetbrains/compose/reload/orchestration/OrchestrationHandle;)Ljava/util/concurrent/BlockingQueue;
 	public static final fun asChannel (Lorg/jetbrains/compose/reload/orchestration/OrchestrationHandle;)Lkotlinx/coroutines/channels/ReceiveChannel;
 	public static final fun asFlow (Lorg/jetbrains/compose/reload/orchestration/OrchestrationHandle;)Lkotlinx/coroutines/flow/Flow;
+	public static final fun flowOf (Lorg/jetbrains/compose/reload/orchestration/OrchestrationStates;Lorg/jetbrains/compose/reload/orchestration/OrchestrationStateKey;)Lkotlinx/coroutines/flow/Flow;
 }
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestartionLoggingKt {

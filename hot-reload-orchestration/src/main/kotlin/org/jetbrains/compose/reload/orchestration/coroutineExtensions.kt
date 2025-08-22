@@ -9,8 +9,14 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.onSubscription
+import kotlinx.coroutines.flow.stateIn
 import org.jetbrains.compose.reload.core.launchTask
 import java.lang.ref.WeakReference
 import java.util.concurrent.BlockingQueue
@@ -66,4 +72,8 @@ public fun OrchestrationHandle.asChannel(): ReceiveChannel<OrchestrationMessage>
 
     channel.invokeOnClose { task.stop() }
     return channel
+}
+
+public fun <T : OrchestrationState?> OrchestrationStates.flowOf(key: OrchestrationStateKey<T>): Flow<T> = flow {
+    get(key).collect { value -> emit(value) }
 }
