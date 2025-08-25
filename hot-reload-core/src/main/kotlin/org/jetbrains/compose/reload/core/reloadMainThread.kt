@@ -5,24 +5,30 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import kotlin.coroutines.ContinuationInterceptor
 
 /**
  * The 'main thread' for all 'compose hot reload' operations.
  * Note: this is not the 'UI' thread.
  */
+@InternalHotReloadApi
 public val reloadMainThread: WorkerThread = WorkerThread("Hot Reload Main")
 
+@InternalHotReloadApi
 public val reloadMainDispatcher: ContinuationInterceptor =
     WorkerThreadDispatcher(reloadMainThread)
 
+@InternalHotReloadApi
 public val reloadMainDispatcherImmediate: ContinuationInterceptor =
     WorkerThreadDispatcher(reloadMainThread, isImmediate = true)
 
 /**
  * @see reloadMainThread
  */
+@InternalHotReloadApi
 internal val isReloadMainThread get() = Thread.currentThread() == reloadMainThread
 
+@InternalHotReloadApi
 public suspend inline fun<T> withReloadMainThread(noinline action: suspend () -> T): T =
     withThread(reloadMainThread, true, action)

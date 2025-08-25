@@ -5,7 +5,10 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
+
 @JvmInline
+@DelicateHotReloadApi
 public value class ExitCode(public val code: Int) {
     public companion object {
         public val success: ExitCode = ExitCode(0)

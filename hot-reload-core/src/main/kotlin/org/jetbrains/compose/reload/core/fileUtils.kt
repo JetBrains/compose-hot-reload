@@ -9,6 +9,7 @@ import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.io.File
 import java.util.zip.CRC32
 
+@InternalHotReloadApi
 @OptIn(ExperimentalStdlibApi::class)
 public fun String.asFileName(): String {
     var result = this

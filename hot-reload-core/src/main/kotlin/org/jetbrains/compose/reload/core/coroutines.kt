@@ -28,10 +28,10 @@ public suspend fun <T> withThread(
     }.getOrThrow()
 }
 
+@InternalHotReloadApi
 public suspend fun WorkerThread.awaitIdle(): Unit = invokeWhenIdle {}.await().getOrThrow()
 
-public suspend fun <T> Future<T>.awaitOrThrow(): T = await().getOrThrow()
-
+@InternalHotReloadApi
 public suspend fun <T> suspendStoppableCoroutine(action: (Continuation<T>) -> Unit): Try<T> {
     val task = coroutineContext[Task]
     var onStop: Disposable? = null
@@ -69,41 +69,51 @@ internal class SelectContinuation<T>(
     }
 }
 
+@InternalHotReloadApi
 @Suppress("RedundantSuspendModifier")
 public suspend fun stopNow(): Nothing = throw StoppedException()
 
+@InternalHotReloadApi
 public suspend fun currentTask(): Task<*> =
     coroutineContext[Task] ?: error("Missing '${Task::class.simpleName}' in context")
 
+@InternalHotReloadApi
 public suspend fun stop(error: Throwable? = null) {
     coroutineContext[Task]?.stop(error)
 }
 
+@InternalHotReloadApi
 public suspend fun invokeOnStop(action: (error: Throwable?) -> Unit): Disposable {
     return currentTask().invokeOnStop(action)
 }
 
+@InternalHotReloadApi
 public suspend fun invokeOnFinish(action: (result: Try<*>) -> Unit): Disposable {
     return currentTask().invokeOnFinish(action)
 }
 
+@InternalHotReloadApi
 public suspend fun launchOnFinish(action: suspend Task<*>.(result: Try<*>) -> Unit): Disposable {
     val task = currentTask()
     return task.launchOnFinish("${task.name}.launchOnFinish", action)
 }
 
+@InternalHotReloadApi
 public suspend fun launchOnStop(action: suspend Task<*>.(error: Throwable) -> Unit): Disposable {
     val task = currentTask()
     return currentTask().launchOnStop("${task.name}.launchOnStop", action)
 }
 
+@InternalHotReloadApi
 public suspend fun isActive(): Boolean = coroutineContext.isActive()
 
+@InternalHotReloadApi
 public suspend fun CoroutineContext.isActive(): Boolean = this[Task]?.isActive() ?: hasActiveJob()
 
+@InternalHotReloadApi
 public fun <T> Continuation<T>.resumeWith(result: Try<T>) {
     resumeWith(result.toResult())
 }
 
-
+@InternalHotReloadApi
 public class StoppedException(override val cause: Throwable? = null) : CancellationException()

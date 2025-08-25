@@ -5,11 +5,13 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
 
+@InternalHotReloadApi
 public fun Serializable.encodeSerializableObject(): ByteArray {
     val baos = ByteArrayOutputStream()
     ObjectOutputStream(baos).use { stream ->
@@ -18,6 +20,7 @@ public fun Serializable.encodeSerializableObject(): ByteArray {
     return baos.toByteArray()
 }
 
+@InternalHotReloadApi
 public fun ByteArray.decodeSerializableObject(): Any? {
     return ObjectInputStream(inputStream()).use { stream ->
         stream.readObject()

@@ -5,9 +5,12 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.util.concurrent.atomic.AtomicReference
 
 
+@DelicateHotReloadApi
 public interface State<T> {
     public val value: T
 
@@ -18,6 +21,7 @@ public interface State<T> {
     public suspend fun collect(collector: suspend (T) -> Unit)
 }
 
+@InternalHotReloadApi
 public class MutableState<T>(initialValue: T) : State<T> {
     private val _value = AtomicReference(State(initialValue, Future<T>()))
     override val value: T get() = _value.get().value
@@ -59,6 +63,7 @@ public class MutableState<T>(initialValue: T) : State<T> {
     internal data class State<T>(val value: T, val nextState: CompletableFuture<T> = Future<T>())
 }
 
+@DelicateHotReloadApi
 public fun <T, R> State<T>.map(transform: (T) -> R): State<R> = object : State<R> {
     override val value: R get() = transform(this@map.value)
 
@@ -67,6 +72,7 @@ public fun <T, R> State<T>.map(transform: (T) -> R): State<R> = object : State<R
     }
 }
 
+@DelicateHotReloadApi
 public suspend fun <T> State<T>.await(condition: (T) -> Boolean): T {
     try {
         collect { value ->

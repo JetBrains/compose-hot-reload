@@ -5,8 +5,12 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
+
+@DelicateHotReloadApi
 public fun stopCollecting(): Nothing {
     throw StopCollectingException()
 }
 
+@DelicateHotReloadApi
 internal class StopCollectingException : Exception()

@@ -5,9 +5,14 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
+import org.jetbrains.compose.reload.InternalHotReloadApi
+
+@DelicateHotReloadApi
 public fun interface Disposable {
     public fun dispose()
 
+    @InternalHotReloadApi
     public companion object {
         internal val empty: Disposable by lazy { Disposable { } }
     }

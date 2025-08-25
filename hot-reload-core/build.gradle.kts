@@ -12,6 +12,7 @@ plugins {
     `publishing-conventions`
     `java-test-fixtures`
     org.jetbrains.kotlinx.benchmark
+    `api-validation-conventions`
 }
 
 kotlin {
@@ -122,11 +123,28 @@ run {
         val text = """
             package org.jetbrains.compose.reload.core
             
+            import org.jetbrains.compose.reload.DelicateHotReloadApi
+
+            @DelicateHotReloadApi
             public const val HOT_RELOAD_VERSION: String = "$versionProperty"
+            
+            @DelicateHotReloadApi
             public const val HOT_RELOAD_KOTLIN_VERSION: String = "$kotlinVersion"
+            
+            @DelicateHotReloadApi
             public const val HOT_RELOAD_GRADLE_VERSION: String = "$gradleVersion"
+            
+            @DelicateHotReloadApi
             public const val HOT_RELOAD_COMPOSE_VERSION: String = "$composeVersion"
+            
+            @DelicateHotReloadApi
             public const val HOT_RELOAD_ANDROID_VERSION: String = "$androidVersion"
+            
+            public val hotReloadVersion: String get() = "$versionProperty"
+            public val hotReloadKotlinVersion: String get() = "$kotlinVersion"
+            public val hotReloadGradleVersion: String get() = "$gradleVersion"
+            public val hotReloadComposeVersion: String get() = "$composeVersion"
+            public val hotReloadAndroidVersion: String get() = "$androidVersion"
             """
             .trimIndent()
 
@@ -155,4 +173,9 @@ run {
     kotlin.target.compilations.getByName("main").compileTaskProvider.configure {
         dependsOn(writeBuildConfig, generateEnvironmentSources)
     }
+}
+
+apiValidation {
+    additionalSourceSets.add("kotlinxCoroutinesExtensions")
+    additionalSourceSets.add("kotlinxCoroutinesBridge")
 }

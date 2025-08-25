@@ -5,17 +5,21 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
+
+@InternalHotReloadApi
 public enum class Os {
     Windows, MacOs, Linux;
 
+    @InternalHotReloadApi
     public companion object {
         @JvmStatic
         public fun currentOrNull(): Os? {
             val os = System.getProperty("os.name")
             return when {
                 os.startsWith("Mac", ignoreCase = true) -> MacOs
-                os.startsWith("Win", ignoreCase = true) -> Os.Windows
-                os.startsWith("Linux", ignoreCase = true) -> Os.Linux
+                os.startsWith("Win", ignoreCase = true) -> Windows
+                os.startsWith("Linux", ignoreCase = true) -> Linux
                 else -> null
             }
         }

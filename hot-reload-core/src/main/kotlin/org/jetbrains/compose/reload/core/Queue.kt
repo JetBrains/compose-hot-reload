@@ -5,23 +5,27 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 
-
+@DelicateHotReloadApi
 public interface SendQueue<T> : Send<T> {
     public fun add(value: T)
 }
 
+@DelicateHotReloadApi
 public interface ReceiveQueue<T> {
     public suspend fun receive(): T
     public fun nextOrNull(): Either<T, Nothing?>
 }
 
+@DelicateHotReloadApi
 public interface Queue<T> : SendQueue<T>, ReceiveQueue<T>
 
+@DelicateHotReloadApi
 public fun <T> Queue(): Queue<T> {
     return QueueImpl()
 }

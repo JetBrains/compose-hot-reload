@@ -5,14 +5,20 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
+
+@InternalHotReloadApi
 public fun <T> Iterator<T>.nextOrNull(): T? = if (hasNext()) next() else null
 
+@InternalHotReloadApi
 public inline fun <reified T> name(): String {
     return T::class.java.name
 }
 
+@InternalHotReloadApi
 public inline fun <reified T> simpleName(): String {
     return T::class.java.simpleName
 }
 
+@InternalHotReloadApi
 public fun hashCode(vararg values: Any?): Int = values.contentHashCode()

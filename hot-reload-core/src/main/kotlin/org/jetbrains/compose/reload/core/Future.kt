@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicReference
@@ -18,6 +19,7 @@ import kotlin.time.Duration
  * The result can also be awaited by blocking the current thread, using the [getBlocking] (which cannot
  * be called from the [reloadMainThread])
  */
+@DelicateHotReloadApi
 public interface Future<out T> {
     public fun isCompleted(): Boolean
     public fun getOrNull(): Try<T>?
@@ -31,6 +33,7 @@ public interface Future<out T> {
  * If the future is not yet completed, the result handler will be called once the future completes.
  * The [onResult] will always be called on the [reloadMainThread]
  */
+@DelicateHotReloadApi
 public fun <T> Future<T>.invokeOnCompletion(onResult: (Try<T>) -> Unit): Disposable {
     return awaitWith(Continuation(EmptyCoroutineContext) { result ->
         reloadMainThread.invoke {
@@ -39,16 +42,23 @@ public fun <T> Future<T>.invokeOnCompletion(onResult: (Try<T>) -> Unit): Disposa
     })
 }
 
+@DelicateHotReloadApi
+public suspend fun <T> Future<T>.awaitOrThrow(): T = await().getOrThrow()
+
+@DelicateHotReloadApi
 public sealed interface CompletableFuture<T> : Future<T> {
     public fun completeWith(result: Try<T>): Boolean
 }
 
+@DelicateHotReloadApi
 public fun CompletableFuture<Unit>.complete(): Boolean =
     completeWith(Unit.toLeft())
 
+@DelicateHotReloadApi
 public fun <T> CompletableFuture<T>.complete(value: T): Boolean =
     completeWith(value.toLeft())
 
+@DelicateHotReloadApi
 public fun <T> CompletableFuture<T>.completeWith(result: Try<T>) {
     when (result) {
         is Left<T> -> complete(result.value)
@@ -56,28 +66,34 @@ public fun <T> CompletableFuture<T>.completeWith(result: Try<T>) {
     }
 }
 
+@DelicateHotReloadApi
 public fun <T> CompletableFuture<T>.completeExceptionally(exception: Throwable): Boolean =
     completeWith(exception.toRight())
 
+@DelicateHotReloadApi
 public fun <T> Future(): CompletableFuture<T> {
     return FutureImpl()
 }
 
+@DelicateHotReloadApi
 @JvmName("UnitFuture")
 public fun Future(): CompletableFuture<Unit> {
     return Future<Unit>()
 }
 
+@DelicateHotReloadApi
 @JvmName("FutureFromResult")
 public fun <T> Future(result: Result<T>): Future<T> {
     return CompletedFuture(result.toTry())
 }
 
+@DelicateHotReloadApi
 @JvmName("FutureFromTry")
 public fun <T> Future(result: Try<T>): Future<T> {
     return CompletedFuture(result)
 }
 
+@DelicateHotReloadApi
 @JvmName("FutureFromValue")
 public fun <T> Future(result: T): Future<T> {
     return CompletedFuture(result.toLeft())
@@ -188,6 +204,7 @@ private class CompletedFuture<T>(val result: Try<T>) : Future<T> {
  *  - This is done to prevent deadlocking the main thread. An exception is thrown because a failing
  *  result object has different semantics than this precondition.
  */
+@DelicateHotReloadApi
 public fun <T> Future<T>.getBlocking(): Try<T> {
     if (isReloadMainThread) throw IllegalStateException("Cannot call getBlocking() from the 'reloadMainThread'")
     val javaFuture = java.util.concurrent.CompletableFuture<Try<T>>()
@@ -199,6 +216,7 @@ public fun <T> Future<T>.getBlocking(): Try<T> {
  * Same as [getBlocking], but with a given [timeout] which will return a failing Result, containing a
  * [TimeoutException] if the timeout is reached.]
  */
+@DelicateHotReloadApi
 public fun <T> Future<T>.getBlocking(timeout: Duration): Try<T> {
     if (isReloadMainThread) throw IllegalStateException("Cannot call getBlocking() from the 'reloadMainThread'")
     val javaFuture = java.util.concurrent.CompletableFuture<Try<T>>()
@@ -213,6 +231,7 @@ public fun <T> Future<T>.getBlocking(timeout: Duration): Try<T> {
 /**
  * Converts a [java.util.concurrent.CompletableFuture] to our async [Future] object.
  */
+@DelicateHotReloadApi
 public fun <T> java.util.concurrent.CompletableFuture<T>.toFuture(): Future<T> {
     val future = Future<T>()
     whenComplete { value, error ->

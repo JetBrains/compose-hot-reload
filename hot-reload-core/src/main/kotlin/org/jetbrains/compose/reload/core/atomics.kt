@@ -5,10 +5,14 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.util.concurrent.atomic.AtomicReference
 
+@DelicateHotReloadApi
 public data class Update<T>(val previous: T, val updated: T)
 
+@InternalHotReloadApi
 public inline fun <T> AtomicReference<T>.update(updater: (T) -> T): Update<T> {
     while (true) {
         val value = get()

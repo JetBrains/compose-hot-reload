@@ -51,6 +51,7 @@ public fun DataInputStream.readFrame(): ByteArray {
     return readNBytes(size)
 }
 
+@InternalHotReloadApi
 public fun DataOutputStream.writeOptionalFrame(bytes: ByteArray?) {
     if (bytes == null) {
         writeInt(-1)

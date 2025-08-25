@@ -5,13 +5,17 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
+
 /**
  * Every event will be received by all [collect]'ing coroutines.
  */
+@DelicateHotReloadApi
 public interface Broadcast<T> {
     public suspend fun collect(action: suspend (T) -> Unit)
 }
 
+@DelicateHotReloadApi
 public fun <T> Broadcast<T>.invokeOnValue(acton: (T) -> Unit): Disposable {
     val task = launchTask("Broadcast.invokeOnValue") {
         collect { value -> acton(value) }
@@ -22,6 +26,7 @@ public fun <T> Broadcast<T>.invokeOnValue(acton: (T) -> Unit): Disposable {
     }
 }
 
+@DelicateHotReloadApi
 public inline fun <reified T> Broadcast<*>.withType(): Broadcast<T> {
     return object : Broadcast<T> {
         override suspend fun collect(action: suspend (T) -> Unit) {

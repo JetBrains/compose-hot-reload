@@ -5,13 +5,16 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.io.Serializable
 import kotlin.streams.asSequence
 
 @JvmInline
+@InternalHotReloadApi
 public value class Environment(private val value: String) : Serializable {
     override fun toString(): String = value
 
+    @InternalHotReloadApi
     public companion object {
         public val ide: Environment = Environment("IDE")
         public val build: Environment = Environment("Build")

@@ -5,22 +5,29 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.ParsedTemplate.Block
 import org.jetbrains.compose.reload.core.Template.ParseFailure
 
+@InternalHotReloadApi
 public interface Template {
     public fun render(values: Map<String, Any?>): Try<String>
 
+    @InternalHotReloadApi
     public class ParseFailure(message: String) : IllegalArgumentException(message)
+
+    @InternalHotReloadApi
     public class RenderFailure(message: String) : IllegalArgumentException(message)
 }
 
+@InternalHotReloadApi
 public interface TemplateBuilder {
     public fun push(key: String, value: Any?)
     public fun set(key: String, value: Any?)
     public operator fun String.invoke(value: Any?): Unit = push(this, value)
 }
 
+@InternalHotReloadApi
 public inline fun Template.render(values: TemplateBuilder.() -> Unit): Try<String> {
     val values = mutableMapOf<String, MutableList<Any?>>()
     object : TemplateBuilder {
@@ -35,10 +42,12 @@ public inline fun Template.render(values: TemplateBuilder.() -> Unit): Try<Strin
     return render(values)
 }
 
+@InternalHotReloadApi
 public inline fun Template.renderOrThrow(values: TemplateBuilder.() -> Unit): String {
     return render(values).getOrThrow()
 }
 
+@InternalHotReloadApi
 public fun Template.render(vararg values: Pair<String, Any?>): Try<String> {
     val map = mutableMapOf<String, MutableList<Any?>>()
     values.forEach { (key, value) ->
@@ -47,17 +56,21 @@ public fun Template.render(vararg values: Pair<String, Any?>): Try<String> {
     return render(map)
 }
 
+@InternalHotReloadApi
 public fun Template.renderOrThrow(vararg values: Pair<String, Any?>): String {
     return render(*values).getOrThrow()
 }
 
+@InternalHotReloadApi
 public fun Template(value: String): Try<Template> = value.asTemplate()
 
+@InternalHotReloadApi
 public fun String.asTemplate(): Try<Template> {
     val tokens = createTemplateTokens(this).leftOr { return it }
     return parseTemplateTokens(this, tokens)
 }
 
+@InternalHotReloadApi
 public fun String.asTemplateOrThrow(): Template {
     return asTemplate().getOrThrow()
 }

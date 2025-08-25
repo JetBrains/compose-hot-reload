@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.core
 
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
 import java.lang.invoke.MethodHandles
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
@@ -17,6 +18,7 @@ import kotlin.coroutines.suspendCoroutine
 
 private val thisClass = MethodHandles.lookup().lookupClass()
 
+@DelicateHotReloadApi
 public data class AsyncTraces(val frames: List<Frame>) : CoroutineContext.Element {
     public companion object Key : CoroutineContext.Key<AsyncTraces>
 
@@ -28,6 +30,7 @@ public data class AsyncTraces(val frames: List<Frame>) : CoroutineContext.Elemen
     )
 }
 
+@DelicateHotReloadApi
 public suspend inline fun <T> withAsyncTrace(
     title: String? = null, noinline block: suspend () -> T
 ): T {
@@ -47,12 +50,14 @@ public suspend inline fun <T> withAsyncTrace(
     }
 }
 
+@DelicateHotReloadApi
 @Suppress("NOTHING_TO_INLINE")
 public inline fun CoroutineContext.createAsyncTraces(title: String? = null): AsyncTraces {
     val frames = (this[AsyncTraces]?.frames ?: emptyList()) + AsyncTraces.Frame(title)
     return AsyncTraces(frames)
 }
 
+@DelicateHotReloadApi
 @Suppress("NOTHING_TO_INLINE")
 public inline fun CoroutineContext.withAsyncTraces(title: String? = null): CoroutineContext {
     return this + createAsyncTraces(title)
@@ -77,16 +82,19 @@ internal class AsyncTracesThrowable(trace: AsyncTraces) : Throwable() {
     }
 }
 
+@DelicateHotReloadApi
 public suspend fun AsyncTraces(title: String? = null): AsyncTraces {
     val frame = AsyncTraces.Frame(title, currentStackTrace())
     val trace = coroutineContext[AsyncTraces] ?: AsyncTraces(emptyList())
     return AsyncTraces(trace.frames + frame)
 }
 
+@DelicateHotReloadApi
 public suspend fun asyncTraces(): AsyncTraces? {
     return coroutineContext[AsyncTraces]
 }
 
+@DelicateHotReloadApi
 public suspend fun asyncTracesString(): String {
     val maxRenderedStackTraceElements = 7
     val traces = asyncTraces() ?: return "N/A (No async traces)"

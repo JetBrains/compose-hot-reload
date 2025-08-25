@@ -5,11 +5,15 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
 import java.io.Serializable
 import java.util.UUID
 
+@DelicateHotReloadApi
 @JvmInline
 public value class WindowId(public val value: String) : Serializable {
+
+    @DelicateHotReloadApi
     public companion object {
         public fun create(): WindowId = WindowId(UUID.randomUUID().toString())
     }

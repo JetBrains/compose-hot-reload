@@ -5,11 +5,12 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.atomic.AtomicInteger
 
-
+@InternalHotReloadApi
 public class WorkerThread(
     name: String, isDaemon: Boolean = true,
 ) : Thread(name), AutoCloseable {

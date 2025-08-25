@@ -5,6 +5,8 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
+
 /*
  * Copyright 2010-2022 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
@@ -19,6 +21,7 @@ package org.jetbrains.compose.reload.core
  * @param edges: Producer function from one node to all its children. This implementation can handle loops and self references gracefully.
  * @return Note: The order of the set is guaranteed to be bfs
  */
+@InternalHotReloadApi
 public inline fun <reified T> T.closure(edges: (T) -> Iterable<T>): Set<T> {
     val initialEdges = edges(this)
 
@@ -41,6 +44,7 @@ public inline fun <reified T> T.closure(edges: (T) -> Iterable<T>): Set<T> {
 /**
  * Same as [closure], but returns a lazy sequence instead
  */
+@InternalHotReloadApi
 public inline fun <reified T> T.closureSequence(crossinline edges: (T) -> Iterable<T>): Sequence<T> {
     val initialEdges = edges(this)
 
@@ -74,6 +78,7 @@ public inline fun <reified T> T.closureSequence(crossinline edges: (T) -> Iterab
  * Similar to [closure], but will also include the receiver(seed) of this function into the final set
  * @see closure
  */
+@InternalHotReloadApi
 public inline fun <reified T> T.withClosure(edges: (T) -> Iterable<T>): Set<T> {
     val initialEdges = edges(this)
 
@@ -98,6 +103,7 @@ public inline fun <reified T> T.withClosure(edges: (T) -> Iterable<T>): Set<T> {
  * Similar to [closureSequence], but will also include the receiver(seed) of this function into the final set
  * @see closure
  */
+@InternalHotReloadApi
 public inline fun <reified T> T.withClosureSequence(crossinline edges: (T) -> Iterable<T>): Sequence<T> {
     val initialEdges = edges(this)
 
@@ -131,6 +137,7 @@ public inline fun <reified T> T.withClosureSequence(crossinline edges: (T) -> It
  * @see closure
  * @receiver: Will not be included in the return set
  */
+@InternalHotReloadApi
 public inline fun <reified T> Iterable<T>.closure(edges: (T) -> Iterable<T>): Set<T> {
     if (this is Collection && this.isEmpty()) return emptySet()
     val thisSet = this.toSet()
@@ -155,6 +162,7 @@ public inline fun <reified T> Iterable<T>.closure(edges: (T) -> Iterable<T>): Se
  * @see closure
  * @receiver: Will not be included in the return set
  */
+@InternalHotReloadApi
 public inline fun <reified T> Iterable<T>.closureSequence(crossinline edges: (T) -> Iterable<T>): Sequence<T> {
     if (this is Collection && this.isEmpty()) return emptySequence()
     val thisSet = if (this is Set<T>) this else this.toSet()
@@ -178,6 +186,7 @@ public inline fun <reified T> Iterable<T>.closureSequence(crossinline edges: (T)
  * @see closure
  * @receiver Initial sequence of elements will not be included in the return squence
  */
+@InternalHotReloadApi
 public inline fun <reified T> Sequence<T>.closureSequence(crossinline edges: (T) -> Iterable<T>): Sequence<T> {
     return toSet().closureSequence(edges)
 }
@@ -186,6 +195,7 @@ public inline fun <reified T> Sequence<T>.closureSequence(crossinline edges: (T)
  * @see closure
  * @receiver: Will be included in the return set
  */
+@InternalHotReloadApi
 public inline fun <reified T> Iterable<T>.withClosure(edges: (T) -> Iterable<T>): Set<T> {
     val dequeue = if (this is Collection) {
         if (this.isEmpty()) return emptySet()
@@ -208,6 +218,7 @@ public inline fun <reified T> Iterable<T>.withClosure(edges: (T) -> Iterable<T>)
  * @see withClosure
  * @receiver: Will be included in the return set
  */
+@InternalHotReloadApi
 public inline fun <reified T> Iterable<T>.withClosureSequence(crossinline edges: (T) -> Iterable<T>): Sequence<T> {
     return asSequence().withClosureSequence(edges)
 }
@@ -216,6 +227,7 @@ public inline fun <reified T> Iterable<T>.withClosureSequence(crossinline edges:
  * @see closure
  * @receiver: Will be included in the return set
  */
+@InternalHotReloadApi
 public inline fun <reified T> Sequence<T>.withClosureSequence(crossinline edges: (T) -> Iterable<T>): Sequence<T> {
     val results = HashSet<T>()
     val resolveQueue = createDequeue<T>()
@@ -244,6 +256,7 @@ public inline fun <reified T> Sequence<T>.withClosureSequence(crossinline edges:
  * @see closure
  * @receiver is not included in the return set
  */
+@InternalHotReloadApi
 public inline fun <reified T : Any> T.linearClosure(next: (T) -> T?): Set<T> {
     val initial = next(this) ?: return emptySet()
     val results = createResultSet<T>()
@@ -261,6 +274,7 @@ public inline fun <reified T : Any> T.linearClosure(next: (T) -> T?): Set<T> {
  * @see closure
  * @receiver is not included in the return set
  */
+@InternalHotReloadApi
 public inline fun <reified T : Any> T.linearClosureSequence(crossinline next: (T) -> T?): Sequence<T> {
     val initial = next(this) ?: return emptySequence()
     val results = HashSet<T>()
@@ -280,6 +294,7 @@ public inline fun <reified T : Any> T.linearClosureSequence(crossinline next: (T
  * @see closure
  * @receiver is included in the return set
  */
+@InternalHotReloadApi
 public inline fun <reified T : Any> T.withLinearClosure(next: (T) -> T?): Set<T> {
     val initial = next(this) ?: return setOf(this)
     val results = createResultSet<T>()
@@ -299,6 +314,7 @@ public inline fun <reified T : Any> T.withLinearClosure(next: (T) -> T?): Set<T>
  * @see closure
  * @receiver is included in the return set
  */
+@InternalHotReloadApi
 public inline fun <reified T : Any> T.withLinearClosureSequence(crossinline next: (T) -> T?): Sequence<T> {
     val initial = next(this) ?: return sequenceOf(this)
     val results = HashSet<T>()
@@ -314,36 +330,6 @@ public inline fun <reified T : Any> T.withLinearClosureSequence(crossinline next
             } else break
         }
     }
-}
-
-/**
- * Similar to [closure], but the result is returned in explicit BFS depth order starting with the receiver
- * @see closure
- */
-public inline fun <reified T> Iterable<T>.withClosureGroupingByDistance(edges: (T) -> Iterable<T>): List<Set<T>> {
-    val dequeue = if (this is Collection) {
-        if (this.isEmpty()) return emptyList()
-        createDequeue(this)
-    } else createDequeueFromIterable(this)
-
-    val allElements = createResultSet<T>(dequeue.size)
-    val results = mutableListOf<MutableSet<T>>()
-
-    while (dequeue.isNotEmpty()) {
-        val levelElements = createResultSet<T>(dequeue.size)
-        var levelSize = dequeue.size
-        while (levelSize != 0) {
-            levelSize -= 1
-            val element = dequeue.removeAt(0)
-            if (allElements.add(element) && levelElements.add(element)) {
-                dequeue.addAll(edges(element))
-            }
-        }
-        if (levelElements.isNotEmpty()) {
-            results.add(levelElements)
-        }
-    }
-    return results
 }
 
 @PublishedApi
@@ -366,6 +352,7 @@ internal inline fun <reified T> createDequeueFromIterable(elements: Iterable<T>)
 }
 
 @PublishedApi
+@InternalHotReloadApi
 internal fun <T> createResultSet(initialSize: Int = 16): MutableSet<T> {
     return LinkedHashSet(initialSize)
 }

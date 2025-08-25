@@ -3,6 +3,8 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
+@file:OptIn(DelicateHotReloadApi::class)
+
 package properties
 
 import org.gradle.api.DefaultTask
@@ -10,6 +12,7 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.core.asTemplateOrThrow
 import org.jetbrains.compose.reload.core.renderOrThrow
 import properties.DeclaredHotReloadProperty.Type
@@ -44,6 +47,9 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
         val template = """
             package org.jetbrains.compose.reload.core
 
+            import org.jetbrains.compose.reload.InternalHotReloadApi
+            
+            @InternalHotReloadApi
             public enum class HotReloadProperty(
                 public val key: String,
                 public val type: Type,
@@ -52,10 +58,13 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
             ) {
                 {{case}},
             ;
+                
+                @InternalHotReloadApi
                 public enum class Environment {
                     BuildTool, DevTools, Application;
                 }
 
+                @InternalHotReloadApi
                 public enum class Type {
                     String, Int, Long, Boolean, File, Files, Enum
                 }
@@ -119,7 +128,9 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
             import java.nio.file.Path
             import kotlin.io.path.Path
             import org.jetbrains.compose.reload.core.Os
+            import org.jetbrains.compose.reload.InternalHotReloadApi
             
+            @InternalHotReloadApi
             public object HotReloadEnvironment {
                 {{element}}
             }

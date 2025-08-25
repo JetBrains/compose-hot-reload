@@ -6,12 +6,15 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Primitive for two coroutines (with separate lifecycles (tasks)) communicating.
  * The inputs sent using the [invoke] method will be processed by the actor, connected using the [process] method.
  */
+@DelicateHotReloadApi
 public interface Actor<In, Out> {
     public suspend operator fun invoke(input: In): Out
     public suspend fun process(action: suspend (In) -> Out)
@@ -20,9 +23,10 @@ public interface Actor<In, Out> {
     public fun isClosed(): Boolean
 }
 
+@InternalHotReloadApi
 public fun <In, Out> Actor(): Actor<In, Out> = ActorImpl()
 
-
+@DelicateHotReloadApi
 public class ActorClosedException(override val cause: Throwable? = null) : Exception()
 
 private class ActorImpl<In, Out> : Actor<In, Out> {

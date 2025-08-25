@@ -5,6 +5,9 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
+
+@InternalHotReloadApi
 public enum class LaunchMode {
     Ide, GradleBlocking, Detached
 }

@@ -5,11 +5,13 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
 public typealias Try<T> = Either<T, Throwable>
 
+@DelicateHotReloadApi
 public inline fun <T> Try(block: () -> T): Try<T> {
     return try {
         block().toLeft()

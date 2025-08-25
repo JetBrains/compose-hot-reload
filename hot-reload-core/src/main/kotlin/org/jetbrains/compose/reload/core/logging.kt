@@ -17,16 +17,20 @@ import java.util.ServiceLoader
 
 @Suppress("NOTHING_TO_INLINE") // We want the caller class!
 @JvmName("createLookupLogger")
+@InternalHotReloadApi
 public inline fun createLogger(): Logger =
     createLogger(MethodHandles.lookup().lookupClass().name)
 
 @Suppress("NOTHING_TO_INLINE") // We want the caller class!
 @JvmName("createLookupLogger")
+@InternalHotReloadApi
 public inline fun createLogger(environment: Environment? = Environment.current): Logger =
     createLogger(MethodHandles.lookup().lookupClass().name, environment)
 
+@InternalHotReloadApi
 public inline fun <reified T : Any> createLogger(): Logger = createLogger(T::class.java.name)
 
+@InternalHotReloadApi
 public fun createLogger(
     name: String,
     environment: Environment? = Environment.current,
@@ -35,11 +39,15 @@ public fun createLogger(
     return LoggerImpl(environment, loggerName = name, dispatch)
 }
 
+@InternalHotReloadApi
 public interface Logger {
+
+    @InternalHotReloadApi
     public enum class Level : Serializable {
         Trace, Debug, Info, Warn, Error
     }
 
+    @InternalHotReloadApi
     public interface Log {
         public val environment: Environment?
         public val loggerName: String?
@@ -52,6 +60,7 @@ public interface Logger {
         public val throwableStacktrace: List<StackTraceElement>?
     }
 
+    @InternalHotReloadApi
     public fun interface Dispatch {
         public fun add(log: Log)
     }
@@ -78,34 +87,41 @@ internal data class LogImpl(
     override val throwableStacktrace: List<StackTraceElement>?
 ) : Logger.Log
 
+@InternalHotReloadApi
 public inline fun Logger.trace(message: () -> String) {
     if (HotReloadEnvironment.logLevel <= Level.Trace) {
         log(Level.Debug, message())
     }
 }
 
+@InternalHotReloadApi
 public inline fun Logger.debug(message: () -> String) {
     if (HotReloadEnvironment.logLevel <= Level.Debug) {
         log(Level.Debug, message())
     }
 }
 
+@InternalHotReloadApi
 public fun Logger.debug(message: String) {
     log(Level.Debug, message)
 }
 
+@InternalHotReloadApi
 public fun Logger.info(message: String) {
     log(Level.Info, message)
 }
 
+@InternalHotReloadApi
 public fun Logger.warn(message: String) {
     log(Level.Warn, message)
 }
 
+@InternalHotReloadApi
 public fun Logger.warn(message: String, throwable: Throwable? = null) {
     log(Level.Warn, message, throwable)
 }
 
+@InternalHotReloadApi
 public fun Logger.error(message: String, throwable: Throwable? = null) {
     log(Level.Error, message, throwable)
 }
@@ -152,6 +168,7 @@ private val timeFormatter = DateTimeFormatterBuilder()
     .appendFraction(ChronoField.NANO_OF_SECOND, 3, 3, true)
     .toFormatter()
 
+@InternalHotReloadApi
 public fun Logger.Log.displayString(
     includeTimestamp: Boolean = true,
     includeEnvironment: Boolean = true,

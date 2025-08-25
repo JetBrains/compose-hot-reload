@@ -5,4 +5,7 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
+
+@DelicateHotReloadApi
 public data class Failure(val message: String?, val throwable: Throwable? = null)

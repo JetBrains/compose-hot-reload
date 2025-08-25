@@ -5,14 +5,17 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.KVariance
 import kotlin.reflect.typeOf
 
+@DelicateHotReloadApi
 public inline fun <reified T> type(): Type<T> = Type(renderReifiedTypeSignatureString(typeOf<T>()))
 
+@DelicateHotReloadApi
 @JvmInline
 public value class Type<@Suppress("unused") T>
 @InternalHotReloadApi constructor(

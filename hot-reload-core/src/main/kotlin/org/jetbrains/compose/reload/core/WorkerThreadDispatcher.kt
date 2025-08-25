@@ -41,8 +41,10 @@ public class WorkerThreadDispatcher(
         get() = ContinuationInterceptor.Key
 }
 
+@InternalHotReloadApi
 public val WorkerThread.dispatcher: ContinuationInterceptor
     get() = WorkerThreadDispatcher(this)
 
+@InternalHotReloadApi
 public val WorkerThread.dispatcherImmediate: ContinuationInterceptor
     get() = WorkerThreadDispatcher(this, isImmediate = true)

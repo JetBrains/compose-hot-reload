@@ -5,13 +5,16 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
 import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Implementation of [Broadcast] which allows sending events
  */
+@DelicateHotReloadApi
 public interface Bus<T> : Broadcast<T>, Send<T>
 
+@DelicateHotReloadApi
 public fun <T> Bus(): Bus<T> {
     return BusImpl()
 }

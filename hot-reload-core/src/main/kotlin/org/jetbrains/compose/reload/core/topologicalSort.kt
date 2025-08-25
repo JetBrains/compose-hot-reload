@@ -5,6 +5,8 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
+
 /**
  * Will sort a graph by its topology, provided in [edges].
  * For example:
@@ -33,6 +35,7 @@ package org.jetbrains.compose.reload.core
  * Detected cycles will be reported using the [onCycle] callback.
  * Cycles will be resolved by breaking the edge which breaks the fewest dependencies.
  */
+@InternalHotReloadApi
 public fun <T> Iterable<T>.sortedByTopology(
     onCycle: ((cycle: Iterable<T>) -> Unit)? = null,
     edges: (T) -> Iterable<T>

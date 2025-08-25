@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.Continuation
@@ -17,6 +18,7 @@ import kotlin.coroutines.suspendCoroutine
 
 private val logger = createLogger()
 
+@DelicateHotReloadApi
 public interface Task<out T> : Future<T>, CoroutineContext.Element {
     public val name: String?
     public val value: Future<T>
@@ -42,6 +44,7 @@ public interface Task<out T> : Future<T>, CoroutineContext.Element {
  * ```
  * @return true if the current task is still executing (no value produced, not stopped)
  */
+@DelicateHotReloadApi
 public suspend fun Task<*>.isActive(): Boolean {
     val currentContext = coroutineContext
     return suspendCoroutine { continuation ->
@@ -54,14 +57,17 @@ public suspend fun Task<*>.isActive(): Boolean {
 }
 
 
+@DelicateHotReloadApi
 public fun Task<*>.isStopped(): Boolean = onStop.isCompleted()
 
+@DelicateHotReloadApi
 public fun Task<*>.invokeOnStop(action: (error: Throwable) -> Unit): Disposable {
     return onStop.invokeOnCompletion { result ->
         action(result.rightOr { it.value })
     }
 }
 
+@DelicateHotReloadApi
 public fun Task<*>.launchOnStop(name: String, body: suspend Task<*>.(error: Throwable) -> Unit): Disposable =
     invokeOnStop { error ->
         launchTask(name) {
@@ -69,6 +75,7 @@ public fun Task<*>.launchOnStop(name: String, body: suspend Task<*>.(error: Thro
         }
     }
 
+@DelicateHotReloadApi
 public fun Task<*>.invokeOnError(action: (error: Throwable) -> Unit): Disposable {
     return value.invokeOnCompletion { result ->
         if (result.isFailure()) {
@@ -77,6 +84,7 @@ public fun Task<*>.invokeOnError(action: (error: Throwable) -> Unit): Disposable
     }
 }
 
+@DelicateHotReloadApi
 public fun Task<*>.launchOnError(name: String, body: suspend Task<*>.(error: Throwable) -> Unit): Disposable =
     invokeOnError { error ->
         launchTask(name) {
@@ -84,10 +92,12 @@ public fun Task<*>.launchOnError(name: String, body: suspend Task<*>.(error: Thr
         }
     }
 
+@DelicateHotReloadApi
 public fun <T> Task<T>.invokeOnFinish(action: (result: Try<T>) -> Unit): Disposable {
     return value.invokeOnCompletion { result -> action(result) }
 }
 
+@DelicateHotReloadApi
 public fun <T> Task<T>.launchOnFinish(name: String, action: suspend Task<*>.(result: Try<T>) -> Unit): Disposable =
     invokeOnFinish { result ->
         launchTask(name) {
@@ -95,10 +105,12 @@ public fun <T> Task<T>.launchOnFinish(name: String, action: suspend Task<*>.(res
         }
     }
 
+@DelicateHotReloadApi
 public fun <T> launchTask(body: suspend Task<T>.() -> T): Task<T> {
     return launchTask(name = null, body = body)
 }
 
+@DelicateHotReloadApi
 public fun <T> launchTask(
     name: String? = null, context: CoroutineContext = EmptyCoroutineContext, body: suspend Task<T>.() -> T
 ): Task<T> {

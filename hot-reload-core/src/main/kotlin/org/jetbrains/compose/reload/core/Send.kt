@@ -5,6 +5,9 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
+
+@DelicateHotReloadApi
 public interface Send<T> {
     public suspend infix fun send(value: T)
 }

@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
@@ -14,6 +15,7 @@ import java.util.concurrent.Future
  * when the submission was rejected (e.g., because the service was closed).
  * This function will catch issues when submitting the [block] and convert it to a 'failed future' instead.
  */
+@InternalHotReloadApi
 public fun <T> ExecutorService.submitSafe(block: () -> T): Future<T> {
     return try {
         submit(block)

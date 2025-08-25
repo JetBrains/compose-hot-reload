@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.core
 
+import org.jetbrains.compose.reload.DelicateHotReloadApi
 import java.io.ByteArrayOutputStream
 import java.nio.file.Path
 import java.util.Properties
@@ -13,6 +14,7 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.outputStream
 
+@DelicateHotReloadApi
 public fun PidFileInfo(path: Path): Try<PidFileInfo> = Try {
     val properties = Properties()
     path.inputStream().buffered().use { input ->
