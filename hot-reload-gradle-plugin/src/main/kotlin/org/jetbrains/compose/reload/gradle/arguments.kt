@@ -21,6 +21,7 @@ import org.gradle.process.JavaForkOptions
 import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.HotReloadProperty
+import org.jetbrains.compose.reload.orchestration.OrchestrationClientPortPropertyPrefix
 import java.io.File
 import kotlin.io.path.absolutePathString
 

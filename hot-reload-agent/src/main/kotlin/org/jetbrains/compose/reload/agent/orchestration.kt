@@ -23,6 +23,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.connectBlocking
+import org.jetbrains.compose.reload.orchestration.connectAllAwaitingClients
 import org.jetbrains.compose.reload.orchestration.startBlocking
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
@@ -97,6 +98,7 @@ internal fun startOrchestration() {
 
     if (orchestration is OrchestrationServer) {
         orchestration.startBlocking()
+        orchestration.connectAllAwaitingClients()
         logger.info("Agent: Server started on port '${orchestration.port.getOrNull()}'")
     }
 
