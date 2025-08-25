@@ -7,14 +7,12 @@ package org.jetbrains.compose.reload.orchestration.tests
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
-import org.jetbrains.compose.reload.core.await
 import org.jetbrains.compose.reload.core.awaitIdle
 import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.reloadMainThread
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
-import org.jetbrains.compose.reload.orchestration.OrchestrationConnectionsState
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
@@ -60,6 +58,8 @@ class ServerForwardCompatibilityTest {
             val port = server.port.await().getOrThrow()
             log("Server started on port '$port'")
             ServerPort(port).send()
+
+            server.await()
         }
     }
 
