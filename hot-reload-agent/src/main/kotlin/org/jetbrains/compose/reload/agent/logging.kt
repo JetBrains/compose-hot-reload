@@ -14,10 +14,12 @@ import org.jetbrains.compose.reload.core.displayString
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.invokeOnFinish
 import org.jetbrains.compose.reload.core.invokeOnStop
+import org.jetbrains.compose.reload.core.launchOnFinish
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.withThread
 import org.jetbrains.compose.reload.core.withType
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
+import org.jetbrains.compose.reload.orchestration.OrchestrationLoggerState
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.CriticalException
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.toMessage
@@ -60,6 +62,14 @@ internal fun OrchestrationHandle.startDispatchingLogs() {
     }
 
     subtask {
+        subtask {
+            val loggerId = OrchestrationLoggerState.LoggerId.create()
+            update(OrchestrationLoggerState) { state -> state.withLogger(loggerId) }
+            launchOnFinish {
+                update(OrchestrationLoggerState) { state -> state.withoutLogger(loggerId) }
+            }
+        }
+
         orchestration.messages.withType<LogMessage>().collect { message ->
             incomingLoggingQueue.add(message)
         }

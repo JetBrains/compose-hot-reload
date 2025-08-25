@@ -14,13 +14,18 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.Environment
+import org.jetbrains.compose.reload.core.Logger
+import org.jetbrains.compose.reload.core.Queue
 import org.jetbrains.compose.reload.core.asFileName
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
+import org.jetbrains.compose.reload.orchestration.toMessage
 import org.junit.jupiter.api.extension.ExtensionContext
 import java.io.BufferedWriter
 import kotlin.io.path.ExperimentalPathApi
@@ -127,5 +132,21 @@ internal fun ExtensionContext.startOrchestrationTestLogging(server: Orchestratio
         writer.appendLine("<<End>>")
         writer.flush()
         writer.close()
+    }
+}
+
+@InternalHotReloadApi
+public fun OrchestrationHandle.startLoggerDispatch(): Logger.Dispatch {
+    val queue = Queue<Logger.Log>()
+
+    subtask("loggerDispatch") {
+        while (true) {
+            val log = queue.receive()
+            send(log.toMessage())
+        }
+    }
+
+    return Logger.Dispatch { log ->
+        queue.add(log)
     }
 }

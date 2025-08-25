@@ -38,7 +38,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.asFlow
 import org.jetbrains.compose.reload.orchestration.sendAsync
-import org.jetbrains.compose.reload.orchestration.startLoggerDispatch
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.coroutines.CoroutineContext

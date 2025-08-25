@@ -7,7 +7,9 @@ package org.jetbrains.compose.devtools
 
 import org.jetbrains.compose.reload.core.Logger
 import org.jetbrains.compose.reload.core.Queue
+import org.jetbrains.compose.reload.core.await
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
+import org.jetbrains.compose.reload.orchestration.OrchestrationLoggerState
 import org.jetbrains.compose.reload.orchestration.toMessage
 
 internal val devtoolsLoggingQueue = Queue<Logger.Log>()
@@ -19,7 +21,15 @@ internal class DevToolsLoggerDispatch : Logger.Dispatch {
 }
 
 internal fun OrchestrationHandle.startLoggingDispatch() = subtask {
+    val loggingState = states.get(OrchestrationLoggerState)
+
     while (true) {
+
+        /* Await at lest one logger to be present in the orchestration, to avoid logs being swallowed */
+        if (loggingState.value.loggers.isEmpty()) {
+            loggingState.await { state -> state.loggers.isNotEmpty() }
+        }
+
         val log = devtoolsLoggingQueue.receive()
         try {
             send(log.toMessage())
