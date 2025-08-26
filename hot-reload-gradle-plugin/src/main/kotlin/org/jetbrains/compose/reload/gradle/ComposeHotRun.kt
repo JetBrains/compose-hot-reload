@@ -18,11 +18,6 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 
 @UntrackedTask(because = "This task should always run")
 sealed class AbstractComposeHotRun : JavaExec(), ComposeHotReloadRunTask {
-
-    init {
-        System.setProperty("compose.resources.generate.ResourceContentHash.annotation", "true")
-    }
-
     @Transient
     @get:Internal
     val compilation = project.objects.property<KotlinCompilation<*>>()

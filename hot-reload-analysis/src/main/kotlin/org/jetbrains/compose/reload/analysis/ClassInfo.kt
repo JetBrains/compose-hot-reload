@@ -46,7 +46,7 @@ internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
             fieldId = FieldId(classNode, fieldNode),
             isStatic = fieldNode.access and (Opcodes.ACC_STATIC) != 0,
             initialValue = fieldNode.value,
-            resourceContentHash = getResourceContentHash(fieldNode)
+            changeIndicatorHash = getResourceContentHash(fieldNode)
         )
     }
 
@@ -68,8 +68,7 @@ private fun getResourceContentHash(fieldNode: FieldNode?): Int? {
     }
 }
 
-fun isResourceContentHashAnnotation(it: AnnotationNode): Boolean =
-    it.desc == "Lorg/jetbrains/compose/resources/ResourceContentHash;"
+private fun isResourceContentHashAnnotation(it: AnnotationNode): Boolean = it.desc == Ids.ResourceContentHash.classId.descriptor
 
 
 

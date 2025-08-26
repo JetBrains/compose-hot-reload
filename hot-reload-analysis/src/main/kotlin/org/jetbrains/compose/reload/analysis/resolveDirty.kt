@@ -12,7 +12,6 @@ import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.simpleName
 import org.jetbrains.compose.reload.core.withClosure
-import java.util.ServiceLoader
 import kotlin.time.measureTimedValue
 
 private val logger = createLogger()
@@ -47,7 +46,6 @@ private fun Context.resolveDirtyRuntimeScopeInfos(
         resolveRemovedMethods(current, redefined)
 
     val dirtyFields = resolveDirtyFields(current, redefined) +
-        resolveDirtyComposeResourceAccessors(current, redefined) +
         resolveRemovedFields(current, redefined)
 
     val transitivelyDirty = resolveTransitivelyDirty(current, redefined, dirtyMethods, dirtyFields)
@@ -82,31 +80,17 @@ private fun resolveRemovedMethods(current: ApplicationInfo, redefined: Applicati
     }
 }
 
-private fun resolveDirtyFields(
-    current: ApplicationInfo, redefined: ApplicationInfo,
-    predicate: (FieldInfo, FieldInfo) -> Boolean
-): List<FieldInfo> {
+private fun resolveDirtyFields(current: ApplicationInfo, redefined: ApplicationInfo): List<FieldInfo> {
     return redefined.fieldIndex.mapNotNull { (fieldId, redefinedField) ->
         val previousField = current.fieldIndex[fieldId] ?: return@mapNotNull redefinedField
-        if (predicate(previousField, redefinedField)) {
+        if (previousField.initialValue != redefinedField.initialValue ||
+            previousField.changeIndicatorHash != redefinedField.changeIndicatorHash
+        ) {
             return@mapNotNull redefinedField
         }
         null
     }
 }
-
-private fun resolveDirtyFields(current: ApplicationInfo, redefined: ApplicationInfo): List<FieldInfo> =
-    resolveDirtyFields(current, redefined) { previousField, redefinedField ->
-        previousField.initialValue != redefinedField.initialValue
-    }
-
-private fun resolveDirtyComposeResourceAccessors(
-    current: ApplicationInfo,
-    redefined: ApplicationInfo
-): List<FieldInfo> =
-    resolveDirtyFields(current, redefined) { previousField, redefinedField ->
-        previousField.resourceContentHash != redefinedField.resourceContentHash
-    }
 
 private fun resolveRemovedFields(current: ApplicationInfo, redefined: ApplicationInfo): List<FieldInfo> {
     return redefined.classIndex.flatMap { (classId, redefinedClass) ->
@@ -300,7 +284,7 @@ private fun resolveTransitivelyDirty(
                 ?: current.classIndex[element.memberId.classId]
 
             classInfo?.fields?.forEach { (fieldId, field) ->
-                if (field.isStatic && field.resourceContentHash == null) {
+                if (field.isStatic && field.changeIndicatorHash == null) {
                     queue.add(Element(fieldId, depth = element.depth + 1))
                 }
             }

@@ -7,6 +7,7 @@
 
 package org.jetbrains.compose.reload.gradle
 
+import groovy.lang.MissingPropertyException
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.JavaExec
@@ -61,6 +62,17 @@ internal val Project.hotRunTasks: Future<Collection<TaskProvider<out AbstractCom
         task.description = "Compose Application Dev Run (Hot Reload enabled) | --className=... --funName=..."
         task.mainClass.set("org.jetbrains.compose.reload.jvm.DevApplication")
         task.args("--className", task.className.string(), "--funName", task.funName.string())
+    }
+
+
+    tasks.matching { task ->
+        task.name.startsWith("generateResourceAccessorsFor")
+    }.configureEach { task ->
+        try {
+            task.setProperty("generateResourceContentHashAnnotation", true)
+        } catch (_: MissingPropertyException) {
+            // Ignore as the property is introduced since CMP 1.10 only
+        }
     }
 
     val hotRunTasks = tasks.withType<ComposeHotRun>().awaitDeferred()

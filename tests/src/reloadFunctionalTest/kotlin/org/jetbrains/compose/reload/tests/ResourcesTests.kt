@@ -31,7 +31,7 @@ import kotlin.io.path.name
 @GradleIntegrationTest
 @TestedProjectMode(ProjectMode.Kmp)
 @ExtendBuildGradleKts(ResourcesTests.Extension::class)
-@MinComposeVersion("1.9.10+dev2818")
+@MinComposeVersion("1.10.0+dev2856")
 class ResourcesTests {
 
     private fun HotReloadTestFixture.projectName() = projectDir.path.name.replace('-', '_')
@@ -279,9 +279,9 @@ class ResourcesTests {
         val testResource = testStringResourceFile()
         val xmlBefore = stringsXmlResource(
             """
-                     <string name="outer">outer</string>
-                     <string name="inner">inner before</string>
-                """
+                 <string name="outer">outer</string>
+                 <string name="inner">inner before</string>
+            """
         )
         writeString(testResource, xmlBefore)
 
