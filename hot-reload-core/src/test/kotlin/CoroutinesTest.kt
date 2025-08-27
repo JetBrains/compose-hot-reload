@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalAtomicApi::class)
+
 import org.jetbrains.compose.reload.core.StoppedException
 import org.jetbrains.compose.reload.core.Task
 import org.jetbrains.compose.reload.core.WorkerThread
@@ -10,7 +12,10 @@ import org.jetbrains.compose.reload.core.isActive
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.reloadMainThread
+import org.jetbrains.compose.reload.core.update
 import org.jetbrains.compose.reload.core.withThread
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -92,20 +97,22 @@ class CoroutinesTest {
     @Test
     fun `test - switching threads`() {
         val threads = launchTask("test") {
-            val threads = mutableListOf<Thread>()
-            threads += Thread.currentThread()
+            val threads = AtomicReference<List<Thread>>(emptyList())
+            threads.update { it + Thread.currentThread() }
+
             val worker1 = use(WorkerThread("w1"))
             val worker2 = use(WorkerThread("w2"))
             try {
                 withThread(worker1) {
-                    threads += Thread.currentThread()
+                    threads.update { it + Thread.currentThread() }
+
                     withThread(worker2) {
-                        threads += Thread.currentThread()
+                        threads.update { it + Thread.currentThread() }
                     }
                 }
 
-                threads += Thread.currentThread()
-                threads
+                threads.update { it + Thread.currentThread() }
+                threads.get()
             } finally {
                 worker1.shutdown().await()
                 worker2.shutdown().await()
