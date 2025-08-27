@@ -16,6 +16,7 @@ data class FieldInfo internal constructor(
     val fieldId: FieldId,
     val isStatic: Boolean,
     val initialValue: Any?,
+    val changeIndicatorHash: Int?,
 ) : MemberInfo() {
     override val memberId: FieldId get() = fieldId
 }
