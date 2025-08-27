@@ -7,14 +7,11 @@
 
 package org.jetbrains.compose.reload.orchestration
 
-import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.decode
 import org.jetbrains.compose.reload.core.decodeSerializableObject
 import org.jetbrains.compose.reload.core.encodeByteArray
 import org.jetbrains.compose.reload.core.encodeSerializableObject
 import org.jetbrains.compose.reload.core.getOrThrow
-import org.jetbrains.compose.reload.core.toLeft
-import org.jetbrains.compose.reload.core.toRight
 import org.jetbrains.compose.reload.orchestration.OrchestrationPackage.Introduction
 import java.io.Serializable
 import kotlin.uuid.ExperimentalUuidApi
@@ -33,6 +30,7 @@ internal fun OrchestrationPackage.encodeToFrame(): OrchestrationFrame {
         is OrchestrationStateUpdate -> encodeToFrame()
         is OrchestrationStateUpdate.Response -> encodeToFrame()
         is OrchestrationStateValue -> encodeToFrame()
+        is OpaqueOrchestrationMessage -> frame
     }
 }
 
@@ -41,6 +39,18 @@ internal fun OrchestrationMessage.encodeToFrame() = OrchestrationFrame(
     data = encodeSerializableObject()
 )
 
+internal fun OrchestrationFrame.decodeOrchestrationMessage(): OrchestrationPackage {
+    require(type == OrchestrationPackageType.JavaSerializableMessage) {
+        "Expected ${OrchestrationPackageType.JavaSerializableMessage}, got $type"
+    }
+
+    return try {
+        (data.decodeSerializableObject() as OrchestrationMessage)
+    } catch (_: ClassNotFoundException) {
+        OpaqueOrchestrationMessage(this)
+    }
+}
+
 internal fun Introduction.encodeToFrame() = OrchestrationFrame(
     type = OrchestrationPackageType.JavaSerializableClientIntroduction,
     data = encodeSerializableObject()
@@ -48,12 +58,13 @@ internal fun Introduction.encodeToFrame() = OrchestrationFrame(
 
 internal fun OrchestrationPackage.Ack.encodeToFrame() = OrchestrationFrame(
     type = OrchestrationPackageType.Ack,
-    data = messageId.value.toByteArray()
+    data = messageId?.value?.toByteArray() ?: byteArrayOf()
 )
 
 internal fun ByteArray.decodeAck(): OrchestrationPackage.Ack {
     return OrchestrationPackage.Ack(
-        messageId = OrchestrationMessageId(this.decodeToString())
+        messageId = if (this.isNotEmpty()) OrchestrationMessageId(this.decodeToString())
+        else null
     )
 }
 
@@ -127,7 +138,7 @@ internal fun ByteArray.decodeStateValue(): OrchestrationStateValue = decode {
 
 internal fun OrchestrationFrame.decodePackage(): OrchestrationPackage {
     return when (type) {
-        OrchestrationPackageType.JavaSerializableMessage -> data.decodeSerializableObject() as OrchestrationMessage
+        OrchestrationPackageType.JavaSerializableMessage -> decodeOrchestrationMessage()
         OrchestrationPackageType.JavaSerializableClientIntroduction -> data.decodeSerializableObject() as Introduction
         OrchestrationPackageType.Ack -> data.decodeAck()
         OrchestrationPackageType.StateRequest -> data.decodeStateRequest()
@@ -150,9 +161,8 @@ internal enum class OrchestrationPackageType(val intValue: Int) {
     companion object {
         internal const val serialVersionUID: Long = 0L
 
-        fun from(intValue: Int): Try<OrchestrationPackageType> {
-            entries.firstOrNull { it.intValue == intValue }?.let { return it.toLeft() }
-            return IllegalArgumentException("Unknown package type: $intValue").toRight()
+        fun from(intValue: Int): OrchestrationPackageType? {
+            return entries.firstOrNull { it.intValue == intValue }
         }
     }
 }
@@ -169,11 +179,19 @@ public sealed class OrchestrationPackage : Serializable {
     }
 
     internal data class Ack(
-        val messageId: OrchestrationMessageId
+        val messageId: OrchestrationMessageId?
     ) : OrchestrationPackage(), Serializable {
         companion object {
             const val serialVersionUID: Long = 0L
         }
+    }
+}
+
+internal class OpaqueOrchestrationMessage(
+    val frame: OrchestrationFrame
+) : OrchestrationPackage() {
+    companion object {
+        const val serialVersionUID: Long = 0L
     }
 }
 
@@ -185,6 +203,7 @@ internal data class OrchestrationStateUpdate(
     companion object {
         const val serialVersionUID: Long = 0L
     }
+
     data class Response(val accepted: Boolean) : OrchestrationPackage() {
         companion object {
             const val serialVersionUID: Long = 0L

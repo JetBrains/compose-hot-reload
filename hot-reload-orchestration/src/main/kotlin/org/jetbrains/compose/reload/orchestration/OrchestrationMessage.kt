@@ -264,7 +264,7 @@ public sealed class OrchestrationMessage : OrchestrationPackage(), Serializable 
 
     /**
      * Simple message that can be passed across the whole orchestration:
-     * Can be used for very important log messages, or for testing.
+     * Can be used for very important log messages or for testing.
      */
     public data class LogMessage(
         public override val environment: Environment?,

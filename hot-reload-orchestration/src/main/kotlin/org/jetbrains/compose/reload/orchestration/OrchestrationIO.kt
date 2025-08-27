@@ -7,14 +7,17 @@ package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.core.WorkerThread
 import org.jetbrains.compose.reload.core.awaitOrThrow
+import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.getOrNull
-import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.invokeOnCompletion
 import org.jetbrains.compose.reload.core.withThread
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
+
+private val logger = createLogger()
 
 internal interface OrchestrationIO {
     suspend infix fun writeInt(value: Int)
@@ -27,7 +30,8 @@ internal interface OrchestrationIO {
     suspend fun readByte(): Byte
 
     /**
-     * Returns `null` if the IO is closed
+     * Returns `null` if the IO is closed.
+     * Will skip packages of unknown types (see [OrchestrationPackageType])
      */
     suspend fun readPackage(): OrchestrationPackage?
 
@@ -97,20 +101,37 @@ internal class OrchestrationIOImpl(
 
     override suspend fun readPackage(): OrchestrationPackage? = withThread(reader) {
         val input = input.awaitOrThrow()
-        try {
-            val pkgType = OrchestrationPackageType.from(input.readInt()).getOrThrow()
-            val pkgSize = input.readInt()
-            if (pkgSize < 0) error("Illegal pkg size: '$pkgSize'")
-            if (pkgSize > 12e6) error("Illegal pkg size: '$pkgSize'")
-            val pkgData = input.readNBytes(pkgSize)
-            val frame = OrchestrationFrame(pkgType, pkgData)
-            frame.decodePackage()
-        } catch (t: Throwable) {
-            if (isClosed.get()) {
-                return@withThread null
+        while (!isClosed.get()) {
+            try {
+                val pkgTypeRaw = input.readInt()
+                val pkgSize = input.readInt()
+
+                if (pkgSize < 0) error("Illegal pkg size: '$pkgSize'")
+                if (pkgSize > 12e6) error("Illegal pkg size: '$pkgSize'")
+                val pkgData = input.readNBytes(pkgSize)
+
+                /*
+               Unknown package type: Maybe we're on an older version of the protocol?
+               Skip the package and continue reading!
+                */
+                val pkgType = OrchestrationPackageType.from(pkgTypeRaw)
+                if (pkgType == null) {
+                    logger.debug { "Received unknown package type: $pkgTypeRaw" }
+                    continue
+                }
+
+                val frame = OrchestrationFrame(pkgType, pkgData)
+                return@withThread frame.decodePackage()
+            } catch (t: Throwable) {
+                if (isClosed.get()) {
+                    return@withThread null
+                }
+                throw t
             }
-            throw t
         }
+
+        /* We exited the loop: 'isClosed' is set to true, we can safely return null! */
+        null
     }
 
     override suspend fun close() {

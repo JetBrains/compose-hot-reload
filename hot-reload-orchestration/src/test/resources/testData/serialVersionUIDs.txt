@@ -1,4 +1,5 @@
 org/jetbrains/compose/reload/orchestration/Binary = 0
+org/jetbrains/compose/reload/orchestration/OpaqueOrchestrationMessage = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationClientId = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationClientRole = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationHandshake = 0

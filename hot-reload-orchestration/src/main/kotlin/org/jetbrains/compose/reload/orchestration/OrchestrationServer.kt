@@ -32,6 +32,7 @@ import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.stopNow
 import org.jetbrains.compose.reload.core.trace
 import org.jetbrains.compose.reload.core.withThread
+import org.jetbrains.compose.reload.core.withType
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationPackage.Ack
@@ -72,7 +73,7 @@ public fun OrchestrationServer(): OrchestrationServer {
     val port = Future<Int>()
 
     val start = Future<Unit>()
-    val messages = Bus<OrchestrationMessage>()
+    val messages = Bus<OrchestrationPackage>()
     val states = OrchestrationServerStates()
 
     /**
@@ -137,7 +138,7 @@ public fun OrchestrationServer(): OrchestrationServer {
     }
 
     return object : OrchestrationServer, Task<Unit> by task {
-        override val messages = messages
+        override val messages = messages.withType<OrchestrationMessage>()
         override val port: Future<Int> = port
         override val states = states
 
@@ -174,7 +175,7 @@ public fun OrchestrationServer(): OrchestrationServer {
 
 private fun launchClient(
     io: OrchestrationIO,
-    messages: Bus<OrchestrationMessage>,
+    messages: Bus<OrchestrationPackage>,
     states: OrchestrationServerStates,
 ): Task<*> = launchTask("Client Connection") {
     val logger = createLogger()
@@ -286,6 +287,11 @@ private fun launchClient(
                 is OrchestrationStateUpdate -> states.withLock {
                     val accepted = states.update(pkg.stateId, pkg.expectedValue, pkg.updatedValue)
                     io writePackage OrchestrationStateUpdate.Response(accepted)
+                }
+
+                is OpaqueOrchestrationMessage -> {
+                    messages.send(pkg)
+                    io.writePackage(Ack(null))
                 }
 
                 is OrchestrationMessage -> {
