@@ -130,8 +130,10 @@ private class LoggerImpl(
     private val environment: Environment?,
     private val loggerName: String,
     private val dispatch: List<Logger.Dispatch> = Logger.defaultDispatch,
+    private val level: Level = HotReloadEnvironment.logLevel,
 ) : Logger {
     override fun log(level: Level, message: String, throwable: Throwable?) {
+        if (level < this.level) return
         val log = LogImpl(
             environment = environment,
             loggerName = loggerName,
@@ -187,7 +189,7 @@ public fun Logger.Log.displayString(
         append(" | ${formattedTime.withEffects(ansiGreen)}")
     }
 
-    if(includeEnvironment) {
+    if (includeEnvironment) {
         append(" | ${environment.withSize(8).withEffects(ansiCyan)}")
     }
 
