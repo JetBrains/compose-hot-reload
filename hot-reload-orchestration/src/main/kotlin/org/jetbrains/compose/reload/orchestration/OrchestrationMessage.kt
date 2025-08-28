@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.orchestration
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
@@ -20,7 +21,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.uuid.ExperimentalUuidApi
 
 @OptIn(ExperimentalUuidApi::class)
-public sealed class OrchestrationMessage : OrchestrationPackage(), Serializable {
+@SubclassOptInRequired(InternalHotReloadApi::class)
+public abstract class OrchestrationMessage
+internal constructor() : OrchestrationPackage(), Serializable {
     /**
      * Requests that all participants in the orchestration are supposed to shut down.
      * Note: Closing the [OrchestrationServer] is also supposed to close all clients.
