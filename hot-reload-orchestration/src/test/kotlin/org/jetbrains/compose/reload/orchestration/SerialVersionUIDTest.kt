@@ -40,7 +40,6 @@ class SerialVersionUIDTest {
         fun ClassNode.check() {
             if (!name.startsWith("org/jetbrains/compose/reload/orchestration")) return
             val thisClass = Class.forName(ClassId(this).toFqn()).kotlin
-            if (thisClass.isAbstract || thisClass.isSealed) return
             if (!thisClass.isSubclassOf(Serializable::class)) return
             val serialVersionUID = thisClass.java.fields.find { it.name == "serialVersionUID" }
             if (serialVersionUID == null) {
@@ -102,7 +101,7 @@ class SerialVersionUIDTest {
 
         if (!expectFile.exists() || TestEnvironment.updateTestData) {
             expectFile.writeText(actualText)
-            if (!TestEnvironment.updateTestData) fail("${expectFile.toUri().toURL()} did not exist; Generated")
+            if (!TestEnvironment.updateTestData) fail("${expectFile.toUri()} did not exist; Generated")
         }
 
         if (expectFile.readText().sanitized() != actualText) {
@@ -110,7 +109,7 @@ class SerialVersionUIDTest {
                 expectFile.nameWithoutExtension + "-actual." + expectFile.extension
             )
             actualFile.writeText(actualText)
-            fail("${expectFile.toUri().toURL()} did not match\n${actualFile.toUri().toURL()}")
+            fail("${expectFile.toUri()} did not match\n${actualFile.toUri()}")
         }
     }
 

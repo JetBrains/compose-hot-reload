@@ -24,6 +24,11 @@ import kotlin.uuid.ExperimentalUuidApi
 @SubclassOptInRequired(InternalHotReloadApi::class)
 public abstract class OrchestrationMessage
 internal constructor() : OrchestrationPackage(), Serializable {
+
+    internal companion object {
+        internal const val serialVersionUID = -8290608363400259915
+    }
+
     /**
      * Requests that all participants in the orchestration are supposed to shut down.
      * Note: Closing the [OrchestrationServer] is also supposed to close all clients.
