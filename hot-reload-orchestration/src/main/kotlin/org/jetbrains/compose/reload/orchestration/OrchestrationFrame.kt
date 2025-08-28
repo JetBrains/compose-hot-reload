@@ -168,6 +168,11 @@ internal enum class OrchestrationPackageType(val intValue: Int) {
 }
 
 public sealed class OrchestrationPackage : Serializable {
+
+    internal companion object {
+        internal const val serialVersionUID: Long = 4708005812100712021
+    }
+
     public data class Introduction(
         public val clientId: OrchestrationClientId,
         public val clientRole: OrchestrationClientRole,
