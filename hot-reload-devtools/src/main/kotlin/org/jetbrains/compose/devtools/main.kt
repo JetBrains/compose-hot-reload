@@ -7,27 +7,13 @@
 
 package org.jetbrains.compose.devtools
 
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.key
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.application
 import io.sellmair.evas.Events
 import io.sellmair.evas.States
-import io.sellmair.evas.compose.composeValue
-import io.sellmair.evas.compose.installEvas
-import io.sellmair.evas.eventsOrThrow
-import io.sellmair.evas.statesOrThrow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import org.jetbrains.compose.devtools.errorOverlay.DevToolingErrorOverlay
-import org.jetbrains.compose.devtools.sidecar.DtAttachedSidecarWindow
-import org.jetbrains.compose.devtools.sidecar.DtDetachedSidecarWindow
-import org.jetbrains.compose.devtools.sidecar.DtDetachedStatusBar
-import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
-import org.jetbrains.compose.devtools.states.DtLifecycleState
-import org.jetbrains.compose.devtools.states.WindowsUIState
 import org.jetbrains.compose.devtools.states.launchConsoleLogUIState
 import org.jetbrains.compose.devtools.states.launchErrorUIState
 import org.jetbrains.compose.devtools.states.launchReloadCountStateActor
@@ -35,9 +21,8 @@ import org.jetbrains.compose.devtools.states.launchReloadCountUIState
 import org.jetbrains.compose.devtools.states.launchReloadStateActor
 import org.jetbrains.compose.devtools.states.launchReloadUIState
 import org.jetbrains.compose.devtools.states.launchWindowsUIState
-import org.jetbrains.compose.reload.core.HotReloadEnvironment
-import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsDetached
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.info
 
 internal val applicationScope = CoroutineScope(Dispatchers.Main + SupervisorJob() + Events() + States())
@@ -62,62 +47,15 @@ internal fun CoroutineScope.launchApplicationStates() {
     launchReloadUIState()
 }
 
-
 fun main() {
     logger.info("PID: '${ProcessHandle.current().pid()}'")
+    logger.debug("Starting devtools process")
     setupDevToolsProcess()
 
+    logger.debug("Starting application states")
     applicationScope.launchApplicationStates()
-
     launchRecompiler()
 
-    if (
-        HotReloadEnvironment.isHeadless ||
-        HotReloadEnvironment.devToolsIsHeadless ||
-        !HotReloadEnvironment.devToolsEnabled
-    ) {
-        logger.info("DevTools started headless")
-        return
-    }
-
-    application(exitProcessOnExit = false) {
-        installEvas(
-            applicationScope.coroutineContext.eventsOrThrow,
-            applicationScope.coroutineContext.statesOrThrow
-        ) {
-            val windowsState = WindowsUIState.composeValue()
-            val lifecycleState = DtLifecycleState.composeValue()
-
-            if (!lifecycleState.isActive) {
-                logger.info("DevTools UI is shutting down")
-                return@installEvas
-            }
-
-            if (devToolsDetached) {
-                DtDetachedSidecarWindow()
-            }
-
-            logger.info("Composing '${windowsState.windows.size}' windows")
-            windowsState.windows.forEach { (windowId, windowState) ->
-                key(windowId) {
-                    CompositionLocalProvider(targetApplicationWindowStateLocal provides windowState) {
-                        if (devToolsDetached) {
-                            if (devToolsUseTransparency) {
-                                DtDetachedStatusBar(
-                                    windowId, windowState,
-                                    isAlwaysOnTop = windowsState.alwaysOnTop[windowId] == true
-                                )
-                            }
-                        } else {
-                            DtAttachedSidecarWindow(
-                                windowId, windowState,
-                                isAlwaysOnTop = windowsState.alwaysOnTop[windowId] == true
-                            )
-                        }
-                        DevToolingErrorOverlay(windowId, windowState)
-                    }
-                }
-            }
-        }
-    }
+    logger.debug("Starting UI")
+    startDevToolsUI()
 }

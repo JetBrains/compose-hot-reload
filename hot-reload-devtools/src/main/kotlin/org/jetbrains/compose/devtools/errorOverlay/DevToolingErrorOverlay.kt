@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import io.sellmair.evas.compose.composeFlow
@@ -44,8 +43,8 @@ import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.sendAsync
 import org.jetbrains.compose.devtools.sidecar.DtConsole
 import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
-import org.jetbrains.compose.devtools.states.UIErrorDescription
 import org.jetbrains.compose.devtools.states.ErrorUIState
+import org.jetbrains.compose.devtools.states.UIErrorDescription
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtImages
@@ -62,7 +61,7 @@ import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 
 @Composable
-internal fun ApplicationScope.DevToolingErrorOverlay(windowId: WindowId, windowState: WindowState) {
+internal fun DevToolingErrorOverlay(windowId: WindowId, windowState: WindowState) {
     val uiExceptionState by ErrorUIState.composeFlow()
         .map { value -> value.errors[windowId] }
         .collectAsState(initial = null)
