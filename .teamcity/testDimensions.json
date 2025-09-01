@@ -4,7 +4,7 @@
       "version": "2.1.20"
     },
     {
-      "version": "2.2.20-RC",
+      "version": "2.2.20-RC2",
       "isDefault": true
     },
     {
@@ -20,7 +20,7 @@
       "version": "8.14.3",
       "isDefault": true
     }, {
-      "version": "9.0.0",
+      "version": "9.1.0-rc-1",
       "isGradleIntegrationTest": true
     }
   ],
