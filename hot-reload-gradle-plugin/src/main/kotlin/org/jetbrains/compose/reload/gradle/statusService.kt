@@ -12,6 +12,8 @@ import org.gradle.api.logging.Logging
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ValueSource
+import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 import org.gradle.build.event.BuildEventsListenerRegistry
@@ -62,12 +64,13 @@ internal val Project.statusService: Future<Provider<StatusService>?> by projectF
 
     val service = gradle.sharedServices.registerIfAbsent("StatusService ($buildTreePath)", StatusService::class.java) {
         it.parameters.projectPath.set(path)
-        it.parameters.ports.set(activeReloadTasks.map { tasks -> tasks.mapNotNull { task -> task.agentPort.orNull } })
+        it.parameters.ports.set(activeReloadTasks.map { tasks -> tasks.map { task -> task.agentPort} })
     }
 
     gradle.taskGraph.whenReady { graph ->
         val activeTaskNames = reloadTasks.names.filter { name -> graph.hasTask(project.absoluteProjectPath(name)) }
         activeReloadTasks.set(reloadTasks.named { it in activeTaskNames })
+
         if (activeTaskNames.isNotEmpty()) {
             gradle.serviceOf<BuildEventsListenerRegistry>().onTaskCompletion(service)
         }
@@ -80,15 +83,28 @@ internal abstract class StatusService : BuildService<StatusService.Params>, Oper
 
     interface Params : BuildServiceParameters {
         val projectPath: Property<String>
-        val ports: ListProperty<Int>
+        val ports: ListProperty<Any>
     }
 
     private val clients = AtomicReference<List<OrchestrationClient>>(emptyList())
 
     private val logger = Logging.getLogger(StatusService::class.java)
 
+    private fun resolvePorts(any: Any?): List<Int> {
+        return when(any) {
+            is Int -> listOf(any)
+            is Provider<*> -> resolvePorts(any.orNull)
+            is Iterable<*> -> any.flatMap { resolvePorts(it) }
+            else -> emptyList()
+        }
+    }
+
+    private fun resolvePorts(): List<Int> {
+        return parameters.ports.get().flatMap { any -> resolvePorts(any) }
+    }
+
     init {
-        clients.set(parameters.ports.get().mapNotNull { port ->
+        clients.set(resolvePorts().mapNotNull { port ->
             OrchestrationClient(OrchestrationClientRole.Compiler, port).connectBlocking().leftOr { right ->
                 logger.error("StatusService: Failed to connect to '$port' for '${parameters.projectPath.get()}'", right.exception)
                 null

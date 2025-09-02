@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.gradle
 
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import org.jetbrains.compose.reload.gradle.idea.IdeaComposeHotReloadSupportVersions
 
 /*
@@ -13,9 +14,13 @@ import org.jetbrains.compose.reload.gradle.idea.IdeaComposeHotReloadSupportVersi
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-internal val Project.ideIsRecompileContinuousMode get() =
-    project.composeReloadIdeaComposeHotReloadProvider.map { idePlugin ->
-        if (!idePlugin) return@map null
-        val supportVersion = project.composeReloadIdeaComposeHotReloadSupportVersion ?: return@map null
-        supportVersion < IdeaComposeHotReloadSupportVersions.supportReloadTasks
+internal val Project.ideIsRecompileContinuousMode: Provider<Boolean>
+    get() {
+        val ideaSupportVersion = project.composeReloadIdeaComposeHotReloadSupportVersionProvider
+
+        return project.composeReloadIdeaComposeHotReloadProvider.map { idePlugin ->
+            if (!idePlugin) return@map null
+            val supportVersion = ideaSupportVersion.orNull ?: return@map null
+            supportVersion < IdeaComposeHotReloadSupportVersions.supportReloadTasks
+        }
     }

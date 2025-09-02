@@ -9,6 +9,7 @@ package org.jetbrains.compose.reload.gradle
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
+import org.gradle.api.logging.Logger
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
@@ -66,13 +67,8 @@ fun <T> T.withComposeHotReload(arguments: ComposeHotReloadArgumentsBuilder.() ->
      * To be compliant with Gradle's configuration cache, we read such 'ephemeral' properties
      * here as [org.gradle.api.provider.ValueSource] and only use them during task execution.
      */
-    val orchestrationListenerPortSystemProperties = project.orchestrationListenerPortSystemProperties()
     val orchestrationListenerPortEnvironmentVariables = project.orchestrationListenerPortEnvironmentVariables()
-
-    doFirst {
-        systemProperties(orchestrationListenerPortSystemProperties.orNull.orEmpty())
-        environment(orchestrationListenerPortEnvironmentVariables.orNull.orEmpty())
-    }
+    doFirst { environment(orchestrationListenerPortEnvironmentVariables.orNull.orEmpty()) }
 }
 
 internal fun Project.orchestrationListenerPortSystemProperties(): Provider<Map<String, String>> {
@@ -93,7 +89,9 @@ internal class ComposeHotReloadArguments(project: Project) :
     CommandLineArgumentProvider {
     private val rootProjectDir = project.rootProject.projectDir
     private val projectPath = project.path
-    private val logger = project.logger
+
+    @field:Transient
+    private val logger: Logger? = project.logger
 
     @get:Input
     @get:Optional
@@ -156,10 +154,13 @@ internal class ComposeHotReloadArguments(project: Project) :
     val isRecompilerWarmupEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadGradleWarmupEnabled)
 
+    @get:Input
+    @get:Optional
+    val orchestrationPort = project.composeReloadOrchestrationPortProvider
 
     @get:Input
     @get:Optional
-    val orchestrationPort = project.composeReloadOrchestrationPort
+    val orchestrationListenerPortSystemProperties = project.orchestrationListenerPortSystemProperties()
 
     @get:Input
     @get:Optional
@@ -323,9 +324,13 @@ internal class ComposeHotReloadArguments(project: Project) :
         }
 
         /* Forward the orchestration port if one is explicitly requested (client mode) */
-        if (orchestrationPort != null) {
-            logger.quiet("Using orchestration server port: $orchestrationPort")
+        orchestrationPort.orNull?.let { orchestrationPort ->
+            logger?.quiet("Using orchestration server port: $orchestrationPort")
             add("-D${HotReloadProperty.OrchestrationPort.key}=${orchestrationPort}")
+        }
+
+        orchestrationListenerPortSystemProperties.orNull.orEmpty().forEach { (key, value) ->
+            add("-D$key=$value")
         }
 
         add("-D${HotReloadProperty.VirtualMethodResolveEnabled.key}=$virtualMethodResolveEnabled")
@@ -348,7 +353,7 @@ internal class ComposeHotReloadArguments(project: Project) :
         }
 
     }.also { arguments ->
-        if (logger.isInfoEnabled) {
+        if (logger?.isInfoEnabled == true) {
             logger.info("Compose Hot Reload arguments:\n${arguments.joinToString("\n") { it.prependIndent("  ") }}")
         }
     }

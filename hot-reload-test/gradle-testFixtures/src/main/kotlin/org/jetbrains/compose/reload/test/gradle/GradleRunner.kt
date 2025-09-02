@@ -72,7 +72,7 @@ public suspend fun GradleRunner.build(
         "-i", "-s",
         "--console=plain",
         "--configuration-cache",
-        "--configuration-cache-problems=warn",
+        "--configuration-cache-problems=fail",
         "-Dorg.gradle.daemon.idletimeout=10000",
         "-Dorg.gradle.jvmargs=-Xmx1G -XX:+UseParallelGC " +
             issueNewDebugSessionJvmArguments("Gradle (${args.joinToString(" ")})").joinToString(" "),

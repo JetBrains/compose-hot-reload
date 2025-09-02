@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.gradle
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.JavaExec
@@ -23,7 +24,6 @@ internal val Project.hotArgFileTasks: Future<Collection<TaskProvider<ComposeHotA
     hotRunTasks.await().map { runTask ->
         registerHotArgfileTask(runTask)
     }
-
 }
 
 internal fun TaskProvider<out JavaExec>.argFileTaskName(): String {
@@ -37,7 +37,8 @@ private fun Project.registerHotArgfileTask(
         task.description = "Creates an argument file for the '${runTask.name}' task"
         task.runTaskName.set(runTask.name)
         task.argFile.set(provider { runTask.get().argFile.get() })
-        task.arguments.addAll(provider { runTask.get().allJvmArgs + runTask.get().jvmArgs.orEmpty() })
+        task.arguments.addAll(provider { runTask.get().allJvmArgs })
+        task.arguments.addAll(provider { runTask.get().jvmArgs })
         task.classpath.from(project.files { runTask.get().classpath })
         task.dependsOn(provider { runTask.get().snapshotTaskName })
     }
@@ -53,7 +54,7 @@ private fun Project.registerHotArgfileTask(
 @DisableCachingByDefault(because = "Not worth caching")
 internal open class ComposeHotArgFileTask : DefaultTask(), ComposeHotReloadOtherTask {
     @get:Input
-    internal val arguments = project.objects.listProperty(String::class.java)
+    internal val arguments = project.objects.listProperty(Any::class.java)
 
     @get:Classpath
     internal val classpath = project.objects.fileCollection()
@@ -64,10 +65,19 @@ internal open class ComposeHotArgFileTask : DefaultTask(), ComposeHotReloadOther
     @get:OutputFile
     internal val argFile = project.objects.fileProperty()
 
+    private fun resolveArgument(arg: Any?): List<String> {
+        return when (arg) {
+            is String -> listOf(arg)
+            is Provider<*> -> resolveArgument(arg.orNull)
+            is Iterable<*> -> arg.flatMap { resolveArgument(it) }
+            else -> emptyList()
+        }
+    }
+
     @TaskAction
     internal fun createArgfile() {
         val argFile = this.argFile.get().asFile.toPath()
-        argFile.createArgfile(arguments.get(), classpath.files)
+        argFile.createArgfile(arguments.get().flatMap { arg -> resolveArgument(arg) }, classpath.files)
         logger.info("$argFile created")
     }
 }

@@ -7,11 +7,15 @@ package org.jetbrains.compose.reload.gradle
 
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ValueSource
+import org.gradle.api.provider.ValueSourceParameters
 import org.jetbrains.compose.reload.core.PidFileInfo
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation.Companion.MAIN_COMPILATION_NAME
+import kotlin.io.path.isRegularFile
 
 internal val KotlinCompilation<*>.runBuildDirectory: Provider<Directory>
     get() = project.layout.buildDirectory.dir("run/${camelCase(target.name, compilationName)}")
@@ -25,9 +29,26 @@ internal fun KotlinCompilation<*>.runBuildFile(path: String): Provider<RegularFi
 }
 
 internal val KotlinCompilation<*>.pidFileOrchestrationPort: Provider<Int>
-    get() = project.providers.fileContents(pidFile).asBytes.map { bytes ->
-        PidFileInfo(bytes).getOrThrow().orchestrationPort ?: error("Failed reading pid file")
+    get() = project.providers.of(PidFileOrchestrationPort::class.java) { spec ->
+        spec.parameters { params ->
+            params.pidFile.set(pidFile)
+        }
     }
+
+internal abstract class PidFileOrchestrationPort : ValueSource<Int, PidFileOrchestrationPort.Params> {
+    interface Params : ValueSourceParameters {
+        val pidFile: RegularFileProperty
+    }
+
+    override fun obtain(): Int? {
+        val pidFile = parameters.pidFile.asFile.orNull?.toPath() ?: return null
+        if (pidFile.isRegularFile()) {
+            return PidFileInfo(pidFile).getOrThrow().orchestrationPort
+        }
+
+        return null
+    }
+}
 
 /**
  * Represents the directory where 'hot' classes will be put for the running application
@@ -55,7 +76,7 @@ internal val KotlinCompilation<*>.hotRunTaskName
     get() = camelCase("hot", "run", target.name, compilationName.takeIf { it != MAIN_COMPILATION_NAME })
 
 internal val KotlinCompilation<*>.hotDevTaskName
-    get() = camelCase("hot", "dev",  target.name, compilationName.takeIf { it  !="dev" })
+    get() = camelCase("hot", "dev", target.name, compilationName.takeIf { it != "dev" })
 
 internal val KotlinCompilation<*>.hotReloadTaskName
     get() = camelCase("hot", "reload", target.name, compilationName)
