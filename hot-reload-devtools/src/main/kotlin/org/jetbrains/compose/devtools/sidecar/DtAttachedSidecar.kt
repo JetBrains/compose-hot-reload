@@ -15,6 +15,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -44,7 +45,6 @@ import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.devtools.theme.DtSizes
 import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
 import org.jetbrains.compose.devtools.widgets.DtComposeLogo
-import org.jetbrains.compose.devtools.widgets.DtReloadStatusBanner
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusColor
 import org.jetbrains.compose.devtools.widgets.dtBackground
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsAnimationsEnabled
@@ -170,13 +170,9 @@ internal fun DtMinimizedSidecarWindowContent(
                     idleColor = Color.White,
                 ).value
             )
-            DtMinimisedReloadCounterStatusItem(showDefaultValue = !devToolsUseTransparency)
-        }
-
-        if (devToolsUseTransparency) {
-            DtReloadStatusBanner(
-                modifier = Modifier
-                    .padding(DtPadding.small)
+            DtMinimisedReloadCounterStatusItem(
+                modifier = Modifier.size(DtSizes.reloadCounterSize),
+                showDefaultValue = !devToolsUseTransparency,
             )
         }
     }
@@ -227,19 +223,15 @@ internal fun DtExpandedSidecarWindowContent(
                             reloadingColor = DtColors.statusColorOrange2
                         ).value
                     )
-                    DtMinimisedReloadCounterStatusItem(showDefaultValue = !devToolsUseTransparency)
+                    DtMinimisedReloadCounterStatusItem(
+                        modifier = Modifier.size(DtSizes.reloadCounterSize),
+                        showDefaultValue = !devToolsUseTransparency,
+                    )
                 }
             } else {
                 // Expanded state - show the full UI
                 DtAttachedSidecarBody(Modifier.fillMaxSize()) { isExpandedChanged(false) }
             }
-        }
-
-        if (devToolsUseTransparency) {
-            DtReloadStatusBanner(
-                modifier = Modifier
-                    .padding(DtPadding.small)
-            )
         }
     }
 }

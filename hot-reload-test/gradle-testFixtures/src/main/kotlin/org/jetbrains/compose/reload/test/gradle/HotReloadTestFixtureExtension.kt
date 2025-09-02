@@ -82,6 +82,7 @@ internal class HotReloadTestFixtureExtension(
         val orchestrationServer = startOrchestrationServer()
         startOrchestrationTestLogging(orchestrationServer)
         val isHeadless = findAnnotation<Headless>()?.isHeadless ?: true
+        val withOverlay = findAnnotation<ReloadOverlay>()?.enabled ?: false
 
         val gradleRunner = GradleRunner(
             projectRoot = projectDir.path,
@@ -89,7 +90,8 @@ internal class HotReloadTestFixtureExtension(
             arguments = listOf(
                 "-P${HotReloadProperty.OrchestrationPort.key}=${orchestrationServer.port.getBlocking()}",
                 "-P${HotReloadProperty.IsHeadless.key}=$isHeadless",
-                "-P${HotReloadProperty.LogLevel.key}=${Logger.Level.Trace.name}"
+                "-P${HotReloadProperty.LogLevel.key}=${Logger.Level.Trace.name}",
+                "-P${HotReloadProperty.ReloadOverlayEnabled.key}=$withOverlay"
             ),
             stdoutChannel = Channel(),
             stderrChannel = Channel(),

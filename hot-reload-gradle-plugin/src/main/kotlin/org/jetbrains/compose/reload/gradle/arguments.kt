@@ -41,6 +41,10 @@ sealed interface ComposeHotReloadArgumentsBuilder {
     fun setDevToolsDetached(detached: Provider<Boolean>)
     fun setDevToolsAnimationsEnabled(enabled: Provider<Boolean>)
 
+    fun setReloadOverlayEnabled(enabled: Provider<Boolean>)
+
+    fun setGlitchOverlayEnabled(enabled: Provider<Boolean>)
+
     fun setReloadTaskName(name: Provider<String>)
     fun setReloadTaskName(name: String)
     fun isAutoRecompileEnabled(isAutoRecompileEnabled: Provider<Boolean>)
@@ -134,6 +138,14 @@ internal class ComposeHotReloadArguments(project: Project) :
     @get:Input
     val devToolsAnimationsEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadDevToolsAnimationsEnabled)
+
+    @get:Input
+    val reloadOverlayEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .value(project.composeReloadReloadOverlayEnabled)
+
+    @get:Input
+    val glitchOverlayEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .value(project.composeReloadGlitchOverlayEnabled)
 
     @get:Input
     @get:Optional
@@ -231,6 +243,14 @@ internal class ComposeHotReloadArguments(project: Project) :
         devToolsAnimationsEnabled.set(enabled)
     }
 
+    override fun setReloadOverlayEnabled(enabled: Provider<Boolean>) {
+        reloadOverlayEnabled.set(enabled)
+    }
+
+    override fun setGlitchOverlayEnabled(enabled: Provider<Boolean>) {
+        glitchOverlayEnabled.set(enabled)
+    }
+
     override fun setDevToolsHeadless(headless: Provider<Boolean>) {
         devToolsIsHeadless.set(headless.orElse(false))
     }
@@ -294,6 +314,10 @@ internal class ComposeHotReloadArguments(project: Project) :
         if (argFile != null) {
             add("-D${HotReloadProperty.ArgFile.key}=${argFile.absolutePath}")
         }
+
+        /* Provide reload overlay */
+        add("-D${HotReloadProperty.ReloadOverlayEnabled.key}=${reloadOverlayEnabled.getOrElse(true)}")
+        add("-D${HotReloadProperty.GlitchOverlayEnabled.key}=${glitchOverlayEnabled.getOrElse(true)}")
 
         /* Provide dev tools */
         val isDevToolsEnabled = devToolsEnabled.getOrElse(true)
