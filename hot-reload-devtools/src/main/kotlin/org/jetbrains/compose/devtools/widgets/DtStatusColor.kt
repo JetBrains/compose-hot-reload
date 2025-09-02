@@ -43,6 +43,9 @@ import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.reload.core.Update
 import kotlin.time.Duration.Companion.seconds
 
+private const val fadeAnimationDuration = 400
+private const val colorAnimationDuration = 100
+
 @Composable
 fun animateReloadStatusColor(
     idleColor: Color = Color.LightGray,
@@ -62,17 +65,17 @@ fun animateReloadStatusColor(
         state.changes().collectLatest { (_, state) ->
             when (state) {
                 is ReloadUIState.Reloading -> {
-                    color.animateTo(reloadingColor)
+                    color.animateTo(reloadingColor, colorChange())
                 }
 
                 is ReloadUIState.Failed -> {
-                    color.animateTo(errorColor)
+                    color.animateTo(errorColor, colorChange())
                 }
 
                 is ReloadUIState.Ok -> {
-                    color.animateTo(okColor)
+                    color.animateTo(okColor, colorChange())
                     delay(1.seconds)
-                    color.animateTo(idleColor)
+                    color.animateTo(idleColor, fadeOut())
                 }
             }
         }
@@ -171,6 +174,9 @@ fun Modifier.dtBorder(
         shape = shape
     )
 }
+
+private fun colorChange() = tween<Color>(durationMillis = colorAnimationDuration, easing = LinearEasing)
+private fun fadeOut() = tween<Color>(durationMillis = fadeAnimationDuration, easing = LinearEasing)
 
 private fun <T> Flow<T>.changes(): Flow<Update<T>> = flow<Update<T>> {
     val NULL = Any()

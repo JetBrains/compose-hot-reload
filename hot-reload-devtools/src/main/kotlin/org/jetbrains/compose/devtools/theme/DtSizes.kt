@@ -9,13 +9,12 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 
 object DtSizes {
-    val small = 4.dp
-
-
     val iconSize = 16.dp
 
     val statusItemSize = 16.dp
     val scrollbarSize = 64.dp
+
+    val reloadCounterSize = 20.dp
 
     val logoSize = 24.dp
     val largeLogoSize = 28.dp

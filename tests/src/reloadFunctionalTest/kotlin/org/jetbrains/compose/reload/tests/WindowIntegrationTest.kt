@@ -18,12 +18,13 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientCon
 import org.jetbrains.compose.reload.test.gradle.Headless
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
+import org.jetbrains.compose.reload.test.gradle.ReloadOverlay
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.utils.HostIntegrationTest
 import kotlin.jvm.optionals.getOrNull
 import kotlin.test.fail
 
-class DevelopmentEntryPointIntegrationTest {
+class WindowIntegrationTest {
 
     private val logger = createLogger()
 
@@ -33,6 +34,10 @@ class DevelopmentEntryPointIntegrationTest {
      */
 
     @Headless(false)
+    @ReloadOverlay(
+        overlayEnabled = true,
+        animationsEnabled = false,
+    )
     @HostIntegrationTest
     @HotReloadTest
     fun `test - singleWindowApplication`(
@@ -56,6 +61,10 @@ class DevelopmentEntryPointIntegrationTest {
     )
 
     @Headless(false)
+    @ReloadOverlay(
+        overlayEnabled = true,
+        animationsEnabled = false,
+    )
     @HostIntegrationTest
     @HotReloadTest
     fun `test - Window`(
@@ -81,6 +90,10 @@ class DevelopmentEntryPointIntegrationTest {
     )
 
     @Headless(false)
+    @ReloadOverlay(
+        overlayEnabled = true,
+        animationsEnabled = false,
+    )
     @HostIntegrationTest
     @HotReloadTest
     fun `test - DialogWindow`(

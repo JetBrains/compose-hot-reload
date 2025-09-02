@@ -6,6 +6,7 @@
 package org.jetbrains.compose.devtools.sidecar
 
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,6 +27,8 @@ import org.jetbrains.compose.devtools.states.ReloadUIState
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtImages
+import org.jetbrains.compose.devtools.theme.DtPadding
+import org.jetbrains.compose.devtools.theme.DtSizes
 import org.jetbrains.compose.devtools.theme.DtTextStyles
 import org.jetbrains.compose.devtools.widgets.DtBuildSystemLogo
 import org.jetbrains.compose.devtools.widgets.DtImage
@@ -53,7 +56,10 @@ fun DtExpandedReloadCounterStatusItem() {
 }
 
 @Composable
-fun DtMinimisedReloadCounterStatusItem(showDefaultValue: Boolean = false) {
+fun DtMinimisedReloadCounterStatusItem(
+    modifier: Modifier = Modifier,
+    showDefaultValue: Boolean = false
+) {
     val reloadState = ReloadUIState.composeValue()
     val countState = ReloadCountUIState.composeValue()
 
@@ -66,21 +72,24 @@ fun DtMinimisedReloadCounterStatusItem(showDefaultValue: Boolean = false) {
         is ReloadUIState.Reloading -> {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.scale(scale).horizontalScroll(rememberScrollState())
+                modifier = modifier.scale(scale).horizontalScroll(rememberScrollState())
             ) {
                 val buildSystem = BuildSystemUIState.composeValue()?.buildSystem
 
                 if (buildSystem == null)
                     CircularProgressIndicator(
                         strokeWidth = 4.dp, color = DtColors.statusColorOrange2,
-                        modifier = Modifier.size(10.dp).padding(2.dp).tag(Tag.ReloadStatusSymbol)
+                        modifier = Modifier.size(DtSizes.reloadCounterSize / 2)
+                            .padding(DtPadding.tiny)
+                            .tag(Tag.ReloadStatusSymbol)
                             .progressSemantics()
                     )
 
                 if (buildSystem != null) {
                     DtBuildSystemLogo(
                         buildSystem,
-                        modifier = Modifier.size(20.dp).padding(2.dp)
+                        modifier = Modifier.size(DtSizes.reloadCounterSize)
+                            .padding(DtPadding.tiny)
                             .bouncing(min = 0.9f, max = 1.10f, 250)
                             .shaking(min = -5f, max = 5f, 128)
                     )
@@ -91,12 +100,14 @@ fun DtMinimisedReloadCounterStatusItem(showDefaultValue: Boolean = false) {
             if (countState.successfulReloads < 1 && !showDefaultValue) return
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.scale(scale).horizontalScroll(rememberScrollState())
+                horizontalArrangement = Arrangement.Center,
+                modifier = modifier.scale(scale).horizontalScroll(rememberScrollState())
             ) {
                 DtText(
                     text = "${countState.successfulReloads}",
                     modifier = Modifier.tag(Tag.ReloadCounterText),
-                    style = DtTextStyles.smallSemiBold.copy(color = DtColors.text).copy(fontWeight = FontWeight.Bold)
+                    style = DtTextStyles.smallSemiBold.copy(color = DtColors.text)
+                        .copy(fontWeight = FontWeight.Bold)
                 )
             }
         }

@@ -64,7 +64,7 @@ fun DtReloadStatusItem() {
             content = {
                 val buildSystem = BuildSystemUIState.composeValue()?.buildSystem
                 if (buildSystem != null) {
-                    DtBuildSystemLogo(buildSystem, modifier = Modifier.padding(2.dp))
+                    DtBuildSystemLogo(buildSystem, modifier = Modifier.padding(DtPadding.tiny))
                 }
                 DtText("Reloading...", Modifier.tag(Tag.ReloadStatusText))
             }

@@ -20,8 +20,6 @@ import io.sellmair.evas.statesOrThrow
 import org.jetbrains.compose.devtools.errorOverlay.DevToolingErrorOverlay
 import org.jetbrains.compose.devtools.sidecar.DtAttachedSidecarWindow
 import org.jetbrains.compose.devtools.sidecar.DtDetachedSidecarWindow
-import org.jetbrains.compose.devtools.sidecar.DtDetachedStatusBar
-import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.states.DtLifecycleState
 import org.jetbrains.compose.devtools.states.WindowsUIState
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
@@ -75,14 +73,7 @@ private fun DevToolsUI() {
     windowsState.windows.forEach { (windowId, windowState) ->
         key(windowId) {
             CompositionLocalProvider(targetApplicationWindowStateLocal provides windowState) {
-                if (devToolsDetached) {
-                    if (devToolsUseTransparency) {
-                        DtDetachedStatusBar(
-                            windowId, windowState,
-                            isAlwaysOnTop = windowsState.alwaysOnTop[windowId] == true
-                        )
-                    }
-                } else {
+                if (!devToolsDetached) {
                     DtAttachedSidecarWindow(
                         windowId, windowState,
                         isAlwaysOnTop = windowsState.alwaysOnTop[windowId] == true

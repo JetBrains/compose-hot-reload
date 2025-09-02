@@ -20,8 +20,8 @@ object DtColors {
     val statusColorOk = Color(0xFF21D789) //jetBrainsGreen
     val statusColorOrange1 = Color(0xFFFFCB6B)
     val statusColorOrange2 = Color(0xFFF97A12) //jetBrainsOrange
-    val statusColorError = Color(0xFFFF5252)
-    val statusColorWarning = Color(0xFFF97A12)
+    val statusColorError = Color(0xFFFE2857) //jetBrainsRed
+    val statusColorWarning = statusColorOrange2
 
     val text = Color.White
     val textSecondary = Color(0xFFBBBBBB)

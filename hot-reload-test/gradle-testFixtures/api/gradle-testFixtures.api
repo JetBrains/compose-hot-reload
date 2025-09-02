@@ -454,6 +454,11 @@ public abstract interface class org/jetbrains/compose/reload/test/gradle/Project
 	public abstract fun setupProject (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Lorg/junit/jupiter/api/extension/ExtensionContext;)V
 }
 
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/ReloadOverlay : java/lang/annotation/Annotation {
+	public abstract fun animationsEnabled ()Z
+	public abstract fun overlayEnabled ()Z
+}
+
 public abstract interface class org/jetbrains/compose/reload/test/gradle/SettingsGradleKtsExtension {
 	public abstract fun dependencyResolutionManagement (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
 	public abstract fun dependencyResolutionManagementRepositories (Lorg/junit/jupiter/api/extension/ExtensionContext;)Ljava/lang/String;
