@@ -10,14 +10,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.job
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.devtools.api.WindowsState
 import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.sendAsync
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.trace
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowPositioned
@@ -35,33 +34,30 @@ internal fun startWindowManager(window: Window): WindowId {
     val windowId = remember { WindowId.create() }
 
     LaunchedEffect(windowId) {
-        val windowState = MutableStateFlow<WindowsState.WindowState?>(null)
-
-        /* Synchronize windows state with orchestration */
-        launch {
-            windowState.collect { state ->
-                orchestration.update(WindowsState) { current ->
-                    val windows = if (state == null) current.windows - windowId
-                    else current.windows + (windowId to state)
-                    WindowsState(windows)
-                }
+        fun updateWindowState(windowId: WindowId, state: WindowsState.WindowState?) = launchTask {
+            orchestration.update(WindowsState) { current ->
+                val windows = if (state == null) current.windows - windowId
+                else current.windows + (windowId to state)
+                WindowsState(windows)
             }
         }
 
         fun broadcastActiveState() {
-            windowState.value = WindowsState.WindowState(
-                x = window.x, y = window.y, width = window.width, height = window.height,
-                isAlwaysOnTop = window.isAlwaysOnTop
-            )
-
             ApplicationWindowPositioned(
                 windowId, window.x, window.y, window.width, window.height, isAlwaysOnTop = window.isAlwaysOnTop
             ).sendAsync()
+
+            updateWindowState(
+                windowId, WindowsState.WindowState(
+                    x = window.x, y = window.y, width = window.width, height = window.height,
+                    isAlwaysOnTop = window.isAlwaysOnTop
+                )
+            )
         }
 
         fun broadcastGone() {
-            windowState.value = null
             OrchestrationMessage.ApplicationWindowGone(windowId).sendAsync()
+            updateWindowState(windowId, null)
         }
 
         broadcastActiveState()
