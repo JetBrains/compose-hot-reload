@@ -13,7 +13,6 @@ import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceText
 import org.jetbrains.compose.reload.test.gradle.sendTestEvent
 import org.jetbrains.compose.reload.utils.QuickTest
-import org.junit.jupiter.api.Disabled
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -49,7 +48,6 @@ class ErrorRecoveryTests {
         }
     }
 
-    @Disabled("https://github.com/JetBrains/compose-hot-reload/issues/294")
     @HotReloadTest
     @QuickTest
     fun `good - bad - good - good`(fixture: HotReloadTestFixture) = fixture.runTest {
