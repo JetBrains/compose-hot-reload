@@ -40,6 +40,8 @@ public annotation class TestedLaunchMode(val mode: ApplicationLaunchMode)
 
 public annotation class Headless(val isHeadless: Boolean = true)
 
+public annotation class ReloadOverlay(val enabled: Boolean = false)
+
 @Repeatable
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 public annotation class ExtendBuildGradleKts(val extension: KClass<out BuildGradleKtsExtension>)

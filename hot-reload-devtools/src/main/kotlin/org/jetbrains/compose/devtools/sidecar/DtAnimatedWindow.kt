@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.DialogWindowScope
 import androidx.compose.ui.window.WindowPosition
@@ -210,7 +209,7 @@ internal fun DpSize.toDimension(): Dimension = Dimension(width.value.toInt(), he
 internal fun WindowPosition.toPoint(): Point = Point(x.value.toInt(), y.value.toInt())
 
 internal fun getSideCarWindowPosition(mainWindowPosition: WindowPosition, width: Dp): WindowPosition {
-    val targetX = mainWindowPosition.x - width - if (!devToolsUseTransparency) DtPadding.small * 3 else 0.dp
+    val targetX = mainWindowPosition.x - width - DtPadding.small * 3
     val targetY = mainWindowPosition.y
     return WindowPosition(targetX, targetY)
 }
@@ -219,9 +218,8 @@ internal fun getSideCarWindowSize(mainWindowSize: DpSize, isExpanded: Boolean): 
     return when {
         isExpanded -> DpSize(DtSizes.sidecarWidth, maxOf(mainWindowSize.height, DtSizes.minSidecarHeight))
         else -> DpSize(
-            width = DtSizes.largeLogoSize + DtPadding.small * 2 + if (devToolsUseTransparency) DtPadding.small * 3 else 0.dp,
-            height = if (devToolsUseTransparency) maxOf(mainWindowSize.height, DtSizes.minSidecarHeight)
-            else DtSizes.largeLogoSize + DtPadding.small * 2 + 12.dp + if (Os.current() == Os.Windows) 2.dp else 0.dp
+            width = DtSizes.largeLogoSize + DtPadding.small * 2,
+            height = DtSizes.largeLogoSize + DtPadding.small * 2 + DtSizes.reloadCounterSize,
         )
     }
 }
