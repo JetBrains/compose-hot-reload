@@ -107,12 +107,18 @@ sealed class InstructionToken {
         }
     }
 
-    data class LabelToken(
-        val labelInsn: LabelNode
+    data class LabelToken @JvmOverloads constructor(
+        val labelInsn: LabelNode,
+        val lineNumberInsn: LineNumberNode? = null,
     ) : InstructionToken() {
-        override val instructions: List<AbstractInsnNode> = listOf(labelInsn)
+
+        fun copy(labelInsn: LabelNode = this.labelInsn): LabelToken {
+            return LabelToken(labelInsn, lineNumberInsn)
+        }
+
+        override val instructions: List<AbstractInsnNode> = listOfNotNull(labelInsn, lineNumberInsn)
         override fun toString(): String {
-            return "LabelToken(label=${labelInsn.label})"
+            return "LabelToken(label=${labelInsn.label}, lineNumber=${lineNumberInsn?.line})"
         }
     }
 
@@ -235,10 +241,14 @@ private val tokenizer by lazy {
     )
 }
 
-private val LabelTokenizer = SingleInstructionTokenizer { instruction ->
-    if (instruction is LabelNode) {
-        InstructionToken.LabelToken(instruction)
-    } else null
+private object LabelTokenizer : InstructionTokenizer() {
+    override fun nextToken(context: TokenizerContext): Either<InstructionToken, Failure>? {
+        val labelInsn = context[0] ?: return null
+        if (labelInsn !is LabelNode) return null
+        val lineNumberInsn = context[1] as? LineNumberNode
+
+        return InstructionToken.LabelToken(labelInsn, lineNumberInsn).toLeft()
+    }
 }
 
 private val JumpTokenizer = SingleInstructionTokenizer { instruction ->

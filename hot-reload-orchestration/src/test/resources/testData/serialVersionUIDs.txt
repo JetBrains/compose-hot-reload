@@ -18,6 +18,9 @@ org/jetbrains/compose/reload/orchestration/OrchestrationMessage$CleanComposition
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ClientConnected = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ClientDisconnected = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$CriticalException = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessage$InvalidatedComposeGroupMessage = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessage$InvalidatedComposeGroupMessage$DirtyScope = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessage$InvalidatedComposeGroupMessage$DirtyScope$ScopeType = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$LogMessage = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$Ping = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$RecompileRequest = 0

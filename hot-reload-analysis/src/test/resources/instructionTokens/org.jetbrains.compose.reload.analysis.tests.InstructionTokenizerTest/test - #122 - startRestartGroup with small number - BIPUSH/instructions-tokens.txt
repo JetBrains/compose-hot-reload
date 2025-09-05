@@ -27,10 +27,10 @@ class FooKt {
     }
     
     fun Foo(Landroidx/compose/runtime/Composer;I)V {
-        LabelToken(L0)
+        LabelToken(L0, lineNumber=4)
             LabelNode(L0)
-        BlockToken(2)
             LineNumberNode [-1]
+        BlockToken(1)
             VarInsnNode [25]
         StartRestartGroup(key=ComposeGroupKey(key=-965539098))
             LdcInsnNode(-965539098) [18]
@@ -75,9 +75,8 @@ class FooKt {
         BlockToken(2)
             FrameNode [-1]
             VarInsnNode [25]
-        LabelToken(L4)
+        LabelToken(L4, lineNumber=5)
             LabelNode(L4)
-        BlockToken(1)
             LineNumberNode [-1]
         StartRestartGroup(key=ComposeGroupKey(key=122))
             IntInsnNode [16]
@@ -85,9 +84,8 @@ class FooKt {
         BlockToken(2)
             InsnNode [87]
             VarInsnNode [25]
-        LabelToken(L5)
+        LabelToken(L5, lineNumber=6)
             LabelNode(L5)
-        BlockToken(1)
             LineNumberNode [-1]
         EndRestartGroup()
             MethodInsnNode(androidx/compose/runtime/Composer.endRestartGroup ()Landroidx/compose/runtime/ScopeUpdateScope;) [185]
@@ -100,17 +98,17 @@ class FooKt {
             MethodInsnNode(androidx/compose/runtime/ComposerKt.traceEventEnd ()V) [184]
         JumpToken(L7, opocde=167)
             JumpInsNode(L7)) [GOTO])
-        LabelToken(L6)
+        LabelToken(L6, lineNumber=3)
             LabelNode(L6)
-        BlockToken(4)
             LineNumberNode [-1]
+        BlockToken(3)
             FrameNode [-1]
             VarInsnNode [25]
             MethodInsnNode(androidx/compose/runtime/Composer.skipToGroupEnd ()V) [185]
-        LabelToken(L7)
+        LabelToken(L7, lineNumber=7)
             LabelNode(L7)
-        BlockToken(3)
             LineNumberNode [-1]
+        BlockToken(2)
             FrameNode [-1]
             VarInsnNode [25]
         EndRestartGroup()

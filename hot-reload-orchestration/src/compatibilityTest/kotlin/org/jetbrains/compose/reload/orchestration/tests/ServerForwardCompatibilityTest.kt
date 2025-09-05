@@ -16,6 +16,8 @@ import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.reloadMainThread
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage.DirtyScope
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
@@ -213,6 +215,43 @@ class ServerForwardCompatibilityTest {
 
         await("state received") {
             client.states.get(stateKey).await { it.payload == 42 }
+        }
+    }
+
+    @IsolateTest(StartServer::class)
+    context(_: IsolateTestFixture)
+    fun `test - client sends InvalidatedComposeGroupMessage to old server - connection survives`() = runIsolateTest {
+        val port = receiveAs<ServerPort>().port
+
+        val client = OrchestrationClient(Unknown, port)
+        val messages = client.asChannel()
+        client.connect().getOrThrow()
+
+        client.send(TestEvent("Hello"))
+
+        await("TestEvent echo from server") {
+            messages.receiveAsFlow().first { it is TestEvent && it.payload == "Hello" }
+        }
+
+        val invalidation = InvalidatedComposeGroupMessage(
+            groupKey = 456,
+            dirtyScopes = listOf(
+                DirtyScope(
+                    methodName = "bar",
+                    methodDescriptor = "()V",
+                    classId = "com/example/Bar",
+                    scopeType = DirtyScope.ScopeType.Method,
+                    sourceFile = "App.kt",
+                    firstLineNumber = 42,
+                )
+            )
+        )
+
+        client.send(invalidation)
+
+        client.send(TestEvent("Bye"))
+        await("TestEvent echo from server") {
+            messages.receiveAsFlow().first { it is TestEvent && it.payload == "Bye" }
         }
     }
 }

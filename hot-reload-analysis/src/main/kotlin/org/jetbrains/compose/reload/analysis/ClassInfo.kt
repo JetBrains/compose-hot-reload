@@ -18,6 +18,7 @@ data class ClassInfo internal constructor(
     val superClass: ClassId?,
     val superInterfaces: List<ClassId>,
     val flags: ClassFlags,
+    val sourceFile: String?,
 )
 
 fun ClassInfo(bytecode: ByteArray): ClassInfo? {
@@ -56,7 +57,8 @@ internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
         methods = methods,
         superClass = classNode.superName?.let(::ClassId),
         superInterfaces = classNode.interfaces.map(::ClassId),
-        flags = ClassFlags(classNode.access)
+        flags = ClassFlags(classNode.access),
+        sourceFile = classNode.sourceFile,
     )
 }
 

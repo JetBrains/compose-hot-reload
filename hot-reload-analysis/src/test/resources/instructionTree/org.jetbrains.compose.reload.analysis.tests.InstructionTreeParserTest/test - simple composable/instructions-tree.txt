@@ -19,8 +19,8 @@ class TestKt {
     
     fun Foo (Landroidx/compose/runtime/Composer;I)V {
         Method (group=ComposeGroupKey(key=-607362160)) {
-            LabelToken(L0)
-            BlockToken(2)
+            LabelToken(L0, lineNumber=5)
+            BlockToken(1)
             BlockToken(1)
             JumpToken(L6, opocde=198)
             BlockToken(3)
@@ -45,15 +45,15 @@ class TestKt {
                 BlockToken(1)
                 JumpToken(L3, opocde=153)
                 BlockToken(5)
-                LabelToken(L3)
-                BlockToken(25)
+                LabelToken(L3, lineNumber=6)
+                BlockToken(24)
                 JumpToken(L5, opocde=153)
                 BlockToken(1)
                 JumpToken(L5, opocde=167)
-                LabelToken(L4)
-                BlockToken(4)
-                LabelToken(L5)
+                LabelToken(L4, lineNumber=4)
                 BlockToken(3)
+                LabelToken(L5, lineNumber=7)
+                BlockToken(2)
                 EndRestartGroup()
             }
         }

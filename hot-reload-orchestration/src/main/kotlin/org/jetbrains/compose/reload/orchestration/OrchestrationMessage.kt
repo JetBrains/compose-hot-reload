@@ -297,6 +297,39 @@ internal constructor() : OrchestrationPackage(), Serializable {
         }
     }
 
+    public data class InvalidatedComposeGroupMessage(
+        val groupKey: Int,
+        val dirtyScopes: List<DirtyScope>,
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+
+        public data class DirtyScope(
+            val methodName: String,
+            val methodDescriptor: String,
+            val classId: String,
+            val scopeType: ScopeType,
+            val sourceFile: String?,
+            val firstLineNumber: Int?,
+        ) : Serializable {
+            internal companion object {
+                @Suppress("unused")
+                internal const val serialVersionUID: Long = 0L
+            }
+
+            public enum class ScopeType : Serializable {
+                Method, RestartGroup, ReplaceGroup, SourceInformationMarker;
+
+                internal companion object {
+                    @Suppress("unused")
+                    internal const val serialVersionUID: Long = 0L
+                }
+            }
+        }
+    }
+
     /**
      * Noop empty message used to ping, or sync with the application.
      */

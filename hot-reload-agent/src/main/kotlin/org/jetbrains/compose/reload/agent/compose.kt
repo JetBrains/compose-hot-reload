@@ -8,16 +8,20 @@ package org.jetbrains.compose.reload.agent
 import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.ComposeGroupKey
 import org.jetbrains.compose.reload.analysis.Ids
+import org.jetbrains.compose.reload.analysis.ScopeType
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.warn
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage.DirtyScope
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.security.ProtectionDomain
 import java.util.WeakHashMap
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage.DirtyScope.ScopeType as DirtyScopeType
 
 private val logger = createLogger()
 
@@ -67,16 +71,37 @@ private fun launchComposeGroupInvalidation() {
             .filter { scope -> scope.group != null }
             .groupBy { it.group }
 
-        invalidations.forEach { (group, methods) ->
+        invalidations.forEach { group, scopes ->
             if (group == null) return@forEach
 
-            val methods = methods.map { it.methodId }.toSet()
+            val methods = scopes.map { it.methodId }.toSet()
                 .joinToString(", ", prefix = "(", postfix = ")") { methodId ->
                     "${methodId.classId}.${methodId.methodName}"
                 }
+            val dirtyScopes = scopes.map { scope ->
+                val scopeType = when (scope.scopeType) {
+                    ScopeType.Method -> DirtyScopeType.Method
+                    ScopeType.RestartGroup -> DirtyScopeType.RestartGroup
+                    ScopeType.ReplaceGroup -> DirtyScopeType.ReplaceGroup
+                    ScopeType.SourceInformationMarker -> DirtyScopeType.SourceInformationMarker
+                }
+                DirtyScope(
+                    scopeType = scopeType,
+                    sourceFile = scope.sourceLocation.sourceFile,
+                    classId = scope.methodId.classId.value,
+                    methodName = scope.methodId.methodName,
+                    methodDescriptor = scope.methodId.methodDescriptor,
+                    firstLineNumber = scope.sourceLocation.firstLineNumber,
+                )
+            }
 
             logger.debug("Invalidating group '${group.key}' $methods")
             invalidateGroupsWithKey(group)
+
+            InvalidatedComposeGroupMessage(
+                groupKey = group.key,
+                dirtyScopes = dirtyScopes,
+            ).sendAsync()
         }
     }
 }

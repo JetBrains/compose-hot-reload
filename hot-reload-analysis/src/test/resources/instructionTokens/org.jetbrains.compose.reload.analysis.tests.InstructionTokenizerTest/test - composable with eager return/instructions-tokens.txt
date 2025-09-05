@@ -50,10 +50,10 @@ class FooKt {
     }
     
     fun Foo(Landroidx/compose/runtime/Composer;I)V {
-        LabelToken(L0)
+        LabelToken(L0, lineNumber=8)
             LabelNode(L0)
-        BlockToken(2)
             LineNumberNode [-1]
+        BlockToken(1)
             VarInsnNode [25]
         StartRestartGroup(key=ComposeGroupKey(key=-965539098))
             LdcInsnNode(-965539098) [18]
@@ -93,10 +93,10 @@ class FooKt {
             InsnNode [2]
             LdcInsnNode(Foo (Foo.kt:7)) [18]
             MethodInsnNode(androidx/compose/runtime/ComposerKt.traceEventStart (IIILjava/lang/String;)V) [184]
-        LabelToken(L3)
+        LabelToken(L3, lineNumber=9)
             LabelNode(L3)
-        BlockToken(6)
             LineNumberNode [-1]
+        BlockToken(5)
             FrameNode [-1]
             VarInsnNode [25]
             InsnNode [3]
@@ -118,10 +118,10 @@ class FooKt {
             JumpInsNode(L5)) [153])
         BlockToken(1)
             MethodInsnNode(androidx/compose/runtime/ComposerKt.traceEventEnd ()V) [184]
-        LabelToken(L5)
+        LabelToken(L5, lineNumber=13)
             LabelNode(L5)
-        BlockToken(3)
             LineNumberNode [-1]
+        BlockToken(2)
             FrameNode [-1]
             VarInsnNode [25]
         EndRestartGroup()
@@ -141,10 +141,10 @@ class FooKt {
         BlockToken(2)
             FrameNode [-1]
             InsnNode [87]
-        LabelToken(L7)
+        LabelToken(L7, lineNumber=9)
             LabelNode(L7)
-        BlockToken(2)
             LineNumberNode [-1]
+        BlockToken(1)
             FrameNode [-1]
         ReturnToken(returnInsn=177)
             InsnNode [177]
@@ -153,10 +153,10 @@ class FooKt {
         BlockToken(2)
             FrameNode [-1]
             VarInsnNode [54]
-        LabelToken(L9)
+        LabelToken(L9, lineNumber=10)
             LabelNode(L9)
-        BlockToken(2)
             LineNumberNode [-1]
+        BlockToken(1)
             VarInsnNode [21]
         JumpToken(L12, opocde=153)
             JumpInsNode(L12)) [153])
@@ -165,10 +165,10 @@ class FooKt {
         StartReplaceGroup(key=ComposeGroupKey(key=-979214881))
             LdcInsnNode(-979214881) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]
-        LabelToken(L10)
+        LabelToken(L10, lineNumber=11)
             LabelNode(L10)
-        BlockToken(23)
             LineNumberNode [-1]
+        BlockToken(22)
             LdcInsnNode(Hello) [18]
             InsnNode [1]
             InsnNode [9]
@@ -191,10 +191,10 @@ class FooKt {
             InsnNode [3]
             LdcInsnNode(131070) [18]
             MethodInsnNode(androidx/compose/material3/TextKt.Text--4IGK_g (Ljava/lang/String;Landroidx/compose/ui/Modifier;JJLandroidx/compose/ui/text/font/FontStyle;Landroidx/compose/ui/text/font/FontWeight;Landroidx/compose/ui/text/font/FontFamily;JLandroidx/compose/ui/text/style/TextDecoration;Landroidx/compose/ui/text/style/TextAlign;JIZIILkotlin/jvm/functions/Function1;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)V) [184]
-        LabelToken(L11)
+        LabelToken(L11, lineNumber=10)
             LabelNode(L11)
-        BlockToken(2)
             LineNumberNode [-1]
+        BlockToken(1)
             VarInsnNode [25]
         EndReplaceGroup()
             MethodInsnNode(androidx/compose/runtime/Composer.endReplaceGroup ()V) [185]
@@ -225,17 +225,17 @@ class FooKt {
             LabelNode(L14)
         JumpToken(L16, opocde=167)
             JumpInsNode(L16)) [GOTO])
-        LabelToken(L15)
+        LabelToken(L15, lineNumber=7)
             LabelNode(L15)
-        BlockToken(4)
             LineNumberNode [-1]
+        BlockToken(3)
             FrameNode [-1]
             VarInsnNode [25]
             MethodInsnNode(androidx/compose/runtime/Composer.skipToGroupEnd ()V) [185]
-        LabelToken(L16)
+        LabelToken(L16, lineNumber=13)
             LabelNode(L16)
-        BlockToken(3)
             LineNumberNode [-1]
+        BlockToken(2)
             FrameNode [-1]
             VarInsnNode [25]
         EndRestartGroup()
@@ -293,9 +293,8 @@ class FooKt {
             FrameNode [-1]
             InsnNode [3]
             MethodInsnNode(java/lang/Boolean.valueOf (Z)Ljava/lang/Boolean;) [184]
-        LabelToken(L3)
+        LabelToken(L3, lineNumber=5)
             LabelNode(L3)
-        BlockToken(1)
             LineNumberNode [-1]
         ReturnToken(returnInsn=176)
             InsnNode [176]

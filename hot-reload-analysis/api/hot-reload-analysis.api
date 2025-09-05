@@ -101,11 +101,13 @@ public final class org/jetbrains/compose/reload/analysis/ClassInfo {
 	public final fun component4-ejqTZCE ()Ljava/lang/String;
 	public final fun component5 ()Ljava/util/List;
 	public final fun component6-aqB5Kkw ()I
+	public final fun component7 ()Ljava/lang/String;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
 	public final fun getFields ()Ljava/util/Map;
 	public final fun getFlags-aqB5Kkw ()I
 	public final fun getMethods ()Ljava/util/Map;
+	public final fun getSourceFile ()Ljava/lang/String;
 	public final fun getSuperClass-ejqTZCE ()Ljava/lang/String;
 	public final fun getSuperInterfaces ()Ljava/util/List;
 	public fun hashCode ()I
@@ -419,12 +421,18 @@ public final class org/jetbrains/compose/reload/analysis/InstructionToken$JumpTo
 
 public final class org/jetbrains/compose/reload/analysis/InstructionToken$LabelToken : org/jetbrains/compose/reload/analysis/InstructionToken {
 	public fun <init> (Lorg/objectweb/asm/tree/LabelNode;)V
+	public fun <init> (Lorg/objectweb/asm/tree/LabelNode;Lorg/objectweb/asm/tree/LineNumberNode;)V
+	public synthetic fun <init> (Lorg/objectweb/asm/tree/LabelNode;Lorg/objectweb/asm/tree/LineNumberNode;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lorg/objectweb/asm/tree/LabelNode;
+	public final fun component2 ()Lorg/objectweb/asm/tree/LineNumberNode;
 	public final fun copy (Lorg/objectweb/asm/tree/LabelNode;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$LabelToken;
+	public final fun copy (Lorg/objectweb/asm/tree/LabelNode;Lorg/objectweb/asm/tree/LineNumberNode;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$LabelToken;
 	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$LabelToken;Lorg/objectweb/asm/tree/LabelNode;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$LabelToken;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$LabelToken;Lorg/objectweb/asm/tree/LabelNode;Lorg/objectweb/asm/tree/LineNumberNode;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$LabelToken;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getInstructions ()Ljava/util/List;
 	public final fun getLabelInsn ()Lorg/objectweb/asm/tree/LabelNode;
+	public final fun getLineNumberInsn ()Lorg/objectweb/asm/tree/LineNumberNode;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -643,6 +651,7 @@ public final class org/jetbrains/compose/reload/analysis/ScopeInfo {
 	public final fun component6 ()Ljava/util/Set;
 	public final fun component7 ()Ljava/util/List;
 	public final fun component8 ()Lorg/jetbrains/compose/reload/core/Context;
+	public final fun component9 ()Lorg/jetbrains/compose/reload/analysis/ScopeInfo$SourceLocation;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getChildren ()Ljava/util/List;
 	public final fun getExtras ()Lorg/jetbrains/compose/reload/core/Context;
@@ -652,6 +661,17 @@ public final class org/jetbrains/compose/reload/analysis/ScopeInfo {
 	public final fun getMethodId ()Lorg/jetbrains/compose/reload/analysis/MethodId;
 	public final fun getScopeHash-hC-z0cA ()J
 	public final fun getScopeType ()Lorg/jetbrains/compose/reload/analysis/ScopeType;
+	public final fun getSourceLocation ()Lorg/jetbrains/compose/reload/analysis/ScopeInfo$SourceLocation;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/analysis/ScopeInfo$SourceLocation {
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Integer;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFirstLineNumber ()Ljava/lang/Integer;
+	public final fun getSourceFile ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

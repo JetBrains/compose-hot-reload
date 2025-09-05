@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.analysis
 
 import org.jetbrains.compose.reload.InternalHotReloadApi
+import org.jetbrains.compose.reload.analysis.ScopeInfo.SourceLocation
 import org.jetbrains.compose.reload.core.Context
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
@@ -19,8 +20,15 @@ data class ScopeInfo @InternalHotReloadApi internal constructor(
     val methodDependencies: Set<MethodId>,
     val fieldDependencies: Set<FieldId>,
     val children: List<ScopeInfo>,
-    val extras: Context
-)
+    val extras: Context,
+    val sourceLocation: SourceLocation,
+) {
+    @ConsistentCopyVisibility
+    data class SourceLocation @InternalHotReloadApi internal constructor(
+        val sourceFile: String?,
+        val firstLineNumber: Int?,
+    )
+}
 
 enum class ScopeType {
     Method, RestartGroup, ReplaceGroup, SourceInformationMarker,
@@ -32,13 +40,15 @@ internal fun ScopeInfo(
 ): ScopeInfo {
     val methodId = MethodId(classNode, methodNode)
     val runtimeInstructionTree = parseInstructionTreeLenient(methodId, methodNode)
-    return createScopeInfo(methodId, methodNode, runtimeInstructionTree)
+    val sourceFile = classNode.sourceFile
+    return createScopeInfo(methodId, methodNode, runtimeInstructionTree, sourceFile)
 }
 
 internal fun createScopeInfo(
     methodId: MethodId,
     methodNode: MethodNode,
     tree: InstructionTree,
+    sourceFile: String?,
 ): ScopeInfo {
     return ScopeInfo(
         methodId = methodId,
@@ -47,7 +57,18 @@ internal fun createScopeInfo(
         group = tree.group,
         methodDependencies = tree.methodDependencies(),
         fieldDependencies = tree.fieldDependencies(),
-        children = tree.children.map { child -> createScopeInfo(methodId, methodNode, child) },
-        extras = createScopeInfoExtras(methodId, methodNode, tree)
+        children = tree.children.map { child -> createScopeInfo(methodId, methodNode, child, sourceFile) },
+        extras = createScopeInfoExtras(methodId, methodNode, tree),
+        sourceLocation = SourceLocation(
+            sourceFile = sourceFile,
+            firstLineNumber = tree.tokens.firstLineNumber,
+        )
     )
 }
+
+
+private val List<InstructionToken>.firstLineNumber: Int?
+    get() = minOfOrNull min@{
+        val label = it as? InstructionToken.LabelToken ?: return@min Int.MAX_VALUE
+        label.lineNumberInsn?.line ?: Int.MAX_VALUE
+    }.takeIf { it != Int.MAX_VALUE }

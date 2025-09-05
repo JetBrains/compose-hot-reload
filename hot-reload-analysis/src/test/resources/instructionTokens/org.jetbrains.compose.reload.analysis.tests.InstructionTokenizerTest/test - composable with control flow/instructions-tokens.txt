@@ -36,10 +36,10 @@ class FooKt {
     }
     
     fun Foo(ILandroidx/compose/runtime/Composer;I)V {
-        LabelToken(L0)
+        LabelToken(L0, lineNumber=5)
             LabelNode(L0)
-        BlockToken(2)
             LineNumberNode [-1]
+        BlockToken(1)
             VarInsnNode [25]
         StartRestartGroup(key=ComposeGroupKey(key=-412519275))
             LdcInsnNode(-412519275) [18]
@@ -118,10 +118,10 @@ class FooKt {
             InsnNode [2]
             LdcInsnNode(Foo (Foo.kt:4)) [18]
             MethodInsnNode(androidx/compose/runtime/ComposerKt.traceEventStart (IIILjava/lang/String;)V) [184]
-        LabelToken(L7)
+        LabelToken(L7, lineNumber=6)
             LabelNode(L7)
-        BlockToken(3)
             LineNumberNode [-1]
+        BlockToken(2)
             FrameNode [-1]
             VarInsnNode [21]
         JumpToken(L10, opocde=158)
@@ -131,10 +131,10 @@ class FooKt {
         StartReplaceGroup(key=ComposeGroupKey(key=-1460235184))
             LdcInsnNode(-1460235184) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]
-        LabelToken(L8)
+        LabelToken(L8, lineNumber=7)
             LabelNode(L8)
-        BlockToken(23)
             LineNumberNode [-1]
+        BlockToken(22)
             LdcInsnNode(Hello) [18]
             InsnNode [1]
             InsnNode [9]
@@ -157,28 +157,28 @@ class FooKt {
             InsnNode [3]
             LdcInsnNode(131070) [18]
             MethodInsnNode(androidx/compose/material3/TextKt.Text--4IGK_g (Ljava/lang/String;Landroidx/compose/ui/Modifier;JJLandroidx/compose/ui/text/font/FontStyle;Landroidx/compose/ui/text/font/FontWeight;Landroidx/compose/ui/text/font/FontFamily;JLandroidx/compose/ui/text/style/TextDecoration;Landroidx/compose/ui/text/style/TextAlign;JIZIILkotlin/jvm/functions/Function1;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)V) [184]
-        LabelToken(L9)
+        LabelToken(L9, lineNumber=6)
             LabelNode(L9)
-        BlockToken(2)
             LineNumberNode [-1]
+        BlockToken(1)
             VarInsnNode [25]
         EndReplaceGroup()
             MethodInsnNode(androidx/compose/runtime/Composer.endReplaceGroup ()V) [185]
         JumpToken(L17, opocde=167)
             JumpInsNode(L17)) [GOTO])
-        LabelToken(L10)
+        LabelToken(L10, lineNumber=8)
             LabelNode(L10)
-        BlockToken(3)
             LineNumberNode [-1]
+        BlockToken(2)
             FrameNode [-1]
             VarInsnNode [25]
         StartReplaceGroup(key=ComposeGroupKey(key=-1460198046))
             LdcInsnNode(-1460198046) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]
-        LabelToken(L11)
+        LabelToken(L11, lineNumber=9)
             LabelNode(L11)
-        BlockToken(3)
             LineNumberNode [-1]
+        BlockToken(2)
             VarInsnNode [21]
             IntInsnNode [16]
         JumpToken(L14, opocde=164)
@@ -188,10 +188,10 @@ class FooKt {
         StartReplaceGroup(key=ComposeGroupKey(key=-1460175323))
             LdcInsnNode(-1460175323) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]
-        LabelToken(L12)
+        LabelToken(L12, lineNumber=10)
             LabelNode(L12)
-        BlockToken(23)
             LineNumberNode [-1]
+        BlockToken(22)
             LdcInsnNode(Hello 10) [18]
             InsnNode [1]
             InsnNode [9]
@@ -214,10 +214,10 @@ class FooKt {
             InsnNode [3]
             LdcInsnNode(131070) [18]
             MethodInsnNode(androidx/compose/material3/TextKt.Text--4IGK_g (Ljava/lang/String;Landroidx/compose/ui/Modifier;JJLandroidx/compose/ui/text/font/FontStyle;Landroidx/compose/ui/text/font/FontWeight;Landroidx/compose/ui/text/font/FontFamily;JLandroidx/compose/ui/text/style/TextDecoration;Landroidx/compose/ui/text/style/TextAlign;JIZIILkotlin/jvm/functions/Function1;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)V) [184]
-        LabelToken(L13)
+        LabelToken(L13, lineNumber=9)
             LabelNode(L13)
-        BlockToken(2)
             LineNumberNode [-1]
+        BlockToken(1)
             VarInsnNode [25]
         EndReplaceGroup()
             MethodInsnNode(androidx/compose/runtime/Composer.endReplaceGroup ()V) [185]
@@ -235,10 +235,10 @@ class FooKt {
             VarInsnNode [25]
         EndReplaceGroup()
             MethodInsnNode(androidx/compose/runtime/Composer.endReplaceGroup ()V) [185]
-        LabelToken(L15)
+        LabelToken(L15, lineNumber=13)
             LabelNode(L15)
-        BlockToken(24)
             LineNumberNode [-1]
+        BlockToken(23)
             FrameNode [-1]
             LdcInsnNode(Hello else) [18]
             InsnNode [1]
@@ -262,10 +262,10 @@ class FooKt {
             InsnNode [3]
             LdcInsnNode(131070) [18]
             MethodInsnNode(androidx/compose/material3/TextKt.Text--4IGK_g (Ljava/lang/String;Landroidx/compose/ui/Modifier;JJLandroidx/compose/ui/text/font/FontStyle;Landroidx/compose/ui/text/font/FontWeight;Landroidx/compose/ui/text/font/FontFamily;JLandroidx/compose/ui/text/style/TextDecoration;Landroidx/compose/ui/text/style/TextAlign;JIZIILkotlin/jvm/functions/Function1;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)V) [184]
-        LabelToken(L16)
+        LabelToken(L16, lineNumber=8)
             LabelNode(L16)
-        BlockToken(2)
             LineNumberNode [-1]
+        BlockToken(1)
             VarInsnNode [25]
         EndReplaceGroup()
             MethodInsnNode(androidx/compose/runtime/Composer.endReplaceGroup ()V) [185]
@@ -280,17 +280,17 @@ class FooKt {
             MethodInsnNode(androidx/compose/runtime/ComposerKt.traceEventEnd ()V) [184]
         JumpToken(L19, opocde=167)
             JumpInsNode(L19)) [GOTO])
-        LabelToken(L18)
+        LabelToken(L18, lineNumber=4)
             LabelNode(L18)
-        BlockToken(4)
             LineNumberNode [-1]
+        BlockToken(3)
             FrameNode [-1]
             VarInsnNode [25]
             MethodInsnNode(androidx/compose/runtime/Composer.skipToGroupEnd ()V) [185]
-        LabelToken(L19)
+        LabelToken(L19, lineNumber=15)
             LabelNode(L19)
-        BlockToken(3)
             LineNumberNode [-1]
+        BlockToken(2)
             FrameNode [-1]
             VarInsnNode [25]
         EndRestartGroup()

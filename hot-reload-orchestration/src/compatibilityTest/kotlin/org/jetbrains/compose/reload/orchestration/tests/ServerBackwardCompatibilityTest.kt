@@ -22,16 +22,20 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknow
 import org.jetbrains.compose.reload.orchestration.OrchestrationConnectionsState
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage.DirtyScope
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
 import org.jetbrains.compose.reload.orchestration.startOrchestrationListener
+import org.jetbrains.compose.reload.orchestration.tests.ServerBackwardCompatibilityTest.EchoClient
 import org.jetbrains.compose.reload.orchestration.tests.ServerBackwardCompatibilityTest.SingleClientSingleEvent.ServerPort
 import org.jetbrains.compose.reload.orchestration.utils.Isolate
 import org.jetbrains.compose.reload.orchestration.utils.IsolateContext
 import org.jetbrains.compose.reload.orchestration.utils.IsolateMessage
 import org.jetbrains.compose.reload.orchestration.utils.IsolateTest
+import org.jetbrains.compose.reload.orchestration.utils.IsolateTestContext
 import org.jetbrains.compose.reload.orchestration.utils.IsolateTestFixture
 import org.jetbrains.compose.reload.orchestration.utils.MinSupportedVersion
 import org.jetbrains.compose.reload.orchestration.utils.TestOrchestrationState
@@ -198,35 +202,12 @@ class ServerBackwardCompatibilityTest {
 
     @IsolateTest(EchoClient::class)
     context(_: IsolateTestFixture)
-    fun `test - update state - echo is still alive`() = runIsolateTest {
-        val server = OrchestrationServer()
-        server.start()
-        val messages = server.asChannel()
-
-        EchoClient.ServerPort(server.port.await().getOrThrow()).send()
-        await("client connection") {
-            messages.receiveAsFlow().filterIsInstance<ClientConnected>().first()
-        }
-
-        await("client ready") {
-            receiveAs<EchoClient.Ready>()
-        }
-
-        await("client echo") {
-            server.send(TestEvent("Foo"))
-            messages.receiveAsFlow().first { it is TestEvent && it.payload == "Echo: Foo" }
-        }
-
+    fun `test - update state - echo is still alive`() = runAliveEchoClientTest { server ->
         assertEquals(0, server.states.get(stateKey).value.payload)
 
         await("state update") {
             server.update(stateKey) { current -> TestOrchestrationState(current.payload + 1) }
             assertEquals(1, server.states.get(stateKey).value.payload)
-        }
-
-        await("client echo") {
-            server.send(TestEvent("Bar"))
-            messages.receiveAsFlow().first { it is TestEvent && it.payload == "Echo: Bar" }
         }
     }
 
@@ -314,5 +295,58 @@ class ServerBackwardCompatibilityTest {
         await("client sent message") {
             messages.receiveAsFlow().filterIsInstance<TestEvent>().first().payload == "Hello"
         }
+    }
+
+    @IsolateTest(EchoClient::class)
+    @MinSupportedVersion("1.0.0-beta06")
+    context(_: IsolateTestFixture)
+    fun `test - server sends InvalidatedComposeGroupMessage to client - echo is still alive`() =
+        runAliveEchoClientTest { server ->
+            val invalidation = InvalidatedComposeGroupMessage(
+                groupKey = 456,
+                dirtyScopes = listOf(
+                    DirtyScope(
+                        methodName = "bar",
+                        methodDescriptor = "()V",
+                        classId = "com/example/Bar",
+                        scopeType = DirtyScope.ScopeType.Method,
+                        sourceFile = "App.kt",
+                        firstLineNumber = 42,
+                    )
+                )
+            )
+            server.send(invalidation)
+        }
+}
+
+context(ctx: IsolateTestFixture)
+private fun runAliveEchoClientTest(
+    test: suspend context(IsolateTestContext) (
+        server: OrchestrationServer,
+    ) -> Unit
+) = runIsolateTest {
+    val server = OrchestrationServer()
+    server.start()
+    val messages = server.asChannel()
+
+    EchoClient.ServerPort(server.port.await().getOrThrow()).send()
+    await("client connection") {
+        messages.receiveAsFlow().filterIsInstance<ClientConnected>().first()
+    }
+
+    await("client ready") {
+        receiveAs<EchoClient.Ready>()
+    }
+
+    await("client echo") {
+        server.send(TestEvent("Foo"))
+        messages.receiveAsFlow().first { it is TestEvent && it.payload == "Echo: Foo" }
+    }
+
+    test(server)
+
+    await("client echo") {
+        server.send(TestEvent("Bar"))
+        messages.receiveAsFlow().first { it is TestEvent && it.payload == "Echo: Bar" }
     }
 }

@@ -129,7 +129,7 @@ private fun MethodNode.indexOfLabel(label: Label): Int {
 
 private fun MethodNode.render(token: InstructionToken): String {
     return when (token) {
-        is InstructionToken.LabelToken -> "LabelToken(L${indexOfLabel(token.labelInsn.label)})"
+        is InstructionToken.LabelToken -> "LabelToken(L${indexOfLabel(token.labelInsn.label)}${token.lineNumberInsn?.run { ", lineNumber=${line}"}.orEmpty()})"
         is InstructionToken.JumpToken -> "JumpToken(L${indexOfLabel(token.jumpInsn.label.label)}, opocde=${token.jumpInsn.opcode})"
         else -> token.toString()
     }
