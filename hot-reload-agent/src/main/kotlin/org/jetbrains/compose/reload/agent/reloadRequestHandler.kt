@@ -8,9 +8,9 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.exception
-import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.isSuccess
 import org.jetbrains.compose.reload.core.launchTask
@@ -47,13 +47,13 @@ internal fun launchReloadRequestHandler(instrumentation: Instrumentation) = laun
             Yuhuu! We reloaded the classes; We can reset the 'pending changes'; No re-try necessary
              */
             if (result.isSuccess()) {
-                logger.info("Reloaded classes: ${request.messageId}")
+                logger.debug("Reloaded classes: ${request.messageId}")
                 pendingChanges = emptyMap()
                 OrchestrationMessage.ReloadClassesResult(request.messageId, true).sendAsync()
             }
 
             if (result.isFailure()) {
-                logger.error("Failed to reload classes", result.exception)
+                logger.error("Reload failed", result.exception)
                 OrchestrationMessage.ReloadClassesResult(
                     request.messageId, false, result.exception.message,
                     result.exception.withLinearClosure { throwable -> throwable.cause }

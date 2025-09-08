@@ -12,8 +12,8 @@ import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.DevTools
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.error
-import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
 import org.jetbrains.compose.reload.core.subprocessSystemProperties
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
@@ -40,7 +40,7 @@ internal fun startDevTools() {
 private fun tryStartDevToolsProcess(): DevToolsHandle? {
     if (!HotReloadEnvironment.devToolsEnabled) return null
     val classpath = HotReloadEnvironment.devToolsClasspath ?: return null
-    logger.info("Starting 'DevTools'")
+    logger.debug("Starting 'DevTools'")
 
     val process = ProcessBuilder(
         resolveDevtoolsJavaBinary(),

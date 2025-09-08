@@ -15,10 +15,10 @@ import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.dispatcher
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.getBlocking
-import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.invokeOnFinish
 import org.jetbrains.compose.reload.core.invokeOnStop
 import org.jetbrains.compose.reload.core.isActive
@@ -130,7 +130,7 @@ public fun OrchestrationServer.connectAllOrchestrationListeners() {
 
             try {
                 val task = launchTask {
-                    logger.info("Connecting to orchestration listener on port $port, suspend=$suspend")
+                    logger.debug("Connecting to orchestration listener on port $port, suspend=$suspend")
                     if (!connectClient(port)) {
                         logger.error("Failed to connect to orchestration listener on port $port")
                     }

@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.agent
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.info
@@ -22,8 +23,8 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
-import org.jetbrains.compose.reload.orchestration.connectBlocking
 import org.jetbrains.compose.reload.orchestration.connectAllOrchestrationListeners
+import org.jetbrains.compose.reload.orchestration.connectBlocking
 import org.jetbrains.compose.reload.orchestration.startBlocking
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
@@ -93,13 +94,13 @@ internal fun startOrchestration() {
 
     if (orchestration is OrchestrationClient) {
         orchestration.connectBlocking()
-        logger.info("Agent: 'Client' mode (connected to '${orchestration.port.getOrNull()}')")
+        logger.debug("Agent: 'Client' mode (connected to '${orchestration.port.getOrNull()}')")
     }
 
     if (orchestration is OrchestrationServer) {
         orchestration.startBlocking()
         orchestration.connectAllOrchestrationListeners()
-        logger.info("Agent: Server started on port '${orchestration.port.getOrNull()}'")
+        logger.debug("Agent: Server started on port '${orchestration.port.getOrNull()}'")
     }
 
     orchestration.startDispatchingLogs()

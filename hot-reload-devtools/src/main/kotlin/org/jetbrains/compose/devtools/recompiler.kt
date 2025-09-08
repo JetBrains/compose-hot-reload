@@ -11,7 +11,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import org.jetbrains.compose.devtools.api.RecompilerExtension
-import org.jetbrains.compose.devtools.api.ReloadState
 import org.jetbrains.compose.reload.core.Environment
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.Try
@@ -31,7 +30,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.Recompile
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileResult
 import org.jetbrains.compose.reload.orchestration.asChannel
 import java.util.ServiceLoader
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 private val logger = createLogger()
@@ -58,10 +56,10 @@ internal fun launchRecompiler(): Future<Unit> = launchTask("Recompiler", recompi
         return@task
     }
 
-    logger.info("Recompiler created: '${recompiler.name}'")
+    logger.debug("Recompiler created: '${recompiler.name}'")
     messages.consumeAsFlow().filterIsInstance<RecompileRequest>().conflateAsList()
         .collect recompile@{ pendingRequests ->
-            logger.info("Running Recompiler on '${pendingRequests.map { it.messageId }}'")
+            logger.info("Running '${recompiler.name}'...")
 
             /*
             Collect all accumulated pending requests

@@ -27,6 +27,7 @@ import org.jetbrains.compose.devtools.states.WindowsUIState
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsDetached
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
@@ -70,7 +71,7 @@ private fun DevToolsUI() {
         DtDetachedSidecarWindow()
     }
 
-    logger.info("Composing '${windowsState.windows.size}' windows")
+    logger.debug("Composing '${windowsState.windows.size}' windows")
     windowsState.windows.forEach { (windowId, windowState) ->
         key(windowId) {
             CompositionLocalProvider(targetApplicationWindowStateLocal provides windowState) {

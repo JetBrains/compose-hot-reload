@@ -13,11 +13,11 @@ import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.exception
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
-import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
@@ -35,7 +35,7 @@ import kotlin.time.Duration.Companion.seconds
 private val logger = createLogger()
 
 internal val orchestration: OrchestrationHandle = run {
-    logger.info("Connecting 'orchestration'")
+    logger.debug("Connecting 'orchestration'")
 
     /*
     Orchestration Server Precedence:
@@ -68,7 +68,7 @@ internal val orchestration: OrchestrationHandle = run {
         startOrchestrationServer()
     }
 
-    logger.info("Connected 'orchestration'")
+    logger.debug("Connected 'orchestration'")
 
     /* Ensure we connect all deferred clients */
     if (handle is OrchestrationServer) {

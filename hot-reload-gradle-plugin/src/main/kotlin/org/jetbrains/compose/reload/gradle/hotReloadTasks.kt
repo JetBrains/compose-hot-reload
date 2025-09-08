@@ -93,12 +93,12 @@ abstract class ComposeHotReloadTask : DefaultTask(), ComposeHotReloadOtherTask {
     fun execute() {
         OrchestrationClient(Compiler, agentPort.get()).use { client ->
             client.connectBlocking().leftOr {
-                logger.quiet("Failed to create 'OrchestrationClient'!")
+                logger.error("Failed to create 'OrchestrationClient'!")
                 getCancellationToken().cancel()
                 error("Failed to create 'OrchestrationClient'!")
             }
 
-            logger.quiet("Connected to '${client.port.getOrNull()}'")
+            logger.debug("Connected to '${client.port.getOrNull()}'")
 
             val pendingRequestFile = pendingRequestFile.get().asFile.toPath()
 
@@ -108,10 +108,10 @@ abstract class ComposeHotReloadTask : DefaultTask(), ComposeHotReloadOtherTask {
             }
 
             if (request.changedClassFiles.isEmpty()) {
-                logger.debug("UP-TO-DATE: No changed classes found")
+                logger.info("UP-TO-DATE: No changed classes found")
             }
 
-            logger.quiet(reloadReport(request))
+            logger.info(reloadReport(request))
             client.sendBlocking(request)
             pendingRequestFile.deleteIfExists()
         }

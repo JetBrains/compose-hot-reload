@@ -23,7 +23,6 @@ import org.jetbrains.compose.devtools.states.launchReloadUIState
 import org.jetbrains.compose.devtools.states.launchWindowsUIState
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
-import org.jetbrains.compose.reload.core.info
 
 internal val applicationScope = CoroutineScope(Dispatchers.Main + SupervisorJob() + Events() + States())
 
@@ -48,7 +47,7 @@ internal fun CoroutineScope.launchApplicationStates() {
 }
 
 fun main() {
-    logger.info("PID: '${ProcessHandle.current().pid()}'")
+    logger.debug("PID: '${ProcessHandle.current().pid()}'")
     logger.debug("Starting devtools process")
     setupDevToolsProcess()
 

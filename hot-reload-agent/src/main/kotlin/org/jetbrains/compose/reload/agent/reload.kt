@@ -12,7 +12,6 @@ import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.error
-import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.isClass
 import org.jetbrains.compose.reload.core.mapLeft
 import org.jetbrains.compose.reload.core.warn
@@ -40,11 +39,11 @@ internal fun Context.reload(
 
     val definitions = pendingChanges.mapNotNull { (file, change) ->
         if (change == ReloadClassesRequest.ChangeType.Removed) {
-            logger.info("Removed: $file")
+            logger.debug("Removed: $file")
             return@mapNotNull null
         }
 
-        logger.info("${change.name}:  $file")
+        logger.debug("${change.name}:  $file")
 
         if (!file.isClass()) {
             return@mapNotNull null
@@ -66,7 +65,7 @@ internal fun Context.reload(
 
         val loader = findClassLoader(classId).get()
         if (loader == null) {
-            logger.info("Class '$classId' is not loaded yet")
+            logger.debug("Class '$classId' is not loaded yet")
             return@mapNotNull null
         }
 
@@ -78,11 +77,11 @@ internal fun Context.reload(
             val clazz = getClassPool(loader).makeClass(code.inputStream())
 
             if (originalClass == null) {
-                logger.info("Class '${clazz.name}' was not loaded yet")
+                logger.debug("Class '${clazz.name}' was not loaded yet")
                 return@mapNotNull null
             }
 
-            logger.info(buildString {
+            logger.debug(buildString {
                 appendLine("Reloading class: '${clazz.name}' (${change.name})")
 
                 if (originalClass.superclass?.name != clazz.superclass.name) {

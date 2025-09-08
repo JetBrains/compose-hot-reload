@@ -8,10 +8,10 @@ package org.jetbrains.compose.reload.agent
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.PidFileInfo
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.deleteMyPidFileIfExists
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
-import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.runDirectoryLockFile
 import org.jetbrains.compose.reload.core.writePidFile
 import kotlin.io.path.createParentDirectories
@@ -28,7 +28,7 @@ internal fun createPidfile() {
 
     runDirectoryLockFile?.withLock {
         pidFile.createParentDirectories().writePidFile(myPidFileInfo)
-        logger.info("Created pid file: ${pidFile.toUri()}")
+        logger.debug("Created pid file: ${pidFile.toUri()}")
     }
 
     Runtime.getRuntime().addShutdownHook(Thread {

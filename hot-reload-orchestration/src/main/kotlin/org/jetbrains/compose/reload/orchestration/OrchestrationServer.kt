@@ -17,12 +17,12 @@ import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.dispatcherImmediate
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.exceptionOrNull
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
-import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.invokeOnFinish
 import org.jetbrains.compose.reload.core.invokeOnStop
 import org.jetbrains.compose.reload.core.isActive
@@ -110,7 +110,7 @@ public fun OrchestrationServer(): OrchestrationServer {
             val serverPort = port.awaitOrThrow()
 
             connectActor.process { port ->
-                logger.info("Connecting to client on port '$port'")
+                logger.debug("Connecting to client on port '$port'")
                 val reader = OrchestrationIO.newReaderThread()
                 val writer = OrchestrationIO.newWriterThread()
                 try {

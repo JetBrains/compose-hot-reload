@@ -15,12 +15,13 @@ import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.BuildTool
 import org.jetbrains.compose.reload.core.LaunchMode
+import org.jetbrains.compose.reload.core.Logger.Level
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.destroyWithDescendants
 import org.jetbrains.compose.reload.core.error
-import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.runDirectoryLockFile
 import org.jetbrains.compose.reload.core.subprocessSystemProperties
 import org.jetbrains.compose.reload.core.toFuture
@@ -113,7 +114,7 @@ internal class GradleRecompiler(
         /* Start the process and wire up the disposal */
         val process = processBuilder.start()
         context.invokeOnDispose { process.toHandle().destroyGradleProcess() }
-        context.logger.info("'Recompiler': Started (${process.pid()})")
+        context.logger.debug("'Recompiler': Started (${process.pid()})")
 
         /* Write the pid file with the new process id */
         runDirectoryLockFile?.withLock {
@@ -125,7 +126,14 @@ internal class GradleRecompiler(
         /* Read the output of the new process and forward it as log messages */
         withContext(Dispatchers.IO) {
             process.inputStream.bufferedReader().forEachLine { line ->
-                context.logger.info(line)
+                val level = when {
+                    line.startsWith("e: ") -> Level.Error
+                    line.startsWith("warning: ") -> Level.Warn
+                    line.startsWith("w: ") -> Level.Warn
+                    line.startsWith(">") -> Level.Debug
+                    else -> Level.Info
+                }
+                context.logger.log(level, line)
             }
         }
 

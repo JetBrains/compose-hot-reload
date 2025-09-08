@@ -10,8 +10,8 @@ import org.jetbrains.compose.reload.core.Logger
 import org.jetbrains.compose.reload.core.Queue
 import org.jetbrains.compose.reload.core.WorkerThread
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.displayString
-import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.invokeOnFinish
 import org.jetbrains.compose.reload.core.invokeOnStop
 import org.jetbrains.compose.reload.core.launchOnFinish
@@ -85,9 +85,9 @@ internal fun OrchestrationHandle.startDispatchingLogs() {
 
 internal fun startWritingLogs() = launchTask task@{
     /* Create 'Hello' statements */
-    logger.info("Compose Hot Reload: Run at ${LocalDateTime.now()}")
-    logger.info("Compose Hot Reload: PID: ${ProcessHandle.current().pid()}")
-    logger.info("Compose Hot Reload: Orchestration port: ${orchestration.port.await()}")
+    logger.debug("Compose Hot Reload: Run at ${LocalDateTime.now()}")
+    logger.debug("Compose Hot Reload: PID: ${ProcessHandle.current().pid()}")
+    logger.debug("Compose Hot Reload: Orchestration port: ${orchestration.port.await()}")
 
     HotReloadEnvironment::class.java.declaredMethods
         .filter { it.name.startsWith("get") }
@@ -95,7 +95,7 @@ internal fun startWritingLogs() = launchTask task@{
         .forEach { method ->
             val key = "${HotReloadEnvironment::class.java.simpleName}.${method.name}"
             val value = method.invoke(HotReloadEnvironment)
-            logger.info("$key = $value")
+            logger.debug("$key = $value")
         }
 
     withThread(loggerThread) {

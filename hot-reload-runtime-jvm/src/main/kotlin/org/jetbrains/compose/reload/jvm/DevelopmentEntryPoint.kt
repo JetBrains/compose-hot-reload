@@ -26,8 +26,8 @@ import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.sendAsync
 import org.jetbrains.compose.reload.agent.sendBlocking
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.error
-import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.CleanCompositionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RetryFailedCompositionRequest
@@ -73,7 +73,7 @@ public fun DevelopmentEntryPoint(
     val currentHotReloadState by hotReloadState.collectAsState()
 
     val intercepted: @Composable () -> Unit = {
-        logger.info("Composing UI: $currentHotReloadState")
+        logger.debug("Composing UI: $currentHotReloadState")
         runCatching { child() }.onFailure { exception ->
             logger.error("Failed invoking 'JvmDevelopmentEntryPoint':", exception)
             hotReloadState.update { state -> state.copy(uiError = exception) }

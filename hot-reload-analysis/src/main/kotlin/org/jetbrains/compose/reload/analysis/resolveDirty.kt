@@ -10,7 +10,6 @@ import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.info
-import org.jetbrains.compose.reload.core.simpleName
 import org.jetbrains.compose.reload.core.withClosure
 import kotlin.time.measureTimedValue
 
@@ -32,7 +31,14 @@ fun Context.resolveDirtyScopes(current: ApplicationInfo, redefined: ApplicationI
         )
     }
 
-    logger.info("${simpleName<ResolvedDirtyScopes>()} resolved in [${duration}]")
+    logger.info("Resolved 'dirty' @Composable scopes within $duration")
+    redefinition.dirtyMethodIds.entries.sortedBy { it.key.methodDescriptor }.forEach { (methodId, scopes) ->
+        logger.info("    - ${methodId.classId.toFqn()}.${methodId.methodName} (${scopes.size})")
+    }
+    if (redefinition.dirtyScopes.isEmpty()) {
+        logger.info("  ~ No @Composable is dirty")
+    }
+
     return redefinition
 }
 
