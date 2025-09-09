@@ -53,11 +53,59 @@ First, set up your environment with IntelliJ IDEA or Android Studio:
 4. If you want to create iOS applications, you need a macOS host with [Xcode](https://apps.apple.com/us/app/xcode/id497799835) installed. Your IDE runs Xcode under the hood to build the necessary iOS frameworks.
   Make sure to launch Xcode before starting to work with your project so that it completes the initial set up.
 
-#### Create a project in IntelliJ IDEA
+#### On macOS
 
-#### Create a project in Android Studio
+1. In IntelliJ IDEA, select **File** | **New** | **Project**.
+2. In the panel on the left, select **Kotlin Multiplatform**.
+3. Specify the **Name**, **Group**, and **Artifact** fields in the **New Project** window.
+4. Select the **Desktop** target and click **Create**.
+    <img alt="Create multiplatform project with desktop target" src="./readme-assets/create-desktop-project.png" width="500">
+
+#### On Windows or Linux
+
+1. Generate a project using the [web KMP wizard](https://kmp.jetbrains.com/). Make sure to select the desktop target.
+2. Extract the archive and open the resulting folder in your IDE.
 
 ### Apply the Gradle plugin to your project
+
+1. In your project, update the version catalog. In `gradle/libs.versions.toml`, add the following code:
+
+   ```
+   composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "composeHotReload"}
+   ```
+
+   > To learn more about how to use a version catalog to centrally manage dependencies across your project, see our [Gradle best practices](https://kotlinlang.org/gradle-best-practices.html).
+
+2. In the `build.gradle.kts` of your parent project, add the following code to your `plugins {}` block:
+
+   ```
+   plugins {
+       alias(libs.plugins.composeHotReload) apply false
+   }
+   ```
+   
+   This prevents the Compose Hot Reload plugin from being loaded multiple times in each of your subprojects.
+
+3. In the `build.gradle.kts` of the subproject containing your multiplatform application, add the following code to your `plugins {}` block:
+
+   ```
+   plugins { 
+       alias(libs.plugins.composeHotReload)
+   }
+   ```
+
+4. In your `settings.gradle.kts` file, add a plugin that's required for the Compose Hot Reload plugin:
+
+   ```
+   plugins {
+       id("org.gradle.toolchains.foojay-resolver-convention") version "%foojayResolverConventionVersion%"
+   }
+   ```
+
+5. Click the **Sync Gradle Changes** button to synchronize Gradle files:
+
+    <img alt="Synchronize Gradle files" src="./readme-assets/gradle-sync.png" width="50">
+
 
 Add the `org.jetbrains.compose.hot-reload` Gradle plugin to your build script:
 
