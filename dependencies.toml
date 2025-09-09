@@ -1,6 +1,7 @@
 [versions]
 kotlin = "2.2.0"
 compose = "1.9.0-rc01"
+composeMin = { prefer = "1.8.2" }
 coroutines = "1.10.2"
 kotlinxDatetime = "0.7.1"
 kotlinxBenchmark = "0.4.13"
@@ -39,6 +40,11 @@ evas-compose = { module = "io.sellmair:evas-compose", version.ref = "evas" }
 compose-gradlePlugin = { module = "org.jetbrains.compose:org.jetbrains.compose.gradle.plugin", version.ref = "compose" }
 compose-compiler-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version = "1.7.3" }
+
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMin" }
+compose-desktop-common = { module = "org.jetbrains.compose.desktop:desktop", version.ref = "composeMin" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "composeMin" }
+compose-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMin" }
 
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }

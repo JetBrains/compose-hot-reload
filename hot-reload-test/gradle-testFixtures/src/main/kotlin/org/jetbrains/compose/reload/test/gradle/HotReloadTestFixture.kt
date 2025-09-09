@@ -38,6 +38,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.asFlow
 import org.jetbrains.compose.reload.orchestration.sendAsync
+import org.jetbrains.compose.reload.test.core.AppClasspath
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.coroutines.CoroutineContext
@@ -63,6 +64,9 @@ internal constructor(
     public val buildMode: BuildMode,
     @PublishedApi
     internal val isDebug: Boolean,
+    internal val kotlinVersion: TestedKotlinVersion,
+    internal val composeVersion: TestedComposeVersion,
+    internal val gradleVersion: TestedGradleVersion
 ) : AutoCloseable {
 
     private val logger = createLogger("Test Fixture", dispatch = listOf(orchestration.startLoggerDispatch()))
@@ -145,6 +149,17 @@ internal constructor(
                         logger.error("CriticalException: '${disconnected.message}'", exception)
                         testScope.cancel(exception)
                     }
+            }
+
+            /*
+            Check Application classpath for suspicious content (such as compose dependencies not matching
+            the expected version from the test fixture
+             */
+            daemonTestScope.launch {
+                orchestration.asFlow().filterIsInstance<OrchestrationMessage.TestEvent>().collect { event ->
+                    val classpath = event.payload as? AppClasspath ?: return@collect
+                    checkClasspath(classpath, composeVersion)
+                }
             }
 
             /* Forward all build outputs */

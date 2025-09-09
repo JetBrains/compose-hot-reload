@@ -12,6 +12,7 @@ import org.jetbrains.compose.reload.core.testFixtures.regexEscaped
 import org.jetbrains.compose.reload.core.testFixtures.repositoryRoot
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
+import org.jetbrains.compose.reload.test.core.AppClasspath
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
@@ -173,14 +174,12 @@ private suspend fun HotReloadTestFixture.resolveRuntimeClasspath(projectPath: St
                     import org.jetbrains.compose.reload.test.*
                     
                     fun main() = screenshotTestApplication {
-                        val classpath = System.getProperty("java.class.path")
-                        sendTestEvent(classpath)
                     }
                     """.trimIndent()
             )
         try {
             this@resolveRuntimeClasspath.launchApplication(":$projectPath")
-            (skipToMessage<TestEvent>().payload as String).split(File.pathSeparator).map(::File)
+            (skipToMessage<TestEvent>().payload as AppClasspath).files.map(::File)
         } finally {
             OrchestrationMessage.ShutdownRequest("Explicitly requested by the test").send()
         }
@@ -211,4 +210,5 @@ private val hotReloadRuntimeDependencies = arrayOf(
 
 private val testRuntimeDependencies = arrayOf(
     PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-test-${HOT_RELOAD_VERSION.regexEscaped}.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-test-core-${HOT_RELOAD_VERSION.regexEscaped}.jar"),
 )

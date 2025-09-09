@@ -58,7 +58,7 @@ kotlin {
 
     sourceSets.commonMain.dependencies {
         api(project(":hot-reload-annotations"))
-        implementation(compose.runtime)
+        implementation(deps.compose.runtime)
         implementation(deps.coroutines.core)
     }
 

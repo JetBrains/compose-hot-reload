@@ -46,8 +46,8 @@
     </dependency>
     <dependency>
       <groupId>org.jetbrains.compose.runtime</groupId>
-      <artifactId>runtime-linuxx64</artifactId>
-      <version>1.9.0-rc01</version>
+      <artifactId>runtime</artifactId>
+      <version>1.8.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

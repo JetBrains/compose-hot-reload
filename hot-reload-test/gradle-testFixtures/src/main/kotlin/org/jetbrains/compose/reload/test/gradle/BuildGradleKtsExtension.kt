@@ -50,6 +50,7 @@ public fun renderBuildGradleKts(context: ExtensionContext): String {
             javaExecConfigureKey(extension.javaExecConfigure(context))
             compilerOptionsKey(extension.compilerOptions(context))
             composeCompilerKey(extension.composeCompiler(context))
+            footerKey(extension.footer(context))
             with(extension) { buildTemplate(context) }
         }
     }
@@ -117,6 +118,7 @@ private val kmpBuildGradleKtsTemplate = Template(
     {{/if}}
     
     {{$footerKey}}
+
     """.trimIndent()
 ).getOrThrow()
 
@@ -153,6 +155,7 @@ private val jvmBuildGradleKtsTemplate = Template(
     }
     
     {{$footerKey}}
+
     """.trimIndent()
 ).getOrThrow()
 
@@ -202,5 +205,42 @@ internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
 
     override fun compilerOptions(context: ExtensionContext): String? {
         return """freeCompilerArgs.add("-Xindy-allow-annotated-lambdas=${context.compilerOptions.getValue(CompilerOption.IndyAllowAnnotatedLambdas)}")"""
+    }
+
+    override fun footer(context: ExtensionContext): String? {
+        if (context.projectMode == ProjectMode.Jvm) return """
+            dependencies {
+                configurations.compileClasspath.get().resolutionStrategy { 
+                    force(compose.foundation)
+                    force(compose.material3)
+                    force(compose.desktop.currentOs)
+                }
+                
+                configurations.runtimeClasspath.get().resolutionStrategy {
+                    force(compose.foundation)
+                    force(compose.material3)
+                    force(compose.desktop.currentOs)
+                }
+            }
+        """.trimIndent()
+
+        if (context.projectMode == ProjectMode.Kmp) return """
+            dependencies {
+                configurations.getByName("jvmCompileClasspath").resolutionStrategy { 
+                    force(compose.foundation)
+                    force(compose.material3)
+                    force(compose.desktop.currentOs)
+                }
+                
+                configurations.getByName("jvmRuntimeClasspath").resolutionStrategy {
+                    force(compose.foundation)
+                    force(compose.material3)
+                    force(compose.desktop.currentOs)
+                }
+            }
+        """.trimIndent()
+
+        return null
+
     }
 }

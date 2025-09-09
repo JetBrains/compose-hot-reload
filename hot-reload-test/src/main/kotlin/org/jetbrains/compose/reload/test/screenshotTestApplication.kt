@@ -13,6 +13,8 @@ import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.jvm.runHeadlessApplicationBlocking
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
+import org.jetbrains.compose.reload.test.core.AppClasspath
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
@@ -44,6 +46,8 @@ public fun screenshotTestApplication(
             logger.info("Sent critical exception")
         }
     }
+
+    TestEvent(AppClasspath.current).sendAsync()
 
     runHeadlessApplicationBlocking(
         timeout.minutes, silenceTimeout = 30.seconds, width = width, height = height, content = {

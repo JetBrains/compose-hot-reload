@@ -58,7 +58,7 @@
     </dependency>
     <dependency>
       <groupId>org.jetbrains.compose.material3</groupId>
-      <artifactId>material3-desktop</artifactId>
+      <artifactId>material3</artifactId>
       <version>1.8.2</version>
       <scope>compile</scope>
     </dependency>
@@ -111,6 +111,12 @@
     </dependency>
     <dependency>
       <groupId>org.jetbrains.compose.hot-reload</groupId>
+      <artifactId>hot-reload-test-core</artifactId>
+      <version>{{Hot Reload Version}}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.compose.hot-reload</groupId>
       <artifactId>hot-reload-analysis</artifactId>
       <version>{{Hot Reload Version}}</version>
       <scope>runtime</scope>
@@ -128,8 +134,8 @@
     </dependency>
     <dependency>
       <groupId>org.jetbrains.compose.components</groupId>
-      <artifactId>components-resources-desktop</artifactId>
-      <version>1.9.0-rc01</version>
+      <artifactId>components-resources</artifactId>
+      <version>1.8.2</version>
       <scope>runtime</scope>
     </dependency>
   </dependencies>

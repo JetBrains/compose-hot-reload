@@ -105,6 +105,9 @@ internal class HotReloadTestFixtureExtension(
             launchMode = context.launchMode,
             buildMode = context.buildMode,
             isDebug = debugAnnotation,
+            kotlinVersion = context.kotlinVersion,
+            composeVersion = context.composeVersion,
+            gradleVersion = context.gradleVersion,
         )
     }
 }

@@ -37,7 +37,7 @@
           "group": "org.jetbrains.compose.material3",
           "module": "material3",
           "version": {
-            "requires": "1.8.2"
+            "prefers": "1.8.2"
           }
         }
       ],
@@ -124,6 +124,13 @@
         },
         {
           "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-test-core",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
           "module": "hot-reload-analysis",
           "version": {
             "requires": "{{Hot Reload Version}}"
@@ -144,7 +151,7 @@
           "group": "org.jetbrains.compose.components",
           "module": "components-resources",
           "version": {
-            "requires": "1.9.0-rc01"
+            "prefers": "1.8.2"
           }
         },
         {
@@ -158,7 +165,7 @@
           "group": "org.jetbrains.compose.material3",
           "module": "material3",
           "version": {
-            "requires": "1.8.2"
+            "prefers": "1.8.2"
           }
         }
       ],

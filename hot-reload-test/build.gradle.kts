@@ -4,6 +4,7 @@
  */
 import org.jetbrains.compose.reload.gradle.HotReloadUsage
 import org.jetbrains.compose.reload.gradle.HotReloadUsageType
+import org.jetbrains.compose.resources.ResourcesExtension.ResourceClassGeneration
 
 plugins {
     kotlin("jvm")
@@ -30,11 +31,17 @@ dependencies {
     implementation(deps.asm.tree)
     implementation(deps.asm)
     implementation(project(":hot-reload-core"))
+    implementation(project(":hot-reload-test:core"))
     implementation(project(":hot-reload-analysis"))
     implementation(kotlin("compiler-embeddable"))
     implementation(project(":hot-reload-orchestration"))
-    api(compose.material3)
-    implementation(compose.components.resources)
+
+    api(deps.compose.material3)
+    implementation(deps.compose.resources)
+}
+
+compose.resources {
+    generateResClass = ResourceClassGeneration.Always
 }
 
 configurations.compileClasspath {

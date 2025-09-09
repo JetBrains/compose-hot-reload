@@ -32,8 +32,12 @@ configurations.runtimeElements.configure {
 }
 
 dependencies {
-    compileOnly(compose.runtime)
-    compileOnly(compose.desktop.common)
+
+    compileOnly(deps.compose.desktop.common) {
+        version {
+            strictly(deps.versions.composeMin.get())
+        }
+    }
 
     implementation(project(":hot-reload-devtools-api"))
 

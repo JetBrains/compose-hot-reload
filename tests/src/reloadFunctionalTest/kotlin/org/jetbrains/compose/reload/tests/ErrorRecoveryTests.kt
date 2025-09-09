@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.tests
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
+import org.jetbrains.compose.reload.test.gradle.MinComposeVersion
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceText
@@ -50,6 +51,7 @@ class ErrorRecoveryTests {
 
     @HotReloadTest
     @QuickTest
+    @MinComposeVersion("1.9.0-rc01")
     fun `good - bad - good - good`(fixture: HotReloadTestFixture) = fixture.runTest {
         val code = fixture.initialSourceCode(
             """
