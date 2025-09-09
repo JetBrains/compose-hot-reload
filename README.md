@@ -7,37 +7,38 @@
 [![docs](https://img.shields.io/badge/documentation-blue)](https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-hot-reload.html)
 [![Slack channel](https://img.shields.io/badge/chat-slack-green.svg?logo=slack)](https://kotlinlang.slack.com/messages/compose-desktop/)
 
-Iterate on your Compose UIs faster and let your creativity flow when building multiplatform UIs.
+Build Compose UIs faster and let your creativity flow when designing multiplatform user interfaces.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./readme-assets/banner_dark.png">
   <img alt="Text changing depending on mode. Light: 'So light!' Dark: 'So dark!'" src="./readme-assets/banner_light.png">
 </picture>
 
-Compose Hot Reload lets you make UI code changes in a Compose Multiplatform app and see the results instantly, no restarts needed.
-Use JetBrains Runtime to intelligently reload your code whenever it changes.
+With Compose Hot Reload, you can make UI code changes in a Compose Multiplatform app and see the results instantly, without needing to restart.
+The JetBrains Runtime intelligently reloads your code whenever it changes.
 
 > [!IMPORTANT]  
 > Compose Hot Reload only works if you have a desktop target in your multiplatform project. We're exploring adding support for 
 > other targets in the future.
 
 ## Prerequisites
+
 - Kotlin 2.1.20 or higher.
 - Compose compiler 2.1.20 or higher.
-- JetBrains runtime.
+- JetBrains Runtime.
 
 ## Set up your project
 
 There are two ways to add Compose Hot Reload to your project:
 
-* Create a project from scratch in IntelliJ IDEA or Android Studio
-* Add it as a Gradle plugin to an existing project
+* [Create a project from scratch in IntelliJ IDEA or Android Studio](#create-a-project-from-scratch)
+* [Add it as a Gradle plugin to an existing project](#apply-the-gradle-plugin-to-your-project)
 
 ### Create a project from scratch
 
 First, set up your environment with IntelliJ IDEA or Android Studio:
 
-1. Install **IntelliJ IDEA 2025.1.1.1** or **Android Studio Narwhal 2025.1.1 RC 1**.
+1. Install **IntelliJ IDEA 2025.1.1.1** or **Android Studio Narwhal 2025.1.1**.
 2. If you have:
    * MacOS, install the [Kotlin Multiplatform IDE plugin](https://plugins.jetbrains.com/plugin/14936-kotlin-multiplatform.).
    * Windows or Linux, install the following plugins:
@@ -51,7 +52,7 @@ First, set up your environment with IntelliJ IDEA or Android Studio:
     export ANDROID_HOME=~/Library/Android/sdk
     ```
 4. If you want to create iOS applications, you need a macOS host with [Xcode](https://apps.apple.com/us/app/xcode/id497799835) installed. Your IDE runs Xcode under the hood to build the necessary iOS frameworks.
-  Make sure to launch Xcode before starting to work with your project so that it completes the initial set up.
+  Make sure to launch Xcode before starting to work with your project so that it completes the initial setup.
 
 #### On macOS
 
@@ -73,8 +74,6 @@ First, set up your environment with IntelliJ IDEA or Android Studio:
    ```
    composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "composeHotReload"}
    ```
-
-   > To learn more about how to use a version catalog to centrally manage dependencies across your project, see our [Gradle best practices](https://kotlinlang.org/gradle-best-practices.html).
 
 2. In the `build.gradle.kts` of your parent project, add the following code to your `plugins {}` block:
 
@@ -106,83 +105,69 @@ First, set up your environment with IntelliJ IDEA or Android Studio:
 
     <img alt="Synchronize Gradle files" src="./readme-assets/gradle-sync.png" width="50">
 
+## Use Compose Hot Reload
 
-Add the `org.jetbrains.compose.hot-reload` Gradle plugin to your build script:
+You can run your application with Compose Hot Reload from inside your IDE or from the CLI by using Gradle tasks.
 
-```kotlin
-plugins {
-    kotlin("multiplatform") version "2.1.20" // <- Use Kotlin 2.1.20 or higher!
-    kotlin("plugin.compose") version "2.1.20" // <- Use Compose Compiler Plugin 2.1.20 or higher!
-    id("org.jetbrains.compose")
-    id("org.jetbrains.compose.hot-reload") version "1.0.0-beta06" // <- add this additionally
-}
+### From the IDE
+
+In IntelliJ IDEA or Android Studio, in the gutter, click the **Run** icon of your main function. Select **Run 'composeApp [hotRunJvm]' with Compose Hot Reload (Beta)**.
+
+<img alt="Run Compose Hot Reload from gutter" src="./readme-assets/compose-hot-reload-gutter-run.png" width="400">
+
+### From the CLI
+
+#### Run tasks
+
+The Compose Hot Reload plugin automatically creates the following tasks to launch the application in 'hot reload mode':
+
+- `:hotRunJvm`: For multiplatform projects. The async alternative is `:hotRunJvmAsync`.
+- `:hotRun`: For Kotlin/JVM projects. The async alternative `:hotRunAsync`.
+
+You can run these Gradle tasks from the command line:
+
+```shell
+./gradlew :app:hotRunDesktop
 ```
 
-## Run the application
-### Multiplatform + IntelliJ
-Using Kotlin Multiplatform and IntelliJ, launching your app is as simple as pressing 'run' on your main function:
-<img alt="IntelliJ Run Gutter" src="./readme-assets/run-gutter.png">
+After making changes, save all files to automatically update your app's UI.
 
-### Gradle Tasks
-#### Run Tasks
+##### Custom target name
 
-The plugin will create the following tasks to launch the application in 'hot reload mode':
-- `:hotRunJvm`: Multiplatform, async alternative (`hotRunJvmAsync`)
-- `:hotRun`: Kotlin/JVM, async alternative (`hotRunAsync`)
-- 
-____
-**⚠️Note:**
+If you define a custom JVM target name, Gradle uses a different task name. For example, if your target name is `desktop`:
 
-Task names require adjustments if a custom target name is used. 
-e.g. 
 ```kotlin
 kotlin {
-    jvm("desktop") 
-         // ^
-         // custom target name
+    jvm("desktop")
 }
 ```
 
-Will lead to a task name of `hotRunDesktop` which can be invoked
-```
-./gradlew :app:hotRunDesktop --mainClass {{MainClass}}
-```
-____
+The task name is `:hotRunDesktop`.
 
-**Arguments**
+##### Command-line arguments
 
-- `--mainClass <Main Class FQN>`:<br>
-The main class to run.<br> 
-_Example: `--mainClass com.example.MainKt`_
+Here's a list of all the possible arguments that you can use with the Gradle run tasks:
 
+| Argument                           | Description                                   | Example                                                                         |
+|------------------------------------|-----------------------------------------------|---------------------------------------------------------------------------------|
+| `--mainClass <Main class FQN>`     | The main class to run.                        | `./gradlew :app:hotRunJvm --mainClass com.example.MainKt`                       |
+| `--autoReload` <br> `--auto`       | Enable automatic reloading. Default: `false`. | `./gradlew :app:hotRunJvm --autoReload` <br> `./gradlew :app:hotRunJvm --auto`  |
+| `--no-autoReload` <br> `--no-auto` | Disable automatic reloading.                  | `./gradlew :myApp:hotRunJvm --no-auto` <br> `./gradlew :myApp:hotRunJvm --auto` |
 
-- `--autoReload` or `--auto`:<br>
-Enable automatic reloading. Default: `false`.<br> 
-_Example: `--autoReload`_<br>
-_Example: `--auto`_
+##### Configure the main class
 
+You can configure the main class directly in your build script instead of passing it as a command-line argument.
 
-- `--no-autoReload` or `--no-auto`:
-Disable automatic reloading.<br>
-  _Example: `./gradlew :myApp:hotRunJvm --no-auto`_<br>
+You can configure it in the Compose Hot Reload task:
 
-**Reload Task**
-
-If the application was launched from CLI without the `--auto` option, 
-then 'recompile + reloads' can be executed using the following task:
-- `reload`: Generic task to reload all, currently running, applications.
-- `hotReloadJvmMain`: Reload all applications that use the `jvmMain` source set.
-
-The tasks 'mainClass' can be configured in the buildscript
-
-**Using Compose Hot Reload:** 
 ```kotlin
 tasks.withType<ComposeHotRun>().configureEach {
     mainClass.set("com.example.MainKt")
 }
 ```
 
-**Using Compose** 
+Or if you use Compose Multiplatform, in the `application {}` block:
+
 ```kotlin
 compose.desktop {
     application {
@@ -191,14 +176,26 @@ compose.desktop {
 }
 ```
 
-or provided when invoking the task
+#### Reload tasks
+
+> [!WARNING]  
+> You can't run reload tasks with the `--autoReload` or `--auto` command-line argument.
+
+The Compose Hot Reload plugin also provides Gradle tasks to recompile **and** reload your application:
+
+- `reload`: Reload all, currently running, applications.
+- `hotReloadJvmMain`: Reload all applications that use the `jvmMain` source set.
+
+For example:
+
 ```shell
-./gradlew hotRunJvm --mainClass com.example.MainKt
+./gradlew :app:reload
 ```
 
-### Optimization: Enable 'OptimizeNonSkippingGroups' (Optional):
-Note: This optimization is not required, but will lead to a better user experience.
-It is expected that the feature will be enabled by default in future versions of the compiler.
+## Compose Multiplatform optimization
+
+If you're using Compose Multiplatform, you can configure the [`OptimizeNonSkippingGroups`](https://kotlinlang.org/api/kotlin-gradle-plugin/compose-compiler-gradle-plugin/org.jetbrains.kotlin.compose.compiler.gradle/-compose-feature-flag/-companion/-optimize-non-skipping-groups.html) feature flag to remove groups around non-skipping composable functions.
+Enabling this feature flag can improve your app's runtime performance.
 
 Add the following to your `build.gradle.kts`:
 
@@ -212,39 +209,9 @@ composeCompiler {
 }
 ```
 
-## Set up automatic provisioning of the JetBrains Runtime (JBR) via Gradle
+## Use developer builds
 
-> [!IMPORTANT]  
-> To use the full functionality of Compose Hot Reload, your project **must** run on the JetBrains Runtime (JBR, an OpenJDK fork that supports enhanced class redefinition).
-
-Gradle can perform the download and setup for the JBR automatically for you via [Gradle Toolchains](https://github.com/gradle/foojay-toolchains).
-
-Add the following to your `settings.gradle.kts`:
-```kotlin
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-}
-```
-The Compose Hot Reload Gradle plugin will then use this resolver to automatically provision a compatible JDK.
-
-
-## FAQ
-
-### I am developing an Android application and am not using Kotlin Multiplatform. Can I use Compose Hot Reload?
-
-Compose Hot Reload is designed to work with Compose Multiplatform. If you'd like to use Compose Hot Reload with an Android-only project, you need to:
-
-- Switch from the Jetpack Compose plugin to the Compose Multiplatform plugin.
-- Add a separate Gradle module and configure the `desktop` target according to the instructions above.
-
-### My project is a desktop-only app with Compose Multiplatform. Can I use Compose Hot Reload?
-
-Yes! However, please note that you can't start the application via the run button in the gutter ([CMP-3123](https://youtrack.jetbrains.com/issue/CMP-3123)). Instead, use the custom Gradle task as described above.
-
-
-## Using 'dev' builds
-The project publishes dev builds. To obtain the 'dev' Compose Hot Reload artifacts, first add the `firework` Maven repository:
-In your projects' `settings.gradle.kts`, add the following:
+If you want to try the latest changes in Compose Hot Reload, you can use `dev` builds. To use the latest 'dev' builds of Compose Hot Reload, add the `firework` Maven repository in your `settings.gradle.kts` file:
 
 ```kotlin
 pluginManagement {
@@ -258,5 +225,17 @@ dependencyResolutionManagement {
         maven("https://packages.jetbrains.team/maven/p/firework/dev")
     }
 }
-
 ```
+
+## FAQ
+
+### I'm developing an Android-only app without Kotlin Mutliplatform. Can I use Compose Hot Reload?
+
+Compose Hot Reload is designed to work with Compose Multiplatform. To use Compose Hot Reload with an Android-only project, you need to:
+
+- Switch from the Jetpack Compose plugin to the Compose Multiplatform plugin.
+- Add a separate Gradle module and configure the `desktop` target according to [the instructions](#apply-the-gradle-plugin-to-your-project).
+
+### My project is a desktop-only app with Compose Multiplatform. Can I use Compose Hot Reload?
+
+Yes! However, be aware that you can't start the application via the run button in the gutter ([CMP-3123](https://youtrack.jetbrains.com/issue/CMP-3123)). Instead, use [Gradle tasks](#from-the-cli).
