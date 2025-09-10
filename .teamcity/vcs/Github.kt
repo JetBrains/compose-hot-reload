@@ -12,7 +12,10 @@ object Github : GitVcsRoot({
     name = "Compose Hot Reload"
     url = "git@github.com:JetBrains/compose-hot-reload"
     branch = "refs/heads/master"
-    branchSpec = "refs/heads/*"
+    branchSpec = """
+        +:refs/heads/*
+        +:refs/pull/*/head
+    """.trimIndent()
     authMethod = uploadedKey {
         uploadedKey = "compose-hot-reload-deploy-id_rsa"
     }
@@ -24,7 +27,10 @@ object GithubTeamcityBranch : GitVcsRoot({
     name = "Compose Hot Reload (Teamcity)"
     url = "git@github.com:JetBrains/compose-hot-reload"
     branch = "refs/heads/teamcity"
-    branchSpec = "refs/heads/*"
+    branchSpec = """
+        +:refs/heads/*
+        +:refs/pull/*/head
+    """.trimIndent()
     authMethod = uploadedKey {
         uploadedKey = "compose-hot-reload-deploy-id_rsa"
     }
