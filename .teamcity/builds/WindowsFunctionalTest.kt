@@ -9,6 +9,7 @@ import builds.conventions.BuildCacheConvention
 import builds.conventions.CommitStatusPublisher
 import builds.conventions.HardwareCapacity
 import builds.conventions.HostRequirement
+import builds.conventions.PublishLocallyConvention
 import builds.conventions.requiredHost
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.buildFeatures.buildCache
@@ -57,20 +58,13 @@ class WindowsFunctionalTest(
 
     steps {
         gradle {
-            name = "Bootstrap"
-            tasks = "publishBootstrap -i"
-            conditions {
-                matches("bootstrap", "true")
-            }
-        }
-
-        gradle {
             name = "Test"
-            tasks = "reloadFunctionalTest -i --continue " +
+            tasks = "reloadFunctionalTest -i --continue -x publishLocally " +
                 "-Pchr.tests.sequential -Phost-integration-tests=true"
         }
     }
-}), CommitStatusPublisher,
+}), PublishLocallyConvention,
+    CommitStatusPublisher,
     HostRequirement.Windows,
     HardwareCapacity.Large,
     BuildCacheConvention.Consumer
