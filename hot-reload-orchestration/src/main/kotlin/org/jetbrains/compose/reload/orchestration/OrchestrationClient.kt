@@ -159,13 +159,19 @@ internal fun OrchestrationClient(
         /* Launch sequential writer coroutine */
         subtask("Writer") {
             sendActor.process { message ->
-                /* Get dispatch and write it as package */
+                /* Get dispatch and write it as a package */
                 io.writePackage(message)
 
                 /* Await the ack from the server */
                 val ack = ackQueue.receive()
 
-                check(ack.messageId == message.messageId) {
+                /**
+                 * If the ack contains a message id then it should match the message id of the sent message.
+                 * If a given ack does not contain a message id, then the server was not able to decode
+                 * the message: This is called 'opaque message'. The server still distributes the message
+                 * to all clients
+                 */
+                check(ack.messageId == null || ack.messageId == message.messageId) {
                     "Unexpected ack '${ack.messageId}'"
                 }
             }
