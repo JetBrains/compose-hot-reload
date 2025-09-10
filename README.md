@@ -18,7 +18,7 @@ With Compose Hot Reload, you can make UI code changes in a Compose Multiplatform
 The JetBrains Runtime intelligently reloads your code whenever it changes.
 
 > [!IMPORTANT]  
-> Compose Hot Reload only works if you have a desktop target in your multiplatform project. We're exploring adding support for 
+> Compose Hot Reload needs a JVM target in your multiplatform project. We're exploring adding support for 
 > other targets in the future.
 
 ## Prerequisites
@@ -111,6 +111,9 @@ You can run your application with Compose Hot Reload from inside your IDE or fro
 
 ### From the IDE
 
+> [!IMPORTANT]  
+> Currently, only MacOS is supported for running Compose Hot Reload from the gutter in your IDE. We're working on adding support for Windows and Linux.
+
 In IntelliJ IDEA or Android Studio, in the gutter, click the **Run** icon of your main function. Select **Run 'composeApp [hotRunJvm]' with Compose Hot Reload (Beta)**.
 
 <img alt="Run Compose Hot Reload from gutter" src="./readme-assets/compose-hot-reload-gutter-run.png" width="400">
@@ -127,7 +130,7 @@ The Compose Hot Reload plugin automatically creates the following tasks to launc
 You can run these Gradle tasks from the command line:
 
 ```shell
-./gradlew :app:hotRunDesktop
+./gradlew :app:hotRunJvm
 ```
 
 After making changes, save all files to automatically update your app's UI.
@@ -234,7 +237,7 @@ dependencyResolutionManagement {
 Compose Hot Reload is designed to work with Compose Multiplatform. To use Compose Hot Reload with an Android-only project, you need to:
 
 - Switch from the Jetpack Compose plugin to the Compose Multiplatform plugin.
-- Add a separate Gradle module and configure the `desktop` target according to [the instructions](#apply-the-gradle-plugin-to-your-project).
+- Add a separate Gradle module and configure the JVM target according to [the instructions](#apply-the-gradle-plugin-to-your-project).
 
 ### My project is a desktop-only app with Compose Multiplatform. Can I use Compose Hot Reload?
 
