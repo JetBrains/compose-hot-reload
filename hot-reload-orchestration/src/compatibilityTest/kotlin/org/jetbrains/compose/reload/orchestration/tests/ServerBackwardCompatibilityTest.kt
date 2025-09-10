@@ -22,6 +22,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknow
 import org.jetbrains.compose.reload.orchestration.OrchestrationConnectionsState
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage.DirtyScope
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
@@ -51,6 +52,7 @@ import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 @Execution(ExecutionMode.SAME_THREAD)
 class ServerBackwardCompatibilityTest {
@@ -184,7 +186,7 @@ class ServerBackwardCompatibilityTest {
             val client = connectOrchestrationClient(Unknown, receiveAs<EchoClient.ServerPort>().port).getOrThrow()
             log("Client connected (${client.port.awaitOrThrow()})")
 
-            currentTask().subtask {
+            client.subtask {
                 client.messages.withType<TestEvent>().collect {
                     if (it.payload is String && it.payload.startsWith("Echo:")) return@collect
                     client.send(TestEvent("Echo: ${it.payload}"))
@@ -197,6 +199,7 @@ class ServerBackwardCompatibilityTest {
             log("Client ready")
             Ready.send()
             client.await()
+            log("Client disconnected")
         }
     }
 
@@ -268,7 +271,7 @@ class ServerBackwardCompatibilityTest {
             val awaitingClient = startOrchestrationListener(Unknown)
             ClientPort(awaitingClient.port.await().getOrThrow()).send()
 
-            while(isActive()) {
+            while (isActive()) {
                 val client = awaitingClient.connections.receive().getOrThrow()
                 client.send(TestEvent("Hello"))
                 client.await()
@@ -298,7 +301,6 @@ class ServerBackwardCompatibilityTest {
     }
 
     @IsolateTest(EchoClient::class)
-    @MinSupportedVersion("1.0.0-beta06")
     context(_: IsolateTestFixture)
     fun `test - server sends InvalidatedComposeGroupMessage to client - echo is still alive`() =
         runAliveEchoClientTest { server ->
@@ -321,9 +323,7 @@ class ServerBackwardCompatibilityTest {
 
 context(ctx: IsolateTestFixture)
 private fun runAliveEchoClientTest(
-    test: suspend context(IsolateTestContext) (
-        server: OrchestrationServer,
-    ) -> Unit
+    test: suspend context(IsolateTestContext) (server: OrchestrationServer) -> Unit
 ) = runIsolateTest {
     val server = OrchestrationServer()
     server.start()
@@ -345,8 +345,16 @@ private fun runAliveEchoClientTest(
 
     test(server)
 
+    val connectionMonitor = launch {
+        server.messages.withType<ClientDisconnected>().collect {
+            fail("Client disconnected unexpectedly")
+        }
+    }
+
     await("client echo") {
         server.send(TestEvent("Bar"))
         messages.receiveAsFlow().first { it is TestEvent && it.payload == "Echo: Bar" }
     }
+
+    connectionMonitor.cancel()
 }

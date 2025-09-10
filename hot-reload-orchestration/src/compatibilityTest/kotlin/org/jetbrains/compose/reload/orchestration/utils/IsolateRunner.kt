@@ -80,7 +80,7 @@ object IsolateRunner {
                 }.apply {
                     log("Starting Isolate (${currentJar.fileName})")
                     instance.run()
-                    log("Isolate finished successfully")
+                    logger.info("Isolate.run() finished successfully")
                 }
 
             }.getBlocking(30.seconds).getOrThrow()
