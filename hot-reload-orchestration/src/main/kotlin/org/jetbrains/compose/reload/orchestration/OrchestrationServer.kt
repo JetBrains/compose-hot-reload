@@ -187,7 +187,7 @@ private fun launchClient(
     checkMagicNumberOrThrow(io.readInt())
 
     /* Read the client protocol version */
-    val clientProtocolVersion = io.readInt()
+    val clientProtocolVersion = OrchestrationVersion(io.readInt())
     logger.trace { "client protocol version: $clientProtocolVersion" }
 
     /* Write protocol magic number and the servers protocol version */
@@ -272,8 +272,18 @@ private fun launchClient(
             }
         }
 
-        messages.collect { pkg ->
-            queue.send(pkg)
+        messages.collect { message ->
+            /* Do not forward opaque messages if the client is not guaranteed to support them */
+            if (message is OpaqueOrchestrationMessage && !clientProtocolVersion.supportsOpaqueMessages) {
+                return@collect
+            }
+
+            /* Do not send the messages to clients who do not know/care about newer messages */
+            if (message is OrchestrationMessage && message.availableSinceVersion > clientProtocolVersion) {
+                return@collect
+            }
+
+            queue.send(message)
         }
     }
 

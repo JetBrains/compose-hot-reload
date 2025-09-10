@@ -23,6 +23,7 @@ import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.currentCoroutineContext
+import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.exceptionOrNull
 import org.jetbrains.compose.reload.core.invokeOnError
 import org.jetbrains.compose.reload.core.isActive
@@ -159,6 +160,13 @@ internal fun OrchestrationClient(
         /* Launch sequential writer coroutine */
         subtask("Writer") {
             sendActor.process { message ->
+                if (message.availableSinceVersion > serverProtocolVersion &&
+                    !serverProtocolVersion.supportsOpaqueMessages
+                ) {
+                    logger.debug("Message ${message.javaClass.simpleName} is not supported by the server ($serverProtocolVersion); availableSince: ${message.availableSinceVersion}")
+                    return@process
+                }
+
                 /* Get dispatch and write it as a package */
                 io.writePackage(message)
 

@@ -509,6 +509,7 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationProto
 	public static final field Companion Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion$Companion;
 	public static final field V1 Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
 	public static final field V1_1 Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
+	public static final field V1_2 Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getIntValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
@@ -603,5 +604,6 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationVersi
 	public final fun getCurrent ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 	public final fun getV1 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 	public final fun getV1_1 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
+	public final fun getV1_2 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 }
 

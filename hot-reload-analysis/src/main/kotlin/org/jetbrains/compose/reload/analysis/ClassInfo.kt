@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.analysis
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
@@ -25,7 +26,8 @@ fun ClassInfo(bytecode: ByteArray): ClassInfo? {
     return ClassInfo(ClassNode(bytecode))
 }
 
-internal fun ClassInfo(classNode: ClassNode): ClassInfo? {
+@InternalHotReloadApi
+fun ClassInfo(classNode: ClassNode): ClassInfo? {
     val classId = ClassId(classNode)
     if (classId.isIgnored) return null
 
@@ -71,6 +73,3 @@ private fun getResourceContentHash(fieldNode: FieldNode?): Int? {
 }
 
 private fun isResourceContentHashAnnotation(it: AnnotationNode): Boolean = it.desc == Ids.ResourceContentHash.classId.descriptor
-
-
-

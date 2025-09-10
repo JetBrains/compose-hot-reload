@@ -6,15 +6,12 @@
 package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.analysis.ClassId
-import org.jetbrains.compose.reload.analysis.ClassNode
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
+import org.jetbrains.compose.reload.orchestration.utils.walkClasspath
 import org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi
 import org.jetbrains.compose.reload.test.core.TestEnvironment
-import org.objectweb.asm.tree.ClassNode
-import java.io.File
 import java.io.Serializable
 import java.lang.reflect.Modifier
-import java.util.zip.ZipInputStream
 import kotlin.io.path.Path
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
@@ -37,14 +34,14 @@ class SerialVersionUIDTest {
         val violations = mutableListOf<String>()
         val serialVersionUIDs = mutableMapOf<String, Long>()
 
-        fun ClassNode.check() {
-            if (!name.startsWith("org/jetbrains/compose/reload/orchestration")) return
-            val thisClass = Class.forName(ClassId(this).toFqn()).kotlin
-            if (!thisClass.isSubclassOf(Serializable::class)) return
+        walkClasspath { node ->
+            if (!node.name.startsWith("org/jetbrains/compose/reload/orchestration")) return@walkClasspath
+            val thisClass = Class.forName(ClassId(node).toFqn()).kotlin
+            if (!thisClass.isSubclassOf(Serializable::class)) return@walkClasspath
             val serialVersionUID = thisClass.java.fields.find { it.name == "serialVersionUID" }
             if (serialVersionUID == null) {
                 violations.add("$thisClass: Missing 'serialVersionUID'")
-                return
+                return@walkClasspath
             }
 
             if (serialVersionUID.modifiers and Modifier.STATIC == 0) {
@@ -63,30 +60,7 @@ class SerialVersionUIDTest {
                 violations.add("$thisClass: 'serialVersionUID' should be a Long")
             }
 
-            serialVersionUIDs.put(name, serialVersionUID.kotlinProperty!!.call(null) as Long)
-        }
-
-        val classpath = System.getProperty("java.class.path").split(File.pathSeparator).map(::File)
-        classpath.forEach { file ->
-            if (file.isDirectory) {
-                file.walk().forEach { file ->
-                    if (file.extension == "class") {
-                        ClassNode(file.readBytes()).check()
-
-                    }
-                }
-            }
-
-            if (file.isFile && file.extension == "jar") {
-                ZipInputStream(file.inputStream()).use {
-                    while (true) {
-                        val entry = it.nextEntry ?: break
-                        if (entry.name.endsWith(".class")) {
-                            ClassNode(it.readBytes()).check()
-                        }
-                    }
-                }
-            }
+            serialVersionUIDs.put(node.name, serialVersionUID.kotlinProperty!!.call(null) as Long)
         }
 
         if (violations.isNotEmpty()) fail(violations.joinToString("\n"))
@@ -112,6 +86,4 @@ class SerialVersionUIDTest {
             fail("${expectFile.toUri()} did not match\n${actualFile.toUri()}")
         }
     }
-
-
 }
