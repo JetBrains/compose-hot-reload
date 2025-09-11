@@ -36,36 +36,7 @@ There are two ways to add Compose Hot Reload to your project:
 
 ### Create a project from scratch
 
-First, set up your environment with IntelliJ IDEA or Android Studio:
-
-1. Install **IntelliJ IDEA 2025.1.1.1** or **Android Studio Narwhal 2025.1.1**.
-2. If you have:
-   * MacOS, install the [Kotlin Multiplatform IDE plugin](https://plugins.jetbrains.com/plugin/14936-kotlin-multiplatform.).
-   * Windows or Linux, install the following plugins:
-     * [Android](https://plugins.jetbrains.com/plugin/22989-android)
-     * [Android Design Tools](https://plugins.jetbrains.com/plugin/22990-android-design-tools)
-     * [Jetpack Compose](https://plugins.jetbrains.com/plugin/18409-jetpack-compose)
-     * [Native Debugging Support](https://plugins.jetbrains.com/plugin/12775-native-debugging-support)
-     * [Compose Multiplatform for Desktop IDE Support](https://plugins.jetbrains.com/plugin/16541-compose-multiplatform-for-desktop-ide-support)
-3. If you want to create Android applications, make sure that you have the `ANDROID_HOME` variable set. For example, in Bash or Zsh:
-    ```
-    export ANDROID_HOME=~/Library/Android/sdk
-    ```
-4. If you want to create iOS applications, you need a macOS host with [Xcode](https://apps.apple.com/us/app/xcode/id497799835) installed. Your IDE runs Xcode under the hood to build the necessary iOS frameworks.
-  Make sure to launch Xcode before starting to work with your project so that it completes the initial setup.
-
-#### On macOS
-
-1. In IntelliJ IDEA, select **File** | **New** | **Project**.
-2. In the panel on the left, select **Kotlin Multiplatform**.
-3. Specify the **Name**, **Group**, and **Artifact** fields in the **New Project** window.
-4. Select the **Desktop** target and click **Create**.
-    <img alt="Create multiplatform project with desktop target" src="./readme-assets/create-desktop-project.png" width="500">
-
-#### On Windows or Linux
-
-1. Generate a project using the [web KMP wizard](https://kmp.jetbrains.com/). Make sure to select the desktop target.
-2. Extract the archive and open the resulting folder in your IDE.
+Follow the [Kotlin Multiplatform quickstart](https://www.jetbrains.com/help/kotlin-multiplatform-dev/quickstart.html) guide to set up your environment and create a project. Be sure to select the desktop target when you create the project.
 
 ### Apply the Gradle plugin to your project
 
