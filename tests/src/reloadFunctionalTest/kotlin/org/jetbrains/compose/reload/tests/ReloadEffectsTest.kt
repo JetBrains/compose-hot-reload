@@ -61,7 +61,7 @@ class ReloadEffectsTest {
     ) {
         fixture.orchestration.update(ReloadState) { newState }
         skipToMessage<OrchestrationMessage.LogMessage> { message ->
-            message.message.contains("Recomposing ReloadOverlay")
+            message.message.contains("Recomposing ReloadEffects")
         }
     }
 }

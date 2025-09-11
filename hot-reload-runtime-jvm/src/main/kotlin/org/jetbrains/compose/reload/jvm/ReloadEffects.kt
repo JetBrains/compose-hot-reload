@@ -24,168 +24,119 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.api.ReloadState
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.agent.orchestration
-import org.jetbrains.compose.reload.core.HotReloadEnvironment.reloadOverlayAnimationsEnabled
-import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
-import org.jetbrains.compose.reload.core.error
-import org.jetbrains.compose.reload.core.leftOr
+import org.jetbrains.compose.reload.jvm.effects.ReloadEffect
+import org.jetbrains.compose.reload.jvm.effects.ReloadEffectsConfiguration
+import org.jetbrains.compose.reload.jvm.effects.getReloadEffects
+import org.jetbrains.compose.reload.jvm.effects.getReloadOverlayEffects
+import org.jetbrains.compose.reload.jvm.effects.reloadEffectsConfiguration
 import org.jetbrains.compose.reload.orchestration.flowOf
-import org.jetbrains.skia.ImageFilter
-import org.jetbrains.skia.RuntimeEffect
-import org.jetbrains.skia.RuntimeShaderBuilder
-import java.lang.invoke.MethodHandles
+import kotlin.time.Duration
 
 
 private val logger = createLogger()
 
-private val borderEffect: RuntimeEffect? by lazy { loadRuntimeEffect("shaders/border.glsl") }
-private val glitchEffect: RuntimeEffect? by lazy { loadRuntimeEffect("shaders/glitch.glsl") }
-
-private object StatusColors {
-    val idle = Color.Transparent
-    val ok = Color(0xFF21D789)
-    val reloading = Color(0xFFFC801D)
-    val error = Color(0xFFFE2857)
-}
-
-private object EffectAnimationSpecs {
-    val enabled = reloadOverlayAnimationsEnabled
-    const val timeStart = 0f
-    const val timeEnd = 1f
-
-    const val timeDuration = 2000
-    const val fadeDuration = 400
-    const val colorDuration = 100
-
-    fun timeAnimation(): TweenSpec<Float> = tween(durationMillis = timeDuration, easing = LinearEasing)
-    fun colorAnimation(): TweenSpec<Color> = tween(durationMillis = colorDuration, easing = LinearEasing)
-    fun fadeAnimation(): TweenSpec<Color> = tween(durationMillis = fadeDuration, easing = LinearEasing)
-}
-
 @Composable
 @InternalHotReloadApi
-internal fun ReloadEffects(child: @Composable () -> Unit) {
+internal fun ReloadEffects(content: @Composable () -> Unit) = with(ReloadEffectsScope) {
     // flags to only show overlay after everything is initialised
     // mainly required so that we don't show 'green' overlay at the launch of the app
     var initialized by remember { mutableStateOf(false) }
 
-    val reloadState by remember { orchestration.states.flowOf(ReloadState.Key) }.collectAsState(initial = ReloadState.default)
-    val color = remember { androidx.compose.animation.Animatable(overlayColor(reloadState, !initialized)) }
-    val timeAnim = remember { Animatable(EffectAnimationSpecs.timeStart) }
+    val state by remember { orchestration.states.flowOf(ReloadState.Key) }.collectAsState(initial = ReloadState.default)
+    val color = remember { androidx.compose.animation.Animatable(overlayColor(state, !initialized)) }
+    val timeAnim = remember { Animatable(reloadEffectsConfiguration.timeAnimationRange.start) }
 
-    logger.debug { "Recomposing ReloadOverlay: $reloadState" }
+    logger.debug { "Recomposing ReloadEffects: $state" }
 
     // Launch color animations
-    LaunchedEffect(reloadState) {
+    LaunchedEffect(state) {
         // update color only on the second iteration
-        color.animate(overlayColor(reloadState, !initialized), animationSpec = EffectAnimationSpecs.colorAnimation())
+        color.launchColorAnimation(state, isInitial = !initialized)
         initialized = true
-
-        if (reloadState is ReloadState.Ok) {
-            delay(1000)
-            color.animate(StatusColors.idle, animationSpec = EffectAnimationSpecs.fadeAnimation())
-        }
     }
 
     // Launch time animation
-    LaunchedEffect(reloadState) {
-        timeAnim.snapTo(EffectAnimationSpecs.timeStart)
-        if (reloadState is ReloadState.Ok) {
-            timeAnim.animate(EffectAnimationSpecs.timeEnd, animationSpec = EffectAnimationSpecs.timeAnimation())
+    LaunchedEffect(state) {
+        timeAnim.launchTimeAnimation(state)
+    }
+
+    fun Modifier.withEffects(effects: List<ReloadEffect>): Modifier =
+        effects.fold(this.fillMaxSize()) { modifier, effect ->
+            modifier.graphicsLayer {
+                renderEffect = effect.render(state, size, timeAnim.value, color.value)
+            }
+        }
+
+    Box(Modifier.withEffects(getReloadOverlayEffects())) {
+        content()
+        Box(Modifier.withEffects(getReloadEffects()))
+    }
+}
+
+private object ReloadEffectsScope {
+    val configuration: ReloadEffectsConfiguration = reloadEffectsConfiguration
+
+    suspend fun Animatable<Color, AnimationVector4D>.launchColorAnimation(
+        state: ReloadState,
+        isInitial: Boolean = false,
+    ) = with(configuration) {
+        animate(overlayColor(state, isInitial), animationSpec = tween(colorAnimationDuration))
+        if (state is ReloadState.Ok) {
+            delay(fadeDelay)
+            animate(idle, animationSpec = tween(fadeAnimationDuration))
+        }
+    }
+
+    suspend fun Animatable<Float, AnimationVector1D>.launchTimeAnimation(
+        state: ReloadState,
+    ) = with(configuration) {
+        snapTo(timeAnimationRange.start)
+        if (state is ReloadState.Ok) {
+            animate(
+                timeAnimationRange.endInclusive,
+                animationSpec = tween(timeAnimationDuration),
+            )
         } else {
-            timeAnim.animate(
-                EffectAnimationSpecs.timeEnd,
+            animate(
+                timeAnimationRange.endInclusive,
                 animationSpec = infiniteRepeatable(
-                    animation = EffectAnimationSpecs.timeAnimation(),
+                    animation = tween(timeAnimationDuration),
                     repeatMode = RepeatMode.Restart
-                )
+                ),
             )
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .graphicsLayer {
-                if (reloadState !is ReloadState.Failed) return@graphicsLayer
-                renderEffect = ImageFilter.makeRuntimeShader(
-                    glitchShader(size, timeAnim.value) ?: return@graphicsLayer,
-                    shaderNames = arrayOf("content"),
-                    inputs = arrayOf(null)
-                ).asComposeRenderEffect()
-            }
+    suspend fun Animatable<Float, AnimationVector1D>.animate(
+        targetValue: Float,
+        animationSpec: AnimationSpec<Float>
     ) {
-        child()
+        if (!configuration.animationsEnabled) snapTo(targetValue)
+        else animateTo(targetValue, animationSpec = animationSpec)
+    }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    renderEffect = ImageFilter.makeRuntimeShader(
-                        borderShader(size, timeAnim.value, color.value) ?: return@graphicsLayer,
-                        shaderNames = arrayOf(),
-                        inputs = arrayOf()
-                    ).asComposeRenderEffect()
-                }
-        ) {}
+    suspend fun Animatable<Color, AnimationVector4D>.animate(
+        targetValue: Color,
+        animationSpec: AnimationSpec<Color>
+    ) {
+        if (!configuration.animationsEnabled) snapTo(targetValue)
+        else animateTo(targetValue, animationSpec = animationSpec)
+    }
+
+    fun <T> tween(duration: Duration): TweenSpec<T> =
+        tween(durationMillis = duration.inWholeMilliseconds.toInt(), easing = LinearEasing)
+
+    fun overlayColor(state: ReloadState, isInitial: Boolean = false): Color = when (state) {
+        is ReloadState.Ok -> if (isInitial) configuration.idle else configuration.ok
+        is ReloadState.Reloading -> configuration.reloading
+        is ReloadState.Failed -> configuration.error
     }
 }
-
-private suspend fun Animatable<Float, AnimationVector1D>.animate(
-    targetValue: Float,
-    animationSpec: AnimationSpec<Float>
-) {
-    if (!EffectAnimationSpecs.enabled) snapTo(targetValue)
-    else animateTo(targetValue, animationSpec = animationSpec)
-}
-
-private suspend fun Animatable<Color, AnimationVector4D>.animate(
-    targetValue: Color,
-    animationSpec: AnimationSpec<Color>
-) {
-    if (!EffectAnimationSpecs.enabled) snapTo(targetValue)
-    else animateTo(targetValue, animationSpec = animationSpec)
-}
-
-private fun overlayColor(state: ReloadState, isInitial: Boolean = false): Color {
-    return when (state) {
-        is ReloadState.Ok -> if (isInitial) StatusColors.idle else StatusColors.ok
-        is ReloadState.Reloading -> StatusColors.reloading
-        is ReloadState.Failed -> StatusColors.error
-    }
-}
-
-
-private fun glitchShader(size: Size, time: Float): RuntimeShaderBuilder? {
-    return RuntimeShaderBuilder(glitchEffect ?: return null).apply {
-        uniform("iResolution", size.width, size.height)
-        uniform("iTime", time)
-    }
-}
-
-private fun borderShader(size: Size, time: Float, color: Color): RuntimeShaderBuilder? {
-    return RuntimeShaderBuilder(borderEffect ?: return null).apply {
-        uniform("iResolution", size.width, size.height)
-        uniform("iFrequency", 0.5f)
-        uniform("iTime", time)
-        uniform("iBaseColor", color.red, color.green, color.blue, color.alpha)
-    }
-}
-
-private fun loadRuntimeEffect(path: String): RuntimeEffect? =
-    Try {
-        val text = MethodHandles.lookup().lookupClass().classLoader.getResource(path)!!.readText()
-        RuntimeEffect.makeForShader(text)
-    }.leftOr { e ->
-        logger.error("Error loading \"$path\" runtime effect: ", e.value)
-        null
-    }
