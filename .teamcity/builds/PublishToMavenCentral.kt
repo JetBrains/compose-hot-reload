@@ -6,6 +6,7 @@
 package builds
 
 import builds.conventions.PushPrivilege
+import builds.conventions.PublishProdPrivilege
 import builds.conventions.setupGit
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.ParameterDisplay
@@ -100,4 +101,4 @@ object PublishToMavenCentral : BuildType({
             tasks = "deployMavenCentralDeployBundle"
         }
     }
-}), PushPrivilege
+}), PushPrivilege, PublishProdPrivilege

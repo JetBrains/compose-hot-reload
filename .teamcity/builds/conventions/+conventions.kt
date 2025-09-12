@@ -13,6 +13,7 @@ fun BuildType.configureConventions() {
     defaultConventions()
     pushPrivilegeConventions()
     publishDevPrivilegeConventions()
+    publishProdPrivilegeConventions()
     publishLocallyConventions()
     hostRequirementConventions()
     commitPublisherConventions()
