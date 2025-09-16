@@ -150,8 +150,8 @@ half4 renderGlow(vec2 position, vec2 halfSize) {
 
     // Combine masks and color
     float strength = clamp(rimMask * 0.9 + haloMask * 0.7, 0.0, 1.0);
-    strength *= clamp(0.8, 1.0, breathe);
-    strength = clamp(0.9, 1.0, strength);
+    strength *= clamp(breathe, 0.8, 1.0);
+    strength = clamp(strength, 0.0, 1.0);
 
     half3 color = mesh3(position) * half(strength);
     half alpha = half(iBaseColor.a) * half(strength);
