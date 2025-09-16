@@ -22,6 +22,11 @@ private val logger = createLogger()
 
 /**
  * Entry points for "Applications under test"
+ *
+ * @param timeout Timeout for the application to start
+ * @param width Width of the application window, <= 0 for unspecified width
+ * @param height Height of the application window, <= 0 for unspecified height
+ * @param content Content of the application
  */
 @Suppress("unused") // Used by integration tests
 public fun screenshotTestApplication(

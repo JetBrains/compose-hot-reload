@@ -24,15 +24,12 @@ import kotlin.time.ExperimentalTime
 @TestOnlyDefaultCompilerOptions
 @TestOnlyDefaultKotlinVersion
 class ReloadEffectsTest {
-    @OptIn(ExperimentalTime::class)
+
     @ReloadEffects
     @HotReloadTest
-    fun `test - reload effects`(fixture: HotReloadTestFixture) = fixture.runTest {
-        /* Set the virtual time to render animations consistently for this test */
-        setTime(0.seconds)
-
-        val reloadState = orchestration.states.get(ReloadState)
-        fixture initialSourceCode """
+    fun `test - reload effects`(fixture: HotReloadTestFixture) =
+        testReloadEffects(
+            fixture, """
             import androidx.compose.foundation.layout.*
             import androidx.compose.ui.unit.sp
             import androidx.compose.ui.window.*
@@ -44,6 +41,69 @@ class ReloadEffectsTest {
                 }
             }
             """.trimIndent()
+        )
+
+    @ReloadEffects
+    @HotReloadTest
+    fun `test - reload effects on window with unspecified size`(fixture: HotReloadTestFixture) =
+        testReloadEffects(
+            fixture, """
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.ui.unit.sp
+            import androidx.compose.ui.window.*
+            import org.jetbrains.compose.reload.test.*
+            
+            fun main() {
+                screenshotTestApplication(width = -1, height = -1) {
+                    TestText("Servus!")
+                }
+            }
+            """.trimIndent()
+        )
+
+    @ReloadEffects
+    @HotReloadTest
+    fun `test - reload effects on window with unspecified width`(fixture: HotReloadTestFixture) =
+        testReloadEffects(
+            fixture, """
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.ui.unit.sp
+            import androidx.compose.ui.window.*
+            import org.jetbrains.compose.reload.test.*
+            
+            fun main() {
+                screenshotTestApplication(width = -1, height = 512) {
+                    TestText("Servus!")
+                }
+            }
+            """.trimIndent()
+        )
+
+    @ReloadEffects
+    @HotReloadTest
+    fun `test - reload effects on window with unspecified height`(fixture: HotReloadTestFixture) =
+        testReloadEffects(
+            fixture, """
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.ui.unit.sp
+            import androidx.compose.ui.window.*
+            import org.jetbrains.compose.reload.test.*
+            
+            fun main() {
+                screenshotTestApplication(width = 512, height = -1) {
+                    TestText("Servus!")
+                }
+            }
+            """.trimIndent()
+        )
+
+    @OptIn(ExperimentalTime::class)
+    private fun testReloadEffects(fixture: HotReloadTestFixture, code: String) = fixture.runTest {
+        /* Set the virtual time to render animations consistently for this test */
+        setTime(0.seconds)
+
+        val reloadState = orchestration.states.get(ReloadState)
+        fixture initialSourceCode code
 
         assertIs<ReloadState.Ok>(reloadState.value)
         advanceTimeBy(1.seconds)
@@ -66,6 +126,7 @@ class ReloadEffectsTest {
         advanceTimeBy(500.milliseconds)
         fixture.checkScreenshot("7-ok-1000ms")
     }
+
 
     private suspend fun HotReloadTestFixture.updateReloadStateAndAwait(newState: ReloadState) {
         runTransaction {

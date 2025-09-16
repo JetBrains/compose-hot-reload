@@ -16,6 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.use
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Dispatchers
@@ -80,12 +83,13 @@ public suspend fun runHeadlessApplication(
     val applicationScope = this
     val messages = orchestration.asChannel()
 
-    val scene = ImageComposeScene(width, height, coroutineContext = applicationScope.coroutineContext)
+    val sceneSize = computeSceneSize(width, height, content)
+    val scene = ImageComposeScene(
+        sceneSize.width, sceneSize.height, coroutineContext = applicationScope.coroutineContext
+    )
     scene.setContent {
         Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
-            DevelopmentEntryPoint {
-                content()
-            }
+            DevelopmentEntryPoint { content() }
         }
     }
 
@@ -248,7 +252,7 @@ public fun runHeadlessApplicationBlocking(
     runBlocking(
         Dispatchers.Main + Job() + CoroutineName("HeadlessApplication") +
             (if (silenceTimeout != null) SilenceTimeout(silenceTimeout) else EmptyCoroutineContext) +
-            CoroutineExceptionHandler { context, throwable ->
+            CoroutineExceptionHandler { _, throwable ->
                 OrchestrationMessage.CriticalException(
                     clientRole = OrchestrationClientRole.Application,
                     message = throwable.message,
@@ -259,6 +263,36 @@ public fun runHeadlessApplicationBlocking(
 
         runHeadlessApplication(timeout, width, height, content)
     }
+}
+
+/**
+ * Assumes there are no animations that increase in size
+ */
+private fun computeSceneSize(
+    width: Int, height: Int, content: @Composable () -> Unit
+): IntSize {
+    if (width > 0 && height > 0) return IntSize(width, height)
+
+    var measuredSize: IntSize? = null
+    // big enough scene to fit everything
+    ImageComposeScene(4096, 4096).use { scene ->
+        scene.setContent {
+            Box(modifier = Modifier.onSizeChanged { measuredSize = it }) {
+                DevelopmentEntryPoint { content() }
+            }
+        }
+        scene.render(0)
+    }
+
+    val finalWidth = when {
+        width > 0 -> width
+        else -> measuredSize?.width?.coerceAtLeast(1) ?: 512
+    }
+    val finalHeight = when {
+        height > 0 -> height
+        else -> measuredSize?.height?.coerceAtLeast(1) ?: 512
+    }
+    return IntSize(finalWidth, finalHeight)
 }
 
 private fun OrchestrationMessage.isSilenceWarning() = this is OrchestrationMessage.LogMessage &&
