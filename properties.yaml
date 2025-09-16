@@ -201,23 +201,13 @@ DevToolsAnimationsEnabled:
     Note: window contents will still be animated. This property is present because of some platform-specific issues with
     window management. Subject to change and might be removed in the future, if the current issues are resolved.
 
-ReloadOverlayEnabled:
-  key: compose.reload.reloadOverlayEnabled
+ReloadEffectsEnabled:
+  key: compose.reload.effectsEnabled
   type: boolean
   default: "true"
   target: [ application, build ]
   documentation: |
-    Enable reload overlay effects that are shown in the UI when a reload is triggered.
-
-ReloadOverlayAnimationsEnabled:
-  key: compose.reload.reloadOverlayAnimationsEnabled
-  type: boolean
-  default: "true"
-  target: [ application, build ]
-  isDelicateApi: true
-  documentation: |
-    Enable reload overlay animations when a reload is triggered. This effect will only be shown
-    if the 'compose.reload.reloadOverlayEnabled' is set to 'true'.
+    Enable reload effects that are shown in the UI when a reload is triggered.
 
 IntelliJDebuggerDispatchPort:
   key: compose.reload.idea.debugger.dispatch.port

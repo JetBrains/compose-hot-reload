@@ -12,6 +12,8 @@ plugins {
     `maven-publish`
     `publishing-conventions`
     `api-validation-conventions`
+    org.jetbrains.compose
+    org.jetbrains.kotlin.plugin.compose
 }
 
 kotlin {
@@ -23,6 +25,10 @@ kotlin {
 dependencies {
     api(project(":hot-reload-core"))
     api(project(":hot-reload-orchestration"))
+    compileOnly(deps.compose.runtime)
+    compileOnly(deps.compose.ui)
+
+    testCompileOnly(deps.compose.runtime)
 }
 
 tasks.withType<Test>().configureEach {

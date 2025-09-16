@@ -3,9 +3,13 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
+@file:OptIn(ExperimentalHotReloadApi::class)
+
 package org.jetbrains.compose.devtools.theme
 
 import androidx.compose.ui.graphics.Color
+import org.jetbrains.compose.devtools.api.ReloadColors
+import org.jetbrains.compose.reload.ExperimentalHotReloadApi
 
 object DtColors {
 
@@ -15,13 +19,11 @@ object DtColors {
 
     val surface = Color(0xFF3C3F41) // Darker surface for cards and panels
     val surfaceActive = Color(0xFF4E5254) // Slightly lighter for active elements
-    val surfaceConsole = Color(0xFF2B2D30) // Dark console background
 
-    val statusColorOk = Color(0xFF21D789) //jetBrainsGreen
+    val statusColorOk = ReloadColors.ok
     val statusColorOrange1 = Color(0xFFFFCB6B)
-    val statusColorOrange2 = Color(0xFFF97A12) //jetBrainsOrange
-    val statusColorError = Color(0xFFFE2857) //jetBrainsRed
-    val statusColorWarning = statusColorOrange2
+    val statusColorOrange2 = ReloadColors.reloading //jetBrainsOrange
+    val statusColorError = ReloadColors.error //jetBrainsRed
 
     val text = Color.White
     val textSecondary = Color(0xFFBBBBBB)

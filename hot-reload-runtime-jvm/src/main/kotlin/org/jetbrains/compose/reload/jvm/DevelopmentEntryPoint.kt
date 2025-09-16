@@ -25,7 +25,7 @@ import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.sendAsync
 import org.jetbrains.compose.reload.agent.sendBlocking
-import org.jetbrains.compose.reload.core.HotReloadEnvironment.reloadOverlayEnabled
+import org.jetbrains.compose.reload.core.HotReloadEnvironment.reloadEffectsEnabled
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.error
@@ -77,7 +77,7 @@ public fun DevelopmentEntryPoint(
         logger.debug("Composing UI: $currentHotReloadState")
         runCatching {
             when {
-                reloadOverlayEnabled -> ReloadEffects(child)
+                reloadEffectsEnabled -> ReloadEffects(child)
                 else -> child()
             }
         }.onFailure { exception ->

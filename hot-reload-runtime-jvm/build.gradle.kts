@@ -48,6 +48,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(deps.junit.jupiter)
     testImplementation(deps.junit.jupiter.engine)
+    testImplementation(deps.compose.desktop.common)
 }
 
 tasks.withType<Test>().configureEach {

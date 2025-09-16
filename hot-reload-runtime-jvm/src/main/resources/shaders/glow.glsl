@@ -2,6 +2,7 @@ uniform float2 iResolution;
 uniform float iFrequency;
 uniform float iTime;
 uniform float4 iBaseColor;
+uniform float iScale;
 
 const float PI = 3.14159265358979323846;
 const float PI2 = PI * 2.0;
@@ -132,7 +133,7 @@ half3 mesh3(vec2 position) {
 
 half4 renderGlow(vec2 position, vec2 halfSize) {
     // scale to calibrate relative sizes to the actual size of the image
-    float scale = 50.0 / min(iResolution.x, iResolution.y);
+    float scale = iScale / min(iResolution.x, iResolution.y);
 
     float base = min(halfSize.x, halfSize.y);
     float thickness = base * scale;

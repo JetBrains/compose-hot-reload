@@ -37,14 +37,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
+import org.jetbrains.compose.devtools.api.ReloadAnimationSpec
+import org.jetbrains.compose.devtools.api.ReloadAnimationSpec.milliseconds
+import org.jetbrains.compose.devtools.api.ReloadAnimationSpec.statusColorFadeDuration
+import org.jetbrains.compose.devtools.api.ReloadAnimationSpec.statusFadeoutDuration
 import org.jetbrains.compose.devtools.states.ReloadUIState
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.reload.core.Update
 import kotlin.time.Duration.Companion.seconds
-
-private const val fadeAnimationDuration = 400
-private const val colorAnimationDuration = 100
 
 @Composable
 fun animateReloadStatusColor(
@@ -74,7 +75,7 @@ fun animateReloadStatusColor(
 
                 is ReloadUIState.Ok -> {
                     color.animateTo(okColor, colorChange())
-                    delay(1.seconds)
+                    delay(ReloadAnimationSpec.okStatusRetention)
                     color.animateTo(idleColor, fadeOut())
                 }
             }
@@ -175,8 +176,13 @@ fun Modifier.dtBorder(
     )
 }
 
-private fun colorChange() = tween<Color>(durationMillis = colorAnimationDuration, easing = LinearEasing)
-private fun fadeOut() = tween<Color>(durationMillis = fadeAnimationDuration, easing = LinearEasing)
+private fun colorChange() = tween<Color>(
+    durationMillis = statusColorFadeDuration.milliseconds, easing = LinearEasing
+)
+
+private fun fadeOut() = tween<Color>(
+    durationMillis = statusFadeoutDuration.milliseconds, easing = LinearEasing
+)
 
 private fun <T> Flow<T>.changes(): Flow<Update<T>> = flow<Update<T>> {
     val NULL = Any()

@@ -41,7 +41,9 @@ sealed interface ComposeHotReloadArgumentsBuilder {
     fun setDevToolsDetached(detached: Provider<Boolean>)
     fun setDevToolsAnimationsEnabled(enabled: Provider<Boolean>)
 
+    @Deprecated("Use 'setReloadEffectsEnabled' instead.", ReplaceWith("setReloadEffectsEnabled()"))
     fun setReloadOverlayEnabled(enabled: Provider<Boolean>)
+    fun setReloadEffectsEnabled(enabled: Provider<Boolean>)
 
     fun setReloadTaskName(name: Provider<String>)
     fun setReloadTaskName(name: String)
@@ -138,12 +140,8 @@ internal class ComposeHotReloadArguments(project: Project) :
         .value(project.composeReloadDevToolsAnimationsEnabled)
 
     @get:Input
-    val reloadOverlayEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
-        .value(project.composeReloadReloadOverlayEnabled)
-
-    @get:Input
-    val reloadOverlayAnimationsEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
-        .value(project.composeReloadReloadOverlayAnimationsEnabled)
+    val reloadEffectsEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .value(project.composeReloadReloadEffectsEnabledProvider)
 
     @get:Input
     @get:Optional
@@ -241,8 +239,13 @@ internal class ComposeHotReloadArguments(project: Project) :
         devToolsAnimationsEnabled.set(enabled)
     }
 
+    @Deprecated("Use 'setReloadEffectsEnabled' instead.", replaceWith = ReplaceWith("setReloadEffectsEnabled()"))
     override fun setReloadOverlayEnabled(enabled: Provider<Boolean>) {
-        reloadOverlayEnabled.set(enabled)
+        reloadEffectsEnabled.set(enabled)
+    }
+
+    override fun setReloadEffectsEnabled(enabled: Provider<Boolean>) {
+        reloadEffectsEnabled.set(enabled)
     }
 
     override fun setDevToolsHeadless(headless: Provider<Boolean>) {
@@ -310,8 +313,7 @@ internal class ComposeHotReloadArguments(project: Project) :
         }
 
         /* Provide reload overlay */
-        add("-D${HotReloadProperty.ReloadOverlayEnabled.key}=${reloadOverlayEnabled.getOrElse(true)}")
-        add("-D${HotReloadProperty.ReloadOverlayAnimationsEnabled.key}=${reloadOverlayAnimationsEnabled.getOrElse(true)}")
+        add("-D${HotReloadProperty.ReloadEffectsEnabled.key}=${reloadEffectsEnabled.getOrElse(true)}")
 
         /* Provide dev tools */
         val isDevToolsEnabled = devToolsEnabled.getOrElse(true)

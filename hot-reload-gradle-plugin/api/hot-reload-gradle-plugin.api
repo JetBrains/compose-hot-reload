@@ -22,6 +22,7 @@ public abstract interface class org/jetbrains/compose/reload/gradle/ComposeHotRe
 	public abstract fun setIsHeadless (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setMainClass (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setPidFile (Lorg/gradle/api/provider/Provider;)V
+	public abstract fun setReloadEffectsEnabled (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setReloadOverlayEnabled (Lorg/gradle/api/provider/Provider;)V
 	public abstract fun setReloadTaskName (Ljava/lang/String;)V
 	public abstract fun setReloadTaskName (Lorg/gradle/api/provider/Provider;)V

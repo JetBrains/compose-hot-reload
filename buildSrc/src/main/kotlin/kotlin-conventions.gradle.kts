@@ -29,6 +29,7 @@ plugins.withType<KotlinBasePluginWrapper> {
                 apiVersion = KotlinVersion.KOTLIN_2_1
                 optIn.add("org.jetbrains.compose.reload.InternalHotReloadApi")
                 optIn.add("org.jetbrains.compose.reload.DelicateHotReloadApi")
+                optIn.add("org.jetbrains.compose.reload.ExperimentalHotReloadApi")
             }
         }
     }

@@ -6,6 +6,9 @@ public abstract interface annotation class org/jetbrains/compose/reload/Developm
 	public abstract fun windowWidth ()I
 }
 
+public abstract interface annotation class org/jetbrains/compose/reload/ExperimentalHotReloadApi : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class org/jetbrains/compose/reload/InternalHotReloadApi : java/lang/annotation/Annotation {
 }
 

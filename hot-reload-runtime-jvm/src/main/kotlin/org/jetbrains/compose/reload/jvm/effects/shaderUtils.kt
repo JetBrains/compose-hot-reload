@@ -5,7 +5,6 @@
 
 package org.jetbrains.compose.reload.jvm.effects
 
-import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
@@ -15,7 +14,6 @@ import java.lang.invoke.MethodHandles
 
 private val logger = createLogger()
 
-@InternalHotReloadApi
 internal fun loadRuntimeEffect(path: String): RuntimeEffect? =
     Try {
         val text = MethodHandles.lookup().lookupClass().classLoader.getResource(path)!!.readText()

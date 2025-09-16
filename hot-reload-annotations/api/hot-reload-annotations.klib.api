@@ -19,6 +19,10 @@ open annotation class org.jetbrains.compose.reload/DevelopmentEntryPoint : kotli
         final fun <get-windowWidth>(): kotlin/Int // org.jetbrains.compose.reload/DevelopmentEntryPoint.windowWidth.<get-windowWidth>|<get-windowWidth>(){}[0]
 }
 
+open annotation class org.jetbrains.compose.reload/ExperimentalHotReloadApi : kotlin/Annotation { // org.jetbrains.compose.reload/ExperimentalHotReloadApi|null[0]
+    constructor <init>() // org.jetbrains.compose.reload/ExperimentalHotReloadApi.<init>|<init>(){}[0]
+}
+
 open annotation class org.jetbrains.compose.reload/InternalHotReloadApi : kotlin/Annotation { // org.jetbrains.compose.reload/InternalHotReloadApi|null[0]
     constructor <init>() // org.jetbrains.compose.reload/InternalHotReloadApi.<init>|<init>(){}[0]
 }

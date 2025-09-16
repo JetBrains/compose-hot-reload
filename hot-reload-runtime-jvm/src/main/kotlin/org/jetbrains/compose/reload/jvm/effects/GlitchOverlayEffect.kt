@@ -3,33 +3,50 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
+@file:OptIn(ExperimentalHotReloadApi::class)
+
 package org.jetbrains.compose.reload.jvm.effects
 
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RenderEffect
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asComposeRenderEffect
+import androidx.compose.ui.graphics.graphicsLayer
 import org.jetbrains.compose.devtools.api.ReloadState
-import org.jetbrains.compose.reload.InternalHotReloadApi
+import org.jetbrains.compose.reload.ExperimentalHotReloadApi
+import org.jetbrains.compose.devtools.api.ReloadEffect
 import org.jetbrains.skia.ImageFilter
 import org.jetbrains.skia.RuntimeEffect
 import org.jetbrains.skia.RuntimeShaderBuilder
 
-@InternalHotReloadApi
-internal object GlitchOverlayEffect : ReloadOverlayEffect {
-    private val glitchEffect: RuntimeEffect? by lazy { loadRuntimeEffect("shaders/glitch.glsl") }
+internal class GlitchEffect : ReloadEffect.ModifierEffect {
 
-    override fun render(state: ReloadState, size: Size, time: Float, color: Color): RenderEffect? {
-        if (state !is ReloadState.Failed) return null
-        val glitch = glitchEffect ?: return null
-        val shader = RuntimeShaderBuilder(glitch).apply {
-            uniform("iResolution", size.width, size.height)
-            uniform("iTime", time)
+    private val runtimeEffect: RuntimeEffect? = loadRuntimeEffect("shaders/glitch.glsl")
+
+    @Composable
+    override fun effectModifier(state: ReloadState): Modifier {
+        if (runtimeEffect == null) return Modifier
+        if (state !is ReloadState.Failed) return Modifier
+
+        val transition = rememberInfiniteTransition()
+        val time by transition.animateFloat(0f, 10f, infiniteRepeatable(tween(15000, easing = LinearEasing)))
+
+        return Modifier.graphicsLayer {
+            val shader = RuntimeShaderBuilder(runtimeEffect).apply {
+                uniform("iResolution", size.width, size.height)
+                uniform("iTime", time)
+            }
+
+            renderEffect = ImageFilter.makeRuntimeShader(
+                shader,
+                shaderNames = arrayOf("content"),
+                inputs = arrayOf(null)
+            ).asComposeRenderEffect()
         }
-        return ImageFilter.makeRuntimeShader(
-            shader,
-            shaderNames = arrayOf("content"),
-            inputs = arrayOf(null)
-        ).asComposeRenderEffect()
     }
 }
