@@ -40,10 +40,7 @@ public annotation class TestedLaunchMode(val mode: ApplicationLaunchMode)
 
 public annotation class Headless(val isHeadless: Boolean = true)
 
-public annotation class ReloadOverlay(
-    val overlayEnabled: Boolean = false,
-    val animationsEnabled: Boolean = false,
-)
+public annotation class ReloadEffects(val isEnabled: Boolean = true)
 
 @Repeatable
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

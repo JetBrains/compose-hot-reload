@@ -136,6 +136,7 @@ internal class HotReloadUnitTestExecutor(
                 "-DtestClasses=${testClasses.asPath + pathSeparator + applicationClassesDir}",
                 "-D${HotReloadProperty.IsHotReloadActive.key}=true",
                 "-D${HotReloadProperty.IsHeadless.key}=true",
+                "-D${HotReloadProperty.ReloadEffectsEnabled.key}=false",
                 "-D${HotReloadProperty.DevToolsEnabled.key}=false",
                 "-D${HotReloadProperty.OrchestrationPort.key}=${orchestrationServer.port.getBlocking()}",
                 "org.jetbrains.compose.reload.test.Main",

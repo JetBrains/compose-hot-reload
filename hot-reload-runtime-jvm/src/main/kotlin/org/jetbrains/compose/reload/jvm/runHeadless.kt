@@ -33,6 +33,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.selects.onTimeout
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.yield
+import org.jetbrains.compose.devtools.api.VirtualTimeState
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.sendAsync
@@ -96,7 +97,18 @@ public suspend fun runHeadlessApplication(
 
     /* Main loop */
     applicationScope.launch {
-        var virtualTime = 0L
+        /*
+        The virtual time can also be provided as orchestration state.
+        The virtual time from such state has precedence and always be used
+         */
+        val virtualTimeState = orchestration.states.get(VirtualTimeState)
+
+        /*
+        The actual current virtual time.
+        If the virtual time is provided by the orchestration, then this time will be used.
+        Otherwise, the virtual time will automatically advance
+         */
+        var virtualTime = virtualTimeState.value?.time?.inWholeNanoseconds ?: 0
         val virtualFrameDuration = 256.milliseconds
 
         val lastMessageBufferSize = 48
@@ -106,7 +118,8 @@ public suspend fun runHeadlessApplication(
         var silenceDuration = Duration.ZERO
 
         while (isActive) {
-            virtualTime += virtualFrameDuration.inWholeNanoseconds
+            virtualTime = virtualTimeState.value?.time?.inWholeNanoseconds
+                ?: (virtualTime + virtualFrameDuration.inWholeNanoseconds)
 
             if (scene.hasInvalidations()) {
                 scene.render(virtualTime)
@@ -126,7 +139,13 @@ public suspend fun runHeadlessApplication(
                     delay(32.milliseconds)
                 }
 
-                continue
+                /*
+                If there is no virtual time provided by the orchestration, then we assume that invalidations
+                are inconsistent states, and we shall advance time until we end up in a stable consistent state again.
+                */
+                if (virtualTimeState.value == null) {
+                    continue
+                }
             }
 
             val message = select {

@@ -18,7 +18,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientCon
 import org.jetbrains.compose.reload.test.gradle.Headless
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.ReloadOverlay
+import org.jetbrains.compose.reload.test.gradle.ReloadEffects
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.utils.HostIntegrationTest
 import kotlin.jvm.optionals.getOrNull
@@ -34,10 +34,7 @@ class WindowIntegrationTest {
      */
 
     @Headless(false)
-    @ReloadOverlay(
-        overlayEnabled = true,
-        animationsEnabled = false,
-    )
+    @ReloadEffects
     @HostIntegrationTest
     @HotReloadTest
     fun `test - singleWindowApplication`(
@@ -61,10 +58,7 @@ class WindowIntegrationTest {
     )
 
     @Headless(false)
-    @ReloadOverlay(
-        overlayEnabled = true,
-        animationsEnabled = false,
-    )
+    @ReloadEffects
     @HostIntegrationTest
     @HotReloadTest
     fun `test - Window`(
@@ -90,10 +84,7 @@ class WindowIntegrationTest {
     )
 
     @Headless(false)
-    @ReloadOverlay(
-        overlayEnabled = true,
-        animationsEnabled = false,
-    )
+    @ReloadEffects
     @HostIntegrationTest
     @HotReloadTest
     fun `test - DialogWindow`(

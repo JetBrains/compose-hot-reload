@@ -6,24 +6,31 @@
 package org.jetbrains.compose.reload.tests
 
 import org.jetbrains.compose.devtools.api.ReloadState
+import org.jetbrains.compose.devtools.api.VirtualTimeState
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.ReloadOverlay
-import org.jetbrains.compose.reload.test.gradle.TransactionScope
+import org.jetbrains.compose.reload.test.gradle.ReloadEffects
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
+import org.jetbrains.compose.reload.utils.TestOnlyDefaultCompilerOptions
+import org.jetbrains.compose.reload.utils.TestOnlyDefaultKotlinVersion
 import kotlin.test.assertIs
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
+@TestOnlyDefaultCompilerOptions
+@TestOnlyDefaultKotlinVersion
 class ReloadEffectsTest {
     @OptIn(ExperimentalTime::class)
-    @ReloadOverlay(
-        overlayEnabled = true,
-        animationsEnabled = false,
-    )
+    @ReloadEffects
     @HotReloadTest
     fun `test - reload effects`(fixture: HotReloadTestFixture) = fixture.runTest {
+        /* Set the virtual time to render animations consistently for this test */
+        setTime(0.seconds)
+
         val reloadState = orchestration.states.get(ReloadState)
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.*
@@ -32,36 +39,50 @@ class ReloadEffectsTest {
             import org.jetbrains.compose.reload.test.*
             
             fun main() {
-                screenshotTestApplication {}
+                screenshotTestApplication {
+                    TestText("Servus!")
+                }
             }
             """.trimIndent()
 
         assertIs<ReloadState.Ok>(reloadState.value)
-        fixture.checkScreenshot("before")
+        advanceTimeBy(1.seconds)
+        fixture.checkScreenshot("0-before")
 
-        runTransaction {
-            updateReloadStateAndAwait(fixture, ReloadState.Reloading())
-            fixture.checkScreenshot("reloading")
-        }
+        updateReloadStateAndAwait(ReloadState.Reloading())
+        fixture.checkScreenshot("1-reloading-0ms")
+        advanceTimeBy(500.milliseconds)
+        fixture.checkScreenshot("2-reloading-500ms")
 
-        runTransaction {
-            updateReloadStateAndAwait(fixture, ReloadState.Failed(reason = "Test"))
-            fixture.checkScreenshot("failed")
-        }
+        updateReloadStateAndAwait(ReloadState.Failed(reason = "Test"))
+        fixture.checkScreenshot("3-failed-0ms")
+        advanceTimeBy(500.milliseconds)
+        fixture.checkScreenshot("4-failed-500ms")
 
+        updateReloadStateAndAwait(ReloadState.Ok())
+        fixture.checkScreenshot("5-ok-0ms")
+        advanceTimeBy(500.milliseconds)
+        fixture.checkScreenshot("6-ok-500ms")
+        advanceTimeBy(500.milliseconds)
+        fixture.checkScreenshot("7-ok-1000ms")
+    }
+
+    private suspend fun HotReloadTestFixture.updateReloadStateAndAwait(newState: ReloadState) {
         runTransaction {
-            updateReloadStateAndAwait(fixture, ReloadState.Ok())
-            fixture.checkScreenshot("ok")
+            this@updateReloadStateAndAwait.orchestration.update(ReloadState) { newState }
+            skipToMessage<OrchestrationMessage.LogMessage>("Waiting for effects to be rendered") { message ->
+                message.message.contains("Recomposing ReloadEffects")
+            }
         }
     }
 
-    private suspend fun TransactionScope.updateReloadStateAndAwait(
-        fixture: HotReloadTestFixture,
-        newState: ReloadState,
-    ) {
-        fixture.orchestration.update(ReloadState) { newState }
-        skipToMessage<OrchestrationMessage.LogMessage> { message ->
-            message.message.contains("Recomposing ReloadEffects")
+    suspend fun HotReloadTestFixture.setTime(duration: Duration) {
+        orchestration.update(VirtualTimeState) { VirtualTimeState(duration) }
+    }
+
+    suspend fun HotReloadTestFixture.advanceTimeBy(duration: Duration) {
+        orchestration.update(VirtualTimeState) { state ->
+            VirtualTimeState((state?.time ?: Duration.ZERO) + duration)
         }
     }
 }
