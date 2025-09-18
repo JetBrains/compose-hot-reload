@@ -114,7 +114,11 @@ public class WorkerThread(
 
             queue.add(work)
         } finally {
-            pendingDispatches.andDecrement
+            val currentPendingDispatches = pendingDispatches.decrementAndGet()
+            /* Send an empty task to awaken the worker thread */
+            if (currentPendingDispatches == Int.MIN_VALUE) {
+                queue.add(Work.empty)
+            }
         }
         return future
     }
