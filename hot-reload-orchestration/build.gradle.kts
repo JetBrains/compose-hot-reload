@@ -14,12 +14,17 @@ plugins {
     `java-test-fixtures`
     `api-validation-conventions`
     `orchestration-compatibility-tests`
+    org.jetbrains.kotlinx.benchmark
 }
 
 kotlin {
     compilerOptions {
         explicitApi()
     }
+}
+
+benchmark {
+    targets.create("test")
 }
 
 dependencies {
@@ -35,6 +40,7 @@ dependencies {
     testImplementation(deps.asm.tree)
     testImplementation(project(":hot-reload-analysis"))
     testImplementation(kotlin("reflect"))
+    testImplementation(deps.benchmark.runtime)
 
     compatibilityTestImplementation(deps.coroutines.test)
 }
