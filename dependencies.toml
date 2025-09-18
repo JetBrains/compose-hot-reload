@@ -7,7 +7,7 @@ kotlinxDatetime = "0.7.1"
 kotlinxBenchmark = "0.4.13"
 kotlinxBinaryCompatibilityValidator = "0.18.1"
 kotlinxSerialization = "1.8.1"
-kotlinxLincheck = "2.39"
+kotlinxLincheck = "3.2"
 androidGradlePlugin = "8.11.1"
 junit = "5.11.4"
 javassist = "3.30.2-GA"
@@ -32,7 +32,7 @@ kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.r
 kotlinxSerialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 kotlinxSerialization-kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "kaml" }
 
-lincheck = { module = "org.jetbrains.kotlinx:lincheck", version.ref = "kotlinxLincheck" }
+lincheck = { module = "org.jetbrains.lincheck:lincheck", version.ref = "kotlinxLincheck" }
 
 evas = { module = "io.sellmair:evas", version.ref = "evas" }
 evas-compose = { module = "io.sellmair:evas-compose", version.ref = "evas" }

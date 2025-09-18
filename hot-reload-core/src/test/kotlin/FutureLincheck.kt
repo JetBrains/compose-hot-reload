@@ -1,12 +1,13 @@
+@file:Suppress("unused")
+
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
 import org.jetbrains.compose.reload.core.getOrThrow
-import org.jetbrains.kotlinx.lincheck.annotations.Operation
-import org.jetbrains.kotlinx.lincheck.check
-import org.jetbrains.kotlinx.lincheck.strategy.managed.modelchecking.ModelCheckingOptions
-import org.jetbrains.kotlinx.lincheck.strategy.stress.StressOptions
-import org.jetbrains.kotlinx.lincheck.util.LoggingLevel
+import org.jetbrains.lincheck.datastructures.ModelCheckingOptions
+import org.jetbrains.lincheck.datastructures.Operation
+import org.jetbrains.lincheck.datastructures.StressOptions
+import org.jetbrains.lincheck.util.LoggingLevel
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty
 import kotlin.coroutines.suspendCoroutine
 import kotlin.test.Test
