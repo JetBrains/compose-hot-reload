@@ -41,6 +41,7 @@ dependencies {
     testImplementation(project(":hot-reload-analysis"))
     testImplementation(kotlin("reflect"))
     testImplementation(deps.benchmark.runtime)
+    testImplementation(deps.lincheck)
 
     compatibilityTestImplementation(deps.coroutines.test)
 }
