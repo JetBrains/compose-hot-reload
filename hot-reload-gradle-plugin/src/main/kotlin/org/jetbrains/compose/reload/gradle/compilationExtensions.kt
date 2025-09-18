@@ -11,6 +11,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.PidFileInfo
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
@@ -66,7 +67,8 @@ internal val KotlinCompilation<*>.hotClasspathSnapshotFile
 internal val KotlinCompilation<*>.hotReloadRequestFile
     get() = runBuildDirectory("classpath").map { it.file(".request") }
 
-internal val KotlinCompilation<*>.pidFile
+@InternalHotReloadApi
+val KotlinCompilation<*>.pidFile
     get() = runBuildFile("${camelCase(target.name, name)}.pid")
 
 internal val KotlinCompilation<*>.argFile

@@ -15,6 +15,7 @@ val updateVersions = tasks.register<UpdateVersionTask>("updateVersions") {
         include("samples/**/build.gradle.kts")
         include("hot-reload-test/idea-plugin/*.gradle.kts")
         include("hot-reload-test/sample/*.gradle.kts")
+        include("tests/**/projects/**/*.gradle.kts")
         exclude("**/build/**/*")
     }
 

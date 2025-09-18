@@ -77,7 +77,6 @@ class OrchestrationStatesLincheck {
         return client.states.get(keyB).value
     }
 
-
     @Test
     fun stressTest() {
         StressOptions().check(this::class)

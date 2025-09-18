@@ -9,6 +9,7 @@ import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.test.core.AppClasspath.Companion.current
 import java.io.File
 import java.io.Serializable
+import java.net.URLClassLoader
 
 /**
  * Simple wrapper around the 'runtime classpath' of a given app.
@@ -23,8 +24,16 @@ public data class AppClasspath(val files: List<String>) : Serializable {
     @InternalHotReloadApi
     public companion object {
         @InternalHotReloadApi
-        public val current: AppClasspath by lazy {
-            AppClasspath(System.getProperty("java.class.path").split(File.pathSeparator))
-        }
+        public val current: AppClasspath
+            get() {
+                val loader = AppClasspath::class.java.classLoader
+                if (loader !is URLClassLoader)
+                    return AppClasspath(System.getProperty("java.class.path").split(File.pathSeparator))
+
+                val files = loader
+                    .urLs.mapNotNull { url -> url.file.takeIf { path -> path.isNotEmpty() } }
+
+                return AppClasspath(files)
+            }
     }
 }
