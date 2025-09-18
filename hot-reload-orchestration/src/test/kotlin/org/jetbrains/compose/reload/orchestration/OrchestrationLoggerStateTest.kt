@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 class OrchestrationLoggerStateTest {
     @Test
     fun `test - encode decode`() {
-        val encoder = encoderOfOrThrow<OrchestrationLoggerState>()
+        val encoder = encoderOfOrThrow(OrchestrationLoggerState)
 
         val empty = OrchestrationLoggerState(emptySet())
         assertEquals(empty, encoder.decode(encoder.encode(empty)).getOrThrow())

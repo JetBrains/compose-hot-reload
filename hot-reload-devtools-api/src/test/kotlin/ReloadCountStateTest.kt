@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 
 class ReloadCountStateTest {
 
-    private val encoder = encoderOfOrThrow<ReloadCountState>()
+    private val encoder = encoderOfOrThrow(ReloadCountState)
 
     @Test
     fun `test - encode decode`() {

@@ -42,4 +42,26 @@ class OrchestrationServerStatesTest {
         assertEquals(TestOrchestrationState(1), stateA.value)
         assertEquals(TestOrchestrationState(2), stateB.value)
     }
+
+    @Test
+    fun `test - update in encoded form`() = runTest {
+        val states = OrchestrationServerStates()
+        val encoder = encoderOfOrThrow(keyA)
+
+        val myState = TestOrchestrationState(42)
+        val myStateEncoded = encoder.encode(myState)
+
+        val myDecoyState = TestOrchestrationState(-1024)
+        val myDecoyStateEncoded = encoder.encode(myDecoyState)
+
+
+        val mySecondState = TestOrchestrationState(43)
+        val mySecondStateEncoded = encoder.encode(mySecondState)
+
+        states.update(keyA.id, null, Binary(myStateEncoded))
+        states.update(keyA.id, null, Binary(myDecoyStateEncoded))
+        states.update(keyA.id, Binary(myStateEncoded), Binary(mySecondStateEncoded))
+
+        assertEquals(mySecondState, states.get(keyA).value)
+    }
 }

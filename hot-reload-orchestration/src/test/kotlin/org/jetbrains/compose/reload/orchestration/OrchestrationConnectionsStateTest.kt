@@ -32,7 +32,7 @@ class OrchestrationConnectionsStateTest {
 
     @Test
     fun `test - encode decode`() {
-        val encoder = encoderOfOrThrow<OrchestrationConnectionsState>()
+        val encoder = encoderOfOrThrow(OrchestrationConnectionsState)
         val empty = OrchestrationConnectionsState(emptyList())
         assertEquals(empty, encoder.decode(encoder.encode(empty)).getOrThrow())
 

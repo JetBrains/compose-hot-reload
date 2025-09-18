@@ -60,11 +60,17 @@ internal fun ByteArray.decodeOrchestrationStateId(): Try<OrchestrationStateId<*>
 }
 
 public inline fun <reified T : OrchestrationState?> stateKey(default: T): OrchestrationStateKey<T> {
-    return OrchestrationStateKeyImpl(stateId<T>(), default)
+    return object : OrchestrationStateKey<T>() {
+        override val id: OrchestrationStateId<T> = stateId()
+        override val default: T get() = default
+    }
 }
 
 public inline fun <reified T : OrchestrationState?> stateKey(name: String, default: T): OrchestrationStateKey<T> {
-    return OrchestrationStateKeyImpl(stateId<T>(name), default)
+    return object : OrchestrationStateKey<T>() {
+        override val id: OrchestrationStateId<T> = stateId(name)
+        override val default: T get() = default
+    }
 }
 
 public abstract class OrchestrationStateKey<T : OrchestrationState?> {
@@ -72,6 +78,7 @@ public abstract class OrchestrationStateKey<T : OrchestrationState?> {
     public abstract val default: T
 }
 
+@Deprecated("Replaced for inlining object declarations")
 @PublishedApi
 internal data class OrchestrationStateKeyImpl<T : OrchestrationState?>(
     override val id: OrchestrationStateId<T>, override val default: T

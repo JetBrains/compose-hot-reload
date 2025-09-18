@@ -3,13 +3,15 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
+
 package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.Type
-import org.jetbrains.compose.reload.core.type
+import org.jetbrains.compose.reload.core.update
 import java.util.ServiceLoader
+import java.util.concurrent.atomic.AtomicReference
 
 public interface OrchestrationStateEncoder<T> {
     public val type: Type<T>
@@ -17,27 +19,29 @@ public interface OrchestrationStateEncoder<T> {
     public fun decode(data: ByteArray): Try<T>
 }
 
-private val encoders: Map<Type<*>, OrchestrationStateEncoder<*>> by lazy {
-    ServiceLoader.load(
-        OrchestrationStateEncoder::class.java,
-        OrchestrationStateEncoder::class.java.classLoader
-    ).associateBy { it.type }
+private val encoders = AtomicReference<Map<OrchestrationStateKey<*>, OrchestrationStateEncoder<*>?>>(emptyMap())
+
+@InternalHotReloadApi
+@Suppress("UNCHECKED_CAST")
+public fun <T : OrchestrationState?> encoderOfOrThrow(key: OrchestrationStateKey<T>): OrchestrationStateEncoder<T> {
+    return encoderOf(key) ?: error("Missing encoder for '$key'")
 }
 
 @InternalHotReloadApi
 @Suppress("UNCHECKED_CAST")
-public fun <T : OrchestrationState?> encoderOfOrThrow(type: Type<T>): OrchestrationStateEncoder<T> =
-    (encoders[type] ?: error("No encoder for '${type.signature}'")) as OrchestrationStateEncoder<T>
+public fun <T : OrchestrationState?> encoderOf(key: OrchestrationStateKey<T>): OrchestrationStateEncoder<T>? {
+    val currentEncoders = encoders.get()
 
-@InternalHotReloadApi
-@Suppress("UNCHECKED_CAST")
-public fun <T : OrchestrationState?> encoderOf(type: Type<T>): OrchestrationStateEncoder<T>? =
-    encoders[type]?.let { it as OrchestrationStateEncoder<T> }
+    /* Fast path: encoder is already known */
+    if (key in currentEncoders) {
+        return currentEncoders[key] as OrchestrationStateEncoder<T>?
+    }
 
-@InternalHotReloadApi
-public inline fun <reified T : OrchestrationState?> encoderOf(): OrchestrationStateEncoder<T>? =
-    encoderOf(type<T>())
+    /* Slow path, find encoder and update it  */
+    val encoder = ServiceLoader.load(OrchestrationStateEncoder::class.java, key::class.java.classLoader)
+        .find { it.type == key.id.type }
 
-@InternalHotReloadApi
-public inline fun <reified T : OrchestrationState?> encoderOfOrThrow(): OrchestrationStateEncoder<T> =
-    encoderOfOrThrow(type<T>())
+    val entry = key to encoder
+    encoders.update { current -> current + entry }
+    return encoder as OrchestrationStateEncoder<T>?
+}

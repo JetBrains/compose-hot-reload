@@ -15,7 +15,7 @@ import kotlin.time.Instant
  */
 
 class ReloadStateTest {
-    val encoder = encoderOfOrThrow<ReloadState>()
+    val encoder = encoderOfOrThrow(ReloadState)
     val instant = Instant.fromEpochMilliseconds(1234567890)
 
     @Test

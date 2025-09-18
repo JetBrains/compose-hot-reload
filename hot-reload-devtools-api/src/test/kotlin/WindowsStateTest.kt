@@ -11,7 +11,7 @@ import kotlin.test.assertEquals
  */
 
 class WindowsStateTest {
-    private val encoder = encoderOfOrThrow<WindowsState>()
+    private val encoder = encoderOfOrThrow(WindowsState)
 
     @Test
     fun `test - encode decode`() {

@@ -27,13 +27,15 @@ class TestOrchestrationStateEncoder : OrchestrationStateEncoder<TestOrchestratio
 class NullableTestOrchestrationStateEncoder : OrchestrationStateEncoder<TestOrchestrationState?> {
     override val type = type<TestOrchestrationState?>()
 
+    private val encoder = TestOrchestrationStateEncoder()
+
     override fun encode(state: TestOrchestrationState?): ByteArray {
         return if (state == null) byteArrayOf()
-        else encoderOfOrThrow<TestOrchestrationState>().encode(state)
+        else encoder.encode(state)
     }
 
     override fun decode(data: ByteArray): Try<TestOrchestrationState?> {
         return if (data.isEmpty()) null.toLeft()
-        else encoderOfOrThrow<TestOrchestrationState>().decode(data)
+        else encoder.decode(data)
     }
 }
