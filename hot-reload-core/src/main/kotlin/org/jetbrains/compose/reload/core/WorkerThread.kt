@@ -8,7 +8,7 @@ package org.jetbrains.compose.reload.core
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.RejectedExecutionException
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicBoolean
 
 @InternalHotReloadApi
 public class WorkerThread(
@@ -17,12 +17,7 @@ public class WorkerThread(
     private val queue = LinkedBlockingQueue<Work<*>>()
     private val idleQueue = LinkedBlockingQueue<Work<*>>()
 
-    /**
-     * [Int.MIN_VALUE]: The worker thread is closed
-     * Int.MIN_VALUE + n: The worker thread is shutting down, but there are still [n] pending dispatches
-     * 0..Int.MAX_VALUE: The worker thread is running and accepting dispatches
-     */
-    private val pendingDispatches = AtomicInteger(0)
+    private val isShutdown = AtomicBoolean(false)
     private val isClosed = Future<Unit>()
 
     override fun run() {
@@ -30,15 +25,26 @@ public class WorkerThread(
             future.completeWith(Try { action() })
         }
 
+        fun cleanupIdleQueue() {
+            while (idleQueue.isNotEmpty()) {
+                val idleElement = idleQueue.poll()
+                idleElement?.execute()
+            }
+        }
+
         try {
-            while (pendingDispatches.get() != Int.MIN_VALUE || queue.isNotEmpty() || idleQueue.isNotEmpty()) run outer@{
+            while (true) {
                 if (queue.isEmpty() && idleQueue.isNotEmpty()) {
                     val idleElement = idleQueue.poll()
                     idleElement?.execute()
-                    return@outer
+                    continue
                 }
 
                 val element = queue.take()
+                if (element is Work.Shutdown) {
+                    cleanupIdleQueue()
+                    break
+                }
                 element.execute()
             }
         } finally {
@@ -47,16 +53,10 @@ public class WorkerThread(
     }
 
     public fun shutdown(): Future<Unit> {
-        /* Try closing the worker thread by setting 'pendingDispatches' to 'Int.MIN_VALUE' */
-        while (true) {
-            val currentPendingDispatches = pendingDispatches.get()
-            if (currentPendingDispatches < 0) return isClosed
-            if (pendingDispatches.compareAndSet(currentPendingDispatches, Int.MIN_VALUE + currentPendingDispatches)) {
-                /* Send an empty task to awaken the worker thread */
-                queue.add(Work.empty)
-                return isClosed
-            }
+        if (isShutdown.compareAndSet(false, true)) {
+            queue.add(Work.Shutdown)
         }
+        return isClosed
     }
 
     override fun close() {
@@ -65,7 +65,7 @@ public class WorkerThread(
 
     public fun <T> invokeWhenIdle(action: () -> T): Future<T> {
         val future = enqueue(idleQueue, action)
-        queue.add(Work.empty)
+        queue.add(Work.Empty)
         return future
     }
 
@@ -98,31 +98,21 @@ public class WorkerThread(
     }
 
     private fun <T> enqueue(queue: LinkedBlockingQueue<Work<*>>, action: () -> T): Future<T> {
-        val future = Future<T>()
-
-        /* Fast path: The thread is already closed for further dispatches */
-        if (pendingDispatches.get() < 0) {
+        val work = Work.Action(action)
+        if (isShutdown.get()) {
             return FailureFuture(RejectedExecutionException("WorkerThread '$name' is shutting down"))
         }
 
-        val work = Work(future, action)
-        val previousPendingDispatches = pendingDispatches.andIncrement
-        try {
-            if (previousPendingDispatches < 0) {
-                return FailureFuture(RejectedExecutionException("WorkerThread '$name' is shutting down"))
-            }
-
-            queue.add(work)
-        } finally {
-            pendingDispatches.andDecrement
-        }
-        return future
+        queue.add(work)
+        return work.future
     }
 
-    private class Work<T>(val future: CompletableFuture<T>, val action: () -> T) {
-        companion object {
-            val empty get() = Work(Future(), {})
-        }
+    private sealed class Work<T>(val action: () -> T) {
+        val future: CompletableFuture<T> = Future<T>()
+
+        object Empty : Work<Unit>({})
+        object Shutdown : Work<Unit>({})
+        class Action<T>(action: () -> T) : Work<T>(action)
     }
 
     init {
