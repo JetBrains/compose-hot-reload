@@ -7,13 +7,16 @@ package org.jetbrains.compose.reload.agent
 
 import org.jetbrains.compose.reload.core.Future
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
+import org.jetbrains.compose.reload.core.StoppedException
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
+import org.jetbrains.compose.reload.core.exception
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.invokeOnCompletion
 import org.jetbrains.compose.reload.core.invokeOnValue
+import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.core.withType
@@ -84,6 +87,13 @@ internal fun startOrchestration() {
 
     orchestration.invokeOnCompletion {
         logger.info("Application Orchestration closed")
+
+        if (it.isFailure() && it.exception !is StoppedException) {
+            System.err.println("Application Orchestration closed")
+            it.exception.printStackTrace(System.err)
+            System.err.flush()
+        }
+
         exitProcess(0)
     }
 
