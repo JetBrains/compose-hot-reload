@@ -14,6 +14,7 @@ import org.jetbrains.compose.reload.ExperimentalHotReloadApi
 @ExperimentalHotReloadApi
 public object ReloadColors {
     public val ok: Color = Color(0xFF21D789)
+    public val okDarker: Color = Color(0xFF1aab6d)
     public val reloading: Color = Color(0xFFFC801D)
     public val error: Color = Color(0xFFFE2857)
 }

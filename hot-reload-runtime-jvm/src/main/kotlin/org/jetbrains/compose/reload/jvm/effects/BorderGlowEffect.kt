@@ -55,7 +55,7 @@ internal class BorderGlowEffect : ReloadEffect.OverlayEffect {
         val stateChange = rememberChanges(state)
 
         val targetColor = when (state) {
-            is ReloadState.Ok -> ReloadColors.ok
+            is ReloadState.Ok -> ReloadColors.okDarker
             is ReloadState.Reloading -> ReloadColors.reloading
             is ReloadState.Failed -> ReloadColors.error
         }
@@ -120,7 +120,7 @@ internal class BorderGlowEffect : ReloadEffect.OverlayEffect {
                     uniform("iResolution", size.width, size.height)
                     uniform("iFrequency", 0.5f)
                     uniform("iTime", time)
-                    uniform("iScale", currentScale.value * 30f)
+                    uniform("iScale", currentScale.value * 15)
                     uniform("iBaseColor", color.red, color.green, color.blue, color.alpha)
                 }
 

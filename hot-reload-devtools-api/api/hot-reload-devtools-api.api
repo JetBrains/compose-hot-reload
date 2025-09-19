@@ -32,6 +32,7 @@ public final class org/jetbrains/compose/devtools/api/ReloadColors {
 	public static final field INSTANCE Lorg/jetbrains/compose/devtools/api/ReloadColors;
 	public final fun getError-0d7_KjU ()J
 	public final fun getOk-0d7_KjU ()J
+	public final fun getOkDarker-0d7_KjU ()J
 	public final fun getReloading-0d7_KjU ()J
 }
 
