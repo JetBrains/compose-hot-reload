@@ -46,7 +46,7 @@
     <dependency>
       <groupId>org.jetbrains.compose.runtime</groupId>
       <artifactId>runtime-desktop</artifactId>
-      <version>1.9.0-rc01</version>
+      <version>1.9.0</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
@@ -76,7 +76,7 @@
     <dependency>
       <groupId>org.jetbrains.compose.desktop</groupId>
       <artifactId>desktop-jvm</artifactId>
-      <version>1.9.0-rc01</version>
+      <version>1.9.0</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
@@ -88,7 +88,7 @@
     <dependency>
       <groupId>org.jetbrains.compose.components</groupId>
       <artifactId>components-resources-desktop</artifactId>
-      <version>1.9.0-rc01</version>
+      <version>1.9.0</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>

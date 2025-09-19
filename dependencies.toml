@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.2.0"
-compose = "1.9.0-rc01"
+compose = "1.9.0"
 composeMin = { prefer = "1.8.2" }
 coroutines = "1.10.2"
 kotlinxDatetime = "0.7.1"
@@ -16,7 +16,7 @@ evas = "1.3.0"
 ktor = "3.1.3"
 shadow = "9.0.0-beta13"
 kaml = "0.77.1"
-skiko = "0.9.21"
+skiko = "0.9.24"
 
 [libraries]
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
