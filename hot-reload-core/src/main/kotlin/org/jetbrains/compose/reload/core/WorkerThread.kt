@@ -22,14 +22,12 @@ public class WorkerThread(
 
     override fun run() {
         fun <T> Work<T>.execute() {
-            future.completeWith(Try { action() })
+            if (this is Work.Action<T>) future.completeWith(Try { action() })
         }
 
-        fun cleanupIdleQueue() {
-            while (idleQueue.isNotEmpty()) {
-                val idleElement = idleQueue.poll()
-                idleElement?.execute()
-            }
+        fun cleanupQueues() {
+            while (queue.isNotEmpty()) queue.poll()?.execute()
+            while (idleQueue.isNotEmpty()) idleQueue.poll()?.execute()
         }
 
         try {
@@ -41,11 +39,12 @@ public class WorkerThread(
                 }
 
                 val element = queue.take()
+                element.execute()
+
                 if (element is Work.Shutdown) {
-                    cleanupIdleQueue()
+                    cleanupQueues()
                     break
                 }
-                element.execute()
             }
         } finally {
             isClosed.complete(Unit)
@@ -98,21 +97,19 @@ public class WorkerThread(
     }
 
     private fun <T> enqueue(queue: LinkedBlockingQueue<Work<*>>, action: () -> T): Future<T> {
-        val work = Work.Action(action)
         if (isShutdown.get()) {
             return FailureFuture(RejectedExecutionException("WorkerThread '$name' is shutting down"))
         }
 
+        val work = Work.Action(action)
         queue.add(work)
         return work.future
     }
 
-    private sealed class Work<T>(val action: () -> T) {
-        val future: CompletableFuture<T> = Future<T>()
-
-        object Empty : Work<Unit>({})
-        object Shutdown : Work<Unit>({})
-        class Action<T>(action: () -> T) : Work<T>(action)
+    private sealed class Work<T> {
+        object Empty : Work<Unit>()
+        object Shutdown : Work<Unit>()
+        class Action<T>(val action: () -> T, val future: CompletableFuture<T> = Future<T>()) : Work<T>()
     }
 
     init {
