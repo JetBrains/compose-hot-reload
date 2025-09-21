@@ -21,7 +21,7 @@ pluginManagement {
         kotlin("jvm") version "2.2.0"
         kotlin("plugin.compose") version "2.2.0"
         id("org.jetbrains.compose") version "1.9.0"
-        id("org.jetbrains.compose.hot-reload") version "1.0.0-rc01+168"
+        id("org.jetbrains.compose.hot-reload") version "1.0.0-rc01+169"
     }
 }
 
