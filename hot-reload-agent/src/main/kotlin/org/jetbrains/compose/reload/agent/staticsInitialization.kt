@@ -27,6 +27,12 @@ internal const val reinitializeName = "\$chr\$clinit"
  */
 internal fun CtClass.transformForStaticsInitialization(originalClass: Class<*>?) {
     if (originalClass == null) return
+    /**
+     * Static fields on interfaces have to be final!
+     * Therefore, we disable the re-initialization for interfaces.
+     * If re-initialization is desired, either JBR support or more advanced class rewriting is required.
+     */
+    if (this.isInterface) return
 
     val clazzInitializer = classInitializer ?: return
 
