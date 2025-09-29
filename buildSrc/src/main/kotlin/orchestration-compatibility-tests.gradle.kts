@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmExtension
  */
 
 val testedVersions = listOf(
-    "1.0.0-beta03", "1.0.0-beta04", "1.0.0-beta05", "1.0.0-beta06", "1.0.0-beta07", "1.0.0-beta08",
+    "1.0.0-beta03", "1.0.0-beta04", "1.0.0-beta05", "1.0.0-beta06", "1.0.0-beta07", "1.0.0-beta08", "1.0.0-beta09",
     project.providers.gradleProperty("bootstrap.version").get()
 )
 
