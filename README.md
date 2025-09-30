@@ -25,8 +25,10 @@ The JetBrains Runtime intelligently reloads your code whenever it changes.
 
 - Kotlin 2.1.20 or higher.
 - Compose compiler 2.1.20 or higher.
-- Compose 1.8.2 or higher
-- JetBrains Runtime.
+- Compose Multiplatform 1.8.2
+- [JetBrains Runtime](https://github.com/JetBrains/JetBrainsRuntime).
+  To be compatible with JetBrains Runtime, your project needs to [target](https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_cross_compilation)
+  Java 21 or earlier.
 
 ## Set up your project
 
