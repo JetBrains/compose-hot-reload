@@ -24,7 +24,7 @@ private class BusImpl<T> : Bus<T> {
 
     override suspend fun send(value: T) {
         val dispatchQueues = dispatchQueues.get()
-        dispatchQueues.map { queue ->
+        dispatchQueues.forEach { queue ->
             launchTask("BusImpl.dispatch($queue)") {
                 queue.send(value)
             }
@@ -35,15 +35,17 @@ private class BusImpl<T> : Bus<T> {
         val queue = Queue<T>()
         dispatchQueues.update { it + queue }
 
-        while (isActive()) {
-            val element = queue.receive()
-            try {
+        try {
+            while (isActive()) {
+                val element = queue.receive()
                 action(element)
-            } catch (_: StopCollectingException) {
-                break
-            } catch (t: Throwable) {
-                throw t
             }
+        } catch (_: StopCollectingException) {
+            // stopping
+        } catch (t: Throwable) {
+            throw t
+        } finally {
+            dispatchQueues.update { it - queue }
         }
     }
 }
