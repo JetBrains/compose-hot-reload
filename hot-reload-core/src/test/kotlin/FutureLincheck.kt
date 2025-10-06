@@ -47,6 +47,9 @@ class FutureLincheck {
         }
     }
 
+    /**
+     * Disabled by default due to long execution time.
+     */
     @EnabledIfSystemProperty(named = "lincheck", matches = "true")
     @Test
     fun modelTest() {
@@ -56,7 +59,6 @@ class FutureLincheck {
             .check(this::class)
     }
 
-    @EnabledIfSystemProperty(named = "lincheck", matches = "true")
     @Test
     fun stressTest() {
         StressOptions().check(this::class)
