@@ -1,8 +1,6 @@
-@file:OptIn(InternalHotReloadGradleApi::class, InternalHotReloadApi::class)
+@file:OptIn(InternalHotReloadApi::class)
 
 import org.jetbrains.compose.reload.InternalHotReloadApi
-import org.jetbrains.compose.reload.gradle.InternalHotReloadGradleApi
-import org.jetbrains.compose.reload.gradle.camelCase
 
 /*
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
@@ -148,10 +146,12 @@ plugins.withId("org.jetbrains.kotlin.multiplatform") {
 }
 
 fun MavenPublication.signPublicationIfKeyPresent() {
-    if (signingSecretKey.isNullOrBlank()) return
-    if (signingPassword.isNullOrBlank()) return
-
     extensions.configure<SigningExtension>("signing") {
+        if (signingSecretKey.isNullOrBlank() || signingKeyId.isNullOrBlank() || signingPassword.isNullOrBlank()) {
+            isRequired = false
+            return@configure
+        }
+
         useInMemoryPgpKeys(signingKeyId, signingSecretKey, signingPassword)
         sign(this@signPublicationIfKeyPresent)
 
