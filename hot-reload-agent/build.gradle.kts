@@ -77,13 +77,13 @@ val standaloneRuntimeElements = configurations.register("standaloneRuntimeElemen
     }
 }
 
+shadow {
+    addShadowVariantIntoJavaComponent = false
+}
+
 components.named<AdhocComponentWithVariants>("java").configure {
     addVariantsFromConfiguration(standaloneRuntimeElements.get()) {
         mapToOptional()
-    }
-
-    withVariantsFromConfiguration(configurations.shadowRuntimeElements.get()) {
-        this.skip()
     }
 }
 

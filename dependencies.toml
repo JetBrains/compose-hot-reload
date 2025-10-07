@@ -14,9 +14,10 @@ javassist = "3.30.2-GA"
 asm = "9.8"
 evas = "1.3.0"
 ktor = "3.3.0"
-shadow = "9.0.0"
+shadow = "9.2.2"
 kaml = "0.77.1"
 skiko = "0.9.24"
+gradlePluginPublish = "2.0.0"
 
 [libraries]
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -45,7 +46,7 @@ compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.re
 compose-desktop-common = { module = "org.jetbrains.compose.desktop:desktop", version.ref = "composeMin" }
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "composeMin" }
 compose-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMin" }
-compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMin"}
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMin" }
 
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
@@ -58,5 +59,6 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 
 shadow-gradlePlugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
+pluginPublish-gradlePlugin = { module = "com.gradle.plugin-publish:com.gradle.plugin-publish.gradle.plugin", version.ref = "gradlePluginPublish" }
 
 skiko-awt = { module = "org.jetbrains.skiko:skiko-awt", version.ref = "skiko" }
