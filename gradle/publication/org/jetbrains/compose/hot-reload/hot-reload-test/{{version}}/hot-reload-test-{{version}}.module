@@ -169,7 +169,7 @@
           }
         }
       ],
-      "{{HASH}}": [
+      "dependencyConstraints": [
         {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-reflect",

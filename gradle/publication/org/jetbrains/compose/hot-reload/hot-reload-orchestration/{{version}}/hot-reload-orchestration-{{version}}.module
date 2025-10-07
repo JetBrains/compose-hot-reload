@@ -133,7 +133,7 @@
       ]
     },
     {
-      "name": "{{HASH}}",
+      "name": "testFixturesApiElements",
       "attributes": {
         "org.gradle.category": "library",
         "org.gradle.dependency.bundling": "external",
@@ -170,7 +170,7 @@
       ]
     },
     {
-      "name": "{{HASH}}",
+      "name": "testFixturesRuntimeElements",
       "attributes": {
         "org.gradle.category": "library",
         "org.gradle.dependency.bundling": "external",
