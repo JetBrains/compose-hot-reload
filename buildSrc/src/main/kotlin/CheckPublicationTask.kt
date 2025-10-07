@@ -84,7 +84,7 @@ open class CheckPublicationTask : DefaultTask() {
 
     @OptIn(ExperimentalPathApi::class)
     private fun checkPublicationDump(root: Path) {
-        val hashRegex = Regex(""""[a-zA-Z0-9]{16,}"""")
+        val hashRegex = Regex(""""[a-z0-9]{16,}"""")
         val sizeRegex = Regex(""""size":\h*(?<size>\d+)""")
         val issues = mutableListOf<String>()
 

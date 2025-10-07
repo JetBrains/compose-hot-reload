@@ -126,7 +126,7 @@
       ]
     },
     {
-      "name": "{{HASH}}",
+      "name": "testFixturesApiElements",
       "attributes": {
         "org.gradle.category": "library",
         "org.gradle.dependency.bundling": "external",
@@ -170,7 +170,7 @@
       ]
     },
     {
-      "name": "{{HASH}}",
+      "name": "testFixturesRuntimeElements",
       "attributes": {
         "org.gradle.category": "library",
         "org.gradle.dependency.bundling": "external",
@@ -212,7 +212,7 @@
           }
         }
       ],
-      "{{HASH}}": [
+      "dependencyConstraints": [
         {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-tooling-core",

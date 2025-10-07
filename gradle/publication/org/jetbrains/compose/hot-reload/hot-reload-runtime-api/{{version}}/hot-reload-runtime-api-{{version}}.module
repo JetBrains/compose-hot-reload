@@ -15,7 +15,7 @@
   },
   "variants": [
     {
-      "name": "{{HASH}}",
+      "name": "metadataApiElements",
       "attributes": {
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "name": "{{HASH}}",
+      "name": "metadataSourcesElements",
       "attributes": {
         "org.gradle.category": "documentation",
         "org.gradle.dependency.bundling": "external",
