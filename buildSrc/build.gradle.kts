@@ -31,6 +31,7 @@ repositories {
     gradlePluginPortal {
         content {
             includeModuleByRegex("org.jetbrains.kotlinx", "kotlinx-benchmark-plugin")
+            includeModuleByRegex("com\\.gradle.*", ".*")
         }
     }
 
@@ -64,6 +65,8 @@ dependencies {
     implementation(deps.benchmark.gradlePlugin)
     implementation(deps.binaryCompatibilityValidator.gradlePlugin)
     implementation(deps.shadow.gradlePlugin)
+    implementation(deps.pluginPublish.gradlePlugin)
+
     implementation(deps.kotlinxSerialization.json)
     implementation(deps.kotlinxSerialization.kaml)
 
