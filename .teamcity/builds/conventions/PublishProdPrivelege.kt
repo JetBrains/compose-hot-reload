@@ -7,6 +7,8 @@ package builds.conventions
 
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.ParameterDisplay
+import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
+import jetbrains.buildServer.configs.kotlin.ui.insert
 
 interface PublishProdPrivilege
 
@@ -25,5 +27,19 @@ fun BuildType.publishProdPrivilegeConventions() {
             "credentialsJSON:55dbddf8-050d-4139-8a8c-82ede4c58523",
             display = ParameterDisplay.HIDDEN,
         )
+    }
+
+    steps.insert(0) {
+        gradle {
+            name = "Check Publication"
+            tasks = "checkPublishDeploy"
+        }
+    }
+
+    steps.insert(1) {
+        gradle {
+            name = "Check API"
+            tasks = "apiCheck"
+        }
     }
 }

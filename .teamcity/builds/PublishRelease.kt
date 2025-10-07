@@ -5,8 +5,8 @@
 
 package builds
 
-import builds.conventions.PushPrivilege
 import builds.conventions.PublishProdPrivilege
+import builds.conventions.PushPrivilege
 import builds.conventions.setupGit
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.ParameterDisplay
@@ -14,10 +14,11 @@ import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.projectFeatures.hashiCorpVaultConnection
 import jetbrains.buildServer.configs.kotlin.remoteParameters.hashiCorpVaultParameter
+import jetbrains.buildServer.configs.kotlin.sequential
 
 object PublishToMavenCentralProject : Project({
-    name = "Publish: Maven Central"
-    description = "Build configuration for publishing to Maven Central"
+    name = "Publish: Release"
+    description = "Release artifacts to Maven Central and Gradle Plugin Portal"
 
     features {
         hashiCorpVaultConnection {
@@ -34,8 +35,15 @@ object PublishToMavenCentralProject : Project({
 
     buildType(BuildDeployBundle)
     buildType(PublishToMavenCentral)
-})
+    buildType(PublishToGradlePluginPortal)
+    buildType(PublishRelease)
 
+    sequential {
+        buildType(PublishToMavenCentral)
+        buildType(PublishToGradlePluginPortal)
+        buildType(PublishRelease)
+    }
+})
 
 object BuildDeployBundle : BuildType({
     name = "Build: Deploy Bundle"
@@ -58,6 +66,11 @@ object BuildDeployBundle : BuildType({
     }
 })
 
+object PublishRelease : BuildType({
+    name = "Publish Release"
+    description = "Publish release artifacts to Maven Central and Gradle Plugin Portal"
+    type = Type.REGULAR
+})
 
 object PublishToMavenCentral : BuildType({
     name = "Publish to Maven Central"
@@ -99,6 +112,35 @@ object PublishToMavenCentral : BuildType({
         gradle {
             name = "Deploy"
             tasks = "deployMavenCentralDeployBundle"
+        }
+    }
+}), PushPrivilege, PublishProdPrivilege
+
+
+object PublishToGradlePluginPortal : BuildType({
+    name = "Publish to Gradle Plugin Portal"
+    type = Type.DEPLOYMENT
+
+    vcs {
+        cleanCheckout = true
+    }
+
+    params {
+        password("env.ORG_GRADLE_PROJECT_gradle.publish.key", "credentialsJSON:4e14fb85-66ca-467d-b53e-7b952d90e086")
+        password("env.ORG_GRADLE_PROJECT_gradle.publish.secret", "credentialsJSON:3724d482-e55a-4706-bc43-6756b0991272")
+    }
+
+    steps {
+        setupGit()
+
+        gradle {
+            name = "Deploy (Dry Run)"
+            tasks = "publishPlugins --validate-only"
+        }
+
+        gradle {
+            name = "Deploy"
+            tasks = "publishPlugins"
         }
     }
 }), PushPrivilege, PublishProdPrivilege
