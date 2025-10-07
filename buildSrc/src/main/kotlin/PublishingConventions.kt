@@ -10,6 +10,4 @@ open class PublishingConventions(project: Project) {
 
     val artifactId = project.objects.property<String>()
         .value(project.name)
-
-    val oldArtifactId = project.objects.property<String>()
 }

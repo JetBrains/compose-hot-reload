@@ -19,5 +19,4 @@ dependencies {
 
 publishingConventions {
     artifactId = "hot-reload-test-core"
-    oldArtifactId = "test-core"
 }

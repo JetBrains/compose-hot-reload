@@ -12,7 +12,6 @@ plugins {
 
 publishingConventions {
     artifactId = "hot-reload-test-gradle-plugin"
-    oldArtifactId = "test-gradle-plugin"
 }
 
 

@@ -160,31 +160,3 @@ fun MavenPublication.signPublicationIfKeyPresent() {
         }
     }
 }
-
-
-afterEvaluate {
-    publishing {
-        val oldArtifactId = extension.oldArtifactId.orNull ?: return@publishing
-        publications.toList().forEach { publication ->
-            if (publication !is MavenPublication) return@forEach
-
-            /* No relocation for gradle plugin markers */
-            if (publication.artifactId.endsWith("gradle.plugin")) return@forEach
-
-            publications.create(camelCase(publication.name, "relocation"), MavenPublication::class.java) {
-                afterEvaluate {
-                    artifactId = publication.artifactId.replace(extension.artifactId.get(), oldArtifactId)
-                    pom {
-                        distributionManagement {
-                            relocation {
-                                group = publication.groupId
-                                artifactId = publication.artifactId
-                                version = publication.version
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}

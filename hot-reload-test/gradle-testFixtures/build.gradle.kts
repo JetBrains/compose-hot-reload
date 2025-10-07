@@ -60,5 +60,4 @@ dependencies {
 
 publishingConventions {
     artifactId = "hot-reload-gradle-testFixtures"
-    oldArtifactId = "test-gradle"
 }
