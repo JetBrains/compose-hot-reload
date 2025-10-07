@@ -154,7 +154,7 @@
       ]
     },
     {
-      "name": "{{HASH}}",
+      "name": "standaloneRuntimeElements",
       "attributes": {
         "org.gradle.category": "library",
         "org.gradle.dependency.bundling": "shadowed",
