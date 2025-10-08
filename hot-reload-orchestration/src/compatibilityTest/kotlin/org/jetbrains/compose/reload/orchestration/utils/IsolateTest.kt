@@ -30,6 +30,7 @@ import java.io.File
 import java.nio.file.Path
 import java.util.concurrent.TimeoutException
 import java.util.stream.Stream
+import kotlin.io.path.name
 import kotlin.reflect.KClass
 import kotlin.streams.asStream
 import kotlin.test.assertEquals
@@ -113,8 +114,31 @@ class IsolateTestInvocationContextProvider : TestTemplateInvocationContextProvid
             .map { version ->
                 val isolateClass = context.requiredTestMethod.getAnnotation(IsolateTest::class.java).isolate
                 val classpath = System.getProperty("classpathV$version").split(File.pathSeparator).map { Path.of(it) }
+                checkClasspath(classpath, version)
                 IsolateTestInvocationContext(isolateClass, version, classpath)
             }.asStream()
+    }
+}
+
+private fun checkClasspath(classpath: List<Path>, testedVersion: Version) {
+    val orchestrationLibraryRegex = Regex("hot-reload-orchestration-(?<version>.*)\\.jar")
+    val orchestrationLibraryMatches = classpath.mapNotNull { file ->
+        orchestrationLibraryRegex.matchEntire(file.name)
+    }
+
+    if (orchestrationLibraryMatches.isEmpty()) {
+        error("Cannot find hot-reload-orchestration in classpath: $classpath")
+    }
+
+    if (orchestrationLibraryMatches.size > 1) {
+        error("Multiple hot-reload-orchestration versions found in classpath: $classpath")
+    }
+
+    val orchestrationLibraryMatch = orchestrationLibraryMatches.single()
+    orchestrationLibraryMatch.groups["version"]?.let { version ->
+        if (Version(version.value) != testedVersion) {
+            error("Unexpected hot-reload-orchestration version found in classpath: ${version.value}; expected: $testedVersion")
+        }
     }
 }
 
@@ -128,7 +152,7 @@ fun launch(action: suspend CoroutineScope.() -> Unit): Job {
 }
 
 context(_: IsolateTestContext, _: IsolateHandle)
-suspend fun<T> await(title: String, timeout: Duration = 30.seconds, action: suspend () -> T): T {
+suspend fun <T> await(title: String, timeout: Duration = 30.seconds, action: suspend () -> T): T {
     log("awaiting: '$title'")
     return try {
         withTimeout(timeout) {

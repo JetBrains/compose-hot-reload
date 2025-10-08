@@ -25,15 +25,20 @@ compatibilityTestCompilation.compileTaskProvider.configure {
 }
 
 val classpaths = testedVersions.associateWith { version ->
-    configurations.create("classpathV$version") {
-        attributes {
+    rootProject.configurations.create("classpathV$version").also { classpath ->
+        classpath.attributes {
             attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.JAVA_RUNTIME))
             attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.LIBRARY))
         }
 
-        dependencies.add(
-            project.dependencies.create("org.jetbrains.compose.hot-reload:hot-reload-orchestration:$version")
-        )
+
+        rootProject.dependencies {
+            classpath("org.jetbrains.compose.hot-reload:hot-reload-orchestration") {
+                version {
+                    strictly(version)
+                }
+            }
+        }
     }
 }
 
