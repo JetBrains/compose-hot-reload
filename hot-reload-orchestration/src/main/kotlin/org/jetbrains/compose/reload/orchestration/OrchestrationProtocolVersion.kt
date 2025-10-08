@@ -13,7 +13,9 @@ import org.jetbrains.compose.reload.core.toRight
 public enum class OrchestrationProtocolVersion(public val intValue: Int) {
     V1(1),
     V1_1(2),
-    V1_2(3);
+    V1_2(3),
+    V1_3(4),
+    ;
 
     public companion object {
         internal const val serialVersionUID: Long = 0L
@@ -32,7 +34,8 @@ public data class OrchestrationVersion(public val intValue: Int) : Comparable<Or
         public val v1: OrchestrationVersion = OrchestrationVersion(1)
         public val v1_1: OrchestrationVersion = OrchestrationVersion(2)
         public val v1_2: OrchestrationVersion = OrchestrationVersion(3)
-        public val current: OrchestrationVersion = v1_2
+        public val v1_3: OrchestrationVersion = OrchestrationVersion(4)
+        public val current: OrchestrationVersion = v1_3
     }
 
     override fun compareTo(other: OrchestrationVersion): Int {
@@ -44,6 +47,7 @@ public data class OrchestrationVersion(public val intValue: Int) : Comparable<Or
             v1 -> "v1($intValue)"
             v1_1 -> "v1.1($intValue)"
             v1_2 -> "v1.2($intValue)"
+            v1_3 -> "v1.3($intValue)"
             else -> "N/A($intValue)"
         }
     }
@@ -61,5 +65,6 @@ internal val OrchestrationMessage.availableSinceVersion: OrchestrationVersion
 internal val Class<out OrchestrationMessage>.availableSinceVersion: OrchestrationVersion
     get() = when (this) {
         OrchestrationMessage.InvalidatedComposeGroupMessage::class.java -> OrchestrationVersion.v1_2
+        OrchestrationMessage.RestartRequest::class.java -> OrchestrationVersion.v1_3
         else -> OrchestrationVersion.v1
     }

@@ -44,6 +44,8 @@ internal fun CoroutineScope.launchApplicationStates() {
 
     launchReloadStateActor()
     launchReloadUIState()
+
+    launchRestartActor()
 }
 
 fun main() {

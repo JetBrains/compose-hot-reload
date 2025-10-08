@@ -29,6 +29,7 @@ org/jetbrains/compose/reload/orchestration/OrchestrationMessage$RecompilerReady 
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ReloadClassesRequest = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ReloadClassesRequest$ChangeType = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ReloadClassesResult = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessage$RestartRequest = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$RetryFailedCompositionRequest = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$Screenshot = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ShutdownRequest = 0

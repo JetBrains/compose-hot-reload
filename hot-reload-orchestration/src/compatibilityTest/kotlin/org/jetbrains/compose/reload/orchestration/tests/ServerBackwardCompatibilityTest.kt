@@ -25,6 +25,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientCon
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage.DirtyScope
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RestartRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
@@ -318,6 +319,13 @@ class ServerBackwardCompatibilityTest {
                 )
             )
             server.send(invalidation)
+        }
+
+    @IsolateTest(EchoClient::class)
+    context(_: IsolateTestFixture)
+    fun `test - server sends RestartRequest to client - echo is still alive`() =
+        runAliveEchoClientTest { server ->
+            server.send(RestartRequest())
         }
 }
 

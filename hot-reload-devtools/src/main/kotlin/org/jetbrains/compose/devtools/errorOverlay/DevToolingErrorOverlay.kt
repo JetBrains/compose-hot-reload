@@ -56,8 +56,8 @@ import org.jetbrains.compose.devtools.widgets.DtHeader1
 import org.jetbrains.compose.devtools.widgets.DtText
 import org.jetbrains.compose.devtools.widgets.DtTextButton
 import org.jetbrains.compose.devtools.widgets.dtBorder
-import org.jetbrains.compose.devtools.widgets.restartAction
 import org.jetbrains.compose.reload.core.WindowId
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RestartRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 
 @Composable
@@ -135,7 +135,7 @@ private fun DevToolingErrorOverlay(
                         text = "Restart",
                         icon = DtImages.Image.RESTART_ICON,
                         tag = Tag.ActionButton,
-                        onClick = restartAction()
+                        onClick = { RestartRequest().sendAsync() }
                     )
 
                     DtTextButton(

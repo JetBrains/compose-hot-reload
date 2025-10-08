@@ -27,3 +27,4 @@ org.jetbrains.compose.reload.orchestration.OrchestrationMessage$TestEvent = v1(1
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$UIException = v1(1)
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$UIRendered = v1(1)
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$InvalidatedComposeGroupMessage = v1.2(3)
+org.jetbrains.compose.reload.orchestration.OrchestrationMessage$RestartRequest = v1.3(4)

@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.orchestration.tests
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.job
+import org.jetbrains.compose.reload.core.Version
 import org.jetbrains.compose.reload.core.await
 import org.jetbrains.compose.reload.core.awaitIdle
 import org.jetbrains.compose.reload.core.awaitOrThrow
@@ -18,6 +19,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage.DirtyScope
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RestartRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
@@ -34,11 +36,13 @@ import org.jetbrains.compose.reload.orchestration.utils.MinSupportedVersion
 import org.jetbrains.compose.reload.orchestration.utils.TestOrchestrationState
 import org.jetbrains.compose.reload.orchestration.utils.await
 import org.jetbrains.compose.reload.orchestration.utils.currentJar
+import org.jetbrains.compose.reload.orchestration.utils.launch
 import org.jetbrains.compose.reload.orchestration.utils.log
 import org.jetbrains.compose.reload.orchestration.utils.receiveAs
 import org.jetbrains.compose.reload.orchestration.utils.runIsolateTest
 import org.jetbrains.compose.reload.orchestration.utils.send
 import org.jetbrains.compose.reload.orchestration.utils.stateKey
+import org.jetbrains.compose.reload.orchestration.utils.testedVersion
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
 import kotlin.test.assertEquals
@@ -253,5 +257,38 @@ class ServerForwardCompatibilityTest {
         await("TestEvent echo from server") {
             messages.receiveAsFlow().first { it is TestEvent && it.payload == "Bye" }
         }
+    }
+
+    @IsolateTest(StartServer::class)
+    context(_: IsolateTestFixture)
+    fun `test - RestartRequest message`() = runIsolateTest {
+        val port = receiveAs<ServerPort>().port
+        val client = OrchestrationClient(Unknown, port)
+        client.connect().getOrThrow()
+
+        val channel = client.asChannel()
+
+        client.send(RestartRequest())
+        client.send(TestEvent("Bye"))
+
+        val connectionMonitor = launch {
+            client.awaitOrThrow()
+            error("Client disconnected")
+        }
+
+        // Opaque Orchestration Messages are supported since beta06
+        if (testedVersion > Version("1.0.0-beta06")) {
+            await("RestartRequest echo") {
+                channel.receiveAsFlow().first { it is RestartRequest }
+                log("RestartRequest echo received")
+            }
+        }
+
+        await("TestEvent echo") {
+            channel.receiveAsFlow().first { it is TestEvent && it.payload == "Bye" }
+            log("TestEvent echo received")
+        }
+
+        connectionMonitor.cancel()
     }
 }

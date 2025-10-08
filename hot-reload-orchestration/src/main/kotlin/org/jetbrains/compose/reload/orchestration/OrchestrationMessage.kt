@@ -479,6 +479,16 @@ internal constructor() : OrchestrationPackage(), Serializable {
         }
     }
 
+    /**
+     * Requests the devtools to restart the underlying application.
+     */
+    public class RestartRequest : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
+
 
     /* Base implementation */
     public val messageId: OrchestrationMessageId = OrchestrationMessageId.random()

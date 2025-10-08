@@ -15,7 +15,6 @@ import org.jetbrains.compose.devtools.sendAsync
 import org.jetbrains.compose.devtools.theme.DtImages
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.widgets.DtTextButton
-import org.jetbrains.compose.devtools.widgets.restartAction
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import kotlin.io.path.exists
@@ -51,14 +50,16 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
         )
 
         if (
-            (HotReloadEnvironment.argFile?.exists() == true &&
-                HotReloadEnvironment.mainClass != null)
+            HotReloadEnvironment.argFile?.exists() == true &&
+                HotReloadEnvironment.mainClass != null
         ) {
             DtTextButton(
                 text = "Restart",
                 icon = DtImages.Image.RESTART_ICON,
                 tag = Tag.ActionButton,
-                onClick = restartAction()
+                onClick = {
+                    OrchestrationMessage.RestartRequest().sendAsync()
+                }
             )
         }
 
