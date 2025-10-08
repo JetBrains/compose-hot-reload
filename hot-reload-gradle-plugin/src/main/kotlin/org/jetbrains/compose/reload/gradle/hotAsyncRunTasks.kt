@@ -111,12 +111,6 @@ internal open class ComposeHotAsyncRun : DefaultTask(), ComposeHotReloadRunTask 
     internal val mainClass = project.objects.property(String::class.java)
 
     @get:Internal
-    internal val className = project.objects.property(String::class.java)
-
-    @get:Internal
-    internal val funName = project.objects.property(String::class.java)
-
-    @get:Internal
     internal val stdinFile = project.objects.fileProperty()
 
     @get:Internal
@@ -142,18 +136,25 @@ internal open class ComposeHotAsyncRun : DefaultTask(), ComposeHotReloadRunTask 
     @Option(option = "mainClass", description = "Override the main class name")
     fun mainClas(mainClass: String) {
         this.mainClass.set(mainClass)
+        runTask?.configure { task ->
+            task.mainClass.set(mainClass)
+        }
     }
 
     @Suppress("unused")
     @Option(option = "className", description = "Provide the name of the class to execute")
     fun className(className: String) {
-        this.className.set(className)
+        runTask?.configure { task ->
+            (task as? ComposeHotDevRun)?.className?.set(className)
+        }
     }
 
     @Suppress("unused")
     @Option(option = "funName", description = "Provide the name of the function to execute")
     fun funName(funName: String) {
-        this.funName.set(funName)
+        runTask?.configure { task ->
+            (task as? ComposeHotDevRun)?.funName?.set(funName)
+        }
     }
 
     @Suppress("unused")
@@ -209,18 +210,11 @@ internal open class ComposeHotAsyncRun : DefaultTask(), ComposeHotReloadRunTask 
             .map { (key, value) -> "-D$key=$value" }
 
 
-        val additionalArguments = listOfNotNull(
-            *className.orNull?.let { className -> arrayOf("--className", className) }.orEmpty(),
-            *funName.orNull?.let { funName -> arrayOf("--funName", funName) }.orEmpty()
-        ).toTypedArray()
-
         val processBuilder = ProcessBuilder(
             javaBinary.get().asFile.absolutePath,
             *issueNewDebugSessionJvmArguments(name, intellijDebuggerDispatchPort),
-            "@${argFile.asFile.get().absolutePath}",
             *additionalJvmArguments.toTypedArray(),
-            mainClass.get(),
-            *additionalArguments
+            "@${argFile.asFile.get().absolutePath}",
         ).apply { environment().putAll(orchestrationListenerPortEnvironmentVariables.orNull.orEmpty()) }
             .redirectOutput(stdoutFile.get().asFile)
             .redirectError(stderrFile.get().asFile)

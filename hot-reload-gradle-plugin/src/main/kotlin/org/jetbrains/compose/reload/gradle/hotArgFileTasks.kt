@@ -37,9 +37,16 @@ private fun Project.registerHotArgfileTask(
         task.description = "Creates an argument file for the '${runTask.name}' task"
         task.runTaskName.set(runTask.name)
         task.argFile.set(provider { runTask.get().argFile.get() })
-        task.arguments.addAll(provider { runTask.get().allJvmArgs })
-        task.arguments.addAll(provider { runTask.get().jvmArgs })
+        task.jvmArguments.addAll(provider { runTask.get().allJvmArgs })
+        task.jvmArguments.addAll(provider { runTask.get().jvmArgs })
         task.classpath.from(project.files { runTask.get().classpath })
+
+        task.arguments.add(provider {
+            val mainClass = runTask.get().mainClass.orNull ?: return@provider emptyList<String>()
+            val args = runTask.get().args.orEmpty()
+            listOf(mainClass) + args
+        })
+
         task.dependsOn(provider { runTask.get().snapshotTaskName })
     }
 
@@ -53,6 +60,9 @@ private fun Project.registerHotArgfileTask(
 
 @DisableCachingByDefault(because = "Not worth caching")
 internal open class ComposeHotArgFileTask : DefaultTask(), ComposeHotReloadOtherTask {
+    @get:Input
+    internal val jvmArguments = project.objects.listProperty(Any::class.java)
+
     @get:Input
     internal val arguments = project.objects.listProperty(Any::class.java)
 
@@ -77,15 +87,19 @@ internal open class ComposeHotArgFileTask : DefaultTask(), ComposeHotReloadOther
     @TaskAction
     internal fun createArgfile() {
         val argFile = this.argFile.get().asFile.toPath()
-        argFile.createArgfile(arguments.get().flatMap { arg -> resolveArgument(arg) }, classpath.files)
+        argFile.createArgfile(
+            jvmArguments = jvmArguments.get().flatMap { arg -> resolveArgument(arg) },
+            classpath = classpath.files,
+            arguments = arguments.get().flatMap { arg -> resolveArgument(arg) }
+        )
         logger.info("$argFile created")
     }
 }
 
-internal fun Path.createArgfile(arguments: List<String>, classpath: Collection<File>) {
+internal fun Path.createArgfile(jvmArguments: List<String>, classpath: Collection<File>, arguments: List<String>) {
     createParentDirectories()
     outputStream().bufferedWriter().use { writer ->
-        arguments.forEach { arg ->
+        jvmArguments.forEach { arg ->
             val escaped = arg.replace("""\""", """\\""")
             writer.appendLine("\"$escaped\"")
         }
@@ -94,6 +108,12 @@ internal fun Path.createArgfile(arguments: List<String>, classpath: Collection<F
             file.absolutePath.replace("""\""", """\\""")
         }
         writer.appendLine("-cp \"$classpathFormatted\"")
+
+        arguments.forEach { arg ->
+            val escaped = arg.replace("""\""", """\\""")
+            writer.appendLine("\"$escaped\"")
+        }
+
         writer.flush()
     }
 }

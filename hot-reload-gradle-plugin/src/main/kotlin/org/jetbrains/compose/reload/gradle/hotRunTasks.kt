@@ -139,7 +139,9 @@ internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<Ko
         ComposeHotRun tasks will have a dedicated task to create this argfile
         */
         if (this !is AbstractComposeHotRun) {
-            argfile.orNull?.asFile?.toPath()?.createArgfile(allJvmArgs, classpath.files)
+            argfile.orNull?.asFile?.toPath()?.createArgfile(
+                allJvmArgs, classpath.files, listOfNotNull(mainClass.orNull, *args.orEmpty().toTypedArray())
+            )
         }
 
         jvmArgs = jvmArgs.orEmpty() + "-D${HotReloadProperty.LaunchMode.key}=${LaunchMode.GradleBlocking.name}"

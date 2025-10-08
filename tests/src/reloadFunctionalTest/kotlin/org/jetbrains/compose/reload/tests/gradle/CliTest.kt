@@ -25,7 +25,6 @@ class CliTest {
     @GradleIntegrationTest
     @HotReloadTest
     fun `test - --auto option`(fixture: HotReloadTestFixture) = fixture.runTest {
-        System.getProperties()
         projectDir.resolve(getDefaultMainKtSourceFile()).createParentDirectories().writeText(
             """
             import org.jetbrains.compose.reload.test.*

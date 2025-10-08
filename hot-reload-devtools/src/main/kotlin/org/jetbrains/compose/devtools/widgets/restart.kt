@@ -9,8 +9,6 @@ import androidx.compose.runtime.Composable
 import io.sellmair.evas.compose.EvasLaunching
 import org.jetbrains.compose.devtools.send
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
-import org.jetbrains.compose.reload.core.HotReloadProperty
-import org.jetbrains.compose.reload.core.LaunchMode
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
@@ -26,8 +24,6 @@ internal fun restartAction(): () -> Unit = EvasLaunching {
     val processBuilder = ProcessBuilder(
         System.getProperty("java.home") + "/bin/java",
         "@" + (HotReloadEnvironment.argFile?.absolutePathString() ?: return@EvasLaunching),
-        "-D${HotReloadProperty.LaunchMode.key}=${LaunchMode.Detached.name}",
-        HotReloadEnvironment.mainClass ?: return@EvasLaunching,
     )
 
     HotReloadEnvironment.stdinFile?.let { file ->
