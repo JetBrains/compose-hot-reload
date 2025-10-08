@@ -147,7 +147,7 @@ plugins.withId("org.jetbrains.kotlin.multiplatform") {
 
 fun MavenPublication.signPublicationIfKeyPresent() {
     extensions.configure<SigningExtension>("signing") {
-        if (signingSecretKey.isNullOrBlank() || signingKeyId.isNullOrBlank() || signingPassword.isNullOrBlank()) {
+        if (signingSecretKey.isNullOrBlank() || signingPassword.isNullOrBlank()) {
             isRequired = false
             return@configure
         }
