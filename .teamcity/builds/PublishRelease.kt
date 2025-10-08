@@ -9,6 +9,7 @@ import builds.conventions.PublishProdPrivilege
 import builds.conventions.PushPrivilege
 import builds.conventions.setupGit
 import jetbrains.buildServer.configs.kotlin.BuildType
+import jetbrains.buildServer.configs.kotlin.FailureAction
 import jetbrains.buildServer.configs.kotlin.ParameterDisplay
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
@@ -69,7 +70,7 @@ object BuildDeployBundle : BuildType({
 object PublishRelease : BuildType({
     name = "Publish Release"
     description = "Publish release artifacts to Maven Central and Gradle Plugin Portal"
-    type = Type.REGULAR
+    type = Type.COMPOSITE
 })
 
 object PublishToMavenCentral : BuildType({
@@ -128,6 +129,13 @@ object PublishToGradlePluginPortal : BuildType({
     params {
         password("env.ORG_GRADLE_PROJECT_gradle.publish.key", "credentialsJSON:4e14fb85-66ca-467d-b53e-7b952d90e086")
         password("env.ORG_GRADLE_PROJECT_gradle.publish.secret", "credentialsJSON:3724d482-e55a-4706-bc43-6756b0991272")
+    }
+
+    dependencies {
+        snapshot(PublishToMavenCentral) {
+            onDependencyFailure = FailureAction.FAIL_TO_START
+            onDependencyCancel = FailureAction.FAIL_TO_START
+        }
     }
 
     steps {
