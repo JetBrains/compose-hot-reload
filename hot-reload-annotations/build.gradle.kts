@@ -14,9 +14,8 @@ import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
-    `maven-publish`
-    `publishing-conventions`
-    `api-validation-conventions`
+    build.publish
+    build.apiValidation
 }
 
 kotlin {

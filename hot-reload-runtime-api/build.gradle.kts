@@ -17,9 +17,8 @@ plugins {
     kotlin("plugin.compose")
     id("org.jetbrains.compose")
     id("com.android.library")
-    `maven-publish`
-    `publishing-conventions`
-    `api-validation-conventions`
+    build.publish
+    build.apiValidation
 }
 
 kotlin {

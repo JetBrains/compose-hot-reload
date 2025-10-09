@@ -9,18 +9,11 @@ import org.jetbrains.compose.reload.InternalHotReloadApi
 
 plugins {
     kotlin("jvm")
-    `maven-publish`
-    `publishing-conventions`
     `java-test-fixtures`
-    `api-validation-conventions`
-    `orchestration-compatibility-tests`
     org.jetbrains.kotlinx.benchmark
-}
-
-kotlin {
-    compilerOptions {
-        explicitApi()
-    }
+    build.publish
+    build.apiValidation
+    build.orchestrationCompatibilityTests
 }
 
 benchmark {
@@ -44,11 +37,4 @@ dependencies {
     testImplementation(deps.lincheck)
 
     compatibilityTestImplementation(deps.coroutines.test)
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
-    testLogging {
-        showStandardStreams = true
-    }
 }

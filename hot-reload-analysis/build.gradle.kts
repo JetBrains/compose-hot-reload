@@ -10,21 +10,20 @@
 
 plugins {
     kotlin("jvm")
-    `maven-publish`
-    `publishing-conventions`
-    `tests-with-compiler`
     `java-test-fixtures`
     org.jetbrains.kotlinx.benchmark
-    `api-validation-conventions`
+
+    build.publish
+    build.compilerTest
+    build.apiValidation
 }
 
 kotlin.compilerOptions {
     optIn.add("org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi")
 }
 
-
 kotlin {
-    target.compilations.create("benchmark") {
+    target.compilations.create("benchmark").apply {
         associateWith(target.compilations.getByName("main"))
         defaultSourceSet {
             dependencies {

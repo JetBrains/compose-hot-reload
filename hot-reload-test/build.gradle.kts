@@ -10,9 +10,8 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.compose")
     id("org.jetbrains.compose")
-    `maven-publish`
-    `publishing-conventions`
-    `api-validation-conventions`
+    build.publish
+    build.apiValidation
     `bootstrap-conventions`
 }
 

@@ -5,9 +5,13 @@
 
 @file:Suppress("UnstableApiUsage")
 
+
+rootProject.name = "compose-hot-reload"
+
 pluginManagement {
     repositories {
         maven(file("build/bootstrap"))
+
         maven("https://packages.jetbrains.team/maven/p/firework/dev") {
             mavenContent {
                 includeGroupAndSubgroups("org.jetbrains.compose.hot-reload")
@@ -18,8 +22,17 @@ pluginManagement {
             content {
                 includeGroupByRegex("org.gradle.*")
                 includeGroupByRegex("com.gradle.*")
+                includeModuleByRegex("org.jetbrains.kotlinx", "kotlinx-benchmark-plugin")
             }
         }
+
+        google {
+            mavenContent {
+                includeGroupByRegex(".*google.*")
+                includeGroupByRegex(".*android.*")
+            }
+        }
+
         mavenCentral()
     }
 }
@@ -28,12 +41,13 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
+
 /*
 Configure Repositories / Dependencies
 */
 dependencyResolutionManagement {
     versionCatalogs {
-        create("deps") {
+        create("deps").apply {
             from(files("dependencies.toml"))
         }
     }
@@ -78,16 +92,13 @@ include(":hot-reload-test:gradle-plugin")
 include(":hot-reload-test:gradle-testFixtures")
 include(":tests")
 
-
 gradle.beforeProject {
     group = "org.jetbrains.compose.hot-reload"
     version = project.providers.gradleProperty("version").get()
 
-    plugins.apply("test-conventions")
     plugins.apply("main-conventions")
-    plugins.apply("kotlin-conventions")
+    plugins.apply("test-conventions")
 }
-
 
 buildCache {
     local {

@@ -3,7 +3,14 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-@file:Suppress("UnstableApiUsage", "unused")
+import org.jetbrains.compose.reload.build.isCI
+import org.jetbrains.compose.reload.build.tasks.CheckPublicationTask
+import org.jetbrains.compose.reload.build.tasks.PublishToMavenCentralTask
+import org.jetbrains.compose.reload.build.tasks.UpdateVersionTask
+
+plugins {
+    `root-conventions`
+}
 
 tasks.maybeCreate<Delete>("clean").apply {
     delete(layout.buildDirectory)
@@ -58,7 +65,6 @@ val publishDeploy by tasks.registering {
 checkPublishDeploy.configure {
     dependsOn(publishDeploy)
 }
-
 
 val cleanBootstrap by tasks.registering(Delete::class) {
     delete(layout.buildDirectory.dir("bootstrap"))

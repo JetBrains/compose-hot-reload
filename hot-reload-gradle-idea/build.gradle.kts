@@ -5,10 +5,9 @@
 
 plugins {
     `embedded-kotlin`
-    `maven-publish`
-    `publishing-conventions`
-    `api-validation-conventions`
-    `kotlinx-serialization`
+    org.jetbrains.kotlin.plugin.serialization
+    build.publish
+    build.apiValidation
 }
 
 kotlin {

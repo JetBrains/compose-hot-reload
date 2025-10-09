@@ -3,6 +3,8 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
+package org.jetbrains.compose.reload.build.tasks
+
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -30,7 +32,6 @@ import kotlin.io.path.exists
 import kotlin.io.path.extension
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.name
-import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.pathString
 import kotlin.io.path.readText
 import kotlin.io.path.relativeTo

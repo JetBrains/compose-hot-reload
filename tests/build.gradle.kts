@@ -7,6 +7,7 @@
 
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.compose.ExperimentalComposeLibrary
+import org.jetbrains.compose.reload.build.skikoCurrentOs
 
 plugins {
     kotlin("jvm")
@@ -17,7 +18,6 @@ plugins {
     id("org.jetbrains.compose.hot-reload")
     id("org.jetbrains.compose.hot-reload.test")
     `bootstrap-conventions`
-    `test-conventions`
 }
 
 kotlin {

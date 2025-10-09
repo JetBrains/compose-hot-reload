@@ -11,10 +11,8 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 plugins {
     kotlin("jvm")
-    `maven-publish`
-    `publishing-conventions`
-    `tests-with-compiler`
-    `test-conventions`
+    build.publish
+    build.compilerTest
     com.gradleup.shadow
 }
 
@@ -27,7 +25,7 @@ kotlin.compilerOptions {
 Setup the 'embedded' fat jar which allows the agent being used as one single jar file.
 This might be useful for simpler build systems
  */
-val packageStandalone = configurations.create("packageStandalone") {
+val packageStandalone: Configuration = configurations.create("packageStandalone").apply {
     this.isCanBeResolved = true
     this.isCanBeConsumed = false
     attributes {

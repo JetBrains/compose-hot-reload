@@ -1,7 +1,9 @@
 /*
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
- * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
+
+package org.jetbrains.compose.reload.build.tasks
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -11,7 +13,6 @@ import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitForm
-import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -30,11 +31,6 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
 import java.util.Base64
 import kotlin.io.path.createDirectories
-
-/*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
- * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
- */
 
 abstract class PublishToMavenCentralTask : DefaultTask() {
 
@@ -93,7 +89,7 @@ abstract class PublishToMavenCentralTask : DefaultTask() {
             }
         }
 
-        if (response.status != HttpStatusCode.Created) {
+        if (response.status != HttpStatusCode.Companion.Created) {
             error("Deployment failed (${response.status}):\n ${response.bodyAsText()}")
         }
 
@@ -111,7 +107,7 @@ abstract class PublishToMavenCentralTask : DefaultTask() {
                 url("https://central.sonatype.com/api/v1/publisher/status")
                 parameter("id", deploymentId)
             }
-            if (statusResponse.status != HttpStatusCode.OK) {
+            if (statusResponse.status != HttpStatusCode.Companion.OK) {
                 error("Deployment failed (${statusResponse.status}):\n ${statusResponse.bodyAsText()}")
             }
 

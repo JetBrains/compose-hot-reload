@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package properties
+package org.jetbrains.compose.reload.build.tasks
 
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlList
@@ -11,7 +11,7 @@ import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
 import com.charleskorn.kaml.yamlScalar
 import kotlinx.serialization.decodeFromString
-import properties.DeclaredHotReloadProperty.Type
+import org.jetbrains.compose.reload.build.tasks.DeclaredHotReloadProperty.Type
 import java.nio.file.Path
 import kotlin.io.path.readText
 

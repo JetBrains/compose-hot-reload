@@ -12,11 +12,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 plugins {
     kotlin("jvm")
     kotlin("plugin.compose")
-    id("org.jetbrains.compose")
     id("org.jetbrains.compose.hot-reload")
-    `maven-publish`
+    org.jetbrains.compose
     `bootstrap-conventions`
-    `publishing-conventions`
+    build.publish
 }
 
 kotlin {

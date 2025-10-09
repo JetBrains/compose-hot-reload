@@ -5,8 +5,7 @@
 
 plugins {
     kotlin("jvm")
-    `maven-publish`
-    `publishing-conventions`
+    build.publish
 }
 
 kotlin {

@@ -12,11 +12,10 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar.Companion.shad
 plugins {
     `embedded-kotlin`
     `java-gradle-plugin`
-    `maven-publish`
-    `publishing-conventions`
-    `api-validation-conventions`
     com.gradle.`plugin-publish`
     com.gradleup.shadow
+    build.publish
+    build.apiValidation
 }
 
 gradlePlugin {

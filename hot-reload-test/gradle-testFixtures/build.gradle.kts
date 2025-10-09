@@ -3,12 +3,12 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
+import org.jetbrains.compose.reload.build.skikoCurrentOs
+
 plugins {
     kotlin("jvm")
-    `maven-publish`
-    `kotlin-conventions`
-    `publishing-conventions`
-    `tests-with-compiler`
+    build.publish
+    build.compilerTest
     org.jetbrains.kotlinx.benchmark
 }
 
@@ -19,7 +19,7 @@ kotlin {
         optIn.add("org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi")
     }
 
-    target.compilations.create("benchmark") {
+    target.compilations.create("benchmark").apply {
         associateWith(target.compilations.getByName("main"))
         defaultSourceSet {
             dependencies {

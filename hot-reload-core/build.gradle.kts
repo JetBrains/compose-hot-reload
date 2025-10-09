@@ -1,4 +1,5 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import org.jetbrains.compose.reload.build.tasks.GenerateHotReloadEnvironmentTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 /*
@@ -8,11 +9,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
     kotlin("jvm")
-    `maven-publish`
-    `publishing-conventions`
     `java-test-fixtures`
     org.jetbrains.kotlinx.benchmark
-    `api-validation-conventions`
+    build.publish
+    build.apiValidation
 }
 
 kotlin {
@@ -158,7 +158,7 @@ run {
     }
 
     val generateEnvironmentSources =
-        tasks.register<properties.GenerateHotReloadEnvironmentTask>("generateHotReloadEnvironment") {
+        tasks.register<GenerateHotReloadEnvironmentTask>("generateHotReloadEnvironment") {
             outputSourcesDir = generatedSourceDir
         }
 

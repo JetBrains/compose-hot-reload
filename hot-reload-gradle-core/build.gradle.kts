@@ -1,5 +1,5 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
-import properties.GenerateHotReloadEnvironmentGradleExtensionsTask
+import org.jetbrains.compose.reload.build.tasks.GenerateHotReloadEnvironmentGradleExtensionsTask
 
 /*
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
@@ -8,9 +8,8 @@ import properties.GenerateHotReloadEnvironmentGradleExtensionsTask
 
 plugins {
     kotlin("jvm")
-    `maven-publish`
-    `publishing-conventions`
-    `api-validation-conventions`
+    build.publish
+    build.apiValidation
 }
 
 dependencies {

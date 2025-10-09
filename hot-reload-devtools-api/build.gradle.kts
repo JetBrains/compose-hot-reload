@@ -9,11 +9,10 @@ import org.jetbrains.compose.ExperimentalComposeLibrary
 
 plugins {
     kotlin("jvm")
-    `maven-publish`
-    `publishing-conventions`
-    `api-validation-conventions`
     org.jetbrains.compose
     org.jetbrains.kotlin.plugin.compose
+    build.publish
+    build.apiValidation
 }
 
 kotlin {

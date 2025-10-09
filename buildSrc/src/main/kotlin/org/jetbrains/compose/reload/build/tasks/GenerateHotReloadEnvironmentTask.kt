@@ -5,7 +5,7 @@
 
 @file:OptIn(DelicateHotReloadApi::class)
 
-package properties
+package org.jetbrains.compose.reload.build.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.InputFile
@@ -13,9 +13,9 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.compose.reload.DelicateHotReloadApi
+import org.jetbrains.compose.reload.build.tasks.DeclaredHotReloadProperty.Type
 import org.jetbrains.compose.reload.core.asTemplateOrThrow
 import org.jetbrains.compose.reload.core.renderOrThrow
-import properties.DeclaredHotReloadProperty.Type
 
 open class GenerateHotReloadEnvironmentTask : DefaultTask() {
     @InputFile
