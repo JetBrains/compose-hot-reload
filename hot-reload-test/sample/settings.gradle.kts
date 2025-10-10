@@ -17,8 +17,8 @@ pluginManagement {
     }
 
     plugins {
-        kotlin("multiplatform") version "2.2.0"
-        kotlin("plugin.compose") version "2.2.0"
+        kotlin("multiplatform") version "2.2.21-RC"
+        kotlin("plugin.compose") version "2.2.21-RC"
         id("org.jetbrains.compose") version "1.7.3"
     }
 }

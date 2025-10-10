@@ -99,7 +99,7 @@ class TestKt {
         }
     }
     
-    fun Foo$lambda$1$lambda$0 (IILandroidx/compose/runtime/Composer;I)Lkotlin/Unit; {
+    fun Foo$lambda$0$0 (IILandroidx/compose/runtime/Composer;I)Lkotlin/Unit; {
         Method (group=null)
         L0
         ILOAD 0
@@ -115,7 +115,7 @@ class TestKt {
         }
     }
     
-    fun Foo$lambda$2 (IILandroidx/compose/runtime/Composer;I)Lkotlin/Unit; {
+    fun Foo$lambda$1 (IILandroidx/compose/runtime/Composer;I)Lkotlin/Unit; {
         Method (group=null)
         L0
         ILOAD 0
@@ -222,8 +222,8 @@ class TestKt {
             BIPUSH -12
             IF_ICMPLE L10
             ALOAD 1
-                ReplaceGroup (group=ComposeGroupKey(key=-1254930869))
-                LDC -1254930869
+                ReplaceGroup (group=ComposeGroupKey(key=-1254942773))
+                LDC -1254942773
                 INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
                 ALOAD 1
                 ASTORE 5
@@ -304,7 +304,7 @@ class TestKt {
                     IFLE L18
                     ALOAD 9
                     INVOKEINTERFACE androidx/compose/runtime/Composer.endReplaceGroup ()V (itf)
-                ReplaceGroup (group=ComposeGroupKey(key=-1254930869))
+                ReplaceGroup (group=ComposeGroupKey(key=-1254942773))
                 GOTO L19
                     ReplaceGroup (group=ComposeGroupKey(key=-1795835205))
                     L18
@@ -336,7 +336,7 @@ class TestKt {
               // arguments:
               (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;, 
               // handle kind 0x6 : INVOKESTATIC
-              TestKt.Foo$lambda$1$lambda$0(IILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;, 
+              TestKt.Foo$lambda$0$0(IILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;, 
               (Landroidx/compose/runtime/Composer;Ljava/lang/Integer;)Lkotlin/Unit;
             ]
         INVOKEINTERFACE androidx/compose/runtime/ScopeUpdateScope.updateScope (Lkotlin/jvm/functions/Function2;)V (itf)
@@ -376,7 +376,7 @@ class TestKt {
                     INVOKESTATIC androidx/compose/material3/TextKt.Text--4IGK_g (Ljava/lang/String;Landroidx/compose/ui/Modifier;JJLandroidx/compose/ui/text/font/FontStyle;Landroidx/compose/ui/text/font/FontWeight;Landroidx/compose/ui/text/font/FontFamily;JLandroidx/compose/ui/text/style/TextDecoration;Landroidx/compose/ui/text/style/TextAlign;JIZIILkotlin/jvm/functions/Function1;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)V
                     ALOAD 9
                     INVOKEINTERFACE androidx/compose/runtime/Composer.endReplaceGroup ()V (itf)
-                ReplaceGroup (group=ComposeGroupKey(key=-1254930869))
+                ReplaceGroup (group=ComposeGroupKey(key=-1254942773))
                 L24
                 LINENUMBER 13 L24
                 NOP
@@ -420,8 +420,8 @@ class TestKt {
             L10
             FRAME FULL [I androidx/compose/runtime/Composer I I I] []
             ALOAD 1
-                ReplaceGroup (group=ComposeGroupKey(key=-1255078367))
-                LDC -1255078367
+                ReplaceGroup (group=ComposeGroupKey(key=-1255090271))
+                LDC -1255090271
                 INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
                 ALOAD 1
                 INVOKEINTERFACE androidx/compose/runtime/Composer.endReplaceGroup ()V (itf)
@@ -456,7 +456,7 @@ class TestKt {
             INVOKESTATIC androidx/compose/runtime/ComposerKt.traceEventEnd ()V
             GOTO L29
             L7
-            LINENUMBER 4 L7
+            LINENUMBER 5 L7
             FRAME SAME
             ALOAD 1
             INVOKEINTERFACE androidx/compose/runtime/Composer.skipToGroupEnd ()V (itf)
@@ -476,7 +476,7 @@ class TestKt {
               // arguments:
               (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;, 
               // handle kind 0x6 : INVOKESTATIC
-              TestKt.Foo$lambda$2(IILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;, 
+              TestKt.Foo$lambda$1(IILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;, 
               (Landroidx/compose/runtime/Composer;Ljava/lang/Integer;)Lkotlin/Unit;
             ]
         INVOKEINTERFACE androidx/compose/runtime/ScopeUpdateScope.updateScope (Lkotlin/jvm/functions/Function2;)V (itf)

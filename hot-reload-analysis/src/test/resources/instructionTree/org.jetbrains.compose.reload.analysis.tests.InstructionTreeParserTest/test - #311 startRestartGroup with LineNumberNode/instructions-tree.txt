@@ -52,14 +52,14 @@ class TestKt {
             BlockToken(2)
             ReturnToken(returnInsn=176)
     
-            ReplaceGroup (group=ComposeGroupKey(key=415376659)) {
-                StartReplaceGroup(key=ComposeGroupKey(key=415376659))
+            ReplaceGroup (group=ComposeGroupKey(key=415364755)) {
+                StartReplaceGroup(key=ComposeGroupKey(key=415364755))
                 BlockToken(1)
                 EndReplaceGroup()
             }
     
-            ReplaceGroup (group=ComposeGroupKey(key=415415223)) {
-                StartReplaceGroup(key=ComposeGroupKey(key=415415223))
+            ReplaceGroup (group=ComposeGroupKey(key=415403319)) {
+                StartReplaceGroup(key=ComposeGroupKey(key=415403319))
                 BlockToken(4)
                 LabelToken(L9, lineNumber=9)
                 BlockToken(1)

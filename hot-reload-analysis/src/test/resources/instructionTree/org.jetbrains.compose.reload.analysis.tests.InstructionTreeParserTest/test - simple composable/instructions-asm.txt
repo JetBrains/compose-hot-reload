@@ -85,7 +85,7 @@ class TestKt {
             INVOKESTATIC androidx/compose/runtime/ComposerKt.traceEventEnd ()V
             GOTO L5
             L3
-            LINENUMBER 4 L3
+            LINENUMBER 5 L3
             FRAME SAME
             ALOAD 0
             INVOKEINTERFACE androidx/compose/runtime/Composer.skipToGroupEnd ()V (itf)

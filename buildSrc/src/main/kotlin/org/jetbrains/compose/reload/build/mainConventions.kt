@@ -3,6 +3,8 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
+@file:OptIn(ExperimentalWasmDsl::class)
+
 package org.jetbrains.compose.reload.build
 
 import org.gradle.api.Plugin
@@ -15,6 +17,7 @@ import org.gradle.jvm.toolchain.JvmVendorSpec
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.compose.reload.gradle.HotReloadUsage
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.HasConfigurableKotlinCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
@@ -61,6 +64,11 @@ private fun Project.setupKotlinStdlibDependency() {
         if (this is KotlinMultiplatformExtension) {
             sourceSets.commonMain.dependencies {
                 implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.21")
+            }
+
+            // wasmJs requires the same stdlib version as the compiler version
+            wasmJs().compilations.getByName("main").dependencies {
+                implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21-RC")
             }
         }
 

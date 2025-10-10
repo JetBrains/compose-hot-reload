@@ -1,15 +1,15 @@
 import androidx.compose.runtime.*
 import androidx.compose.material3.Text
 
-@Composable                                                 	// RestartGroup (group=ComposeGroupKey(key=-643616831))
+@Composable
 fun Foo(value: Int) {                                       	// Method (group=ComposeGroupKey(key=-643616831)),RestartGroup (group=ComposeGroupKey(key=-643616831))
-    if(value > 0) {                                         	// RestartGroup (group=ComposeGroupKey(key=-643616831)),ReplaceGroup (group=ComposeGroupKey(key=-1254950492))
-        Text("Hello")                                       	// ReplaceGroup (group=ComposeGroupKey(key=-1254950492))
-    } else {                                                	// RestartGroup (group=ComposeGroupKey(key=-643616831)),ReplaceGroup (group=ComposeGroupKey(key=-1254913354))
-        if(value > 10) {                                    	// ReplaceGroup (group=ComposeGroupKey(key=-1254913354)),ReplaceGroup (group=ComposeGroupKey(key=-1254890631)),ReplaceGroup (group=ComposeGroupKey(key=-1255077375))
-            Text("Hello 10")                                	// ReplaceGroup (group=ComposeGroupKey(key=-1254890631))
+    if(value > 0) {                                         	// RestartGroup (group=ComposeGroupKey(key=-643616831)),ReplaceGroup (group=ComposeGroupKey(key=-1254962396))
+        Text("Hello")                                       	// ReplaceGroup (group=ComposeGroupKey(key=-1254962396))
+    } else {                                                	// RestartGroup (group=ComposeGroupKey(key=-643616831)),ReplaceGroup (group=ComposeGroupKey(key=-1254925258))
+        if(value > 10) {                                    	// ReplaceGroup (group=ComposeGroupKey(key=-1254925258)),ReplaceGroup (group=ComposeGroupKey(key=-1254902535)),ReplaceGroup (group=ComposeGroupKey(key=-1255089279))
+            Text("Hello 10")                                	// ReplaceGroup (group=ComposeGroupKey(key=-1254902535))
         }
         
-        Text("Hello else")                                  	// ReplaceGroup (group=ComposeGroupKey(key=-1254913354))
+        Text("Hello else")                                  	// ReplaceGroup (group=ComposeGroupKey(key=-1254925258))
     }
 }                                                           	// RestartGroup (group=ComposeGroupKey(key=-643616831)),Method (group=ComposeGroupKey(key=-643616831))

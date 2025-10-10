@@ -36,7 +36,7 @@ class FooKt {
         BlockToken(3)
             FrameNode [-1]
             VarInsnNode [25]
-            LdcInsnNode(-1292291978) [18]
+            LdcInsnNode(-1292292362) [18]
         LabelToken(L2, lineNumber=5)
             LabelNode(L2)
             LineNumberNode [-1]
@@ -70,8 +70,8 @@ class FooKt {
             JumpInsNode(L7)) [153])
         BlockToken(1)
             VarInsnNode [25]
-        StartReplaceGroup(key=ComposeGroupKey(key=-1406308483))
-            LdcInsnNode(-1406308483) [18]
+        StartReplaceGroup(key=ComposeGroupKey(key=-1406320387))
+            LdcInsnNode(-1406320387) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]
         BlockToken(1)
             VarInsnNode [25]
@@ -89,8 +89,8 @@ class FooKt {
         BlockToken(2)
             FrameNode [-1]
             VarInsnNode [25]
-        StartReplaceGroup(key=ComposeGroupKey(key=-1406269919))
-            LdcInsnNode(-1406269919) [18]
+        StartReplaceGroup(key=ComposeGroupKey(key=-1406281823))
+            LdcInsnNode(-1406281823) [18]
             LabelNode(L8)
             LineNumberNode [-1]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]

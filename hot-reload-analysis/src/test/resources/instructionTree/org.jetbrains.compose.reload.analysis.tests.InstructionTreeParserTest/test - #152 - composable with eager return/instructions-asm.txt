@@ -461,7 +461,7 @@ class TestKt {
             L77
             GOTO L76
             L3
-            LINENUMBER 10 L3
+            LINENUMBER 11 L3
             FRAME FULL [androidx/compose/runtime/Composer I] []
             ALOAD 0
             INVOKEINTERFACE androidx/compose/runtime/Composer.skipToGroupEnd ()V (itf)

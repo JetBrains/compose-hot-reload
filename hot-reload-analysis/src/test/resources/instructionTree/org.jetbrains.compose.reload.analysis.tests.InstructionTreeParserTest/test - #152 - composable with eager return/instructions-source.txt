@@ -7,7 +7,7 @@ fun Value(): String? {
     return "value: 0"                                       	// Method (group=ComposeGroupKey(key=-1250970360))
 }
 
-@Composable                                                 	// RestartGroup (group=ComposeGroupKey(key=-607362160))
+@Composable
 fun Foo() {                                                 	// Method (group=ComposeGroupKey(key=-607362160)),RestartGroup (group=ComposeGroupKey(key=-607362160))
     val value = Value() ?: return                           	// RestartGroup (group=ComposeGroupKey(key=-607362160)),Method (group=ComposeGroupKey(key=-607362160))
     Column {                                                	// RestartGroup (group=ComposeGroupKey(key=-607362160))

@@ -31,7 +31,7 @@ class TestKt {
         L1
         FRAME SAME
         ALOAD 1
-        LDC 13398048
+        LDC 13397664
         L2
         LINENUMBER 5 L2
         ALOAD 0
@@ -52,8 +52,8 @@ class TestKt {
         FRAME SAME1 I
         IFEQ L6
         ALOAD 1
-            ReplaceGroup (group=ComposeGroupKey(key=415376659))
-            LDC 415376659
+            ReplaceGroup (group=ComposeGroupKey(key=415364755))
+            LDC 415364755
             INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
             ALOAD 1
             INVOKEINTERFACE androidx/compose/runtime/Composer.endReplaceGroup ()V (itf)
@@ -65,8 +65,8 @@ class TestKt {
         L6
         FRAME SAME
         ALOAD 1
-            ReplaceGroup (group=ComposeGroupKey(key=415415223))
-            LDC 415415223
+            ReplaceGroup (group=ComposeGroupKey(key=415403319))
+            LDC 415403319
             L9
             LINENUMBER 8 L9
             INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)

@@ -96,8 +96,8 @@ class TestKt {
             ILOAD 0
             IFLE L9
             ALOAD 1
-                ReplaceGroup (group=ComposeGroupKey(key=-1254950492))
-                LDC -1254950492
+                ReplaceGroup (group=ComposeGroupKey(key=-1254962396))
+                LDC -1254962396
                 INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
                 L10
                 LINENUMBER 7 L10
@@ -133,8 +133,8 @@ class TestKt {
             LINENUMBER 8 L9
             FRAME SAME
             ALOAD 1
-                ReplaceGroup (group=ComposeGroupKey(key=-1254913354))
-                LDC -1254913354
+                ReplaceGroup (group=ComposeGroupKey(key=-1254925258))
+                LDC -1254925258
                 INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
                 L13
                 LINENUMBER 9 L13
@@ -142,8 +142,8 @@ class TestKt {
                 BIPUSH 10
                 IF_ICMPLE L14
                 ALOAD 1
-                    ReplaceGroup (group=ComposeGroupKey(key=-1254890631))
-                    LDC -1254890631
+                    ReplaceGroup (group=ComposeGroupKey(key=-1254902535))
+                    LDC -1254902535
                     INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
                     L15
                     LINENUMBER 10 L15
@@ -173,17 +173,17 @@ class TestKt {
                     LINENUMBER 9 L16
                     ALOAD 1
                     INVOKEINTERFACE androidx/compose/runtime/Composer.endReplaceGroup ()V (itf)
-                ReplaceGroup (group=ComposeGroupKey(key=-1254913354))
+                ReplaceGroup (group=ComposeGroupKey(key=-1254925258))
                 GOTO L17
                 L14
                 FRAME SAME
                 ALOAD 1
-                    ReplaceGroup (group=ComposeGroupKey(key=-1255077375))
-                    LDC -1255077375
+                    ReplaceGroup (group=ComposeGroupKey(key=-1255089279))
+                    LDC -1255089279
                     INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
                     ALOAD 1
                     INVOKEINTERFACE androidx/compose/runtime/Composer.endReplaceGroup ()V (itf)
-                ReplaceGroup (group=ComposeGroupKey(key=-1254913354))
+                ReplaceGroup (group=ComposeGroupKey(key=-1254925258))
                 L17
                 LINENUMBER 13 L17
                 FRAME SAME
@@ -221,7 +221,7 @@ class TestKt {
             INVOKESTATIC androidx/compose/runtime/ComposerKt.traceEventEnd ()V
             GOTO L19
             L7
-            LINENUMBER 4 L7
+            LINENUMBER 5 L7
             FRAME SAME
             ALOAD 1
             INVOKEINTERFACE androidx/compose/runtime/Composer.skipToGroupEnd ()V (itf)

@@ -50,7 +50,7 @@ class TestKt {
                 JumpToken(L5, opocde=153)
                 BlockToken(1)
                 JumpToken(L5, opocde=167)
-                LabelToken(L4, lineNumber=4)
+                LabelToken(L4, lineNumber=5)
                 BlockToken(3)
                 LabelToken(L5, lineNumber=7)
                 BlockToken(2)

@@ -93,46 +93,6 @@
       ]
     },
     {
-      "name": "sourcesElements",
-      "attributes": {
-        "org.gradle.category": "documentation",
-        "org.gradle.dependency.bundling": "external",
-        "org.gradle.docstype": "sources",
-        "org.gradle.usage": "java-runtime"
-      },
-      "files": [
-        {
-          "name": "hot-reload-orchestration-{{Hot Reload Version}}-sources.jar",
-          "url": "hot-reload-orchestration-{{Hot Reload Version}}-sources.jar",
-          "size": {{SIZE}},
-          "sha512": "{{HASH}}",
-          "sha256": "{{HASH}}",
-          "sha1": "{{HASH}}",
-          "md5": "{{HASH}}"
-        }
-      ]
-    },
-    {
-      "name": "javadocElements",
-      "attributes": {
-        "org.gradle.category": "documentation",
-        "org.gradle.dependency.bundling": "external",
-        "org.gradle.docstype": "javadoc",
-        "org.gradle.usage": "java-runtime"
-      },
-      "files": [
-        {
-          "name": "hot-reload-orchestration-{{Hot Reload Version}}-javadoc.jar",
-          "url": "hot-reload-orchestration-{{Hot Reload Version}}-javadoc.jar",
-          "size": {{SIZE}},
-          "sha512": "{{HASH}}",
-          "sha256": "{{HASH}}",
-          "sha1": "{{HASH}}",
-          "md5": "{{HASH}}"
-        }
-      ]
-    },
-    {
       "name": "testFixturesApiElements",
       "attributes": {
         "org.gradle.category": "library",
@@ -203,6 +163,46 @@
           "group": "org.jetbrains.compose.hot-reload",
           "name": "hot-reload-orchestration-test-fixtures",
           "version": "{{Hot Reload Version}}"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "hot-reload-orchestration-{{Hot Reload Version}}-sources.jar",
+          "url": "hot-reload-orchestration-{{Hot Reload Version}}-sources.jar",
+          "size": {{SIZE}},
+          "sha512": "{{HASH}}",
+          "sha256": "{{HASH}}",
+          "sha1": "{{HASH}}",
+          "md5": "{{HASH}}"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "hot-reload-orchestration-{{Hot Reload Version}}-javadoc.jar",
+          "url": "hot-reload-orchestration-{{Hot Reload Version}}-javadoc.jar",
+          "size": {{SIZE}},
+          "sha512": "{{HASH}}",
+          "sha256": "{{HASH}}",
+          "sha1": "{{HASH}}",
+          "md5": "{{HASH}}"
         }
       ]
     }

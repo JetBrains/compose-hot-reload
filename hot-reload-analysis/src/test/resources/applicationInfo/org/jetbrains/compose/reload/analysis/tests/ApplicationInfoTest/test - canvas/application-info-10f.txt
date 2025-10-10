@@ -39,17 +39,17 @@ FooKt {
         type: Composable
         Method {
             key: 857161579
-            codeHash: 2346738419
+            codeHash: 2337359085
             methodDependencies: [
-                FooKt.App$lambda$3 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+                FooKt.App$lambda$1 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
             ]
             fieldDependencies: []
     
             RestartGroup {
                 key: 857161579
-                codeHash: 4141555804
+                codeHash: 2276554394
                 methodDependencies: [
-                    FooKt.App$lambda$2$lambda$1$lambda$0 (Landroidx/compose/ui/graphics/drawscope/DrawScope;)Lkotlin/Unit;
+                    FooKt.App$lambda$0$0$0 (Landroidx/compose/ui/graphics/drawscope/DrawScope;)Lkotlin/Unit;
                 ]
                 fieldDependencies: []
             }
@@ -57,7 +57,7 @@ FooKt {
     }
     
     
-    App$lambda$2$lambda$1$lambda$0 {
+    App$lambda$0$0$0 {
         desc: (Landroidx/compose/ui/graphics/drawscope/DrawScope;)Lkotlin/Unit;
         type: Regular
         Method {
@@ -69,7 +69,7 @@ FooKt {
     }
     
     
-    App$lambda$3 {
+    App$lambda$1 {
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         type: Composable
         Method {

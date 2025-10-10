@@ -1,16 +1,16 @@
 import androidx.compose.runtime.*
 import androidx.compose.material3.Text
  
-@Composable                                                 	// RestartGroup (group=ComposeGroupKey(key=-643616831))
+@Composable
 fun Foo(value: Int) {                                       	// Method (group=ComposeGroupKey(key=-643616831)),RestartGroup (group=ComposeGroupKey(key=-643616831))
     Text("A")                                               	// RestartGroup (group=ComposeGroupKey(key=-643616831))
-    if(value > -12) {                                       	// RestartGroup (group=ComposeGroupKey(key=-643616831)),ReplaceGroup (group=ComposeGroupKey(key=-1254930869)),ReplaceGroup (group=ComposeGroupKey(key=-1255078367))
-        Bar {                                               	// ReplaceGroup (group=ComposeGroupKey(key=-1254930869))
-            Text("B")                                       	// ReplaceGroup (group=ComposeGroupKey(key=-1254930869)),ReplaceGroup (group=ComposeGroupKey(key=-1795835205))
-            if(value > 0) return@Bar                        	// ReplaceGroup (group=ComposeGroupKey(key=-1795835205)),ReplaceGroup (group=ComposeGroupKey(key=-1254930869))
+    if(value > -12) {                                       	// RestartGroup (group=ComposeGroupKey(key=-643616831)),ReplaceGroup (group=ComposeGroupKey(key=-1254942773)),ReplaceGroup (group=ComposeGroupKey(key=-1255090271))
+        Bar {                                               	// ReplaceGroup (group=ComposeGroupKey(key=-1254942773))
+            Text("B")                                       	// ReplaceGroup (group=ComposeGroupKey(key=-1254942773)),ReplaceGroup (group=ComposeGroupKey(key=-1795835205))
+            if(value > 0) return@Bar                        	// ReplaceGroup (group=ComposeGroupKey(key=-1795835205)),ReplaceGroup (group=ComposeGroupKey(key=-1254942773))
             if(value > 10) return@Foo                       	// ReplaceGroup (group=ComposeGroupKey(key=-1795835205)),RestartGroup (group=ComposeGroupKey(key=-643616831)),Method (group=ComposeGroupKey(key=-643616831))
-            Text("C")                                       	// ReplaceGroup (group=ComposeGroupKey(key=-1795835205)),ReplaceGroup (group=ComposeGroupKey(key=-1254930869))
-        }                                                   	// ReplaceGroup (group=ComposeGroupKey(key=-1254930869))
+            Text("C")                                       	// ReplaceGroup (group=ComposeGroupKey(key=-1795835205)),ReplaceGroup (group=ComposeGroupKey(key=-1254942773))
+        }                                                   	// ReplaceGroup (group=ComposeGroupKey(key=-1254942773))
     }
     
     Text("D")                                               	// RestartGroup (group=ComposeGroupKey(key=-643616831))

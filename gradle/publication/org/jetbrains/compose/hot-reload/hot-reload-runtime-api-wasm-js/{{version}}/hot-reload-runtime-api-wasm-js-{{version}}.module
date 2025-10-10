@@ -56,6 +56,13 @@
       },
       "dependencies": [
         {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.21-RC"
+          }
+        },
+        {
           "group": "org.jetbrains.compose.hot-reload",
           "module": "hot-reload-annotations",
           "version": {
@@ -136,6 +143,13 @@
           "module": "hot-reload-annotations",
           "version": {
             "requires": "{{Hot Reload Version}}"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.21-RC"
           }
         },
         {

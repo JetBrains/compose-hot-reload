@@ -98,7 +98,7 @@ class FooKt {
             MethodInsnNode(androidx/compose/runtime/ComposerKt.traceEventEnd ()V) [184]
         JumpToken(L7, opocde=167)
             JumpInsNode(L7)) [GOTO])
-        LabelToken(L6, lineNumber=3)
+        LabelToken(L6, lineNumber=4)
             LabelNode(L6)
             LineNumberNode [-1]
         BlockToken(3)

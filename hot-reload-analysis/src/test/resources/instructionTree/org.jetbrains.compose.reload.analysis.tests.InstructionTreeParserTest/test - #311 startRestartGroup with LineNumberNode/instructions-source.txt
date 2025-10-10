@@ -3,11 +3,11 @@ import androidx.compose.runtime.*
 @Composable
 fun Foot(param: String): String {
     return key(param) {                                     	// Method (group=ComposeGroupKey(key=-227918768))
-        if (param.isEmpty()) {                              	// Method (group=ComposeGroupKey(key=-227918768)),ReplaceGroup (group=ComposeGroupKey(key=415376659))
-            "Empty"                                         	// Method (group=ComposeGroupKey(key=-227918768)),ReplaceGroup (group=ComposeGroupKey(key=415415223))
-        } else {                                            	// ReplaceGroup (group=ComposeGroupKey(key=415415223)),Method (group=ComposeGroupKey(key=-227918768))
-            val state = remember { mutableStateOf("") }     	// ReplaceGroup (group=ComposeGroupKey(key=415415223))
-            state.value                                     	// ReplaceGroup (group=ComposeGroupKey(key=415415223))
+        if (param.isEmpty()) {                              	// Method (group=ComposeGroupKey(key=-227918768)),ReplaceGroup (group=ComposeGroupKey(key=415364755))
+            "Empty"                                         	// Method (group=ComposeGroupKey(key=-227918768)),ReplaceGroup (group=ComposeGroupKey(key=415403319))
+        } else {                                            	// ReplaceGroup (group=ComposeGroupKey(key=415403319)),Method (group=ComposeGroupKey(key=-227918768))
+            val state = remember { mutableStateOf("") }     	// ReplaceGroup (group=ComposeGroupKey(key=415403319))
+            state.value                                     	// ReplaceGroup (group=ComposeGroupKey(key=415403319))
         }
     }
 }

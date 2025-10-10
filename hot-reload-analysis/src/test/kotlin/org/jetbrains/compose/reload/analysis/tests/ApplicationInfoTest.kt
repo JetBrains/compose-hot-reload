@@ -370,7 +370,6 @@ class ApplicationInfoTest {
 
     }
 
-    @Disabled("https://github.com/JetBrains/compose-hot-reload/issues/220")
     @Test
     fun `test - method hash is the same when adding a Composable function above`(
         compiler: Compiler, testInfo: TestInfo

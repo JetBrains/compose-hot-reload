@@ -174,21 +174,21 @@
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-reflect",
           "version": {
-            "requires": "2.2.0"
+            "requires": "2.2.21-RC"
           }
         },
         {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",
           "version": {
-            "requires": "2.2.0"
+            "requires": "2.2.21-RC"
           }
         },
         {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-compiler-embeddable",
           "version": {
-            "requires": "2.2.0"
+            "requires": "2.2.21-RC"
           }
         }
       ],

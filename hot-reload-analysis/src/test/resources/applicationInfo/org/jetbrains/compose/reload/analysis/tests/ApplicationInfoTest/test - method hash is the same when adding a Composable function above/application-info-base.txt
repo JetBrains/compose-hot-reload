@@ -5,24 +5,12 @@
 // Foo.kt
 import androidx.compose.runtime.*
 import androidx.compose.material3.Text
+             
+// add decoy
 
 @Composable
-inline fun Bar(child: @Composable () -> Unit) {
-    print("Bar")
-    child()
-}
-
-@Composable 
 fun Foo() {
-    Bar {
-        Bar {
-            Text("First Text")
-        }
-    }
-    
-    Bar {
-        Text("Second Text")
-    }
+    Text("Test")
 }
 
 /*
@@ -30,32 +18,20 @@ fun Foo() {
 */
 
 FooKt {
-    Bar {
-        desc: (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
-        type: Composable
-        Method {
-            key: 490236094
-            codeHash: 1716190341
-            methodDependencies: []
-            fieldDependencies: []
-        }
-    }
-    
-    
     Foo {
         desc: (Landroidx/compose/runtime/Composer;I)V
         type: Composable
         Method {
             key: -965539098
-            codeHash: 3620098168
+            codeHash: 3924881808
             methodDependencies: [
-                FooKt.Foo$lambda$2 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+                FooKt.Foo$lambda$0 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
             ]
             fieldDependencies: []
     
             RestartGroup {
                 key: -965539098
-                codeHash: 1622656563
+                codeHash: 4136965881
                 methodDependencies: []
                 fieldDependencies: []
             }
@@ -63,7 +39,7 @@ FooKt {
     }
     
     
-    Foo$lambda$2 {
+    Foo$lambda$0 {
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         type: Composable
         Method {

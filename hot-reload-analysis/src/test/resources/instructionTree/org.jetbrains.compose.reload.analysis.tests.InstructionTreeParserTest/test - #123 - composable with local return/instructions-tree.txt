@@ -41,7 +41,7 @@ class TestKt {
         }
     }
     
-    fun Foo$lambda$1$lambda$0 (IILandroidx/compose/runtime/Composer;I)Lkotlin/Unit; {
+    fun Foo$lambda$0$0 (IILandroidx/compose/runtime/Composer;I)Lkotlin/Unit; {
         Method (group=null) {
             LabelToken(L0)
             BlockToken(8)
@@ -49,7 +49,7 @@ class TestKt {
         }
     }
     
-    fun Foo$lambda$2 (IILandroidx/compose/runtime/Composer;I)Lkotlin/Unit; {
+    fun Foo$lambda$1 (IILandroidx/compose/runtime/Composer;I)Lkotlin/Unit; {
         Method (group=null) {
             LabelToken(L0)
             BlockToken(8)
@@ -129,14 +129,14 @@ class TestKt {
                 JumpToken(L29, opocde=153)
                 BlockToken(1)
                 JumpToken(L29, opocde=167)
-                LabelToken(L28, lineNumber=4)
+                LabelToken(L28, lineNumber=5)
                 BlockToken(3)
                 LabelToken(L29, lineNumber=17)
                 BlockToken(2)
                 EndRestartGroup()
     
-                ReplaceGroup (group=ComposeGroupKey(key=-1254930869)) {
-                    StartReplaceGroup(key=ComposeGroupKey(key=-1254930869))
+                ReplaceGroup (group=ComposeGroupKey(key=-1254942773)) {
+                    StartReplaceGroup(key=ComposeGroupKey(key=-1254942773))
                     BlockToken(4)
                     LabelToken(L9, lineNumber=8)
                     BlockToken(1)
@@ -182,8 +182,8 @@ class TestKt {
                     }
                 }
     
-                ReplaceGroup (group=ComposeGroupKey(key=-1255078367)) {
-                    StartReplaceGroup(key=ComposeGroupKey(key=-1255078367))
+                ReplaceGroup (group=ComposeGroupKey(key=-1255090271)) {
+                    StartReplaceGroup(key=ComposeGroupKey(key=-1255090271))
                     BlockToken(1)
                     EndReplaceGroup()
                 }

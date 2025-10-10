@@ -631,7 +631,7 @@ class FooKt {
             LabelNode(L75)
         JumpToken(L77, opocde=167)
             JumpInsNode(L77)) [GOTO])
-        LabelToken(L76, lineNumber=10)
+        LabelToken(L76, lineNumber=11)
             LabelNode(L76)
             LineNumberNode [-1]
         BlockToken(3)

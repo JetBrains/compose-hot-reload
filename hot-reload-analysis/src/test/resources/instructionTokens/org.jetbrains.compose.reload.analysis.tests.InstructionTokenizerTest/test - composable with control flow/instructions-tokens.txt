@@ -128,8 +128,8 @@ class FooKt {
             JumpInsNode(L10)) [158])
         BlockToken(1)
             VarInsnNode [25]
-        StartReplaceGroup(key=ComposeGroupKey(key=-1460235184))
-            LdcInsnNode(-1460235184) [18]
+        StartReplaceGroup(key=ComposeGroupKey(key=-1460247088))
+            LdcInsnNode(-1460247088) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]
         LabelToken(L8, lineNumber=7)
             LabelNode(L8)
@@ -172,8 +172,8 @@ class FooKt {
         BlockToken(2)
             FrameNode [-1]
             VarInsnNode [25]
-        StartReplaceGroup(key=ComposeGroupKey(key=-1460198046))
-            LdcInsnNode(-1460198046) [18]
+        StartReplaceGroup(key=ComposeGroupKey(key=-1460209950))
+            LdcInsnNode(-1460209950) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]
         LabelToken(L11, lineNumber=9)
             LabelNode(L11)
@@ -185,8 +185,8 @@ class FooKt {
             JumpInsNode(L14)) [164])
         BlockToken(1)
             VarInsnNode [25]
-        StartReplaceGroup(key=ComposeGroupKey(key=-1460175323))
-            LdcInsnNode(-1460175323) [18]
+        StartReplaceGroup(key=ComposeGroupKey(key=-1460187227))
+            LdcInsnNode(-1460187227) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]
         LabelToken(L12, lineNumber=10)
             LabelNode(L12)
@@ -228,8 +228,8 @@ class FooKt {
         BlockToken(2)
             FrameNode [-1]
             VarInsnNode [25]
-        StartReplaceGroup(key=ComposeGroupKey(key=-1460362067))
-            LdcInsnNode(-1460362067) [18]
+        StartReplaceGroup(key=ComposeGroupKey(key=-1460373971))
+            LdcInsnNode(-1460373971) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]
         BlockToken(1)
             VarInsnNode [25]
@@ -280,7 +280,7 @@ class FooKt {
             MethodInsnNode(androidx/compose/runtime/ComposerKt.traceEventEnd ()V) [184]
         JumpToken(L19, opocde=167)
             JumpInsNode(L19)) [GOTO])
-        LabelToken(L18, lineNumber=4)
+        LabelToken(L18, lineNumber=5)
             LabelNode(L18)
             LineNumberNode [-1]
         BlockToken(3)

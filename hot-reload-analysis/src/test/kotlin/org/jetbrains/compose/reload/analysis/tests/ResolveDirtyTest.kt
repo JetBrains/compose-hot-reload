@@ -143,7 +143,7 @@ class ResolveDirtyTests {
                 
                 @Composable
                 fun Foo() {
-                   bar
+                   println(bar)
                 }
 
                 @Composable
@@ -161,7 +161,7 @@ class ResolveDirtyTests {
                 
                 @Composable
                 fun Foo() {
-                   bar
+                   println(bar)
                 }
 
                 @Composable

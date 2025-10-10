@@ -153,9 +153,9 @@ FooKt {
         type: Composable
         Method {
             key: -965539098
-            codeHash: 3033200613
+            codeHash: 3924881808
             methodDependencies: [
-                FooKt.Foo$lambda$1 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+                FooKt.Foo$lambda$0 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
             ]
             fieldDependencies: []
     
@@ -188,7 +188,7 @@ FooKt {
     }
     
     
-    Foo$lambda$1 {
+    Foo$lambda$0 {
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         type: Composable
         Method {
