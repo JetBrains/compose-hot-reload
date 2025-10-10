@@ -21,6 +21,7 @@ import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberDialogState
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.invokeWhenMessageReceived
+import org.jetbrains.compose.devtools.orchestration
 import org.jetbrains.compose.devtools.sendBlocking
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtSizes
@@ -35,6 +36,7 @@ import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.getOrNull
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.warn
+import org.jetbrains.compose.reload.core.withType
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowGainedFocus
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
 import java.awt.Dimension
@@ -136,11 +138,13 @@ fun DtAnimatedWindow(
             window.location = newPosition.toPoint()
         }
 
-        invokeWhenMessageReceived<ApplicationWindowGainedFocus> { event ->
-            if (event.windowId == windowId && visible) {
-                logger.debug("$windowId: $title 'toFront()'")
-                if (!window.tryForceToFront()) {
-                    logger.debug("$windowId: $title 'toFront()' failed")
+        LaunchedEffect(title, visible) {
+            orchestration.messages.withType<ApplicationWindowGainedFocus>().collect { event ->
+                if (event.windowId == windowId && visible) {
+                    logger.debug("$windowId: $title 'toFront()'")
+                    if (!window.tryForceToFront()) {
+                        logger.debug("$windowId: $title 'toFront()' failed")
+                    }
                 }
             }
         }
@@ -243,4 +247,3 @@ private fun ComposeDialog.tryForceToFront() = Try {
     isAlwaysOnTop = oldIsAlwaysOnTop
     true
 }.getOrNull() ?: false
-
