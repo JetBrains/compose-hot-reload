@@ -16,7 +16,7 @@ evas = "1.3.0"
 ktor = "3.3.1"
 shadow = "9.2.2"
 kaml = "0.98.0"
-skiko = "0.9.24"
+skiko = "0.9.27"
 gradlePluginPublish = "2.0.0"
 
 [libraries]
