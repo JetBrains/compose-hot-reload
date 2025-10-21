@@ -90,14 +90,14 @@
           "group": "org.ow2.asm",
           "module": "asm",
           "version": {
-            "requires": "9.8"
+            "requires": "9.9"
           }
         },
         {
           "group": "org.ow2.asm",
           "module": "asm-tree",
           "version": {
-            "requires": "9.8"
+            "requires": "9.9"
           }
         },
         {
