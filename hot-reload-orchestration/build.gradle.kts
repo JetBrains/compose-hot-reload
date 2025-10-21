@@ -30,8 +30,6 @@ dependencies {
     compileOnly(deps.coroutines.core)
 
     testImplementation(kotlin("test"))
-    testImplementation(deps.junit.jupiter)
-    testImplementation(deps.junit.jupiter.engine)
     testImplementation(deps.coroutines.test)
     testImplementation(deps.asm)
     testImplementation(deps.asm.tree)

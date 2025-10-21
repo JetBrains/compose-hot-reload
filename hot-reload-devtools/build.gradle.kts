@@ -54,8 +54,6 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("reflect"))
-    testImplementation(deps.junit.jupiter)
-    testImplementation(deps.junit.jupiter.engine)
     testImplementation(compose.uiTest)
     testImplementation(compose.desktop.currentOs)
 

@@ -45,7 +45,7 @@
           "group": "org.junit.jupiter",
           "module": "junit-jupiter",
           "version": {
-            "requires": "5.11.4"
+            "requires": "5.14.0"
           }
         },
         {
@@ -130,9 +130,9 @@
         },
         {
           "group": "org.junit.jupiter",
-          "module": "junit-jupiter-engine",
+          "module": "junit-jupiter",
           "version": {
-            "requires": "5.11.4"
+            "requires": "5.14.0"
           }
         },
         {
@@ -149,13 +149,6 @@
         {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-tooling-core"
-        },
-        {
-          "group": "org.junit.jupiter",
-          "module": "junit-jupiter",
-          "version": {
-            "requires": "5.11.4"
-          }
         },
         {
           "group": "org.jetbrains.kotlinx",

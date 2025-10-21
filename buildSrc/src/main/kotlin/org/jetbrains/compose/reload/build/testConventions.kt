@@ -72,8 +72,9 @@ open class TestConventionsPlugin : Plugin<Project> {
                 }
 
                 "testImplementation"(kotlin("test"))
+                "testImplementation"(platform(project.versionCatalogs.named("deps").findLibrary("junit-bom").get()))
                 "testImplementation"(project.versionCatalogs.named("deps").findLibrary("junit-jupiter").get())
-                "testImplementation"(project.versionCatalogs.named("deps").findLibrary("junit-jupiter-engine").get())
+                "testRuntimeOnly"(project.versionCatalogs.named("deps").findLibrary("junit-platform-launcher").get())
             }
         }
 

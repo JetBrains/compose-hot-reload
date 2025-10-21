@@ -75,9 +75,9 @@ dependencies {
 
     reloadUnitTestImplementation(compose.uiTest)
 
-    reloadFunctionalTestImplementation(kotlin("test"))
+    reloadFunctionalTestImplementation(platform(deps.junit.bom))
     reloadFunctionalTestImplementation(deps.junit.jupiter)
-    reloadFunctionalTestImplementation(deps.junit.jupiter.engine)
+    reloadFunctionalTestRuntimeOnly(deps.junit.platform.launcher)
     reloadFunctionalTestImplementation(deps.asm)
     reloadFunctionalTestImplementation(deps.asm.tree)
     reloadFunctionalTestRuntimeOnly(skikoCurrentOs())

@@ -52,7 +52,7 @@ dependencies {
     api(kotlin("tooling-core"))
     api(deps.junit.jupiter)
     api(deps.coroutines.test)
-    implementation(deps.junit.jupiter.engine)
+    implementation(deps.junit.jupiter)
 
     compileOnly(deps.skiko.awt)
     testImplementation(skikoCurrentOs())

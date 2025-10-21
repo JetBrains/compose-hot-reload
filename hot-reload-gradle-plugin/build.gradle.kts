@@ -109,8 +109,6 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(gradleKotlinDsl())
-    testImplementation(deps.junit.jupiter)
-    testImplementation(deps.junit.jupiter.engine)
     testImplementation(kotlin("gradle-plugin"))
     testImplementation(deps.compose.gradlePlugin)
     testImplementation(deps.compose.compiler.gradlePlugin)

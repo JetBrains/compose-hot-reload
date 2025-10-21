@@ -73,8 +73,9 @@ kotlin {
     }
 
     sourceSets.jvmTest.dependencies {
+        implementation(project.dependencies.platform(deps.junit.bom))
         implementation(deps.junit.jupiter)
-        implementation(deps.junit.jupiter.engine)
+        runtimeOnly(deps.junit.platform.launcher)
         implementation(compose.uiTest)
         implementation(compose.material3)
         implementation(compose.desktop.currentOs)

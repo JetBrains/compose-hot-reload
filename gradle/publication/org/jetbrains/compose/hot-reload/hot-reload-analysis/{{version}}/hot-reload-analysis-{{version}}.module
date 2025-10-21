@@ -161,7 +161,7 @@
           "group": "org.junit.jupiter",
           "module": "junit-jupiter",
           "version": {
-            "requires": "5.11.4"
+            "requires": "5.14.0"
           }
         },
         {
