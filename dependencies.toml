@@ -4,7 +4,7 @@ compose = "1.9.0"
 composeMin = { prefer = "1.8.2" }
 coroutines = "1.10.2"
 kotlinxDatetime = "0.7.1"
-kotlinxBenchmark = "0.4.13"
+kotlinxBenchmark = "0.4.14"
 kotlinxBinaryCompatibilityValidator = "0.18.1"
 kotlinxSerialization = "1.9.0"
 kotlinxLincheck = "3.3"
