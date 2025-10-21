@@ -3,6 +3,8 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
+@file:Suppress("DuplicatedCode")
+
 package org.jetbrains.compose.reload.orchestration
 
 import org.jetbrains.compose.reload.InternalHotReloadApi
@@ -156,6 +158,21 @@ internal constructor() : OrchestrationPackage(), Serializable {
             @Suppress("unused")
             internal const val serialVersionUID: Long = 0L
         }
+
+        override fun hashCode(): Int {
+            var hashCode = recompileRequestId.hashCode()
+            hashCode = 31 * hashCode + (exitCode?.hashCode() ?: 0)
+            return hashCode
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (other === this) return true
+            if (!super.equals(other)) return false
+            if (other !is RecompileResult) return false
+            if (other.recompileRequestId != recompileRequestId) return false
+            if (other.exitCode != exitCode) return false
+            return true
+        }
     }
 
     public sealed class BuildEvent : OrchestrationMessage() {
@@ -268,6 +285,20 @@ internal constructor() : OrchestrationPackage(), Serializable {
             @Suppress("unused")
             internal const val serialVersionUID: Long = 0L
         }
+
+        override fun hashCode(): Int {
+            var hashCode = format.hashCode()
+            hashCode = 31 * hashCode + data.contentHashCode()
+            return hashCode
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (other === this) return true
+            if (other !is Screenshot) return false
+            if (other.format != format) return false
+            if (!other.data.contentEquals(data)) return false
+            return true
+        }
     }
 
     /**
@@ -365,6 +396,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
         }
     }
 
+    @Deprecated("Use 'WindowState' instead")
     public data class ApplicationWindowPositioned(
         val windowId: WindowId,
         val x: Int,
@@ -379,6 +411,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
         }
     }
 
+    @Deprecated("Use 'WindowState' instead")
     public data class ApplicationWindowGone(
         val windowId: WindowId
     ) : OrchestrationMessage() {
@@ -388,6 +421,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
         }
     }
 
+    @Deprecated("Use 'WindowState' instead")
     public data class ApplicationWindowGainedFocus(
         val windowId: WindowId
     ) : OrchestrationMessage() {
@@ -424,6 +458,22 @@ internal constructor() : OrchestrationPackage(), Serializable {
             @Suppress("unused")
             internal const val serialVersionUID: Long = 0L
         }
+
+        override fun hashCode(): Int {
+            var hashCode = windowId.hashCode()
+            hashCode = 31 * hashCode + message.hashCode()
+            hashCode = 31 * hashCode + stacktrace.hashCode()
+            return hashCode
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is UIException) return false
+            if (windowId != other.windowId) return false
+            if (message != other.message) return false
+            if (stacktrace != other.stacktrace) return false
+            return true
+        }
     }
 
 
@@ -450,7 +500,6 @@ internal constructor() : OrchestrationPackage(), Serializable {
         override fun toString(): String {
             return "CriticalException($clientRole, $message)"
         }
-
 
         internal companion object {
             @Suppress("unused")
@@ -491,7 +540,8 @@ internal constructor() : OrchestrationPackage(), Serializable {
 
 
     /* Base implementation */
-    public val messageId: OrchestrationMessageId = OrchestrationMessageId.random()
+    public var messageId: OrchestrationMessageId = OrchestrationMessageId.random()
+        internal set
 
     override fun equals(other: Any?): Boolean {
         if (other !is OrchestrationMessage) return false

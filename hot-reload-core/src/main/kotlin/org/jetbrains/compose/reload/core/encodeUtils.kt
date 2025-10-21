@@ -12,8 +12,8 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 
 @InternalHotReloadApi
-public fun encodeByteArray(encode: DataOutputStream.() -> Unit): ByteArray {
-    val baos = ByteArrayOutputStream()
+public fun encodeByteArray(initialSize: Int = 32, encode: DataOutputStream.() -> Unit): ByteArray {
+    val baos = ByteArrayOutputStream(initialSize)
     val daos = DataOutputStream(baos)
     daos.encode()
     return baos.toByteArray()
@@ -93,6 +93,44 @@ public fun DataOutputStream.writeFields(vararg fields: Pair<String, ByteArray?>)
     writeFields(fields.toMap())
 }
 
+
+@InternalHotReloadApi
+public fun Boolean.encodeToByteArray(): ByteArray {
+    return if (this) return byteArrayOf(1) else byteArrayOf(0)
+}
+
+@OptIn(ExperimentalStdlibApi::class)
+@InternalHotReloadApi
+public fun ByteArray.decodeToBoolean(): Boolean {
+    require(this.size == 1) { "Invalid boolean value: ${this.toHexString()}" }
+    return this[0] != 0.toByte()
+}
+
+@InternalHotReloadApi
+public fun Long.encodeToByteArray(): ByteArray {
+    return encodeByteArray(8) { writeLong(this@encodeToByteArray) }
+}
+
+@OptIn(ExperimentalStdlibApi::class)
+@InternalHotReloadApi
+public fun ByteArray.decodeToLong(): Long {
+    require(this.size == 8) { "Invalid long value: ${this.toHexString()}" }
+    return decode { readLong() }
+}
+
+@InternalHotReloadApi
+public fun Int.encodeToByteArray(): ByteArray {
+    return encodeByteArray(4) { writeInt(this@encodeToByteArray) }
+}
+
+@InternalHotReloadApi
+@OptIn(ExperimentalStdlibApi::class)
+public fun ByteArray.decodeToInt(): Int {
+    require(this.size == 4) { "Invalid int value: ${this.toHexString()}" }
+    return decode { readInt() }
+}
+
+
 @InternalHotReloadApi
 public fun DataInputStream.readFields(): Map<String, ByteArray?> {
     val size = readInt()
@@ -102,4 +140,10 @@ public fun DataInputStream.readFields(): Map<String, ByteArray?> {
             put(name, bytes)
         }
     }
+}
+
+@InternalHotReloadApi
+public fun Map<String, ByteArray?>.requireField(key: String): ByteArray {
+    if (key !in this) error("Missing field '$key'")
+    return get(key) ?: error("Field '$key' is null")
 }

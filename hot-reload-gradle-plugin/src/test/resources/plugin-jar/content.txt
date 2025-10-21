@@ -12,6 +12,7 @@ META-INF/hot-reload-gradle-idea.shadow.kotlin_module
 META-INF/hot-reload-gradle-plugin.shadow.kotlin_module
 META-INF/hot-reload-orchestration.shadow.kotlin_module
 META-INF/services/
+META-INF/services/org.jetbrains.compose.reload.orchestration.OrchestrationMessageEncoder
 META-INF/services/org.jetbrains.compose.reload.orchestration.OrchestrationStateEncoder
 org/
 org/jetbrains/

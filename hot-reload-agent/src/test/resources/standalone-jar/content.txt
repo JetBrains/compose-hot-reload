@@ -16,6 +16,7 @@ META-INF/maven/org.javassist/javassist/pom.xml
 META-INF/services/
 META-INF/services/org.jetbrains.compose.reload.analysis.Ignore
 META-INF/services/org.jetbrains.compose.reload.core.Logger$Dispatch
+META-INF/services/org.jetbrains.compose.reload.orchestration.OrchestrationMessageEncoder
 META-INF/services/org.jetbrains.compose.reload.orchestration.OrchestrationStateEncoder
 org/
 org/jetbrains/

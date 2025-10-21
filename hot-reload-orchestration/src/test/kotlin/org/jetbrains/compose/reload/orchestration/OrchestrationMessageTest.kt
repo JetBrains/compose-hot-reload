@@ -7,19 +7,16 @@
 
 package org.jetbrains.compose.reload.orchestration
 
+import org.jetbrains.compose.reload.analysis.ClassInfo
 import org.jetbrains.compose.reload.analysis.classId
+import org.jetbrains.compose.reload.core.Type
 import org.jetbrains.compose.reload.core.closure
+import org.jetbrains.compose.reload.core.testFixtures.assertFileContent
 import org.jetbrains.compose.reload.core.testFixtures.sanitized
 import org.jetbrains.compose.reload.orchestration.utils.analyzeClasspath
 import org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi
-import org.jetbrains.compose.reload.test.core.TestEnvironment
+import java.util.ServiceLoader
 import kotlin.io.path.Path
-import kotlin.io.path.createParentDirectories
-import kotlin.io.path.exists
-import kotlin.io.path.extension
-import kotlin.io.path.nameWithoutExtension
-import kotlin.io.path.readText
-import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -51,20 +48,67 @@ class OrchestrationMessageTest {
         }.trim().sanitized()
 
 
-        val expectFile = Path("src/test/resources/testData/message_availableSince.txt")
-        expectFile.createParentDirectories()
+        assertFileContent(Path("src/test/resources/testData/message_availableSince.txt"), actualText)
+    }
 
-        if(!expectFile.exists() || TestEnvironment.updateTestData) {
-            expectFile.createParentDirectories().writeText(actualText)
-            if(!TestEnvironment.updateTestData) fail("${expectFile.toUri()} did not exist; Generated")
+
+    @Test
+    fun `test - messageClassifier and encoders`() {
+        data class Mapping(val messageClassInfo: ClassInfo, val classifier: String)
+
+        val applicationInfo = analyzeClasspath()
+        val orchestrationMessageInfo = applicationInfo.classIndex.getValue(OrchestrationMessage::class.classId)
+
+        val allMessageClassInfos = orchestrationMessageInfo.closure { classInfo ->
+            applicationInfo.superIndexInverse[classInfo.classId].orEmpty()
+                .map { applicationInfo.classIndex.getValue(it) }
+        }.filter { classInfo -> !classInfo.flags.isAbstract && !classInfo.flags.isInterface }
+
+        val encoders = ServiceLoader.load(
+            OrchestrationMessageEncoder::class.java,
+            OrchestrationMessageEncoder::class.java.classLoader
+        ).toList()
+
+        val unusedEncoders = encoders.toMutableSet()
+
+        /* Check if any classifier is duplicated */
+        encoders.groupBy { it.messageClassifier }.forEach { (classifier, encoders) ->
+            if (encoders.size > 1) {
+                fail("Duplicated encoder for classifier '$classifier': $encoders")
+            }
         }
 
-        if (expectFile.readText().sanitized() != actualText) {
-            val actualFile = expectFile.resolveSibling(
-                expectFile.nameWithoutExtension + "-actual." + expectFile.extension
-            )
-            actualFile.writeText(actualText)
-            fail("${expectFile.toUri()} did not match\n${actualFile.toUri()}")
+        val classifiedMessages = allMessageClassInfos.map { messageClassInfo ->
+            val messageClass = Class.forName(messageClassInfo.classId.toFqn())
+            val encoder = encoders.find { it.messageType == Type<Any?>(messageClass.canonicalName) }
+            val classifier = encoder?.messageClassifier?.toString() ?: "<null>"
+            unusedEncoders.remove(encoder)
+            Mapping(messageClassInfo, classifier)
         }
+
+        fun  ClassInfo.displayString() = classId.toFqn().replace("org.jetbrains.compose.reload.orchestration", "o.j.c.r.o")
+
+        val actualText = buildString {
+            appendLine("{{messageClassifier}} => Message FQN")
+            appendLine("`o.j.c.r.o` = `org.jetbrains.compose.reload.orchestration`")
+            appendLine("==========================================")
+            classifiedMessages.sortedBy { it.messageClassInfo.classId.toFqn() }
+                .forEach { (messageClassInfo, classifier) ->
+                    appendLine("${classifier.padEnd(42)} => ${messageClassInfo.displayString()}")
+                }
+
+            if (unusedEncoders.isNotEmpty()) {
+                appendLine()
+                appendLine("Unused encoders:")
+                appendLine("{{encoder FQN}} ({{classifier}}")
+                appendLine("==========================================")
+
+                unusedEncoders.forEach { encoder ->
+                    "${encoder.javaClass.canonicalName} (${encoder.messageClassifier})"
+                }
+            }
+        }
+
+        assertFileContent(Path("src/test/resources/testData/message_classifier.txt"), actualText)
     }
 }

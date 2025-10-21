@@ -204,7 +204,7 @@ private fun launchClient(
 
     fun launchStateStreaming(id: OrchestrationStateId<*>) = subtask("State Stream: '$id'") {
         states.getEncodedState(id).collect { value ->
-            io writePackage OrchestrationStateValue(id, value)
+            io.writePackage(clientProtocolVersion, OrchestrationStateValue(id, value))
         }
     }
 
@@ -261,13 +261,13 @@ private fun launchClient(
              */
             while (isActive()) {
                 if (queue.receive() == clientConnected) {
-                    io.writePackage(clientConnected)
+                    io.writePackage(clientProtocolVersion, clientConnected)
                     break
                 }
             }
 
             while (isActive()) {
-                io writePackage queue.receive()
+                io.writePackage(clientProtocolVersion, queue.receive())
             }
         }
 
@@ -295,17 +295,17 @@ private fun launchClient(
 
                 is OrchestrationStateUpdate -> states.withLock {
                     val accepted = states.update(pkg.stateId, pkg.expectedValue, pkg.updatedValue)
-                    io writePackage OrchestrationStateUpdate.Response(accepted)
+                    io.writePackage(clientProtocolVersion, OrchestrationStateUpdate.Response(accepted))
                 }
 
                 is OpaqueOrchestrationMessage -> {
                     messages.send(pkg)
-                    io.writePackage(Ack(null))
+                    io.writePackage(clientProtocolVersion, Ack(null))
                 }
 
                 is OrchestrationMessage -> {
                     messages.send(pkg)
-                    io.writePackage(Ack(pkg.messageId))
+                    io.writePackage(clientProtocolVersion, Ack(pkg.messageId))
                 }
 
                 else -> continue

@@ -351,8 +351,10 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$RecompileResult : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
 	public fun <init> (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageId;Ljava/lang/Integer;)V
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getExitCode ()Ljava/lang/Integer;
 	public final fun getRecompileRequestId ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageId;
+	public fun hashCode ()I
 }
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$RecompilerReady : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
@@ -413,8 +415,10 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$Screenshot : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
 	public fun <init> (Ljava/lang/String;[B)V
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getData ()[B
 	public final fun getFormat ()Ljava/lang/String;
+	public fun hashCode ()I
 }
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ShutdownRequest : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
@@ -454,9 +458,11 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIException : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getMessage ()Ljava/lang/String;
 	public final fun getStacktrace ()Ljava/util/List;
 	public final fun getWindowId-cPrXUn0 ()Ljava/lang/String;
+	public fun hashCode ()I
 }
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIRendered : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
@@ -472,6 +478,23 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 	public final fun getWindowId-cPrXUn0 ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessageClassifier : java/io/Serializable {
+	public static final field serialVersionUID J
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageClassifier;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageClassifier;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageClassifier;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class org/jetbrains/compose/reload/orchestration/OrchestrationMessageEncoder {
+	public abstract fun decode ([B)Lorg/jetbrains/compose/reload/core/Either;
+	public abstract fun encode (Ljava/lang/Object;)[B
+	public abstract fun getMessageClassifier ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageClassifier;
+	public abstract fun getMessageType-cAobLks ()Ljava/lang/String;
 }
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessageId : java/io/Serializable {
@@ -515,6 +538,7 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationProto
 	public static final field V1_1 Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
 	public static final field V1_2 Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
 	public static final field V1_3 Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
+	public static final field V1_4 Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getIntValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
@@ -611,5 +635,6 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationVersi
 	public final fun getV1_1 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 	public final fun getV1_2 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 	public final fun getV1_3 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
+	public final fun getV1_4 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 }
 

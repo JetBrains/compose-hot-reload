@@ -15,6 +15,7 @@ public enum class OrchestrationProtocolVersion(public val intValue: Int) {
     V1_1(2),
     V1_2(3),
     V1_3(4),
+    V1_4(5)
     ;
 
     @Suppress("DEPRECATION")
@@ -36,7 +37,8 @@ public data class OrchestrationVersion(public val intValue: Int) : Comparable<Or
         public val v1_1: OrchestrationVersion = OrchestrationVersion(2)
         public val v1_2: OrchestrationVersion = OrchestrationVersion(3)
         public val v1_3: OrchestrationVersion = OrchestrationVersion(4)
-        public val current: OrchestrationVersion = v1_3
+        public val v1_4: OrchestrationVersion = OrchestrationVersion(5)
+        public val current: OrchestrationVersion = v1_4
     }
 
     override fun compareTo(other: OrchestrationVersion): Int {
@@ -49,6 +51,7 @@ public data class OrchestrationVersion(public val intValue: Int) : Comparable<Or
             v1_1 -> "v1.1($intValue)"
             v1_2 -> "v1.2($intValue)"
             v1_3 -> "v1.3($intValue)"
+            v1_4 -> "v1.4($intValue)"
             else -> "N/A($intValue)"
         }
     }
@@ -59,6 +62,9 @@ internal val OrchestrationVersion.supportsStates: Boolean
 
 internal val OrchestrationVersion.supportsOpaqueMessages: Boolean
     get() = this >= OrchestrationVersion.v1_2
+
+internal val OrchestrationVersion.supportsEncodedMessages: Boolean
+    get() = this >= OrchestrationVersion.v1_4
 
 internal val OrchestrationMessage.availableSinceVersion: OrchestrationVersion
     get() = javaClass.availableSinceVersion

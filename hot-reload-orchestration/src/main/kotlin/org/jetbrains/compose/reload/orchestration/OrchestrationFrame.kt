@@ -21,9 +21,9 @@ internal class OrchestrationFrame(
     val data: ByteArray
 )
 
-internal fun OrchestrationPackage.encodeToFrame(): OrchestrationFrame {
+internal fun OrchestrationPackage.encodeToFrame(version: OrchestrationVersion): OrchestrationFrame {
     return when (this) {
-        is OrchestrationMessage -> encodeToFrame()
+        is OrchestrationMessage -> encodeToFrame(version)
         is Introduction -> encodeToFrame()
         is OrchestrationPackage.Ack -> encodeToFrame()
         is OrchestrationStateRequest -> encodeToFrame()
@@ -34,12 +34,8 @@ internal fun OrchestrationPackage.encodeToFrame(): OrchestrationFrame {
     }
 }
 
-internal fun OrchestrationMessage.encodeToFrame() = OrchestrationFrame(
-    type = OrchestrationPackageType.JavaSerializableMessage,
-    data = encodeSerializableObject()
-)
 
-internal fun OrchestrationFrame.decodeOrchestrationMessage(): OrchestrationPackage {
+internal fun OrchestrationFrame.decodeSerializableOrchestrationMessage(): OrchestrationPackage {
     require(type == OrchestrationPackageType.JavaSerializableMessage) {
         "Expected ${OrchestrationPackageType.JavaSerializableMessage}, got $type"
     }
@@ -138,7 +134,8 @@ internal fun ByteArray.decodeStateValue(): OrchestrationStateValue = decode {
 
 internal fun OrchestrationFrame.decodePackage(): OrchestrationPackage {
     return when (type) {
-        OrchestrationPackageType.JavaSerializableMessage -> decodeOrchestrationMessage()
+        OrchestrationPackageType.Message -> decodeOrchestrationMessage()
+        OrchestrationPackageType.JavaSerializableMessage -> decodeSerializableOrchestrationMessage()
         OrchestrationPackageType.JavaSerializableClientIntroduction -> data.decodeSerializableObject() as Introduction
         OrchestrationPackageType.Ack -> data.decodeAck()
         OrchestrationPackageType.StateRequest -> data.decodeStateRequest()
@@ -149,12 +146,22 @@ internal fun OrchestrationFrame.decodePackage(): OrchestrationPackage {
 }
 
 internal enum class OrchestrationPackageType(val intValue: Int) {
+    /**
+     * Special type of message encoding (similar to [Message]), but uses [java.io.Serializable]
+     * to encode and decode the underlying message (whereas [Message] uses [OrchestrationMessageEncoder])
+     */
     JavaSerializableMessage(0),
     JavaSerializableClientIntroduction(1),
     StateRequest(2),
     StateUpdate(3),
     StateUpdateResponse(4),
     StateValue(5),
+
+    /**
+     * Replacement for [JavaSerializableMessage]
+     * Uses registered [OrchestrationMessageEncoder] to encode and decode the underlying message
+     */
+    Message(6),
 
     Ack(128);
 

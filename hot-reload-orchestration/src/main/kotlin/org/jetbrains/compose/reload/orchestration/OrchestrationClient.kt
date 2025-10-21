@@ -110,7 +110,7 @@ internal fun OrchestrationClient(
         logger.trace { "OrchestrationServer protocol version: $serverProtocolVersion" }
 
         /* Send Handshake, expect 'ClientConnected' response */
-        io.writePackage(Introduction(clientId, clientRole, ProcessHandle.current().pid()))
+        io.writePackage(serverProtocolVersion, Introduction(clientId, clientRole, ProcessHandle.current().pid()))
         val response = io.readPackage()
         if (response !is OrchestrationMessage.ClientConnected || response.clientId != clientId) {
             error("Unexpected response: $response")
@@ -129,7 +129,7 @@ internal fun OrchestrationClient(
                     return@subtask
                 }
 
-                io writePackage stateRequest
+                io.writePackage(serverProtocolVersion, stateRequest)
             }
         }
 
@@ -147,7 +147,7 @@ internal fun OrchestrationClient(
                 try {
                     pendingUpdate = update
                     pendingUpdateAccepted = Future<Boolean>()
-                    io writePackage update
+                    io.writePackage(serverProtocolVersion, update)
                     pendingUpdateAccepted!!.awaitOrThrow()
                 } finally {
                     pendingUpdate = null
@@ -167,7 +167,7 @@ internal fun OrchestrationClient(
                 }
 
                 /* Get dispatch and write it as a package */
-                io.writePackage(message)
+                io.writePackage(serverProtocolVersion, message)
 
                 /* Await the ack from the server */
                 val ack = ackQueue.receive()

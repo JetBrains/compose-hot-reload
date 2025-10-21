@@ -1,0 +1,27 @@
+#
+# Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+# Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+#
+org.jetbrains.compose.reload.orchestration.ShutdownRequestEncoder
+org.jetbrains.compose.reload.orchestration.ClientConnectedEncoder
+org.jetbrains.compose.reload.orchestration.ClientDisconnectedEncoder
+org.jetbrains.compose.reload.orchestration.RecompileRequestEncoder
+org.jetbrains.compose.reload.orchestration.RecompileResultEncoder
+org.jetbrains.compose.reload.orchestration.BuildStartedEncoder
+org.jetbrains.compose.reload.orchestration.BuildFinishedEncoder
+org.jetbrains.compose.reload.orchestration.TestEventEncoder
+org.jetbrains.compose.reload.orchestration.ReloadClassesRequestEncoder
+org.jetbrains.compose.reload.orchestration.TakeScreenshotRequestEncoder
+org.jetbrains.compose.reload.orchestration.PingEncoder
+org.jetbrains.compose.reload.orchestration.CleanCompositionRequestEncoder
+org.jetbrains.compose.reload.orchestration.RetryFailedCompositionRequestEncoder
+org.jetbrains.compose.reload.orchestration.RestartRequestEncoder
+org.jetbrains.compose.reload.orchestration.AckMessageEncoder
+org.jetbrains.compose.reload.orchestration.ScreenshotEncoder
+org.jetbrains.compose.reload.orchestration.ReloadClassesResultEncoder
+org.jetbrains.compose.reload.orchestration.LogMessageEncoder
+org.jetbrains.compose.reload.orchestration.InvalidatedComposeGroupMessageEncoder
+org.jetbrains.compose.reload.orchestration.UIRenderedEncoder
+org.jetbrains.compose.reload.orchestration.UIExceptionEncoder
+org.jetbrains.compose.reload.orchestration.CriticalExceptionEncoder
+org.jetbrains.compose.reload.orchestration.BuildTaskResultEncoder

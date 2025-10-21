@@ -23,7 +23,7 @@ internal interface OrchestrationIO {
     suspend infix fun writeInt(value: Int)
     suspend infix fun writeShort(value: Short)
     suspend infix fun writeByte(value: Byte)
-    suspend infix fun writePackage(pkg: OrchestrationPackage)
+    suspend fun writePackage(version: OrchestrationVersion, pkg: OrchestrationPackage)
 
     suspend fun readInt(): Int
     suspend fun readShort(): Short
@@ -78,9 +78,9 @@ internal class OrchestrationIOImpl(
         output.flush()
     }
 
-    override suspend fun writePackage(pkg: OrchestrationPackage) = withThread(writer) {
+    override suspend fun writePackage(version: OrchestrationVersion, pkg: OrchestrationPackage) = withThread(writer) {
         val output = output.awaitOrThrow()
-        val frame = pkg.encodeToFrame()
+        val frame = pkg.encodeToFrame(version)
         output.writeInt(frame.type.intValue)
         output.writeInt(frame.data.size)
         output.write(frame.data)

@@ -37,6 +37,7 @@ org/jetbrains/compose/reload/orchestration/OrchestrationMessage$TakeScreenshotRe
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$TestEvent = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIException = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIRendered = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessageClassifier = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessageId = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationPackage = 4708005812100712021
 org/jetbrains/compose/reload/orchestration/OrchestrationPackage$Ack = 0
