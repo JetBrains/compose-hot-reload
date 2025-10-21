@@ -55,6 +55,24 @@ Each message is sent as frame, typically using java.io.Serializable as message b
 Message binaries therefore include the information about which exact type of `OrchestrationMessage` it represents.
 Lenient serialization (e.g., by using a constant serialVersionUID) is therefore desired.
 
+### Encoded Messages
+Starting from protocol version 1.4, custom encoded messages are supported. 
+Each message therefore is defined by a given encoder. The frame of such an encoded message is defined
+as 
+```text
+┌──────────────────────┬───────────────────┬───────────────────┐     
+│ short(Schema Version)│int(MessageId size)│ byte[](MessageId) │..   
+└──────────────────────┴───────────────────┴───────────────────┘     
+┌───────────────────────────────────┬───────────────────────────────┐
+│String(MessageClassifier.namespace)│ String(MessageClassifier.type)│
+└───────────────────────────────────┴───────────────────────────────┘
+┌─────────────────┬───────────────┐                                  
+│int(Payload Size)│byte[](Payload)│                                  
+└─────────────────┴───────────────┘                                  
+```
+where the 'Payload' is the encoded message itself.
+
+
 ## Message Ack
 Each message, once received by the server, will get an 'Ack' response
 ```text
