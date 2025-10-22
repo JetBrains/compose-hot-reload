@@ -10,6 +10,7 @@ import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.Type
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
+import org.jetbrains.compose.reload.core.decodeSerializableObject
 import org.jetbrains.compose.reload.core.encodeByteArray
 import org.jetbrains.compose.reload.core.encodeSerializableObject
 import org.jetbrains.compose.reload.core.error
@@ -141,5 +142,17 @@ internal fun OrchestrationFrame.decodeOrchestrationMessage(
         return OpaqueOrchestrationMessage(this)
     } else {
         return result.value ?: OpaqueOrchestrationMessage(this)
+    }
+}
+
+internal fun OrchestrationFrame.decodeSerializableOrchestrationMessage(): OrchestrationPackage {
+    require(type == OrchestrationPackageType.JavaSerializableMessage) {
+        "Expected ${OrchestrationPackageType.JavaSerializableMessage}, got $type"
+    }
+
+    return try {
+        (data.decodeSerializableObject() as OrchestrationMessage)
+    } catch (_: ClassNotFoundException) {
+        OpaqueOrchestrationMessage(this)
     }
 }

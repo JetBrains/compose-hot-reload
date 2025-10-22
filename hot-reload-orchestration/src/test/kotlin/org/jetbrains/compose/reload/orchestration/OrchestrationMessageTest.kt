@@ -69,7 +69,7 @@ class OrchestrationMessageTest {
             OrchestrationMessageEncoder::class.java.classLoader
         ).toList()
 
-        val unusedEncoders = encoders.toMutableSet()
+        val leftoverEncoders = encoders.toMutableSet()
 
         /* Check if any classifier is duplicated */
         encoders.groupBy { it.messageClassifier }.forEach { (classifier, encoders) ->
@@ -82,7 +82,7 @@ class OrchestrationMessageTest {
             val messageClass = Class.forName(messageClassInfo.classId.toFqn())
             val encoder = encoders.find { it.messageType == Type<Any?>(messageClass.canonicalName) }
             val classifier = encoder?.messageClassifier?.toString() ?: "<null>"
-            unusedEncoders.remove(encoder)
+            leftoverEncoders.remove(encoder)
             Mapping(messageClassInfo, classifier)
         }
 
@@ -97,14 +97,13 @@ class OrchestrationMessageTest {
                     appendLine("${classifier.padEnd(42)} => ${messageClassInfo.displayString()}")
                 }
 
-            if (unusedEncoders.isNotEmpty()) {
+            if (leftoverEncoders.isNotEmpty()) {
                 appendLine()
-                appendLine("Unused encoders:")
-                appendLine("{{encoder FQN}} ({{classifier}}")
+                appendLine("Non 'OrchestrationMessage' encoders:")
+                appendLine("{{messageClassifier}} => Message FQN")
                 appendLine("==========================================")
-
-                unusedEncoders.forEach { encoder ->
-                    "${encoder.javaClass.canonicalName} (${encoder.messageClassifier})"
+                leftoverEncoders.forEach { encoder ->
+                    appendLine("${encoder.messageClassifier.toString().padEnd(42)} => ${encoder.messageType.signature}")
                 }
             }
         }

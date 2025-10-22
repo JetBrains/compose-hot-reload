@@ -25,3 +25,4 @@ org.jetbrains.compose.reload.orchestration.UIRenderedEncoder
 org.jetbrains.compose.reload.orchestration.UIExceptionEncoder
 org.jetbrains.compose.reload.orchestration.CriticalExceptionEncoder
 org.jetbrains.compose.reload.orchestration.BuildTaskResultEncoder
+org.jetbrains.compose.reload.orchestration.IntroductionEncoder

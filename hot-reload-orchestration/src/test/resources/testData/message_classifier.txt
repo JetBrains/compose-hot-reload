@@ -28,3 +28,8 @@ root/TakeScreenshotRequest                 => o.j.c.r.o.OrchestrationMessage$Tak
 root/TestEvent                             => o.j.c.r.o.OrchestrationMessage$TestEvent
 root/UIException                           => o.j.c.r.o.OrchestrationMessage$UIException
 root/UIRendered                            => o.j.c.r.o.OrchestrationMessage$UIRendered
+
+Non 'OrchestrationMessage' encoders:
+{{messageClassifier}} => Message FQN
+==========================================
+root/ClientIntroduction                    => org.jetbrains.compose.reload.orchestration.OrchestrationPackage.Introduction

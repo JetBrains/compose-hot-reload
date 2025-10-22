@@ -7,11 +7,13 @@
 
 package org.jetbrains.compose.reload.orchestration
 
+import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.decode
 import org.jetbrains.compose.reload.core.decodeSerializableObject
 import org.jetbrains.compose.reload.core.encodeByteArray
 import org.jetbrains.compose.reload.core.encodeSerializableObject
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.type
 import org.jetbrains.compose.reload.orchestration.OrchestrationPackage.Introduction
 import java.io.Serializable
 import kotlin.uuid.ExperimentalUuidApi
@@ -24,7 +26,7 @@ internal class OrchestrationFrame(
 internal fun OrchestrationPackage.encodeToFrame(version: OrchestrationVersion): OrchestrationFrame {
     return when (this) {
         is OrchestrationMessage -> encodeToFrame(version)
-        is Introduction -> encodeToFrame()
+        is Introduction -> encodeToFrame(version)
         is OrchestrationPackage.Ack -> encodeToFrame()
         is OrchestrationStateRequest -> encodeToFrame()
         is OrchestrationStateUpdate -> encodeToFrame()
@@ -34,24 +36,48 @@ internal fun OrchestrationPackage.encodeToFrame(version: OrchestrationVersion): 
     }
 }
 
-
-internal fun OrchestrationFrame.decodeSerializableOrchestrationMessage(): OrchestrationPackage {
-    require(type == OrchestrationPackageType.JavaSerializableMessage) {
-        "Expected ${OrchestrationPackageType.JavaSerializableMessage}, got $type"
-    }
-
-    return try {
-        (data.decodeSerializableObject() as OrchestrationMessage)
-    } catch (_: ClassNotFoundException) {
-        OpaqueOrchestrationMessage(this)
+internal fun OrchestrationFrame.decodePackage(): OrchestrationPackage {
+    return when (type) {
+        OrchestrationPackageType.Message -> decodeOrchestrationMessage()
+        OrchestrationPackageType.JavaSerializableMessage -> decodeSerializableOrchestrationMessage()
+        OrchestrationPackageType.JavaSerializableClientIntroduction -> data.decodeSerializableObject() as Introduction
+        OrchestrationPackageType.ClientIntroduction -> decodeIntroduction()
+        OrchestrationPackageType.Ack -> data.decodeAck()
+        OrchestrationPackageType.StateRequest -> data.decodeStateRequest()
+        OrchestrationPackageType.StateUpdate -> data.decodeStateUpdate()
+        OrchestrationPackageType.StateUpdateResponse -> data.decodeStateUpdateResponse()
+        OrchestrationPackageType.StateValue -> data.decodeStateValue()
     }
 }
 
-internal fun Introduction.encodeToFrame() = OrchestrationFrame(
-    type = OrchestrationPackageType.JavaSerializableClientIntroduction,
-    data = encodeSerializableObject()
-)
+//region Introduction Encode/Decode
+private val introductionEncoder = Try {
+    messageEncoderOf(type<Introduction>())
+        ?: error("Missing message encoder for type ${Introduction::class.java.canonicalName}")
+}
 
+internal fun Introduction.encodeToFrame(version: OrchestrationVersion): OrchestrationFrame {
+    if (!version.supportsEncodedMessages) return OrchestrationFrame(
+        type = OrchestrationPackageType.JavaSerializableClientIntroduction,
+        data = encodeSerializableObject()
+    )
+
+    return OrchestrationFrame(
+        type = OrchestrationPackageType.ClientIntroduction,
+        data = introductionEncoder.getOrThrow().encode(this)
+    )
+}
+
+internal fun OrchestrationFrame.decodeIntroduction(): Introduction {
+    if (type != OrchestrationPackageType.ClientIntroduction) {
+        error("Expected ${OrchestrationPackageType.ClientIntroduction}, got $type")
+    }
+
+    return introductionEncoder.getOrThrow().decode(data).getOrThrow()
+}
+//endregion
+
+//region Ack Encode/Decode
 internal fun OrchestrationPackage.Ack.encodeToFrame() = OrchestrationFrame(
     type = OrchestrationPackageType.Ack,
     data = messageId?.value?.toByteArray() ?: byteArrayOf()
@@ -63,7 +89,9 @@ internal fun ByteArray.decodeAck(): OrchestrationPackage.Ack {
         else null
     )
 }
+//endregion
 
+//region StateRequest Encode/Decode
 internal fun OrchestrationStateRequest.encodeToFrame() = OrchestrationFrame(
     type = OrchestrationPackageType.StateRequest,
     data = stateId.encodeToByteArray()
@@ -72,7 +100,9 @@ internal fun OrchestrationStateRequest.encodeToFrame() = OrchestrationFrame(
 internal fun ByteArray.decodeStateRequest(): OrchestrationStateRequest = OrchestrationStateRequest(
     decodeOrchestrationStateId().getOrThrow()
 )
+//endregion
 
+//region StateUpdate Encode/Decode
 internal fun OrchestrationStateUpdate.encodeToFrame() = OrchestrationFrame(
     type = OrchestrationPackageType.StateUpdate,
     data = encodeByteArray {
@@ -100,7 +130,9 @@ internal fun ByteArray.decodeStateUpdate(): OrchestrationStateUpdate = decode {
 
     OrchestrationStateUpdate(stateId, expectedValue = expectedValue?.let(::Binary), Binary(updatedValue))
 }
+//endregion
 
+//region StateUpdateResponse Encode/Decode
 internal fun OrchestrationStateUpdate.Response.encodeToFrame() = OrchestrationFrame(
     type = OrchestrationPackageType.StateUpdateResponse,
     data = encodeByteArray { writeBoolean(accepted) }
@@ -109,7 +141,9 @@ internal fun OrchestrationStateUpdate.Response.encodeToFrame() = OrchestrationFr
 internal fun ByteArray.decodeStateUpdateResponse() = OrchestrationStateUpdate.Response(
     accepted = decode { readBoolean() }
 )
+//endregion
 
+//region StateValue Encode/Decode
 internal fun OrchestrationStateValue.encodeToFrame() = OrchestrationFrame(
     type = OrchestrationPackageType.StateValue,
     data = encodeByteArray {
@@ -130,20 +164,7 @@ internal fun ByteArray.decodeStateValue(): OrchestrationStateValue = decode {
     val value = if (valueSize == -1) null else readNBytes(valueSize)
     OrchestrationStateValue(stateId, value?.let(::Binary))
 }
-
-
-internal fun OrchestrationFrame.decodePackage(): OrchestrationPackage {
-    return when (type) {
-        OrchestrationPackageType.Message -> decodeOrchestrationMessage()
-        OrchestrationPackageType.JavaSerializableMessage -> decodeSerializableOrchestrationMessage()
-        OrchestrationPackageType.JavaSerializableClientIntroduction -> data.decodeSerializableObject() as Introduction
-        OrchestrationPackageType.Ack -> data.decodeAck()
-        OrchestrationPackageType.StateRequest -> data.decodeStateRequest()
-        OrchestrationPackageType.StateUpdate -> data.decodeStateUpdate()
-        OrchestrationPackageType.StateUpdateResponse -> data.decodeStateUpdateResponse()
-        OrchestrationPackageType.StateValue -> data.decodeStateValue()
-    }
-}
+//endregion
 
 internal enum class OrchestrationPackageType(val intValue: Int) {
     /**
@@ -151,6 +172,11 @@ internal enum class OrchestrationPackageType(val intValue: Int) {
      * to encode and decode the underlying message (whereas [Message] uses [OrchestrationMessageEncoder])
      */
     JavaSerializableMessage(0),
+
+    /**
+     * Special type of [ClientIntroduction] encoding, which uses [java.io.Serializable]
+     * to encode and decode the underlying message (whereas [ClientIntroduction] uses [OrchestrationMessageEncoder])
+     */
     JavaSerializableClientIntroduction(1),
     StateRequest(2),
     StateUpdate(3),
@@ -162,6 +188,12 @@ internal enum class OrchestrationPackageType(val intValue: Int) {
      * Uses registered [OrchestrationMessageEncoder] to encode and decode the underlying message
      */
     Message(6),
+
+    /**
+     * Replacement for [JavaSerializableClientIntroduction]
+     * Uses a registered [OrchestrationMessageEncoder] to encode and decode the underlying message
+     */
+    ClientIntroduction(7),
 
     Ack(128);
 

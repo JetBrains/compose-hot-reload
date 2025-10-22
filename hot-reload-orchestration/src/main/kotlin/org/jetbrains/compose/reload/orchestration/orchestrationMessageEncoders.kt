@@ -553,6 +553,28 @@ internal class BuildTaskResultEncoder : OrchestrationMessageEncoder<Orchestratio
     }
 }
 
+internal class IntroductionEncoder : OrchestrationMessageEncoder<OrchestrationPackage.Introduction> {
+    override val messageType: Type<OrchestrationPackage.Introduction> = type()
+    override val messageClassifier = classifier("ClientIntroduction")
+
+    override fun encode(message: OrchestrationPackage.Introduction): ByteArray = encodeByteArray {
+        writeFields(
+            "clientId" to message.clientId.value.encodeToByteArray(),
+            "clientRole" to message.clientRole.name.encodeToByteArray(),
+            "clientPid" to message.clientPid?.encodeToByteArray()
+        )
+    }
+
+    override fun decode(data: ByteArray): Try<OrchestrationPackage.Introduction> = data.tryDecode {
+        val fields = readFields()
+        OrchestrationPackage.Introduction(
+            clientId = OrchestrationClientId(fields.requireField("clientId").decodeToString()),
+            clientRole = OrchestrationClientRole.valueOf(fields.requireField("clientRole").decodeToString()),
+            clientPid = fields["clientPid"]?.decodeToLong()
+        )
+    }
+}
+
 private fun encodeStackTrace(stacktrace: List<StackTraceElement>): ByteArray = encodeByteArray {
     writeInt(stacktrace.size)
     stacktrace.forEach { ste ->
