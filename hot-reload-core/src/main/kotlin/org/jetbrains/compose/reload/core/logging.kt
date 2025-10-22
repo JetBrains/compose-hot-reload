@@ -30,13 +30,25 @@ public inline fun createLogger(environment: Environment? = Environment.current):
 @InternalHotReloadApi
 public inline fun <reified T : Any> createLogger(): Logger = createLogger(T::class.java.name)
 
+@JvmOverloads
 @InternalHotReloadApi
 public fun createLogger(
     name: String,
     environment: Environment? = Environment.current,
     dispatch: List<Logger.Dispatch> = Logger.defaultDispatch,
 ): Logger {
-    return LoggerImpl(environment, loggerName = name, dispatch)
+    return LoggerImpl(environment, loggerName = name, dispatch = dispatch, level = HotReloadEnvironment.logLevel)
+}
+
+@JvmOverloads
+@InternalHotReloadApi
+public fun createLogger(
+    name: String,
+    environment: Environment? = Environment.current,
+    dispatch: List<Logger.Dispatch> = Logger.defaultDispatch,
+    level: Level,
+): Logger {
+    return LoggerImpl(environment, loggerName = name, dispatch = dispatch, level = level)
 }
 
 @InternalHotReloadApi
@@ -65,6 +77,7 @@ public interface Logger {
         public fun add(log: Log)
     }
 
+    public val level: Level
     public fun log(level: Level, message: String, throwable: Throwable? = null)
 
     @InternalHotReloadApi
@@ -89,14 +102,14 @@ internal data class LogImpl(
 
 @InternalHotReloadApi
 public inline fun Logger.trace(message: () -> String) {
-    if (HotReloadEnvironment.logLevel <= Level.Trace) {
+    if (level <= Level.Trace) {
         log(Level.Debug, message())
     }
 }
 
 @InternalHotReloadApi
 public inline fun Logger.debug(message: () -> String) {
-    if (HotReloadEnvironment.logLevel <= Level.Debug) {
+    if (level <= Level.Debug) {
         log(Level.Debug, message())
     }
 }
@@ -130,7 +143,7 @@ private class LoggerImpl(
     private val environment: Environment?,
     private val loggerName: String,
     private val dispatch: List<Logger.Dispatch> = Logger.defaultDispatch,
-    private val level: Level = HotReloadEnvironment.logLevel,
+    override val level: Level = HotReloadEnvironment.logLevel,
 ) : Logger {
     override fun log(level: Level, message: String, throwable: Throwable?) {
         if (level < this.level) return
