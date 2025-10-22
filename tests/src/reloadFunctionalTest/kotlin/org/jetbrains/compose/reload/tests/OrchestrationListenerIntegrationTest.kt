@@ -9,6 +9,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.job
+import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.await
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.getOrThrow
@@ -57,7 +58,10 @@ class OrchestrationListenerIntegrationTest {
         fixture.launchTestDaemon {
 
             /* Clear arguments from the Gradle runner, to allow the application to host the server */
-            val runner = fixture.gradleRunner.copy(arguments = emptyList())
+            val runner = fixture.gradleRunner.copy(
+                arguments = listOf("-D${HotReloadProperty.IsHeadless.key}=true")
+            )
+
             runner.buildFlow(
                 ":hotRunJvm", "--mainClass", "MainKt", orchestrationListener.toJvmArg()
             ).toList().assertSuccessful()
