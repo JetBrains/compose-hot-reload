@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.job
 import org.jetbrains.compose.reload.core.await
+import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.withAsyncTrace
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
@@ -29,6 +31,9 @@ import kotlin.io.path.createParentDirectories
 import kotlin.io.path.writeText
 
 class OrchestrationListenerIntegrationTest {
+
+    private val logger = createLogger()
+
     @HotReloadTest
     @QuickTest
     fun `test - connection`(fixture: HotReloadTestFixture) = fixture.runTest {
@@ -63,12 +68,14 @@ class OrchestrationListenerIntegrationTest {
             client.close()
         }
 
+        logger.info("Waiting for client connection")
         withAsyncTrace("Await deferred client connection") {
             client.states.get(OrchestrationConnectionsState).await { state ->
                 client.clientId in state.connections.map { it.clientId }
             }
         }
 
+        logger.info("Waiting for application to connect")
         val application = withAsyncTrace("Await application to connect") {
             client.states.get(OrchestrationConnectionsState).await { state ->
                 Application in state.connections.map { it.clientRole }
@@ -80,7 +87,12 @@ class OrchestrationListenerIntegrationTest {
             applicationProcessHandle.destroy()
         }
 
+        logger.info("Sending shutdown request to the application")
         client.sendAsync(OrchestrationMessage.ShutdownRequest("Requested by test"))
+
+        logger.info("Waiting for the application to exit")
         applicationProcessHandle.onExit().await()
+
+        logger.info("Application has exited")
     }
 }

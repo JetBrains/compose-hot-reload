@@ -44,14 +44,19 @@ internal fun startDevToolsUI() {
         return
     }
 
-    application(exitProcessOnExit = false) {
-        CompositionLocalProvider(
-            LocalWindowExceptionHandlerFactory provides { DevToolsWindowExceptionHandler },
-            LocalEvents provides (applicationScope.coroutineContext.eventsOrThrow),
-            LocalStates provides (applicationScope.coroutineContext.statesOrThrow),
-        ) {
-            DevToolsUI()
+    try {
+        application(exitProcessOnExit = false) {
+            CompositionLocalProvider(
+                LocalWindowExceptionHandlerFactory provides { DevToolsWindowExceptionHandler },
+                LocalEvents provides (applicationScope.coroutineContext.eventsOrThrow),
+                LocalStates provides (applicationScope.coroutineContext.statesOrThrow),
+            ) {
+                DevToolsUI()
+            }
         }
+    } catch (t: Throwable) {
+        logger.error("Exception when starting DevTools UI", t)
+        OrchestrationMessage.CriticalException(OrchestrationClientRole.Tooling, t).sendAsync()
     }
 }
 
