@@ -53,6 +53,9 @@ open class ServerClientBenchmark {
     /**
      * 18.09.2025 | M4
      *  166162.919 ±(99.9%) 2519.063 ops/s [Average]
+     *
+     * 20.10.2025 | M4
+     * 161828.341 ±(99.9%) 7735.523 ops/s [Average]
      */
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
@@ -65,6 +68,9 @@ open class ServerClientBenchmark {
     /**
      * 18.09.2025 | M4
      *  11676.025 ±(99.9%) 151.538 ops/s [Average]
+     *
+     * 22.10.2025 | M4
+     * 12652.528 ±(99.9%) 147.886 ops/s [Average]
      */
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
