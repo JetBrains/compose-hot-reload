@@ -107,7 +107,13 @@ internal class GradleRecompiler(
                     /* Continuous mode arguments */
                     "-t".takeIf { HotReloadEnvironment.gradleBuildContinuous },
                     "--no-daemon".takeIf { !useGradleDaemon },
-                    "--offline".takeIf { HotReloadEnvironment.gradleOfflineMode }
+                    "--offline".takeIf { HotReloadEnvironment.gradleOfflineMode },
+
+                    /* Performance arguments */
+                    "--configuration-cache".takeIf { HotReloadEnvironment.gradleBuildOptimize },
+                    "--configuration-cache-problems=warn".takeIf { HotReloadEnvironment.gradleBuildOptimize },
+                    "--build-cache".takeIf { HotReloadEnvironment.gradleBuildOptimize },
+                    "--parallel".takeIf { HotReloadEnvironment.gradleBuildOptimize }
                 )
             )
         }

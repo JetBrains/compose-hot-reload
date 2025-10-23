@@ -145,6 +145,17 @@ GradleWarmupEnabled:
     the recompiler Gradle daemon is running and ready to handle requests
     - false: No warmup request will be sent, first reload request may take longer time
 
+GradleBuildOptimize:
+  key: compose.reload.gradle.build.optimize
+  type: boolean
+  default: "true"
+  target: [ application, devtools, build ]
+  isDelicateApi: true
+  documentation: |
+    - true: Compose Hot Reload will try to optimize your build during hot reload 
+    (e.g. by enabling Gradle's configuration cache during 'recompilation')
+    - false: No optimization will be performed.
+
 AmperBuildRoot:
   key: amper.build.root
   type: string
