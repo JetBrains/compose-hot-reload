@@ -7,6 +7,7 @@ package builds.conventions
 
 import builds.BuildCache
 import jetbrains.buildServer.configs.kotlin.BuildType
+import jetbrains.buildServer.configs.kotlin.ReuseBuilds
 
 sealed interface BuildCacheConvention {
     interface Consumer : BuildCacheConvention
@@ -42,6 +43,11 @@ fun BuildType.buildCacheConventions() {
                 artifactRules = caches.entries.joinToString("\n") { (location, artifact) ->
                     "$artifact!** => $location"
                 }
+            }
+
+            snapshot(producer) {
+                reuseBuilds = ReuseBuilds.ANY
+                synchronizeRevisions = false
             }
         }
     }
