@@ -22,14 +22,13 @@ import org.jetbrains.compose.reload.core.JavaHome
 import org.jetbrains.compose.reload.core.JavaReleaseFileContent
 import kotlin.io.path.absolutePathString
 
-private val jetbrainsRuntimeVersionMin = JavaLanguageVersion.of(21)
-
 @InternalHotReloadApi
 fun Project.jetbrainsRuntimeVersion(): Provider<JavaLanguageVersion> {
+    val defaultVersion = JavaLanguageVersion.of(composeReloadJetBrainsRuntimeVersion)
     return project.provider {
         val projectLevel = extensions.findByType<JavaPluginExtension>()?.toolchain?.languageVersion?.orNull
-        if (projectLevel != null && projectLevel > jetbrainsRuntimeVersionMin) return@provider projectLevel
-        jetbrainsRuntimeVersionMin
+        if (projectLevel != null && projectLevel > defaultVersion) return@provider projectLevel
+        defaultVersion
     }
 }
 
