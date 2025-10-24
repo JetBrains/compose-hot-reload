@@ -10,6 +10,7 @@ import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.devToolsDetached
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.HotReloadProperty.Environment.DevTools
+import org.jetbrains.compose.reload.core.JavaHome
 import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
@@ -18,9 +19,7 @@ import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
 import org.jetbrains.compose.reload.core.subprocessSystemProperties
 import org.jetbrains.compose.reload.core.withHotReloadEnvironmentVariables
 import java.io.File
-import java.nio.file.Path
 import kotlin.concurrent.thread
-import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 
 private val logger = createLogger()
@@ -46,6 +45,7 @@ private fun tryStartDevToolsProcess(): DevToolsHandle? {
         resolveDevtoolsJavaBinary(),
         *platformSpecificJvmArguments(),
         "-XX:+UseZGC", "-Xmx256M", "-XX:SoftMaxHeapSize=128M",
+        "--enable-native-access=ALL-UNNAMED",
         "-cp", classpath.joinToString(File.pathSeparator),
         *subprocessSystemProperties(DevTools).toTypedArray(),
         *issueNewDebugSessionJvmArguments("DevTools"),
@@ -73,20 +73,8 @@ private fun tryStartDevToolsProcess(): DevToolsHandle? {
     return DevToolsHandle(orchestrationPort)
 }
 
-private fun resolveDevtoolsJavaBinary(): String? {
-    fun Path.resolveJavaHome(): Path = resolve(
-        if (Os.currentOrNull() == Os.Windows) "bin/java.exe" else "bin/java"
-    )
-
-    System.getProperty("java.home")?.let { javaHome ->
-        return Path(javaHome).resolveJavaHome().absolutePathString()
-    }
-
-    System.getenv("JAVA_HOME")?.let { javaHome ->
-        return Path(javaHome).resolveJavaHome().absolutePathString()
-    }
-
-    return null
+private fun resolveDevtoolsJavaBinary(): String {
+    return JavaHome.current().javaExecutable.absolutePathString()
 }
 
 private fun platformSpecificJvmArguments(): Array<String> = when (Os.current()) {

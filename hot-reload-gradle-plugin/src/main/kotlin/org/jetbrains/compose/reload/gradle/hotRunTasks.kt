@@ -147,6 +147,11 @@ internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<Ko
         jvmArgs = jvmArgs.orEmpty() + "-D${HotReloadProperty.LaunchMode.key}=${LaunchMode.GradleBlocking.name}"
 
 
+        val vmTitle = javaLauncher.orNull?.metadata?.vendor?.let { vendor ->
+            if (vendor.contains("jetbrains", ignoreCase = true)) "JetBrains Runtime"
+            else "⚠️ VM: $vendor (JetBrains Runtime required)"
+        } ?: "⚠️ Unknown VM"
+
         logger.quiet(buildString {
             append(
                 """
@@ -154,7 +159,7 @@ internal fun JavaExec.configureJavaExecTaskForHotReload(compilation: Provider<Ko
             | 
             | Compose Hot Reload ($HOT_RELOAD_VERSION)
             | Running '${mainClass.get()}'
-            | JetBrains Runtime: ${javaLauncher.orNull?.executablePath?.asFile?.path}
+            | $vmTitle: ${javaLauncher.orNull?.executablePath?.asFile?.path}
             | ________________________________________________________________________________________________
             """.trimIndent()
             )
