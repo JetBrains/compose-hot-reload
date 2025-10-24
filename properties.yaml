@@ -264,9 +264,19 @@ JetBrainsRuntimeBinary:
   key: compose.reload.jbr.binary
   type: file
   target: [ build ]
+  isDelicateApi: true
   documentation: |
     The path to the 'JetBrainsRuntime' which shall be used when launching the app. 
     Note: This is a build-only property!
+
+JetBrainsRuntimeVersion:
+  key: compose.reload.jbr.version
+  type: int
+  default: "21"
+  target: [ build ]
+  isDelicateApi: true
+  documentation: |
+    Specifies the default 'JetBrains Runtime' version that shall be used (e.g. '21' or '25')
 
 AutoRuntimeDependenciesEnabled:
   key: compose.reload.autoRuntimeDependenciesEnabled
@@ -293,8 +303,17 @@ IdeaComposeHotReloadSupportVersion:
   documentation: |
     Set by IntelliJ during builds to convey its 'support level' for hot reload.
     Not Present, but 'idea.compose.hot-reload' being set: Supports running hot run tasks
-
     2: Support running 'hot run' tasks and 'hot reload' tasks
+    3: Supports providing IDEA runtime using 'idea.compose.hot-reload.jbr'
+
+IdeaJetBrainsRuntimeBinary:
+  key: idea.compose.hot-reload.jbr
+  type: file
+  target: [ build ]
+  documentation: |
+    Forwards the 'JetBrains Runtime' which is bundled with the current version of IntelliJ
+    - (Points to the binary (bin/java))
+    - Can be used as 'fallback' when no other JBR is found
 
 StdinFile:
   key: compose.reload.stdinFile

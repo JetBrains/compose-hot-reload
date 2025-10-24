@@ -56,12 +56,9 @@ private fun Project.registerComposeHotAsyncRunTask(
         })
 
         /* JetBrains Runtime */
-        val composeReloadJetBrainsRuntimeBinary = project.composeReloadJetBrainsRuntimeBinary
-        if (composeReloadJetBrainsRuntimeBinary != null) {
-            task.javaBinary.set(composeReloadJetBrainsRuntimeBinary.toFile())
-        } else {
-            task.javaBinary.set(project.jetbrainsRuntimeLauncher().map { it.executablePath })
-        }
+        task.javaBinary.convention(
+            runTask.flatMap { task -> task.javaLauncher }.map { javaLauncher -> javaLauncher.executablePath }
+        )
 
         /* stdout */
         if (project.composeReloadStdoutFile != null) {

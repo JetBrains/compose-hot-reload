@@ -18,7 +18,7 @@ compose.desktop {
 
 kotlin {
     jvm()
-    jvmToolchain(21)
+    jvmToolchain(25)
 
     sourceSets.commonMain.dependencies {
         implementation("io.sellmair:evas:1.2.0")
