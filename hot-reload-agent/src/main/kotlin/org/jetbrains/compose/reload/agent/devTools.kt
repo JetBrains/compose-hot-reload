@@ -45,6 +45,7 @@ private fun tryStartDevToolsProcess(): DevToolsHandle? {
         resolveDevtoolsJavaBinary(),
         *platformSpecificJvmArguments(),
         "-XX:+UseZGC", "-Xmx256M", "-XX:SoftMaxHeapSize=128M",
+        "--enable-native-access=ALL-UNNAMED",
         "-cp", classpath.joinToString(File.pathSeparator),
         *subprocessSystemProperties(DevTools).toTypedArray(),
         *issueNewDebugSessionJvmArguments("DevTools"),
