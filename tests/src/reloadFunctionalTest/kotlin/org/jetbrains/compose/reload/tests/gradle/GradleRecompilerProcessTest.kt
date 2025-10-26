@@ -8,7 +8,7 @@
 package org.jetbrains.compose.reload.tests.gradle
 
 import kotlinx.coroutines.flow.toList
-import org.jetbrains.compose.reload.core.Os
+import org.jetbrains.compose.reload.core.JavaHome
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
@@ -133,8 +133,7 @@ class GradleRecompilerProcessTest {
         val command = recompilerProcess.info().command().getOrNull() ?: error("Missing 'command' in recompiler process")
 
         assertEquals(
-            if (Os.current() == Os.Windows) targetJavaHome.resolve("bin/java.exe").toRealPath()
-            else targetJavaHome.resolve("bin/java").toRealPath(),
+            JavaHome(targetJavaHome).javaExecutable.toRealPath(),
             Path(command).toRealPath(),
             "Expected 'java' command"
         )

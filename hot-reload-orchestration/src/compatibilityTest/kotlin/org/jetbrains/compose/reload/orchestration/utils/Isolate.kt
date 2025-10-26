@@ -14,8 +14,8 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.reload.core.Future
+import org.jetbrains.compose.reload.core.JavaHome
 import org.jetbrains.compose.reload.core.Logger
-import org.jetbrains.compose.reload.core.Os
 import org.jetbrains.compose.reload.core.Queue
 import org.jetbrains.compose.reload.core.complete
 import org.jetbrains.compose.reload.core.completeExceptionally
@@ -77,8 +77,7 @@ fun CoroutineScope.launchIsolate(
 ): IsolateHandle {
     val previousClasspath = classpath + System.getProperty("testClasspath").split(File.pathSeparator).map { Path(it) }
 
-    val javaHome = Path(System.getProperty("java.home"))
-    val java = javaHome.resolve(if (Os.current() == Os.Windows) "bin/java.exe" else "bin/java")
+    val java = JavaHome.current().javaExecutable
 
     val process = ProcessBuilder(
         java.absolutePathString(),

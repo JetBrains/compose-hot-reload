@@ -268,6 +268,15 @@ JetBrainsRuntimeBinary:
     The path to the 'JetBrainsRuntime' which shall be used when launching the app. 
     Note: This is a build-only property!
 
+JetBrainsRuntimeVersion:
+  key: compose.reload.jbr.version
+  type: int
+  default: "21"
+  target: [ build ]
+  isDelicateApi: true
+  documentation: |
+    Specifies the default 'JetBrains Runtime' version that shall be used (e.g. '21' or '25')
+
 AutoRuntimeDependenciesEnabled:
   key: compose.reload.autoRuntimeDependenciesEnabled
   type: boolean

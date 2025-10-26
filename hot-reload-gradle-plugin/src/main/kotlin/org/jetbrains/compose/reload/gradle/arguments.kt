@@ -57,11 +57,10 @@ fun <T> T.withComposeHotReload(arguments: ComposeHotReloadArgumentsBuilder.() ->
     jvmArgumentProviders.add(arguments)
 
     /* Ensure the task is launched with a proper JetBrains Runtime */
-    if (project.composeReloadJetBrainsRuntimeBinary != null) {
-        this.executable(project.composeReloadJetBrainsRuntimeBinary)
-    } else if (this is JavaExec) {
-        javaLauncher.set(project.jetbrainsRuntimeLauncher())
+    if (this is JavaExec) {
+        javaLauncher.convention(project.jetbrainsRuntimeLauncher())
     }
+
 
     /**
      * Wire up the orchestration listener ports:
