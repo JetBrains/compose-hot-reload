@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.jetbrains.compose.devtools.states.launchConsoleLogUIState
 import org.jetbrains.compose.devtools.states.launchErrorUIState
+import org.jetbrains.compose.devtools.states.launchNotificationsUIState
 import org.jetbrains.compose.devtools.states.launchReloadCountStateActor
 import org.jetbrains.compose.devtools.states.launchReloadCountUIState
 import org.jetbrains.compose.devtools.states.launchReloadStateActor
@@ -46,6 +47,7 @@ internal fun CoroutineScope.launchApplicationStates() {
     launchReloadUIState()
 
     launchRestartActor()
+    launchNotificationsUIState()
 }
 
 fun main() {

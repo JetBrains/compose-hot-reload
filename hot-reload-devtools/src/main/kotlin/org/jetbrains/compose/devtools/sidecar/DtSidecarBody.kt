@@ -14,52 +14,26 @@ import androidx.compose.ui.Modifier
 import org.jetbrains.compose.devtools.theme.DtPadding
 
 @Composable
-internal fun DtAttachedSidecarBody(
-    modifier: Modifier = Modifier,
-    onClose: () -> Unit,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(DtPadding.largeElementPadding),
-        modifier = modifier.fillMaxSize()
-            .padding(horizontal = DtPadding.borderPadding)
-            .padding(bottom = DtPadding.large)
-            .padding(top = DtPadding.borderPadding),
-    ) {
-        // Header
-        DtAttachedSidecarHeaderBar(
-            onClose = onClose,
-        )
-
-        // Action bar with controls
-        DtSidecarActionBar()
-
-        // Status section showing the current state
-        DtSidecarStatusSection()
-
-        // Main console with logs
-        DtMainConsole(Modifier.fillMaxSize())
-    }
-}
-
-@Composable
 internal fun DtDetachedSidecarBody(modifier: Modifier = Modifier) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(DtPadding.largeElementPadding),
-        modifier = modifier.fillMaxSize()
-            .padding(horizontal = DtPadding.borderPadding)
-            .padding(bottom = DtPadding.large)
-            .padding(top = DtPadding.borderPadding),
-    ) {
-        // Header
-        DtDetachedSidecarHeaderBar()
+    DtCompositionLocalProvider {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(DtPadding.largeElementPadding),
+            modifier = modifier.fillMaxSize()
+                .padding(horizontal = DtPadding.borderPadding)
+                .padding(bottom = DtPadding.large)
+                .padding(top = DtPadding.borderPadding),
+        ) {
+            // Header
+            DtDetachedSidecarHeaderBar()
 
-        // Action bar with controls
-        DtSidecarActionBar()
+            // Action bar with controls
+            DtSidecarActionBar()
 
-        // Status section showing the current state
-        DtSidecarStatusSection()
+            // Status section showing the current state
+            DtSidecarStatusSection()
 
-        // Main console with logs
-        DtMainConsole(Modifier.fillMaxSize())
+            // Main console with logs
+            DtMainConsole(modifier = Modifier.fillMaxSize())
+        }
     }
 }

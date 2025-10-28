@@ -11,24 +11,29 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.filter
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.onChild
 import androidx.compose.ui.test.onParent
 import org.jetbrains.compose.devtools.Tag
-import org.jetbrains.compose.devtools.sidecar.DtMinimizedSidecarWindowContent
+import org.jetbrains.compose.devtools.sidecar.DtSidecarWindowContent
 import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.states.BuildSystemUIState
+import org.jetbrains.compose.devtools.states.NotificationsUIState
 import org.jetbrains.compose.devtools.states.ReloadCountUIState
 import org.jetbrains.compose.devtools.states.ReloadUIState
+import org.jetbrains.compose.devtools.states.UINotificationType
 import org.jetbrains.compose.devtools.theme.DtImages
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.junit.jupiter.api.Test
 
-class MinimisedSidecarUiTest : SidecarBodyUiTest() {
+class SidecarUiTest : DevToolsUiTest() {
 
     @Composable
     override fun content() {
-        DtMinimizedSidecarWindowContent()
+        DtSidecarWindowContent()
     }
 
     @Test
@@ -36,12 +41,7 @@ class MinimisedSidecarUiTest : SidecarBodyUiTest() {
         awaitNodeWithTag(Tag.HotReloadLogo)
             .assertExists()
             .onParent()
-            .assertHasClickAction()
-
-        onAllNodesWithTag(Tag.ExpandMinimiseButton)
-            .assertCountEquals(1)
-            .onFirst()
-            .assertHasClickAction()
+            .assertHasNoClickAction()
     }
 
     @Test
@@ -67,11 +67,54 @@ class MinimisedSidecarUiTest : SidecarBodyUiTest() {
         states.updateState(BuildSystemUIState.Key) { BuildSystemUIState(BuildSystem.Gradle) }
         awaitNodeWithTag(Tag.BuildSystemLogo)
             .assertExists()
-            .assertContentDescriptionContains(DtImages.Image.GRADLE_LOGO.name)
+            .assertContentDescriptionContains(DtImages.Image.GRADLE_LOGO.description)
 
         states.updateState(BuildSystemUIState.Key) { BuildSystemUIState(BuildSystem.Amper) }
         awaitNodeWithTag(Tag.BuildSystemLogo)
             .assertExists()
-            .assertContentDescriptionContains(DtImages.Image.AMPER_LOGO.name)
+            .assertContentDescriptionContains(DtImages.Image.AMPER_LOGO.description)
+    }
+
+    @Test
+    fun `test - actions`() = runSidecarUiTest {
+        onAllNodesWithTag(Tag.ActionButton)
+            .assertCountEquals(5)
+            .filter(hasClickAction())
+            .assertCountEquals(5)
+    }
+
+    @Test
+    fun `test - notifications`() = runSidecarUiTest {
+        onNodeWithTag(Tag.NotificationsButton).assertDoesNotExist()
+
+        states.updateState(NotificationsUIState.Key) {
+            NotificationsUIState(
+                listOf(TestNotification(UINotificationType.INFO))
+            )
+        }
+        awaitNodeWithTag(Tag.NotificationsButton)
+            .assertHasClickAction()
+            .onChild()
+            .assertContentDescriptionContains(DtImages.Image.INFO_ICON.description)
+
+        states.updateState(NotificationsUIState.Key) {
+            NotificationsUIState(
+                listOf(TestNotification(UINotificationType.WARNING))
+            )
+        }
+        awaitNodeWithTag(Tag.NotificationsButton)
+            .assertHasClickAction()
+            .onChild()
+            .assertContentDescriptionContains(DtImages.Image.WARNING_ICON.description)
+
+        states.updateState(NotificationsUIState.Key) {
+            NotificationsUIState(
+                listOf(TestNotification(UINotificationType.ERROR))
+            )
+        }
+        awaitNodeWithTag(Tag.NotificationsButton)
+            .assertHasClickAction()
+            .onChild()
+            .assertContentDescriptionContains(DtImages.Image.ERROR_ICON.description)
     }
 }

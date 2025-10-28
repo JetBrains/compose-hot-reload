@@ -36,3 +36,12 @@ fun Modifier.shaking(min: Float = -35f, max: Float = 35f, time: Int = 500): Modi
 
     return this.rotate(rotate)
 }
+
+@Composable
+inline fun Modifier.applyIf(
+    condition: Boolean,
+    body: @Composable Modifier.() -> Modifier,
+): Modifier = when {
+    condition -> body()
+    else -> this
+}

@@ -18,6 +18,8 @@ import io.sellmair.evas.States
 import io.sellmair.evas.compose.installEvas
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.Tag
+import org.jetbrains.compose.devtools.states.UINotification
+import org.jetbrains.compose.devtools.states.UINotificationType
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.launchTask
@@ -25,25 +27,9 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-abstract class SidecarBodyUiTest {
+abstract class DevToolsUiTestBase {
     protected val events = Events()
     protected val states = States()
-
-
-    @Composable
-    abstract fun content()
-
-
-    @OptIn(ExperimentalTestApi::class)
-    fun runSidecarUiTest(block: ComposeUiTest.() -> Unit) = runComposeUiTest {
-        setContent {
-            installEvas(events, states) {
-                content()
-            }
-        }
-
-        block()
-    }
 
     // wrappers for onNodeWithTag that change the default value for `useUnmergedTree`
     // we need `useUnmergedTree = true` to prevent flakiness in tests
@@ -69,3 +55,45 @@ abstract class SidecarBodyUiTest {
         onNodeWithTag(tag, useUnmergedTree)
     }.getBlocking(timeout = timeout).getOrThrow()
 }
+
+abstract class DevToolsUiTest : DevToolsUiTestBase() {
+    @Composable
+    abstract fun content()
+
+
+    @OptIn(ExperimentalTestApi::class)
+    fun runSidecarUiTest(block: ComposeUiTest.() -> Unit) = runComposeUiTest {
+        setContent {
+            installEvas(events, states) {
+                content()
+            }
+        }
+
+        block()
+    }
+}
+
+abstract class ParameterizedDevToolsUiTest<T> : DevToolsUiTestBase() {
+    @Composable
+    abstract fun content(param: T)
+
+
+    @OptIn(ExperimentalTestApi::class)
+    fun runSidecarUiTest(param: T, block: ComposeUiTest.() -> Unit) = runComposeUiTest {
+        setContent {
+            installEvas(events, states) {
+                content(param)
+            }
+        }
+
+        block()
+    }
+}
+
+internal fun TestNotification(
+    type: UINotificationType = UINotificationType.INFO,
+    title: String = "Title",
+    message: String = "Message",
+    isDisposableFromUI: Boolean = true,
+    details: List<String> = emptyList(),
+) : UINotification = UINotification(type, title, message, isDisposableFromUI, details)

@@ -49,4 +49,5 @@ object DtTextStyles {
         color = DtColors.text
     )
 
+    val tooltip = default.copy(color = DtColors.tooltipText)
 }

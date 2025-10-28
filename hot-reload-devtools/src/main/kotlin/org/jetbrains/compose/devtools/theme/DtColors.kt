@@ -30,4 +30,9 @@ object DtColors {
     val border = Color(0xFF5E6060)
 
     val scrollbar = Color(0xFF898989)
+
+    // Tooltip colors
+    val tooltipBackground = applicationBackground
+    val tooltipBorder = border
+    val tooltipText = Color.White
 }

@@ -32,7 +32,7 @@ fun DtSidecarActionBar(modifier: Modifier = Modifier.Companion) {
         if (!HotReloadEnvironment.gradleBuildContinuous) {
             DtTextButton(
                 text = "Reload",
-                icon = DtImages.Image.RESTART_ICON,
+                icon = DtImages.Image.SYNC_ICON,
                 tag = Tag.ActionButton,
                 onClick = {
                     OrchestrationMessage.RecompileRequest().sendAsync()

@@ -16,6 +16,7 @@ object DtPadding {
     val large = 16.dp
 
     // Padding values between elements in containers
+    val tinyElementPadding = 4.dp
     val smallElementPadding = 8.dp
     val mediumElementPadding = 12.dp
     val largeElementPadding = 24.dp

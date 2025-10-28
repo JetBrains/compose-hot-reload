@@ -26,13 +26,16 @@ import org.jetbrains.compose.reload.core.BuildSystem
 
 @Composable
 fun DtComposeLogo(
+    tooltip: String? = null,
     modifier: Modifier = Modifier,
     tint: Color? = Color.White,
-) = DtImage(
-    image = DtImages.Image.COMPOSE_LOGO,
-    tint = tint,
-    modifier = modifier.tag(Tag.HotReloadLogo)
-)
+) = DtTooltip(tooltip) {
+    DtImage(
+        image = DtImages.Image.COMPOSE_LOGO,
+        tint = tint,
+        modifier = modifier.tag(Tag.HotReloadLogo)
+    )
+}
 
 @Composable
 fun DtBuildSystemLogo(
@@ -50,7 +53,7 @@ fun DtBuildSystemLogo(
 @Composable
 fun DtImage(
     image: DtImages.Image,
-    contentDescription: String = image.name,
+    contentDescription: String = image.description,
     tint: Color? = null,
     modifier: Modifier = Modifier,
 ) {

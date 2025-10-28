@@ -18,7 +18,7 @@ import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.eventsOrThrow
 import io.sellmair.evas.statesOrThrow
 import org.jetbrains.compose.devtools.errorOverlay.DevToolingErrorOverlay
-import org.jetbrains.compose.devtools.sidecar.DtAttachedSidecarWindow
+import org.jetbrains.compose.devtools.sidecar.DtSidecarWindow
 import org.jetbrains.compose.devtools.sidecar.DtDetachedSidecarWindow
 import org.jetbrains.compose.devtools.states.DtLifecycleState
 import org.jetbrains.compose.devtools.states.WindowsUIState
@@ -79,7 +79,7 @@ private fun DevToolsUI() {
         key(windowId) {
             CompositionLocalProvider(targetApplicationWindowStateLocal provides windowState) {
                 if (!devToolsDetached) {
-                    DtAttachedSidecarWindow(
+                    DtSidecarWindow(
                         windowId, windowState,
                         isAlwaysOnTop = windowsState.alwaysOnTop[windowId] == true
                     )

@@ -42,7 +42,6 @@ import org.jetbrains.compose.devtools.theme.DtImages
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtTextStyles
 import org.jetbrains.compose.devtools.widgets.DtBuildSystemLogo
-import org.jetbrains.compose.devtools.widgets.DtErrorDialogWindow
 import org.jetbrains.compose.devtools.widgets.DtImage
 import org.jetbrains.compose.devtools.widgets.DtSmallText
 import org.jetbrains.compose.devtools.widgets.DtText
@@ -139,28 +138,18 @@ private fun SuccessStatusText(state: ReloadUIState.Ok, modifier: Modifier = Modi
 
 @Composable
 private fun FailedStatusText(state: ReloadUIState.Failed, modifier: Modifier) {
-    var isDialogVisible by remember { mutableStateOf(false) }
-
+    val controller = LocalDtNotificationsWindowController.current
     DtText(
         "Failed:${if (state.reason.isNotEmpty()) " ${state.reason}: " else ""} ${state.formattedTime()}",
         modifier = modifier.tag(Tag.ReloadStatusText)
             .pointerHoverIcon(PointerIcon.Hand)
-            .clickable(role = Role.Button) { isDialogVisible = !isDialogVisible }
+            .clickable(role = Role.Button) { controller.requestFocus() }
             .widthIn(max = 350.dp),
         maxLines = 1, overflow = TextOverflow.Ellipsis,
         style = DtTextStyles.code.copy(
             textDecoration = TextDecoration.Underline
         )
     )
-
-    if (isDialogVisible) {
-        DtErrorDialogWindow(
-            title = "Reloading Code failed",
-            message = state.reason,
-            logs = state.logs.map { it.message },
-            onCloseRequest = { isDialogVisible = false }
-        )
-    }
 }
 
 

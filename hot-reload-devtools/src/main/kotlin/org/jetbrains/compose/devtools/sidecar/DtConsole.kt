@@ -6,8 +6,6 @@
 package org.jetbrains.compose.devtools.sidecar
 
 import androidx.compose.foundation.HorizontalScrollbar
-import androidx.compose.foundation.LocalScrollbarStyle
-import androidx.compose.foundation.ScrollbarStyle
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
@@ -29,18 +27,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.tag
-import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtShapes
-import org.jetbrains.compose.devtools.theme.DtSizes
 import org.jetbrains.compose.devtools.widgets.DtCode
 import org.jetbrains.compose.devtools.widgets.animatedReloadStatusBorder
+import org.jetbrains.compose.devtools.widgets.dtBorder
+import org.jetbrains.compose.devtools.widgets.dtScrollbarStyle
 
 @Composable
 fun DtConsole(
     logs: List<String>,
     modifier: Modifier = Modifier,
     scrollToBottom: Boolean = true,
+    animateBorder: Boolean = true,
 ) {
     val verticalScrollState = rememberLazyListState()
     val horizontalScrollState = rememberScrollState()
@@ -54,7 +53,10 @@ fun DtConsole(
     Box(
         modifier
             .tag(Tag.Console)
-            .animatedReloadStatusBorder(idleColor = Color.Gray, resetErrorState = true)
+            .apply {
+                if (animateBorder) animatedReloadStatusBorder(idleColor = Color.Gray, resetErrorState = true)
+                else dtBorder()
+            }
             .clip(DtShapes.RoundedCornerShape)
             .fillMaxSize(),
     ) {
@@ -75,20 +77,12 @@ fun DtConsole(
         VerticalScrollbar(
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
             adapter = rememberScrollbarAdapter(verticalScrollState),
-            style = scrollbarStyle(),
+            style = dtScrollbarStyle(),
         )
         HorizontalScrollbar(
             modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
             adapter = rememberScrollbarAdapter(horizontalScrollState),
-            style = scrollbarStyle(),
+            style = dtScrollbarStyle(),
         )
     }
 }
-
-
-@Composable
-private fun scrollbarStyle(): ScrollbarStyle = LocalScrollbarStyle.current.copy(
-    hoverColor = DtColors.scrollbar.copy(alpha = 0.5f),
-    unhoverColor = DtColors.scrollbar.copy(alpha = 0.2f),
-    minimalHeight = DtSizes.scrollbarSize,
-)

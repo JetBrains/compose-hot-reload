@@ -40,8 +40,7 @@ fun DtSidecarStatusSection() {
                 verticalArrangement = Arrangement.spacedBy(DtPadding.smallElementPadding)
             ) {
                 DtReloadStatusItem()
-                DtExpandedReloadCounterStatusItem()
-                DtMissingJbrStatusItem()
+                DtDetachedReloadCounterStatusItem()
                 DtRuntimeErrorStatusItem()
             }
         }

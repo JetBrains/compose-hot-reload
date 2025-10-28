@@ -27,4 +27,6 @@ object DtSizes {
 
     val sidecarWidth = defaultWindowWidth
     val minSidecarHeight = defaultWindowHeight
+
+    val maxNotificationCardHeight = 128.dp
 }

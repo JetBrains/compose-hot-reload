@@ -50,10 +50,16 @@ object DtImages {
         GREEN_CHECKMARK_ICON("greenCheckmark"),
         RESTART_ICON("restart"),
         WARNING_ICON("warning"),
+        LOG_ICON("log"),
+        SYNC_ICON("sync"),
+        INFO_ICON("info"),
+        EXPAND_ICON("expand"),
         ;
 
         val png: String get() = "img/$resource.png"
         val svg: String get() = "img/$resource.svg"
+
+        internal val description: String get() = resource
     }
 
     val COMPOSE_ICON_PNGS = listOf(

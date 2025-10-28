@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.devtools.orchestration
 import org.jetbrains.compose.devtools.sendAsync
 import org.jetbrains.compose.reload.core.WindowId
+import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.asFlow
 
@@ -29,7 +30,9 @@ data class UIErrorDescription(
     val recovery: (() -> Unit)? = null
 )
 
-fun CoroutineScope.launchErrorUIState() = launchState(ErrorUIState) {
+fun CoroutineScope.launchErrorUIState(
+    orchestration: OrchestrationHandle = org.jetbrains.compose.devtools.orchestration,
+) = launchState(ErrorUIState) {
     val errors = mutableMapOf<WindowId, UIErrorDescription>()
 
     suspend fun update() {

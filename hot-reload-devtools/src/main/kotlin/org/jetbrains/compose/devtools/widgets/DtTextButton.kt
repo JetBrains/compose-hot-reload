@@ -28,6 +28,7 @@ fun DtTextButton(
     modifier: Modifier = Modifier,
     tag: Tag? = null,
     icon: DtImages.Image? = null,
+    iconModifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
     DtButton(
@@ -43,7 +44,7 @@ fun DtTextButton(
             if (icon != null) {
                 DtImage(
                     image = icon,
-                    modifier = Modifier.size(DtSizes.iconSize),
+                    modifier = iconModifier.size(DtSizes.iconSize),
                     tint = Color.White
                 )
                 Spacer(Modifier.width(DtPadding.small))

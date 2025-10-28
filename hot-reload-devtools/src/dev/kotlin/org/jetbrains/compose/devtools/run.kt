@@ -9,14 +9,10 @@ package org.jetbrains.compose.devtools
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import io.sellmair.evas.compose.installEvas
 import io.sellmair.evas.eventsOrThrow
 import io.sellmair.evas.statesOrThrow
-import org.jetbrains.compose.devtools.sidecar.DtExpandedSidecarWindowContent
+import org.jetbrains.compose.devtools.sidecar.DtDetachedSidecarContent
 import org.jetbrains.compose.reload.DevelopmentEntryPoint
 
 @DevelopmentEntryPoint
@@ -28,7 +24,6 @@ fun DevToolingSidecarEntryPoint() {
     }
 
     installEvas(applicationScope.coroutineContext.eventsOrThrow, applicationScope.coroutineContext.statesOrThrow) {
-        var isExpanded by remember { mutableStateOf(true) }
-        DtExpandedSidecarWindowContent(isExpanded, isExpandedChanged = { isExpanded = it })
+        DtDetachedSidecarContent()
     }
 }

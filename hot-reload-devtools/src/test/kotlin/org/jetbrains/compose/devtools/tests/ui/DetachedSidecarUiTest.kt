@@ -13,24 +13,28 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.onChild
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.sidecar.DtDetachedSidecarContent
 import org.jetbrains.compose.devtools.states.BuildSystemUIState
 import org.jetbrains.compose.devtools.states.ErrorUIState
+import org.jetbrains.compose.devtools.states.NotificationsUIState
 import org.jetbrains.compose.devtools.states.ReloadCountUIState
 import org.jetbrains.compose.devtools.states.ReloadUIState
 import org.jetbrains.compose.devtools.states.UIErrorDescription
+import org.jetbrains.compose.devtools.states.UINotificationType
 import org.jetbrains.compose.devtools.theme.DtImages
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.WindowId
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class DetachedSidecarUiTest : SidecarBodyUiTest() {
+class DetachedSidecarUiTest : DevToolsUiTest() {
     @Composable
     override fun content() {
         DtDetachedSidecarContent()
@@ -86,12 +90,12 @@ class DetachedSidecarUiTest : SidecarBodyUiTest() {
         states.updateState(BuildSystemUIState.Key) { BuildSystemUIState(BuildSystem.Gradle) }
         awaitNodeWithTag(Tag.BuildSystemLogo)
             .assertExists()
-            .assertContentDescriptionContains(DtImages.Image.GRADLE_LOGO.name)
+            .assertContentDescriptionContains(DtImages.Image.GRADLE_LOGO.description)
 
         states.updateState(BuildSystemUIState.Key) { BuildSystemUIState(BuildSystem.Amper) }
         awaitNodeWithTag(Tag.BuildSystemLogo)
             .assertExists()
-            .assertContentDescriptionContains(DtImages.Image.AMPER_LOGO.name)
+            .assertContentDescriptionContains(DtImages.Image.AMPER_LOGO.description)
     }
 
     @Test
@@ -124,8 +128,37 @@ class DetachedSidecarUiTest : SidecarBodyUiTest() {
     }
 
     @Test
-    fun `test - expand minimise`() = runSidecarUiTest {
-        onNodeWithTag(Tag.ExpandMinimiseButton)
-            .assertDoesNotExist()
+    fun `test - notifications`() = runSidecarUiTest {
+        onNodeWithTag(Tag.NotificationsButton).assertDoesNotExist()
+
+        states.updateState(NotificationsUIState.Key) {
+            NotificationsUIState(
+                listOf(TestNotification(UINotificationType.INFO))
+            )
+        }
+        awaitNodeWithTag(Tag.NotificationsButton)
+            .assertHasClickAction()
+            .onChild()
+            .assertContentDescriptionContains(DtImages.Image.INFO_ICON.description)
+
+        states.updateState(NotificationsUIState.Key) {
+            NotificationsUIState(
+                listOf(TestNotification(UINotificationType.WARNING))
+            )
+        }
+        awaitNodeWithTag(Tag.NotificationsButton)
+            .assertHasClickAction()
+            .onChild()
+            .assertContentDescriptionContains(DtImages.Image.WARNING_ICON.description)
+
+        states.updateState(NotificationsUIState.Key) {
+            NotificationsUIState(
+                listOf(TestNotification(UINotificationType.ERROR))
+            )
+        }
+        awaitNodeWithTag(Tag.NotificationsButton)
+            .assertHasClickAction()
+            .onChild()
+            .assertContentDescriptionContains(DtImages.Image.ERROR_ICON.description)
     }
 }

@@ -15,8 +15,6 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.ripple
@@ -28,14 +26,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.tag
 import org.jetbrains.compose.devtools.theme.DtColors
-import org.jetbrains.compose.devtools.theme.DtImages
-import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtSizes
 
 @Immutable
@@ -45,33 +40,9 @@ data class DtButtonState(
 )
 
 @Composable
-fun DtCloseButton(
-    onClick: () -> Unit = {},
-    modifier: Modifier = Modifier,
-    tag: Tag? = null
-) = DtButton(
-    onClick = onClick,
-    modifier = modifier
-        .padding(bottom = DtPadding.medium, start = DtPadding.medium)
-        .defaultMinSize(minWidth = DtSizes.logoSize, minHeight = DtSizes.logoSize),
-    backgroundColor = { isHovered -> if (isHovered) DtColors.defaultActive else DtColors.applicationBackground },
-    tag = tag,
-    shape = RectangleShape,
-    border = null,
-    contentModifier = Modifier.animateReloadStatusBackground(DtColors.applicationBackground),
-    content = { _ ->
-        DtImage(
-            DtImages.Image.CLOSE_ICON,
-            modifier = Modifier.fillMaxSize(),
-            tint = Color.White
-        )
-    }
-)
-
-
-@Composable
 fun DtButton(
     onClick: () -> Unit = {},
+    tooltip: String? = null,
     modifier: Modifier = Modifier,
     backgroundColor: (Boolean) -> Color = { isHovered -> if (isHovered) DtColors.surfaceActive else DtColors.surface },
     tag: Tag? = null,
@@ -99,23 +70,25 @@ fun DtButton(
         else -> 0.5.dp
     }
 
-    Surface(
-        modifier = modifier
-            .scale(scale)
-            .hoverable(interactionSource)
-            .defaultMinSize(minWidth = DtSizes.minButtonSize, minHeight = DtSizes.minButtonSize),
-        shadowElevation = elevation,
-        color = backgroundColor(isHovered),
-        shape = shape,
-        border = border,
-    ) {
-        Box(
-            modifier = contentModifier
-                .tag(tag)
-                .clickable(interactionSource, ripple(bounded = true), onClick = onClick),
-            contentAlignment = Alignment.Center
+    DtTooltip(text = tooltip) {
+        Surface(
+            modifier = modifier
+                .scale(scale)
+                .hoverable(interactionSource)
+                .defaultMinSize(minWidth = DtSizes.minButtonSize, minHeight = DtSizes.minButtonSize),
+            shadowElevation = elevation,
+            color = backgroundColor(isHovered),
+            shape = shape,
+            border = border,
         ) {
-            content(DtButtonState(isHovered = isHovered, isPressed = isPressed))
+            Box(
+                modifier = contentModifier
+                    .tag(tag)
+                    .clickable(interactionSource, ripple(bounded = true), onClick = onClick),
+                contentAlignment = Alignment.Center
+            ) {
+                content(DtButtonState(isHovered = isHovered, isPressed = isPressed))
+            }
         }
     }
 }

@@ -13,43 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtSizes
 import org.jetbrains.compose.devtools.theme.DtTitles.COMPOSE_HOT_RELOAD_TITLE
-import org.jetbrains.compose.devtools.widgets.DtCloseButton
 import org.jetbrains.compose.devtools.widgets.DtComposeLogo
 import org.jetbrains.compose.devtools.widgets.DtHeader1
 import org.jetbrains.compose.devtools.widgets.animateReloadStatusColor
-
-@Composable
-internal fun DtAttachedSidecarHeaderBar(
-    onClose: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(
-            DtPadding.mediumElementPadding
-        ),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        DtComposeLogo(
-            modifier = Modifier.size(DtSizes.logoSize),
-            tint = animateReloadStatusColor(
-                idleColor = Color.White,
-            ).value
-        )
-        DtHeader1(COMPOSE_HOT_RELOAD_TITLE)
-        Spacer(Modifier.weight(1f))
-        DtCloseButton(
-            onClick = onClose,
-            modifier = Modifier.size(DtSizes.logoSize),
-            tag = Tag.ExpandMinimiseButton,
-        )
-    }
-}
-
 
 @Composable
 internal fun DtDetachedSidecarHeaderBar(
@@ -69,5 +38,7 @@ internal fun DtDetachedSidecarHeaderBar(
             ).value
         )
         DtHeader1(COMPOSE_HOT_RELOAD_TITLE)
+        Spacer(Modifier.weight(1f))
+        DtNotificationsButton()
     }
 }

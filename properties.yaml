@@ -210,17 +210,6 @@ DevToolsDetached:
   documentation: |
     If enabled, dev tools window will be detached from the main application
 
-DevToolsAnimationsEnabled:
-  key: compose.reload.devToolsAnimationsEnabled
-  type: boolean
-  default: "true"
-  target: [ application, build, devtools ]
-  isDelicateApi: true
-  documentation: |
-    If disabled, dev tools will not use window animations when switching between expanded/minimised states. 
-    Note: window contents will still be animated. This property is present because of some platform-specific issues with
-    window management. Subject to change and might be removed in the future, if the current issues are resolved.
-
 ReloadEffectsEnabled:
   key: compose.reload.effectsEnabled
   type: boolean

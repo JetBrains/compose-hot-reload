@@ -23,7 +23,10 @@ import org.jetbrains.compose.devtools.widgets.DtHeader2
 
 @Composable
 fun DtMainConsole(
-    modifier: Modifier = Modifier
+    header: String = "Console",
+    modifier: Modifier = Modifier,
+    scrollToBottom: Boolean = true,
+    animateBorder: Boolean = true,
 ) {
     val logState = ConsoleLogUIState.composeValue()
     val scroll = rememberScrollState(0)
@@ -40,10 +43,15 @@ fun DtMainConsole(
         Row(
             verticalAlignment = Alignment.Bottom,
         ) {
-            DtHeader2("Console")
+            DtHeader2(header)
             Spacer(Modifier.weight(1f))
             DtCopyToClipboardButton { logState.logs.joinToString("\n") }
         }
-        DtConsole(logs = logState.logs, modifier = Modifier.fillMaxSize())
+        DtConsole(
+            logs = logState.logs,
+            modifier = Modifier.fillMaxSize(),
+            scrollToBottom = scrollToBottom,
+            animateBorder = animateBorder,
+        )
     }
 }

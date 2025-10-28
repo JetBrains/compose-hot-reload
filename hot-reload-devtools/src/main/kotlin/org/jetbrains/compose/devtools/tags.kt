@@ -21,9 +21,18 @@ enum class Tag {
     BuildSystemLogo,
 
     ActionButton,
-    ExpandMinimiseButton,
 
     Console,
+
+    NotificationCard,
+    NotificationIcon,
+    NotificationsButton,
+    NotificationCleanButton,
+    NotificationExpandButton,
+    NotificationTitle,
+    NotificationMessage,
+
+    CopyToClipboardButton,
 }
 
 internal fun Modifier.tag(tags: Tag?): Modifier = tags?.let { testTag(it.name) } ?: this

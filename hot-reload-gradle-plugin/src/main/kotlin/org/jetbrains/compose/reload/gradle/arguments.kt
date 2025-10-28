@@ -39,6 +39,8 @@ sealed interface ComposeHotReloadArgumentsBuilder {
     fun setDevToolsHeadless(headless: Provider<Boolean>)
     fun setDevToolsTransparencyEnabled(enabled: Provider<Boolean>)
     fun setDevToolsDetached(detached: Provider<Boolean>)
+
+    @Deprecated("Dev tools window does not have/use this property anymore. Will be removed in the future")
     fun setDevToolsAnimationsEnabled(enabled: Provider<Boolean>)
 
     @Deprecated("Use 'setReloadEffectsEnabled' instead.", ReplaceWith("setReloadEffectsEnabled()"))
@@ -133,10 +135,6 @@ internal class ComposeHotReloadArguments(project: Project) :
     @get:Input
     val devToolsDetached: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadDevToolsDetached)
-
-    @get:Input
-    val devToolsAnimationsEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
-        .value(project.composeReloadDevToolsAnimationsEnabled)
 
     @get:Input
     val reloadEffectsEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
@@ -239,8 +237,9 @@ internal class ComposeHotReloadArguments(project: Project) :
         devToolsDetached.set(detached)
     }
 
+    @Deprecated("Dev tools window does not have/use this property anymore. Will be removed in the future")
     override fun setDevToolsAnimationsEnabled(enabled: Provider<Boolean>) {
-        devToolsAnimationsEnabled.set(enabled)
+        // do nothing
     }
 
     @Deprecated("Use 'setReloadEffectsEnabled' instead.", replaceWith = ReplaceWith("setReloadEffectsEnabled()"))
@@ -328,7 +327,6 @@ internal class ComposeHotReloadArguments(project: Project) :
             add("-D${HotReloadProperty.DevToolsClasspath.key}=${devToolsClasspathFiles.asPath}")
             add("-D${HotReloadProperty.DevToolsTransparencyEnabled.key}=${devToolsTransparencyEnabled.orNull ?: true}")
             add("-D${HotReloadProperty.DevToolsDetached.key}=${devToolsDetached.orNull ?: false}")
-            add("-D${HotReloadProperty.DevToolsAnimationsEnabled.key}=${devToolsAnimationsEnabled.orNull ?: true}")
         }
 
         /* Provide "recompiler" properties */

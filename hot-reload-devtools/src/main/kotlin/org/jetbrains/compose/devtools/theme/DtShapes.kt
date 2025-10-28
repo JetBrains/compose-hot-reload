@@ -11,4 +11,5 @@ import androidx.compose.ui.unit.dp
 object DtShapes {
     val SquareCornerShape = RoundedCornerShape(0.dp)
     val RoundedCornerShape = RoundedCornerShape(8.dp)
+    val TooltipCornerShape = RoundedCornerShape(4.dp)
 }
