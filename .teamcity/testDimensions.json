@@ -1,10 +1,10 @@
 {
   "kotlin": [
     {
-      "version": "2.1.21-RC2"
+      "version": "2.1.21"
     },
     {
-      "version": "2.3.0-Beta1",
+      "version": "2.3.0-Beta2",
       "isDefault": true
     },
     {
@@ -21,7 +21,7 @@
       "isDefault": true
     },
     {
-      "version": "9.1.0",
+      "version": "9.2.0",
       "isGradleIntegrationTest": true
     }
   ],
@@ -30,8 +30,11 @@
       "version": "1.8.2"
     },
     {
-      "version": "1.9.1",
+      "version": "1.9.3",
       "isDefault": true
+    },
+    {
+      "version": "1.10.0-beta01"
     },
     {
       "version": "1.10.0+dev3105"
