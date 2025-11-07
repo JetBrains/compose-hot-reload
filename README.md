@@ -86,9 +86,9 @@ You can run your application with Compose Hot Reload from inside your IDE or fro
 > [!IMPORTANT]  
 > Currently, only MacOS is supported for running Compose Hot Reload from the gutter in your IDE. We're working on adding support for Windows and Linux.
 
-In IntelliJ IDEA or Android Studio, in the gutter, click the **Run** icon of your main function. Select **Run 'composeApp [hotRunJvm]' with Compose Hot Reload (Beta)**.
-
-<img alt="Run Compose Hot Reload from gutter" src="./readme-assets/compose-hot-reload-gutter-run.png" width="400">
+* If you have the [Kotlin Multiplatform IDE plugin](https://plugins.jetbrains.com/plugin/14936-kotlin-multiplatform)
+  installed, select **Run 'MainKt [hotRunJvm]' with Compose Hot Reload (Rc)**.
+* Otherwise, manually create Gradle run configurations with hot reload tasks (see [Run tasks](#run-tasks)).
 
 ### From the CLI
 
