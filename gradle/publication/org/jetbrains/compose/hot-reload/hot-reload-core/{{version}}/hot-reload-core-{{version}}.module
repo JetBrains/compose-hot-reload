@@ -177,7 +177,7 @@
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-tooling-core",
           "version": {
-            "requires": "2.2.21-RC"
+            "requires": "2.2.21"
           }
         }
       ],

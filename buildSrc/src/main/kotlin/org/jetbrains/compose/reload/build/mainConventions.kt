@@ -68,7 +68,7 @@ private fun Project.setupKotlinStdlibDependency() {
 
             // wasmJs requires the same stdlib version as the compiler version
             wasmJs().compilations.getByName("main").dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21-RC")
+                implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
             }
         }
 

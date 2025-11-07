@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.2.21-RC"
+kotlin = "2.2.21"
 compose = "1.9.0"
 composeMin = { prefer = "1.8.2" }
 coroutines = "1.10.2"
