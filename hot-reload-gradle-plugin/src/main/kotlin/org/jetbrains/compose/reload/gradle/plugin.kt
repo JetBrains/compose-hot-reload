@@ -27,7 +27,6 @@ class ComposeHotReloadPlugin : Plugin<Project> {
             target.launch { target.createCompatibilityTasks() }
             target.launch { target.statusService.await() }
             target.launch { target.hotRunTasks.await() }
-            target.launch { target.jvmRunHijackTasks.await() }
             target.launch { target.hotAsyncRunTasks.await() }
             target.launch { target.hotArgFileTasks.await() }
             target.launch { target.hotDevCompilations.await() }
