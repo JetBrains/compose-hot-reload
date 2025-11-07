@@ -96,8 +96,8 @@ In IntelliJ IDEA or Android Studio, in the gutter, click the **Run**
 icon <img alt="Run main function" src="./readme-assets/run.png" width="12"> of your main function:
 
 * If you have the [Kotlin Multiplatform IDE plugin](https://plugins.jetbrains.com/plugin/14936-kotlin-multiplatform)
-  installed, select **Run 'MainKt [hotRunJvm]' with Compose Hot Reload (Beta)**.
-* Otherwise, select **Run 'MainKt [jvm]'**.
+  installed, select **Run 'MainKt [hotRunJvm]' with Compose Hot Reload (Rc)**.
+* Otherwise, manually create Gradle run configurations with hot reload tasks (see [Run tasks](#run-tasks)).
 
 ### From the CLI
 
