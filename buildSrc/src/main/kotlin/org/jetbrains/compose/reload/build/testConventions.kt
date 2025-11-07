@@ -49,10 +49,6 @@ open class TestConventionsPlugin : Plugin<Project> {
                 /* We do not want to open actual windows */
                 systemProperty("apple.awt.UIElement", true)
 
-                providers.gradleProperty("chr.tests.maxParallelForks").map { it.toInt() }.orNull?.let {
-                    maxParallelForks = it
-                }
-
                 if (!providers.gradleProperty("chr.tests.sequential").isPresent) {
                     val parallelism = providers.gradleProperty("chr.tests.parallelism").getOrElse("2").toInt()
                     systemProperty("junit.jupiter.execution.parallel.enabled", true)

@@ -72,7 +72,7 @@ class FunctionalTest(
     steps {
         gradle {
             name = "Test"
-            tasks = "reloadFunctionalTest --continue -x publishLocally -Pchr.tests.sequential -Pchr.tests.maxParallelForks=2"
+            tasks = "reloadFunctionalTest --continue -x publishLocally -Pchr.tests.parallelism=2"
         }
     }
 }), PublishLocallyConvention,
