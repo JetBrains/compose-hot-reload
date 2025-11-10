@@ -33,6 +33,9 @@ object ComposeHotReloadProject : Project({
     vcsRoot(Github)
     vcsRoot(GithubTeamcityBranch)
 
+    val linuxCaches = BuildCache(Host.Linux)
+    val windowsCaches = BuildCache(Host.Windows)
+
     /* Tests */
     buildType(AllTests)
     val linuxTest = Test(Host.Linux)
@@ -51,6 +54,10 @@ object ComposeHotReloadProject : Project({
 
     sequential {
         parallel {
+            buildType(linuxCaches)
+            buildType(windowsCaches)
+        }
+        parallel {
             buildType(windowsTests)
             buildType(linuxTest)
             buildType(ApiCheck)
@@ -62,8 +69,8 @@ object ComposeHotReloadProject : Project({
         buildType(AllTests)
     }
 
-    buildType(BuildCache(Host.Linux))
-    buildType(BuildCache(Host.Windows))
+    buildType(linuxCaches)
+    buildType(windowsCaches)
     buildType(UpdateComposeDevVersion)
 
     buildType(PublishDevBuild)

@@ -6,6 +6,7 @@
 package builds
 
 import builds.conventions.CommitStatusPublisher
+import builds.utils.Host
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.buildFeatures.PullRequests
 import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests
@@ -25,6 +26,14 @@ object AllTests : BuildType({
             "reverse.dep.*.bootstrap",
             label = "Bootstrap", value = "false", checked = "true", unchecked = "false"
         )
+    }
+
+    dependencies {
+        snapshot(BuildCache(Host.Linux).id!!) {
+        }
+
+        snapshot(BuildCache(Host.Windows).id!!) {
+        }
     }
 
     features {
