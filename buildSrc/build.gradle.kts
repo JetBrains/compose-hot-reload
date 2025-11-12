@@ -50,6 +50,11 @@ gradlePlugin {
         id = "build.orchestrationCompatibilityTests"
         implementationClass = "org.jetbrains.compose.reload.build.OrchestrationCompatibilityTestsPlugin"
     }
+
+    plugins.register("build.withShadowing") {
+        id = "build.withShadowing"
+        implementationClass = "org.jetbrains.compose.reload.build.WithShadowingPlugin"
+    }
 }
 
 kotlin {

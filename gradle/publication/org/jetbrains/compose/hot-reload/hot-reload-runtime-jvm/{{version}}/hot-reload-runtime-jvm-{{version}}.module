@@ -15,42 +15,10 @@
   },
   "variants": [
     {
-      "name": "apiElements",
+      "name": "shadowRuntimeElements",
       "attributes": {
         "org.gradle.category": "library",
-        "org.gradle.dependency.bundling": "external",
-        "org.gradle.jvm.environment": "standard-jvm",
-        "org.gradle.jvm.version": 11,
-        "org.gradle.libraryelements": "jar",
-        "org.gradle.usage": "java-api",
-        "org.jetbrains.kotlin.platform.type": "jvm"
-      },
-      "dependencies": [
-        {
-          "group": "org.jetbrains.compose.hot-reload",
-          "module": "hot-reload-annotations",
-          "version": {
-            "requires": "{{Hot Reload Version}}"
-          }
-        }
-      ],
-      "files": [
-        {
-          "name": "hot-reload-runtime-jvm-{{Hot Reload Version}}.jar",
-          "url": "hot-reload-runtime-jvm-{{Hot Reload Version}}.jar",
-          "size": {{SIZE}},
-          "sha512": "{{HASH}}",
-          "sha256": "{{HASH}}",
-          "sha1": "{{HASH}}",
-          "md5": "{{HASH}}"
-        }
-      ]
-    },
-    {
-      "name": "runtimeElements",
-      "attributes": {
-        "org.gradle.category": "library",
-        "org.gradle.dependency.bundling": "external",
+        "org.gradle.dependency.bundling": "shadowed",
         "org.gradle.jvm.environment": "standard-jvm",
         "org.gradle.jvm.version": 11,
         "org.gradle.libraryelements": "jar",

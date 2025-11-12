@@ -5,9 +5,11 @@
 
 @file:OptIn(ExperimentalComposeLibrary::class)
 
+import org.gradle.api.attributes.java.TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE
 import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.reload.gradle.HotReloadUsage
 import org.jetbrains.compose.reload.gradle.HotReloadUsageType
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 plugins {
     kotlin("jvm")
@@ -15,6 +17,7 @@ plugins {
     id("org.jetbrains.compose")
     build.publish
     build.apiValidation
+    build.withShadowing
 }
 
 kotlin {
@@ -23,15 +26,38 @@ kotlin {
     }
 }
 
-configurations.runtimeElements.configure {
+/**
+ * The published artifacts are not usable for 'generic' JAVA_RUNTIME.
+ * It only makes sense for the hot reload runs; therefore,
+ * we publish the elemnts with our special 'COMPOSE_DEV_RUNTIME' usage.
+ */
+configurations.shadowRuntimeElements.configure {
     attributes {
         attribute(Usage.USAGE_ATTRIBUTE, objects.named(HotReloadUsage.COMPOSE_DEV_RUNTIME_USAGE))
         attribute(HotReloadUsageType.attribute, HotReloadUsageType.Dev)
+        attribute(KotlinPlatformType.attribute, KotlinPlatformType.jvm)
+        attribute(TARGET_JVM_ENVIRONMENT_ATTRIBUTE, objects.named(TargetJvmEnvironment.STANDARD_JVM))
     }
 }
 
-dependencies {
+/**
+ * Note:
+ * Since we allow embedding/shadowing some libraries into this runtime artifact,
+ * we should very well ensure that we relocate all entries to avoid clashes with the user application.
+ */
+withShadowing {
+    relocate(
+        from = "org.jetbrains.compose.resources",
+        to = "org.jetbrains.compose.reload.shaded.resources"
+    )
+}
 
+compose {
+    resources {
+        generateResClass = always
+    }
+}
+dependencies {
     compileOnly(deps.compose.desktop.common) {
         version {
             strictly(deps.versions.composeMin.get())
@@ -39,6 +65,7 @@ dependencies {
     }
 
     implementation(project(":hot-reload-devtools-api"))
+    shadowedImplementation(compose.components.resources)
 
     compileOnly(project(":hot-reload-core"))
     compileOnly(project(":hot-reload-agent"))
@@ -46,8 +73,4 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(deps.compose.desktop.common)
-}
-
-tasks.withType<Test>().configureEach {
-    useJUnitPlatform()
 }
