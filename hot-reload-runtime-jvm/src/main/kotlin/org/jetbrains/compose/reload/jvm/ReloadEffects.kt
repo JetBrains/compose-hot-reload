@@ -7,12 +7,13 @@
 
 package org.jetbrains.compose.reload.jvm
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.unit.IntOffset
 import org.jetbrains.compose.devtools.api.ReloadEffect
 import org.jetbrains.compose.devtools.api.ReloadEffect.ModifierEffect
 import org.jetbrains.compose.devtools.api.ReloadEffect.OverlayEffect
@@ -36,16 +37,46 @@ internal fun ReloadEffects(content: @Composable () -> Unit) {
 
     logger.debug { "Recomposing ReloadEffects: $state" }
 
-    val baseModifier = Modifier
-
-    val effectsModifier = hotReloadModifierEffects(state).fold(baseModifier) { modifier: Modifier, effect ->
+    val effectsModifier = hotReloadModifierEffects(state).fold(Modifier) { modifier: Modifier, effect ->
         modifier then effect.effectModifier(state)
     }
 
-    Box(effectsModifier) {
-        content()
-        hotReloadOverlayEffects(state).forEach { effect ->
-            effect.effectOverlay(state)
+    OverlayLayout(
+        modifier = effectsModifier,
+        content = content,
+        overlay = {
+            hotReloadOverlayEffects(state).forEach { effect ->
+                effect.effectOverlay(state)
+            }
+        }
+    )
+}
+
+/**
+ * Special layout, which will use the width and height from the [content],
+ * but allows the overlay to still match the incoming constraints (e.g. be as large as the window)
+ */
+@Composable
+private fun OverlayLayout(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+    overlay: @Composable () -> Unit
+) {
+    Layout(
+        modifier = modifier,
+        content = {
+            content()
+            overlay()
+        }) { measurables, constraints ->
+        val placeables = measurables.map { follower ->
+            follower.measure(constraints)
+        }
+
+        layout(
+            width = placeables.firstOrNull()?.width ?: constraints.minWidth,
+            height = placeables.firstOrNull()?.height ?: constraints.minHeight
+        ) {
+            placeables.forEach { it.placeRelative(IntOffset.Zero) }
         }
     }
 }
