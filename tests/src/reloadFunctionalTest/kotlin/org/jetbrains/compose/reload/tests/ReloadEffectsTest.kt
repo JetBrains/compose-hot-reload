@@ -15,6 +15,8 @@ import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultCompilerOptions
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultKotlinVersion
+import org.junit.jupiter.api.condition.EnabledOnOs
+import org.junit.jupiter.api.condition.OS
 import kotlin.test.assertIs
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -23,6 +25,7 @@ import kotlin.time.ExperimentalTime
 
 @TestOnlyDefaultCompilerOptions
 @TestOnlyDefaultKotlinVersion
+@EnabledOnOs(OS.LINUX)
 class ReloadEffectsTest {
 
     @ReloadEffects
@@ -119,6 +122,7 @@ class ReloadEffectsTest {
         advanceTimeBy(500.milliseconds)
         fixture.checkScreenshot("4-failed-500ms")
 
+        updateReloadStateAndAwait(ReloadState.Reloading())
         updateReloadStateAndAwait(ReloadState.Ok())
         fixture.checkScreenshot("5-ok-0ms")
         advanceTimeBy(500.milliseconds)

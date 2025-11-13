@@ -15,6 +15,8 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.compose")
     id("org.jetbrains.compose")
+    id("org.jetbrains.compose.hot-reload")
+    `bootstrap-conventions`
     build.publish
     build.apiValidation
     build.withShadowing
@@ -57,6 +59,10 @@ compose {
         generateResClass = always
     }
 }
+
+kotlin.sourceSets.main.configure {
+    kotlin.srcDir("src/main/kotlinUI")
+}
 dependencies {
     compileOnly(deps.compose.desktop.common) {
         version {
@@ -66,6 +72,7 @@ dependencies {
 
     implementation(project(":hot-reload-devtools-api"))
     shadowedImplementation(compose.components.resources)
+    devImplementation(compose.components.resources)
 
     compileOnly(project(":hot-reload-core"))
     compileOnly(project(":hot-reload-agent"))

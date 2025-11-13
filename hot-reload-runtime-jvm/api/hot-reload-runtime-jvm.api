@@ -1,3 +1,15 @@
+public final class org/jetbrains/compose/hotReloadUI/ComposableSingletons$ErrorNotificationOverlayEffectKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/hotReloadUI/ComposableSingletons$ErrorNotificationOverlayEffectKt;
+	public fun <init> ()V
+	public final fun getLambda$-2028905833$hot_reload_runtime_jvm ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class org/jetbrains/compose/hotReloadUI/ComposableSingletons$MagicBorderEffectKt {
+	public static final field INSTANCE Lorg/jetbrains/compose/hotReloadUI/ComposableSingletons$MagicBorderEffectKt;
+	public fun <init> ()V
+	public final fun getLambda$1929292220$hot_reload_runtime_jvm ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class org/jetbrains/compose/reload/jvm/JvmDevelopmentEntryPoint {
 	public static final fun setContent (Landroidx/compose/ui/awt/ComposeDialog;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;)V
 	public static final fun setContent (Landroidx/compose/ui/awt/ComposeDialog;Lkotlin/jvm/functions/Function3;)V

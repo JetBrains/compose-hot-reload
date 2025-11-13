@@ -16,6 +16,10 @@ img/compose-logo.png
 org/
 org/jetbrains/
 org/jetbrains/compose/
+org/jetbrains/compose/hotReloadUI
+org/jetbrains/compose/hotReloadUI/
+org/jetbrains/compose/hotReloadUI/widgets
+org/jetbrains/compose/hotReloadUI/widgets/
 org/jetbrains/compose/hot_reload/
 org/jetbrains/compose/hot_reload/hot_reload_runtime_jvm/
 org/jetbrains/compose/hot_reload/hot_reload_runtime_jvm/generated/
@@ -24,8 +28,6 @@ org/jetbrains/compose/hot_reload/hot_reload_runtime_jvm/generated/resources/
 org/jetbrains/compose/reload/
 org/jetbrains/compose/reload/jvm
 org/jetbrains/compose/reload/jvm/
-org/jetbrains/compose/reload/jvm/effects
-org/jetbrains/compose/reload/jvm/effects/
 org/jetbrains/compose/reload/shaded/
 org/jetbrains/compose/reload/shaded/resources
 org/jetbrains/compose/reload/shaded/resources/
@@ -35,6 +37,3 @@ org/jetbrains/compose/reload/shaded/resources/vector
 org/jetbrains/compose/reload/shaded/resources/vector/
 org/jetbrains/compose/reload/shaded/resources/vector/xmldom
 org/jetbrains/compose/reload/shaded/resources/vector/xmldom/
-shaders/
-shaders/glitch.glsl
-shaders/glow.glsl
