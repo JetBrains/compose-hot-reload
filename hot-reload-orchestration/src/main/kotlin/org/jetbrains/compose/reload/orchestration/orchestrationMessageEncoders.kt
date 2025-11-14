@@ -431,7 +431,7 @@ internal class InvalidatedComposeGroupMessageEncoder :
                         firstLineNumber = scopeFields["fileNumber"]?.decodeToInt()
                     )
                 }
-            }
+            }.toList()
         }
         OrchestrationMessage.InvalidatedComposeGroupMessage(groupKey, dirtyScopes)
     }
@@ -600,4 +600,20 @@ private fun java.io.DataInputStream.readStackTrace(): List<StackTraceElement> {
             )
         }
     }
+}
+
+/**
+ * Ensure we're not using kotlin-stdlib list builder.
+ * https://github.com/JetBrains/compose-hot-reload/issues/423
+ */
+private inline fun <E> buildList(capacity: Int, builderAction: MutableList<E>.() -> Unit): List<E> {
+    return ArrayList<E>(capacity).apply(builderAction)
+}
+
+/**
+ * Ensure we're not using kotlin-stdlib map builder.
+ * https://github.com/JetBrains/compose-hot-reload/issues/423
+ */
+private inline fun <K, V> buildMap(builderAction: MutableMap<K, V>.() -> Unit): Map<K, V> {
+    return mutableMapOf<K, V>().apply(builderAction)
 }
