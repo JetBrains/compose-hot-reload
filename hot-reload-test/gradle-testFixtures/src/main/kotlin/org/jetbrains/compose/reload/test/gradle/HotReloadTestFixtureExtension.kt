@@ -11,6 +11,7 @@ import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.Logger
 import org.jetbrains.compose.reload.core.getBlocking
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
+import org.jetbrains.kotlin.tooling.core.mutableExtrasOf
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
@@ -99,6 +100,13 @@ internal class HotReloadTestFixtureExtension(
             stderrChannel = Channel(),
         )
 
+
+        val extras = mutableExtrasOf()
+
+        findAnnotation<CheckScreenshot>()?.let { checkScreenshot ->
+            extras[CheckScreenshot.key] = checkScreenshot
+        }
+
         return HotReloadTestFixture(
             testClassName = testClass.get().name,
             testMethodName = testMethod.get().name,
@@ -112,6 +120,7 @@ internal class HotReloadTestFixtureExtension(
             kotlinVersion = context.kotlinVersion,
             composeVersion = context.composeVersion,
             gradleVersion = context.gradleVersion,
+            extras = extras,
         )
     }
 }

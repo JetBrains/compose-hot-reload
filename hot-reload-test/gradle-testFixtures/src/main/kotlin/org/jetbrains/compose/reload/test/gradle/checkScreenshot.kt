@@ -5,11 +5,14 @@
 
 package org.jetbrains.compose.reload.test.gradle
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.asFileName
 import org.jetbrains.compose.reload.core.withAsyncTrace
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.Screenshot
 import org.jetbrains.compose.reload.test.core.TestEnvironment
+import org.jetbrains.kotlin.tooling.core.Extras
+import org.jetbrains.kotlin.tooling.core.extrasKeyOf
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Color
 import org.jetbrains.skia.Image
@@ -19,6 +22,31 @@ import kotlin.io.path.exists
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.writeBytes
 import kotlin.test.fail
+
+/**
+ * Allows for configuring the [checkScreenshot] function withing a test.
+ * This annotation can be used to target the entire test class or a individual test method.
+ */
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+public annotation class CheckScreenshot(
+    /**
+     * See [compare] colorTolerance:
+     * This value describes a 'search' tolerance in the color value (from 0 to 1.0)
+     */
+    val colorTolerance: Float = COMPARE_DEFAULT_COLOR_TOLERANCE,
+
+    /**
+     * See [compare] radius:
+     * This value describes the 'search radius' for a given pixel in the expect image:
+     * For each actual image pixel, we try to find the corresponding to expect pixel within this radius.
+     */
+    val radius: Int = COMPARE_DEFAULT_RADIUS,
+) {
+    @InternalHotReloadApi
+    public companion object {
+        public val key: Extras.Key<CheckScreenshot> = extrasKeyOf()
+    }
+}
 
 public suspend fun HotReloadTestFixture.checkScreenshot(name: String): Unit =
     withAsyncTrace("'checkScreenshot($name)'") run@{
@@ -48,7 +76,8 @@ public suspend fun HotReloadTestFixture.checkScreenshot(name: String): Unit =
 
         val expectImage = expectFile.readImage()
         val actualImage = screenshot.data.readImage()
-        val diff = describeImageDifferences(expectImage, actualImage)
+        val params = extras[CheckScreenshot.key] ?: CheckScreenshot()
+        val diff = describeImageDifferences(params, expectImage, actualImage)
         if (diff.isNotEmpty()) {
             val actualFile = expectFile.resolveSibling("${expectFile.nameWithoutExtension}-actual.${screenshot.format}")
             actualFile.writeBytes(screenshot.data)
@@ -60,7 +89,10 @@ public suspend fun HotReloadTestFixture.checkScreenshot(name: String): Unit =
  * @param expectImage The binary representation of the expected image
  * @param actualImage The binary representation of the actual image
  */
-internal fun describeImageDifferences(expectImage: Image, actualImage: Image): List<String> = buildList {
+internal fun describeImageDifferences(
+    params: CheckScreenshot,
+    expectImage: Image, actualImage: Image,
+): List<String> = buildList {
     if (expectImage.width != actualImage.width) {
         add("Expected width '${expectImage.width}', found '${actualImage.width}'")
     }
@@ -71,12 +103,19 @@ internal fun describeImageDifferences(expectImage: Image, actualImage: Image): L
 
     if (isNotEmpty()) return@buildList
 
-    val badPixels = countBadPixels(expectImage, actualImage)
+    val badPixels = countBadPixels(expectImage, actualImage, params)
     if (badPixels > 0) add("Found '$badPixels' pixels which cannot be found in the 'expectImage'")
 }
 
-internal fun countBadPixels(expectImage: Image, actualImage: Image): Int {
-    val comparisonImage = compare(expectImage, actualImage)
+internal fun countBadPixels(
+    expectImage: Image, actualImage: Image,
+    params: CheckScreenshot = CheckScreenshot(),
+): Int {
+    val comparisonImage = compare(
+        expect = expectImage,
+        actual = actualImage,
+        colorTolerance = params.colorTolerance, radius = params.radius
+    )
     val comparisonBitmap = Bitmap.makeFromImage(comparisonImage)
 
     var badPixels = 0

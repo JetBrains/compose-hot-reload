@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.tests
 import org.jetbrains.compose.devtools.api.ReloadState
 import org.jetbrains.compose.devtools.api.VirtualTimeState
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.test.gradle.CheckScreenshot
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.ReloadEffects
@@ -15,8 +16,6 @@ import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultCompilerOptions
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultKotlinVersion
-import org.junit.jupiter.api.condition.EnabledOnOs
-import org.junit.jupiter.api.condition.OS
 import kotlin.test.assertIs
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -25,7 +24,12 @@ import kotlin.time.ExperimentalTime
 
 @TestOnlyDefaultCompilerOptions
 @TestOnlyDefaultKotlinVersion
-@EnabledOnOs(OS.LINUX)
+
+/**
+ * Those screenshots are less stable (different rendering on different platforms)
+ * We therefore allow a larger tolerance when comparing the screenshots and increase the pixel search radius
+ */
+@CheckScreenshot(colorTolerance = .25f, radius = 9)
 class ReloadEffectsTest {
 
     @ReloadEffects

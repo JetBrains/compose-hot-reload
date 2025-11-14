@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.test.gradle
 
 import org.intellij.lang.annotations.Language
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.Codec
@@ -73,6 +74,21 @@ public fun diff(first: Image, second: Image): Image {
     return Image.makeFromBitmap(resultBitmap)
 }
 
+
+/**
+ * See [compare]'s colorTolerance
+ */
+@InternalHotReloadApi
+public const val COMPARE_DEFAULT_COLOR_TOLERANCE: Float = 0.01f
+
+
+/**
+ * See [compare]'s radius
+ */
+@InternalHotReloadApi
+public const val COMPARE_DEFAULT_RADIUS: Int = 3
+
+
 /**
  * Compare two images, returning a 'comparison image' that is white at each given pixel
  * which is considered 'bad' (expect and actual images differ there).
@@ -84,8 +100,8 @@ public fun diff(first: Image, second: Image): Image {
  */
 public fun compare(
     expect: Image, actual: Image,
-    colorTolerance: Float = 0.01f,
-    radius: Int = 3,
+    colorTolerance: Float = COMPARE_DEFAULT_COLOR_TOLERANCE,
+    radius: Int = COMPARE_DEFAULT_RADIUS,
 ): Image {
     val width = expect.width
     require(actual.width == width) { "actual image width must be equal to expect image width" }
@@ -165,7 +181,7 @@ private fun newCompareShader(radius: Int) = RuntimeEffect.makeForShader(
             }
         }
 
-        return half4(1.0, 1.0, 1.0, 1.0);;
+        return half4(1.0, 1.0, 1.0, 1.0);
     }
 """.trimIndent()
 )

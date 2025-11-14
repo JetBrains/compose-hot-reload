@@ -39,6 +39,7 @@ import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.asFlow
 import org.jetbrains.compose.reload.orchestration.sendAsync
 import org.jetbrains.compose.reload.test.core.AppClasspath
+import org.jetbrains.kotlin.tooling.core.Extras
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.coroutines.CoroutineContext
@@ -66,7 +67,8 @@ internal constructor(
     internal val isDebug: Boolean,
     internal val kotlinVersion: TestedKotlinVersion,
     internal val composeVersion: TestedComposeVersion,
-    internal val gradleVersion: TestedGradleVersion
+    internal val gradleVersion: TestedGradleVersion,
+    internal val extras: Extras
 ) : AutoCloseable {
 
     private val logger = createLogger("Test Fixture", dispatch = listOf(orchestration.startLoggerDispatch()))

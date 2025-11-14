@@ -69,6 +69,11 @@ public final class org/jetbrains/compose/reload/test/gradle/BuildMode$Companion 
 	public final fun getDefault ()Lorg/jetbrains/compose/reload/test/gradle/BuildMode;
 }
 
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/CheckScreenshot : java/lang/annotation/Annotation {
+	public abstract fun colorTolerance ()F
+	public abstract fun radius ()I
+}
+
 public final class org/jetbrains/compose/reload/test/gradle/CheckScreenshotKt {
 	public static final fun checkScreenshot (Lorg/jetbrains/compose/reload/test/gradle/HotReloadTestFixture;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
