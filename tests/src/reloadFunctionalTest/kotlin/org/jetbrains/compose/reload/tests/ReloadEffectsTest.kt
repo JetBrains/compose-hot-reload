@@ -123,8 +123,8 @@ class ReloadEffectsTest {
 
         updateReloadStateAndAwait(ReloadState.Failed(reason = "Test"))
         fixture.checkScreenshot("3-failed-0ms")
-        advanceTimeBy(500.milliseconds)
-        fixture.checkScreenshot("4-failed-500ms")
+        advanceTimeBy(1500.milliseconds)
+        fixture.checkScreenshot("4-failed-1500ms")
 
         updateReloadStateAndAwait(ReloadState.Reloading())
         updateReloadStateAndAwait(ReloadState.Ok())

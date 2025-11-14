@@ -5,13 +5,16 @@
 
 package org.jetbrains.compose.hotReloadUI.widgets
 
+import androidx.compose.animation.core.withInfiniteAnimationFrameMillis
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorProducer
@@ -21,8 +24,6 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import java.time.Duration
-import java.time.Duration.between
-import java.time.Instant
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -31,16 +32,8 @@ internal fun TimeAgoText(
     style: TextStyle = TextStyle.Default,
     color: Color = Color.Unspecified
 ) {
-    val shownInstant = remember { Instant.now() }
-    var text by remember { mutableStateOf("") }
-    LaunchedEffect(Unit) {
-        while (isActive) {
-            val now = Instant.now()
-            val duration = between(shownInstant, now)
-            text = "${duration.displayString()} ago"
-            delay(128.milliseconds)
-        }
-    }
+    val duration by rememberStopwatch()
+    val text by derivedStateOf { "${duration.displayString()} ago" }
 
     BasicText(
         text,
@@ -56,4 +49,30 @@ private fun Duration.displayString(): String {
     if (toHours() > 0) return "${toHours()} hours"
     if (toMinutes() > 0) return "${toMinutes()} minutes"
     return "${toSeconds()} seconds"
+}
+
+
+/**
+ * Returns a state which counts the seconds that have passed
+ */
+@Composable
+private fun rememberStopwatch(): State<Duration> {
+    val state = remember { mutableStateOf<Duration>(Duration.ZERO) }
+
+    LaunchedEffect(Unit) {
+        val initial = withFrameMillis { frameMillis -> frameMillis }
+
+        while (isActive) {
+            delay(128.milliseconds)
+            withInfiniteAnimationFrameMillis { frameMillis ->
+                val millisecondsPassed = frameMillis - initial
+                val newDuration = Duration.ofMillis(millisecondsPassed)
+                if (newDuration.seconds != state.value.seconds) {
+                    state.value = newDuration
+                }
+            }
+        }
+    }
+
+    return state
 }
