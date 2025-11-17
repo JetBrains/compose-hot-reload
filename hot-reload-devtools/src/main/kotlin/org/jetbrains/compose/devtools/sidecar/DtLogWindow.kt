@@ -10,13 +10,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
@@ -27,10 +30,14 @@ import org.jetbrains.compose.devtools.theme.DtImages
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtSizes
 import org.jetbrains.compose.devtools.theme.DtTitles
-import org.jetbrains.compose.devtools.widgets.DtImage
+import org.jetbrains.compose.devtools.widgets.DtHeader2
 import org.jetbrains.compose.devtools.widgets.DtIconButton
+import org.jetbrains.compose.devtools.widgets.DtImage
 import org.jetbrains.compose.devtools.widgets.DtWindowController
 import org.jetbrains.compose.devtools.widgets.rememberWindowController
+import org.jetbrains.compose.reload.core.Os
+import javax.swing.JMenuBar
+import javax.swing.JTextField
 
 @Composable
 internal fun DtShowLogsButton() {
@@ -53,6 +60,7 @@ internal fun DtShowLogsButton() {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DtLogWindow(onClose: () -> Unit) {
     val controller = LocalDtLogWindowController.current
@@ -65,6 +73,21 @@ fun DtLogWindow(onClose: () -> Unit) {
         ),
         title = "${DtTitles.COMPOSE_HOT_RELOAD} Logs"
     ) {
+        if (Os.current() == Os.MacOs) {
+            val rootPane = window.rootPane
+            rootPane.putClientProperty("apple.awt.fullWindowContent", true)
+            rootPane.putClientProperty("apple.awt.transparentTitleBar", true)
+            rootPane.putClientProperty("apple.awt.windowTitleVisible", false)
+        }
+
+        MenuBar {
+            Menu("x") {
+                Text("y")
+            }
+
+        }
+
+
         LaunchedEffect(Unit) {
             controller.focusRequests.collectLatest {
                 if (controller.isOpen.value) {
@@ -74,14 +97,20 @@ fun DtLogWindow(onClose: () -> Unit) {
             }
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(DtColors.applicationBackground)
-                .padding(DtPadding.medium)
-        ) {
-            DtMainConsole(animateBorder = false)
-        }
+        DtLogWindowContent()
+    }
+}
+
+@Composable
+fun DtLogWindowContent() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(DtColors.applicationBackground)
+            .padding(horizontal = DtPadding.medium)
+
+    ) {
+        DtMainConsole(header = "Compose Hot Reload Logs", animateBorder = false)
     }
 }
 

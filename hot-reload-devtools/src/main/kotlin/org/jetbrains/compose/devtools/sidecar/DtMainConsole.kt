@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +21,8 @@ import org.jetbrains.compose.devtools.states.ConsoleLogUIState
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.widgets.DtCopyToClipboardButton
 import org.jetbrains.compose.devtools.widgets.DtHeader2
+import org.jetbrains.compose.devtools.widgets.DtSmallText
+import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun DtMainConsole(
@@ -41,12 +44,15 @@ fun DtMainConsole(
         verticalArrangement = Arrangement.spacedBy(DtPadding.smallElementPadding)
     ) {
         Row(
-            verticalAlignment = Alignment.Bottom,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(vertical = DtPadding.tiny)
         ) {
-            DtHeader2(header)
+            Spacer(Modifier.weight(1f))
+            DtHeader2("Console")
             Spacer(Modifier.weight(1f))
             DtCopyToClipboardButton { logState.logs.joinToString("\n") }
         }
+
         DtConsole(
             logs = logState.logs,
             modifier = Modifier.fillMaxSize(),

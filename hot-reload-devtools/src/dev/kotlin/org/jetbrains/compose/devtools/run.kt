@@ -7,12 +7,19 @@
 
 package org.jetbrains.compose.devtools
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import io.sellmair.evas.compose.installEvas
 import io.sellmair.evas.eventsOrThrow
 import io.sellmair.evas.statesOrThrow
 import org.jetbrains.compose.devtools.sidecar.DtDetachedSidecarContent
+import org.jetbrains.compose.devtools.sidecar.DtLogWindow
+import org.jetbrains.compose.devtools.sidecar.DtLogWindowContent
+import org.jetbrains.compose.devtools.sidecar.DtMainConsole
+import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.reload.DevelopmentEntryPoint
 
 @DevelopmentEntryPoint
@@ -25,5 +32,19 @@ fun DevToolingSidecarEntryPoint() {
 
     installEvas(applicationScope.coroutineContext.eventsOrThrow, applicationScope.coroutineContext.statesOrThrow) {
         DtDetachedSidecarContent()
+    }
+}
+
+
+@DevelopmentEntryPoint
+@Composable
+fun LogsWindowEntryPoint() {
+    LaunchedEffect(Unit) {
+        setupShutdownProcedure()
+        applicationScope.launchApplicationStates()
+    }
+
+    installEvas(applicationScope.coroutineContext.eventsOrThrow, applicationScope.coroutineContext.statesOrThrow) {
+        DtLogWindowContent()
     }
 }
