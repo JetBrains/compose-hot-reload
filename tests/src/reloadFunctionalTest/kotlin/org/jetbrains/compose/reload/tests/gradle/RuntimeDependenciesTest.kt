@@ -186,7 +186,7 @@ private suspend fun HotReloadTestFixture.resolveRuntimeClasspath(projectPath: St
 
 
 private val stdlib = arrayOf(
-    PathRegex(".*annotations-13.0.jar"),
+    PathRegex(".*annotations-.*.jar"),
     PathRegex(".*kotlin-stdlib.*.jar"),
 )
 

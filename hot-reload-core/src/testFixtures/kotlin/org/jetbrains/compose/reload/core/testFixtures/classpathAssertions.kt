@@ -83,3 +83,7 @@ private data class PathRegex(private val regex: Regex) : FileMatcher {
 fun interface FileMatcher {
     fun matches(file: File): Boolean
 }
+
+operator fun FileMatcher.minus(other: FileMatcher): FileMatcher = FileMatcher { file ->
+    this@minus.matches(file) && !other.matches(file)
+}
