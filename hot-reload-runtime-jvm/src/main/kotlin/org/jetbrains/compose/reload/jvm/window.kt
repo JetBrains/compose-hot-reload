@@ -69,7 +69,9 @@ internal fun startWindowManager(window: Window): WindowId {
             OrchestrationMessage.ApplicationWindowGone(windowId).sendAsync()
         }
 
-        broadcastActiveState()
+        if (window.isActive) {
+            broadcastActiveState()
+        }
 
         val windowListener = object : WindowAdapter() {
             override fun windowIconified(e: WindowEvent?) {
@@ -101,6 +103,12 @@ internal fun startWindowManager(window: Window): WindowId {
         }
 
         val componentListener = object : ComponentAdapter() {
+            fun broadcastIfActive() {
+                if (window.isActive) {
+                    broadcastActiveState()
+                }
+            }
+
             override fun componentHidden(e: ComponentEvent?) {
                 logger.trace { "$windowId: componentHidden" }
                 broadcastGone()
@@ -108,17 +116,17 @@ internal fun startWindowManager(window: Window): WindowId {
 
             override fun componentShown(e: ComponentEvent?) {
                 logger.trace { "$windowId: componentShown" }
-                broadcastActiveState()
+                broadcastIfActive()
             }
 
             override fun componentResized(e: ComponentEvent?) {
                 logger.trace { "$windowId: componentResized" }
-                broadcastActiveState()
+                broadcastIfActive()
             }
 
             override fun componentMoved(e: ComponentEvent?) {
                 logger.trace { "$windowId: componentMoved" }
-                broadcastActiveState()
+                broadcastIfActive()
             }
         }
 
