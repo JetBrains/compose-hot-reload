@@ -14,6 +14,7 @@ import org.gradle.api.attributes.Bundling
 import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.Usage
 import org.gradle.api.file.FileCollection
+import org.gradle.kotlin.dsl.exclude
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
@@ -37,6 +38,15 @@ internal val Project.composeHotReloadAgentConfiguration: Configuration
             configuration.dependencies.add(
                 project.dependencies.create("org.jetbrains.compose.hot-reload:hot-reload-agent:$HOT_RELOAD_VERSION")
             )
+
+            /**
+             * We're resolving the agent classpath as part of the System ClassLoader for applications.
+             * This classpath will also resolve in 'isolation' and will be put into the leading position
+             * of the classpath. Since we resolve a 'regular' (not shadowed) classpath, we ensure that
+             * we do not include the kotlin-stdlib from this classpath:
+             * We expect the user application to provide a kotlin-stdlib for us.
+             */
+            configuration.exclude("org.jetbrains.kotlin", "kotlin-stdlib")
         }
     }
 

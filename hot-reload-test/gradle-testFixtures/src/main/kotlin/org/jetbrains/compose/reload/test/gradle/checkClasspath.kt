@@ -38,7 +38,7 @@ internal fun checkClasspath(classpath: AppClasspath, composeVersion: TestedCompo
     }
 }
 
-private class DependencyFinder(private val groupId: String, private val artifactId: String) {
+private class DependencyFinder(groupId: String, artifactId: String) {
     private val regex = dependencyRegex(groupId, artifactId)
     fun findVersion(classpath: AppClasspath): String? {
         classpath.files.forEach { file ->
