@@ -7,6 +7,39 @@ public final class org/jetbrains/compose/reload/gradle/ComposeHotReloadRuntime {
 	public static final fun getComposeHotReloadRuntimeClasspath (Lorg/gradle/api/Project;)Lorg/gradle/api/file/FileCollection;
 }
 
+public final class org/jetbrains/compose/reload/gradle/HotReloadGradleEnvironmentKt {
+	public static final fun getComposeReloadDevToolsDetached (Lorg/gradle/api/Project;)Z
+	public static final fun getComposeReloadDevToolsDetachedProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadDevToolsEnabled (Lorg/gradle/api/Project;)Z
+	public static final fun getComposeReloadDevToolsEnabledProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadDevToolsIsHeadless (Lorg/gradle/api/Project;)Z
+	public static final fun getComposeReloadDevToolsIsHeadlessProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadDevToolsTransparencyEnabled (Lorg/gradle/api/Project;)Z
+	public static final fun getComposeReloadDevToolsTransparencyEnabledProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadGradleBuildContinuous (Lorg/gradle/api/Project;)Z
+	public static final fun getComposeReloadGradleBuildContinuousProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadGradleBuildOptimize (Lorg/gradle/api/Project;)Z
+	public static final fun getComposeReloadGradleBuildOptimizeProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadGradleWarmupEnabled (Lorg/gradle/api/Project;)Z
+	public static final fun getComposeReloadGradleWarmupEnabledProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadJetBrainsRuntimeBinary (Lorg/gradle/api/Project;)Ljava/nio/file/Path;
+	public static final fun getComposeReloadJetBrainsRuntimeBinaryProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadJetBrainsRuntimeVersion (Lorg/gradle/api/Project;)I
+	public static final fun getComposeReloadJetBrainsRuntimeVersionProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadLogLevel (Lorg/gradle/api/Project;)Lorg/jetbrains/compose/reload/core/Logger$Level;
+	public static final fun getComposeReloadLogLevelProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadLogStdout (Lorg/gradle/api/Project;)Z
+	public static final fun getComposeReloadLogStdoutProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadReloadEffectsEnabled (Lorg/gradle/api/Project;)Z
+	public static final fun getComposeReloadReloadEffectsEnabledProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadStderrFile (Lorg/gradle/api/Project;)Ljava/nio/file/Path;
+	public static final fun getComposeReloadStderrFileProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadStdinFile (Lorg/gradle/api/Project;)Ljava/nio/file/Path;
+	public static final fun getComposeReloadStdinFileProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadStdoutFile (Lorg/gradle/api/Project;)Ljava/nio/file/Path;
+	public static final fun getComposeReloadStdoutFileProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+}
+
 public final class org/jetbrains/compose/reload/gradle/HotReloadUsage {
 	public static final field COMPOSE_DEV_RUNTIME_USAGE Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/compose/reload/gradle/HotReloadUsage;

@@ -38,6 +38,8 @@ open class GenerateHotReloadEnvironmentGradleExtensionsTask : DefaultTask() {
             import org.jetbrains.compose.reload.core.HotReloadProperty
             import org.jetbrains.compose.reload.core.Os
             import org.jetbrains.compose.reload.InternalHotReloadApi
+            import org.jetbrains.compose.reload.DelicateHotReloadApi
+            import org.jetbrains.compose.reload.ExperimentalHotReloadApi
             
             {{element}}
         """.trimIndent().asTemplateOrThrow().renderOrThrow {
@@ -47,7 +49,7 @@ open class GenerateHotReloadEnvironmentGradleExtensionsTask : DefaultTask() {
                 * See [HotReloadProperty.{{name}}]
                 * {{documentation}}
                 */
-                {{visibility}} val Project.{{providerName}}: Provider<{{providerType}}> get() {
+                {{visibilityAnnotation}} val Project.{{providerName}}: Provider<{{providerType}}> get() {
                     {{providerStatement}} 
                 }
                 
@@ -55,7 +57,7 @@ open class GenerateHotReloadEnvironmentGradleExtensionsTask : DefaultTask() {
                 * See [HotReloadProperty.{{name}}]
                 * {{documentation}}
                 */
-                {{visibility}} val Project.{{propertyName}}: {{propertyType}} get() {
+                {{visibilityAnnotation}}val Project.{{propertyName}}: {{propertyType}} get() {
                     {{statement}} 
                 }
                 
@@ -67,7 +69,7 @@ open class GenerateHotReloadEnvironmentGradleExtensionsTask : DefaultTask() {
                 val providerName = "${propertyName}Provider"
 
                 "element"(elementTemplate.renderOrThrow {
-                    "visibility"("@InternalHotReloadApi")
+                    "visibilityAnnotation"(property.visibilityAnnotation.let { if (it.isNotBlank()) "$it " else "" })
                     "name"(property.name)
                     "propertyName"("composeReload${property.name.capitalized()}")
                     "providerName"(providerName)

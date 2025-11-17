@@ -231,6 +231,84 @@ public final class org/jetbrains/compose/reload/core/FutureKt {
 	public static final fun toFuture (Ljava/util/concurrent/CompletableFuture;)Lorg/jetbrains/compose/reload/core/Future;
 }
 
+public final class org/jetbrains/compose/reload/core/HotReloadEnvironment {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/core/HotReloadEnvironment;
+	public final fun getDevToolsDetached ()Z
+	public final fun getDevToolsEnabled ()Z
+	public final fun getDevToolsIsHeadless ()Z
+	public final fun getDevToolsTransparencyEnabled ()Z
+	public final fun getGradleBuildContinuous ()Z
+	public final fun getGradleBuildOptimize ()Z
+	public final fun getGradleWarmupEnabled ()Z
+	public final fun getLogLevel ()Lorg/jetbrains/compose/reload/core/Logger$Level;
+	public final fun getLogStdout ()Z
+	public final fun getReloadEffectsEnabled ()Z
+	public final fun getStderrFile ()Ljava/nio/file/Path;
+	public final fun getStdinFile ()Ljava/nio/file/Path;
+	public final fun getStdoutFile ()Ljava/nio/file/Path;
+	public final fun isHotReloadActive ()Z
+}
+
+public final class org/jetbrains/compose/reload/core/HotReloadProperty : java/lang/Enum {
+	public static final field DevToolsDetached Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field DevToolsEnabled Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field DevToolsIsHeadless Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field DevToolsTransparencyEnabled Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field GradleBuildContinuous Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field GradleBuildOptimize Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field GradleWarmupEnabled Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field IsHotReloadActive Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field JetBrainsRuntimeBinary Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field JetBrainsRuntimeVersion Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field LogLevel Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field LogStdout Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field ReloadEffectsEnabled Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field StderrFile Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field StdinFile Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field StdoutFile Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public final fun getDefault ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getTargets ()Ljava/util/List;
+	public final fun getType ()Lorg/jetbrains/compose/reload/core/HotReloadProperty$Type;
+	public final fun getVisibility ()Lorg/jetbrains/compose/reload/core/HotReloadProperty$Visibility;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static fun values ()[Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+}
+
+public final class org/jetbrains/compose/reload/core/HotReloadProperty$Environment : java/lang/Enum {
+	public static final field Application Lorg/jetbrains/compose/reload/core/HotReloadProperty$Environment;
+	public static final field BuildTool Lorg/jetbrains/compose/reload/core/HotReloadProperty$Environment;
+	public static final field DevTools Lorg/jetbrains/compose/reload/core/HotReloadProperty$Environment;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/core/HotReloadProperty$Environment;
+	public static fun values ()[Lorg/jetbrains/compose/reload/core/HotReloadProperty$Environment;
+}
+
+public final class org/jetbrains/compose/reload/core/HotReloadProperty$Type : java/lang/Enum {
+	public static final field Boolean Lorg/jetbrains/compose/reload/core/HotReloadProperty$Type;
+	public static final field Enum Lorg/jetbrains/compose/reload/core/HotReloadProperty$Type;
+	public static final field File Lorg/jetbrains/compose/reload/core/HotReloadProperty$Type;
+	public static final field Files Lorg/jetbrains/compose/reload/core/HotReloadProperty$Type;
+	public static final field Int Lorg/jetbrains/compose/reload/core/HotReloadProperty$Type;
+	public static final field Long Lorg/jetbrains/compose/reload/core/HotReloadProperty$Type;
+	public static final field String Lorg/jetbrains/compose/reload/core/HotReloadProperty$Type;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/core/HotReloadProperty$Type;
+	public static fun values ()[Lorg/jetbrains/compose/reload/core/HotReloadProperty$Type;
+}
+
+public final class org/jetbrains/compose/reload/core/HotReloadProperty$Visibility : java/lang/Enum {
+	public static final field Delicate Lorg/jetbrains/compose/reload/core/HotReloadProperty$Visibility;
+	public static final field Deprecated Lorg/jetbrains/compose/reload/core/HotReloadProperty$Visibility;
+	public static final field Experimental Lorg/jetbrains/compose/reload/core/HotReloadProperty$Visibility;
+	public static final field Internal Lorg/jetbrains/compose/reload/core/HotReloadProperty$Visibility;
+	public static final field Public Lorg/jetbrains/compose/reload/core/HotReloadProperty$Visibility;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/core/HotReloadProperty$Visibility;
+	public static fun values ()[Lorg/jetbrains/compose/reload/core/HotReloadProperty$Visibility;
+}
+
 public final class org/jetbrains/compose/reload/core/KotlinxCoroutinesExtensionsKt {
 	public static final fun asChannel (Lorg/jetbrains/compose/reload/core/State;I)Lkotlinx/coroutines/channels/Channel;
 	public static synthetic fun asChannel$default (Lorg/jetbrains/compose/reload/core/State;IILjava/lang/Object;)Lkotlinx/coroutines/channels/Channel;

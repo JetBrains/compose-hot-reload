@@ -14,6 +14,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.build.tasks.DeclaredHotReloadProperty.Type
+import org.jetbrains.compose.reload.build.tasks.DeclaredHotReloadProperty.Visibility
 import org.jetbrains.compose.reload.core.asTemplateOrThrow
 import org.jetbrains.compose.reload.core.renderOrThrow
 
@@ -48,25 +49,29 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
             package org.jetbrains.compose.reload.core
 
             import org.jetbrains.compose.reload.InternalHotReloadApi
+            import org.jetbrains.compose.reload.DelicateHotReloadApi
+            import org.jetbrains.compose.reload.ExperimentalHotReloadApi
             
-            @InternalHotReloadApi
             public enum class HotReloadProperty(
                 public val key: String,
                 public val type: Type,
                 public val default: String?,
                 public val targets: List<Environment>,
+                public val visibility: Visibility,
             ) {
                 {{case}},
             ;
                 
-                @InternalHotReloadApi
                 public enum class Environment {
                     BuildTool, DevTools, Application;
                 }
 
-                @InternalHotReloadApi
                 public enum class Type {
                     String, Int, Long, Boolean, File, Files, Enum
+                }
+
+                public enum class Visibility {
+                    Public, Delicate, Experimental, Internal, Deprecated
                 }
             }
         """.trimIndent().asTemplateOrThrow()
@@ -74,12 +79,13 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
         val caseTemplate = """
             /**
             * {{documentation}}
-            */{{delicateApi}}
+            */{{visibilityAnnotation}}
             {{name}}(
                 "{{key}}",
                 type = {{type}},
                 default = {{default}},
                 targets = listOf({{targets}}),
+                visibility = {{visibility}},
             )
         """.trimIndent().asTemplateOrThrow()
 
@@ -91,10 +97,7 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
                     if (property.default != null) {
                         "documentation"("- default: '${property.default}'")
                     }
-                    "delicateApi"(
-                        "\n@org.jetbrains.compose.reload.DelicateHotReloadApi"
-                            .takeIf { property.isDelicateApi } ?: ""
-                    )
+                    "visibilityAnnotation"(property.visibilityAnnotation.let { if (it.isNotBlank()) "\n$it" else "" })
                     "name"(property.name)
                     "key"(property.key)
                     "default"(if (property.default != null) property.renderDefault() else """"null"""")
@@ -114,6 +117,15 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
                             target.toSourceCode()
                         }
                     )
+                    "visibility"(
+                        when (property.visibility) {
+                            Visibility.Public -> "Visibility.Public"
+                            Visibility.Delicate -> "Visibility.Delicate"
+                            Visibility.Experimental -> "Visibility.Experimental"
+                            Visibility.Internal -> "Visibility.Internal"
+                            Visibility.Deprecated -> "Visibility.Deprecated"
+                        }
+                    )
                 })
             }
         }
@@ -129,8 +141,9 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
             import kotlin.io.path.Path
             import org.jetbrains.compose.reload.core.Os
             import org.jetbrains.compose.reload.InternalHotReloadApi
+            import org.jetbrains.compose.reload.DelicateHotReloadApi
+            import org.jetbrains.compose.reload.ExperimentalHotReloadApi
             
-            @InternalHotReloadApi
             public object HotReloadEnvironment {
                 {{element}}
             }
@@ -147,7 +160,7 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
                 * See [HotReloadProperty.{{name}}]
                 * {{documentation}}
                 */
-                public val {{propertyName}}: {{type}} get() {
+                {{visibility}} public val {{propertyName}}: {{type}} get() {
                     {{statement}}
                 }
                 
@@ -157,6 +170,7 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
                 property.documentation?.lines()?.forEach { line ->
                     "documentation"(line)
                 }
+                "visibility"(property.visibilityAnnotation)
                 "propertyName"(property.name.replaceFirstChar { it.lowercase() })
                 "type"(property.toKotlinType())
                 "statement"("val value = System.getProperty(\"${property.key}\")")

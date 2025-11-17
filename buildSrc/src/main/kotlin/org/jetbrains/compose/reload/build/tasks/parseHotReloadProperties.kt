@@ -38,14 +38,16 @@ private fun parseHotReloadProperty(
         key = key,
         default = default,
         defaultIsExpression = node.getScalar("defaultIsExpression")?.content?.toBooleanStrict() == true,
-        type = Type.values().firstOrNull { it.name.equals(type, ignoreCase = true) }
+        type = decodeEnum<Type>(type)
             ?: error("Property '$name' has invalid 'type' field: $type"),
         enumClass = node.getScalar("enumClass")?.content,
         targets = target.map { declaredTarget ->
-            DeclaredHotReloadProperty.Target.values().firstOrNull { it.name.equals(declaredTarget, ignoreCase = true) }
+            decodeEnum<DeclaredHotReloadProperty.Target>(declaredTarget)
                 ?: error("Property '$name' has invalid 'target' field: $declaredTarget")
         },
-        isDelicateApi = node.getScalar("isDelicateApi")?.content?.toBooleanStrict() == true,
+        visibility = node.getScalar("visibility")?.content?.let { decodeEnum<DeclaredHotReloadProperty.Visibility>(it) }
+            ?: DeclaredHotReloadProperty.Visibility.Internal,
+        deprecationMessage = node.getScalar("deprecationMessage")?.content,
         documentation = node.getScalar("documentation")?.content,
     )
 }
@@ -58,7 +60,8 @@ internal class DeclaredHotReloadProperty(
     val type: Type,
     val enumClass: String?,
     val targets: List<Target>,
-    val isDelicateApi: Boolean,
+    val visibility: Visibility,
+    val deprecationMessage: String?,
     val documentation: String?,
 ) {
     enum class Type {
@@ -67,6 +70,14 @@ internal class DeclaredHotReloadProperty(
 
     enum class Target {
         Build, DevTools, Application
+    }
+
+    enum class Visibility {
+        Public,
+        Delicate,
+        Experimental,
+        Internal,
+        Deprecated,
     }
 }
 
@@ -90,6 +101,15 @@ internal fun DeclaredHotReloadProperty.Target.toSourceCode(): String {
     }
 }
 
+internal val DeclaredHotReloadProperty.visibilityAnnotation: String
+    get() = when (visibility) {
+        DeclaredHotReloadProperty.Visibility.Public -> ""
+        DeclaredHotReloadProperty.Visibility.Delicate -> "@DelicateHotReloadApi"
+        DeclaredHotReloadProperty.Visibility.Experimental -> "@ExperimentalHotReloadApi"
+        DeclaredHotReloadProperty.Visibility.Internal -> "@InternalHotReloadApi"
+        DeclaredHotReloadProperty.Visibility.Deprecated -> "@Deprecated(\"${deprecationMessage.orEmpty()}\")"
+    }
+
 internal fun DeclaredHotReloadProperty.convertTypeCode(variableName: String) = when (type) {
     Type.String -> variableName
     Type.Boolean -> "$variableName.toBooleanStrict()"
@@ -104,4 +124,10 @@ internal fun DeclaredHotReloadProperty.renderDefault(): String? {
     if (default == null) return null
     if (defaultIsExpression) return default
     return "\"$default\""
+}
+
+private inline fun <reified T : Enum<T>> decodeEnum(string: String): T? {
+    return enumValues<T>().firstOrNull {
+        it.name.equals(string, ignoreCase = true)
+    }
 }

@@ -127,7 +127,7 @@ GradleBuildContinuous:
   type: boolean
   default: "false"
   target: [ application, devtools, build ]
-  isDelicateApi: true
+  visibility: delicate
   documentation: |
     - true: Compose Hot Reload will start a recompiler Gradle Daemon, which will continuously rebuilt/reload the project
     by watching all  inputs to the build
@@ -139,7 +139,7 @@ GradleWarmupEnabled:
   type: boolean
   default: "false"
   target: [ application, devtools, build ]
-  isDelicateApi: true
+  visibility: delicate
   documentation: |
     - true: Compose Hot Reload will launch a warmup recompile request when the application is started, to ensure that
     the recompiler Gradle daemon is running and ready to handle requests
@@ -150,7 +150,7 @@ GradleBuildOptimize:
   type: boolean
   default: "true"
   target: [ application, devtools, build ]
-  isDelicateApi: true
+  visibility: delicate
   documentation: |
     - true: Compose Hot Reload will try to optimize your build during hot reload 
     (e.g. by enabling Gradle's configuration cache during 'recompilation')
@@ -171,6 +171,7 @@ DevToolsEnabled:
   type: boolean
   default: "true"
   target: [ application, devtools, build ]
+  visibility: public
   documentation: |
     Flag to disable the 'devtools' application entirely
 
@@ -179,6 +180,7 @@ DevToolsIsHeadless:
   type: boolean
   default: "false"
   target: [ application, devtools, build ]
+  visibility: public
   documentation: |
     Run the dev tools in headless mode (No UI window shown)
 
@@ -196,7 +198,7 @@ DevToolsTransparencyEnabled:
   default: "(Os.currentOrNull() != Os.Linux).toString()"
   defaultIsExpression: true
   target: [ application, build, devtools ]
-  isDelicateApi: true
+  visibility: delicate
   documentation: |
     Some platforms might not be able to render transparency correctly (e.g. some linux environments).
     This property will allow such platforms to disable/enable transparency. This property is subject to change
@@ -207,6 +209,7 @@ DevToolsDetached:
   type: boolean
   default: "false"
   target: [ application, build, devtools ]
+  visibility: public
   documentation: |
     If enabled, dev tools window will be detached from the main application
 
@@ -215,6 +218,7 @@ ReloadEffectsEnabled:
   type: boolean
   default: "true"
   target: [ application, build ]
+  visibility: public
   documentation: |
     Enable reload effects that are shown in the UI when a reload is triggered.
 
@@ -243,7 +247,6 @@ SubprocessDebuggingEnabled:
   type: boolean
   default: "false"
   target: [ build ]
-  isDelicateApi: true
   documentation: |
     Enable this property to allow propagating the 'idea.debugger.dispatch.port' to all subprocesses.
     This is useful when debugging dev tools. Note: this may break the debugging of the user application if IJ is
@@ -253,7 +256,7 @@ JetBrainsRuntimeBinary:
   key: compose.reload.jbr.binary
   type: file
   target: [ build ]
-  isDelicateApi: true
+  visibility: delicate
   documentation: |
     The path to the 'JetBrainsRuntime' which shall be used when launching the app. 
     Note: This is a build-only property!
@@ -263,7 +266,7 @@ JetBrainsRuntimeVersion:
   type: int
   default: "21"
   target: [ build ]
-  isDelicateApi: true
+  visibility: delicate
   documentation: |
     Specifies the default 'JetBrains Runtime' version that shall be used (e.g. '21' or '25')
 
@@ -308,7 +311,7 @@ StdinFile:
   key: compose.reload.stdinFile
   type: file
   target: [ build, application, devtools ]
-  isDelicateApi: true
+  visibility: delicate
   documentation: |
     Used by 'async'/'non-blocking' launches of the application.
     Will point to the stdin file (can be pipe)
@@ -318,7 +321,7 @@ StdoutFile:
   key: compose.reload.stdoutFile
   type: file
   target: [ build, application, devtools ]
-  isDelicateApi: true
+  visibility: delicate
   documentation: |
     Used by 'async'/'non-blocking' launches of the application.
     Will point to a file where the stdout is supposed to be written to.
@@ -328,7 +331,7 @@ StderrFile:
   key: compose.reload.stderrFile
   type: file
   target: [ build, application, devtools ]
-  isDelicateApi: true
+  visibility: delicate
   documentation: |
     Used by 'async'/'non-blocking' launches of the application.
     Will point to a file where the stderr is supposed to be written to.
@@ -357,6 +360,7 @@ LogLevel:
   enumClass: org.jetbrains.compose.reload.core.Logger.Level
   target: [ application, devtools, build ]
   default: "Info"
+  visibility: public
   documentation: |
     Minimum logging level
 
@@ -365,6 +369,7 @@ LogStdout:
   type: boolean
   target: [ application, build, devtools ]
   default: "false"
+  visibility: public
   documentation: |
     Enable output of all logs into the standard output
 
@@ -373,6 +378,7 @@ IsHotReloadActive:
   type: boolean
   target: [ application ]
   default: "false"
+  visibility: public
   documentation: |
     Will be set to 'true' if the application is launched with Hot Reload and therefore can be used
     to detect if hot reload is 'active'

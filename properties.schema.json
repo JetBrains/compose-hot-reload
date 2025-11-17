@@ -34,9 +34,12 @@
             "enum": ["build", "devtools", "application"]
           }
         },
-        "isDelicateApi": {
-          "type": "boolean",
-          "default": false
+        "visibility": {
+          "type": "string",
+          "enum": ["public", "delicate", "experimental", "internal", "deprecated"]
+        },
+        "deprecationMessage": {
+          "type": "string"
         },
         "documentation": {
           "type": "string"
