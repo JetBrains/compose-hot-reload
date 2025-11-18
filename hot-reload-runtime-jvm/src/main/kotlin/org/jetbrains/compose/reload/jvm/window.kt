@@ -69,7 +69,7 @@ internal fun startWindowManager(window: Window): WindowId {
             OrchestrationMessage.ApplicationWindowGone(windowId).sendAsync()
         }
 
-        if (window.isActive) {
+        if (window.isVisible) {
             broadcastActiveState()
         }
 
@@ -104,7 +104,11 @@ internal fun startWindowManager(window: Window): WindowId {
 
         val componentListener = object : ComponentAdapter() {
             fun broadcastIfActive() {
-                if (window.isActive) {
+                /**
+                 * `window.isActive` behaves inconsistently on Linux
+                 * Therefore we use `window.isVisible` to check if the window is active
+                 */
+                if (window.isVisible) {
                     broadcastActiveState()
                 }
             }
