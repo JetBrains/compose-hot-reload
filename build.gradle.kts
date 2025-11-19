@@ -101,6 +101,7 @@ val buildMavenCentralDeployBundle by tasks.registering(Zip::class) {
     from(layout.buildDirectory.dir("deploy"))
     archiveBaseName.set("mavenCentral.deploy")
     destinationDirectory.set(layout.buildDirectory)
+    archiveVersion.set(project.version.toString())
 }
 
 val deployMavenCentralDeployBundle by tasks.registering(PublishToMavenCentralTask::class) {
