@@ -22,7 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import io.sellmair.evas.emit
+import io.sellmair.evas.compose.LocalEvents
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.sidecar.DtConsole
@@ -41,6 +41,7 @@ import org.jetbrains.compose.devtools.theme.DtSizes
 fun DtNotificationCard(notification: UINotification) {
     var showDetails by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val events = LocalEvents.current
 
     Column(
         modifier = Modifier
@@ -86,7 +87,9 @@ fun DtNotificationCard(notification: UINotification) {
                 if (notification.isDisposableFromUI) {
                     DtIconButton(
                         onClick = {
-                            scope.launch { UINotificationDisposeEvent(notification.id).emit() }
+                            scope.launch {
+                                events?.emit(UINotificationDisposeEvent(notification.id))
+                            }
                         },
                         tooltip = "Clean the warning",
                         modifier = Modifier.size(DtSizes.iconSize),
