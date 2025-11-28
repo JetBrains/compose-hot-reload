@@ -92,7 +92,7 @@ fun Project.createComposeHotReloadArguments(builder: ComposeHotReloadArgumentsBu
 internal class ComposeHotReloadArguments(project: Project) :
     ComposeHotReloadArgumentsBuilder,
     CommandLineArgumentProvider {
-    private val rootProjectDir = project.rootProject.projectDir
+    private val rootProjectDir = project.isolated.rootProject.projectDirectory
     private val projectPath = project.path
 
     @field:Transient
@@ -331,7 +331,7 @@ internal class ComposeHotReloadArguments(project: Project) :
 
         /* Provide "recompiler" properties */
         add("-D${HotReloadProperty.BuildSystem.key}=${BuildSystem.Gradle.name}")
-        add("-D${HotReloadProperty.GradleBuildRoot.key}=${rootProjectDir.absolutePath}")
+        add("-D${HotReloadProperty.GradleBuildRoot.key}=${rootProjectDir.asFile.absolutePath}")
         add("-D${HotReloadProperty.GradleBuildProject.key}=$projectPath")
         if (reloadTaskName.isPresent) {
             add("-D${HotReloadProperty.GradleBuildTask.key}=${reloadTaskName.get()}")
