@@ -6,15 +6,12 @@
 package org.jetbrains.compose.reload.jvm
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.remember
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.trySendBlocking
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.job
 import org.jetbrains.compose.devtools.api.WindowsState
 import org.jetbrains.compose.devtools.api.WindowsState.WindowState
 import org.jetbrains.compose.reload.agent.orchestration
@@ -37,7 +34,7 @@ private val logger = createLogger()
 internal fun startWindowManager(window: Window): WindowId {
     val windowId = remember { WindowId.create() }
 
-    LaunchedEffect(windowId) {
+    remember(windowId) {
         val windowState = Channel<WindowState?>(Channel.CONFLATED)
 
         /* Synchronize windows state with orchestration */
@@ -139,15 +136,17 @@ internal fun startWindowManager(window: Window): WindowId {
         window.addWindowFocusListener(windowListener)
         window.addComponentListener(componentListener)
 
-        currentCoroutineContext().job.invokeOnCompletion {
-            window.removeWindowListener(windowListener)
-            window.removeComponentListener(componentListener)
-            broadcastGone()
-            windowState.close()
+        object : RememberObserver {
+            override fun onRemembered() {}
+            override fun onAbandoned() {}
+
+            override fun onForgotten() {
+                window.removeWindowListener(windowListener)
+                window.removeComponentListener(componentListener)
+                broadcastGone()
+                windowState.close()
+            }
         }
-
-        awaitCancellation()
     }
-
     return windowId
 }
