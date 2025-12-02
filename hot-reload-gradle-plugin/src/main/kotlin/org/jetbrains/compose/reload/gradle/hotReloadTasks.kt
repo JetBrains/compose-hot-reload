@@ -78,7 +78,7 @@ internal val KotlinCompilation<*>.hotReloadTask: Future<TaskProvider<ComposeHotR
 @DisableCachingByDefault(because = "Should always run")
 @InternalHotReloadApi
 abstract class ComposeHotReloadTask : DefaultTask(), ComposeHotReloadOtherTask {
-    private val rootProjectDirectory = project.isolated.rootProject.projectDirectory
+    private val rootProjectDirectory = project.rootProjectDirectory
 
     @get:Internal
     val agentPort: Property<Int> = project.objects.property<Int>()
@@ -119,7 +119,7 @@ abstract class ComposeHotReloadTask : DefaultTask(), ComposeHotReloadOtherTask {
 
 
     private fun reloadReport(request: ReloadClassesRequest): String {
-        val rootPath = rootProjectDirectory.asFile
+        val rootPath = rootProjectDirectory
         val entries = request.changedClassFiles.entries.toTypedArray()
 
         return """
