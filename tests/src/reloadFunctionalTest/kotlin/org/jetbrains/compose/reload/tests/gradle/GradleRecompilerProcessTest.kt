@@ -51,6 +51,7 @@ import kotlin.test.fail
 @QuickTest
 @TestedProjectMode(ProjectMode.Kmp)
 @TestedBuildMode(BuildMode.Continuous)
+@Execution(ExecutionMode.SAME_THREAD)
 class GradleRecompilerProcessTest {
 
     private val logger = createLogger()
@@ -75,7 +76,6 @@ class GradleRecompilerProcessTest {
 
     @HotReloadTest
     @TestedLaunchMode(ApplicationLaunchMode.Detached)
-    @Execution(ExecutionMode.SAME_THREAD)
     fun `test - gradle recompiler process is stopped - application destroyed forcefully`(
         fixture: HotReloadTestFixture
     ) = fixture.runTest {
