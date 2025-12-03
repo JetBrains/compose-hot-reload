@@ -112,6 +112,8 @@ You can run these Gradle tasks from the command line:
 
 ```shell
 ./gradlew :app:hotRunJvm
+# or
+./gradlew :composeApp:hotRunJvm
 ```
 
 After making changes, save all files to automatically update your app's UI.
