@@ -61,7 +61,6 @@ interface Ignore {
             "kotlin/", "kotlinx/", "androidx/",
             "org/jetbrains/skia/", "org/jetbrains/skiko/",
             "org/jetbrains/compose/reload",
-            "org/jetbrains/compose/hotReloadUI",
             "com/intellij/rt/debugger/",
             "io/netty/",
             "org/objectweb",
