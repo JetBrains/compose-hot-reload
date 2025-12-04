@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.tests
 
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.future.asDeferred
 import kotlinx.coroutines.isActive
 import org.jetbrains.compose.devtools.api.ReloadState
@@ -23,6 +24,7 @@ import org.jetbrains.compose.reload.test.gradle.HotReloadTestDimensionExtension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestInvocationContext
 import org.jetbrains.compose.reload.test.gradle.TestedBuildMode
+import org.jetbrains.compose.reload.test.gradle.TransactionScope
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.utils.HostIntegrationTest
 import org.jetbrains.compose.reload.utils.QuickTest
@@ -94,7 +96,11 @@ class DevtoolsIntegrationTests {
             }
             """.trimIndent()
 
-            assertIs<ReloadState.Ok>(reloadState.value)
+            if (fixture.buildMode == BuildMode.Explicit) {
+                assertIs<ReloadState.Ok>(reloadState.value)
+            } else {
+                awaitState<ReloadState.Ok>(reloadStateChannel)
+            }
 
             replaceSourceCode("// Foo", "TestText(\"Foo\")")
             if (fixture.buildMode == BuildMode.Explicit) {
@@ -102,15 +108,11 @@ class DevtoolsIntegrationTests {
             }
 
             withAsyncTrace("Waiting for ReloadState: 'Reloading'") {
-                while (isActive) {
-                    if (reloadStateChannel.receive() is ReloadState.Reloading) break
-                }
+                awaitState<ReloadState.Reloading>(reloadStateChannel)
             }
 
             withAsyncTrace("Waiting for ReloadState: 'Ok'") {
-                while (isActive) {
-                    if (reloadStateChannel.receive() is ReloadState.Ok) break
-                }
+                awaitState<ReloadState.Ok>(reloadStateChannel)
             }
         }
     }
@@ -169,6 +171,12 @@ class DevtoolsIntegrationTests {
             fail("Expected shutdown duration to be less than 5 seconds, but was $duration")
         }
     }
+
+    private suspend inline fun <reified T : ReloadState> TransactionScope.awaitState(channel: Channel<ReloadState>) {
+        while (isActive) {
+            if (channel.receive() is T) break
+        }
+    }
 }
 
 /**
@@ -194,9 +202,9 @@ internal class DevtoolsIntegrationTestsExtension : BuildGradleKtsExtension, HotR
         if (context.testClass.getOrNull() != DevtoolsIntegrationTests::class.java) return tests
 
         /*
-        Actually, we do not really care about test-dimensions. Anyone should be fine:
-        Let's just pick the last one available in the transformation chain.
+        Actually, we do not really care about test-dimensions. We only care about the different build modes.
+        So let's just pick the last dimension for each build mode from the ones available in the transformation chain.
          */
-        return tests.takeLast(1)
+        return tests.groupBy { it.buildMode }.map { it.value.last() }
     }
 }

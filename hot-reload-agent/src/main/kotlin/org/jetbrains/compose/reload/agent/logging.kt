@@ -14,7 +14,6 @@ import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.displayString
 import org.jetbrains.compose.reload.core.invokeOnFinish
 import org.jetbrains.compose.reload.core.invokeOnStop
-import org.jetbrains.compose.reload.core.launchOnFinish
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.withThread
 import org.jetbrains.compose.reload.core.withType
@@ -65,9 +64,6 @@ internal fun OrchestrationHandle.startDispatchingLogs() {
         subtask {
             val loggerId = OrchestrationLoggerState.LoggerId.create()
             update(OrchestrationLoggerState) { state -> state.withLogger(loggerId) }
-            launchOnFinish {
-                update(OrchestrationLoggerState) { state -> state.withoutLogger(loggerId) }
-            }
         }
 
         orchestration.messages.withType<LogMessage>().collect { message ->

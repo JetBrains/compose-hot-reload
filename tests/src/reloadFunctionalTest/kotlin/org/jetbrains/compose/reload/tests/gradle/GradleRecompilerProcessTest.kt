@@ -26,12 +26,11 @@ import org.jetbrains.compose.reload.test.gradle.TestedProjectMode
 import org.jetbrains.compose.reload.test.gradle.assertSuccessful
 import org.jetbrains.compose.reload.test.gradle.buildFlow
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
+import org.jetbrains.compose.reload.utils.Deflake
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
 import org.jetbrains.compose.reload.utils.HostIntegrationTest
 import org.jetbrains.compose.reload.utils.QuickTest
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultKotlinVersion
-import org.junit.jupiter.api.parallel.Execution
-import org.junit.jupiter.api.parallel.ExecutionMode
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.Path
@@ -57,6 +56,7 @@ class GradleRecompilerProcessTest {
 
     @HotReloadTest
     @TestedLaunchMode(ApplicationLaunchMode.GradleBlocking)
+    @Deflake(100)
     fun `test - gradle recompiler process is stopped - ShutdownRequest`(fixture: HotReloadTestFixture) =
         fixture.runTest {
             val processes = startApplicationAndAwaitGradleProcess()
@@ -75,7 +75,7 @@ class GradleRecompilerProcessTest {
 
     @HotReloadTest
     @TestedLaunchMode(ApplicationLaunchMode.Detached)
-    @Execution(ExecutionMode.SAME_THREAD)
+    @Deflake(100)
     fun `test - gradle recompiler process is stopped - application destroyed forcefully`(
         fixture: HotReloadTestFixture
     ) = fixture.runTest {
@@ -142,7 +142,8 @@ class GradleRecompilerProcessTest {
     private suspend fun HotReloadTestFixture.startApplicationAndAwaitGradleProcess(): Processes {
         val fixture = this
 
-        val processes = fixture.initialSourceCode("""
+        val processes = fixture.initialSourceCode(
+            """
             import org.jetbrains.compose.reload.test.*
             
             fun main() {
@@ -151,7 +152,6 @@ class GradleRecompilerProcessTest {
             }
         """.trimIndent()
         ) {
-
             var application: ClientConnected? = null
             var recompiler: Long? = null
             val recompilerPidRegex = Regex("""'Recompiler': Started \((?<pid>\d+)\)""")

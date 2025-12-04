@@ -17,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
  * Can be used to 'Deflake' a test by running it many times.
  */
 @Suppress("unused") // Debugging/Deflaking utility
-annotation class Deflake
+annotation class Deflake(val repetitions: Int = 1024)
 
 data class DeflakeInvocationIndex(val index: Int) : HotReloadTestDimension {
     override fun displayName(): String {
@@ -33,9 +33,9 @@ internal class DeflakeExtension : HotReloadTestDimensionExtension {
     override fun transform(
         context: ExtensionContext, tests: List<HotReloadTestInvocationContext>
     ): List<HotReloadTestInvocationContext> {
-        context.findAnnotation<Deflake>() ?: return tests
+        val repetitions = context.findAnnotation<Deflake>()?.repetitions ?: return tests
         return buildList {
-            repeat(1024) { index ->
+            repeat(repetitions) { index ->
                 addAll(tests.map { context ->
                     context.copy {
                         extras[DeflakeInvocationIndex.key] = DeflakeInvocationIndex(index)
