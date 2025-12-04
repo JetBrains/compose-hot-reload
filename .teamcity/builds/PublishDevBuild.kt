@@ -10,14 +10,23 @@ import builds.conventions.PublishDevPrivilege
 import builds.conventions.PushPrivilege
 import builds.conventions.setupGit
 import jetbrains.buildServer.configs.kotlin.BuildType
+import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.triggers.ScheduleTrigger
 import jetbrains.buildServer.configs.kotlin.triggers.schedule
 
+object PublishDevBuildsProject : Project({
+    name = "Publish: Dev Builds"
+    description = "Release dev build artifacts to dev repository"
+
+    buildType(PublishDevBuild)
+    buildType(PublishPreReleaseBuild)
+})
+
 object PublishDevBuild : BuildType({
     name = "Publish: Dev Build"
-    description = "Bumps the 'dev' version and publishes to 'dev' repositories; Bumps the bootstrap version"
+    description = "Bumps the 'dev' version and publishes to 'dev' repository; Bumps the bootstrap version"
 
     vcs {
         cleanCheckout = true
@@ -68,11 +77,6 @@ object PublishDevBuild : BuildType({
         }
 
         gradle {
-            name = "Publish to Sellmair Repository"
-            tasks = "publishAllPublicationsToSellmairRepository --no-configuration-cache"
-        }
-
-        gradle {
             workingDir = "repository-tools"
             name = "Push"
             tasks = "push pushDevVersionTag"
@@ -85,6 +89,31 @@ object PublishDevBuild : BuildType({
                 git rebase origin/staging
                 git push origin HEAD:refs/heads/staging -v --force-with-lease
             """.trimIndent()
+        }
+    }
+}), PushPrivilege, PublishDevPrivilege, BuildCacheConvention.Consumer
+
+
+object PublishPreReleaseBuild : BuildType({
+    name = "Publish: Pre-release Build"
+    description = "Publishes pre-release artifacts to dev repository"
+    type = Type.DEPLOYMENT
+
+    vcs {
+        cleanCheckout = true
+    }
+
+    steps {
+        setupGit()
+
+        gradle {
+            name = "Api Check"
+            tasks = "apiCheck"
+        }
+
+        gradle {
+            name = "Publish to Firework Repository"
+            tasks = "publishAllPublicationsToFireworkRepository --no-configuration-cache"
         }
     }
 }), PushPrivilege, PublishDevPrivilege, BuildCacheConvention.Consumer

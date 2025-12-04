@@ -7,8 +7,8 @@ import builds.AllTests
 import builds.ApiCheck
 import builds.BootstrapDeploy
 import builds.BuildCache
-import builds.PublishDevBuild
 import builds.PublishToMavenCentralProject
+import builds.PublishDevBuildsProject
 import builds.SamplesCheck
 import builds.StagingDeploy
 import builds.Test
@@ -66,10 +66,10 @@ object ComposeHotReloadProject : Project({
     buildType(BuildCache(Host.Windows))
     buildType(UpdateComposeDevVersion)
 
-    buildType(PublishDevBuild)
     buildType(StagingDeploy)
     buildType(BootstrapDeploy)
 
+    subProject(PublishDevBuildsProject)
     subProject(PublishToMavenCentralProject)
 
     buildTypesOrder = buildTypes.toList()
