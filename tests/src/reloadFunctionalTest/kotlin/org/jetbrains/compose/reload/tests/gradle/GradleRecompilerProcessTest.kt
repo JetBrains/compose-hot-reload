@@ -51,7 +51,6 @@ import kotlin.test.fail
 @QuickTest
 @TestedProjectMode(ProjectMode.Kmp)
 @TestedBuildMode(BuildMode.Continuous)
-@Execution(ExecutionMode.SAME_THREAD)
 class GradleRecompilerProcessTest {
 
     private val logger = createLogger()
@@ -76,6 +75,7 @@ class GradleRecompilerProcessTest {
 
     @HotReloadTest
     @TestedLaunchMode(ApplicationLaunchMode.Detached)
+    @Execution(ExecutionMode.SAME_THREAD)
     fun `test - gradle recompiler process is stopped - application destroyed forcefully`(
         fixture: HotReloadTestFixture
     ) = fixture.runTest {
@@ -142,15 +142,15 @@ class GradleRecompilerProcessTest {
     private suspend fun HotReloadTestFixture.startApplicationAndAwaitGradleProcess(): Processes {
         val fixture = this
 
-        val processes = runTransaction {
-            fixture initialSourceCode """
-                import org.jetbrains.compose.reload.test.*
-                
-                fun main() {
-                    screenshotTestApplication {
-                    }
+        val processes = fixture.initialSourceCode("""
+            import org.jetbrains.compose.reload.test.*
+            
+            fun main() {
+                screenshotTestApplication {
                 }
-            """.trimIndent()
+            }
+        """.trimIndent()
+        ) {
 
             var application: ClientConnected? = null
             var recompiler: Long? = null
