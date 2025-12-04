@@ -19,6 +19,7 @@ object Github : GitVcsRoot({
         uploadedKey = "compose-hot-reload-deploy-id_rsa"
     }
     pollInterval = 5.minutes.inWholeSeconds.toInt()
+    userNameStyle = GitVcsRoot.UserNameStyle.FULL
 })
 
 
