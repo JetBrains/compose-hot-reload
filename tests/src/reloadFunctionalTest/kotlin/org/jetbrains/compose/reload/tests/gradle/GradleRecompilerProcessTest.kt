@@ -57,6 +57,7 @@ class GradleRecompilerProcessTest {
 
     @HotReloadTest
     @TestedLaunchMode(ApplicationLaunchMode.GradleBlocking)
+    @Execution(ExecutionMode.SAME_THREAD)
     fun `test - gradle recompiler process is stopped - ShutdownRequest`(fixture: HotReloadTestFixture) =
         fixture.runTest {
             val processes = startApplicationAndAwaitGradleProcess()
