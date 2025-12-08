@@ -92,7 +92,7 @@ fun Project.createComposeHotReloadArguments(builder: ComposeHotReloadArgumentsBu
 internal class ComposeHotReloadArguments(project: Project) :
     ComposeHotReloadArgumentsBuilder,
     CommandLineArgumentProvider {
-    private val rootProjectDir = project.rootProjectDirectory
+    private val rootProjectDir = project.rootDir
     private val projectPath = project.path
 
     @field:Transient

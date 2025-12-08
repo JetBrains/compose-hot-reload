@@ -78,7 +78,7 @@ internal val KotlinCompilation<*>.hotReloadTask: Future<TaskProvider<ComposeHotR
 @DisableCachingByDefault(because = "Should always run")
 @InternalHotReloadApi
 abstract class ComposeHotReloadTask : DefaultTask(), ComposeHotReloadOtherTask {
-    private val rootProjectDirectory = project.rootProjectDirectory
+    private val rootProjectDirectory = project.rootDir
 
     @get:Internal
     val agentPort: Property<Int> = project.objects.property<Int>()

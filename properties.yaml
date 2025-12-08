@@ -388,7 +388,6 @@ IsolatedProjectsEnabled:
   type: boolean
   target: [ application, build, devtools ]
   default: "false"
-  visibility: experimental
+  visibility: deprecated
   documentation: |
     Enables support for Gradle's incubating 'isolated projects' feature
-
