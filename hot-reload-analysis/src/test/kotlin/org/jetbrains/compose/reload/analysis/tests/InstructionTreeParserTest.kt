@@ -132,6 +132,89 @@ class InstructionTreeParserTest {
         """.trimIndent(),
     )
 
+    @Test
+    fun `test - composable with switch control flow`(compiler: Compiler, testInfo: TestInfo) = doTest(
+        compiler, testInfo, """
+            import androidx.compose.runtime.*
+            import androidx.compose.material3.Text
+            
+            @Composable
+            fun Foo(value: Int) {
+                when (value) {
+                    0 -> {
+                        Text("Hello")
+                    }
+                    10 -> {
+                        Text("Hello 10")
+                    }
+                    else -> {
+                        Text("Hello else")
+                    }
+                }
+            }
+    """.trimIndent()
+    )
+
+    @Test
+    fun `test - composable with switch eager return`(compiler: Compiler, testInfo: TestInfo) = doTest(
+        compiler, testInfo, """
+            import androidx.compose.runtime.*
+            import androidx.compose.material3.Text
+            
+            @Composable
+            fun value(): Int? = 10
+            
+            @Composable
+            fun Foo() {
+                val value = value() ?: return
+                when (value) {
+                    0 -> {
+                        Text("Hello")
+                    }
+                    10 -> {
+                        Text("Hello 10")
+                    }
+                    else -> {
+                        Text("Hello else")
+                    }
+                }
+            }
+        """.trimIndent()
+    )
+
+    @Test
+    fun `test - composable with switch local return`(compiler: Compiler, testInfo: TestInfo) = doTest(
+        compiler, testInfo, """
+            import androidx.compose.runtime.*
+            import androidx.compose.material3.Text
+            
+            @Composable
+            fun Foo(a: Int, b: Int) {
+                when (a) {
+                    0 -> {
+                        Text("Hello")
+                    }
+                    10 -> Bar {
+                        Text("B")
+                        if(b > 0) return@Bar
+                        if(b > 10) return@Foo
+                        Text("C")
+                    }
+                    else -> {
+                        Text("Hello else")
+                    }
+                }
+            }
+            
+            @Composable
+            inline fun Bar(content: @Composable () -> Unit) {
+                Text("Bar A")
+                content()
+                Text("Bar B")
+            }
+        """.trimIndent()
+    )
+
     private fun doTest(compiler: Compiler, testInfo: TestInfo, code: String) {
         val directory = Path("src/test/resources/instructionTree")
             .resolve(testInfo.testClass.get().name.asFileName())
@@ -184,13 +267,13 @@ class InstructionTreeParserTest {
         )
 
         if (TestEnvironment.updateTestData) {
-            file2Render.forEach { file, render ->
+            file2Render.forEach { (file, render) ->
                 file.createParentDirectories().writeText(render)
             }
             return
         }
 
-        file2Render.forEach { file, render ->
+        file2Render.forEach { (file, render) ->
             if (!file.exists()) {
                 file.createParentDirectories().writeText(render)
                 error("Render '${file.toUri()}' did not exist; Generated")

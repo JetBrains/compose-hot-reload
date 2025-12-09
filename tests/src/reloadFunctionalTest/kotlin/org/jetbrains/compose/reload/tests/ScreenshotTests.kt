@@ -173,7 +173,7 @@ class ScreenshotTests {
         fixture.replaceSourceCodeAndReload("""// add effect""", """onTestEvent { state++ }""")
         fixture.checkScreenshot("3-addedEffect")
 
-        fixture.sendTestEvent { event ->
+        fixture.sendTestEvent {
             fixture.checkScreenshot("4-afterEvent")
         }
     }
@@ -783,4 +783,59 @@ class ScreenshotTests {
         replaceSourceCodeAndReload("// decoy body", "Group {}")
         checkScreenshot("A3")
     }
+
+    /**
+     * Group keys inside branches are currently computed using offset. Meaning any change in the method
+     * is causing the group key to change, which leads to the whole method recomposing. This test only
+     * captures the current behaviour. If the group keys inside the method become stable, we will be
+     * able to preserve the state in this test case.
+     */
+    @HotReloadTest
+    fun `test - switch control flow`(fixture: HotReloadTestFixture) = fixture.runTest {
+        fixture initialSourceCode """
+            import androidx.compose.foundation.layout.*
+            import androidx.compose.runtime.*
+            import org.jetbrains.compose.reload.test.*
+              
+            fun main() = screenshotTestApplication {
+                Column {
+                    Foo(10)
+                }
+            }
+            
+            @Composable
+            fun Foo(value: Int) {
+                when (value) {
+                    0 -> {
+                        TestText("Before")
+                    }
+                    10 -> {
+                        var state by remember { mutableStateOf(0) }
+                        onTestEvent { value -> if(value == "inc") state++ }
+                        TestText("Foo: %state")
+                    }
+                    else -> {
+                        TestText("After")
+                    }
+                }
+            }
+        """.replace("%", "$").trimIndent()
+
+        fixture.checkScreenshot("0-10-0")
+        fixture.sendTestEvent("inc")
+        fixture.checkScreenshot("1-10-1")
+
+        fixture.replaceSourceCodeAndReload("TestText(\"After\")", "TestText(\"After updated\")")
+        fixture.checkScreenshot("2-10-change after-0")
+
+        fixture.sendTestEvent("inc")
+        fixture.checkScreenshot("3-10-1")
+
+        fixture.replaceSourceCodeAndReload("TestText(\"Before\")", "TestText(\"Before updated\")")
+        fixture.checkScreenshot("4-10-change before-0")
+
+        fixture.replaceSourceCodeAndReload("Foo(10)", "Foo(0)")
+        fixture.checkScreenshot("5-0-0")
+    }
+
 }

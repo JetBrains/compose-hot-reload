@@ -1,0 +1,162 @@
+/* Code */
+import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+
+@Composable
+fun value(): Int? = 10
+
+@Composable
+fun Foo() {
+    val value = value() ?: return
+    when (value) {
+        0 -> {
+            Text("Hello")
+        }
+        10 -> {
+            Text("Hello 10")
+        }
+        else -> {
+            Text("Hello else")
+        }
+    }
+}
+
+ /* Tree */ 
+class TestKt {
+    fun Foo$lambda$0 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit; {
+        Method (group=null) {
+            LabelToken(L0)
+            BlockToken(7)
+            ReturnToken(returnInsn=176)
+        }
+    }
+    
+    fun Foo$lambda$1 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit; {
+        Method (group=null) {
+            LabelToken(L0)
+            BlockToken(7)
+            ReturnToken(returnInsn=176)
+        }
+    }
+    
+    fun Foo (Landroidx/compose/runtime/Composer;I)V {
+        Method (group=ComposeGroupKey(key=-607362160)) {
+            LabelToken(L0, lineNumber=8)
+            BlockToken(1)
+            BlockToken(1)
+            JumpToken(L6, opocde=198)
+            BlockToken(3)
+            JumpToken(L7, opocde=167)
+            LabelToken(L6)
+            BlockToken(2)
+            LabelToken(L7, lineNumber=9)
+            BlockToken(1)
+            ReturnToken(returnInsn=177)
+            BlockToken(1)
+            JumpToken(L23, opocde=198)
+            BlockToken(3)
+            JumpToken(L24, opocde=167)
+            LabelToken(L23)
+            BlockToken(2)
+            LabelToken(L24)
+            BlockToken(1)
+            ReturnToken(returnInsn=177)
+    
+            RestartGroup (group=ComposeGroupKey(key=-607362160)) {
+                StartRestartGroup(key=ComposeGroupKey(key=-607362160))
+                BlockToken(3)
+                JumpToken(L1, opocde=153)
+                BlockToken(1)
+                JumpToken(L2, opocde=167)
+                LabelToken(L1)
+                BlockToken(2)
+                LabelToken(L2)
+                BlockToken(5)
+                JumpToken(L21, opocde=153)
+                BlockToken(1)
+                JumpToken(L3, opocde=153)
+                BlockToken(5)
+                LabelToken(L3, lineNumber=9)
+                BlockToken(5)
+                JumpToken(L4, opocde=198)
+                BlockToken(1)
+                JumpToken(L8, opocde=167)
+                LabelToken(L4)
+                BlockToken(3)
+                JumpToken(L5, opocde=153)
+                BlockToken(1)
+                LabelToken(L5, lineNumber=21)
+                BlockToken(2)
+                EndRestartGroup()
+                LabelToken(L8)
+                BlockToken(2)
+                LabelToken(L9, lineNumber=10)
+                BlockToken(1)
+                SwitchToken([0 -> L10, 10 -> L13], default=L16)
+                LabelToken(L10, lineNumber=11)
+                BlockToken(2)
+                JumpToken(L19, opocde=167)
+                LabelToken(L13, lineNumber=14)
+                BlockToken(2)
+                JumpToken(L19, opocde=167)
+                LabelToken(L16, lineNumber=17)
+                BlockToken(2)
+                LabelToken(L19)
+                BlockToken(2)
+                JumpToken(L22, opocde=153)
+                BlockToken(1)
+                LabelToken(L20)
+                JumpToken(L22, opocde=167)
+                LabelToken(L21, lineNumber=8)
+                BlockToken(3)
+                LabelToken(L22, lineNumber=21)
+                BlockToken(2)
+                EndRestartGroup()
+    
+                ReplaceGroup (group=ComposeGroupKey(key=771188013)) {
+                    StartReplaceGroup(key=ComposeGroupKey(key=771188013))
+                    LabelToken(L11, lineNumber=12)
+                    BlockToken(23)
+                    LabelToken(L12, lineNumber=11)
+                    BlockToken(1)
+                    EndReplaceGroup()
+                }
+    
+                ReplaceGroup (group=ComposeGroupKey(key=771239690)) {
+                    StartReplaceGroup(key=ComposeGroupKey(key=771239690))
+                    LabelToken(L14, lineNumber=15)
+                    BlockToken(23)
+                    LabelToken(L15, lineNumber=14)
+                    BlockToken(1)
+                    EndReplaceGroup()
+                }
+    
+                ReplaceGroup (group=ComposeGroupKey(key=771296296)) {
+                    StartReplaceGroup(key=ComposeGroupKey(key=771296296))
+                    LabelToken(L17, lineNumber=18)
+                    BlockToken(23)
+                    LabelToken(L18, lineNumber=17)
+                    BlockToken(1)
+                    EndReplaceGroup()
+                }
+            }
+        }
+    }
+    
+    fun value (Landroidx/compose/runtime/Composer;I)Ljava/lang/Integer; {
+        Method (group=ComposeGroupKey(key=1944819582)) {
+            LabelToken(L0)
+            BlockToken(1)
+            JumpToken(L1, opocde=153)
+            BlockToken(5)
+            LabelToken(L1)
+            BlockToken(2)
+            JumpToken(L2, opocde=153)
+            BlockToken(1)
+            LabelToken(L2)
+            BlockToken(3)
+            LabelToken(L3, lineNumber=5)
+            ReturnToken(returnInsn=176)
+        }
+    }
+}

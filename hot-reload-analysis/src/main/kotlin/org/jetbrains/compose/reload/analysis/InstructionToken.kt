@@ -9,6 +9,7 @@ import org.jetbrains.compose.reload.analysis.InstructionToken.EndReplaceGroup
 import org.jetbrains.compose.reload.analysis.InstructionToken.ReturnToken
 import org.jetbrains.compose.reload.analysis.InstructionToken.StartReplaceGroup
 import org.jetbrains.compose.reload.analysis.InstructionToken.StartRestartGroup
+import org.jetbrains.compose.reload.analysis.InstructionToken.SwitchToken
 import org.jetbrains.compose.reload.analysis.InstructionTokenizer.TokenizerContext
 import org.jetbrains.compose.reload.core.Either
 import org.jetbrains.compose.reload.core.Failure
@@ -22,7 +23,9 @@ import org.objectweb.asm.tree.JumpInsnNode
 import org.objectweb.asm.tree.LabelNode
 import org.objectweb.asm.tree.LdcInsnNode
 import org.objectweb.asm.tree.LineNumberNode
+import org.objectweb.asm.tree.LookupSwitchInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
+import org.objectweb.asm.tree.TableSwitchInsnNode
 import org.objectweb.asm.tree.VarInsnNode
 
 sealed class InstructionToken {
@@ -147,6 +150,45 @@ sealed class InstructionToken {
             return "BlockToken(${instructions.size})"
         }
     }
+
+    data class SwitchToken(
+        val instruction: AbstractInsnNode,
+    ) : InstructionToken() {
+        override val instructions = listOf(instruction)
+
+        init {
+            assert(instruction is LookupSwitchInsnNode || instruction is TableSwitchInsnNode) {
+                "SwitchToken only supports LookupSwitchInsnNode and TableSwitchInsnNode"
+            }
+        }
+
+        val keys: List<Int>
+            get() = when (instruction) {
+                is LookupSwitchInsnNode -> instruction.keys
+                is TableSwitchInsnNode -> (instruction.min..instruction.max).toList()
+                else -> error("Unexpected instruction type: ${instruction.javaClass.name}")
+            }
+
+        val branches: List<LabelNode>
+            get() = when (instruction) {
+                is LookupSwitchInsnNode -> instruction.labels
+                is TableSwitchInsnNode -> instruction.labels
+                else -> error("Unexpected instruction type: ${instruction.javaClass.name}")
+            }
+
+        val default: LabelNode
+            get() = when (instruction) {
+                is LookupSwitchInsnNode -> instruction.dflt
+                is TableSwitchInsnNode -> instruction.dflt
+                else -> error("Unexpected instruction type: ${instruction.javaClass.name}")
+            }
+
+        override fun toString(): String = buildString {
+            append("SwitchToken(instruction=${instruction.opcode}, ")
+            append(keys.zip(branches) { key, branch -> "$key -> ${branch.label}" })
+            append(", default=${default.label})")
+        }
+    }
 }
 
 internal sealed class InstructionTokenizer {
@@ -221,6 +263,7 @@ private val priorityTokenizer by lazy {
     CompositeInstructionTokenizer(
         LabelTokenizer,
         JumpTokenizer,
+        SwitchTokenizer,
         ReturnTokenizer,
         CurrentMarkerTokenizer,
         EndToMarkerTokenizer,
@@ -255,6 +298,14 @@ private val JumpTokenizer = SingleInstructionTokenizer { instruction ->
     if (instruction is JumpInsnNode) {
         InstructionToken.JumpToken(instruction)
     } else null
+}
+
+private val SwitchTokenizer = SingleInstructionTokenizer { instruction ->
+    when (instruction) {
+        is LookupSwitchInsnNode -> SwitchToken(instruction)
+        is TableSwitchInsnNode -> SwitchToken(instruction)
+        else -> null
+    }
 }
 
 private val ReturnTokenizer = SingleInstructionTokenizer { instruction ->

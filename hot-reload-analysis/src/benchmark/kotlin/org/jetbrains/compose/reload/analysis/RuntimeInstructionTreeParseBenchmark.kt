@@ -43,9 +43,45 @@ open class RuntimeInstructionTreeParseBenchmark {
     @Param("1", "5", "10", "20")
     var depth = 0
 
+    @Param("if", "switch", "mixed")
+    var mode = ""
+
     lateinit var workingDir: Path
 
     lateinit var baselineBytecode: Map<String, ByteArray>
+
+    fun generateSwitchCombo(depth: Int, index: Int): String = """
+                when (staticField$index) {
+                    0 -> Text("Hello")
+                    10 -> {
+                        Text("Hello " + res)
+                        ${if (depth > 0) generateBaseCombo(depth - 1, index) else ""}
+                    }
+                    else -> {
+                        Text("Hello else")
+                    }
+                }
+            """.trimIndent()
+
+    fun generateIfCombo(depth: Int, index: Int): String = """
+                if(staticField$index > 0) {
+                    Text("Hello")
+                } else {
+                    if(res.length > $depth) {
+                        Text("Hello " + res)
+                        ${if (depth > 0) generateBaseCombo(depth - 1, index) else ""}
+                    }
+                    
+                    Text("Hello else")
+                }
+            """.trimIndent()
+
+    fun generateBaseCombo(depth: Int, index: Int): String = when (mode) {
+        "switch" -> generateSwitchCombo(depth, index)
+        "if" -> generateIfCombo(depth, index)
+        "mixed" -> if (depth % 2 == 0) generateSwitchCombo(depth, index) else generateIfCombo(depth, index)
+        else -> error("Unknown mode: $mode")
+    }
 
     @Setup
     fun setup() {
@@ -55,19 +91,6 @@ open class RuntimeInstructionTreeParseBenchmark {
 
         fun generateSource(index: Int, stringLiteral: String): String {
             val logIndex = log2(index.toFloat()).roundToInt()
-
-            fun generateIfCombo(depth: Int, index: Int): String = """
-                if(staticField$index > 0) {
-                    Text("Hello")
-                } else {
-                    if(res.length > $depth) {
-                        Text("Hello " + res)
-                        ${if (depth > 0) generateIfCombo(depth - 1, index) else ""}
-                    }
-                    
-                    Text("Hello else")
-                }
-            """.trimIndent()
 
             return """
                     import androidx.compose.runtime.*
@@ -81,7 +104,7 @@ open class RuntimeInstructionTreeParseBenchmark {
                     @Composable
                     fun Widget$index() {
                         val res = helper$index()
-                        ${generateIfCombo(depth, index)}
+                        ${generateBaseCombo(depth, index)}
                     }
                 """.trimIndent().replace("%", "$")
         }

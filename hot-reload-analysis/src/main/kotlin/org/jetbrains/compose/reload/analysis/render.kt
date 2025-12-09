@@ -19,8 +19,10 @@ import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.JumpInsnNode
 import org.objectweb.asm.tree.LabelNode
 import org.objectweb.asm.tree.LdcInsnNode
+import org.objectweb.asm.tree.LookupSwitchInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
+import org.objectweb.asm.tree.TableSwitchInsnNode
 
 @InternalHotReloadApi
 fun ApplicationInfo.render(): String = buildString {
@@ -127,11 +129,25 @@ private fun MethodNode.indexOfLabel(label: Label): Int {
     return instructions.filterIsInstance<LabelNode>().indexOfFirst { node -> node.label == label }
 }
 
-private fun MethodNode.render(token: InstructionToken): String {
-    return when (token) {
-        is InstructionToken.LabelToken -> "LabelToken(L${indexOfLabel(token.labelInsn.label)}${token.lineNumberInsn?.run { ", lineNumber=${line}"}.orEmpty()})"
-        is InstructionToken.JumpToken -> "JumpToken(L${indexOfLabel(token.jumpInsn.label.label)}, opocde=${token.jumpInsn.opcode})"
-        else -> token.toString()
+private fun MethodNode.render(token: InstructionToken): String = buildString {
+    when (token) {
+        is InstructionToken.LabelToken -> {
+            append("LabelToken(L")
+            append(indexOfLabel(token.labelInsn.label))
+            token.lineNumberInsn?.run { append(", lineNumber=${line}") }
+            append(")")
+        }
+        is InstructionToken.JumpToken -> {
+            append("JumpToken(L")
+            append(indexOfLabel(token.jumpInsn.label.label))
+            append(", opocde=${token.jumpInsn.opcode})")
+        }
+        is InstructionToken.SwitchToken -> {
+            append("SwitchToken(")
+            append(token.keys.zip(token.branches) { key, branch -> "$key -> L${indexOfLabel(branch.label)}" })
+            append(", default=L${indexOfLabel(token.default.label)})")
+        }
+        else -> append(token)
     }
 }
 
@@ -142,6 +158,16 @@ private fun MethodNode.render(node: AbstractInsnNode): String {
         is LabelNode -> "LabelNode(L${indexOfLabel(node.label)})"
         is JumpInsnNode -> "JumpInsNode(L${indexOfLabel(node.label.label)})) " +
             "[${if (node.opcode == Opcodes.GOTO) "GOTO" else node.opcode}])"
+        is LookupSwitchInsnNode -> buildString {
+            append("LookupSwitchInsnNode(")
+            append(node.keys.zip(node.labels) { key, branch -> "$key -> L${indexOfLabel(branch.label)}" })
+            append(", default=L${indexOfLabel(node.dflt.label)})")
+        }
+        is TableSwitchInsnNode -> buildString {
+            append("TableSwitchInsnNode(")
+            append((node.min..node.max).zip(node.labels) { key, branch -> "$key -> L${indexOfLabel(branch.label)}" })
+            append(", default=L${indexOfLabel(node.dflt.label)})")
+        }
 
         else -> "${node.javaClass.simpleName} [${node.opcode}]"
     }

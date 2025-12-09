@@ -514,6 +514,21 @@ public final class org/jetbrains/compose/reload/analysis/InstructionToken$StartR
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class org/jetbrains/compose/reload/analysis/InstructionToken$SwitchToken : org/jetbrains/compose/reload/analysis/InstructionToken {
+	public fun <init> (Lorg/objectweb/asm/tree/AbstractInsnNode;)V
+	public final fun component1 ()Lorg/objectweb/asm/tree/AbstractInsnNode;
+	public final fun copy (Lorg/objectweb/asm/tree/AbstractInsnNode;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$SwitchToken;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/analysis/InstructionToken$SwitchToken;Lorg/objectweb/asm/tree/AbstractInsnNode;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/analysis/InstructionToken$SwitchToken;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBranches ()Ljava/util/List;
+	public final fun getDefault ()Lorg/objectweb/asm/tree/LabelNode;
+	public final fun getInstruction ()Lorg/objectweb/asm/tree/AbstractInsnNode;
+	public fun getInstructions ()Ljava/util/List;
+	public final fun getKeys ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class org/jetbrains/compose/reload/analysis/InstructionTree {
 	public synthetic fun <init> (Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;Lorg/jetbrains/compose/reload/analysis/ScopeType;Ljava/util/List;Ljava/util/List;Lorg/jetbrains/compose/reload/core/Failure;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-z2uEmV4 ()Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;

@@ -1,0 +1,17 @@
+import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+
+@Composable
+fun Foo(value: Int) {                                       	// Method (group=ComposeGroupKey(key=-643616831)),RestartGroup (group=ComposeGroupKey(key=-643616831))
+    when (value) {                                          	// RestartGroup (group=ComposeGroupKey(key=-643616831))
+        0 -> {                                              	// RestartGroup (group=ComposeGroupKey(key=-643616831)),ReplaceGroup (group=ComposeGroupKey(key=-1254948260))
+            Text("Hello")                                   	// ReplaceGroup (group=ComposeGroupKey(key=-1254948260))
+        }
+        10 -> {                                             	// RestartGroup (group=ComposeGroupKey(key=-643616831)),ReplaceGroup (group=ComposeGroupKey(key=-1254896583))
+            Text("Hello 10")                                	// ReplaceGroup (group=ComposeGroupKey(key=-1254896583))
+        }
+        else -> {                                           	// RestartGroup (group=ComposeGroupKey(key=-643616831)),ReplaceGroup (group=ComposeGroupKey(key=-1254839977))
+            Text("Hello else")                              	// ReplaceGroup (group=ComposeGroupKey(key=-1254839977))
+        }
+    }
+}                                                           	// RestartGroup (group=ComposeGroupKey(key=-643616831)),Method (group=ComposeGroupKey(key=-643616831))

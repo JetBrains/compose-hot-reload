@@ -1,0 +1,27 @@
+import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+
+@Composable
+fun Foo(a: Int, b: Int) {                                   	// Method (group=ComposeGroupKey(key=-1265930754)),RestartGroup (group=ComposeGroupKey(key=-1265930754))
+    when (a) {                                              	// RestartGroup (group=ComposeGroupKey(key=-1265930754))
+        0 -> {                                              	// RestartGroup (group=ComposeGroupKey(key=-1265930754)),ReplaceGroup (group=ComposeGroupKey(key=764788479))
+            Text("Hello")                                   	// ReplaceGroup (group=ComposeGroupKey(key=764788479))
+        }
+        10 -> Bar {                                         	// RestartGroup (group=ComposeGroupKey(key=-1265930754)),ReplaceGroup (group=ComposeGroupKey(key=-1083706308))
+            Text("B")                                       	// ReplaceGroup (group=ComposeGroupKey(key=-1083706308)),ReplaceGroup (group=ComposeGroupKey(key=861701996))
+            if(b > 0) return@Bar                            	// ReplaceGroup (group=ComposeGroupKey(key=861701996)),ReplaceGroup (group=ComposeGroupKey(key=-1083706308))
+            if(b > 10) return@Foo                           	// ReplaceGroup (group=ComposeGroupKey(key=861701996)),RestartGroup (group=ComposeGroupKey(key=-1265930754)),Method (group=ComposeGroupKey(key=-1265930754))
+            Text("C")                                       	// ReplaceGroup (group=ComposeGroupKey(key=861701996)),ReplaceGroup (group=ComposeGroupKey(key=-1083706308))
+        }                                                   	// ReplaceGroup (group=ComposeGroupKey(key=-1083706308))
+        else -> {                                           	// RestartGroup (group=ComposeGroupKey(key=-1265930754)),ReplaceGroup (group=ComposeGroupKey(key=764982074))
+            Text("Hello else")                              	// ReplaceGroup (group=ComposeGroupKey(key=764982074))
+        }
+    }
+}                                                           	// RestartGroup (group=ComposeGroupKey(key=-1265930754)),Method (group=ComposeGroupKey(key=-1265930754))
+
+@Composable
+inline fun Bar(content: @Composable () -> Unit) {
+    Text("Bar A")                                           	// Method (group=ComposeGroupKey(key=1571995832))
+    content()                                               	// Method (group=ComposeGroupKey(key=1571995832))
+    Text("Bar B")                                           	// Method (group=ComposeGroupKey(key=1571995832))
+}                                                           	// Method (group=ComposeGroupKey(key=1571995832))

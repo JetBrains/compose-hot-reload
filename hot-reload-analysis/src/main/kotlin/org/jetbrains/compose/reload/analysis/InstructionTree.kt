@@ -18,6 +18,7 @@ import org.jetbrains.compose.reload.analysis.InstructionToken.SourceInformationM
 import org.jetbrains.compose.reload.analysis.InstructionToken.SourceInformationMarkerStart
 import org.jetbrains.compose.reload.analysis.InstructionToken.StartReplaceGroup
 import org.jetbrains.compose.reload.analysis.InstructionToken.StartRestartGroup
+import org.jetbrains.compose.reload.analysis.InstructionToken.SwitchToken
 import org.jetbrains.compose.reload.core.Either
 import org.jetbrains.compose.reload.core.Failure
 import org.jetbrains.compose.reload.core.createLogger
@@ -119,6 +120,9 @@ private fun linearParseInstructionTree(
 ): Either<InstructionTree, Failure> {
     if (tokens.isEmpty()) return Failure("empty tokens").toRight()
 
+    val labels = tokens.withIndex().filter { it.value is LabelToken }.associate {
+        (it.value as LabelToken).labelInsn.label to it.index
+    }
     val token2Tree = MutableList<MutableTree?>(tokens.size + 1) { null }
     val root = MutableTree(
         group = methodNode.readFunctionKeyMetaAnnotation(),
@@ -186,9 +190,8 @@ private fun linearParseInstructionTree(
             is JumpToken -> {
                 currentNode.tokens += currentToken
 
-                val jumpIndex = tokens.indexOfFirst {
-                    it is LabelToken && it.labelInsn.label == currentToken.jumpInsn.label.label
-                }
+                val jumpIndex = labels[currentToken.jumpInsn.label.label]
+                    ?: return Failure("Jump target label ${currentToken.jumpInsn.label.label} not found").toRight()
 
                 /* Perform the forward jump; We don't care about backward jumps, because they are already handled */
                 if (jumpIndex > currentIndex) {
@@ -198,6 +201,23 @@ private fun linearParseInstructionTree(
                 /* Continue execution on path w/o jump */
                 if (currentToken.jumpInsn.opcode != Opcodes.GOTO) {
                     token2Tree.matchToken2Tree(nextIndex, currentNode)
+                }
+            }
+
+            is SwitchToken -> {
+                currentNode.tokens += currentToken
+
+                val branches = (currentToken.branches + currentToken.default).map {
+                    labels[it.label] ?: return Failure("Switch target label ${it.label} not found").toRight()
+                }
+                for (branchIndex in branches) {
+                    /* All 'switch' branches are expected to be forward */
+                    /* This is just a safety guard to prevent unexpected situations */
+                    if (branchIndex > currentIndex) {
+                        token2Tree.matchToken2Tree(branchIndex, currentNode)
+                    } else {
+                        logger.warn("Unexpected 'switch' backward jump at index $currentIndex")
+                    }
                 }
             }
 
@@ -224,7 +244,10 @@ private fun linearParseInstructionTree(
                         var parent = currentNode
                         do {
                             parent = parent.parent
-                                ?: return Failure("EndToMarkerToken(${currentToken.variableIndex}) is not matched in ${currentNode.type} scope").toRight()
+                                ?: return Failure(
+                                    "EndToMarkerToken(${currentToken.variableIndex}) " +
+                                        "is not matched in ${currentNode.type} scope"
+                                ).toRight()
                         } while (currentToken.variableIndex !in parent.markers)
                         token2Tree.matchToken2Tree(nextIndex, parent)
                     }

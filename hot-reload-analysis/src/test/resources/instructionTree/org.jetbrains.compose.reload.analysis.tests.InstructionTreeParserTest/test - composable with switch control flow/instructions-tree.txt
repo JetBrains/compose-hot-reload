@@ -1,0 +1,122 @@
+/* Code */
+import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+
+@Composable
+fun Foo(value: Int) {
+    when (value) {
+        0 -> {
+            Text("Hello")
+        }
+        10 -> {
+            Text("Hello 10")
+        }
+        else -> {
+            Text("Hello else")
+        }
+    }
+}
+
+ /* Tree */ 
+class TestKt {
+    fun Foo$lambda$0 (IILandroidx/compose/runtime/Composer;I)Lkotlin/Unit; {
+        Method (group=null) {
+            LabelToken(L0)
+            BlockToken(8)
+            ReturnToken(returnInsn=176)
+        }
+    }
+    
+    fun Foo (ILandroidx/compose/runtime/Composer;I)V {
+        Method (group=ComposeGroupKey(key=-643616831)) {
+            LabelToken(L0, lineNumber=5)
+            BlockToken(1)
+            BlockToken(1)
+            JumpToken(L20, opocde=198)
+            BlockToken(4)
+            JumpToken(L21, opocde=167)
+            LabelToken(L20)
+            BlockToken(2)
+            LabelToken(L21)
+            BlockToken(1)
+            ReturnToken(returnInsn=177)
+    
+            RestartGroup (group=ComposeGroupKey(key=-643616831)) {
+                StartRestartGroup(key=ComposeGroupKey(key=-643616831))
+                BlockToken(3)
+                LabelToken(L1)
+                BlockToken(3)
+                JumpToken(L4, opocde=154)
+                BlockToken(4)
+                JumpToken(L2, opocde=153)
+                BlockToken(1)
+                JumpToken(L3, opocde=167)
+                LabelToken(L2)
+                BlockToken(2)
+                LabelToken(L3)
+                BlockToken(3)
+                LabelToken(L4)
+                BlockToken(6)
+                JumpToken(L5, opocde=159)
+                BlockToken(1)
+                JumpToken(L6, opocde=167)
+                LabelToken(L5)
+                BlockToken(2)
+                LabelToken(L6)
+                BlockToken(5)
+                JumpToken(L18, opocde=153)
+                BlockToken(1)
+                JumpToken(L7, opocde=153)
+                BlockToken(5)
+                LabelToken(L7, lineNumber=6)
+                BlockToken(2)
+                SwitchToken([0 -> L8, 10 -> L11], default=L14)
+                LabelToken(L8, lineNumber=7)
+                BlockToken(2)
+                JumpToken(L17, opocde=167)
+                LabelToken(L11, lineNumber=10)
+                BlockToken(2)
+                JumpToken(L17, opocde=167)
+                LabelToken(L14, lineNumber=13)
+                BlockToken(2)
+                LabelToken(L17)
+                BlockToken(2)
+                JumpToken(L19, opocde=153)
+                BlockToken(1)
+                JumpToken(L19, opocde=167)
+                LabelToken(L18, lineNumber=5)
+                BlockToken(3)
+                LabelToken(L19, lineNumber=17)
+                BlockToken(2)
+                EndRestartGroup()
+    
+                ReplaceGroup (group=ComposeGroupKey(key=-1254948260)) {
+                    StartReplaceGroup(key=ComposeGroupKey(key=-1254948260))
+                    LabelToken(L9, lineNumber=8)
+                    BlockToken(23)
+                    LabelToken(L10, lineNumber=7)
+                    BlockToken(1)
+                    EndReplaceGroup()
+                }
+    
+                ReplaceGroup (group=ComposeGroupKey(key=-1254896583)) {
+                    StartReplaceGroup(key=ComposeGroupKey(key=-1254896583))
+                    LabelToken(L12, lineNumber=11)
+                    BlockToken(23)
+                    LabelToken(L13, lineNumber=10)
+                    BlockToken(1)
+                    EndReplaceGroup()
+                }
+    
+                ReplaceGroup (group=ComposeGroupKey(key=-1254839977)) {
+                    StartReplaceGroup(key=ComposeGroupKey(key=-1254839977))
+                    LabelToken(L15, lineNumber=14)
+                    BlockToken(23)
+                    LabelToken(L16, lineNumber=13)
+                    BlockToken(1)
+                    EndReplaceGroup()
+                }
+            }
+        }
+    }
+}
