@@ -113,7 +113,9 @@ internal class GradleRecompiler(
                     "--configuration-cache".takeIf { HotReloadEnvironment.gradleBuildOptimize },
                     "--configuration-cache-problems=warn".takeIf { HotReloadEnvironment.gradleBuildOptimize },
                     "--build-cache".takeIf { HotReloadEnvironment.gradleBuildOptimize },
-                    "--parallel".takeIf { HotReloadEnvironment.gradleBuildOptimize }
+                    "--parallel".takeIf { HotReloadEnvironment.gradleBuildOptimize },
+                    "-Pkotlin.internal.incremental.enableUnsafeOptimizationsForMultiplatform=true"
+                        .takeIf { HotReloadEnvironment.gradleBuildOptimize }
                 )
             )
         }
