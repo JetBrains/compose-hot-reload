@@ -31,12 +31,12 @@ private val externalReloadRequest = AtomicReference<ExternalReloadThreadState>(E
 private val transformLock = ReentrantLock()
 
 internal fun launchJdwpTracker(instrumentation: Instrumentation) {
-    instrumentation.addTransformer(JdwpTracker)
+    instrumentation.addTransformer(JdwpTracker(instrumentation))
     invokeBeforeHotReload { messageId -> localReloadRequest.set(messageId) }
     invokeAfterHotReload { messageId, result -> localReloadRequest.set(null) }
 }
 
-private object JdwpTracker : ClassFileTransformer {
+private class JdwpTracker(val instrumentation: Instrumentation) : ClassFileTransformer {
     override fun transform(
         module: Module?, loader: ClassLoader?, className: String?, classBeingRedefined: Class<*>?,
         protectionDomain: ProtectionDomain?, classfileBuffer: ByteArray?
@@ -69,7 +69,7 @@ private object JdwpTracker : ClassFileTransformer {
             val definition = ClassDefinition(classBeingRedefined, transformedCode)
 
             /* Issue a request to reload the UI */
-            issueExternalReloadRequest(ClassDefinition(classBeingRedefined, classfileBuffer))
+            issueExternalReloadRequest(ClassDefinition(classBeingRedefined, classfileBuffer), instrumentation)
 
             /* Return the transformed code as bytes */
             definition.definitionClassFile
@@ -88,7 +88,7 @@ private sealed class ExternalReloadThreadState {
     data class Pending(val definitions: List<ClassDefinition>) : ExternalReloadThreadState()
 }
 
-private fun issueExternalReloadRequest(definition: ClassDefinition) {
+private fun issueExternalReloadRequest(definition: ClassDefinition, instrumentation: Instrumentation) {
     val previousState = externalReloadRequest.getAndUpdate { state ->
         when (state) {
             is ExternalReloadThreadState.Idle -> ExternalReloadThreadState.Pending(listOf(definition))
@@ -123,7 +123,7 @@ private fun issueExternalReloadRequest(definition: ClassDefinition) {
             val redefined = Context().redefineApplicationInfo().get().getOrThrow()
             val reload = Reload(uuid, definitions = aggregate.definitions, redefined)
 
-            reinitializeStaticsIfNecessary(reload)
+            reinitializeStaticsIfNecessary(reload, instrumentation)
             executeAfterHotReloadListeners(uuid, reload.toLeft())
             logger.info("'external reload': Finished $uuid")
         }

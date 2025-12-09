@@ -5,6 +5,8 @@
 
 package tests
 
+import org.jetbrains.compose.reload.core.HotReloadProperty
+import org.jetbrains.compose.reload.core.StaticsReinitializeMode
 import org.jetbrains.compose.reload.test.HotReloadUnitTest
 import org.jetbrains.compose.reload.test.compileAndReload
 import kotlin.test.assertEquals
@@ -34,4 +36,34 @@ fun `test - change top level property`() {
     """.trimIndent()
     )
     assertEquals("bar", topLevelProperty)
+}
+
+private fun changeInitializer() {
+    assertEquals("foo", topLevelProperty2)
+    compileAndReload(
+        """
+        package tests
+        object StaticsObject {
+            val property = "bar"
+        }
+    """.trimIndent()
+    )
+}
+
+private fun setStaticsReinitializeMode(mode: StaticsReinitializeMode) {
+    System.setProperty(HotReloadProperty.StaticsReinitializeMode.key, mode.name)
+}
+
+@HotReloadUnitTest
+fun `test - change initializer of top level property (ChangedOnly mode)`() {
+    setStaticsReinitializeMode(StaticsReinitializeMode.ChangedOnly)
+    changeInitializer()
+    assertEquals("foo", topLevelProperty2)
+}
+
+@HotReloadUnitTest
+fun `test - change initializer of top level property (AllDirty mode)`() {
+    setStaticsReinitializeMode(StaticsReinitializeMode.AllDirty)
+    changeInitializer()
+    assertEquals("bar", topLevelProperty2)
 }

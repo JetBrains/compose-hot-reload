@@ -391,3 +391,16 @@ IsolatedProjectsEnabled:
   visibility: deprecated
   documentation: |
     Enables support for Gradle's incubating 'isolated projects' feature
+
+StaticsReinitializeMode:
+  key: compose.reload.staticsReinitializeMode
+  type: enum
+  enumClass: org.jetbrains.compose.reload.core.StaticsReinitializeMode
+  target: [ application ]
+  default: "ChangedOnly"
+  visibility: experimental
+  documentation: |
+    Sets the mode for statics re-initialization. 
+    When "AllDirty" is set, all static initializers that are recognized as dirty (affected by changes) 
+    will be re-invoked on reload.
+    When "ChangedOnly" is set, only statics of changed classes will be re-initialized.

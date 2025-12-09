@@ -118,7 +118,7 @@ internal fun Context.reload(
     instrumentation.redefineClasses(*definitions.toTypedArray())
     return redefineApplicationInfo().get().mapLeft { redefinition ->
         val reload = Reload(reloadRequestId, definitions, redefinition)
-        reinitializeStaticsIfNecessary(reload)
+        reinitializeStaticsIfNecessary(reload, instrumentation)
         cleanResourceCacheIfNecessary()
         reload
     }
