@@ -382,3 +382,12 @@ IsHotReloadActive:
   documentation: |
     Will be set to 'true' if the application is launched with Hot Reload and therefore can be used
     to detect if hot reload is 'active'
+
+IsolatedProjectsEnabled:
+  key: compose.reload.isolatedProjectsEnabled
+  type: boolean
+  target: [ application, build, devtools ]
+  default: "false"
+  visibility: deprecated
+  documentation: |
+    Enables support for Gradle's incubating 'isolated projects' feature
