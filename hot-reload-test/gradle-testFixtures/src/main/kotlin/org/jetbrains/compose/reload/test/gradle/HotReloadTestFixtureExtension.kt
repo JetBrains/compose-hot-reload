@@ -22,6 +22,7 @@ import java.nio.file.Files
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
 
 internal class HotReloadTestFixtureExtension(
     private val context: HotReloadTestInvocationContext
@@ -106,6 +107,9 @@ internal class HotReloadTestFixtureExtension(
         findAnnotation<CheckScreenshot>()?.let { checkScreenshot ->
             extras[CheckScreenshot.key] = checkScreenshot
         }
+
+        // Save the shutdown log of the application
+        extras[SaveExecutionLogs.key] = SaveExecutionLogs(hotReloadLogsDirectory)
 
         return HotReloadTestFixture(
             testClassName = testClass.get().name,

@@ -26,8 +26,11 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessag
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.toMessage
+import org.jetbrains.kotlin.tooling.core.Extras
+import org.jetbrains.kotlin.tooling.core.extrasKeyOf
 import org.junit.jupiter.api.extension.ExtensionContext
 import java.io.BufferedWriter
+import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.Path
 import kotlin.io.path.bufferedWriter
@@ -56,9 +59,7 @@ internal fun ExtensionContext.startOrchestrationTestLogging(server: Orchestratio
     val context = hotReloadTestInvocationContextOrThrow
     val job = currentCoroutineContext().job
 
-    val outputDirectory = Path("build/logs/${testClass.name.asFileName()}")
-        .resolve(testMethod.name.asFileName())
-        .resolve(context.getDisplayName().asFileName().replace("(", "").replace(")", ""))
+    val outputDirectory = hotReloadLogsDirectory
 
     /* Clean previous logs if present */
     if (outputDirectory.exists()) outputDirectory.deleteRecursively()
@@ -151,5 +152,17 @@ public fun OrchestrationHandle.startLoggerDispatch(): Logger.Dispatch {
 
     return Logger.Dispatch { log ->
         queue.add(log)
+    }
+}
+
+internal val ExtensionContext.hotReloadLogsDirectory: Path get() = Path("build/logs/${requiredTestClass.name.asFileName()}")
+    .resolve(requiredTestMethod.name.asFileName())
+    .resolve(displayName.asFileName().replace("(", "").replace(")", ""))
+
+internal data class SaveExecutionLogs(
+    val outputDir: Path,
+) {
+    companion object {
+        val key: Extras.Key<SaveExecutionLogs> = extrasKeyOf()
     }
 }

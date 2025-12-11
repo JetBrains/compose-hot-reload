@@ -26,7 +26,6 @@ import org.jetbrains.compose.reload.test.gradle.TestedProjectMode
 import org.jetbrains.compose.reload.test.gradle.assertSuccessful
 import org.jetbrains.compose.reload.test.gradle.buildFlow
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
-import org.jetbrains.compose.reload.utils.Deflake
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
 import org.jetbrains.compose.reload.utils.HostIntegrationTest
 import org.jetbrains.compose.reload.utils.QuickTest
@@ -56,7 +55,6 @@ class GradleRecompilerProcessTest {
 
     @HotReloadTest
     @TestedLaunchMode(ApplicationLaunchMode.GradleBlocking)
-    @Deflake(100)
     fun `test - gradle recompiler process is stopped - ShutdownRequest`(fixture: HotReloadTestFixture) =
         fixture.runTest {
             val processes = startApplicationAndAwaitGradleProcess()
@@ -75,7 +73,6 @@ class GradleRecompilerProcessTest {
 
     @HotReloadTest
     @TestedLaunchMode(ApplicationLaunchMode.Detached)
-    @Deflake(100)
     fun `test - gradle recompiler process is stopped - application destroyed forcefully`(
         fixture: HotReloadTestFixture
     ) = fixture.runTest {

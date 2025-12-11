@@ -40,13 +40,18 @@ import org.jetbrains.compose.reload.orchestration.asFlow
 import org.jetbrains.compose.reload.orchestration.sendAsync
 import org.jetbrains.compose.reload.test.core.AppClasspath
 import org.jetbrains.kotlin.tooling.core.Extras
+import java.nio.file.Path
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.copyTo
 import kotlin.io.path.deleteRecursively
+import kotlin.io.path.name
+import kotlin.io.path.relativeTo
+import kotlin.io.path.walk
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -198,6 +203,11 @@ internal constructor(
         testScope.cancel()
         daemonTestScope.cancel()
 
+        /* Save the necessary execution logs before cleaning up the projectDir */
+        extras[SaveExecutionLogs.key]?.let {
+            saveExecutionLogs(it.outputDir)
+        }
+
         /* Use multiple attempts to delete the projectDir */
         var cleanupAttempts = 0
         while (true) {
@@ -216,6 +226,23 @@ internal constructor(
             resources.clear()
         }
     }
+
+    private fun saveExecutionLogs(outputDir: Path) = runCatching {
+            projectDir.path.walk()
+                .filter { it.name == "shutdown.log" }
+                .groupBy { it.name }
+                .forEach { (name, files) ->
+                    when (files.size) {
+                        1 -> files.single().copyTo(outputDir.resolve(name))
+                        else -> files.forEach {
+                            val compressedName = it.relativeTo(projectDir.path).toString().replace('/', '_')
+                            it.copyTo(outputDir.resolve(compressedName))
+                        }
+                    }
+                }
+        }.getOrElse {
+            logger.error("Failed saving execution logs", it)
+        }
 }
 
 private class CriticalExceptionCancellation(
