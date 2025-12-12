@@ -17,24 +17,24 @@ interface MutableApplicationInfo : ApplicationInfo {
 fun MutableApplicationInfo(): MutableApplicationInfo = MutableApplicationInfoImpl()
 
 private class MutableApplicationInfoImpl(
-    override val classIndex: MutableMap<ClassId, ClassInfo> = mutableMapOf(),
-    override val methodIndex: MutableMap<MethodId, MethodInfo> = mutableMapOf(),
-    override val fieldIndex: MutableMap<FieldId, FieldInfo> = mutableMapOf(),
-    override val groupIndex: MutableMap<ComposeGroupKey?, MutableSet<ScopeInfo>> = mutableMapOf(),
-    override val superIndex: MutableMap<ClassId, MutableSet<ClassId>> = mutableMapOf(),
-    override val superIndexInverse: MutableMap<ClassId, MutableSet<ClassId>> = mutableMapOf(),
-    override val dependencyIndex: MutableMap<MemberId, MutableSet<ScopeInfo>> = mutableMapOf()
+    override val classIndex: MutableMap<ClassId, ClassInfo> = hashMapOf(),
+    override val methodIndex: MutableMap<MethodId, MethodInfo> = hashMapOf(),
+    override val fieldIndex: MutableMap<FieldId, FieldInfo> = hashMapOf(),
+    override val groupIndex: MutableMap<ComposeGroupKey?, MutableSet<ScopeInfo>> = hashMapOf(),
+    override val superIndex: MutableMap<ClassId, MutableSet<ClassId>> = hashMapOf(),
+    override val superIndexInverse: MutableMap<ClassId, MutableSet<ClassId>> = hashMapOf(),
+    override val dependencyIndex: MutableMap<MemberId, MutableSet<ScopeInfo>> = hashMapOf()
 ) : MutableApplicationInfo {
 
     override fun copy(): MutableApplicationInfo {
         return MutableApplicationInfoImpl(
-            classIndex = classIndex.toMutableMap(),
-            methodIndex = methodIndex.toMutableMap(),
-            fieldIndex = fieldIndex.toMutableMap(),
-            groupIndex = groupIndex.toMutableMap(),
-            superIndex = superIndex.toMutableMap(),
-            superIndexInverse = superIndexInverse.toMutableMap(),
-            dependencyIndex = dependencyIndex.toMutableMap(),
+            classIndex = classIndex.toHashMap(),
+            methodIndex = methodIndex.toHashMap(),
+            fieldIndex = fieldIndex.toHashMap(),
+            groupIndex = groupIndex.toHashMap(),
+            superIndex = superIndex.toHashMap(),
+            superIndexInverse = superIndexInverse.toHashMap(),
+            dependencyIndex = dependencyIndex.toHashMap(),
         )
     }
 
@@ -59,24 +59,25 @@ private class MutableApplicationInfoImpl(
 
         /* Fill groupIndex */
         allScopes.forEach { scope ->
-            groupIndex.getOrPut(scope.group) { mutableSetOf() }.add(scope)
+            if (scope.group == null) return@forEach
+            groupIndex.getOrPut(scope.group) { hashSetOf() }.add(scope)
         }
 
         /* Fill superIndex & superIndexInverse */
-        val superClassifiers = listOfNotNull(info.superClass, *info.superInterfaces.toTypedArray()).toMutableSet()
+        val superClassifiers = listOfNotNull(info.superClass, *info.superInterfaces.toTypedArray()).toHashSet()
         superIndex[info.classId] = superClassifiers
         superClassifiers.forEach { superClassifier ->
-            superIndexInverse.getOrPut(superClassifier) { mutableSetOf() }.add(info.classId)
+            superIndexInverse.getOrPut(superClassifier) { hashSetOf() }.add(info.classId)
         }
 
         /* Fill dependency index */
         allScopes.forEach { scope ->
-            scope.methodDependencies.forEach { methodId ->
-                dependencyIndex.getOrPut(methodId) { mutableSetOf() }.add(scope)
+            scope.methodDependenciesList.forEach { methodId ->
+                dependencyIndex.getOrPut(methodId) { hashSetOf() }.add(scope)
             }
 
-            scope.fieldDependencies.forEach { fieldId ->
-                dependencyIndex.getOrPut(fieldId) { mutableSetOf() }.add(scope)
+            scope.fieldDependenciesList.forEach { fieldId ->
+                dependencyIndex.getOrPut(fieldId) { hashSetOf() }.add(scope)
             }
         }
     }
@@ -101,14 +102,14 @@ private class MutableApplicationInfoImpl(
                 if (isEmpty()) groupIndex.remove(scope.group)
             }
 
-            scope.methodDependencies.forEach { methodId ->
+            scope.methodDependenciesList.forEach { methodId ->
                 dependencyIndex[methodId]?.apply {
                     remove(scope)
                     if (isEmpty()) dependencyIndex.remove(methodId)
                 }
             }
 
-            scope.fieldDependencies.forEach { fieldId ->
+            scope.fieldDependenciesList.forEach { fieldId ->
                 dependencyIndex[fieldId]?.apply {
                     remove(scope)
                     if (isEmpty()) dependencyIndex.remove(fieldId)

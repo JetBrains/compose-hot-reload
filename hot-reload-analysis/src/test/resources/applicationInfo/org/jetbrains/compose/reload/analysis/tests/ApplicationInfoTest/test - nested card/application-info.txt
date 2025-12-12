@@ -29,6 +29,26 @@ ComposableSingletons$FooKt {
     val lambda$1969856002: Lkotlin/jvm/functions/Function3;
     val lambda$904522804: Lkotlin/jvm/functions/Function3;
 
+    <clinit> {
+        desc: ()V
+        type: Regular
+        Method {
+            key: null
+            codeHash: 2144001912
+            methodDependencies: [
+                ComposableSingletons$FooKt.<init> ()V
+            ]
+            fieldDependencies: [
+                ComposableSingletons$FooKt.lambda$1969856002 Lkotlin/jvm/functions/Function3;,
+                ComposableSingletons$FooKt$lambda$904522804$1.INSTANCE LComposableSingletons$FooKt$lambda$904522804$1;,
+                ComposableSingletons$FooKt.lambda$904522804 Lkotlin/jvm/functions/Function3;,
+                ComposableSingletons$FooKt.INSTANCE LComposableSingletons$FooKt;,
+                ComposableSingletons$FooKt$lambda$1969856002$1.INSTANCE LComposableSingletons$FooKt$lambda$1969856002$1;
+            ]
+        }
+    }
+    
+    
     <init> {
         desc: ()V
         type: Regular
@@ -67,31 +87,27 @@ ComposableSingletons$FooKt {
             ]
         }
     }
-    
-    
-    <clinit> {
-        desc: ()V
-        type: Regular
-        Method {
-            key: null
-            codeHash: 2144001912
-            methodDependencies: [
-                ComposableSingletons$FooKt.<init> ()V
-            ]
-            fieldDependencies: [
-                ComposableSingletons$FooKt.INSTANCE LComposableSingletons$FooKt;,
-                ComposableSingletons$FooKt$lambda$1969856002$1.INSTANCE LComposableSingletons$FooKt$lambda$1969856002$1;,
-                ComposableSingletons$FooKt.lambda$1969856002 Lkotlin/jvm/functions/Function3;,
-                ComposableSingletons$FooKt$lambda$904522804$1.INSTANCE LComposableSingletons$FooKt$lambda$904522804$1;,
-                ComposableSingletons$FooKt.lambda$904522804 Lkotlin/jvm/functions/Function3;
-            ]
-        }
-    }
 }
 
 ComposableSingletons$FooKt$lambda$1969856002$1 {
     val INSTANCE: LComposableSingletons$FooKt$lambda$1969856002$1;
 
+    <clinit> {
+        desc: ()V
+        type: Regular
+        Method {
+            key: null
+            codeHash: 2164608135
+            methodDependencies: [
+                ComposableSingletons$FooKt$lambda$1969856002$1.<init> ()V
+            ]
+            fieldDependencies: [
+                ComposableSingletons$FooKt$lambda$1969856002$1.INSTANCE LComposableSingletons$FooKt$lambda$1969856002$1;
+            ]
+        }
+    }
+    
+    
     <init> {
         desc: ()V
         type: Regular
@@ -128,27 +144,27 @@ ComposableSingletons$FooKt$lambda$1969856002$1 {
             fieldDependencies: []
         }
     }
-    
-    
-    <clinit> {
-        desc: ()V
-        type: Regular
-        Method {
-            key: null
-            codeHash: 2164608135
-            methodDependencies: [
-                ComposableSingletons$FooKt$lambda$1969856002$1.<init> ()V
-            ]
-            fieldDependencies: [
-                ComposableSingletons$FooKt$lambda$1969856002$1.INSTANCE LComposableSingletons$FooKt$lambda$1969856002$1;
-            ]
-        }
-    }
 }
 
 ComposableSingletons$FooKt$lambda$904522804$1 {
     val INSTANCE: LComposableSingletons$FooKt$lambda$904522804$1;
 
+    <clinit> {
+        desc: ()V
+        type: Regular
+        Method {
+            key: null
+            codeHash: 2886943498
+            methodDependencies: [
+                ComposableSingletons$FooKt$lambda$904522804$1.<init> ()V
+            ]
+            fieldDependencies: [
+                ComposableSingletons$FooKt$lambda$904522804$1.INSTANCE LComposableSingletons$FooKt$lambda$904522804$1;
+            ]
+        }
+    }
+    
+    
     <init> {
         desc: ()V
         type: Regular
@@ -187,22 +203,6 @@ ComposableSingletons$FooKt$lambda$904522804$1 {
                 ComposableSingletons$FooKt$lambda$904522804$1.invoke (Landroidx/compose/foundation/layout/ColumnScope;Landroidx/compose/runtime/Composer;I)V
             ]
             fieldDependencies: []
-        }
-    }
-    
-    
-    <clinit> {
-        desc: ()V
-        type: Regular
-        Method {
-            key: null
-            codeHash: 2886943498
-            methodDependencies: [
-                ComposableSingletons$FooKt$lambda$904522804$1.<init> ()V
-            ]
-            fieldDependencies: [
-                ComposableSingletons$FooKt$lambda$904522804$1.INSTANCE LComposableSingletons$FooKt$lambda$904522804$1;
-            ]
         }
     }
 }

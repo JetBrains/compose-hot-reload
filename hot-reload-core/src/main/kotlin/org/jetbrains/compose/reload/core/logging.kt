@@ -115,6 +115,13 @@ public inline fun Logger.debug(message: () -> String) {
 }
 
 @InternalHotReloadApi
+public inline fun Logger.info(message: () -> String) {
+    if (level <= Level.Info) {
+        log(Level.Info, message())
+    }
+}
+
+@InternalHotReloadApi
 public fun Logger.debug(message: String) {
     log(Level.Debug, message)
 }

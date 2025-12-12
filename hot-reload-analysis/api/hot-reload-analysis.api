@@ -662,8 +662,8 @@ public final class org/jetbrains/compose/reload/analysis/ScopeInfo {
 	public final fun component2 ()Lorg/jetbrains/compose/reload/analysis/ScopeType;
 	public final fun component3-hC-z0cA ()J
 	public final fun component4-z2uEmV4 ()Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;
-	public final fun component5 ()Ljava/util/Set;
-	public final fun component6 ()Ljava/util/Set;
+	public final fun component5 ()Ljava/util/List;
+	public final fun component6 ()Ljava/util/List;
 	public final fun component7 ()Ljava/util/List;
 	public final fun component8 ()Lorg/jetbrains/compose/reload/core/Context;
 	public final fun component9 ()Lorg/jetbrains/compose/reload/analysis/ScopeInfo$SourceLocation;
@@ -671,8 +671,10 @@ public final class org/jetbrains/compose/reload/analysis/ScopeInfo {
 	public final fun getChildren ()Ljava/util/List;
 	public final fun getExtras ()Lorg/jetbrains/compose/reload/core/Context;
 	public final fun getFieldDependencies ()Ljava/util/Set;
+	public final fun getFieldDependenciesList ()Ljava/util/List;
 	public final fun getGroup-z2uEmV4 ()Lorg/jetbrains/compose/reload/analysis/ComposeGroupKey;
 	public final fun getMethodDependencies ()Ljava/util/Set;
+	public final fun getMethodDependenciesList ()Ljava/util/List;
 	public final fun getMethodId ()Lorg/jetbrains/compose/reload/analysis/MethodId;
 	public final fun getScopeHash-hC-z0cA ()J
 	public final fun getScopeType ()Lorg/jetbrains/compose/reload/analysis/ScopeType;

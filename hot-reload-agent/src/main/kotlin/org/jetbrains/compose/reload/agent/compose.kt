@@ -71,7 +71,7 @@ private fun launchComposeGroupInvalidation() {
             .filter { scope -> scope.group != null }
             .groupBy { it.group }
 
-        invalidations.forEach { group, scopes ->
+        invalidations.forEach { (group, scopes) ->
             if (group == null) return@forEach
 
             val methods = scopes.map { it.methodId }.toSet()

@@ -19,12 +19,12 @@ fun Foo() {
 FooKt {
     val x: I
 
-    getX {
-        desc: ()I
+    <clinit> {
+        desc: ()V
         type: Regular
         Method {
             key: null
-            codeHash: 3555685996
+            codeHash: 2373262093
             methodDependencies: []
             fieldDependencies: [
                 FooKt.x I
@@ -77,12 +77,12 @@ FooKt {
     }
     
     
-    <clinit> {
-        desc: ()V
+    getX {
+        desc: ()I
         type: Regular
         Method {
             key: null
-            codeHash: 2373262093
+            codeHash: 3555685996
             methodDependencies: []
             fieldDependencies: [
                 FooKt.x I

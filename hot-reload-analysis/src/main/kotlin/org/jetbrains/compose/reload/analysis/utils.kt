@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.analysis
 
 import java.nio.ByteBuffer
+import java.util.Collections.singletonMap
 import java.util.zip.Checksum
 
 internal fun Checksum.updateBoolean(value: Boolean) {
@@ -36,3 +37,11 @@ internal fun Checksum.updateString(value: String) {
     updateInt(value.length)
     update(value.encodeToByteArray())
 }
+
+internal fun <K, V> HashMap<K, V>.toReadOnlyHashMap(): Map<K, V> = when (size) {
+    0 -> emptyMap()
+    1 -> entries.first().let { singletonMap(it.key, it.value) }
+    else -> this
+}
+
+internal fun <K, V> Map<K, V>.toHashMap(): HashMap<K, V> = HashMap(this)

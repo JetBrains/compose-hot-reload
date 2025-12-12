@@ -37,12 +37,21 @@ fun ClassInfo.render(): String = buildString {
     appendLine("$classId {")
 
     if (fields.isNotEmpty()) {
-        appendLine(fields.values.joinToString("\n") { it.render() }.indent())
+        appendLine(
+            fields.values
+                .sortedWith { f1, f2 -> f1.fieldId.compareTo(f2.fieldId) }
+                .joinToString("\n") { it.render() }
+                .indent()
+        )
         appendLine()
     }
 
     withIndent {
-        appendLine(methods.values.joinToString("\n\n") { it.render() })
+        appendLine(
+            methods.values
+                .sortedWith { m1, m2 -> m1.methodId.compareTo(m2.methodId) }
+                .joinToString("\n\n") { it.render() }
+        )
     }
 
 
@@ -70,22 +79,22 @@ internal fun ScopeInfo.render(): String = buildString {
     withIndent {
         appendLine("key: ${group?.key}")
         appendLine("codeHash: ${scopeHash.value}")
-        if (methodDependencies.isEmpty()) {
+        if (methodDependenciesList.isEmpty()) {
             appendLine("methodDependencies: []")
         } else {
             appendLine("methodDependencies: [")
             withIndent {
-                append(methodDependencies.joinToString(",\n"))
+                append(methodDependenciesList.joinToString(",\n"))
             }
             appendLine("]")
         }
 
-        if (fieldDependencies.isEmpty()) {
+        if (fieldDependenciesList.isEmpty()) {
             appendLine("fieldDependencies: []")
         } else {
             appendLine("fieldDependencies: [")
             withIndent {
-                append(fieldDependencies.joinToString(",\n"))
+                append(fieldDependenciesList.joinToString(",\n"))
             }
             appendLine("]")
         }
@@ -221,3 +230,11 @@ internal fun StringBuilder.withIndent(builder: StringBuilder.() -> Unit) {
 }
 
 internal fun String.indent(n: Int = 1) = prependIndent("    ".repeat(n))
+
+internal fun FieldId.compareTo(other: FieldId): Int {
+    return compareValuesBy(this, other, { it.fieldName }, { it.fieldDescriptor })
+}
+
+internal fun MethodId.compareTo(other: MethodId): Int {
+    return compareValuesBy(this, other, { it.methodName }, { it.methodDescriptor })
+}

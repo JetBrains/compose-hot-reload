@@ -25,6 +25,24 @@ ComposableSingletons$FooKt {
     val INSTANCE: LComposableSingletons$FooKt;
     val lambda$-1435676418: Lkotlin/jvm/functions/Function2;
 
+    <clinit> {
+        desc: ()V
+        type: Regular
+        Method {
+            key: null
+            codeHash: 2631766068
+            methodDependencies: [
+                ComposableSingletons$FooKt.<init> ()V
+            ]
+            fieldDependencies: [
+                ComposableSingletons$FooKt$lambda$-1435676418$1.INSTANCE LComposableSingletons$FooKt$lambda$-1435676418$1;,
+                ComposableSingletons$FooKt.INSTANCE LComposableSingletons$FooKt;,
+                ComposableSingletons$FooKt.lambda$-1435676418 Lkotlin/jvm/functions/Function2;
+            ]
+        }
+    }
+    
+    
     <init> {
         desc: ()V
         type: Regular
@@ -49,29 +67,27 @@ ComposableSingletons$FooKt {
             ]
         }
     }
-    
-    
-    <clinit> {
-        desc: ()V
-        type: Regular
-        Method {
-            key: null
-            codeHash: 2631766068
-            methodDependencies: [
-                ComposableSingletons$FooKt.<init> ()V
-            ]
-            fieldDependencies: [
-                ComposableSingletons$FooKt.INSTANCE LComposableSingletons$FooKt;,
-                ComposableSingletons$FooKt$lambda$-1435676418$1.INSTANCE LComposableSingletons$FooKt$lambda$-1435676418$1;,
-                ComposableSingletons$FooKt.lambda$-1435676418 Lkotlin/jvm/functions/Function2;
-            ]
-        }
-    }
 }
 
 ComposableSingletons$FooKt$lambda$-1435676418$1 {
     val INSTANCE: LComposableSingletons$FooKt$lambda$-1435676418$1;
 
+    <clinit> {
+        desc: ()V
+        type: Regular
+        Method {
+            key: null
+            codeHash: 385586306
+            methodDependencies: [
+                ComposableSingletons$FooKt$lambda$-1435676418$1.<init> ()V
+            ]
+            fieldDependencies: [
+                ComposableSingletons$FooKt$lambda$-1435676418$1.INSTANCE LComposableSingletons$FooKt$lambda$-1435676418$1;
+            ]
+        }
+    }
+    
+    
     <init> {
         desc: ()V
         type: Regular
@@ -108,22 +124,6 @@ ComposableSingletons$FooKt$lambda$-1435676418$1 {
             fieldDependencies: []
         }
     }
-    
-    
-    <clinit> {
-        desc: ()V
-        type: Regular
-        Method {
-            key: null
-            codeHash: 385586306
-            methodDependencies: [
-                ComposableSingletons$FooKt$lambda$-1435676418$1.<init> ()V
-            ]
-            fieldDependencies: [
-                ComposableSingletons$FooKt$lambda$-1435676418$1.INSTANCE LComposableSingletons$FooKt$lambda$-1435676418$1;
-            ]
-        }
-    }
 }
 
 FooKt {
@@ -148,6 +148,20 @@ FooKt {
     }
     
     
+    Bar$lambda$0 {
+        desc: (Lkotlin/jvm/functions/Function2;ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+        type: Composable
+        Method {
+            key: null
+            codeHash: 4235434057
+            methodDependencies: [
+                FooKt.Bar (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+            ]
+            fieldDependencies: []
+        }
+    }
+    
+    
     Foo {
         desc: (Landroidx/compose/runtime/Composer;I)V
         type: Composable
@@ -163,27 +177,13 @@ FooKt {
                 key: -965539098
                 codeHash: 3015966053
                 methodDependencies: [
-                    ComposableSingletons$FooKt.getLambda$-1435676418$testModule ()Lkotlin/jvm/functions/Function2;,
-                    FooKt.Bar (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+                    FooKt.Bar (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V,
+                    ComposableSingletons$FooKt.getLambda$-1435676418$testModule ()Lkotlin/jvm/functions/Function2;
                 ]
                 fieldDependencies: [
                     ComposableSingletons$FooKt.INSTANCE LComposableSingletons$FooKt;
                 ]
             }
-        }
-    }
-    
-    
-    Bar$lambda$0 {
-        desc: (Lkotlin/jvm/functions/Function2;ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
-        type: Composable
-        Method {
-            key: null
-            codeHash: 4235434057
-            methodDependencies: [
-                FooKt.Bar (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
-            ]
-            fieldDependencies: []
         }
     }
     

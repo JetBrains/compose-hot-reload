@@ -17,12 +17,18 @@ data class ScopeInfo @InternalHotReloadApi internal constructor(
     val scopeType: ScopeType,
     val scopeHash: ScopeHash,
     val group: ComposeGroupKey?,
-    val methodDependencies: Set<MethodId>,
-    val fieldDependencies: Set<FieldId>,
+    val methodDependenciesList: List<MethodId>,
+    val fieldDependenciesList: List<FieldId>,
     val children: List<ScopeInfo>,
     val extras: Context,
     val sourceLocation: SourceLocation,
 ) {
+    @Deprecated("Use methodDependenciesList instead", ReplaceWith("methodDependenciesList"))
+    val methodDependencies: Set<MethodId> get() = methodDependenciesList.toSet()
+
+    @Deprecated("Use fieldDependenciesList instead", ReplaceWith("fieldDependenciesList"))
+    val fieldDependencies: Set<FieldId> get() = fieldDependenciesList.toSet()
+
     @ConsistentCopyVisibility
     data class SourceLocation @InternalHotReloadApi internal constructor(
         val sourceFile: String?,
@@ -55,12 +61,12 @@ internal fun createScopeInfo(
         scopeType = tree.type,
         scopeHash = tree.scopeHash(methodNode),
         group = tree.group,
-        methodDependencies = tree.methodDependencies(),
-        fieldDependencies = tree.fieldDependencies(),
-        children = tree.children.map { child -> createScopeInfo(methodId, methodNode, child, sourceFile) },
+        methodDependenciesList = tree.methodDependencies(),
+        fieldDependenciesList = tree.fieldDependencies(),
+        children = tree.children.map { child -> createScopeInfo(methodId, methodNode, child, sourceFile) }.toList(),
         extras = createScopeInfoExtras(methodId, methodNode, tree),
         sourceLocation = SourceLocation(
-            sourceFile = sourceFile,
+            sourceFile = sourceFile?.interned(),
             firstLineNumber = tree.tokens.firstLineNumber,
         )
     )

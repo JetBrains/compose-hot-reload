@@ -23,7 +23,7 @@ import org.objectweb.asm.tree.LdcInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
 
-fun ClassId(node: ClassNode): ClassId = ClassId(node.name)
+fun ClassId(node: ClassNode): ClassId = ClassId(node.name.interned())
 
 internal fun AbstractInsnNode.intValueOrNull(): Int? {
     if (this is LdcInsnNode) return this.cst as? Int
@@ -74,38 +74,38 @@ fun ClassId(bytecode: ByteArray): ClassId? {
         }
     }, SKIP_CODE and SKIP_FRAMES and ClassReader.SKIP_DEBUG)
 
-    return className?.let { name -> ClassId(name) }
+    return className?.let { name -> ClassId(name.interned()) }
 }
 
 
 internal fun MethodId(classNode: ClassNode, methodNode: MethodNode): MethodId = MethodId(
     classId = ClassId(classNode),
-    methodName = methodNode.name,
-    methodDescriptor = methodNode.desc,
+    methodName = methodNode.name.interned(),
+    methodDescriptor = methodNode.desc.interned(),
 )
 
 internal fun MethodId(handle: Handle) = MethodId(
-    classId = ClassId(handle.owner),
-    methodName = handle.name,
-    methodDescriptor = handle.desc
+    classId = ClassId(handle.owner.interned()),
+    methodName = handle.name.interned(),
+    methodDescriptor = handle.desc.interned()
 )
 
 internal fun MethodId(methodInsnNode: MethodInsnNode): MethodId = MethodId(
-    classId = ClassId(methodInsnNode.owner),
-    methodName = methodInsnNode.name,
-    methodDescriptor = methodInsnNode.desc
+    classId = ClassId(methodInsnNode.owner.interned()),
+    methodName = methodInsnNode.name.interned(),
+    methodDescriptor = methodInsnNode.desc.interned()
 )
 
 internal fun FieldId(fieldIsnNode: FieldInsnNode): FieldId = FieldId(
-    classId = ClassId(fieldIsnNode.owner),
-    fieldName = fieldIsnNode.name,
-    fieldDescriptor = fieldIsnNode.desc
+    classId = ClassId(fieldIsnNode.owner.interned()),
+    fieldName = fieldIsnNode.name.interned(),
+    fieldDescriptor = fieldIsnNode.desc.interned()
 )
 
 internal fun FieldId(classNode: ClassNode, fieldNode: FieldNode): FieldId = FieldId(
     classId = ClassId(classNode),
-    fieldName = fieldNode.name,
-    fieldDescriptor = fieldNode.desc
+    fieldName = fieldNode.name.interned(),
+    fieldDescriptor = fieldNode.desc.interned()
 )
 
 internal val MethodNode.allAnnotations: List<AnnotationNode>

@@ -24,6 +24,41 @@ fun Bar() {
 */
 
 FooKt {
+    Bar {
+        desc: (Landroidx/compose/runtime/Composer;I)V
+        type: Composable
+        Method {
+            key: -2097341767
+            codeHash: 1143768317
+            methodDependencies: [
+                FooKt.Bar$lambda$0 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+            ]
+            fieldDependencies: []
+    
+            RestartGroup {
+                key: -2097341767
+                codeHash: 3442577276
+                methodDependencies: []
+                fieldDependencies: []
+            }
+        }
+    }
+    
+    
+    Bar$lambda$0 {
+        desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+        type: Composable
+        Method {
+            key: null
+            codeHash: 2483986227
+            methodDependencies: [
+                FooKt.Bar (Landroidx/compose/runtime/Composer;I)V
+            ]
+            fieldDependencies: []
+        }
+    }
+    
+    
     Foo {
         desc: (Landroidx/compose/runtime/Composer;I)V
         type: Composable
@@ -47,27 +82,6 @@ FooKt {
     }
     
     
-    Bar {
-        desc: (Landroidx/compose/runtime/Composer;I)V
-        type: Composable
-        Method {
-            key: -2097341767
-            codeHash: 1143768317
-            methodDependencies: [
-                FooKt.Bar$lambda$0 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
-            ]
-            fieldDependencies: []
-    
-            RestartGroup {
-                key: -2097341767
-                codeHash: 3442577276
-                methodDependencies: []
-                fieldDependencies: []
-            }
-        }
-    }
-    
-    
     Foo$lambda$0 {
         desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         type: Composable
@@ -76,20 +90,6 @@ FooKt {
             codeHash: 210770274
             methodDependencies: [
                 FooKt.Foo (Landroidx/compose/runtime/Composer;I)V
-            ]
-            fieldDependencies: []
-        }
-    }
-    
-    
-    Bar$lambda$0 {
-        desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
-        type: Composable
-        Method {
-            key: null
-            codeHash: 2483986227
-            methodDependencies: [
-                FooKt.Bar (Landroidx/compose/runtime/Composer;I)V
             ]
             fieldDependencies: []
         }

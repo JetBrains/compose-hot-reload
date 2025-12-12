@@ -40,6 +40,20 @@ FooKt {
     }
     
     
+    Decoy$lambda$0 {
+        desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
+        type: Composable
+        Method {
+            key: null
+            codeHash: 3619622796
+            methodDependencies: [
+                FooKt.Decoy (Landroidx/compose/runtime/Composer;I)V
+            ]
+            fieldDependencies: []
+        }
+    }
+    
+    
     Foo {
         desc: (Landroidx/compose/runtime/Composer;I)V
         type: Composable
@@ -57,20 +71,6 @@ FooKt {
                 methodDependencies: []
                 fieldDependencies: []
             }
-        }
-    }
-    
-    
-    Decoy$lambda$0 {
-        desc: (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
-        type: Composable
-        Method {
-            key: null
-            codeHash: 3619622796
-            methodDependencies: [
-                FooKt.Decoy (Landroidx/compose/runtime/Composer;I)V
-            ]
-            fieldDependencies: []
         }
     }
     

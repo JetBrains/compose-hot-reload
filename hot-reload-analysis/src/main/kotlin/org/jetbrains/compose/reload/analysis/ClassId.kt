@@ -36,8 +36,8 @@ value class ClassId(val value: String) : Comparable<ClassId> {
     fun toFqn(): String = value.replace("/", ".")
 
     companion object {
-        fun fromFqn(fqn: String): ClassId = ClassId(fqn.replace(".", "/"))
-        fun fromDesc(desc: String): ClassId = ClassId(desc.removePrefix("L").removeSuffix(";"))
+        fun fromFqn(fqn: String): ClassId = ClassId(fqn.replace(".", "/").interned())
+        fun fromDesc(desc: String): ClassId = ClassId(desc.removePrefix("L").removeSuffix(";").interned())
     }
 }
 
@@ -46,7 +46,7 @@ fun ClassId(clazz: KClass<*>): ClassId {
 }
 
 fun ClassId(clazz: Class<*>): ClassId {
-    return clazz.name.replace(".", "/").let(::ClassId)
+    return clazz.name.replace(".", "/").interned().let(::ClassId)
 }
 
 inline val Class<*>.classId: ClassId
