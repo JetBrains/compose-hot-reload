@@ -31,12 +31,16 @@ fun Context.resolveDirtyScopes(current: ApplicationInfo, redefined: ApplicationI
         )
     }
 
-    logger.info("Resolved 'dirty' @Composable scopes within $duration")
-    redefinition.dirtyMethodIds.entries.sortedBy { it.key.methodDescriptor }.forEach { (methodId, scopes) ->
-        logger.info("    - ${methodId.classId.toFqn()}.${methodId.methodName} (${scopes.size})")
-    }
-    if (redefinition.dirtyScopes.isEmpty()) {
-        logger.info("  ~ No @Composable is dirty")
+    logger.info {
+        buildString {
+            appendLine("Resolved 'dirty' @Composable scopes within $duration")
+            redefinition.dirtyMethodIds.entries.sortedBy { it.key.methodDescriptor }.forEach { (methodId, scopes) ->
+                appendLine("    - ${methodId.classId.toFqn()}.${methodId.methodName} (${scopes.size})")
+            }
+            if (redefinition.dirtyScopes.isEmpty()) {
+                appendLine("  ~ No @Composable is dirty")
+            }
+        }
     }
 
     return redefinition
@@ -336,9 +340,17 @@ private fun ScopeInfo.invalidationKey(): Long {
     return result
 }
 
-private fun Iterable<ScopeInfo>.invalidationKey(): Long = fold(0L) { acc, scope ->
-    31L * acc + scope.invalidationKey()
-}
+private val scopeInfoComparator = compareBy<ScopeInfo>(
+    { it.methodId.classId },
+    { it.methodId.methodName },
+    { it.methodId.methodDescriptor },
+    { it.scopeType },
+    { it.group?.key },
+)
+
+private fun Iterable<ScopeInfo>.invalidationKey(): Long =
+        sortedWith(scopeInfoComparator)
+        .fold(0L) { acc, scope -> 31L * acc + scope.invalidationKey() }
 
 private fun ApplicationInfo.resolveParentRuntimeScopeInfo(
     redefined: ApplicationInfo, scope: ScopeInfo

@@ -21,9 +21,21 @@ fun Foo() {
 */
 
 Bar {
-    val x: I
     val $stable: I
+    val x: I
 
+    <clinit> {
+        desc: ()V
+        type: Regular
+        Method {
+            key: null
+            codeHash: 2636274694
+            methodDependencies: []
+            fieldDependencies: []
+        }
+    }
+    
+    
     <init> {
         desc: ()V
         type: Regular
@@ -50,30 +62,20 @@ Bar {
             ]
         }
     }
-    
-    
-    <clinit> {
-        desc: ()V
-        type: Regular
-        Method {
-            key: null
-            codeHash: 2636274694
-            methodDependencies: []
-            fieldDependencies: []
-        }
-    }
 }
 
 FooKt {
     val bar: LBar;
 
-    getBar {
-        desc: ()LBar;
+    <clinit> {
+        desc: ()V
         type: Regular
         Method {
             key: null
-            codeHash: 886555225
-            methodDependencies: []
+            codeHash: 1891533309
+            methodDependencies: [
+                Bar.<init> ()V
+            ]
             fieldDependencies: [
                 FooKt.bar LBar;
             ]
@@ -127,15 +129,13 @@ FooKt {
     }
     
     
-    <clinit> {
-        desc: ()V
+    getBar {
+        desc: ()LBar;
         type: Regular
         Method {
             key: null
-            codeHash: 1891533309
-            methodDependencies: [
-                Bar.<init> ()V
-            ]
+            codeHash: 886555225
+            methodDependencies: []
             fieldDependencies: [
                 FooKt.bar LBar;
             ]

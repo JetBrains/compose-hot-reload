@@ -14,8 +14,8 @@ import org.objectweb.asm.tree.MethodInsnNode
 private const val lambdaMetaFactoryClassId = "java/lang/invoke/LambdaMetafactory"
 private const val metafactoryMethodName = "metafactory"
 
-internal fun InstructionTree.methodDependencies(): Set<MethodId> {
-    return tokens.filterIsInstance<InstructionToken.BlockToken>().flatMapTo(mutableSetOf()) { block ->
+internal fun InstructionTree.methodDependencies(): List<MethodId> {
+    return tokens.filterIsInstance<InstructionToken.BlockToken>().flatMapTo(hashSetOf()) { block ->
         block.instructions.mapNotNull { instructionNode ->
             if (instructionNode is MethodInsnNode &&
                 (instructionNode.opcode == Opcodes.INVOKESTATIC ||
@@ -23,7 +23,7 @@ internal fun InstructionTree.methodDependencies(): Set<MethodId> {
                     instructionNode.opcode == Opcodes.INVOKESPECIAL ||
                     instructionNode.opcode == Opcodes.INVOKEINTERFACE)
             ) {
-                if (ClassId(instructionNode.owner).isIgnored) return@mapNotNull null
+                if (ClassId(instructionNode.owner.interned()).isIgnored) return@mapNotNull null
                 return@mapNotNull MethodId(instructionNode)
             }
 
@@ -37,15 +37,16 @@ internal fun InstructionTree.methodDependencies(): Set<MethodId> {
 
             null
         }
-    }
+    }.toList()
 }
 
-internal fun InstructionTree.fieldDependencies(): Set<FieldId> {
+internal fun InstructionTree.fieldDependencies(): List<FieldId> {
     return tokens
+        .asSequence()
         .filterIsInstance<InstructionToken.BlockToken>()
         .flatMap { token -> token.instructions }
         .filterIsInstance<FieldInsnNode>()
-        .filter { fieldInsnNode -> !ClassId(fieldInsnNode.owner).isIgnored }
-        .map { fieldNode -> FieldId(fieldNode) }
-        .toSet()
+        .filter { fieldInsnNode -> !ClassId(fieldInsnNode.owner.interned()).isIgnored }
+        .mapTo(hashSetOf()) { fieldNode -> FieldId(fieldNode) }
+        .toList()
 }

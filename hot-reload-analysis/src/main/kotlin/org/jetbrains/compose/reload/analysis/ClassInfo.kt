@@ -42,16 +42,16 @@ fun ClassInfo(classNode: ClassNode): ClassInfo? {
                 else -> MethodInfo.Modality.OPEN
             }
         )
-    }.associateBy { it.methodId }
+    }.associateByTo(hashMapOf()) { it.methodId }.toReadOnlyHashMap()
 
-    val fields = classNode.fields.associate { fieldNode ->
+    val fields = classNode.fields.associateTo(hashMapOf()) { fieldNode ->
         FieldId(classNode, fieldNode) to FieldInfo(
             fieldId = FieldId(classNode, fieldNode),
             isStatic = fieldNode.access and (Opcodes.ACC_STATIC) != 0,
             initialValue = fieldNode.value,
             additionalChangeIndicatorHash = getResourceContentHash(fieldNode)
         )
-    }
+    }.toReadOnlyHashMap()
 
     return ClassInfo(
         classId = classId,
