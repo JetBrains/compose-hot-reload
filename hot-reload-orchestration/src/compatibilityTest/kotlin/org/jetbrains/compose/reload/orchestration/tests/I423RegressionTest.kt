@@ -33,6 +33,7 @@ import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
 import java.io.File
 import java.net.URLClassLoader
+import java.util.concurrent.TimeoutException
 import kotlin.concurrent.thread
 import kotlin.io.path.Path
 import kotlin.system.exitProcess
@@ -108,13 +109,23 @@ class I423RegressionTest {
             @JvmStatic
             @Suppress("unused") // reflection!
             fun run(port: Int) {
-                System.err.println("'PluginCode': connecting to server")
-                val client = OrchestrationClient(Unknown, port).connectBlocking().getOrThrow()
+                val client = run {
+                    repeat(5) { attempt ->
+                        try {
+                            System.err.println("'PluginCode': connecting to server ${attempt + 1} / 5")
+                            return@run OrchestrationClient(Unknown, port).connectBlocking().getOrThrow()
+                        } catch (e: Exception) {
+                            System.err.println("'PluginCode': connecting to server ${attempt + 1} / 5 failed: ${e.message}")
+                        }
+                    }
+                    throw TimeoutException("'PluginCode': timeout while trying to connect to server")
+                }
                 client.subtask {
                     client.send(TestEvent("#423 Ready"))
 
                     System.err.println("'PluginCode': receiving message")
                     client.messages.collect { message ->
+                        System.err.println("'PluginCode': receiving message $message")
                         if (message !is ReloadClassesRequest) return@collect
                         if (message.changedClassFiles.isEmpty()) fail(".changedClassFiles list is empty")
 
