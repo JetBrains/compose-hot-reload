@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,8 +55,8 @@ import org.jetbrains.compose.devtools.api.ReloadAnimationSpec.statusColorFadeDur
 import org.jetbrains.compose.devtools.api.ReloadColors
 import org.jetbrains.compose.devtools.api.ReloadEffect
 import org.jetbrains.compose.devtools.api.ReloadState
+import org.jetbrains.compose.hotReloadUI.widgets.Divider
 import org.jetbrains.compose.hotReloadUI.widgets.TimeAgoText
-import org.jetbrains.compose.hotReloadUI.widgets.alignBox
 import org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources.Res
 import org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources.error
 import org.jetbrains.compose.resources.painterResource

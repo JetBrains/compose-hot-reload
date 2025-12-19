@@ -65,6 +65,7 @@ kotlin.sourceSets.main.configure {
 }
 dependencies {
     compileOnly(deps.compose.desktop.common) {
+        exclude(group = "org.jetbrains.compose.material")
         version {
             strictly(deps.versions.composeMin.get())
         }
