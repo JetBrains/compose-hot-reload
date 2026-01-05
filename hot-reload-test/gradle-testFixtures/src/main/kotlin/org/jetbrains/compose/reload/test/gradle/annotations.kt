@@ -42,9 +42,19 @@ public annotation class Headless(val isHeadless: Boolean = true)
 
 public annotation class ReloadEffects(val isEnabled: Boolean = true)
 
+/**
+ * Extends the build gradle kts file
+ */
 @Repeatable
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 public annotation class ExtendBuildGradleKts(val extension: KClass<out BuildGradleKtsExtension>)
+
+/**
+ * Overrides the build gradle kts file
+ */
+@Repeatable
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+public annotation class OverrideBuildGradleKts(val extension: KClass<out BuildGradleKtsExtension>)
 
 @Repeatable
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

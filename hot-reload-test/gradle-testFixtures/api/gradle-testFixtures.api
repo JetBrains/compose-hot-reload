@@ -413,6 +413,14 @@ public abstract interface annotation class org/jetbrains/compose/reload/test/gra
 	public abstract fun version ()Ljava/lang/String;
 }
 
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/OverrideBuildGradleKts : java/lang/annotation/Annotation {
+	public abstract fun extension ()Ljava/lang/Class;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/OverrideBuildGradleKts$Container : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lorg/jetbrains/compose/reload/test/gradle/OverrideBuildGradleKts;
+}
+
 public final class org/jetbrains/compose/reload/test/gradle/ProjectDir {
 	public fun <init> (Ljava/nio/file/Path;Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;)V
 	public synthetic fun <init> (Ljava/nio/file/Path;Lorg/jetbrains/compose/reload/test/gradle/ProjectDir;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

@@ -16,6 +16,7 @@ import org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi
 import org.junit.jupiter.api.extension.ExtensionContext
 import java.lang.System.lineSeparator
 import java.util.ServiceLoader
+import kotlin.reflect.KClass
 
 public interface BuildGradleKtsExtension {
     public fun header(context: ExtensionContext): String? = null
@@ -37,11 +38,20 @@ public fun renderBuildGradleKts(context: ExtensionContext): String {
     else kmpBuildGradleKtsTemplate
 
     return template.renderOrThrow {
-        val extensionsFromAnnotation = context.findRepeatableAnnotations<ExtendBuildGradleKts>().map { annotation ->
-            annotation.extension.objectInstance ?: annotation.extension.java.getConstructor().newInstance()
-        }
+        val buildGradleKtsExtensions =
+            when (val overrideBuildGradleKts = context.findAnnotation<OverrideBuildGradleKts>()) {
+                null -> buildList {
+                    addAll(ServiceLoader.load(BuildGradleKtsExtension::class.java))
 
-        ServiceLoader.load(BuildGradleKtsExtension::class.java).plus(extensionsFromAnnotation).forEach { extension ->
+                    context.findRepeatableAnnotations<ExtendBuildGradleKts>().forEach { annotation ->
+                        add(annotation.extension.newInstance)
+                    }
+                }
+                else -> listOf(overrideBuildGradleKts.extension.newInstance)
+            }
+
+
+        buildGradleKtsExtensions.forEach { extension ->
             headerKey(extension.header(context))
             pluginsKey(extension.plugins(context))
             kotlinKey(extension.kotlin(context))
@@ -203,7 +213,7 @@ internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
         ).joinToString(lineSeparator()).ifEmpty { return null }
     }
 
-    override fun compilerOptions(context: ExtensionContext): String? {
+    override fun compilerOptions(context: ExtensionContext): String {
         return """freeCompilerArgs.add("-Xindy-allow-annotated-lambdas=${context.compilerOptions.getValue(CompilerOption.IndyAllowAnnotatedLambdas)}")"""
     }
 
@@ -244,3 +254,6 @@ internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
 
     }
 }
+
+private val KClass<out BuildGradleKtsExtension>.newInstance: BuildGradleKtsExtension
+    get() = objectInstance ?: java.getConstructor().newInstance()

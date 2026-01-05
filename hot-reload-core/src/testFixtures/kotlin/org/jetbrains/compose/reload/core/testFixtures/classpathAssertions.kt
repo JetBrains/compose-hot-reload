@@ -14,7 +14,7 @@ import java.io.File
 
 fun Iterable<File>.assertMatches(
     vararg matchers: FileMatcher
-) {
+): Iterable<File> {
     val allFiles = toList()
     val allMatchers = matchers.toList()
 
@@ -35,7 +35,7 @@ fun Iterable<File>.assertMatches(
 
     if (singleFiles.isEmpty() && singleMatchers.isEmpty()) {
         // Love indeed is real.
-        return
+        return this
     }
 
     val errorMessage = buildString {
@@ -58,6 +58,43 @@ fun Iterable<File>.assertMatches(
         }
 
         appendLine()
+        appendLine("All files:")
+        allFiles.forEach { file ->
+            appendLine("  $file")
+        }
+    }
+
+    fail(errorMessage)
+}
+
+fun Iterable<File>.assertNotMatches(
+    vararg matchers: FileMatcher
+): Iterable<File> {
+    val allFiles = toList()
+    val matches = mutableMapOf<FileMatcher, MutableSet<File>>()
+
+    allFiles.forEach { file ->
+        matchers.forEach { matcher ->
+            if (matcher.matches(file)) {
+                matches.getOrPut(matcher, ::mutableSetOf).add(file)
+            }
+        }
+    }
+
+    if (matches.isEmpty()) {
+        return this
+    }
+
+    val errorMessage = buildString {
+        for ((matcher, files) in matches) {
+            appendLine("Unexpected match found")
+            appendLine("  Matcher: $matcher")
+            appendLine("  Files:")
+            files.forEach { file ->
+                appendLine("      $file")
+            }
+            appendLine()
+        }
         appendLine("All files:")
         allFiles.forEach { file ->
             appendLine("  $file")
