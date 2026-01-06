@@ -12,6 +12,7 @@ import org.jetbrains.compose.devtools.api.ReloadState
 import org.jetbrains.compose.reload.core.asChannel
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.withAsyncTrace
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
@@ -104,11 +105,17 @@ class DevtoolsIntegrationTests {
 
             replaceSourceCode("// Foo", "TestText(\"Foo\")")
             if (fixture.buildMode == BuildMode.Explicit) {
+                /*
+                 Start awaiting the reloading state before triggering the reload
+                 to ensure we don't miss the state update if the reload happens too fast
+                 */
+                val awaitReloadingState = launchTask {
+                    withAsyncTrace("Waiting for ReloadState: 'Reloading'") {
+                        awaitState<ReloadState.Reloading>(reloadStateChannel)
+                    }
+                }
                 requestReload()
-            }
-
-            withAsyncTrace("Waiting for ReloadState: 'Reloading'") {
-                awaitState<ReloadState.Reloading>(reloadStateChannel)
+                awaitReloadingState.await()
             }
 
             withAsyncTrace("Waiting for ReloadState: 'Ok'") {
