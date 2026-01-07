@@ -51,15 +51,9 @@ import kotlin.io.path.absolutePathString
  */
 @InternalHotReloadApi
 fun Project.jetbrainsRuntimeLauncher(): Provider<JavaLauncher> {
-    val provisionedLauncher = serviceOf<JavaToolchainService>().launcherFor { spec ->
-        @Suppress("UnstableApiUsage")
-        spec.vendor.set(JvmVendorSpec.JETBRAINS)
-        spec.languageVersion.set(jetbrainsRuntimeVersion())
-    }
-
     return project.provider {
         try {
-            providedJetBrainsRuntimeLauncher() ?: provisionedLauncher.get()
+            providedJetBrainsRuntimeLauncher() ?: provisionedJetBrainsRuntimeLauncher()
         } catch (e: Throwable) {
             intellijJetBrainsRuntimeLauncher() ?: throw e
         }
@@ -85,6 +79,31 @@ private fun Project.jetbrainsRuntimeVersion(): Provider<JavaLanguageVersion> {
 private fun Project.providedJetBrainsRuntimeLauncher(): JavaLauncher? {
     val executablePath = composeReloadJetBrainsRuntimeBinary ?: return null
     val javaHome = JavaHome.fromExecutable(executablePath)
+    return createJavaLauncher(javaHome)
+}
+
+private fun Project.provisionedJetBrainsRuntimeLauncher(): JavaLauncher? = try {
+    serviceOf<JavaToolchainService>().launcherFor { spec ->
+        @Suppress("UnstableApiUsage")
+        spec.vendor.set(JvmVendorSpec.JETBRAINS)
+        spec.languageVersion.set(jetbrainsRuntimeVersion())
+    }.get()
+} catch (e: Throwable) {
+    logger.warn("Failed to provision JBR through Gradle:", e)
+    customProvisionedJetBrainsRuntimeLauncher()
+}
+
+/**
+ * Provisions JBR by downloading it when no toolchain is available.
+ * This replaces the foojay-resolver functionality with a custom implementation.
+ */
+private fun Project.customProvisionedJetBrainsRuntimeLauncher(): JavaLauncher? {
+    val javaVersion = jetbrainsRuntimeVersion().get()
+    logger.info("Attempting to download JetBrains Runtime version $javaVersion")
+    val provisioner = JbrProvisioner(this, logger)
+    val jbrHome = provisioner.provisionJbr(javaVersion) ?: return null
+    
+    val javaHome = JavaHome(jbrHome)
     return createJavaLauncher(javaHome)
 }
 

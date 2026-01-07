@@ -130,10 +130,6 @@ internal class DefaultSettingsGradleKts : SettingsGradleKtsExtension {
         """.trimIndent()
     }
 
-    override fun plugins(context: ExtensionContext): String {
-        return """id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0""""
-    }
-
     override fun dependencyResolutionManagementRepositories(context: ExtensionContext): String {
         return """
             google {
