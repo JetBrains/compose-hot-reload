@@ -180,7 +180,7 @@ class RuntimeDependenciesTest {
 
     @HotReloadTest
     @TestedProjectMode(ProjectMode.Jvm)
-    @OverrideBuildGradleKts(ImplicitRuntimeDependenciesExtension::class)
+    @OverrideBuildGradleKts(BuildGradleKtsWithoutImplicitDependencies::class)
     fun `test - jvm implicit dependencies`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture.resolveImplicitRuntimeClasspath()
             .assertMatches(
@@ -199,7 +199,7 @@ class RuntimeDependenciesTest {
 
     @HotReloadTest
     @TestedProjectMode(ProjectMode.Kmp)
-    @OverrideBuildGradleKts(ImplicitRuntimeDependenciesExtension::class)
+    @OverrideBuildGradleKts(BuildGradleKtsWithoutImplicitDependencies::class)
     fun `test - kmp implicit dependencies`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture.resolveImplicitRuntimeClasspath()
             .assertMatches(
@@ -238,7 +238,6 @@ private suspend fun HotReloadTestFixture.resolveRuntimeClasspath(projectPath: St
     }
 }
 
-
 private suspend fun HotReloadTestFixture.resolveImplicitRuntimeClasspath(
     projectPath: String = ""
 ): List<File> {
@@ -275,7 +274,7 @@ private suspend fun HotReloadTestFixture.resolveImplicitRuntimeClasspath(
 }
 
 
-class ImplicitRuntimeDependenciesExtension : BuildGradleKtsExtension {
+class BuildGradleKtsWithoutImplicitDependencies : BuildGradleKtsExtension {
     override fun plugins(context: ExtensionContext): String = """
         kotlin("{{kotlin.plugin}}")
         kotlin("plugin.compose")
@@ -296,7 +295,6 @@ class ImplicitRuntimeDependenciesExtension : BuildGradleKtsExtension {
                 exclude(group = "org.jetbrains.compose.material3")
             }
     """.trimIndent()
-
 
     override fun composeCompiler(context: ExtensionContext): String? {
         val options = context.compilerOptions
