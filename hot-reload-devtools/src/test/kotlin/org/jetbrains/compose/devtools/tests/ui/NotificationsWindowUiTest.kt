@@ -26,7 +26,7 @@ class NotificationsWindowUiTest : DevToolsUiTest() {
         onAllNodesWithTag(Tag.NotificationCard)
             .assertCountEquals(0)
 
-        states.updateState(NotificationsUIState.Key) {
+        updateStateAndWaitForIdle(NotificationsUIState.Key) {
             NotificationsUIState(
                 listOf(TestNotification(UINotificationType.INFO))
             )
@@ -34,13 +34,13 @@ class NotificationsWindowUiTest : DevToolsUiTest() {
         onAllNodesWithTag(Tag.NotificationCard)
             .assertCountEquals(1)
 
-        states.updateState(NotificationsUIState.Key) {
+        updateStateAndWaitForIdle(NotificationsUIState.Key) {
             NotificationsUIState(emptyList())
         }
         onAllNodesWithTag(Tag.NotificationCard)
             .assertCountEquals(0)
 
-        states.updateState(NotificationsUIState.Key) {
+        updateStateAndWaitForIdle(NotificationsUIState.Key) {
             NotificationsUIState(
                 listOf(
                     TestNotification(UINotificationType.INFO),

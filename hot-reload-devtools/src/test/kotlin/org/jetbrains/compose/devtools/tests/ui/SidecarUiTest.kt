@@ -52,24 +52,24 @@ class SidecarUiTest : DevToolsUiTest() {
             awaitNodeWithTag(Tag.ReloadCounterText).assertTextContains("0", substring = true)
         }
 
-        states.updateState(ReloadCountUIState.Key) { ReloadCountUIState(1) }
+        updateStateAndWaitForIdle(ReloadCountUIState.Key) { ReloadCountUIState(1) }
         awaitNodeWithTag(Tag.ReloadCounterText).assertTextContains("1", substring = true)
 
-        states.updateState(ReloadCountUIState.Key) { ReloadCountUIState(2) }
+        updateStateAndWaitForIdle(ReloadCountUIState.Key) { ReloadCountUIState(2) }
         awaitNodeWithTag(Tag.ReloadCounterText).assertTextContains("2", substring = true)
     }
 
     @Test
     fun `test - reload status`() = runSidecarUiTest {
-        states.updateState(ReloadUIState.Key) { ReloadUIState.Reloading() }
+        updateStateAndWaitForIdle(ReloadUIState.Key) { ReloadUIState.Reloading() }
         onNodeWithTag(Tag.BuildSystemLogo).assertDoesNotExist()
 
-        states.updateState(BuildSystemUIState.Key) { BuildSystemUIState(BuildSystem.Gradle) }
+        updateStateAndWaitForIdle(BuildSystemUIState.Key) { BuildSystemUIState(BuildSystem.Gradle) }
         awaitNodeWithTag(Tag.BuildSystemLogo)
             .assertExists()
             .assertContentDescriptionContains(DtImages.Image.GRADLE_LOGO.description)
 
-        states.updateState(BuildSystemUIState.Key) { BuildSystemUIState(BuildSystem.Amper) }
+        updateStateAndWaitForIdle(BuildSystemUIState.Key) { BuildSystemUIState(BuildSystem.Amper) }
         awaitNodeWithTag(Tag.BuildSystemLogo)
             .assertExists()
             .assertContentDescriptionContains(DtImages.Image.AMPER_LOGO.description)
@@ -87,7 +87,7 @@ class SidecarUiTest : DevToolsUiTest() {
     fun `test - notifications`() = runSidecarUiTest {
         onNodeWithTag(Tag.NotificationsButton).assertDoesNotExist()
 
-        states.updateState(NotificationsUIState.Key) {
+        updateStateAndWaitForIdle(NotificationsUIState.Key) {
             NotificationsUIState(
                 listOf(TestNotification(UINotificationType.INFO))
             )
@@ -97,7 +97,7 @@ class SidecarUiTest : DevToolsUiTest() {
             .onChild()
             .assertContentDescriptionContains(DtImages.Image.INFO_ICON.description)
 
-        states.updateState(NotificationsUIState.Key) {
+        updateStateAndWaitForIdle(NotificationsUIState.Key) {
             NotificationsUIState(
                 listOf(TestNotification(UINotificationType.WARNING))
             )
@@ -107,7 +107,7 @@ class SidecarUiTest : DevToolsUiTest() {
             .onChild()
             .assertContentDescriptionContains(DtImages.Image.WARNING_ICON.description)
 
-        states.updateState(NotificationsUIState.Key) {
+        updateStateAndWaitForIdle(NotificationsUIState.Key) {
             NotificationsUIState(
                 listOf(TestNotification(UINotificationType.ERROR))
             )

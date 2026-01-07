@@ -10,21 +10,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import io.sellmair.evas.Events
+import io.sellmair.evas.State
 import io.sellmair.evas.States
 import io.sellmair.evas.compose.installEvas
-import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.states.UINotification
 import org.jetbrains.compose.devtools.states.UINotificationType
-import org.jetbrains.compose.reload.core.getBlocking
-import org.jetbrains.compose.reload.core.getOrThrow
-import org.jetbrains.compose.reload.core.launchTask
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 abstract class DevToolsUiTestBase {
@@ -47,13 +45,19 @@ abstract class DevToolsUiTestBase {
         tag: Tag,
         useUnmergedTree: Boolean = true,
         timeout: Duration = 10.seconds,
-        pollingInterval: Duration = 200.milliseconds,
-    ): SemanticsNodeInteraction = launchTask {
-        while (onAllNodesWithTag(tag.name, useUnmergedTree).fetchSemanticsNodes().isEmpty()) {
-            delay(pollingInterval)
-        }
-        onNodeWithTag(tag, useUnmergedTree)
-    }.getBlocking(timeout = timeout).getOrThrow()
+    ): SemanticsNodeInteraction {
+        waitUntilAtLeastOneExists(hasTestTag(tag.name), timeoutMillis = timeout.inWholeMilliseconds)
+        /*
+         Await for the recomposition to be finished to ensure the target node and all its children are recomposed
+         */
+        waitForIdle()
+        return onNodeWithTag(tag, useUnmergedTree)
+    }
+
+    protected inline fun <reified T: State?> ComposeUiTest.updateStateAndWaitForIdle(key: State.Key<T>, crossinline update: (T) -> T) {
+        states.updateState(key) { update(it) }
+        waitForIdle()
+    }
 }
 
 abstract class DevToolsUiTest : DevToolsUiTestBase() {
