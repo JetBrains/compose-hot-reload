@@ -5,17 +5,22 @@
 
 package org.jetbrains.compose.reload.gradle
 
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
+import org.apache.commons.io.IOUtils
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.jetbrains.compose.reload.core.Os
 import java.io.File
+import java.io.IOException
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
+import kotlin.io.path.inputStream
 import kotlin.io.path.isDirectory
 
 /**
@@ -83,6 +88,7 @@ internal class JbrProvisioner(
     }
 
     private fun downloadAndExtractJbr(jbrVersion: JbrVersion, osArch: String, targetPath: Path): Path {
+        System.err.println("Downloading JetBrains Runtime $jbrVersion for $osArch and extracting to: ${targetPath.toAbsolutePath()}")
         val downloadUrl = buildDownloadUrl(jbrVersion, osArch)
         val tempFile = Files.createTempFile("jbr-download", ".tar.gz")
 
@@ -115,16 +121,30 @@ internal class JbrProvisioner(
     }
 
     private fun extractTarGz(tarGzFile: Path, targetPath: Path) {
-        // Use system tar command for extraction (more reliable than pure Java)
-        val processBuilder = ProcessBuilder(
-            "tar", "-xzf", tarGzFile.toString(), "-C", targetPath.toString(), "--strip-components=1"
-        )
-        val process = processBuilder.start()
-        val exitCode = process.waitFor()
+        TarArchiveInputStream(GzipCompressorInputStream(tarGzFile.inputStream())).use { archive ->
+            while (true) {
+                val entry = archive.nextEntry ?: break
 
-        if (exitCode != 0) {
-            val error = process.errorStream.bufferedReader().readText()
-            throw RuntimeException("Failed to extract tar.gz: $error")
+                if (!archive.canReadEntryData(entry)) {
+                    logger.warn("Cannot read entry data: $entry")
+                    continue
+                }
+                val f = targetPath.resolve(entry.name).toFile()
+                if (entry.isDirectory()) {
+                    if (!f.isDirectory() && !f.mkdirs()) {
+                        throw IOException("failed to create directory " + f)
+                    }
+                } else {
+                    val parent = f.getParentFile()
+                    if (!parent.isDirectory() && !parent.mkdirs()) {
+                        throw IOException("failed to create directory " + parent)
+                    }
+                    Files.newOutputStream(f.toPath()).use { o ->
+                        IOUtils.copy(archive, o)
+                    }
+                }
+            }
+            logger.info("Archive extracted to: $targetPath")
         }
     }
 

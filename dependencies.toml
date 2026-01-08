@@ -18,6 +18,7 @@ shadow = "9.2.2"
 kaml = "0.103.0"
 skiko = "0.9.30"
 gradlePluginPublish = "2.0.0"
+commonsCompress = "1.28.0"
 
 [libraries]
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -64,3 +65,5 @@ shadow-gradlePlugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", ver
 pluginPublish-gradlePlugin = { module = "com.gradle.plugin-publish:com.gradle.plugin-publish.gradle.plugin", version.ref = "gradlePluginPublish" }
 
 skiko-awt = { module = "org.jetbrains.skiko:skiko-awt", version.ref = "skiko" }
+
+commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commonsCompress"}
