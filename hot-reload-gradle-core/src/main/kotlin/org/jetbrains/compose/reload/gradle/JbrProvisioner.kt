@@ -21,7 +21,6 @@ import java.nio.file.StandardCopyOption
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.inputStream
-import kotlin.io.path.isDirectory
 
 /**
  * Provisions JetBrains Runtime by downloading and caching it locally.
@@ -34,72 +33,56 @@ internal class JbrProvisioner(
     private val jbrCacheDir: Path = gradleUserHome.toPath().resolve("caches/compose-hot-reload/jbr")
 
     fun provisionJbr(javaVersion: JavaLanguageVersion): Path? {
-        val version = javaVersion.asInt()
-        val osArch = detectOsArch() ?: run {
-            logger.warn("Unable to detect OS/architecture for JBR provisioning")
+        val jbrVersion = selectJbrVersion(javaVersion)
+        val os = Os.currentOrNull() ?: run {
+            logger.warn("Unable to detect OS for JBR provisioning")
+            return null
+        }
+        val arch = Arch.currentOrNull() ?: run {
+            logger.warn("Unable to detect OS architecture for JBR provisioning")
             return null
         }
 
-        val jbrVersion = selectJbrVersion(version)
-        val cachedJbrPath = getCachedJbrPath(jbrVersion, osArch)
+        val jbrPath = getJbrPath(jbrVersion, os, arch)
+        if (!jbrPath.exists()) {
+            logger.lifecycle("Downloading JetBrains Runtime $jbrVersion for ${os.osName}-${arch.archName}...")
+            try {
+                downloadAndExtractJbr(jbrVersion, os, arch, jbrPath)
+            } catch (e: Throwable) {
+                logger.warn("Failed to download JetBrains Runtime $jbrVersion for ${os.osName}-${arch.archName}", e)
+                return null
+            }
 
-        if (cachedJbrPath.exists() && cachedJbrPath.isDirectory()) {
-            logger.info("Using cached JBR from: $cachedJbrPath")
-            return cachedJbrPath
         }
 
-        logger.lifecycle("Downloading JetBrains Runtime $jbrVersion for $osArch...")
-        return try {
-            downloadAndExtractJbr(jbrVersion, osArch, cachedJbrPath)
-        } catch (e: Exception) {
-            logger.warn("Failed to download JBR: ${e.message}")
-            null
+        return jbrPath.resolve("Contents/Home")
+    }
+
+    private fun selectJbrVersion(version: JavaLanguageVersion): JbrVersion {
+        val javaVersion = version.asInt()
+        return when {
+            javaVersion >= 25 -> JbrVersion.JBR_25
+            javaVersion >= 21 -> JbrVersion.JBR_21
+            javaVersion >= 17 -> JbrVersion.JBR_17
+            javaVersion >= 11 -> JbrVersion.JBR_11
+            else -> JbrVersion.JBR_21
         }
     }
 
-    private fun selectJbrVersion(javaVersion: Int): JbrVersion = when {
-        javaVersion >= 25 -> JbrVersion.JBR_25
-        javaVersion >= 21 -> JbrVersion.JBR_21
-        javaVersion >= 17 -> JbrVersion.JBR_17
-        javaVersion >= 11 -> JbrVersion.JBR_11
-        else -> JbrVersion.JBR_21
+    private fun getJbrPath(jbrVersion: JbrVersion, os: Os, arch: Arch): Path {
+        return jbrCacheDir.resolve("jbr-$jbrVersion-${os.osName}-${arch.archName}")
     }
 
-    private fun detectOsArch(): String? {
-        val osName = when (Os.currentOrNull()) {
-            Os.MacOs -> "osx"
-            Os.Windows -> "windows"
-            Os.Linux -> "linux"
-            else -> return null
-        }
-
-        val arch = System.getProperty("os.arch").lowercase()
-        val archName = when {
-            arch.contains("aarch64") || arch.contains("arm64") -> "aarch64"
-            arch.contains("x86_64") || arch.contains("amd64") -> "x64"
-            else -> return null
-        }
-
-        return "$osName-$archName"
-    }
-
-    private fun getCachedJbrPath(jbrVersion: JbrVersion, osArch: String): Path {
-        return jbrCacheDir.resolve("jbr-$jbrVersion-$osArch").resolve("Contents/Home")
-    }
-
-    private fun downloadAndExtractJbr(jbrVersion: JbrVersion, osArch: String, targetPath: Path): Path {
-        System.err.println("Downloading JetBrains Runtime $jbrVersion for $osArch and extracting to: ${targetPath.toAbsolutePath()}")
-        val downloadUrl = buildDownloadUrl(jbrVersion, osArch)
+    private fun downloadAndExtractJbr(jbrVersion: JbrVersion, os: Os, arch: Arch, targetPath: Path): Path {
+        val downloadUrl = downloadUrl(jbrVersion, os, arch)
         val tempFile = Files.createTempFile("jbr-download", ".tar.gz")
 
         try {
-            // Download the archive
             logger.info("Downloading from: $downloadUrl")
             URI(downloadUrl).toURL().openStream().use { input ->
                 Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING)
             }
 
-            // Extract the archive
             targetPath.parent?.createDirectories()
             extractArchive(tempFile, targetPath)
 
@@ -110,8 +93,8 @@ internal class JbrProvisioner(
         }
     }
 
-    private fun buildDownloadUrl(jbrVersion: JbrVersion, osArch: String): String {
-        val fileName = "jbr-${jbrVersion.jbrVersion}-$osArch-${jbrVersion.jbrBuild}.tar.gz"
+    private fun downloadUrl(jbrVersion: JbrVersion, os: Os, arch: Arch): String {
+        val fileName = "jbr-${jbrVersion.jbrVersion}-${os.osName}-${arch.archName}-${jbrVersion.jbrBuild}.tar.gz"
         return "https://cache-redirector.jetbrains.com/intellij-jbr/$fileName"
     }
 
@@ -155,5 +138,31 @@ internal class JbrProvisioner(
         JBR_11("11_0_16", "b2043.64");
 
         override fun toString(): String = "$jbrVersion-$jbrBuild"
+    }
+
+    private val Os.osName: String get() = when (this) {
+        Os.MacOs -> "osx"
+        Os.Windows -> "windows"
+        Os.Linux -> "linux"
+    }
+
+    private enum class Arch(val archName: String) {
+        X86("x64"), ARM("aarch64");
+
+        companion object {
+            @JvmStatic
+            fun currentOrNull(): Arch? {
+                val arch = System.getProperty("os.arch").lowercase()
+                return when {
+                    arch.contains("aarch64") || arch.contains("arm64") -> ARM
+                    arch.contains("x86_64") || arch.contains("amd64") -> X86
+                    else -> null
+                }
+            }
+
+            @JvmStatic
+            fun current(): Arch = currentOrNull()
+                ?: error("Could not determine current OS arch: ${System.getProperty("os.arch")}")
+        }
     }
 }
