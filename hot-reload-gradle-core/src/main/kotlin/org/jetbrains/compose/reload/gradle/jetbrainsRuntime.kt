@@ -45,6 +45,10 @@ import kotlin.io.path.absolutePathString
  * If no other suitable JBR was found, or provisioning in step 2 fails, then we use the JBR from
  * IntelliJ as 'last resort'.
  *
+ * 4. Automatically provisioned JBR
+ * If [org.jetbrains.compose.reload.core.HotReloadProperty.AutoJetBrainsRuntimeProvisioningEnabled] is set,
+ * then the JBR will be downloaded automatically using the [JbrProvisioner].
+ *
  * Note:
  * This [jetbrainsRuntimeLauncher] is used as convention:
  * Users are free to configure their run tasks to use any java-launcher using the vanilla Gradle APIs.
@@ -53,9 +57,12 @@ import kotlin.io.path.absolutePathString
 fun Project.jetbrainsRuntimeLauncher(): Provider<JavaLauncher> {
     return project.provider {
         try {
-            providedJetBrainsRuntimeLauncher() ?: provisionedJetBrainsRuntimeLauncher()
+            providedJetBrainsRuntimeLauncher()
+                ?: gradleProvisionedJetBrainsRuntimeLauncher()
         } catch (e: Throwable) {
-            intellijJetBrainsRuntimeLauncher() ?: throw e
+            intellijJetBrainsRuntimeLauncher()
+                ?: automaticallyProvisionedJetBrainsRuntimeLauncher()
+                ?: throw e
         }
     }
 }
@@ -82,27 +89,29 @@ private fun Project.providedJetBrainsRuntimeLauncher(): JavaLauncher? {
     return createJavaLauncher(javaHome)
 }
 
-private fun Project.provisionedJetBrainsRuntimeLauncher(): JavaLauncher? = try {
+/**
+ * Builds a [JavaLauncher] from the JetBrains Runtime provisioned by the [JavaToolchainService].
+ */
+private fun Project.gradleProvisionedJetBrainsRuntimeLauncher(): JavaLauncher? =
     serviceOf<JavaToolchainService>().launcherFor { spec ->
         @Suppress("UnstableApiUsage")
         spec.vendor.set(JvmVendorSpec.JETBRAINS)
         spec.languageVersion.set(jetbrainsRuntimeVersion())
     }.get()
-} catch (e: Throwable) {
-    logger.warn("Failed to provision JBR through Gradle:", e)
-    customProvisionedJetBrainsRuntimeLauncher()
-}
 
 /**
- * Provisions JBR by downloading it when no toolchain is available.
- * This replaces the foojay-resolver functionality with a custom implementation.
+ * Builds a [JavaLauncher] from the JetBrains Runtime provided by the [JbrProvisioner] if
+ * [org.jetbrains.compose.reload.core.HotReloadProperty.AutoJetBrainsRuntimeProvisioningEnabled] property is
+ * enabled. [JbrProvisioner] attempts to download a compatible version of JetBrains Runtime.
+ * This replaces the foojay resolver functionality with a custom implementation.
  */
-private fun Project.customProvisionedJetBrainsRuntimeLauncher(): JavaLauncher? {
+private fun Project.automaticallyProvisionedJetBrainsRuntimeLauncher(): JavaLauncher? {
+    if (!composeReloadAutoJetBrainsRuntimeProvisioningEnabled) return null
     val javaVersion = jetbrainsRuntimeVersion().get()
     logger.info("Attempting to download JetBrains Runtime version $javaVersion")
     val provisioner = JbrProvisioner(this, logger)
     val jbrHome = provisioner.provisionJbr(javaVersion) ?: return null
-    
+
     val javaHome = JavaHome(jbrHome)
     return createJavaLauncher(javaHome)
 }

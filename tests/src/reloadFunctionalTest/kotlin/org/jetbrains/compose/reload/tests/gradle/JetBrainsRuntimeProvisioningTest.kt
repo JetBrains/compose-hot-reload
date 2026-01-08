@@ -28,7 +28,6 @@ import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultCompilerOptions
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultComposeVersion
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultKotlinVersion
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.ExtensionContext
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
@@ -46,14 +45,14 @@ class JetBrainsRuntimeProvisioningTest {
     @HotReloadTest
     @RequestToolchain("25")
     @ExtendBuildGradleKts(CustomLauncherSetup::class)
-    @ExtendSettingsGradleKts(FoojayResolverSetup::class)
+    @ExtendSettingsGradleKts(WithFoojayResolver::class)
     fun `test - use custom launcher - jbr25`(fixture: HotReloadTestFixture) =
         fixture.`test - starts with expected jvm version`("25")
 
     @HotReloadTest
     @RequestToolchain("21")
     @ExtendBuildGradleKts(CustomLauncherSetup::class)
-    @ExtendSettingsGradleKts(FoojayResolverSetup::class)
+    @ExtendSettingsGradleKts(WithFoojayResolver::class)
     fun `test - use custom launcher - jbr21`(fixture: HotReloadTestFixture) =
         fixture.`test - starts with expected jvm version`("21")
 
@@ -87,6 +86,20 @@ class JetBrainsRuntimeProvisioningTest {
     @RequestToolchain("25")
     @ExtendBuildGradleKts(TopLevelToolchain::class)
     fun `test - project level jvmToolchain - 25`(fixture: HotReloadTestFixture) =
+        fixture.`test - starts with expected jvm version`("25")
+
+    @HotReloadTest
+    @RequestToolchain("21")
+    @ExtendBuildGradleKts(TopLevelToolchain::class)
+    @ExtendSettingsGradleKts(WithFoojayResolver::class)
+    fun `test - compatibility with foojay resolver - 21`(fixture: HotReloadTestFixture) =
+        fixture.`test - starts with expected jvm version`("21")
+
+    @HotReloadTest
+    @RequestToolchain("25")
+    @ExtendBuildGradleKts(TopLevelToolchain::class)
+    @ExtendSettingsGradleKts(WithFoojayResolver::class)
+    fun `test - compatibility with foojay resolver - 25`(fixture: HotReloadTestFixture) =
         fixture.`test - starts with expected jvm version`("25")
 
     @HotReloadTest
@@ -155,7 +168,7 @@ class JetBrainsRuntimeProvisioningTest {
         }
     }
 
-    class FoojayResolverSetup : SettingsGradleKtsExtension {
+    class WithFoojayResolver : SettingsGradleKtsExtension {
         override fun plugins(context: ExtensionContext): String {
             return """id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0""""
         }

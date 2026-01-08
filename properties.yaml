@@ -270,6 +270,16 @@ JetBrainsRuntimeVersion:
   documentation: |
     Specifies the default 'JetBrains Runtime' version that shall be used (e.g. '21' or '25')
 
+AutoJetBrainsRuntimeProvisioningEnabled:
+  key: compose.reload.jbr.autoProvisioningEnabled
+  type: boolean
+  default: "false"
+  target: [ build ]
+  visibility: experimental
+  documentation: |
+    When enabled tries to automatically download a compatible version of 'JetBrains Runtime'
+    to be used by the application.
+
 AutoRuntimeDependenciesEnabled:
   key: compose.reload.autoRuntimeDependenciesEnabled
   type: boolean

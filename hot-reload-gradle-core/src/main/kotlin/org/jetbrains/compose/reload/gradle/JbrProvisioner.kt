@@ -104,7 +104,7 @@ internal class JbrProvisioner(
             extractArchive(tempFile, targetPath)
 
             logger.lifecycle("JetBrains Runtime downloaded and extracted to: $targetPath")
-            return targetPath.resolve("Contents/Home")
+            return targetPath
         } finally {
             Files.deleteIfExists(tempFile)
         }
