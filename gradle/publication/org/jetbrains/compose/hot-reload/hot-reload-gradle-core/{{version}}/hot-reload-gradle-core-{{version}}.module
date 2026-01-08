@@ -77,6 +77,13 @@
           }
         },
         {
+          "group": "org.apache.commons",
+          "module": "commons-compress",
+          "version": {
+            "requires": "1.28.0"
+          }
+        },
+        {
           "group": "org.jetbrains.compose.hot-reload",
           "module": "hot-reload-annotations",
           "version": {

@@ -50,7 +50,6 @@ class JetBrainsRuntimeProvisioningTest {
     fun `test - use custom launcher - jbr25`(fixture: HotReloadTestFixture) =
         fixture.`test - starts with expected jvm version`("25")
 
-    @Disabled
     @HotReloadTest
     @RequestToolchain("21")
     @ExtendBuildGradleKts(CustomLauncherSetup::class)
