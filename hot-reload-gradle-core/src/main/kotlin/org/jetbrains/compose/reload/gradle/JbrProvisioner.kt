@@ -14,13 +14,12 @@ import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
-import java.util.zip.ZipInputStream
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 
 /**
- * Provisions JetBrains Runtime (JBR) by downloading and caching it locally.
+ * Provisions JetBrains Runtime by downloading and caching it locally.
  */
 internal class JbrProvisioner(
     private val project: Project,
@@ -29,13 +28,6 @@ internal class JbrProvisioner(
     private val gradleUserHome: File = project.gradle.gradleUserHomeDir
     private val jbrCacheDir: Path = gradleUserHome.toPath().resolve("caches/compose-hot-reload/jbr")
 
-    /**
-     * Provisions JBR for the specified Java version.
-     * Returns the path to the JBR home directory.
-     *
-     * @param javaVersion The Java language version to provision (e.g., 21, 17)
-     * @return Path to the JBR home directory, or null if provisioning failed
-     */
     fun provisionJbr(javaVersion: JavaLanguageVersion): Path? {
         val version = javaVersion.asInt()
         val osArch = detectOsArch() ?: run {
@@ -103,7 +95,7 @@ internal class JbrProvisioner(
 
             // Extract the archive
             targetPath.parent?.createDirectories()
-            extractArchive(tempFile, targetPath, osArch)
+            extractArchive(tempFile, targetPath)
 
             logger.lifecycle("JetBrains Runtime downloaded and extracted to: $targetPath")
             return targetPath.resolve("Contents/Home")
@@ -117,32 +109,9 @@ internal class JbrProvisioner(
         return "https://cache-redirector.jetbrains.com/intellij-jbr/$fileName"
     }
 
-    private fun extractArchive(archiveFile: Path, targetPath: Path, osArch: String) {
+    private fun extractArchive(archiveFile: Path, targetPath: Path) {
         targetPath.createDirectories()
-
-        if (osArch.startsWith("windows")) {
-            // Windows uses zip format
-            extractZip(archiveFile, targetPath)
-        } else {
-            // Unix-like systems use tar.gz
-            extractTarGz(archiveFile, targetPath)
-        }
-    }
-
-    private fun extractZip(zipFile: Path, targetPath: Path) {
-        ZipInputStream(Files.newInputStream(zipFile)).use { zis ->
-            var entry = zis.nextEntry
-            while (entry != null) {
-                val entryPath = targetPath.resolve(entry.name)
-                if (entry.isDirectory) {
-                    entryPath.createDirectories()
-                } else {
-                    entryPath.parent?.createDirectories()
-                    Files.copy(zis, entryPath, StandardCopyOption.REPLACE_EXISTING)
-                }
-                entry = zis.nextEntry
-            }
-        }
+        extractTarGz(archiveFile, targetPath)
     }
 
     private fun extractTarGz(tarGzFile: Path, targetPath: Path) {
