@@ -43,16 +43,22 @@ public fun renderSettingsGradleKts(context: ExtensionContext): String = settings
         dependencyResolutionManagementRepositoriesKey(extension.repositories(context))
     }
 
-    ServiceLoader.load(SettingsGradleKtsExtension::class.java).toList().forEach { extension ->
-        headerKey(extension.header(context))
-        pluginManagementKey(extension.pluginManagement(context))
-        pluginManagementPluginsKey(extension.pluginManagementPlugins(context))
-        pluginManagementRepositoriesKey(extension.pluginManagementRepositories(context))
-        pluginsKey(extension.plugins(context))
-        dependencyResolutionManagementKey(extension.dependencyResolutionManagement(context))
-        dependencyResolutionManagementRepositoriesKey(extension.dependencyResolutionManagementRepositories(context))
-        footerKey(extension.footer(context))
+
+    val extensions = context.findRepeatableAnnotations<ExtendSettingsGradleKts>().map { annotation ->
+        annotation.extension.objectInstance ?: annotation.extension.java.getConstructor().newInstance()
     }
+
+    ServiceLoader.load(SettingsGradleKtsExtension::class.java).toList().plus(extensions)
+        .forEach { extension ->
+            headerKey(extension.header(context))
+            pluginManagementKey(extension.pluginManagement(context))
+            pluginManagementPluginsKey(extension.pluginManagementPlugins(context))
+            pluginManagementRepositoriesKey(extension.pluginManagementRepositories(context))
+            pluginsKey(extension.plugins(context))
+            dependencyResolutionManagementKey(extension.dependencyResolutionManagement(context))
+            dependencyResolutionManagementRepositoriesKey(extension.dependencyResolutionManagementRepositories(context))
+            footerKey(extension.footer(context))
+        }
 }
 
 private const val headerKey = "header"

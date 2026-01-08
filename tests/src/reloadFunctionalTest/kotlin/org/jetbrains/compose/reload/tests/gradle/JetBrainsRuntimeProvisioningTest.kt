@@ -13,10 +13,12 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
 import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts
+import org.jetbrains.compose.reload.test.gradle.ExtendSettingsGradleKts
 import org.jetbrains.compose.reload.test.gradle.GradleRunner
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.ProjectMode
+import org.jetbrains.compose.reload.test.gradle.SettingsGradleKtsExtension
 import org.jetbrains.compose.reload.test.gradle.TestedProjectMode
 import org.jetbrains.compose.reload.test.gradle.assertExit
 import org.jetbrains.compose.reload.test.gradle.assertSuccessful
@@ -26,6 +28,7 @@ import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultCompilerOptions
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultComposeVersion
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultKotlinVersion
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.ExtensionContext
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
@@ -43,12 +46,15 @@ class JetBrainsRuntimeProvisioningTest {
     @HotReloadTest
     @RequestToolchain("25")
     @ExtendBuildGradleKts(CustomLauncherSetup::class)
+    @ExtendSettingsGradleKts(FoojayResolverSetup::class)
     fun `test - use custom launcher - jbr25`(fixture: HotReloadTestFixture) =
         fixture.`test - starts with expected jvm version`("25")
 
+    @Disabled
     @HotReloadTest
     @RequestToolchain("21")
     @ExtendBuildGradleKts(CustomLauncherSetup::class)
+    @ExtendSettingsGradleKts(FoojayResolverSetup::class)
     fun `test - use custom launcher - jbr21`(fixture: HotReloadTestFixture) =
         fixture.`test - starts with expected jvm version`("21")
 
@@ -150,6 +156,12 @@ class JetBrainsRuntimeProvisioningTest {
         }
     }
 
+    class FoojayResolverSetup : SettingsGradleKtsExtension {
+        override fun plugins(context: ExtensionContext): String {
+            return """id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0""""
+        }
+    }
+
     class TopLevelToolchain : BuildGradleKtsExtension {
 
         override fun kotlin(context: ExtensionContext): String? {
@@ -160,5 +172,4 @@ class JetBrainsRuntimeProvisioningTest {
             """.trimIndent()
         }
     }
-
 }

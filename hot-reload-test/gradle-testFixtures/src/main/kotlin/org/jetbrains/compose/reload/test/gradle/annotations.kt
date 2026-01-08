@@ -48,6 +48,10 @@ public annotation class ExtendBuildGradleKts(val extension: KClass<out BuildGrad
 
 @Repeatable
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
+public annotation class ExtendSettingsGradleKts(val extension: KClass<out SettingsGradleKtsExtension>)
+
+@Repeatable
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 public annotation class ExtendGradleProperties(val extension: KClass<out GradlePropertiesExtension>)
 
 @Repeatable
