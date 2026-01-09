@@ -58,27 +58,15 @@ class JetBrainsRuntimeProvisioningTest {
     @HotReloadTest
     @RequestToolchain("21")
     @ExtendBuildGradleKts(TopLevelToolchain::class)
+    @ExtendSettingsGradleKts(WithFoojayResolver::class)
     fun `test - project level jvmToolchain - 21`(fixture: HotReloadTestFixture) =
         fixture.`test - starts with expected jvm version`("21")
 
     @HotReloadTest
     @RequestToolchain("25")
     @ExtendBuildGradleKts(TopLevelToolchain::class)
+    @ExtendSettingsGradleKts(WithFoojayResolver::class)
     fun `test - project level jvmToolchain - 25`(fixture: HotReloadTestFixture) =
-        fixture.`test - starts with expected jvm version`("25")
-
-    @HotReloadTest
-    @RequestToolchain("21")
-    @ExtendBuildGradleKts(TopLevelToolchain::class)
-    @ExtendSettingsGradleKts(WithFoojayResolver::class)
-    fun `test - compatibility with foojay resolver - 21`(fixture: HotReloadTestFixture) =
-        fixture.`test - starts with expected jvm version`("21")
-
-    @HotReloadTest
-    @RequestToolchain("25")
-    @ExtendBuildGradleKts(TopLevelToolchain::class)
-    @ExtendSettingsGradleKts(WithFoojayResolver::class)
-    fun `test - compatibility with foojay resolver - 25`(fixture: HotReloadTestFixture) =
         fixture.`test - starts with expected jvm version`("25")
 
     @HotReloadTest
@@ -132,10 +120,7 @@ class JetBrainsRuntimeProvisioningTest {
             )
         }
 
-        /* Enable automatic JBR provisioning */
-        val clientPid = startClient(
-            "-D${HotReloadProperty.AutoJetBrainsRuntimeProvisioningEnabled.key}=true"
-        ) ?: error("Missing 'clientPid'")
+        val clientPid = startClient() ?: error("Missing 'clientPid'")
 
         val javaBinary = ProcessHandle.of(clientPid).get().info().command().get()
         val javaHome = JavaHome.fromExecutable(Path(javaBinary))

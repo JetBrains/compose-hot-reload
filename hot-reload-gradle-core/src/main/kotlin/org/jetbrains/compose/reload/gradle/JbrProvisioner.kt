@@ -17,6 +17,7 @@ import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.inputStream
@@ -72,7 +73,7 @@ internal class JbrProvisioner(
     }
 
     private fun getJbrPath(jbrVersion: JbrVersion, os: Os, arch: Arch): Path {
-        return jbrCacheDir.resolve("jbr-$jbrVersion-${os.osName}-${arch.archName}")
+        return jbrCacheDir.resolve("jbr_jcef-${jbrVersion.jbrVersion}-${os.osName}-${arch.archName}-${jbrVersion.jbrBuild}")
     }
 
     private fun downloadAndExtractJbr(jbrVersion: JbrVersion, os: Os, arch: Arch, targetPath: Path): Path {
@@ -86,7 +87,7 @@ internal class JbrProvisioner(
             }
 
             targetPath.parent?.createDirectories()
-            extractArchive(tempFile, targetPath)
+            extractArchive(tempFile, targetPath.parent)
 
             logger.lifecycle("JetBrains Runtime downloaded and extracted to: $targetPath")
             return targetPath
@@ -96,7 +97,7 @@ internal class JbrProvisioner(
     }
 
     private fun downloadUrl(jbrVersion: JbrVersion, os: Os, arch: Arch): String {
-        val fileName = "jbr-${jbrVersion.jbrVersion}-${os.osName}-${arch.archName}-${jbrVersion.jbrBuild}.tar.gz"
+        val fileName = "jbr_jcef-${jbrVersion.jbrVersion}-${os.osName}-${arch.archName}-${jbrVersion.jbrBuild}.tar.gz"
         return "https://cache-redirector.jetbrains.com/intellij-jbr/$fileName"
     }
 
@@ -122,6 +123,10 @@ internal class JbrProvisioner(
                     Files.newOutputStream(f.toPath()).use { o ->
                         IOUtils.copy(archive, o)
                     }
+                    val mode = entry.mode
+                    f.setReadable((mode and 0x100) != 0, false)
+                    f.setWritable((mode and 0x080) != 0, false)
+                    f.setExecutable((mode and 0x040) != 0, false)
                 }
             }
             logger.info("Archive extracted to: $targetPath")
