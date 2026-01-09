@@ -24,7 +24,6 @@ import org.jetbrains.compose.reload.test.gradle.assertExit
 import org.jetbrains.compose.reload.test.gradle.assertSuccessful
 import org.jetbrains.compose.reload.test.gradle.buildFlow
 import org.jetbrains.compose.reload.test.gradle.findAnnotation
-import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultCompilerOptions
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultComposeVersion
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultKotlinVersion
@@ -55,26 +54,6 @@ class JetBrainsRuntimeProvisioningTest {
     @ExtendSettingsGradleKts(WithFoojayResolver::class)
     fun `test - use custom launcher - jbr21`(fixture: HotReloadTestFixture) =
         fixture.`test - starts with expected jvm version`("21")
-
-    private fun HotReloadTestFixture.`test - starts with expected jvm version`(version: String) = runTest {
-        val client = initialSourceCode(
-            """
-            import org.jetbrains.compose.reload.test.*
-            fun main() = screenshotTestApplication {}
-        """.trimIndent()
-        ) {
-            skipToMessage<OrchestrationMessage.ClientConnected> { message ->
-                message.clientRole == OrchestrationClientRole.Application
-            }
-        }
-
-        val clientPid = client.clientPid ?: error("Missing 'clientPid'")
-        val javaBinary = ProcessHandle.of(clientPid).get().info().command().get()
-        val javaHome = JavaHome.fromExecutable(Path(javaBinary))
-        val releaseFileContent = javaHome.readReleaseFile()
-        assertEquals(version, releaseFileContent.javaVersion?.split(".")?.first())
-        assertEquals("JetBrains s.r.o.", releaseFileContent.implementor)
-    }
 
     @HotReloadTest
     @RequestToolchain("21")
@@ -126,11 +105,52 @@ class JetBrainsRuntimeProvisioningTest {
         }
 
         /* Run with the intellij fallback property */
+        val clientPid = fixture.startClient(
+            "-D${HotReloadProperty.IdeaJetBrainsRuntimeBinary.key}=${JavaHome.current().javaExecutable.absolutePathString()}"
+        )
+        val clientProcessHandle = ProcessHandle.of(clientPid ?: error("Missing 'clientPid'")).get()
+
+        assertEquals(
+            JavaHome.current().javaExecutable.absolutePathString(),
+            clientProcessHandle.info().command().get()
+        )
+
+        fixture.sendMessage(OrchestrationMessage.ShutdownRequest("Requested by test")) {
+            clientProcessHandle.onExit().await()
+        }
+    }
+
+    private fun HotReloadTestFixture.`test - starts with expected jvm version`(
+        version: String
+    ) = runTest {
+        runTransaction {
+            writeCode(
+                source = """
+                    import org.jetbrains.compose.reload.test.*
+                    fun main() = screenshotTestApplication {}
+                    """.trimIndent()
+            )
+        }
+
+        /* Enable automatic JBR provisioning */
+        val clientPid = startClient(
+            "-D${HotReloadProperty.AutoJetBrainsRuntimeProvisioningEnabled.key}=true"
+        ) ?: error("Missing 'clientPid'")
+
+        val javaBinary = ProcessHandle.of(clientPid).get().info().command().get()
+        val javaHome = JavaHome.fromExecutable(Path(javaBinary))
+        val releaseFileContent = javaHome.readReleaseFile()
+        assertEquals(version, releaseFileContent.javaVersion?.split(".")?.first())
+        assertEquals("JetBrains s.r.o.", releaseFileContent.implementor)
+    }
+
+    private suspend fun HotReloadTestFixture.startClient(vararg args: String): Long? {
+        /* Run with the intellij fallback property */
         val client = runTransaction {
-            fixture.launchTestDaemon {
-                val buildEvents = fixture.gradleRunner.buildFlow(
+            this@startClient.launchTestDaemon {
+                val buildEvents = this@startClient.gradleRunner.buildFlow(
                     "hotRunJvm",
-                    "-D${HotReloadProperty.IdeaJetBrainsRuntimeBinary.key}=${JavaHome.current().javaExecutable.absolutePathString()}",
+                    *args,
                     "--mainClass", "MainKt"
                 ).toList()
                 buildEvents.assertSuccessful()
@@ -141,16 +161,7 @@ class JetBrainsRuntimeProvisioningTest {
             }
         }
 
-        val clientProcessHandle = ProcessHandle.of(client.clientPid ?: error("Missing 'clientPid'")).get()
-
-        assertEquals(
-            JavaHome.current().javaExecutable.absolutePathString(),
-            clientProcessHandle.info().command().get()
-        )
-
-        fixture.sendMessage(OrchestrationMessage.ShutdownRequest("Requested by test")) {
-            clientProcessHandle.onExit().await()
-        }
+        return client.clientPid
     }
 
     class CustomLauncherSetup : BuildGradleKtsExtension {

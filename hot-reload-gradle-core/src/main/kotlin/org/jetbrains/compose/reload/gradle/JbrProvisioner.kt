@@ -13,7 +13,6 @@ import org.gradle.api.logging.Logger
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.jetbrains.compose.reload.core.Os
 import java.io.File
-import java.io.IOException
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
@@ -26,7 +25,7 @@ import kotlin.io.path.inputStream
  * Provisions JetBrains Runtime by downloading and caching it locally.
  */
 internal class JbrProvisioner(
-    private val project: Project,
+    project: Project,
     private val logger: Logger
 ) {
     private val gradleUserHome: File = project.gradle.gradleUserHomeDir
@@ -55,7 +54,10 @@ internal class JbrProvisioner(
 
         }
 
-        return jbrPath.resolve("Contents/Home")
+        return when (os) {
+            Os.MacOs -> jbrPath.resolve("Contents/Home")
+            else -> jbrPath
+        }
     }
 
     private fun selectJbrVersion(version: JavaLanguageVersion): JbrVersion {
@@ -114,14 +116,9 @@ internal class JbrProvisioner(
                 }
                 val f = targetPath.resolve(entry.name).toFile()
                 if (entry.isDirectory()) {
-                    if (!f.isDirectory() && !f.mkdirs()) {
-                        throw IOException("failed to create directory " + f)
-                    }
+                    f.mkdirs()
                 } else {
-                    val parent = f.getParentFile()
-                    if (!parent.isDirectory() && !parent.mkdirs()) {
-                        throw IOException("failed to create directory " + parent)
-                    }
+                    f.parentFile.mkdirs()
                     Files.newOutputStream(f.toPath()).use { o ->
                         IOUtils.copy(archive, o)
                     }
@@ -159,10 +156,6 @@ internal class JbrProvisioner(
                     else -> null
                 }
             }
-
-            @JvmStatic
-            fun current(): Arch = currentOrNull()
-                ?: error("Could not determine current OS arch: ${System.getProperty("os.arch")}")
         }
     }
 }
