@@ -89,6 +89,7 @@ include(":hot-reload-devtools-api")
 include(":hot-reload-test")
 include(":hot-reload-test:core")
 include(":hot-reload-test:gradle-plugin")
+include(":hot-reload-test:gradle-jbr-resolver-plugin")
 include(":hot-reload-test:gradle-testFixtures")
 include(":tests")
 
