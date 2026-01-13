@@ -121,7 +121,7 @@ internal fun reinitializeStaticsIfNecessary(reload: Reload, instrumentation: Ins
 
     val classInitializerDependencies = dirtyClasses.associateWith { clazz ->
         reload.dirty.dirtyMethodIds[clazz.classId.classInitializerMethodId].orEmpty()
-            .flatMap { scope -> scope.methodDependencies }
+            .flatMap { scope -> scope.methodDependenciesList }
             .mapNotNull { dependencyMethodId -> dirtyClassIds[dependencyMethodId.classId].takeIf { it != clazz } }
     }
 

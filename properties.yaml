@@ -397,7 +397,7 @@ StaticsReinitializeMode:
   type: enum
   enumClass: org.jetbrains.compose.reload.core.StaticsReinitializeMode
   target: [ application ]
-  default: "ChangedOnly"
+  default: "AllDirty"
   visibility: experimental
   documentation: |
     Sets the mode for statics re-initialization. 
