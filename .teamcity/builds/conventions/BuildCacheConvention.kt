@@ -38,6 +38,7 @@ fun BuildType.buildCacheConventions() {
         Artifact("gradle-cache-modules-2-metadata-2.107.zip", ".local/gradle/caches/modules-2/metadata-2.107"),
         Artifact("build-cache.zip", ".local/build-cache"),
         Artifact("test-gradle-wrapper.zip", "tests/build/gradleHome/wrapper"),
+        Artifact("test-gradle-jdks.zip", "tests/build/gradleHome/jdks"),
 
         /*
         Declare Gradle caches used by the functionalTests:
