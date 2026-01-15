@@ -319,8 +319,8 @@ private val stdlib = arrayOf(
 )
 
 private val hotReloadAgentDependencies = arrayOf(
-    PathRegex(".*/modules-2/.*/asm-9.9.jar"),
-    PathRegex(".*/modules-2/.*/asm-tree-9.9.jar"),
+    PathRegex(".*/modules-2/.*/asm-9.9.1.jar"),
+    PathRegex(".*/modules-2/.*/asm-tree-9.9.1.jar"),
     PathRegex(".*/modules-2/.*/javassist-3.30.2-GA.jar"),
     PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-agent-${HOT_RELOAD_VERSION.regexEscaped}.jar"),
     PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-core-${HOT_RELOAD_VERSION.regexEscaped}.jar"),
