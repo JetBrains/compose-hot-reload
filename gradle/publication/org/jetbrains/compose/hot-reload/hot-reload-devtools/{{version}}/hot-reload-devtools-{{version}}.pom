@@ -112,13 +112,13 @@
     <dependency>
       <groupId>io.sellmair</groupId>
       <artifactId>evas-jvm</artifactId>
-      <version>1.3.0</version>
+      <version>1.4.0</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>io.sellmair</groupId>
       <artifactId>evas-compose-jvm</artifactId>
-      <version>1.3.0</version>
+      <version>1.4.0</version>
       <scope>runtime</scope>
     </dependency>
   </dependencies>
