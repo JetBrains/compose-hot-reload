@@ -69,7 +69,7 @@
           "group": "org.jetbrains.compose.runtime",
           "module": "runtime",
           "version": {
-            "requires": "1.9.3"
+            "requires": "1.10.0"
           }
         },
         {
@@ -104,7 +104,7 @@
           "group": "org.jetbrains.compose.desktop",
           "module": "desktop",
           "version": {
-            "requires": "1.9.3"
+            "requires": "1.10.0"
           }
         },
         {
@@ -118,7 +118,7 @@
           "group": "org.jetbrains.compose.components",
           "module": "components-resources",
           "version": {
-            "requires": "1.9.3"
+            "requires": "1.10.0"
           }
         },
         {
