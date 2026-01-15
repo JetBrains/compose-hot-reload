@@ -84,8 +84,8 @@ class FooKt {
             InsnNode [4]
             InsnNode [126]
             MethodInsnNode(androidx/compose/runtime/Composer.shouldExecute (ZI)Z) [185]
-        JumpToken(L76, opocde=153)
-            JumpInsNode(L76)) [153])
+        JumpToken(L69, opocde=153)
+            JumpInsNode(L69)) [153])
         BlockToken(1)
             MethodInsnNode(androidx/compose/runtime/ComposerKt.isTraceInProgress ()Z) [184]
         JumpToken(L3, opocde=153)
@@ -170,9 +170,9 @@ class FooKt {
             LabelNode(L11)
         BlockToken(1)
             VarInsnNode [25]
-        SourceInformationMarkerStart(key=ComposeGroupKey(key=1341605231), sourceInformation='CC(Column)P(2,3,1)87@4443L61,88@4509L134:Column.kt#2w3rfo')
+        SourceInformationMarkerStart(key=ComposeGroupKey(key=1341605231), sourceInformation='CC(Column)N(modifier,verticalArrangement,horizontalAlignment,content)87@4443L61,88@4509L134:Column.kt#2w3rfo')
             LdcInsnNode(1341605231) [18]
-            LdcInsnNode(CC(Column)P(2,3,1)87@4443L61,88@4509L134:Column.kt#2w3rfo) [18]
+            LdcInsnNode(CC(Column)N(modifier,verticalArrangement,horizontalAlignment,content)87@4443L61,88@4509L134:Column.kt#2w3rfo) [18]
             LabelNode(L12)
             LineNumberNode [-1]
             MethodInsnNode(androidx/compose/runtime/ComposerKt.sourceInformationMarkerStart (Landroidx/compose/runtime/Composer;ILjava/lang/String;)V) [184]
@@ -220,7 +220,15 @@ class FooKt {
         LabelToken(L17, lineNumber=27)
             LabelNode(L17)
             LineNumberNode [-1]
-        BlockToken(8)
+        BlockToken(2)
+            VarInsnNode [25]
+            VarInsnNode [58]
+        LabelToken(L18, lineNumber=26)
+            LabelNode(L18)
+            LineNumberNode [-1]
+        BlockToken(10)
+            VarInsnNode [25]
+            VarInsnNode [58]
             VarInsnNode [25]
             VarInsnNode [58]
             IntInsnNode [16]
@@ -229,28 +237,28 @@ class FooKt {
             InsnNode [120]
             InsnNode [126]
             VarInsnNode [54]
-        LabelToken(L18, lineNumber=24)
-            LabelNode(L18)
+        LabelToken(L19, lineNumber=24)
+            LabelNode(L19)
             LineNumberNode [-1]
         BlockToken(1)
             InsnNode [0]
-        LabelToken(L19)
-            LabelNode(L19)
+        LabelToken(L20)
+            LabelNode(L20)
         BlockToken(2)
             InsnNode [3]
             VarInsnNode [54]
-        LabelToken(L20)
-            LabelNode(L20)
+        LabelToken(L21)
+            LabelNode(L21)
         BlockToken(1)
             VarInsnNode [25]
-        SourceInformationMarkerStart(key=ComposeGroupKey(key=-1159599143), sourceInformation='CC(Layout)P(!1,2)80@3267L27,83@3433L360:Layout.kt#80mrfh')
+        SourceInformationMarkerStart(key=ComposeGroupKey(key=-1159599143), sourceInformation='CC(Layout)N(content,modifier,measurePolicy)81@3355L27,84@3521L416:Layout.kt#80mrfh')
             LdcInsnNode(-1159599143) [18]
-            LdcInsnNode(CC(Layout)P(!1,2)80@3267L27,83@3433L360:Layout.kt#80mrfh) [18]
-            LabelNode(L21)
+            LdcInsnNode(CC(Layout)N(content,modifier,measurePolicy)81@3355L27,84@3521L416:Layout.kt#80mrfh) [18]
+            LabelNode(L22)
             LineNumberNode [-1]
             MethodInsnNode(androidx/compose/runtime/ComposerKt.sourceInformationMarkerStart (Landroidx/compose/runtime/Composer;ILjava/lang/String;)V) [184]
-        LabelToken(L22, lineNumber=29)
-            LabelNode(L22)
+        LabelToken(L23, lineNumber=29)
+            LabelNode(L23)
             LineNumberNode [-1]
         BlockToken(5)
             VarInsnNode [25]
@@ -258,33 +266,35 @@ class FooKt {
             MethodInsnNode(androidx/compose/runtime/ComposablesKt.getCurrentCompositeKeyHashCode (Landroidx/compose/runtime/Composer;I)J) [184]
             MethodInsnNode(java/lang/Long.hashCode (J)I) [184]
             VarInsnNode [54]
-        LabelToken(L23)
-            LabelNode(L23)
+        LabelToken(L24)
+            LabelNode(L24)
         BlockToken(1)
             VarInsnNode [25]
-        LabelToken(L24, lineNumber=30)
-            LabelNode(L24)
+        LabelToken(L25, lineNumber=30)
+            LabelNode(L25)
             LineNumberNode [-1]
         BlockToken(2)
             MethodInsnNode(androidx/compose/runtime/Composer.getCurrentCompositionLocalMap ()Landroidx/compose/runtime/CompositionLocalMap;) [185]
             VarInsnNode [58]
-        LabelToken(L25)
-            LabelNode(L25)
+        LabelToken(L26)
+            LabelNode(L26)
         BlockToken(1)
             VarInsnNode [25]
-        LabelToken(L26, lineNumber=31)
-            LabelNode(L26)
+        LabelToken(L27, lineNumber=31)
+            LabelNode(L27)
             LineNumberNode [-1]
         BlockToken(3)
             VarInsnNode [25]
             MethodInsnNode(androidx/compose/ui/ComposedModifierKt.materializeModifier (Landroidx/compose/runtime/Composer;Landroidx/compose/ui/Modifier;)Landroidx/compose/ui/Modifier;) [184]
             VarInsnNode [58]
-        LabelToken(L27, lineNumber=33)
-            LabelNode(L27)
+        LabelToken(L28, lineNumber=33)
+            LabelNode(L28)
             LineNumberNode [-1]
-        BlockToken(11)
+        BlockToken(13)
             FieldInsnNode [178]
             MethodInsnNode(androidx/compose/ui/node/ComposeUiNode$Companion.getConstructor ()Lkotlin/jvm/functions/Function0;) [182]
+            VarInsnNode [58]
+            VarInsnNode [25]
             VarInsnNode [58]
             IntInsnNode [16]
             IntInsnNode [17]
@@ -294,90 +304,90 @@ class FooKt {
             InsnNode [126]
             InsnNode [128]
             VarInsnNode [54]
-        LabelToken(L28, lineNumber=32)
-            LabelNode(L28)
+        LabelToken(L29, lineNumber=32)
+            LabelNode(L29)
             LineNumberNode [-1]
         BlockToken(1)
             InsnNode [0]
-        LabelToken(L29)
-            LabelNode(L29)
+        LabelToken(L30)
+            LabelNode(L30)
         BlockToken(2)
             InsnNode [3]
             VarInsnNode [54]
-        LabelToken(L30)
-            LabelNode(L30)
+        LabelToken(L31)
+            LabelNode(L31)
         BlockToken(1)
             VarInsnNode [25]
         SourceInformationMarkerStart(key=ComposeGroupKey(key=-553112988), sourceInformation='CC(ReusableComposeNode)N(factory,update,content)399@15590L9:Composables.kt#9igjgp')
             LdcInsnNode(-553112988) [18]
             LdcInsnNode(CC(ReusableComposeNode)N(factory,update,content)399@15590L9:Composables.kt#9igjgp) [18]
-            LabelNode(L31)
+            LabelNode(L32)
             LineNumberNode [-1]
             MethodInsnNode(androidx/compose/runtime/ComposerKt.sourceInformationMarkerStart (Landroidx/compose/runtime/Composer;ILjava/lang/String;)V) [184]
-        LabelToken(L32, lineNumber=35)
-            LabelNode(L32)
+        LabelToken(L33, lineNumber=35)
+            LabelNode(L33)
             LineNumberNode [-1]
         BlockToken(3)
             VarInsnNode [25]
             MethodInsnNode(androidx/compose/runtime/Composer.getApplier ()Landroidx/compose/runtime/Applier;) [185]
             TypeInsnNode [193]
-        JumpToken(L33, opocde=154)
-            JumpInsNode(L33)) [154])
+        JumpToken(L34, opocde=154)
+            JumpInsNode(L34)) [154])
         BlockToken(1)
             MethodInsnNode(androidx/compose/runtime/ComposablesKt.invalidApplier ()V) [184]
-        LabelToken(L33)
-            LabelNode(L33)
+        LabelToken(L34)
+            LabelNode(L34)
         BlockToken(2)
             FrameNode [-1]
             VarInsnNode [25]
-        LabelToken(L34, lineNumber=36)
-            LabelNode(L34)
+        LabelToken(L35, lineNumber=36)
+            LabelNode(L35)
             LineNumberNode [-1]
         BlockToken(1)
             MethodInsnNode(androidx/compose/runtime/Composer.startReusableNode ()V) [185]
-        LabelToken(L35, lineNumber=37)
-            LabelNode(L35)
-            LineNumberNode [-1]
-        BlockToken(2)
-            VarInsnNode [25]
-            MethodInsnNode(androidx/compose/runtime/Composer.getInserting ()Z) [185]
-        JumpToken(L37, opocde=153)
-            JumpInsNode(L37)) [153])
-        BlockToken(1)
-            VarInsnNode [25]
-        LabelToken(L36, lineNumber=38)
+        LabelToken(L36, lineNumber=37)
             LabelNode(L36)
             LineNumberNode [-1]
         BlockToken(2)
             VarInsnNode [25]
-            MethodInsnNode(androidx/compose/runtime/Composer.createNode (Lkotlin/jvm/functions/Function0;)V) [185]
-        JumpToken(L39, opocde=167)
-            JumpInsNode(L39)) [GOTO])
-        LabelToken(L37)
+            MethodInsnNode(androidx/compose/runtime/Composer.getInserting ()Z) [185]
+        JumpToken(L38, opocde=153)
+            JumpInsNode(L38)) [153])
+        BlockToken(1)
+            VarInsnNode [25]
+        LabelToken(L37, lineNumber=38)
             LabelNode(L37)
+            LineNumberNode [-1]
+        BlockToken(2)
+            VarInsnNode [25]
+            MethodInsnNode(androidx/compose/runtime/Composer.createNode (Lkotlin/jvm/functions/Function0;)V) [185]
+        JumpToken(L40, opocde=167)
+            JumpInsNode(L40)) [GOTO])
+        LabelToken(L38)
+            LabelNode(L38)
         BlockToken(2)
             FrameNode [-1]
             VarInsnNode [25]
-        LabelToken(L38, lineNumber=40)
-            LabelNode(L38)
+        LabelToken(L39, lineNumber=40)
+            LabelNode(L39)
             LineNumberNode [-1]
         BlockToken(1)
             MethodInsnNode(androidx/compose/runtime/Composer.useNode ()V) [185]
-        LabelToken(L39, lineNumber=42)
-            LabelNode(L39)
+        LabelToken(L40, lineNumber=42)
+            LabelNode(L40)
             LineNumberNode [-1]
         BlockToken(4)
             FrameNode [-1]
             VarInsnNode [25]
             MethodInsnNode(androidx/compose/runtime/Updater.constructor-impl (Landroidx/compose/runtime/Composer;)Landroidx/compose/runtime/Composer;) [184]
             VarInsnNode [58]
-        LabelToken(L40)
-            LabelNode(L40)
+        LabelToken(L41)
+            LabelNode(L41)
         BlockToken(2)
             InsnNode [3]
             VarInsnNode [54]
-        LabelToken(L41, lineNumber=43)
-            LabelNode(L41)
+        LabelToken(L42, lineNumber=43)
+            LabelNode(L42)
             LineNumberNode [-1]
         BlockToken(5)
             VarInsnNode [25]
@@ -385,8 +395,8 @@ class FooKt {
             FieldInsnNode [178]
             MethodInsnNode(androidx/compose/ui/node/ComposeUiNode$Companion.getSetMeasurePolicy ()Lkotlin/jvm/functions/Function2;) [182]
             MethodInsnNode(androidx/compose/runtime/Updater.set-impl (Landroidx/compose/runtime/Composer;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)V) [184]
-        LabelToken(L42, lineNumber=44)
-            LabelNode(L42)
+        LabelToken(L43, lineNumber=44)
+            LabelNode(L43)
             LineNumberNode [-1]
         BlockToken(5)
             VarInsnNode [25]
@@ -394,81 +404,26 @@ class FooKt {
             FieldInsnNode [178]
             MethodInsnNode(androidx/compose/ui/node/ComposeUiNode$Companion.getSetResolvedCompositionLocals ()Lkotlin/jvm/functions/Function2;) [182]
             MethodInsnNode(androidx/compose/runtime/Updater.set-impl (Landroidx/compose/runtime/Composer;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)V) [184]
-        LabelToken(L43, lineNumber=45)
-            LabelNode(L43)
+        LabelToken(L44, lineNumber=45)
+            LabelNode(L44)
             LineNumberNode [-1]
-        BlockToken(3)
+        BlockToken(6)
+            VarInsnNode [25]
+            VarInsnNode [21]
+            MethodInsnNode(java/lang/Integer.valueOf (I)Ljava/lang/Integer;) [184]
             FieldInsnNode [178]
             MethodInsnNode(androidx/compose/ui/node/ComposeUiNode$Companion.getSetCompositeKeyHash ()Lkotlin/jvm/functions/Function2;) [182]
-            VarInsnNode [58]
-        LabelToken(L44)
-            LabelNode(L44)
-        BlockToken(2)
-            InsnNode [3]
-            VarInsnNode [54]
+            MethodInsnNode(androidx/compose/runtime/Updater.init-impl (Landroidx/compose/runtime/Composer;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)V) [184]
         LabelToken(L45, lineNumber=46)
             LabelNode(L45)
             LineNumberNode [-1]
-        BlockToken(2)
+        BlockToken(4)
             VarInsnNode [25]
-            VarInsnNode [58]
-        LabelToken(L46)
+            FieldInsnNode [178]
+            MethodInsnNode(androidx/compose/ui/node/ComposeUiNode$Companion.getApplyOnDeactivatedNodeAssertion ()Lkotlin/jvm/functions/Function1;) [182]
+            MethodInsnNode(androidx/compose/runtime/Updater.reconcile-impl (Landroidx/compose/runtime/Composer;Lkotlin/jvm/functions/Function1;)V) [184]
+        LabelToken(L46, lineNumber=47)
             LabelNode(L46)
-        BlockToken(2)
-            InsnNode [3]
-            VarInsnNode [54]
-        LabelToken(L47, lineNumber=47)
-            LabelNode(L47)
-            LineNumberNode [-1]
-        BlockToken(2)
-            VarInsnNode [25]
-            MethodInsnNode(androidx/compose/runtime/Composer.getInserting ()Z) [185]
-        JumpToken(L48, opocde=154)
-            JumpInsNode(L48)) [154])
-        BlockToken(5)
-            VarInsnNode [25]
-            MethodInsnNode(androidx/compose/runtime/Composer.rememberedValue ()Ljava/lang/Object;) [185]
-            VarInsnNode [21]
-            MethodInsnNode(java/lang/Integer.valueOf (I)Ljava/lang/Integer;) [184]
-            MethodInsnNode(kotlin/jvm/internal/Intrinsics.areEqual (Ljava/lang/Object;Ljava/lang/Object;)Z) [184]
-        JumpToken(L50, opocde=154)
-            JumpInsNode(L50)) [154])
-        LabelToken(L48, lineNumber=48)
-            LabelNode(L48)
-            LineNumberNode [-1]
-        BlockToken(5)
-            FrameNode [-1]
-            VarInsnNode [25]
-            VarInsnNode [21]
-            MethodInsnNode(java/lang/Integer.valueOf (I)Ljava/lang/Integer;) [184]
-            MethodInsnNode(androidx/compose/runtime/Composer.updateRememberedValue (Ljava/lang/Object;)V) [185]
-        LabelToken(L49, lineNumber=49)
-            LabelNode(L49)
-            LineNumberNode [-1]
-        BlockToken(5)
-            VarInsnNode [25]
-            VarInsnNode [21]
-            MethodInsnNode(java/lang/Integer.valueOf (I)Ljava/lang/Integer;) [184]
-            VarInsnNode [25]
-            MethodInsnNode(androidx/compose/runtime/Composer.apply (Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)V) [185]
-        LabelToken(L50, lineNumber=51)
-            LabelNode(L50)
-            LineNumberNode [-1]
-        BlockToken(2)
-            FrameNode [-1]
-            InsnNode [0]
-        LabelToken(L51, lineNumber=46)
-            LabelNode(L51)
-            LineNumberNode [-1]
-        BlockToken(1)
-            InsnNode [0]
-        LabelToken(L52, lineNumber=51)
-            LabelNode(L52)
-            LineNumberNode [-1]
-        BlockToken(1)
-            InsnNode [0]
-        LabelToken(L53, lineNumber=52)
-            LabelNode(L53)
             LineNumberNode [-1]
         BlockToken(5)
             VarInsnNode [25]
@@ -476,18 +431,18 @@ class FooKt {
             FieldInsnNode [178]
             MethodInsnNode(androidx/compose/ui/node/ComposeUiNode$Companion.getSetModifier ()Lkotlin/jvm/functions/Function2;) [182]
             MethodInsnNode(androidx/compose/runtime/Updater.set-impl (Landroidx/compose/runtime/Composer;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)V) [184]
-        LabelToken(L54, lineNumber=53)
-            LabelNode(L54)
+        LabelToken(L47, lineNumber=48)
+            LabelNode(L47)
             LineNumberNode [-1]
         BlockToken(1)
             InsnNode [0]
-        LabelToken(L55, lineNumber=42)
-            LabelNode(L55)
+        LabelToken(L48, lineNumber=42)
+            LabelNode(L48)
             LineNumberNode [-1]
         BlockToken(1)
             InsnNode [0]
-        LabelToken(L56, lineNumber=54)
-            LabelNode(L56)
+        LabelToken(L49, lineNumber=49)
+            LabelNode(L49)
             LineNumberNode [-1]
         BlockToken(8)
             VarInsnNode [25]
@@ -498,19 +453,19 @@ class FooKt {
             InsnNode [126]
             VarInsnNode [54]
             VarInsnNode [58]
-        LabelToken(L57)
-            LabelNode(L57)
+        LabelToken(L50)
+            LabelNode(L50)
         BlockToken(2)
             InsnNode [3]
             VarInsnNode [54]
-        LabelToken(L58)
-            LabelNode(L58)
+        LabelToken(L51)
+            LabelNode(L51)
         BlockToken(1)
             VarInsnNode [25]
         SourceInformationMarkerStart(key=ComposeGroupKey(key=2093002350), sourceInformation='C89@4557L9:Column.kt#2w3rfo')
             LdcInsnNode(2093002350) [18]
             LdcInsnNode(C89@4557L9:Column.kt#2w3rfo) [18]
-            LabelNode(L59)
+            LabelNode(L52)
             LineNumberNode [-1]
             MethodInsnNode(androidx/compose/runtime/ComposerKt.sourceInformationMarkerStart (Landroidx/compose/runtime/Composer;ILjava/lang/String;)V) [184]
         BlockToken(13)
@@ -527,13 +482,13 @@ class FooKt {
             VarInsnNode [58]
             TypeInsnNode [192]
             VarInsnNode [58]
-        LabelToken(L60)
-            LabelNode(L60)
+        LabelToken(L53)
+            LabelNode(L53)
         BlockToken(2)
             InsnNode [3]
             VarInsnNode [54]
-        LabelToken(L61, lineNumber=14)
-            LabelNode(L61)
+        LabelToken(L54, lineNumber=14)
+            LabelNode(L54)
             LineNumberNode [-1]
         BlockToken(23)
             VarInsnNode [25]
@@ -559,88 +514,88 @@ class FooKt {
             InsnNode [3]
             LdcInsnNode(262142) [18]
             MethodInsnNode(androidx/compose/material3/TextKt.Text-Nvy7gAk (Ljava/lang/String;Landroidx/compose/ui/Modifier;JLandroidx/compose/foundation/text/TextAutoSize;JLandroidx/compose/ui/text/font/FontStyle;Landroidx/compose/ui/text/font/FontWeight;Landroidx/compose/ui/text/font/FontFamily;JLandroidx/compose/ui/text/style/TextDecoration;Landroidx/compose/ui/text/style/TextAlign;JIZIILkotlin/jvm/functions/Function1;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;III)V) [184]
-        LabelToken(L62, lineNumber=15)
-            LabelNode(L62)
+        LabelToken(L55, lineNumber=15)
+            LabelNode(L55)
             LineNumberNode [-1]
         BlockToken(1)
             InsnNode [0]
-        LabelToken(L63, lineNumber=25)
-            LabelNode(L63)
+        LabelToken(L56, lineNumber=25)
+            LabelNode(L56)
             LineNumberNode [-1]
         BlockToken(1)
             VarInsnNode [25]
         SourceInformationMarkerEnd
             MethodInsnNode(androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V) [184]
-        LabelToken(L64, lineNumber=54)
-            LabelNode(L64)
+        LabelToken(L57, lineNumber=49)
+            LabelNode(L57)
             LineNumberNode [-1]
         BlockToken(1)
             VarInsnNode [25]
-        LabelToken(L65, lineNumber=55)
-            LabelNode(L65)
+        LabelToken(L58, lineNumber=50)
+            LabelNode(L58)
             LineNumberNode [-1]
         BlockToken(2)
             MethodInsnNode(androidx/compose/runtime/Composer.endNode ()V) [185]
             VarInsnNode [25]
-        LabelToken(L66, lineNumber=34)
+        LabelToken(L59, lineNumber=34)
+            LabelNode(L59)
+            LineNumberNode [-1]
+        SourceInformationMarkerEnd
+            MethodInsnNode(androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V) [184]
+        LabelToken(L60, lineNumber=51)
+            LabelNode(L60)
+            LineNumberNode [-1]
+        BlockToken(1)
+            InsnNode [0]
+        LabelToken(L61)
+            LabelNode(L61)
+        BlockToken(1)
+            VarInsnNode [25]
+        LabelToken(L62, lineNumber=28)
+            LabelNode(L62)
+            LineNumberNode [-1]
+        SourceInformationMarkerEnd
+            MethodInsnNode(androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V) [184]
+        LabelToken(L63, lineNumber=52)
+            LabelNode(L63)
+            LineNumberNode [-1]
+        BlockToken(1)
+            InsnNode [0]
+        LabelToken(L64)
+            LabelNode(L64)
+        BlockToken(1)
+            VarInsnNode [25]
+        LabelToken(L65, lineNumber=17)
+            LabelNode(L65)
+            LineNumberNode [-1]
+        SourceInformationMarkerEnd
+            MethodInsnNode(androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V) [184]
+        LabelToken(L66, lineNumber=53)
             LabelNode(L66)
             LineNumberNode [-1]
-        SourceInformationMarkerEnd
-            MethodInsnNode(androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V) [184]
-        LabelToken(L67, lineNumber=56)
+        BlockToken(1)
+            InsnNode [0]
+        LabelToken(L67)
             LabelNode(L67)
-            LineNumberNode [-1]
-        BlockToken(1)
-            InsnNode [0]
-        LabelToken(L68)
-            LabelNode(L68)
-        BlockToken(1)
-            VarInsnNode [25]
-        LabelToken(L69, lineNumber=28)
-            LabelNode(L69)
-            LineNumberNode [-1]
-        SourceInformationMarkerEnd
-            MethodInsnNode(androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V) [184]
-        LabelToken(L70, lineNumber=57)
-            LabelNode(L70)
-            LineNumberNode [-1]
-        BlockToken(1)
-            InsnNode [0]
-        LabelToken(L71)
-            LabelNode(L71)
-        BlockToken(1)
-            VarInsnNode [25]
-        LabelToken(L72, lineNumber=17)
-            LabelNode(L72)
-            LineNumberNode [-1]
-        SourceInformationMarkerEnd
-            MethodInsnNode(androidx/compose/runtime/ComposerKt.sourceInformationMarkerEnd (Landroidx/compose/runtime/Composer;)V) [184]
-        LabelToken(L73, lineNumber=58)
-            LabelNode(L73)
-            LineNumberNode [-1]
-        BlockToken(1)
-            InsnNode [0]
-        LabelToken(L74)
-            LabelNode(L74)
         BlockToken(1)
             MethodInsnNode(androidx/compose/runtime/ComposerKt.isTraceInProgress ()Z) [184]
-        JumpToken(L77, opocde=153)
-            JumpInsNode(L77)) [153])
+        JumpToken(L70, opocde=153)
+            JumpInsNode(L70)) [153])
         BlockToken(1)
             MethodInsnNode(androidx/compose/runtime/ComposerKt.traceEventEnd ()V) [184]
-        LabelToken(L75)
-            LabelNode(L75)
-        JumpToken(L77, opocde=167)
-            JumpInsNode(L77)) [GOTO])
-        LabelToken(L76, lineNumber=11)
-            LabelNode(L76)
+        LabelToken(L68)
+            LabelNode(L68)
+        JumpToken(L70, opocde=167)
+            JumpInsNode(L70)) [GOTO])
+        LabelToken(L69, lineNumber=11)
+            LabelNode(L69)
             LineNumberNode [-1]
         BlockToken(3)
             FrameNode [-1]
             VarInsnNode [25]
             MethodInsnNode(androidx/compose/runtime/Composer.skipToGroupEnd ()V) [185]
-        LabelToken(L77, lineNumber=16)
-            LabelNode(L77)
+        LabelToken(L70, lineNumber=16)
+            LabelNode(L70)
             LineNumberNode [-1]
         BlockToken(2)
             FrameNode [-1]
@@ -649,27 +604,27 @@ class FooKt {
             MethodInsnNode(androidx/compose/runtime/Composer.endRestartGroup ()Landroidx/compose/runtime/ScopeUpdateScope;) [185]
         BlockToken(1)
             InsnNode [89]
-        JumpToken(L78, opocde=198)
-            JumpInsNode(L78)) [198])
+        JumpToken(L71, opocde=198)
+            JumpInsNode(L71)) [198])
         BlockToken(3)
             VarInsnNode [21]
             InvokeDynamicInsnNode [186]
             MethodInsnNode(androidx/compose/runtime/ScopeUpdateScope.updateScope (Lkotlin/jvm/functions/Function2;)V) [185]
-        JumpToken(L79, opocde=167)
-            JumpInsNode(L79)) [GOTO])
-        LabelToken(L78)
-            LabelNode(L78)
+        JumpToken(L72, opocde=167)
+            JumpInsNode(L72)) [GOTO])
+        LabelToken(L71)
+            LabelNode(L71)
         BlockToken(2)
             FrameNode [-1]
             InsnNode [87]
-        LabelToken(L79)
-            LabelNode(L79)
+        LabelToken(L72)
+            LabelNode(L72)
         BlockToken(1)
             FrameNode [-1]
         ReturnToken(returnInsn=177)
             InsnNode [177]
-        LabelToken(L80)
-            LabelNode(L80)
+        LabelToken(L73)
+            LabelNode(L73)
     }
     
     fun Value(Landroidx/compose/runtime/Composer;I)Ljava/lang/String; {

@@ -39,7 +39,7 @@ FooKt {
         type: Composable
         Method {
             key: 857161579
-            codeHash: 2337359085
+            codeHash: 1814175694
             methodDependencies: [
                 FooKt.App$lambda$1 (ILandroidx/compose/runtime/Composer;I)Lkotlin/Unit;
             ]
@@ -47,7 +47,7 @@ FooKt {
     
             RestartGroup {
                 key: 857161579
-                codeHash: 2276554394
+                codeHash: 2013314005
                 methodDependencies: [
                     FooKt.App$lambda$0$0$0 (Landroidx/compose/ui/graphics/drawscope/DrawScope;)Lkotlin/Unit;
                 ]
@@ -62,7 +62,7 @@ FooKt {
         type: Regular
         Method {
             key: null
-            codeHash: 4086007702
+            codeHash: 145781202
             methodDependencies: []
             fieldDependencies: []
         }
