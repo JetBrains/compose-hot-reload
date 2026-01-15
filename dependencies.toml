@@ -15,7 +15,7 @@ asm = "9.9.1"
 evas = "1.4.0"
 ktor = "3.3.3"
 shadow = "9.3.1"
-kaml = "0.103.0"
+kaml = "0.104.0"
 skiko = "0.9.30"
 gradlePluginPublish = "2.0.0"
 
