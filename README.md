@@ -214,7 +214,7 @@ project, you need to:
 Yes! However, be aware that you can't start the application via the run button in the
 gutter ([CMP-3123](https://youtrack.jetbrains.com/issue/CMP-3123)). Instead, use [Gradle tasks](#from-the-cli).
 
-### I'm encountering issues when running my application with Compose Hot Reload.
+## Feedback and issues
 
 Please check out the list of [known issues/limitations](docs/Known_limitations.md). If you can't find your issue
 there, please [submit a new issue](https://github.com/JetBrains/compose-hot-reload/issues).
