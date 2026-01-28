@@ -114,11 +114,11 @@ suspend fun <T> Project.forAllJvmCompilations(block: suspend (compilation: Kotli
     val futures = mutableListOf<Future<T>>()
 
     withKotlinPlugin {
-        kotlinJvmOrNull?.target?.compilations?.all { compilation ->
+        kotlinJvmOrNull?.target?.compilations?.configureEach { compilation ->
             futures += future { block(compilation) }
         }
-        kotlinMultiplatformOrNull?.targets?.withType(KotlinJvmTarget::class.java)?.all { target ->
-            target.compilations.all { compilation ->
+        kotlinMultiplatformOrNull?.targets?.withType(KotlinJvmTarget::class.java)?.configureEach { target ->
+            target.compilations.configureEach { compilation ->
                 futures += future { block(compilation) }
             }
         }
@@ -135,7 +135,7 @@ suspend fun <T> Project.forAllJvmTargets(block: suspend (target: KotlinTarget) -
             futures += future { block(target) }
         }
 
-        kotlinMultiplatformOrNull?.targets?.withType(KotlinJvmTarget::class.java)?.all { target ->
+        kotlinMultiplatformOrNull?.targets?.withType(KotlinJvmTarget::class.java)?.configureEach { target ->
             futures += future { block(target) }
         }
     }
