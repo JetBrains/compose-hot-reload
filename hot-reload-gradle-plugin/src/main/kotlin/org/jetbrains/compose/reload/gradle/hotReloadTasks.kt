@@ -37,14 +37,14 @@ import kotlin.io.path.exists
 internal val Project.hotReloadLifecycleTask: Future<TaskProvider<ComposeHotReloadLifecycleTask>?> by projectFuture {
     PluginStage.EagerConfiguration.await()
     val name = "reload"
-    if (name in tasks.names) {
-        logger.error("Conflicting '$name' task detected")
-        return@projectFuture null
-    }
-
-    tasks.register(name, ComposeHotReloadLifecycleTask::class.java) { task ->
-        task.description = "Hot Reloads code for all running applications"
-        task.dependsOn(tasks.withType<ComposeHotReloadTask>().matching { it.agentPort.isPresent })
+    try {
+        tasks.register(name, ComposeHotReloadLifecycleTask::class.java) { task ->
+            task.description = "Hot Reloads code for all running applications"
+            task.dependsOn(tasks.withType<ComposeHotReloadTask>().matching { it.agentPort.isPresent })
+        }
+    } catch (e: Exception) {
+        logger.error("Conflicting '$name' task detected: ${e.message}")
+        null
     }
 }
 
@@ -57,8 +57,6 @@ internal val Project.hotReloadTasks: Future<Collection<Provider<ComposeHotReload
 }
 
 internal val KotlinCompilation<*>.hotReloadTask: Future<TaskProvider<ComposeHotReloadTask>> by future {
-    if (hotReloadTaskName in project.tasks.names) return@future project.tasks.named(name, ComposeHotReloadTask::class.java)
-
     val task = project.tasks.register(hotReloadTaskName, ComposeHotReloadTask::class.java) { task ->
         task.description = "Hot Reloads code associated with the '$this'"
         task.onlyIf("Running application is known") { task.agentPort.isPresent }
