@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.gradle
 
 import org.gradle.api.Project
+import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.plugins.JavaPluginExtension
@@ -17,6 +18,7 @@ import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.jvm.toolchain.JvmVendorSpec
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.support.serviceOf
+import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.JavaHome
 import org.jetbrains.compose.reload.core.JavaReleaseFileContent
@@ -29,19 +31,19 @@ import kotlin.io.path.absolutePathString
  *
  * The Runtime can be looked up in three ways, with the following precedence:
  *
- * 1. A user specified the [org.jetbrains.compose.reload.core.HotReloadProperty.JetBrainsRuntimeBinary]
+ * 1. A user specified the [HotReloadProperty.JetBrainsRuntimeBinary]
  * Which indicates that the user wants the given binary to be used, in any case
  *
  * 2. Gradle provisioned
  * This provisioning can even download the suitable JBR (using the foojay resolver).
  * It uses the [JavaToolchainService] to request a JetBrains runtime using a suitable languageVersion.
  * This language version matches the project level toolchain's language version or falls back to the
- * [org.jetbrains.compose.reload.core.HotReloadProperty.JetBrainsRuntimeVersion]
+ * [HotReloadProperty.JetBrainsRuntimeVersion]
  *
  * 3. IntelliJ provided
  * When launching hot reload from IntelliJ (using the Kotlin Multiplatform plugin)
  * then IntelliJ will forward its bundled JetBrains Runtime using the
- * [org.jetbrains.compose.reload.core.HotReloadProperty.IdeaJetBrainsRuntimeBinary]
+ * [HotReloadProperty.IdeaJetBrainsRuntimeBinary]
  * If no other suitable JBR was found, or provisioning in step 2 fails, then we use the JBR from
  * IntelliJ as 'last resort'.
  *
@@ -61,7 +63,7 @@ fun Project.jetbrainsRuntimeLauncher(): Provider<JavaLauncher> {
         try {
             providedJetBrainsRuntimeLauncher() ?: provisionedLauncher.get()
         } catch (e: Throwable) {
-            intellijJetBrainsRuntimeLauncher() ?: throw e
+            autoProvisionedJetBrainsRuntimeLauncher() ?: intellijJetBrainsRuntimeLauncher() ?: throw e
         }
     }
 }
@@ -78,7 +80,7 @@ private fun Project.jetbrainsRuntimeVersion(): Provider<JavaLanguageVersion> {
 
 /**
  * Builds a [JavaLauncher] from the JetBrains Runtime provided by the
- * [org.jetbrains.compose.reload.core.HotReloadProperty.JetBrainsRuntimeBinary] property.
+ * [HotReloadProperty.JetBrainsRuntimeBinary] property.
  * The 'executable' path is specified by the user, the [JavaInstallationMetadata] is then inferred
  * by introspecting the distribution.
  */
@@ -89,8 +91,21 @@ private fun Project.providedJetBrainsRuntimeLauncher(): JavaLauncher? {
 }
 
 /**
+ * Builds a [JavaLauncher] from the JetBrains Runtime automatically provided by the
+ * [JbrProvisioner] if [HotReloadProperty.AutoJetBrainsRuntimeProvisioningEnabled] property is enabled.
+ */
+private fun Project.autoProvisionedJetBrainsRuntimeLauncher(): JavaLauncher? {
+    if (!composeReloadAutoJetBrainsRuntimeProvisioningEnabled) return null
+    val javaHome = JbrProvisioner(
+        gradle.gradleUserHomeDir.toPath(),
+        serviceOf<ArchiveOperations>())
+        .provision(jetbrainsRuntimeVersion().get()) ?: return null
+    return createJavaLauncher(javaHome).also { System.err.println(it) }
+}
+
+/**
  * Builds a [JavaLauncher] from the JetBrains Runtime provided by IntelliJ
- * [org.jetbrains.compose.reload.core.HotReloadProperty.IdeaJetBrainsRuntimeBinary]
+ * [HotReloadProperty.IdeaJetBrainsRuntimeBinary]
  * This JBR can be used as 'fallback' if no other suitable JBR was found
  */
 private fun Project.intellijJetBrainsRuntimeLauncher(): JavaLauncher? {
