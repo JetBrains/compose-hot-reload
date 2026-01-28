@@ -26,6 +26,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 import kotlin.test.Test
+import kotlin.test.assertTrue
 import kotlin.test.fail
 
 class ComposeHotTaskTest {
@@ -128,6 +129,36 @@ class ComposeHotTaskTest {
             actualFile.writeText(actualText)
             fail("Tasks file '${expectFile.toUri()}' did not match")
         }
+    }
+
+    @Test
+    fun `test - lazy realization of hot reload tasks`() {
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply("org.jetbrains.kotlin.multiplatform")
+        project.plugins.apply("org.jetbrains.kotlin.plugin.compose")
+        project.plugins.apply("org.jetbrains.compose")
+        project.plugins.apply("org.jetbrains.compose.hot-reload")
+
+        project.kotlinMultiplatformOrNull?.jvm()
+
+        val realizedDuringConfiguration = mutableSetOf<String>()
+        project.tasks.configureEach { task ->
+            if (task is ComposeHotTask) {
+                realizedDuringConfiguration.add(task.name)
+            }
+        }
+        assertTrue(
+            realizedDuringConfiguration.isEmpty(),
+            "Tasks were realized during configuration:\n$realizedDuringConfiguration"
+        )
+
+        project.evaluate()
+
+        val allHotTasks = project.tasks.filterIsInstance<ComposeHotTask>()
+        assertTrue(
+            allHotTasks.isNotEmpty(),
+            "Compose Hot Reload tasks were not realized:\n$allHotTasks"
+        )
     }
 
     private fun tasksInPackage(): List<Task> {

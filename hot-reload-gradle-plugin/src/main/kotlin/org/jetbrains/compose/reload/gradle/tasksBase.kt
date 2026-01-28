@@ -31,8 +31,8 @@ interface ComposeHotReloadRunTask : ComposeHotTask
 interface ComposeHotReloadOtherTask : ComposeHotTask
 
 internal fun Project.configureComposeHotReloadTasks() {
-    tasks.withType<ComposeHotTask> {
-        group = when (this) {
+    tasks.withType<ComposeHotTask>().configureEach  {
+        it.group = when (it) {
             is ComposeHotReloadOtherTask -> COMPOSE_HOT_RELOAD_OTHER_GROUP
             is ComposeHotReloadRunTask -> COMPOSE_HOT_RELOAD_RUN_GROUP
         }
