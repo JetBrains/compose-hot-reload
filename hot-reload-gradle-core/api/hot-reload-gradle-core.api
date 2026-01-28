@@ -8,6 +8,8 @@ public final class org/jetbrains/compose/reload/gradle/ComposeHotReloadRuntime {
 }
 
 public final class org/jetbrains/compose/reload/gradle/HotReloadGradleEnvironmentKt {
+	public static final fun getComposeReloadAutoJetBrainsRuntimeProvisioningEnabled (Lorg/gradle/api/Project;)Z
+	public static final fun getComposeReloadAutoJetBrainsRuntimeProvisioningEnabledProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
 	public static final fun getComposeReloadDevToolsDetached (Lorg/gradle/api/Project;)Z
 	public static final fun getComposeReloadDevToolsDetachedProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
 	public static final fun getComposeReloadDevToolsEnabled (Lorg/gradle/api/Project;)Z

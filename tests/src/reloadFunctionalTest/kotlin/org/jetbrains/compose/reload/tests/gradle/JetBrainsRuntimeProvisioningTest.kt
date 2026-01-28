@@ -11,12 +11,15 @@ import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.JavaHome
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.test.gradle.AutoJbrProvisioning
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
 import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts
+import org.jetbrains.compose.reload.test.gradle.ExtendSettingsGradleKts
 import org.jetbrains.compose.reload.test.gradle.GradleRunner
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.ProjectMode
+import org.jetbrains.compose.reload.test.gradle.SettingsGradleKtsExtension
 import org.jetbrains.compose.reload.test.gradle.TestedProjectMode
 import org.jetbrains.compose.reload.test.gradle.assertExit
 import org.jetbrains.compose.reload.test.gradle.assertSuccessful
@@ -52,6 +55,42 @@ class JetBrainsRuntimeProvisioningTest {
     fun `test - use custom launcher - jbr21`(fixture: HotReloadTestFixture) =
         fixture.`test - starts with expected jvm version`("21")
 
+    @HotReloadTest
+    @RequestToolchain("21")
+    @ExtendBuildGradleKts(TopLevelToolchain::class)
+    fun `test - project level jvmToolchain - 21`(fixture: HotReloadTestFixture) =
+        fixture.`test - starts with expected jvm version`("21")
+
+    @HotReloadTest
+    @RequestToolchain("25")
+    @ExtendBuildGradleKts(TopLevelToolchain::class)
+    fun `test - project level jvmToolchain - 25`(fixture: HotReloadTestFixture) =
+        fixture.`test - starts with expected jvm version`("25")
+
+
+    /**
+     * We need to create a scenario where JBR is provisioned automatically via [HotReloadProperty.AutoJetBrainsRuntimeProvisioningEnabled].
+     * To create this, we need to ensure that the test project:
+     * 1. Does not use JBR as a toolchain (otherwise our jbr-resolver-plugin would provision it)
+     * 2. Uses the foojay resolver plugin (to provision the necessary JDK for other Gradle tasks)
+     * 3. Does not use foojay resolver plugin for JBR provisioning
+     */
+    @HotReloadTest
+    @AutoJbrProvisioning(isEnabled = true)
+    @RequestToolchain("25", vendor = "AMAZON")
+    @ExtendBuildGradleKts(TopLevelToolchain::class)
+    @ExtendSettingsGradleKts(FoojayResolverPlugin::class)
+    fun `test - automatic jbr provisioning 25`(fixture: HotReloadTestFixture) =
+        fixture.`test - starts with expected jvm version`("25")
+
+    @HotReloadTest
+    @AutoJbrProvisioning(isEnabled = true)
+    @RequestToolchain("21", vendor = "AMAZON")
+    @ExtendBuildGradleKts(TopLevelToolchain::class)
+    @ExtendSettingsGradleKts(FoojayResolverPlugin::class)
+    fun `test - automatic jbr provisioning 21`(fixture: HotReloadTestFixture) =
+        fixture.`test - starts with expected jvm version`("21")
+
     private fun HotReloadTestFixture.`test - starts with expected jvm version`(version: String) = runTest {
         val client = initialSourceCode(
             """
@@ -73,23 +112,14 @@ class JetBrainsRuntimeProvisioningTest {
     }
 
     @HotReloadTest
-    @RequestToolchain("21")
-    @ExtendBuildGradleKts(TopLevelToolchain::class)
-    fun `test - project level jvmToolchain - 21`(fixture: HotReloadTestFixture) =
-        fixture.`test - starts with expected jvm version`("21")
-
-    @HotReloadTest
-    @RequestToolchain("25")
-    @ExtendBuildGradleKts(TopLevelToolchain::class)
-    fun `test - project level jvmToolchain - 25`(fixture: HotReloadTestFixture) =
-        fixture.`test - starts with expected jvm version`("25")
-
-    @HotReloadTest
     fun `test - use intellij fallback`(fixture: HotReloadTestFixture) = fixture.runTest {
-
         /* Provide garbage value, to trigger fallback */
         projectDir.gradleProperties.appendLines(
-            listOf("${HotReloadProperty.JetBrainsRuntimeBinary.key}=xyz.garbage")
+            listOf(
+                "${HotReloadProperty.JetBrainsRuntimeBinary.key}=xyz.garbage",
+                "${HotReloadProperty.GradleJetBrainsRuntimeProvisioningEnabled.key}=false",
+                "${HotReloadProperty.AutoJetBrainsRuntimeProvisioningEnabled.key}=false",
+            )
         )
 
         runTransaction {
@@ -102,7 +132,7 @@ class JetBrainsRuntimeProvisioningTest {
         }
 
         /* Run the project without providing the fallback from the IDE and expect failure*/
-        run {
+        fixture.launchTestDaemon {
             val buildEvents = gradleRunner.buildFlow("hotRunJvm", "--mainClass", "MainKt").toList()
             assertEquals(GradleRunner.ExitCode.failure, buildEvents.assertExit().code)
         }
@@ -153,11 +183,20 @@ class JetBrainsRuntimeProvisioningTest {
     class TopLevelToolchain : BuildGradleKtsExtension {
 
         override fun kotlin(context: ExtensionContext): String? {
-            val version = context.findAnnotation<RequestToolchain>()?.version ?: return null
+            val annotation = context.findAnnotation<RequestToolchain>() ?: return null
 
             return """
-                jvmToolchain($version)
+                jvmToolchain {
+                    languageVersion.set(JavaLanguageVersion.of(${annotation.version}))
+                    vendor.set(JvmVendorSpec.${annotation.vendor})
+                }
             """.trimIndent()
+        }
+    }
+
+    class FoojayResolverPlugin : SettingsGradleKtsExtension {
+        override fun plugins(context: ExtensionContext): String {
+            return """id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0""""
         }
     }
 

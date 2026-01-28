@@ -1,0 +1,21 @@
+versions:
+  - name: "JBR_25"
+    majorVersion: 25
+    version: "25.0.2"
+    build: "b300.57"
+
+  - name: "JBR_21"
+    majorVersion: 21
+    version: "21.0.10"
+    build: "b1163.105"
+    isDefault: true
+  
+  - name: "JBR_17"
+    majorVersion: 17
+    version: "17.0.11"
+    build: "b1312.2"
+
+  - name: "JBR_11"
+    majorVersion: 11
+    version: "11_0_16"
+    build: "b2043.64"

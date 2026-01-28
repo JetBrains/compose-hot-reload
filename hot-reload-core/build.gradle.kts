@@ -1,5 +1,6 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 import org.jetbrains.compose.reload.build.tasks.GenerateHotReloadEnvironmentTask
+import org.jetbrains.compose.reload.build.tasks.GenerateJbrMetadataTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 /*
@@ -162,16 +163,21 @@ run {
             outputSourcesDir = generatedSourceDir
         }
 
+    val generateJbrMetadata =
+        tasks.register<GenerateJbrMetadataTask>("generateJbrMetadata") {
+            outputFile.set(generatedSourceDir.resolve("JbrMetadata.kt"))
+        }
+
     kotlin {
         sourceSets.main.get().kotlin.srcDir(generatedSourceDir)
     }
 
-    tasks.named("sourcesJar").dependsOn(writeBuildConfig, generateEnvironmentSources)
+    tasks.named("sourcesJar").dependsOn(writeBuildConfig, generateEnvironmentSources, generateJbrMetadata)
     tasks.register("prepareKotlinIdeaImport") {
-        dependsOn(writeBuildConfig, generateEnvironmentSources)
+        dependsOn(writeBuildConfig, generateEnvironmentSources, generateJbrMetadata)
     }
     kotlin.target.compilations.getByName("main").compileTaskProvider.configure {
-        dependsOn(writeBuildConfig, generateEnvironmentSources)
+        dependsOn(writeBuildConfig, generateEnvironmentSources, generateJbrMetadata)
     }
 }
 

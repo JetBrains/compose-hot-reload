@@ -86,6 +86,7 @@ internal class HotReloadTestFixtureExtension(
         startOrchestrationTestLogging(orchestrationServer)
         val isHeadless = findAnnotation<Headless>()?.isHeadless ?: true
         val effectsEnabled = findAnnotation<ReloadEffects>()?.isEnabled ?: false
+        val autoJbrProvisioningEnabled = findAnnotation<AutoJbrProvisioning>()?.isEnabled ?: false
 
         val gradleRunner = GradleRunner(
             projectRoot = projectDir.path,
@@ -95,6 +96,8 @@ internal class HotReloadTestFixtureExtension(
                 "-P${HotReloadProperty.IsHeadless.key}=$isHeadless",
                 "-P${HotReloadProperty.LogLevel.key}=${Logger.Level.Debug.name}",
                 "-P${HotReloadProperty.ReloadEffectsEnabled.key}=$effectsEnabled",
+                "-P${HotReloadProperty.AutoJetBrainsRuntimeProvisioningEnabled.key}=$autoJbrProvisioningEnabled",
+                "-P${HotReloadProperty.GradleJetBrainsRuntimeProvisioningEnabled.key}=${!autoJbrProvisioningEnabled}",
                 "--offline".takeIf { HotReloadEnvironment.gradleOfflineMode }
             ),
             stdoutChannel = Channel(),

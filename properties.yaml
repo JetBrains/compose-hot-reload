@@ -270,6 +270,25 @@ JetBrainsRuntimeVersion:
   documentation: |
     Specifies the default 'JetBrains Runtime' version that shall be used (e.g. '21' or '25')
 
+GradleJetBrainsRuntimeProvisioningEnabled:
+  key: compose.reload.jbr.gradleProvisioningEnabled
+  type: boolean
+  default: "true"
+  target: [ build ]
+  visibility: internal
+  documentation: |
+    If enabled Compose Hot Reload Gradle plugin will attempt to automatically provision compatible 'JetBrains Runtime'
+    version via Gradle's toolchain resolution mechanism. This property is internal and only indended for use in tests.
+
+AutoJetBrainsRuntimeProvisioningEnabled:
+  key: compose.reload.jbr.autoProvisioningEnabled
+  type: boolean
+  default: "false"
+  target: [ build ]
+  visibility: experimental
+  documentation: |
+    Automatically provisions compatible 'JetBrains Runtime' version that shall be used for hot reload tasks
+
 AutoRuntimeDependenciesEnabled:
   key: compose.reload.autoRuntimeDependenciesEnabled
   type: boolean

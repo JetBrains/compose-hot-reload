@@ -33,6 +33,7 @@ import org.jetbrains.compose.reload.orchestration.sendBlocking
 import org.jetbrains.compose.reload.orchestration.startOrchestrationListener
 import org.jetbrains.compose.reload.orchestration.toJvmArg
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
+import org.jetbrains.compose.reload.test.gradle.AutoJbrProvisioning
 import org.jetbrains.compose.reload.test.gradle.ExtendGradleProperties
 import org.jetbrains.compose.reload.test.gradle.ExtendProjectSetup
 import org.jetbrains.compose.reload.test.gradle.GradleBuildEvent
@@ -52,6 +53,8 @@ import org.jetbrains.compose.reload.utils.TestOnlyDefaultComposeVersion
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultKotlinVersion
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.fail
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.writeText
 import kotlin.test.assertEquals
@@ -202,6 +205,81 @@ class ConfigurationCacheTest {
             connection.send(ShutdownRequest("Requested by the test"))
             connection.await()
         }
+    }
+
+    @HotReloadTest
+    @AutoJbrProvisioning
+    fun `test - start app - auto jbr provisioning`(fixture: HotReloadTestFixture) = fixture.runTest {
+        /* Start application: initialise JBR if necessary */
+        fixture.runTransaction {
+            launchChildTransaction {
+                fixture.gradleRunner.buildFlow(fixture.runTask, "--mainClass", "MainKt").toList()
+                    .assertSuccessful()
+            }
+
+            skipToMessage<ClientConnected> { it.clientRole == Application }
+            ShutdownRequest("Explicitly requested by the test").send()
+        }
+
+        /* Start application */
+        fixture.runTransaction {
+            launchChildTransaction {
+                fixture.gradleRunner.buildFlow(fixture.runTask, "--mainClass", "MainKt").toList()
+                    .assertSuccessful()
+            }
+
+            skipToMessage<ClientConnected> { it.clientRole == Application }
+            ShutdownRequest("Explicitly requested by the test").send()
+        }
+
+        /* Start the application again: Expect gcc reused! */
+        fixture.runTransaction {
+            launchChildTransaction {
+                fixture.gradleRunner.buildFlow(fixture.runTask, "--mainClass", "MainKt").toList()
+                    .assertSuccessful()
+                    .assertConfigurationCacheReused()
+            }
+
+            skipToMessage<ClientConnected> { it.clientRole == Application }
+            ShutdownRequest("Explicitly requested by the test").send()
+        }
+    }
+
+    @HotReloadTest
+    @AutoJbrProvisioning
+    fun `test - reload task - auto jbr provisioning`(fixture: HotReloadTestFixture) = fixture.runTest {
+        /* Start application: initialise JBR if necessary */
+        fixture.runTransaction {
+            launchChildTransaction {
+                fixture.gradleRunner.buildFlow(fixture.runTask, "--mainClass", "MainKt").toList()
+                    .assertSuccessful()
+            }
+
+            skipToMessage<ClientConnected> { it.clientRole == Application }
+            ShutdownRequest("Explicitly requested by the test").send()
+        }
+
+        /* Start application */
+        fixture.launchApplicationAndWait()
+
+        /* Run reload task */
+        gradleRunner.buildFlow("reload").toList().assertSuccessful()
+            .assertConfigurationCacheStored()
+
+        /* Run the reload task again */
+        gradleRunner.buildFlow("reload").toList().assertSuccessful()
+            .assertConfigurationCacheReused()
+
+        /* Shutdown the application, restart it again and expect the reload task to be reused */
+        fixture.runTransaction {
+            ShutdownRequest("Explicitly requested by the test").send()
+            fixture.orchestration.states.get(OrchestrationConnectionsState).await { state ->
+                state.connections.isEmpty()
+            }
+        }
+        fixture.launchApplicationAndWait()
+        gradleRunner.buildFlow("reload").toList().assertSuccessful()
+            .assertConfigurationCacheReused()
     }
 
     private fun Iterable<GradleBuildEvent>.assertConfigurationCacheStored() {

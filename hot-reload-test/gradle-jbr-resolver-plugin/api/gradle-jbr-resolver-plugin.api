@@ -5,14 +5,8 @@ public abstract class org/jetbrains/compose/reload/test/JbrResolverConventionPlu
 }
 
 public abstract class org/jetbrains/compose/reload/test/JbrResolverImpl : org/gradle/jvm/toolchain/JavaToolchainResolver {
-	public static final field Companion Lorg/jetbrains/compose/reload/test/JbrResolverImpl$Companion;
-	public static final field JBR_VENDOR_NAME Ljava/lang/String;
-	public static final field URL Ljava/lang/String;
 	public fun <init> ()V
 	public fun resolve (Lorg/gradle/jvm/toolchain/JavaToolchainRequest;)Ljava/util/Optional;
-}
-
-public final class org/jetbrains/compose/reload/test/JbrResolverImpl$Companion {
 }
 
 public abstract class org/jetbrains/compose/reload/test/JbrResolverPlugin : org/gradle/api/Plugin {

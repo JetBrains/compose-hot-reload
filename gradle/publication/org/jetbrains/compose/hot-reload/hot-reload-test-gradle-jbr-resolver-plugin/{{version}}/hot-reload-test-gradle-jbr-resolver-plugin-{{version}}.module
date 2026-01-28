@@ -67,6 +67,13 @@
         },
         {
           "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-core",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
           "module": "hot-reload-annotations",
           "version": {
             "requires": "{{Hot Reload Version}}"

@@ -13,6 +13,7 @@ import org.jetbrains.compose.reload.core.renderOrThrow
 import org.jetbrains.compose.reload.test.core.InternalHotReloadTestApi
 import org.junit.jupiter.api.extension.ExtensionContext
 import java.util.ServiceLoader
+import kotlin.reflect.KClass
 
 public interface SettingsGradleKtsExtension {
     public fun header(context: ExtensionContext): String? = null
@@ -43,16 +44,21 @@ public fun renderSettingsGradleKts(context: ExtensionContext): String = settings
         dependencyResolutionManagementRepositoriesKey(extension.repositories(context))
     }
 
-    ServiceLoader.load(SettingsGradleKtsExtension::class.java).toList().forEach { extension ->
-        headerKey(extension.header(context))
-        pluginManagementKey(extension.pluginManagement(context))
-        pluginManagementPluginsKey(extension.pluginManagementPlugins(context))
-        pluginManagementRepositoriesKey(extension.pluginManagementRepositories(context))
-        pluginsKey(extension.plugins(context))
-        dependencyResolutionManagementKey(extension.dependencyResolutionManagement(context))
-        dependencyResolutionManagementRepositoriesKey(extension.dependencyResolutionManagementRepositories(context))
-        footerKey(extension.footer(context))
+    val annotationExtensions = context.findRepeatableAnnotations<ExtendSettingsGradleKts>().map { annotation ->
+        annotation.extension.newInstance
     }
+    ServiceLoader.load(SettingsGradleKtsExtension::class.java).toList()
+        .plus(annotationExtensions)
+        .forEach { extension ->
+            headerKey(extension.header(context))
+            pluginManagementKey(extension.pluginManagement(context))
+            pluginManagementPluginsKey(extension.pluginManagementPlugins(context))
+            pluginManagementRepositoriesKey(extension.pluginManagementRepositories(context))
+            pluginsKey(extension.plugins(context))
+            dependencyResolutionManagementKey(extension.dependencyResolutionManagement(context))
+            dependencyResolutionManagementRepositoriesKey(extension.dependencyResolutionManagementRepositories(context))
+            footerKey(extension.footer(context))
+        }
 }
 
 private const val headerKey = "header"
@@ -148,3 +154,6 @@ internal class DefaultSettingsGradleKts : SettingsGradleKtsExtension {
         """.trimIndent()
     }
 }
+
+private val KClass<out SettingsGradleKtsExtension>.newInstance: SettingsGradleKtsExtension
+    get() = objectInstance ?: java.getConstructor().newInstance()

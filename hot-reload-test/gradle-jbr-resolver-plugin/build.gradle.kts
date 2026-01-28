@@ -29,4 +29,5 @@ dependencies {
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
     compileOnly(kotlin("gradle-plugin"))
+    implementation(project(":hot-reload-core"))
 }

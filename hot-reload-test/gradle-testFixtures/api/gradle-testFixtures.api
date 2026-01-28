@@ -21,6 +21,10 @@ public final class org/jetbrains/compose/reload/test/gradle/ApplicationLaunchMod
 	public final fun getDefault ()Lorg/jetbrains/compose/reload/test/gradle/ApplicationLaunchMode;
 }
 
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/AutoJbrProvisioning : java/lang/annotation/Annotation {
+	public abstract fun isEnabled ()Z
+}
+
 public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/BuildGradleKts : java/lang/annotation/Annotation {
 	public abstract fun path ()Ljava/lang/String;
 }
@@ -160,6 +164,14 @@ public abstract interface annotation class org/jetbrains/compose/reload/test/gra
 
 public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/ExtendProjectSetup$Container : java/lang/annotation/Annotation {
 	public abstract fun value ()[Lorg/jetbrains/compose/reload/test/gradle/ExtendProjectSetup;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/ExtendSettingsGradleKts : java/lang/annotation/Annotation {
+	public abstract fun extension ()Ljava/lang/Class;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/ExtendSettingsGradleKts$Container : java/lang/annotation/Annotation {
+	public abstract fun value ()[Lorg/jetbrains/compose/reload/test/gradle/ExtendSettingsGradleKts;
 }
 
 public abstract class org/jetbrains/compose/reload/test/gradle/GradleBuildEvent {
