@@ -11,6 +11,7 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +36,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.devtools.sidecar.devToolsUseTransparency
 import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtShapes
@@ -45,6 +47,11 @@ private val tooltipShowDelay = 500.milliseconds
 private val tooltipHideDelay = 100.milliseconds
 
 private val defaultTooltipOffset = DpSize(1.dp, 1.dp)
+
+private val tooltipCornerShape = when {
+    devToolsUseTransparency -> DtShapes.TooltipCornerShape
+    else -> DtShapes.SquareCornerShape
+}
 
 @Composable
 fun DtTooltip(
@@ -79,7 +86,7 @@ fun DtTooltip(
             onCloseRequest = {},
             state = windowState,
             undecorated = true,
-            transparent = true,
+            transparent = devToolsUseTransparency,
             resizable = false,
             visible = true,
             focusable = false,
@@ -88,10 +95,11 @@ fun DtTooltip(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .border(width = 1.dp, color = DtColors.tooltipBorder, shape = DtShapes.TooltipCornerShape)
-                    .clip(DtShapes.TooltipCornerShape)
+                    .border(width = 1.dp, color = DtColors.tooltipBorder, shape = tooltipCornerShape)
+                    .clip(tooltipCornerShape)
                     .background(DtColors.tooltipBackground)
                     .padding(DtPadding.medium)
+                    .fillMaxSize()
             ) {
                 DtText(text, style = DtTextStyles.tooltip)
             }
