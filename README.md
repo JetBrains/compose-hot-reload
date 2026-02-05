@@ -81,6 +81,10 @@ guide to set up your environment and create a project. Be sure to select the des
        id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
    }
    ```
+    Alternatively, you can use automatic JetBrains Runtime provisioning for the hot reload tasks by enabling
+    the `compose.reload.jbr.autoProvisioningEnabled` property.
+> [!IMPORTANT]  
+> Automatic JetBrains Runtime provisioning is an experimental feature. Please report any issues you encounter.
 
 5. Click the **Sync Gradle Changes** button to synchronize Gradle files:
 
