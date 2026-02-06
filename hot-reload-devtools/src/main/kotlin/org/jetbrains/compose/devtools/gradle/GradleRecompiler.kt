@@ -137,6 +137,9 @@ internal class GradleRecompiler(
             process.inputStream.bufferedReader().forEachLine { line ->
                 val level = when {
                     line.startsWith("e: ") -> Level.Error
+                    line.startsWith("> Task") && line.endsWith("FAILED") -> Level.Error
+                    line.startsWith("FAILURE: ") -> Level.Error
+                    line.startsWith("BUILD FAILED") -> Level.Error
                     line.startsWith("warning: ") -> Level.Warn
                     line.startsWith("w: ") -> Level.Warn
                     line.startsWith(">") -> Level.Debug
