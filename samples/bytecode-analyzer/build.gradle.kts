@@ -15,8 +15,8 @@ kotlin {
     jvmToolchain(21)
 
     sourceSets.commonMain.dependencies {
-        implementation("org.jetbrains.compose.hot-reload:hot-reload-core:1.1.0-alpha+189")
-        implementation("org.jetbrains.compose.hot-reload:hot-reload-analysis:1.1.0-alpha+189")
+        implementation("org.jetbrains.compose.hot-reload:hot-reload-core:1.1.0-alpha+190")
+        implementation("org.jetbrains.compose.hot-reload:hot-reload-analysis:1.1.0-alpha+190")
 
         implementation("io.sellmair:evas:1.2.0")
         implementation("io.sellmair:evas-compose:1.2.0")
