@@ -74,11 +74,11 @@ abstract class ComposeHotSnapshotTask : DefaultTask(), ComposeHotReloadOtherTask
     val pendingRequestFile: RegularFileProperty = project.objects.fileProperty()
 
     /**
-     * The output directory which contains changed/added .class files.
+     * The directory which contains changed/added .class files.
      * This directory should be part of the classpath of a running application to support loading
      * new classes from this directory.
      */
-    @get:OutputDirectory
+    @get:Internal
     val classesDirectory: DirectoryProperty = project.objects.directoryProperty()
 
 
