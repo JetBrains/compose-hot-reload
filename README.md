@@ -24,13 +24,20 @@ The JetBrains Runtime intelligently reloads your code whenever it changes.
 
 ## Prerequisites
 
+Ensure that your project meets the minimum version requirements:
+
 - Kotlin 2.1.20 or higher.
 - Compose compiler 2.1.20 or higher.
-- Compose Multiplatform 1.8.2
-- [JetBrains Runtime](https://github.com/JetBrains/JetBrainsRuntime).
-  To be compatible with JetBrains Runtime, your project needs
-  to [target](https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_cross_compilation)
+- Compose Multiplatform 1.8.2 or higher.
+- [JetBrains Runtime](https://github.com/JetBrains/JetBrainsRuntime):
+  To be compatible with JetBrains Runtime, your project must
+  [target](https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_cross_compilation)
   Java 21 or earlier.
+
+For the best development experience, we recommend using an IDE with the Kotlin Multiplatform plugin:
+
+- IntelliJ IDEA 2025.2.2 or higher, or Android Studio Otter 2025.2.1 or higher.
+- [Kotlin Multiplatform IDE plugin](https://plugins.jetbrains.com/plugin/14936-kotlin-multiplatform).
 
 ## Set up your project
 
@@ -83,6 +90,7 @@ guide to set up your environment and create a project. Be sure to select the des
    ```
     Alternatively, you can use automatic JetBrains Runtime provisioning for the hot reload tasks by enabling
     the `compose.reload.jbr.autoProvisioningEnabled` property.
+
 > [!IMPORTANT]  
 > Automatic JetBrains Runtime provisioning is an experimental feature. Please report any issues you encounter.
 
@@ -92,25 +100,44 @@ guide to set up your environment and create a project. Be sure to select the des
 
 ## Use Compose Hot Reload
 
-You can run your application with Compose Hot Reload from inside your IDE or from the CLI by using Gradle tasks.
+You can run your application with Compose Hot Reload using your IDE or the CLI via Gradle tasks.
+Compose Hot Reload supports two modes: **Explicit** mode and **Auto** mode.
 
-### From the IDE
+* In **Explicit** mode, you manually trigger the reload to apply changes.
+* In **Auto** mode, Compose Hot Reload uses Gradle’s file-watching and continuous build system
+to automatically reload when file changes are detected.
+To enable this mode, specify the `--autoReload` or `--auto` arguments in CLI 
+or in the run configuration settings.
 
-In IntelliJ IDEA or Android Studio, in the gutter, click the **Run**
-icon <img alt="Run main function" src="./readme-assets/run.png" width="12"> of your main function:
+### In the IDE
 
-* If you have the [Kotlin Multiplatform IDE plugin](https://plugins.jetbrains.com/plugin/14936-kotlin-multiplatform)
-  installed, select **Run 'MainKt [hotRunJvm]' with Compose Hot Reload (Rc)**.
-* Otherwise, manually create Gradle run configurations with hot reload tasks (see [Run tasks](#run-tasks)).
+In IntelliJ IDEA or Android Studio, you can run Compose Hot Reload directly from the IDE gutter.
+
+1. Click the **Run** icon <img alt="Run main function" src="./readme-assets/run.png" width="12"> 
+in the gutter of your main function and select **Run 'shared [jvm]' with Compose Hot Reload**.
+
+2. When you save code changes, the reload is triggered automatically. 
+
+   Alternatively, you can trigger the reload explicitly by pressing the assigned shortcut key or
+   clicking the **Reload UI** button:
+
+    <img src="/readme-assets/compose-hot-reload-floating-toolbar.png" alt="Reload UI in the IDE" width="528">
+
+You can modify the trigger behavior on the **Settings | Tools | Compose Hot Reload** page in your IDE.
+
+> [!IMPORTANT]  
+> If you don't have the [Kotlin Multiplatform IDE plugin](https://plugins.jetbrains.com/plugin/14936-kotlin-multiplatform)
+> installed, you can manually create Gradle run configurations with hot reload tasks (see [Run tasks](#run-tasks)).
+> In this case, you can trigger the reload by clicking the **Reload UI** button or running the `reload` Gradle task.
 
 ### From the CLI
 
 #### Run tasks
 
-The Compose Hot Reload plugin automatically creates the following tasks to launch the application in 'hot reload mode':
+The Compose Hot Reload plugin automatically creates the following tasks to launch the application:
 
 - `:hotRunJvm`: For multiplatform projects. The async alternative is `:hotRunJvmAsync`.
-- `:hotRun`: For Kotlin/JVM projects. The async alternative `:hotRunAsync`.
+- `:hotRun`: For Kotlin/JVM projects. The async alternative is `:hotRunAsync`.
 
 You can run these Gradle tasks from the command line:
 
@@ -167,7 +194,7 @@ compose.desktop {
 }
 ```
 
-#### Reload tasks
+#### Reload tasks (Explicit mode)
 
 > [!WARNING]  
 > You can't run reload tasks with the `--autoReload` or `--auto` command-line argument.
