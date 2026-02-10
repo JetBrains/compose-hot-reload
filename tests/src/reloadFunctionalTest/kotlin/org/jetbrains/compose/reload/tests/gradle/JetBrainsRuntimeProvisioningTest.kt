@@ -113,7 +113,6 @@ class JetBrainsRuntimeProvisioningTest {
 
     @HotReloadTest
     fun `test - use intellij fallback`(fixture: HotReloadTestFixture) = fixture.runTest {
-        /* Provide garbage value, to trigger fallback */
         projectDir.gradleProperties.appendLines(
             listOf(
                 "${HotReloadProperty.JetBrainsRuntimeBinary.key}=xyz.garbage",
@@ -131,15 +130,13 @@ class JetBrainsRuntimeProvisioningTest {
             )
         }
 
-        /* Run the project without providing the fallback from the IDE and expect failure*/
-        fixture.launchTestDaemon {
-            val buildEvents = gradleRunner.buildFlow("hotRunJvm", "--mainClass", "MainKt").toList()
-            assertEquals(GradleRunner.ExitCode.failure, buildEvents.assertExit().code)
-        }
-
-        /* Run with the intellij fallback property */
         val client = runTransaction {
             fixture.launchTestDaemon {
+                /* Run with no intellij fallback property and ensure it fails */
+                val failedEvents = fixture.gradleRunner.buildFlow("hotRunJvm", "--mainClass", "MainKt").toList()
+                assertEquals(GradleRunner.ExitCode.failure, failedEvents.assertExit().code)
+
+                /* Run with the intellij fallback property */
                 val buildEvents = fixture.gradleRunner.buildFlow(
                     "hotRunJvm",
                     "-D${HotReloadProperty.IdeaJetBrainsRuntimeBinary.key}=${JavaHome.current().javaExecutable.absolutePathString()}",
