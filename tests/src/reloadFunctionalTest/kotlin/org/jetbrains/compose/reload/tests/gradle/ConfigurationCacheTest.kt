@@ -33,7 +33,7 @@ import org.jetbrains.compose.reload.orchestration.sendBlocking
 import org.jetbrains.compose.reload.orchestration.startOrchestrationListener
 import org.jetbrains.compose.reload.orchestration.toJvmArg
 import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
-import org.jetbrains.compose.reload.test.gradle.AutoJbrProvisioning
+import org.jetbrains.compose.reload.test.gradle.JbrProvisioning
 import org.jetbrains.compose.reload.test.gradle.ExtendGradleProperties
 import org.jetbrains.compose.reload.test.gradle.ExtendProjectSetup
 import org.jetbrains.compose.reload.test.gradle.GradleBuildEvent
@@ -53,8 +53,6 @@ import org.jetbrains.compose.reload.utils.TestOnlyDefaultComposeVersion
 import org.jetbrains.compose.reload.utils.TestOnlyDefaultKotlinVersion
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.fail
-import org.junit.jupiter.api.parallel.Execution
-import org.junit.jupiter.api.parallel.ExecutionMode
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.writeText
 import kotlin.test.assertEquals
@@ -208,7 +206,7 @@ class ConfigurationCacheTest {
     }
 
     @HotReloadTest
-    @AutoJbrProvisioning
+    @JbrProvisioning(gradleProvisioningEnabled = false, autoProvisioningEnabled = true)
     fun `test - start app - auto jbr provisioning`(fixture: HotReloadTestFixture) = fixture.runTest {
         /* Start application: initialise JBR if necessary */
         fixture.runTransaction {
@@ -246,7 +244,7 @@ class ConfigurationCacheTest {
     }
 
     @HotReloadTest
-    @AutoJbrProvisioning
+    @JbrProvisioning(gradleProvisioningEnabled = false, autoProvisioningEnabled = true)
     fun `test - reload task - auto jbr provisioning`(fixture: HotReloadTestFixture) = fixture.runTest {
         /* Start application: initialise JBR if necessary */
         fixture.runTransaction {

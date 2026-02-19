@@ -22,7 +22,6 @@ import java.nio.file.Files
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.name
 
 internal class HotReloadTestFixtureExtension(
     private val context: HotReloadTestInvocationContext
@@ -86,7 +85,9 @@ internal class HotReloadTestFixtureExtension(
         startOrchestrationTestLogging(orchestrationServer)
         val isHeadless = findAnnotation<Headless>()?.isHeadless ?: true
         val effectsEnabled = findAnnotation<ReloadEffects>()?.isEnabled ?: false
-        val autoJbrProvisioningEnabled = findAnnotation<AutoJbrProvisioning>()?.isEnabled ?: false
+        val jbrProvisioning = findAnnotation<JbrProvisioning>()
+        val gradleProvisioningEnabled = jbrProvisioning?.gradleProvisioningEnabled ?: true
+        val autoProvisioningEnabled = jbrProvisioning?.autoProvisioningEnabled ?: false
 
         val gradleRunner = GradleRunner(
             projectRoot = projectDir.path,
@@ -96,8 +97,8 @@ internal class HotReloadTestFixtureExtension(
                 "-P${HotReloadProperty.IsHeadless.key}=$isHeadless",
                 "-P${HotReloadProperty.LogLevel.key}=${Logger.Level.Debug.name}",
                 "-P${HotReloadProperty.ReloadEffectsEnabled.key}=$effectsEnabled",
-                "-P${HotReloadProperty.AutoJetBrainsRuntimeProvisioningEnabled.key}=$autoJbrProvisioningEnabled",
-                "-P${HotReloadProperty.GradleJetBrainsRuntimeProvisioningEnabled.key}=${!autoJbrProvisioningEnabled}",
+                "-P${HotReloadProperty.GradleJetBrainsRuntimeProvisioningEnabled.key}=$gradleProvisioningEnabled",
+                "-P${HotReloadProperty.AutoJetBrainsRuntimeProvisioningEnabled.key}=$autoProvisioningEnabled",
                 "--offline".takeIf { HotReloadEnvironment.gradleOfflineMode }
             ),
             stdoutChannel = Channel(),

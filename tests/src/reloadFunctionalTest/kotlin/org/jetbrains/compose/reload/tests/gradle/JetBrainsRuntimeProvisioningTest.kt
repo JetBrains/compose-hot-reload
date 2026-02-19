@@ -11,7 +11,7 @@ import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.JavaHome
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import org.jetbrains.compose.reload.test.gradle.AutoJbrProvisioning
+import org.jetbrains.compose.reload.test.gradle.JbrProvisioning
 import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
 import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.ExtendSettingsGradleKts
@@ -76,7 +76,7 @@ class JetBrainsRuntimeProvisioningTest {
      * 3. Does not use foojay resolver plugin for JBR provisioning
      */
     @HotReloadTest
-    @AutoJbrProvisioning(isEnabled = true)
+    @JbrProvisioning(gradleProvisioningEnabled = false, autoProvisioningEnabled = true)
     @RequestToolchain("25", vendor = "AMAZON")
     @ExtendBuildGradleKts(TopLevelToolchain::class)
     @ExtendSettingsGradleKts(FoojayResolverPlugin::class)
@@ -84,7 +84,7 @@ class JetBrainsRuntimeProvisioningTest {
         fixture.`test - starts with expected jvm version`("25")
 
     @HotReloadTest
-    @AutoJbrProvisioning(isEnabled = true)
+    @JbrProvisioning(gradleProvisioningEnabled = false, autoProvisioningEnabled = true)
     @RequestToolchain("21", vendor = "AMAZON")
     @ExtendBuildGradleKts(TopLevelToolchain::class)
     @ExtendSettingsGradleKts(FoojayResolverPlugin::class)
@@ -112,13 +112,12 @@ class JetBrainsRuntimeProvisioningTest {
     }
 
     @HotReloadTest
+    @JbrProvisioning(gradleProvisioningEnabled = false, autoProvisioningEnabled = false)
     fun `test - use intellij fallback`(fixture: HotReloadTestFixture) = fixture.runTest {
         /* Provide garbage value, to trigger fallback */
         projectDir.gradleProperties.appendLines(
             listOf(
                 "${HotReloadProperty.JetBrainsRuntimeBinary.key}=xyz.garbage",
-                "${HotReloadProperty.GradleJetBrainsRuntimeProvisioningEnabled.key}=false",
-                "${HotReloadProperty.AutoJetBrainsRuntimeProvisioningEnabled.key}=false",
             )
         )
 

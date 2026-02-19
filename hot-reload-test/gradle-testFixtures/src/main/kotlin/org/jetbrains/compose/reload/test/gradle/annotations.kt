@@ -42,7 +42,10 @@ public annotation class Headless(val isHeadless: Boolean = true)
 
 public annotation class ReloadEffects(val isEnabled: Boolean = true)
 
-public annotation class AutoJbrProvisioning(val isEnabled: Boolean = true)
+public annotation class JbrProvisioning(
+    val gradleProvisioningEnabled: Boolean = true,
+    val autoProvisioningEnabled: Boolean = false,
+)
 
 /**
  * Extends the build gradle kts file

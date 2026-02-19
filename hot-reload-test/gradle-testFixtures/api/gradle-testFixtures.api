@@ -21,10 +21,6 @@ public final class org/jetbrains/compose/reload/test/gradle/ApplicationLaunchMod
 	public final fun getDefault ()Lorg/jetbrains/compose/reload/test/gradle/ApplicationLaunchMode;
 }
 
-public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/AutoJbrProvisioning : java/lang/annotation/Annotation {
-	public abstract fun isEnabled ()Z
-}
-
 public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/BuildGradleKts : java/lang/annotation/Annotation {
 	public abstract fun path ()Ljava/lang/String;
 }
@@ -406,6 +402,11 @@ public final class org/jetbrains/compose/reload/test/gradle/HotReloadTestInvocat
 	public static final fun getTestedComposeVersion (Lorg/junit/jupiter/api/extension/ExtensionContext;)Lorg/jetbrains/compose/reload/test/gradle/TestedComposeVersion;
 	public static final fun getTestedGradleVersion (Lorg/junit/jupiter/api/extension/ExtensionContext;)Lorg/jetbrains/compose/reload/test/gradle/TestedGradleVersion;
 	public static final fun getTestedKotlinVersion (Lorg/junit/jupiter/api/extension/ExtensionContext;)Lorg/jetbrains/compose/reload/test/gradle/TestedKotlinVersion;
+}
+
+public abstract interface annotation class org/jetbrains/compose/reload/test/gradle/JbrProvisioning : java/lang/annotation/Annotation {
+	public abstract fun autoProvisioningEnabled ()Z
+	public abstract fun gradleProvisioningEnabled ()Z
 }
 
 public final class org/jetbrains/compose/reload/test/gradle/LaunchApplicationKt {
