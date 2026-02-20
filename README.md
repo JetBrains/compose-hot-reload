@@ -247,6 +247,5 @@ gutter ([CMP-3123](https://youtrack.jetbrains.com/issue/CMP-3123)). Instead, use
 
 ## Feedback and issues
 
-Feel free to submit any feedback to our [GitHub issues](https://github.com/JetBrains/compose-hot-reload/issues) or 
-[CMP issue tracker](https://youtrack.jetbrains.com/issues/CMP). If you encounter an issue, please check the 
+Feel free to submit any feedback to the [CMP issue tracker](https://youtrack.jetbrains.com/newIssue?project=CMP&c=Library%20group%20Hot%20Reload). If you encounter an issue, please check the 
 [known issues and limitations](docs/Known_limitations.md) for potential workarounds. 
