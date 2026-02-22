@@ -10,6 +10,7 @@ package org.jetbrains.compose.devtools.states
 import io.sellmair.evas.State
 import io.sellmair.evas.flow
 import io.sellmair.evas.launchState
+import io.sellmair.evas.value
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
@@ -62,7 +63,7 @@ fun CoroutineScope.launchReloadUIState(
             val time = Instant.fromEpochMilliseconds(state.time.toEpochMilliseconds())
             when (state) {
                 is ReloadState.Ok -> ReloadUIState.Ok(time)
-                is ReloadState.Failed -> ReloadUIState.Failed(reason = state.reason, time = time, logs = errorLogs)
+                is ReloadState.Failed -> ReloadUIState.Failed(reason = state.reason, time = time, logs = errorLogs.toList())
                 is ReloadState.Reloading -> ReloadUIState.Reloading(time, state.reloadRequestId)
             }.emit()
         }
@@ -72,12 +73,15 @@ fun CoroutineScope.launchReloadUIState(
         ReloadCountUIState.flow().collectLatest { _ ->
             errorLogs.clear()
             orchestration.asFlow().filterIsInstance<LogMessage>().collect { log ->
-                if (log.environment != Environment.devTools && log.level >= Logger.Level.Error) {
-                    errorLogs += log
-                }
+                val isError = (log.environment != Environment.devTools && log.level >= Logger.Level.Error) ||
+                        (log.environment == Environment.build && log.message.contains("e: "))
+                if (!isError) return@collect
 
-                if (log.environment == Environment.build && log.message.contains("e: ")) {
-                    errorLogs += log
+                /* Update the 'Failed' state with the new error logs when they appear */
+                errorLogs += log
+                val current = ReloadUIState.value()
+                if (current is ReloadUIState.Failed) {
+                    current.copy(logs = errorLogs.toList()).emit()
                 }
             }
         }

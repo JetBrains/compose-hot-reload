@@ -42,9 +42,8 @@ data class UINotification(
     val message: String,
     val isDisposableFromUI: Boolean,
     val details: List<String> = emptyList(),
-) {
-    val id: UINotificationId = UINotificationId.random()
-}
+    val id: UINotificationId = UINotificationId.random(),
+)
 
 data class UINotificationDisposeEvent(
     val id: UINotificationId
@@ -65,6 +64,9 @@ data class NotificationsUIState(
 
     operator fun minus(id: UINotificationId): NotificationsUIState =
         copy(notifications = notifications.filter { it.id != id })
+
+    fun replace(notification: UINotification): NotificationsUIState =
+        copy(notifications = notifications.map { if (it.id == notification.id) notification else it })
 }
 
 
@@ -72,6 +74,7 @@ fun CoroutineScope.launchNotificationsUIState() = launchState(NotificationsUISta
     suspend fun UINotificationId.dispose() {
         NotificationsUIState.update { state -> state - this }
     }
+
     suspend fun UINotification.dispose() = id.dispose()
 
     suspend fun checkForJBR() {
@@ -83,7 +86,7 @@ fun CoroutineScope.launchNotificationsUIState() = launchState(NotificationsUISta
             title = "Not running on 'JetBrains Runtime'",
             message = "You're not running on the JetBrains Runtime. Some of the compose hot reload functionality may not be available.",
             isDisposableFromUI = true,
-            details = javaReleaseFile.values.map { "${it.key} = ${it.value}"},
+            details = javaReleaseFile.values.map { "${it.key} = ${it.value}" },
         )
         NotificationsUIState.update { it + warning }
     }
@@ -107,21 +110,35 @@ fun CoroutineScope.launchNotificationsUIState() = launchState(NotificationsUISta
     }
 
     suspend fun collectReloadErrors() {
-        var currentStateNotification: UINotification? = null
+        var currentNotification: UINotification? = null
 
         ReloadUIState.collect { state ->
-            if (state is ReloadUIState.Failed) {
-                currentStateNotification?.dispose()
-                currentStateNotification = UINotification(
-                    type =UINotificationType.ERROR,
-                    title = "Reload failed",
-                    message = "Reason: ${state.reason}",
-                    isDisposableFromUI = false,
-                    details = state.logs.map { it.message },
-                )
-                NotificationsUIState.update { it + currentStateNotification }
-            } else {
-                currentStateNotification?.dispose()
+            when (state) {
+                is ReloadUIState.Failed -> when (val existing = currentNotification) {
+                    null -> {
+                        val new = UINotification(
+                            type = UINotificationType.ERROR,
+                            title = "Reload failed",
+                            message = "Reason: ${state.reason}",
+                            isDisposableFromUI = false,
+                            details = state.logs.map { it.message },
+                        )
+                        currentNotification = new
+                        NotificationsUIState.update { it + new }
+                    }
+                    else -> {
+                        val updated = existing.copy(
+                            message = "Reason: ${state.reason}",
+                            details = state.logs.map { it.message }
+                        )
+                        currentNotification = updated
+                        NotificationsUIState.update { it.replace(updated) }
+                    }
+                }
+                else -> {
+                    currentNotification?.dispose()
+                    currentNotification = null
+                }
             }
         }
     }
