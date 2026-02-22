@@ -1,1 +1,5 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
+contact_links:
+  - name: Create
+    url: https://youtrack.jetbrains.com/newIssue?project=CMP&c=Library%20group%20Hot%20Reload
+    about: Please report new issues to the JetBrains YouTrack

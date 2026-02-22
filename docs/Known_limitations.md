@@ -8,9 +8,16 @@ will be resolved in the future. The list does not cover all possible issues and 
 
 Compose Hot Reload currently supports all main OSs. However, the dev tooling window snapping itself to the main application's
 window can cause unusual behavior (flickering, jumping, etc.) on some window managers. If you encounter such issues,
-please [report](https://github.com/JetBrains/compose-hot-reload/issues) them to us; we will try to reproduce and fix them.
+please [report](https://youtrack.jetbrains.com/newIssue?project=CMP&c=Library%20group%20Hot%20Reload) them to us; we will try to reproduce and fix them.
 
-As a workaround, you can try running the dev tools window in detached mode by setting the `-Dcompose.reload.devToolsDetached=true` property.
+As a workaround, you can try:
+
+1. Running the dev tools window in detached mode by setting the `-Dcompose.reload.devToolsDetached=true` property. This will
+launch the dev tools as a regular window, without snapping to the main application's window.
+2. Running the dev tools window in a headless mode by setting the `-Dcompose.reload.devToolsHeadless=true` property. This
+will launch the dev tools process, but will not show any UI.
+3. Disabling the dev tools process entirely by setting the `-Dcompose.reload.devToolsEnabled=false` property. This will
+prevent the dev tools process from starting, which may limit some functionality of Compose Hot Reload.
 
 Original issue: [CMP-9674](https://youtrack.jetbrains.com/issue/CMP-9674)
 
@@ -73,6 +80,6 @@ Original issue in CMP tracker: [CMP-8800](https://youtrack.jetbrains.com/issue/C
 
 ---
 
-If you encounter any issues not mentioned here, please [report](https://github.com/JetBrains/compose-hot-reload/issues) 
+If you encounter any issues not mentioned here, please [report](https://youtrack.jetbrains.com/newIssue?project=CMP&c=Library%20group%20Hot%20Reload) 
 them to us. If you have any further questions regarding one of the listed issues, please feel free to ask them in the 
 linked original issue or create a new issue/[discussion](https://github.com/JetBrains/compose-hot-reload/discussions).
