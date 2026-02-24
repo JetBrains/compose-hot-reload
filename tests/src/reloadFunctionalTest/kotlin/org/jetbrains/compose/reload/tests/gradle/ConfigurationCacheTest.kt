@@ -23,7 +23,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Application
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
 import org.jetbrains.compose.reload.orchestration.OrchestrationConnectionsState
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIRendered
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileResult
@@ -75,7 +75,7 @@ class ConfigurationCacheTest {
                     .assertConfigurationCacheStored()
             }
 
-            skipToMessage<ClientConnected> { it.clientRole == Application }
+            skipToMessage<UIRendered>()
             ShutdownRequest("Explicitly requested by the test").send()
         }
 
@@ -87,7 +87,7 @@ class ConfigurationCacheTest {
                     .assertConfigurationCacheReused()
             }
 
-            skipToMessage<ClientConnected> { it.clientRole == Application }
+            skipToMessage<UIRendered>()
             ShutdownRequest("Explicitly requested by the test").send()
         }
     }
@@ -215,7 +215,7 @@ class ConfigurationCacheTest {
                     .assertSuccessful()
             }
 
-            skipToMessage<ClientConnected> { it.clientRole == Application }
+            skipToMessage<UIRendered>()
             ShutdownRequest("Explicitly requested by the test").send()
         }
 
@@ -226,7 +226,7 @@ class ConfigurationCacheTest {
                     .assertSuccessful()
             }
 
-            skipToMessage<ClientConnected> { it.clientRole == Application }
+            skipToMessage<UIRendered>()
             ShutdownRequest("Explicitly requested by the test").send()
         }
 
@@ -238,7 +238,7 @@ class ConfigurationCacheTest {
                     .assertConfigurationCacheReused()
             }
 
-            skipToMessage<ClientConnected> { it.clientRole == Application }
+            skipToMessage<UIRendered>()
             ShutdownRequest("Explicitly requested by the test").send()
         }
     }
@@ -253,7 +253,7 @@ class ConfigurationCacheTest {
                     .assertSuccessful()
             }
 
-            skipToMessage<ClientConnected> { it.clientRole == Application }
+            skipToMessage<UIRendered>()
             ShutdownRequest("Explicitly requested by the test").send()
         }
 

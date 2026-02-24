@@ -98,9 +98,19 @@ class JetBrainsRuntimeProvisioningTest {
             fun main() = screenshotTestApplication {}
         """.trimIndent()
         ) {
-            skipToMessage<OrchestrationMessage.ClientConnected> { message ->
-                message.clientRole == OrchestrationClientRole.Application
+            var clientConnected: OrchestrationMessage.ClientConnected? = null
+            var uiRendered = false
+
+            skipToMessage<OrchestrationMessage> { message ->
+                if (message is OrchestrationMessage.ClientConnected && message.clientRole == OrchestrationClientRole.Application) {
+                    clientConnected = message
+                } else if (message is OrchestrationMessage.UIRendered) {
+                    uiRendered = true
+                }
+                clientConnected != null && uiRendered
             }
+
+            clientConnected!!
         }
 
         val clientPid = client.clientPid ?: error("Missing 'clientPid'")
