@@ -7,6 +7,7 @@ package org.jetbrains.compose.reload.analysis
 
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.BenchmarkMode
+import kotlinx.benchmark.Blackhole
 import kotlinx.benchmark.Measurement
 import kotlinx.benchmark.Mode
 import kotlinx.benchmark.OutputTimeUnit
@@ -107,8 +108,13 @@ open class ResolveDirtyScopesBenchmark {
     }
 
     @Benchmark
-    fun redefine(): ResolvedDirtyScopes {
-        return Context().resolveDirtyScopes(currentApplication, pendingRedefinition)
+    fun redefine(blackhole: Blackhole) {
+        blackhole.consume(Context().resolveDirtyScopes(currentApplication, pendingRedefinition))
+    }
+
+    @Benchmark
+    fun verification(blackhole: Blackhole) {
+        blackhole.consume(currentApplication.verifyRedefinitions(pendingRedefinition))
     }
 
 }

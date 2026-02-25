@@ -47,7 +47,11 @@ internal fun launchRuntimeTracking(instrumentation: Instrumentation) {
 
 internal fun Context.redefineApplicationInfo(): Future<Try<ResolvedDirtyScopes>> = runtimeAnalysisThread.submitSafe {
     Try {
-        currentApplicationInfo.verifyRedefinitions(pendingRedefinitions)
+        /* Verify redefinitions before applying them */
+        val verificationDuration = measureTime {
+            currentApplicationInfo.verifyRedefinitions(pendingRedefinitions)
+        }
+        logger.debug("Verified redefinitions in [$verificationDuration]")
 
         val redefinition = resolveDirtyScopes(currentApplicationInfo, pendingRedefinitions)
 

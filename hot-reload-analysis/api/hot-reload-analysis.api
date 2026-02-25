@@ -303,6 +303,11 @@ public final class org/jetbrains/compose/reload/analysis/Ids$SwingWindowDesktopK
 	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
 }
 
+public final class org/jetbrains/compose/reload/analysis/Ids$ViewModel {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$ViewModel;
+	public final fun getClassId-uSFnFHE ()Ljava/lang/String;
+}
+
 public final class org/jetbrains/compose/reload/analysis/Ids$WindowDesktopKt {
 	public static final field INSTANCE Lorg/jetbrains/compose/reload/analysis/Ids$WindowDesktopKt;
 	public final fun getClassId-uSFnFHE ()Ljava/lang/String;

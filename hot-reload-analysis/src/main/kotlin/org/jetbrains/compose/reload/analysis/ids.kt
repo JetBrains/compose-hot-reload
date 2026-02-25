@@ -9,6 +9,7 @@ object Ids {
     object Composable {
         val classId = ClassId("androidx/compose/runtime/Composable")
     }
+
     object Composer {
         val classId = ClassId("androidx/compose/runtime/Composer")
 
@@ -224,9 +225,11 @@ object Ids {
 
     object ResourceCaches {
         val classId = ClassId("org/jetbrains/compose/resources/ResourceCaches")
-        val instance = FieldId(classId,
+        val instance = FieldId(
+            classId,
             "INSTANCE",
-            "Lorg/jetbrains/compose/resources/ResourceCaches;")
+            "Lorg/jetbrains/compose/resources/ResourceCaches;"
+        )
     }
 
     object ResourceCaches_desktopKt {
@@ -240,6 +243,10 @@ object Ids {
 
     internal object ResourceContentHash {
         val classId = ClassId("org/jetbrains/compose/resources/ResourceContentHash")
+    }
+
+    object ViewModel {
+        val classId = ClassId("androidx/lifecycle/ViewModel")
     }
 }
 

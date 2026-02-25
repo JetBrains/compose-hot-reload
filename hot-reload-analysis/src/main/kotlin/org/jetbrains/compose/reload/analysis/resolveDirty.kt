@@ -46,6 +46,13 @@ fun Context.resolveDirtyScopes(current: ApplicationInfo, redefined: ApplicationI
     return redefinition
 }
 
+internal fun resolveAllDirtyMembers(current: ApplicationInfo, redefined: ApplicationInfo): Set<MemberInfo> = buildSet {
+    addAll(resolveDirtyFields(current, redefined))
+    addAll(resolveRemovedFields(current, redefined))
+    addAll(resolveDirtyMethods(current, redefined))
+    addAll(resolveRemovedMethods(current, redefined))
+}
+
 private fun Context.resolveDirtyRuntimeScopeInfos(
     current: ApplicationInfo, redefined: ApplicationInfo
 ): List<ScopeInfo> {
