@@ -22,6 +22,7 @@ import org.gradle.process.JavaForkOptions
 import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.core.BuildSystem
 import org.jetbrains.compose.reload.core.HotReloadProperty
+import org.jetbrains.compose.reload.core.StaticsReinitializeMode
 import org.jetbrains.compose.reload.orchestration.OrchestrationListenerPortPropertyPrefix
 import java.io.File
 import kotlin.io.path.absolutePathString
@@ -51,6 +52,8 @@ sealed interface ComposeHotReloadArgumentsBuilder {
     fun setReloadTaskName(name: String)
     fun isAutoRecompileEnabled(isAutoRecompileEnabled: Provider<Boolean>)
     fun isRecompilerWarmupEnabled(isRecompilerWarmupEnabled: Provider<Boolean>)
+
+    fun setStaticsReinitializeMode(provider: Provider<StaticsReinitializeMode>)
 }
 
 @DelicateHotReloadApi
@@ -158,6 +161,10 @@ internal class ComposeHotReloadArguments(project: Project) :
     @get:JvmName("getIsRecompilerWarmupEnabled")
     val isRecompilerWarmupEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadGradleWarmupEnabled)
+
+    @get:Input
+    val staticsReinitializeMode: Property<StaticsReinitializeMode> = project.objects.property(StaticsReinitializeMode::class.java)
+        .value(project.composeReloadStaticsReinitializeMode)
 
     @get:Input
     @get:Optional
@@ -271,6 +278,10 @@ internal class ComposeHotReloadArguments(project: Project) :
         this.isRecompilerWarmupEnabled.set(isRecompilerWarmupEnabled.orElse(false))
     }
 
+    override fun setStaticsReinitializeMode(provider: Provider<StaticsReinitializeMode>) {
+        this.staticsReinitializeMode.set(provider)
+    }
+
     override fun asArguments(): Iterable<String> = buildList {
         /* Signal that this execution runs with Hot Reload */
         add("-D${HotReloadProperty.IsHotReloadActive.key}=true")
@@ -355,6 +366,7 @@ internal class ComposeHotReloadArguments(project: Project) :
 
         add("-D${HotReloadProperty.VirtualMethodResolveEnabled.key}=$virtualMethodResolveEnabled")
         add("-D${HotReloadProperty.DirtyResolveDepthLimit.key}=$dirtyResolveDepthLimit")
+        add("-D${HotReloadProperty.StaticsReinitializeMode.key}=${staticsReinitializeMode.get().name}")
 
         add("-D${HotReloadProperty.LogLevel.key}=${logLevel.name}")
         add("-D${HotReloadProperty.LogStdout.key}=${logStdout}")

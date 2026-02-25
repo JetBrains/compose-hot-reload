@@ -415,7 +415,7 @@ StaticsReinitializeMode:
   key: compose.reload.staticsReinitializeMode
   type: enum
   enumClass: org.jetbrains.compose.reload.core.StaticsReinitializeMode
-  target: [ application ]
+  target: [ application, build ]
   default: "AllDirty"
   visibility: experimental
   documentation: |

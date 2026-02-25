@@ -36,6 +36,8 @@ public final class org/jetbrains/compose/reload/gradle/HotReloadGradleEnvironmen
 	public static final fun getComposeReloadLogStdoutProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
 	public static final fun getComposeReloadReloadEffectsEnabled (Lorg/gradle/api/Project;)Z
 	public static final fun getComposeReloadReloadEffectsEnabledProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadStaticsReinitializeMode (Lorg/gradle/api/Project;)Lorg/jetbrains/compose/reload/core/StaticsReinitializeMode;
+	public static final fun getComposeReloadStaticsReinitializeModeProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
 	public static final fun getComposeReloadStderrFile (Lorg/gradle/api/Project;)Ljava/nio/file/Path;
 	public static final fun getComposeReloadStderrFileProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
 	public static final fun getComposeReloadStdinFile (Lorg/gradle/api/Project;)Ljava/nio/file/Path;
