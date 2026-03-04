@@ -78,6 +78,51 @@ Original issue: [#343](https://github.com/JetBrains/compose-hot-reload/issues/34
 
 Original issue in CMP tracker: [CMP-8800](https://youtrack.jetbrains.com/issue/CMP-8800)
 
+### Exceptions when making changes to the global state
+
+Compose Hot Reload aims to support any changes to the source code of the application. Unfortunately, it is not always possible, 
+mainly because of the global state. When you make changes to your application's code, Compose Hot Reload invalidates all
+the affected Compose code and re-renders the UI to ensure that all the references to the 'old' code are cleaned up. However,
+Compose Hot Reload cannot invalidate the global state of your application (except statics), which means that it is possible that some
+changes to it will cause exceptions.
+
+If changes to the global state cause issues in your application, you have two options:
+1. Restart the application after the changes.
+2. 'Manually' reset the global state of your application by adding hooks via the Compose Hot Reload Runtime API.
+Add the following dependency:
+```kotlin
+implementation("org.jetbrains.compose.hot-reload:hot-reload-runtime-api:*latest version*")
+```
+```kotlin
+if (isHotReloadActive) {
+    // Non-composable option
+    staticHotReloadScope.invokeAfterHotReload {
+        // reset your state here
+    }
+    // Composable option
+    AfterHotReloadEffect {
+        // reset your state here
+    }
+}
+```
+
+#### `ViewModel` support
+
+One of the common examples of the global state is are the `ViewModel` classes. View models presist their state through the changes
+in the UI, meaning that any information they store will be persisted as well. If you want to use hot reload with view models, you need to
+make sure that you reset their state properly after hot reload.
+
+```kotlin
+if (isHotReloadActive) {
+  val viewModelStoreOwner = LocalViewModelStoreOwner.current
+  staticHotReloadScope.invokeAfterHotReload {
+    viewModelStoreOwner?.viewModelStore?.clear()
+  }
+}
+```
+
+Original issue: [#489](https://github.com/JetBrains/compose-hot-reload/issues/489)
+
 ---
 
 If you encounter any issues not mentioned here, please [report](https://youtrack.jetbrains.com/newIssue?project=CMP&c=Library%20group%20Hot%20Reload) 
