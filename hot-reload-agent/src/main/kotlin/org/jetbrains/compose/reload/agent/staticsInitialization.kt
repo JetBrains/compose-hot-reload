@@ -20,6 +20,7 @@ import org.jetbrains.compose.reload.core.sortedByTopology
 import org.jetbrains.compose.reload.core.warn
 import java.lang.instrument.ClassDefinition
 import java.lang.instrument.Instrumentation
+import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Modifier
 
 private val logger = createLogger()
@@ -155,6 +156,11 @@ private fun Class<*>.reinitializeStaticsIfNecessary() {
     val reinit = runCatching { getDeclaredMethod(reinitializeName) }.getOrNull() ?: return
     logger.debug("Re-initializing '$name'")
     reinit.trySetAccessible()
-    reinit.invoke(null)
+    try {
+        reinit.invoke(null)
+    } catch (e: InvocationTargetException) {
+        val targetException = e.targetException ?: e
+        throw RuntimeException("Failed to re-initialize statics of class '$name': ${targetException.message}", targetException)
+    }
     logger.debug("Re-initialized '$name'")
 }

@@ -54,8 +54,9 @@ internal fun launchReloadRequestHandler(instrumentation: Instrumentation) = laun
 
             if (result.isFailure()) {
                 logger.error("Reload failed", result.exception)
+                val message = result.exception.message ?: result.exception.javaClass.simpleName
                 OrchestrationMessage.ReloadClassesResult(
-                    request.messageId, false, result.exception.message,
+                    request.messageId, false, message,
                     result.exception.withLinearClosure { throwable -> throwable.cause }
                         .flatMap { throwable -> throwable.stackTrace.toList() }
                 ).sendAsync()
