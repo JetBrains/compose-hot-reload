@@ -23,6 +23,10 @@ class BuildCache(
          **/build/reports/** => reports.zip
     """.trimIndent()
 
+    failureConditions {
+        executionTimeoutMin = 180
+    }
+
     triggers {
         schedule {
             withPendingChangesOnly = true
