@@ -20,20 +20,11 @@
         "org.gradle.category": "library",
         "org.gradle.dependency.bundling": "external",
         "org.gradle.jvm.environment": "standard-jvm",
-        "org.gradle.jvm.version": 11,
+        "org.gradle.jvm.version": 8,
         "org.gradle.libraryelements": "jar",
         "org.gradle.usage": "java-api",
         "org.jetbrains.kotlin.platform.type": "jvm"
       },
-      "dependencies": [
-        {
-          "group": "org.jetbrains.compose.hot-reload",
-          "module": "hot-reload-annotations",
-          "version": {
-            "requires": "{{Hot Reload Version}}"
-          }
-        }
-      ],
       "files": [
         {
           "name": "hot-reload-gradle-idea-{{Hot Reload Version}}.jar",
@@ -52,7 +43,7 @@
         "org.gradle.category": "library",
         "org.gradle.dependency.bundling": "external",
         "org.gradle.jvm.environment": "standard-jvm",
-        "org.gradle.jvm.version": 11,
+        "org.gradle.jvm.version": 8,
         "org.gradle.libraryelements": "jar",
         "org.gradle.usage": "java-runtime",
         "org.jetbrains.kotlin.platform.type": "jvm"
@@ -70,13 +61,6 @@
           "module": "kotlinx-serialization-json",
           "version": {
             "requires": "1.9.0"
-          }
-        },
-        {
-          "group": "org.jetbrains.compose.hot-reload",
-          "module": "hot-reload-annotations",
-          "version": {
-            "requires": "{{Hot Reload Version}}"
           }
         }
       ],
