@@ -45,11 +45,11 @@ private fun Project.setupDefaultDependencies() {
     configureKotlin {
         if (this !is KotlinJvmProjectExtension) return@configureKotlin
         dependencies {
-            if (project.name != "hot-reload-core") {
+            if (project.name != "hot-reload-core" && project.name != "hot-reload-gradle-idea") {
                 "testImplementation"(testFixtures(project(":hot-reload-core")))
             }
 
-            if (project.name != "hot-reload-annotations") {
+            if (project.name != "hot-reload-annotations" && project.name != "hot-reload-gradle-idea") {
                 "api"(project(":hot-reload-annotations"))
             }
 

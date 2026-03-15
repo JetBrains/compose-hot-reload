@@ -71,7 +71,7 @@ open class TestConventionsPlugin : Plugin<Project> {
 
         plugins.withType<KotlinPluginWrapper> {
             dependencies {
-                if (project.name != "hot-reload-core") {
+                if (project.name != "hot-reload-core" && project.name != "hot-reload-gradle-idea") {
                     "testImplementation"(testFixtures(project(":hot-reload-core")))
                 }
 
