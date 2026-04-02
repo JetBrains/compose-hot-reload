@@ -15,6 +15,7 @@ asm = "9.9.1"
 evas = "1.4.0"
 ktor = "3.3.3"
 shadow = "9.3.1"
+mcpKotlinSdk = "0.11.0"
 kaml = "0.104.0"
 skiko = "0.9.37.3"
 gradlePluginPublish = "2.0.0"
@@ -59,6 +60,9 @@ asm-util = { module = "org.ow2.asm:asm-util", version.ref = "asm" }
 
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+
+mcp-kotlin-sdk-server = { module = "io.modelcontextprotocol:kotlin-sdk-server", version.ref = "mcpKotlinSdk" }
+mcp-kotlin-sdk-client = { module = "io.modelcontextprotocol:kotlin-sdk-client", version.ref = "mcpKotlinSdk" }
 
 shadow-gradlePlugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
 pluginPublish-gradlePlugin = { module = "com.gradle.plugin-publish:com.gradle.plugin-publish.gradle.plugin", version.ref = "gradlePluginPublish" }
