@@ -229,6 +229,57 @@ dependencyResolutionManagement {
 }
 ```
 
+## MCP server for AI agents
+
+*Note: the MCP server is in experimental status.*
+
+Compose Hot Reload includes a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that allows
+AI agents to interact with a running Compose application. The MCP server connects to the application's orchestration
+layer and exposes the following tools:
+
+| Tool | Description                                                 |
+|------|-------------------------------------------------------------|
+| `status` | Checks whether a Compose application is currently connected |
+| `take_screenshot` | Captures a screenshot of the running application window     |
+
+When the MCP server starts, it waits for the app to launch, detects shutdown, and
+reconnects automatically on restart.
+
+### Run the MCP server
+
+Start the MCP server alongside your application using the Gradle task:
+
+```shell
+./gradlew :app:hotMcpServerJvm
+# or
+./gradlew :composeApp:hotMcpServerJvm
+```
+
+The task name follows the same naming convention as the run tasks. For a custom JVM target named `desktop`,
+the task would be `:app:hotMcpServerDesktop`.
+
+### Configure an AI agent
+
+Currently, only project level MCP server configuration is available (no global level configuration).
+To configure an AI agent, point your AI agent's MCP client project level configuration to the Gradle task. 
+For example, in a `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "compose-hot-reload": {
+      "command": "./gradlew",
+      "args": [
+        "--no-daemon",
+        "--quiet",
+        "--console=plain",
+        "composeApp:hotMcpServer"
+      ]
+    }
+  }
+}
+```
+
 ## FAQ
 
 ### I'm developing an Android-only app without Kotlin Mutliplatform. Can I use Compose Hot Reload?
