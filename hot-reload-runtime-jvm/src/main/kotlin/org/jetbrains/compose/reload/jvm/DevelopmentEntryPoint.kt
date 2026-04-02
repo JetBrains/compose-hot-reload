@@ -32,6 +32,7 @@ import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.CleanCompositionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RetryFailedCompositionRequest
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIException
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIRendered
 import org.jetbrains.compose.reload.orchestration.asFlow
@@ -67,6 +68,14 @@ public fun DevelopmentEntryPoint(
     LaunchedEffect(Unit) {
         orchestration.asFlow().filterIsInstance<RetryFailedCompositionRequest>().collect {
             resetComposition()
+        }
+    }
+
+    if (window != null) {
+        LaunchedEffect(Unit) {
+            orchestration.asFlow().filterIsInstance<ScreenshotRequest>().collect { request ->
+                handleScreenshotRequest(request, window).sendAsync()
+            }
         }
     }
 

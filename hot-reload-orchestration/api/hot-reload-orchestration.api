@@ -421,6 +421,22 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 	public fun hashCode ()I
 }
 
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ScreenshotRequest : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
+	public fun <init> ()V
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ScreenshotResult : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
+	public fun <init> (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageId;Ljava/lang/String;[BZLjava/lang/String;)V
+	public synthetic fun <init> (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageId;Ljava/lang/String;[BZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()[B
+	public final fun getErrorMessage ()Ljava/lang/String;
+	public final fun getFormat ()Ljava/lang/String;
+	public final fun getScreenshotRequestId ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageId;
+	public fun hashCode ()I
+	public final fun isSuccess ()Z
+}
+
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ShutdownRequest : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;)V
@@ -539,6 +555,7 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationProto
 	public static final field V1_2 Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
 	public static final field V1_3 Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
 	public static final field V1_4 Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
+	public static final field V1_5 Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getIntValue ()I
 	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationProtocolVersion;
@@ -636,5 +653,6 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationVersi
 	public final fun getV1_2 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 	public final fun getV1_3 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 	public final fun getV1_4 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
+	public final fun getV1_5 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 }
 

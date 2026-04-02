@@ -9,7 +9,6 @@ import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.asFileName
 import org.jetbrains.compose.reload.core.withAsyncTrace
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.Screenshot
 import org.jetbrains.compose.reload.test.core.TestEnvironment
 import org.jetbrains.kotlin.tooling.core.Extras
 import org.jetbrains.kotlin.tooling.core.extrasKeyOf
@@ -50,8 +49,15 @@ public annotation class CheckScreenshot(
 
 public suspend fun HotReloadTestFixture.checkScreenshot(name: String): Unit =
     withAsyncTrace("'checkScreenshot($name)'") run@{
-        val screenshot = sendMessage(OrchestrationMessage.TakeScreenshotRequest()) {
-            skipToMessage<Screenshot>()
+        val request = OrchestrationMessage.ScreenshotRequest()
+        val screenshot = sendMessage(request) {
+            skipToMessage<OrchestrationMessage.ScreenshotResult> {
+                it.screenshotRequestId == request.messageId
+            }
+        }
+
+        if (!screenshot.isSuccess) {
+            fail("Screenshot failed: ${screenshot.errorMessage ?: "unknown error"}")
         }
 
         val directory = screenshotsDirectory()

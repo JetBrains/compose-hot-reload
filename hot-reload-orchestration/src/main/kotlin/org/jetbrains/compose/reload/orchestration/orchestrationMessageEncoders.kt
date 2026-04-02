@@ -329,6 +329,40 @@ internal class ScreenshotEncoder : OrchestrationMessageEncoder<OrchestrationMess
     }
 }
 
+internal class ScreenshotRequestEncoder : OrchestrationMessageEncoder<OrchestrationMessage.ScreenshotRequest> {
+    override val messageType: Type<OrchestrationMessage.ScreenshotRequest> = type()
+    override val messageClassifier = classifier("ScreenshotRequest")
+    override fun encode(message: OrchestrationMessage.ScreenshotRequest): ByteArray = byteArrayOf()
+    override fun decode(data: ByteArray): Try<OrchestrationMessage.ScreenshotRequest> =
+        OrchestrationMessage.ScreenshotRequest().toLeft()
+}
+
+internal class ScreenshotResultEncoder : OrchestrationMessageEncoder<OrchestrationMessage.ScreenshotResult> {
+    override val messageType: Type<OrchestrationMessage.ScreenshotResult> = type()
+    override val messageClassifier = classifier("ScreenshotResult")
+
+    override fun encode(message: OrchestrationMessage.ScreenshotResult): ByteArray = encodeByteArray {
+        writeFields(
+            "screenshotRequestId" to message.screenshotRequestId.encodeToByteArray(),
+            "format" to message.format.encodeToByteArray(),
+            "data" to message.data,
+            "isSuccess" to message.isSuccess.encodeToByteArray(),
+            "errorMessage" to message.errorMessage?.encodeToByteArray()
+        )
+    }
+
+    override fun decode(data: ByteArray): Try<OrchestrationMessage.ScreenshotResult> = data.tryDecode {
+        val fields = readFields()
+        OrchestrationMessage.ScreenshotResult(
+            screenshotRequestId = OrchestrationMessageId(fields.requireField("screenshotRequestId")),
+            format = fields.requireField("format").decodeToString(),
+            data = fields.requireField("data"),
+            isSuccess = fields["isSuccess"]?.decodeToBoolean() ?: true,
+            errorMessage = fields["errorMessage"]?.decodeToString()
+        )
+    }
+}
+
 internal class ReloadClassesResultEncoder : OrchestrationMessageEncoder<OrchestrationMessage.ReloadClassesResult> {
     override val messageType: Type<OrchestrationMessage.ReloadClassesResult> = type()
     override val messageClassifier = classifier("ReloadClassesResult")

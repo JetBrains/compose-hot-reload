@@ -18,6 +18,8 @@ org.jetbrains.compose.reload.orchestration.RetryFailedCompositionRequestEncoder
 org.jetbrains.compose.reload.orchestration.RestartRequestEncoder
 org.jetbrains.compose.reload.orchestration.AckMessageEncoder
 org.jetbrains.compose.reload.orchestration.ScreenshotEncoder
+org.jetbrains.compose.reload.orchestration.ScreenshotRequestEncoder
+org.jetbrains.compose.reload.orchestration.ScreenshotResultEncoder
 org.jetbrains.compose.reload.orchestration.ReloadClassesResultEncoder
 org.jetbrains.compose.reload.orchestration.LogMessageEncoder
 org.jetbrains.compose.reload.orchestration.InvalidatedComposeGroupMessageEncoder

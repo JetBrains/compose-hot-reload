@@ -15,7 +15,8 @@ public enum class OrchestrationProtocolVersion(public val intValue: Int) {
     V1_1(2),
     V1_2(3),
     V1_3(4),
-    V1_4(5)
+    V1_4(5),
+    V1_5(6)
     ;
 
     @Suppress("DEPRECATION")
@@ -38,7 +39,8 @@ public data class OrchestrationVersion(public val intValue: Int) : Comparable<Or
         public val v1_2: OrchestrationVersion = OrchestrationVersion(3)
         public val v1_3: OrchestrationVersion = OrchestrationVersion(4)
         public val v1_4: OrchestrationVersion = OrchestrationVersion(5)
-        public val current: OrchestrationVersion = v1_4
+        public val v1_5: OrchestrationVersion = OrchestrationVersion(6)
+        public val current: OrchestrationVersion = v1_5
     }
 
     override fun compareTo(other: OrchestrationVersion): Int {
@@ -52,6 +54,7 @@ public data class OrchestrationVersion(public val intValue: Int) : Comparable<Or
             v1_2 -> "v1.2($intValue)"
             v1_3 -> "v1.3($intValue)"
             v1_4 -> "v1.4($intValue)"
+            v1_5 -> "v1.5($intValue)"
             else -> "N/A($intValue)"
         }
     }
@@ -73,5 +76,7 @@ internal val Class<out OrchestrationMessage>.availableSinceVersion: Orchestratio
     get() = when (this) {
         OrchestrationMessage.InvalidatedComposeGroupMessage::class.java -> OrchestrationVersion.v1_2
         OrchestrationMessage.RestartRequest::class.java -> OrchestrationVersion.v1_3
+        OrchestrationMessage.ScreenshotRequest::class.java -> OrchestrationVersion.v1_5
+        OrchestrationMessage.ScreenshotResult::class.java -> OrchestrationVersion.v1_5
         else -> OrchestrationVersion.v1
     }

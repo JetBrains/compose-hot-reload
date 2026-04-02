@@ -33,6 +33,7 @@ class ComposeHotReloadPlugin : Plugin<Project> {
             target.launch { target.hotReloadLifecycleTask.await() }
             target.launch { target.hotReloadTasks.await() }
             target.launch { target.hotSnapshotTasks.await() }
+            target.launch { target.hotMcpServerTasks.await() }
             target.configureComposeHotReloadTasks()
             target.configureComposeCompilerArgs()
             target.configureComposeHotReloadModelBuilder()

@@ -17,6 +17,9 @@ const val HOT_RELOAD_AGENT_CONFIGURATION_NAME = "composeHotReloadAgent"
 const val HOT_RELOAD_DEVTOOLS_CONFIGURATION_NAME = "composeHotReloadDevTools"
 
 @InternalHotReloadApi
+const val HOT_RELOAD_MCP_CONFIGURATION_NAME = "composeHotReloadMcp"
+
+@InternalHotReloadApi
 fun hotReloadDevRuntimeDependenciesConfigurationName(runtimeDependencyConfigurationName: String): String {
     return camelCase("composeHotReloadDev", runtimeDependencyConfigurationName)
 }
