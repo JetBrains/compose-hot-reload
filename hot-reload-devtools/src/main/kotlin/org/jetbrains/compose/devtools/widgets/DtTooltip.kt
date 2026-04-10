@@ -7,11 +7,12 @@ package org.jetbrains.compose.devtools.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,12 +24,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionOnScreen
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -46,7 +49,7 @@ import kotlin.time.Duration.Companion.milliseconds
 private val tooltipShowDelay = 500.milliseconds
 private val tooltipHideDelay = 100.milliseconds
 
-private val defaultTooltipOffset = DpSize(1.dp, 1.dp)
+private val defaultTooltipOffset = DpOffset(1.dp, 1.dp)
 
 private val tooltipCornerShape = when {
     devToolsUseTransparency -> DtShapes.TooltipCornerShape
@@ -56,13 +59,14 @@ private val tooltipCornerShape = when {
 @Composable
 fun DtTooltip(
     text: String?,
-    offset: DpSize = defaultTooltipOffset,
+    offset: DpOffset = defaultTooltipOffset,
     content: @Composable () -> Unit
 ) {
     if (text == null) return content()
 
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
+    var dismissedByClick by remember { mutableStateOf(false) }
     var isTooltipVisible by remember { mutableStateOf(false) }
     val density = LocalDensity.current
 
@@ -72,12 +76,19 @@ fun DtTooltip(
     )
 
     LaunchedEffect(isHovered) {
-        if (isHovered) {
+        if (isHovered && !dismissedByClick) {
             delay(tooltipShowDelay)
             isTooltipVisible = true
         } else {
             delay(tooltipHideDelay)
             isTooltipVisible = false
+            if (dismissedByClick) {
+                // Reset `dismiss by click` with a delay so that the `isHovered` jitteriness
+                // does not affect the tooltip behavior. Important when a new window is spawned on top of
+                // the tooltip e.g., log and notification windows.
+                delay(tooltipShowDelay * 2)
+                dismissedByClick = false
+            }
         }
     }
 
@@ -99,7 +110,6 @@ fun DtTooltip(
                     .clip(tooltipCornerShape)
                     .background(DtColors.tooltipBackground)
                     .padding(DtPadding.medium)
-                    .fillMaxSize()
             ) {
                 DtText(text, style = DtTextStyles.tooltip)
             }
@@ -109,9 +119,15 @@ fun DtTooltip(
     Box(
         modifier = Modifier
             .hoverable(interactionSource)
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false)
+                    dismissedByClick = true
+                }
+            }
             .onGloballyPositioned { coordinates ->
                 val topLeft = coordinates.positionOnScreen().toWindowPosition(density)
-                val size = coordinates.size.toDpSize(density)
+                val size = coordinates.size.toDpOffset(density)
                 windowState.position = topLeft + size + offset
             }
     ) {
@@ -135,7 +151,7 @@ private fun measureTextWidth(
 
 private fun Offset.toWindowPosition(density: Density) = with(density) { WindowPosition(x.toDp(), y.toDp()) }
 
-private fun IntSize.toDpSize(density: Density) = with(density) { DpSize(width.toDp(), height.toDp()) }
+private fun IntSize.toDpOffset(density: Density) = with(density) { DpOffset(width.toDp(), height.toDp()) }
 
-private operator fun WindowPosition.plus(other: DpSize): WindowPosition =
-    WindowPosition(x + other.width, y + other.height)
+private operator fun WindowPosition.plus(other: DpOffset): WindowPosition =
+    WindowPosition(x + other.x, y + other.y)
