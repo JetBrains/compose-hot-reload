@@ -9,6 +9,8 @@ import kotlin.io.path.Path
 
 internal fun screenshotsDirectory() = requireSystemProperty("reloadTests.screenshotsDirectory").let(::Path)
 
+internal fun semanticTreesDirectory() = requireSystemProperty("reloadTests.semanticTreesDirectory").let(::Path)
+
 internal fun gradleWrapperFile() = requireSystemProperty("reloadTests.gradleWrapper").let(::Path)
 
 internal fun gradleWrapperBatFile() = requireSystemProperty("reloadTests.gradleWrapperBat").let(::Path)

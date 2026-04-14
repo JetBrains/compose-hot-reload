@@ -1,0 +1,139 @@
+{
+  "id": 1,
+  "bounds": {
+    "x": 0,
+    "y": 0,
+    "width": 480,
+    "height": 524
+  },
+  "children": [
+    {
+      "id": 5,
+      "text": "Hello World!",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 162,
+        "height": 33
+      }
+    },
+    {
+      "id": 6,
+      "role": "Button",
+      "text": "Click Me",
+      "focused": false,
+      "actions": [
+        "onClick"
+      ],
+      "bounds": {
+        "x": 0,
+        "y": 45,
+        "width": 200,
+        "height": 72
+      }
+    },
+    {
+      "id": 9,
+      "role": "Button",
+      "text": "Disabled",
+      "enabled": false,
+      "actions": [
+        "onClick"
+      ],
+      "bounds": {
+        "x": 0,
+        "y": 141,
+        "width": 202,
+        "height": 72
+      }
+    },
+    {
+      "id": 12,
+      "role": "Checkbox",
+      "toggleableState": "On",
+      "focused": false,
+      "actions": [
+        "onClick"
+      ],
+      "bounds": {
+        "x": 24,
+        "y": 249,
+        "width": 48,
+        "height": 48
+      }
+    },
+    {
+      "id": 13,
+      "progressBar": {
+        "value": 0.5,
+        "range": [
+          0.0,
+          1.0
+        ],
+        "steps": 0
+      },
+      "bounds": {
+        "x": 0,
+        "y": 301,
+        "width": 480,
+        "height": 48
+      }
+    },
+    {
+      "id": 14,
+      "editableText": "editable text",
+      "focused": false,
+      "actions": [
+        "onClick",
+        "onLongClick"
+      ],
+      "bounds": {
+        "x": 0,
+        "y": 329,
+        "width": 208,
+        "height": 33
+      }
+    },
+    {
+      "id": 18,
+      "text": "Annotated",
+      "contentDescription": "custom description",
+      "testTag": "my-tag",
+      "heading": true,
+      "bounds": {
+        "x": 0,
+        "y": 362,
+        "width": 137,
+        "height": 33
+      }
+    },
+    {
+      "id": 19,
+      "text": "Stateful",
+      "stateDescription": "custom state",
+      "selected": true,
+      "bounds": {
+        "x": 0,
+        "y": 395,
+        "width": 103,
+        "height": 33
+      }
+    },
+    {
+      "id": 20,
+      "role": "Button",
+      "text": "Long press",
+      "focused": false,
+      "actions": [
+        "onClick",
+        "onLongClick"
+      ],
+      "bounds": {
+        "x": 0,
+        "y": 440,
+        "width": 238,
+        "height": 72
+      }
+    }
+  ]
+}

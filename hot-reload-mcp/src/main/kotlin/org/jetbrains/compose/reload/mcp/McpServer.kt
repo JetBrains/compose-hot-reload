@@ -27,6 +27,8 @@ import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotResult
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticTreeResult
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticTreeRequest
 import org.jetbrains.compose.reload.orchestration.asChannel
 import java.util.Base64
 import kotlin.time.Duration.Companion.seconds
@@ -65,6 +67,16 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
                 "Use the 'status' tool first to check if the application is connected."
         ) { _ ->
             handleTakeScreenshot(orchestration)
+        }
+
+        addTool(
+            name = "get_semantic_tree",
+            description = "Get the Compose semantic/accessibility tree of the running application. " +
+                "Returns a JSON tree describing the UI component hierarchy with roles, names, " +
+                "descriptions, states (enabled, visible, focused, etc.), and bounds. " +
+                "Use the 'status' tool first to check if the application is connected."
+        ) { _ ->
+            handleGetSemanticTree(orchestration)
         }
     }
 
@@ -118,6 +130,37 @@ private suspend fun handleTakeScreenshot(orchestration: StateFlow<OrchestrationH
     } catch (e: Exception) {
         CallToolResult(
             content = listOf(TextContent("Screenshot failed: ${e.message}")),
+            isError = true
+        )
+    }
+}
+
+private suspend fun handleGetSemanticTree(orchestration: StateFlow<OrchestrationHandle?>): CallToolResult {
+    val handle = orchestration.value
+        ?: return CallToolResult(
+            content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
+            isError = true
+        )
+
+    return try {
+        val semanticTree = handle.asChannel().consumeAsFlow()
+            .filterIsInstance<SemanticTreeResult>()
+            .let { flow ->
+                handle.send(SemanticTreeRequest())
+                withTimeoutOrNull(10.seconds) { flow.first() }
+            }
+
+        if (semanticTree == null) {
+            return CallToolResult(
+                content = listOf(TextContent("Semantic tree request timed out: no response from application")),
+                isError = true
+            )
+        }
+
+        CallToolResult(content = listOf(TextContent(semanticTree.tree)))
+    } catch (e: Exception) {
+        CallToolResult(
+            content = listOf(TextContent("Semantic tree request failed: ${e.message}")),
             isError = true
         )
     }

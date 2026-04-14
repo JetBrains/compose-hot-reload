@@ -593,6 +593,30 @@ internal constructor() : OrchestrationPackage(), Serializable {
         }
     }
 
+    /**
+     * Requests the application to capture and send the Compose semantic tree.
+     */
+    public class SemanticTreeRequest : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
+
+    /**
+     * The Compose semantic tree (as response to [SemanticTreeRequest]).
+     * @param tree JSON representation of the UI component hierarchy including roles, names,
+     * descriptions, states, and bounds of each element.
+     */
+    public class SemanticTreeResult(
+        public val tree: String
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
+
 
     /* Base implementation */
     public var messageId: OrchestrationMessageId = OrchestrationMessageId.random()

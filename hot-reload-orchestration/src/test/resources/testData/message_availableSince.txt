@@ -30,3 +30,5 @@ org.jetbrains.compose.reload.orchestration.OrchestrationMessage$InvalidatedCompo
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$RestartRequest = v1.3(4)
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$ScreenshotRequest = v1.5(6)
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$ScreenshotResult = v1.5(6)
+org.jetbrains.compose.reload.orchestration.OrchestrationMessage$SemanticTreeRequest = v1.5(6)
+org.jetbrains.compose.reload.orchestration.OrchestrationMessage$SemanticTreeResult = v1.5(6)
