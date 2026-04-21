@@ -77,19 +77,19 @@ class JetBrainsRuntimeProvisioningTest {
      */
     @HotReloadTest
     @JbrProvisioning(gradleProvisioningEnabled = false, autoProvisioningEnabled = true)
-    @RequestToolchain("25", vendor = "AMAZON")
-    @ExtendBuildGradleKts(TopLevelToolchain::class)
-    @ExtendSettingsGradleKts(FoojayResolverPlugin::class)
-    fun `test - automatic jbr provisioning 25`(fixture: HotReloadTestFixture) =
-        fixture.`test - starts with expected jvm version`("25")
-
-    @HotReloadTest
-    @JbrProvisioning(gradleProvisioningEnabled = false, autoProvisioningEnabled = true)
     @RequestToolchain("21", vendor = "AMAZON")
     @ExtendBuildGradleKts(TopLevelToolchain::class)
     @ExtendSettingsGradleKts(FoojayResolverPlugin::class)
     fun `test - automatic jbr provisioning 21`(fixture: HotReloadTestFixture) =
         fixture.`test - starts with expected jvm version`("21")
+
+    @HotReloadTest
+    @JbrProvisioning(gradleProvisioningEnabled = false, autoProvisioningEnabled = true)
+    @RequestToolchain("25", vendor = "AMAZON")
+    @ExtendBuildGradleKts(TopLevelToolchain::class)
+    @ExtendSettingsGradleKts(FoojayResolverPlugin::class)
+    fun `test - automatic jbr provisioning 25`(fixture: HotReloadTestFixture) =
+        fixture.`test - starts with expected jvm version`("25")
 
     private fun HotReloadTestFixture.`test - starts with expected jvm version`(version: String) = runTest {
         val client = initialSourceCode(

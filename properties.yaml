@@ -264,7 +264,7 @@ JetBrainsRuntimeBinary:
 JetBrainsRuntimeVersion:
   key: compose.reload.jbr.version
   type: int
-  default: "21"
+  default: "25"
   target: [ build ]
   visibility: delicate
   documentation: |
