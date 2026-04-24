@@ -5,6 +5,7 @@ public abstract class org/jetbrains/compose/reload/test/HotReloadFunctionalTestT
 	public final fun getGradlewWrapperFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public final fun getGradlewWrapperJarFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public final fun getScreenshotsDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public final fun getSemanticTreesDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 }
 
 public final class org/jetbrains/compose/reload/test/HotReloadTestExecutionSpec : org/gradle/api/internal/tasks/testing/TestExecutionSpec {
