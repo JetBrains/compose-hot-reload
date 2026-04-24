@@ -12,6 +12,8 @@ org.jetbrains.compose.reload.orchestration.BuildFinishedEncoder
 org.jetbrains.compose.reload.orchestration.TestEventEncoder
 org.jetbrains.compose.reload.orchestration.ReloadClassesRequestEncoder
 org.jetbrains.compose.reload.orchestration.TakeScreenshotRequestEncoder
+org.jetbrains.compose.reload.orchestration.SemanticTreeRequestEncoder
+org.jetbrains.compose.reload.orchestration.SemanticTreeResultEncoder
 org.jetbrains.compose.reload.orchestration.PingEncoder
 org.jetbrains.compose.reload.orchestration.CleanCompositionRequestEncoder
 org.jetbrains.compose.reload.orchestration.RetryFailedCompositionRequestEncoder

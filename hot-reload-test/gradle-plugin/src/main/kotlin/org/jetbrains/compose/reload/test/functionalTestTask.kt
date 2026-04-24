@@ -75,6 +75,11 @@ internal fun Project.configureGradleTestTasks() {
             task.screenshotsDirectory.map { it.asFile.absolutePath }.string()
         )
 
+        task.systemProperty(
+            "reloadTests.semanticTreesDirectory",
+            task.semanticTreesDirectory.map { it.asFile.absolutePath }.string()
+        )
+
         task.environment("GRADLE_USER_HOME", project.testGradleUserHome.absolutePath)
         task.environment("JAVA_HOME", testJavaHome.absolutePath)
         task.systemProperty(HotReloadProperty.GradleOfflineMode.key, project.gradle.startParameter.isOffline)
@@ -100,6 +105,14 @@ internal fun Project.configureGradleTestTasks() {
             task.compilation.map { compilation ->
                 project.layout.projectDirectory.dir(
                     "src/${lowerCamelCase(compilation.target.name, compilation.name)}/resources/screenshots"
+                )
+            }
+        )
+
+        task.semanticTreesDirectory.convention(
+            task.compilation.map { compilation ->
+                project.layout.projectDirectory.dir(
+                    "src/${lowerCamelCase(compilation.target.name, compilation.name)}/resources/semantic-trees"
                 )
             }
         )
@@ -171,6 +184,9 @@ private fun configureWarmup(warmup: TaskProvider<*>, test: TaskProvider<*>) {
 abstract class HotReloadFunctionalTestTask : Test() {
     @get:Internal
     val screenshotsDirectory: DirectoryProperty = project.objects.directoryProperty()
+
+    @get:Internal
+    val semanticTreesDirectory: DirectoryProperty = project.objects.directoryProperty()
 
     @get:InputFile
     val gradlewWrapperFile: RegularFileProperty = project.objects.fileProperty()

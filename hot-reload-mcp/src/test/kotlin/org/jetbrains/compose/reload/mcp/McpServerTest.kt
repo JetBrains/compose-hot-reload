@@ -24,6 +24,8 @@ import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotResult
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticTreeResult
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticTreeRequest
 import org.jetbrains.compose.reload.orchestration.asFlow
 import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
@@ -125,6 +127,44 @@ class McpServerTest {
             assertNotEquals(true, result.isError)
             val imageContent = result.content.first()
             assertNotNull(imageContent)
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - get_semantic_tree returns error when disconnected`() = runTest(timeout = 10.seconds) {
+        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
+        val client = createMcpClient(orchestration)
+
+        val result = client.callTool("get_semantic_tree", emptyMap())
+        assertEquals(result.isError, true)
+        val text = (result.content.first() as TextContent).text
+        assertTrue(text.contains("No application is currently connected"))
+    }
+
+    @Test
+    fun `test - get_semantic_tree returns tree when connected`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val someJson = "{}"
+
+            // Simulate an app that responds to semantic tree requests
+            launch {
+                server.asFlow().filterIsInstance<SemanticTreeRequest>().first()
+                server.send(SemanticTreeResult(someJson))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            val result = client.callTool("get_semantic_tree", emptyMap())
+            assertNotEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertEquals(someJson, text)
         } finally {
             server.close()
         }

@@ -204,6 +204,28 @@ internal class TakeScreenshotRequestEncoder : OrchestrationMessageEncoder<Orches
         OrchestrationMessage.TakeScreenshotRequest().toLeft()
 }
 
+internal class SemanticTreeRequestEncoder : OrchestrationMessageEncoder<OrchestrationMessage.SemanticTreeRequest> {
+    override val messageType: Type<OrchestrationMessage.SemanticTreeRequest> = type()
+    override val messageClassifier = classifier("SemanticTreeRequest")
+    override fun encode(message: OrchestrationMessage.SemanticTreeRequest): ByteArray = byteArrayOf()
+    override fun decode(data: ByteArray): Try<OrchestrationMessage.SemanticTreeRequest> =
+        OrchestrationMessage.SemanticTreeRequest().toLeft()
+}
+
+internal class SemanticTreeResultEncoder : OrchestrationMessageEncoder<OrchestrationMessage.SemanticTreeResult> {
+    override val messageType: Type<OrchestrationMessage.SemanticTreeResult> = type()
+    override val messageClassifier = classifier("SemanticTreeResult")
+
+    override fun encode(message: OrchestrationMessage.SemanticTreeResult): ByteArray = encodeByteArray {
+        writeFields("tree" to message.tree.encodeToByteArray())
+    }
+
+    override fun decode(data: ByteArray): Try<OrchestrationMessage.SemanticTreeResult> = data.tryDecode {
+        val fields = readFields()
+        OrchestrationMessage.SemanticTreeResult(tree = fields.requireField("tree").decodeToString())
+    }
+}
+
 internal class PingEncoder : OrchestrationMessageEncoder<OrchestrationMessage.Ping> {
     override val messageType: Type<OrchestrationMessage.Ping> = type()
     override val messageClassifier = classifier("Ping")

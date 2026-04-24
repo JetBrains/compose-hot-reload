@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.use
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -258,6 +259,15 @@ public suspend fun runHeadlessApplication(
                     )
                 }
             }
+
+            if (message is OrchestrationMessage.SemanticTreeRequest) {
+                logger.info("Capturing semantic tree: '${message.messageId}'")
+                scene.render(virtualTime)
+                val rootNode = scene.tryGetRootSemanticsNode()
+                val json = if (rootNode != null) buildSemanticTreeJson(rootNode)
+                else """{"error":"No semantic owners available"}"""
+                orchestration.send(OrchestrationMessage.SemanticTreeResult(json))
+            }
         }
 
     }
@@ -325,4 +335,23 @@ private fun OrchestrationMessage.isSilenceWarning() = this is OrchestrationMessa
 
 private fun issueSilenceWarning(silence: Duration, silenceTimeout: SilenceTimeout?) {
     logger.warn("No messages received for '$silence' (timeout '${silenceTimeout?.timeout}')")
+}
+
+/**
+ * Extracts the root [SemanticsNode] from an [ImageComposeScene] using reflection.
+ */
+private fun ImageComposeScene.tryGetRootSemanticsNode(): SemanticsNode? {
+    // ImageComposeScene.scene.mainOwner.semanticsOwner
+    return try {
+        val composeScene = javaClass.getDeclaredField("scene")
+            .also { it.isAccessible = true }.get(this) ?: return null
+        val rootNodeOwner = composeScene.javaClass.getDeclaredField("mainOwner")
+            .also { it.isAccessible = true }.get(composeScene) ?: return null
+        val semanticsOwner = rootNodeOwner.javaClass.getMethod("getSemanticsOwner")
+            .invoke(rootNodeOwner) ?: return null
+        semanticsOwner.javaClass.getMethod("getRootSemanticsNode")
+            .invoke(semanticsOwner) as? SemanticsNode
+    } catch (_: Exception) {
+        null
+    }
 }
