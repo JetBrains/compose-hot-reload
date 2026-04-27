@@ -28,3 +28,5 @@ org.jetbrains.compose.reload.orchestration.OrchestrationMessage$UIException = v1
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$UIRendered = v1(1)
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$InvalidatedComposeGroupMessage = v1.2(3)
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$RestartRequest = v1.3(4)
+org.jetbrains.compose.reload.orchestration.OrchestrationMessage$ScreenshotRequest = v1.5(6)
+org.jetbrains.compose.reload.orchestration.OrchestrationMessage$ScreenshotResult = v1.5(6)

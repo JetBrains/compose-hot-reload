@@ -233,6 +233,31 @@ public suspend fun runHeadlessApplication(
                 orchestration.send(OrchestrationMessage.Screenshot("png", baos.toByteArray()))
                 logger.debug("Sent screenshot: '${message.messageId}'")
             }
+
+            if (message is OrchestrationMessage.ScreenshotRequest) {
+                logger.info("Taking screenshot: '${message.messageId}'")
+                try {
+                    val baos = ByteArrayOutputStream()
+                    ImageIO.write(scene.render(virtualTime).toComposeImageBitmap().toAwtImage(), "png", baos)
+                    orchestration.send(
+                        OrchestrationMessage.ScreenshotResult(
+                            screenshotRequestId = message.messageId,
+                            format = "png",
+                            data = baos.toByteArray()
+                        )
+                    )
+                    logger.debug("Sent screenshot: '${message.messageId}'")
+                } catch (e: Exception) {
+                    logger.warn("Screenshot failed: ${e.message}")
+                    orchestration.send(
+                        OrchestrationMessage.ScreenshotResult(
+                            screenshotRequestId = message.messageId,
+                            isSuccess = false,
+                            errorMessage = "Headless screenshot failed: ${e.message}"
+                        )
+                    )
+                }
+            }
         }
 
     }

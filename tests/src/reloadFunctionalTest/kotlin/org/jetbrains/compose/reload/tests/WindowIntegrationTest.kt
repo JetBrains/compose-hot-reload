@@ -5,17 +5,11 @@
 
 package org.jetbrains.compose.reload.tests
 
-import kotlinx.coroutines.channels.consume
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.devtools.api.WindowsState
-import org.jetbrains.compose.reload.core.asChannel
-import org.jetbrains.compose.reload.core.createLogger
-import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.launchTask
-import org.jetbrains.compose.reload.core.withAsyncTrace
 import org.jetbrains.compose.reload.core.State
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Tooling
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.test.gradle.Headless
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
@@ -33,8 +27,6 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 class WindowIntegrationTest {
-
-    private val logger = createLogger()
 
     /**
      * These tests, annoyingly, run non-headless. This might also lead to CI agents not being
@@ -168,17 +160,7 @@ class WindowIntegrationTest {
         content: String,
         body: suspend HotReloadTestFixture.() -> Unit,
     ) = fixture.runTest {
-        /*
-        This test does not run the underlying screenshot test application.
-        Therefore, we'll manually send back ACK messages
-         */
-        launchTask {
-            orchestration.messages.collect { message ->
-                if (message !is OrchestrationMessage.Ack) {
-                    orchestration send OrchestrationMessage.Ack(message.messageId)
-                }
-            }
-        }
+        fixture.launchAckSender()
 
         val devtools = fixture.initialSourceCode(content) {
             skipToMessage<ClientConnected> { client -> client.clientRole == Tooling }
@@ -189,17 +171,6 @@ class WindowIntegrationTest {
         val devtoolsPid = devtools.clientPid ?: fail("Missing 'pid' for devtools'")
         ProcessHandle.of(devtoolsPid).getOrNull() ?: fail("devtools process not found")
     }
-
-    suspend fun awaitOneWindow(windowsState: State<WindowsState>) =
-        withAsyncTrace("Await one window") {
-            windowsState.asChannel().consume {
-                while (true) {
-                    val state = receive()
-                    if (state.windows.size == 1) break
-                    else logger.info("Waiting for exactly one window: ${state.windows.size}")
-                }
-            }
-        }
 
     @OptIn(ExperimentalTime::class)
     suspend fun ensureNoWindows(

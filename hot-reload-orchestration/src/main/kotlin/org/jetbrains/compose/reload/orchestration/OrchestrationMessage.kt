@@ -265,6 +265,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * Requests the client to take (and send) a screenshot:
      * Note, only special clients (e.g. clients under test) do support this.
      */
+    @Deprecated("Use ScreenshotRequest instead", ReplaceWith("ScreenshotRequest"))
     public class TakeScreenshotRequest : OrchestrationMessage() {
         internal companion object {
             @Suppress("unused")
@@ -277,6 +278,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * @param format the image format (for example, 'png')
      * @param data the raw image data)
      */
+    @Deprecated("Use ScreenshotResult instead", ReplaceWith("ScreenshotResult"))
     public class Screenshot(
         public val format: String,
         public val data: ByteArray
@@ -297,6 +299,59 @@ internal constructor() : OrchestrationPackage(), Serializable {
             if (other !is Screenshot) return false
             if (other.format != format) return false
             if (!other.data.contentEquals(data)) return false
+            return true
+        }
+    }
+
+    /**
+     * Requests a screenshot from the application.
+     * The response is [ScreenshotResult] with [ScreenshotResult.screenshotRequestId]
+     * matching this request's [messageId].
+     */
+    public class ScreenshotRequest : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+    }
+
+    /**
+     * Response to a [ScreenshotRequest], carrying the screenshot image data or an error.
+     * @param screenshotRequestId the [OrchestrationMessageId] of the originating [ScreenshotRequest]
+     * @param format the image format (for example, 'png'), empty if [isSuccess] is false
+     * @param data the raw image data, empty if [isSuccess] is false
+     * @param isSuccess whether the screenshot was captured successfully
+     * @param errorMessage an error description if [isSuccess] is false
+     */
+    public class ScreenshotResult(
+        public val screenshotRequestId: OrchestrationMessageId,
+        public val format: String = "",
+        public val data: ByteArray = ByteArray(0),
+        public val isSuccess: Boolean = true,
+        public val errorMessage: String? = null,
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+
+        override fun hashCode(): Int {
+            var hashCode = screenshotRequestId.hashCode()
+            hashCode = 31 * hashCode + format.hashCode()
+            hashCode = 31 * hashCode + data.contentHashCode()
+            hashCode = 31 * hashCode + isSuccess.hashCode()
+            hashCode = 31 * hashCode + (errorMessage?.hashCode() ?: 0)
+            return hashCode
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (other === this) return true
+            if (other !is ScreenshotResult) return false
+            if (other.screenshotRequestId != screenshotRequestId) return false
+            if (other.format != format) return false
+            if (!other.data.contentEquals(data)) return false
+            if (other.isSuccess != isSuccess) return false
+            if (other.errorMessage != errorMessage) return false
             return true
         }
     }
