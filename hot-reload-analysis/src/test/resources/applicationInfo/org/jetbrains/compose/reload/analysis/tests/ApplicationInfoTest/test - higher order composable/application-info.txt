@@ -30,12 +30,12 @@ ComposableSingletons$FooKt {
         type: Regular
         Method {
             key: null
-            codeHash: 2631766068
+            codeHash: 2937577689
             methodDependencies: [
-                ComposableSingletons$FooKt.<init> ()V
+                ComposableSingletons$FooKt.<init> ()V,
+                ComposableSingletons$FooKt.lambda__1435676418$lambda$0 (Landroidx/compose/runtime/Composer;I)Lkotlin/Unit;
             ]
             fieldDependencies: [
-                ComposableSingletons$FooKt$lambda$-1435676418$1.INSTANCE LComposableSingletons$FooKt$lambda$-1435676418$1;,
                 ComposableSingletons$FooKt.INSTANCE LComposableSingletons$FooKt;,
                 ComposableSingletons$FooKt.lambda$-1435676418 Lkotlin/jvm/functions/Function2;
             ]
@@ -67,60 +67,15 @@ ComposableSingletons$FooKt {
             ]
         }
     }
-}
-
-ComposableSingletons$FooKt$lambda$-1435676418$1 {
-    val INSTANCE: LComposableSingletons$FooKt$lambda$-1435676418$1;
-
-    <clinit> {
-        desc: ()V
-        type: Regular
-        Method {
-            key: null
-            codeHash: 385586306
-            methodDependencies: [
-                ComposableSingletons$FooKt$lambda$-1435676418$1.<init> ()V
-            ]
-            fieldDependencies: [
-                ComposableSingletons$FooKt$lambda$-1435676418$1.INSTANCE LComposableSingletons$FooKt$lambda$-1435676418$1;
-            ]
-        }
-    }
     
     
-    <init> {
-        desc: ()V
-        type: Regular
-        Method {
-            key: null
-            codeHash: 2718894338
-            methodDependencies: []
-            fieldDependencies: []
-        }
-    }
-    
-    
-    invoke {
-        desc: (Landroidx/compose/runtime/Composer;I)V
+    lambda__1435676418$lambda$0 {
+        desc: (Landroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         type: Composable
         Method {
             key: -1435676418
-            codeHash: 153229727
+            codeHash: 3345304799
             methodDependencies: []
-            fieldDependencies: []
-        }
-    }
-    
-    
-    invoke {
-        desc: (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-        type: Regular
-        Method {
-            key: null
-            codeHash: 3219805050
-            methodDependencies: [
-                ComposableSingletons$FooKt$lambda$-1435676418$1.invoke (Landroidx/compose/runtime/Composer;I)V
-            ]
             fieldDependencies: []
         }
     }
