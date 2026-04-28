@@ -11,14 +11,13 @@
   },
   "createdBy": {
     "gradle": {
-      "version": "8.14"
+      "version": "8.14.4"
     }
   },
   "variants": [
     {
       "name": "macosArm64ApiElements-published",
       "attributes": {
-        "artifactType": "org.jetbrains.kotlin.klib",
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
         "org.gradle.usage": "kotlin-api",
@@ -146,7 +145,6 @@
     {
       "name": "macosArm64MetadataElements-published",
       "attributes": {
-        "artifactType": "org.jetbrains.kotlin.klib",
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
         "org.gradle.usage": "kotlin-metadata",

@@ -10,7 +10,7 @@
   },
   "createdBy": {
     "gradle": {
-      "version": "8.14"
+      "version": "8.14.4"
     }
   },
   "variants": [
@@ -61,14 +61,14 @@
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-test",
           "version": {
-            "requires": "2.2.21"
+            "requires": "2.3.21"
           }
         },
         {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-tooling-core",
           "version": {
-            "requires": "2.2.21"
+            "requires": "2.3.21"
           }
         }
       ],
@@ -163,21 +163,21 @@
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-reflect",
           "version": {
-            "requires": "2.2.21"
+            "requires": "2.3.21"
           }
         },
         {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-test",
           "version": {
-            "requires": "2.2.21"
+            "requires": "2.3.21"
           }
         },
         {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-tooling-core",
           "version": {
-            "requires": "2.2.21"
+            "requires": "2.3.21"
           }
         }
       ],
