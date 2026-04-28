@@ -268,7 +268,18 @@ JetBrainsRuntimeVersion:
   target: [ build ]
   visibility: delicate
   documentation: |
-    Specifies the default 'JetBrains Runtime' version that shall be used (e.g. '21' or '25')
+    Specifies the default 'JetBrains Runtime' version that shall be used when the 
+    user project does not explicitly declare toolchain requirements.
+
+JetBrainsRuntimeMinimalVersion:
+  key: compose.reload.jbr.min.version
+  type: int
+  default: "21"
+  target: [ build ]
+  visibility: internal
+  documentation: |
+    Specifies the minimal 'JetBrains Runtime' version that is supported. If the project's toolchain version
+    is set but lower than this value, the plugin will override it and use this version instead.
 
 GradleJetBrainsRuntimeProvisioningEnabled:
   key: compose.reload.jbr.gradleProvisioningEnabled
