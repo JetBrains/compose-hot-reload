@@ -10,7 +10,7 @@
   },
   "createdBy": {
     "gradle": {
-      "version": "8.14"
+      "version": "8.14.4"
     }
   },
   "variants": [
@@ -116,7 +116,6 @@
     {
       "name": "iosArm64ApiElements-published",
       "attributes": {
-        "artifactType": "org.jetbrains.kotlin.klib",
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
         "org.gradle.usage": "kotlin-api",
@@ -151,7 +150,6 @@
     {
       "name": "iosArm64MetadataElements-published",
       "attributes": {
-        "artifactType": "org.jetbrains.kotlin.klib",
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
         "org.gradle.usage": "kotlin-metadata",
@@ -168,7 +166,6 @@
     {
       "name": "iosSimulatorArm64ApiElements-published",
       "attributes": {
-        "artifactType": "org.jetbrains.kotlin.klib",
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
         "org.gradle.usage": "kotlin-api",
@@ -203,7 +200,6 @@
     {
       "name": "iosSimulatorArm64MetadataElements-published",
       "attributes": {
-        "artifactType": "org.jetbrains.kotlin.klib",
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
         "org.gradle.usage": "kotlin-metadata",
@@ -220,7 +216,6 @@
     {
       "name": "iosX64ApiElements-published",
       "attributes": {
-        "artifactType": "org.jetbrains.kotlin.klib",
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
         "org.gradle.usage": "kotlin-api",
@@ -255,7 +250,6 @@
     {
       "name": "iosX64MetadataElements-published",
       "attributes": {
-        "artifactType": "org.jetbrains.kotlin.klib",
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
         "org.gradle.usage": "kotlin-metadata",
@@ -372,7 +366,6 @@
     {
       "name": "linuxArm64ApiElements-published",
       "attributes": {
-        "artifactType": "org.jetbrains.kotlin.klib",
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
         "org.gradle.usage": "kotlin-api",
@@ -407,7 +400,6 @@
     {
       "name": "linuxX64ApiElements-published",
       "attributes": {
-        "artifactType": "org.jetbrains.kotlin.klib",
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
         "org.gradle.usage": "kotlin-api",
@@ -442,7 +434,6 @@
     {
       "name": "macosArm64ApiElements-published",
       "attributes": {
-        "artifactType": "org.jetbrains.kotlin.klib",
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
         "org.gradle.usage": "kotlin-api",
@@ -477,7 +468,6 @@
     {
       "name": "macosArm64MetadataElements-published",
       "attributes": {
-        "artifactType": "org.jetbrains.kotlin.klib",
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
         "org.gradle.usage": "kotlin-metadata",
@@ -494,7 +484,6 @@
     {
       "name": "macosX64ApiElements-published",
       "attributes": {
-        "artifactType": "org.jetbrains.kotlin.klib",
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
         "org.gradle.usage": "kotlin-api",
@@ -529,7 +518,6 @@
     {
       "name": "macosX64MetadataElements-published",
       "attributes": {
-        "artifactType": "org.jetbrains.kotlin.klib",
         "org.gradle.category": "library",
         "org.gradle.jvm.environment": "non-jvm",
         "org.gradle.usage": "kotlin-metadata",

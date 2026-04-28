@@ -10,7 +10,7 @@
   },
   "createdBy": {
     "gradle": {
-      "version": "8.14"
+      "version": "8.14.4"
     }
   },
   "variants": [
@@ -174,21 +174,21 @@
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-reflect",
           "version": {
-            "requires": "2.2.21"
+            "requires": "2.3.21"
           }
         },
         {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-stdlib",
           "version": {
-            "requires": "2.2.21"
+            "requires": "2.3.21"
           }
         },
         {
           "group": "org.jetbrains.kotlin",
           "module": "kotlin-compiler-embeddable",
           "version": {
-            "requires": "2.2.21"
+            "requires": "2.3.21"
           }
         }
       ],
