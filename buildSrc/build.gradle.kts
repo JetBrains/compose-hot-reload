@@ -2,6 +2,7 @@
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     `kotlin-dsl`
@@ -61,6 +62,13 @@ kotlin {
     compilerOptions {
         optIn.add("org.jetbrains.compose.reload.InternalHotReloadApi")
         optIn.add("org.jetbrains.compose.reload.DelicateHotReloadApi")
+    }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        apiVersion.set(KotlinVersion.KOTLIN_2_1)
+        languageVersion.set(KotlinVersion.KOTLIN_2_1)
     }
 }
 
