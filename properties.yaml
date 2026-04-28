@@ -270,6 +270,15 @@ JetBrainsRuntimeVersion:
   documentation: |
     Specifies the default 'JetBrains Runtime' version that shall be used (e.g. '21' or '25')
 
+JetBrainsRuntimeMinimalVersion:
+  key: compose.reload.jbr.min.version
+  type: int
+  default: "21"
+  target: [ build ]
+  visibility: internal
+  documentation: |
+    Specifies the minimal 'JetBrains Runtime' version that is supported
+
 GradleJetBrainsRuntimeProvisioningEnabled:
   key: compose.reload.jbr.gradleProvisioningEnabled
   type: boolean
