@@ -100,7 +100,7 @@ class TestKt {
                     JumpToken(L14, opocde=164)
                     BlockToken(1)
                     JumpToken(L15, opocde=167)
-                    LabelToken(L14)
+                    LabelToken(L14, lineNumber=11)
                     BlockToken(2)
                     LabelToken(L15, lineNumber=13)
                     BlockToken(24)
@@ -117,8 +117,8 @@ class TestKt {
                         EndReplaceGroup()
                     }
     
-                    ReplaceGroup (group=ComposeGroupKey(key=-1255089279)) {
-                        StartReplaceGroup(key=ComposeGroupKey(key=-1255089279))
+                    ReplaceGroup (group=ComposeGroupKey(key=-1254864095)) {
+                        StartReplaceGroup(key=ComposeGroupKey(key=-1254864095))
                         BlockToken(1)
                         EndReplaceGroup()
                     }
