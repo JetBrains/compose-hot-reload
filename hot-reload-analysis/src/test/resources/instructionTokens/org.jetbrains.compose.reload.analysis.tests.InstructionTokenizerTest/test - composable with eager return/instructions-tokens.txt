@@ -201,13 +201,14 @@ class FooKt {
             MethodInsnNode(androidx/compose/runtime/Composer.endReplaceGroup ()V) [185]
         JumpToken(L13, opocde=167)
             JumpInsNode(L13)) [GOTO])
-        LabelToken(L12)
+        LabelToken(L12, lineNumber=12)
             LabelNode(L12)
+            LineNumberNode [-1]
         BlockToken(2)
             FrameNode [-1]
             VarInsnNode [25]
-        StartReplaceGroup(key=ComposeGroupKey(key=-979416164))
-            LdcInsnNode(-979416164) [18]
+        StartReplaceGroup(key=ComposeGroupKey(key=-979198916))
+            LdcInsnNode(-979198916) [18]
             MethodInsnNode(androidx/compose/runtime/Composer.startReplaceGroup (I)V) [185]
         BlockToken(1)
             VarInsnNode [25]

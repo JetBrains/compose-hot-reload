@@ -6,9 +6,9 @@ fun Foo(value: Int) {                                       	// Method (group=Co
     if(value > 0) {                                         	// RestartGroup (group=ComposeGroupKey(key=-643616831)),ReplaceGroup (group=ComposeGroupKey(key=-1254962396))
         Text("Hello")                                       	// ReplaceGroup (group=ComposeGroupKey(key=-1254962396))
     } else {                                                	// RestartGroup (group=ComposeGroupKey(key=-643616831)),ReplaceGroup (group=ComposeGroupKey(key=-1254925258))
-        if(value > 10) {                                    	// ReplaceGroup (group=ComposeGroupKey(key=-1254925258)),ReplaceGroup (group=ComposeGroupKey(key=-1254902535)),ReplaceGroup (group=ComposeGroupKey(key=-1255089279))
+        if(value > 10) {                                    	// ReplaceGroup (group=ComposeGroupKey(key=-1254925258)),ReplaceGroup (group=ComposeGroupKey(key=-1254902535))
             Text("Hello 10")                                	// ReplaceGroup (group=ComposeGroupKey(key=-1254902535))
-        }
+        }                                                   	// ReplaceGroup (group=ComposeGroupKey(key=-1254925258)),ReplaceGroup (group=ComposeGroupKey(key=-1254864095))
         
         Text("Hello else")                                  	// ReplaceGroup (group=ComposeGroupKey(key=-1254925258))
     }

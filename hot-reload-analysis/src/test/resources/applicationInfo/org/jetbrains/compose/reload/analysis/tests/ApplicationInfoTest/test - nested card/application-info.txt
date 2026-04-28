@@ -34,16 +34,16 @@ ComposableSingletons$FooKt {
         type: Regular
         Method {
             key: null
-            codeHash: 2144001912
+            codeHash: 1079242724
             methodDependencies: [
-                ComposableSingletons$FooKt.<init> ()V
+                ComposableSingletons$FooKt.<init> ()V,
+                ComposableSingletons$FooKt.lambda_1969856002$lambda$0 (Landroidx/compose/foundation/layout/ColumnScope;Landroidx/compose/runtime/Composer;I)Lkotlin/Unit;,
+                ComposableSingletons$FooKt.lambda_904522804$lambda$0 (Landroidx/compose/foundation/layout/ColumnScope;Landroidx/compose/runtime/Composer;I)Lkotlin/Unit;
             ]
             fieldDependencies: [
                 ComposableSingletons$FooKt.lambda$1969856002 Lkotlin/jvm/functions/Function3;,
-                ComposableSingletons$FooKt$lambda$904522804$1.INSTANCE LComposableSingletons$FooKt$lambda$904522804$1;,
                 ComposableSingletons$FooKt.lambda$904522804 Lkotlin/jvm/functions/Function3;,
-                ComposableSingletons$FooKt.INSTANCE LComposableSingletons$FooKt;,
-                ComposableSingletons$FooKt$lambda$1969856002$1.INSTANCE LComposableSingletons$FooKt$lambda$1969856002$1;
+                ComposableSingletons$FooKt.INSTANCE LComposableSingletons$FooKt;
             ]
         }
     }
@@ -87,122 +87,31 @@ ComposableSingletons$FooKt {
             ]
         }
     }
-}
-
-ComposableSingletons$FooKt$lambda$1969856002$1 {
-    val INSTANCE: LComposableSingletons$FooKt$lambda$1969856002$1;
-
-    <clinit> {
-        desc: ()V
-        type: Regular
-        Method {
-            key: null
-            codeHash: 2164608135
-            methodDependencies: [
-                ComposableSingletons$FooKt$lambda$1969856002$1.<init> ()V
-            ]
-            fieldDependencies: [
-                ComposableSingletons$FooKt$lambda$1969856002$1.INSTANCE LComposableSingletons$FooKt$lambda$1969856002$1;
-            ]
-        }
-    }
     
     
-    <init> {
-        desc: ()V
-        type: Regular
-        Method {
-            key: null
-            codeHash: 711595204
-            methodDependencies: []
-            fieldDependencies: []
-        }
-    }
-    
-    
-    invoke {
-        desc: (Landroidx/compose/foundation/layout/ColumnScope;Landroidx/compose/runtime/Composer;I)V
+    lambda_1969856002$lambda$0 {
+        desc: (Landroidx/compose/foundation/layout/ColumnScope;Landroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         type: Composable
         Method {
             key: 1969856002
-            codeHash: 1445717390
+            codeHash: 3916160333
             methodDependencies: []
             fieldDependencies: []
         }
     }
     
     
-    invoke {
-        desc: (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-        type: Regular
-        Method {
-            key: null
-            codeHash: 1328456319
-            methodDependencies: [
-                ComposableSingletons$FooKt$lambda$1969856002$1.invoke (Landroidx/compose/foundation/layout/ColumnScope;Landroidx/compose/runtime/Composer;I)V
-            ]
-            fieldDependencies: []
-        }
-    }
-}
-
-ComposableSingletons$FooKt$lambda$904522804$1 {
-    val INSTANCE: LComposableSingletons$FooKt$lambda$904522804$1;
-
-    <clinit> {
-        desc: ()V
-        type: Regular
-        Method {
-            key: null
-            codeHash: 2886943498
-            methodDependencies: [
-                ComposableSingletons$FooKt$lambda$904522804$1.<init> ()V
-            ]
-            fieldDependencies: [
-                ComposableSingletons$FooKt$lambda$904522804$1.INSTANCE LComposableSingletons$FooKt$lambda$904522804$1;
-            ]
-        }
-    }
-    
-    
-    <init> {
-        desc: ()V
-        type: Regular
-        Method {
-            key: null
-            codeHash: 3138473757
-            methodDependencies: []
-            fieldDependencies: []
-        }
-    }
-    
-    
-    invoke {
-        desc: (Landroidx/compose/foundation/layout/ColumnScope;Landroidx/compose/runtime/Composer;I)V
+    lambda_904522804$lambda$0 {
+        desc: (Landroidx/compose/foundation/layout/ColumnScope;Landroidx/compose/runtime/Composer;I)Lkotlin/Unit;
         type: Composable
         Method {
             key: 904522804
-            codeHash: 2732973022
-            methodDependencies: [
-                ComposableSingletons$FooKt.getLambda$1969856002$testModule ()Lkotlin/jvm/functions/Function3;
-            ]
+            codeHash: 4029857084
+            methodDependencies: []
             fieldDependencies: [
+                ComposableSingletons$FooKt.lambda$1969856002 Lkotlin/jvm/functions/Function3;,
                 ComposableSingletons$FooKt.INSTANCE LComposableSingletons$FooKt;
             ]
-        }
-    }
-    
-    
-    invoke {
-        desc: (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-        type: Regular
-        Method {
-            key: null
-            codeHash: 3722307235
-            methodDependencies: [
-                ComposableSingletons$FooKt$lambda$904522804$1.invoke (Landroidx/compose/foundation/layout/ColumnScope;Landroidx/compose/runtime/Composer;I)V
-            ]
-            fieldDependencies: []
         }
     }
 }

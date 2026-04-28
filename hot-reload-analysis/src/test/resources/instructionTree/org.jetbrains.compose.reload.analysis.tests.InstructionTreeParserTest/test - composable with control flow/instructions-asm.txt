@@ -178,10 +178,11 @@ class TestKt {
                 ReplaceGroup (group=ComposeGroupKey(key=-1254925258))
                 GOTO L17
                 L14
+                LINENUMBER 11 L14
                 FRAME SAME
                 ALOAD 1
-                    ReplaceGroup (group=ComposeGroupKey(key=-1255089279))
-                    LDC -1255089279
+                    ReplaceGroup (group=ComposeGroupKey(key=-1254864095))
+                    LDC -1254864095
                     INVOKEINTERFACE androidx/compose/runtime/Composer.startReplaceGroup (I)V (itf)
                     ALOAD 1
                     INVOKEINTERFACE androidx/compose/runtime/Composer.endReplaceGroup ()V (itf)
