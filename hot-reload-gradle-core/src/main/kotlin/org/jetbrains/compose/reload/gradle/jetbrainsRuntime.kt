@@ -68,11 +68,15 @@ fun Project.jetbrainsRuntimeLauncher(): Provider<JavaLauncher> {
 
 @InternalHotReloadApi
 private fun Project.jetbrainsRuntimeVersion(): Provider<JavaLanguageVersion> {
+    val minVersion = JavaLanguageVersion.of(composeReloadJetBrainsRuntimeMinimalVersion)
     val defaultVersion = JavaLanguageVersion.of(composeReloadJetBrainsRuntimeVersion)
     return project.provider {
         val projectLevel = extensions.findByType<JavaPluginExtension>()?.toolchain?.languageVersion?.orNull
-        if (projectLevel != null && projectLevel > defaultVersion) return@provider projectLevel
-        defaultVersion
+        when {
+            projectLevel == null -> defaultVersion
+            projectLevel < minVersion -> minVersion
+            else -> projectLevel
+        }
     }
 }
 

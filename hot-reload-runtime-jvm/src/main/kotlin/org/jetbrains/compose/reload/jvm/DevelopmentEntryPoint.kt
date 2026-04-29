@@ -75,6 +75,7 @@ public fun DevelopmentEntryPoint(
 
     val intercepted: @Composable () -> Unit = {
         logger.debug("Composing UI: $currentHotReloadState")
+        @Suppress("ILLEGAL_RUN_CATCHING_AROUND_COMPOSABLE")
         runCatching {
             when {
                 reloadEffectsEnabled -> ReloadEffects(child)

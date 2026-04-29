@@ -19,7 +19,6 @@ import kotlin.io.path.extension
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
-import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.kotlinProperty
 import kotlin.reflect.typeOf
 import kotlin.test.Test
@@ -36,8 +35,12 @@ class SerialVersionUIDTest {
 
         walkClasspath { node ->
             if (!node.name.startsWith("org/jetbrains/compose/reload/orchestration")) return@walkClasspath
-            val thisClass = Class.forName(ClassId(node).toFqn()).kotlin
-            if (!thisClass.isSubclassOf(Serializable::class)) return@walkClasspath
+            val javaClass = Class.forName(ClassId(node).toFqn())
+            // Starting from 2.3.x some compiler-generated classes also implement java.io.Serializable
+            // We filter them out here
+            if (javaClass.isAnonymousClass || javaClass.isLocalClass || javaClass.isSynthetic) return@walkClasspath
+            if (!Serializable::class.java.isAssignableFrom(javaClass)) return@walkClasspath
+            val thisClass = javaClass.kotlin
             val serialVersionUID = thisClass.java.fields.find { it.name == "serialVersionUID" }
             if (serialVersionUID == null) {
                 violations.add("$thisClass: Missing 'serialVersionUID'")
