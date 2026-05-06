@@ -11,7 +11,9 @@ pluginManagement {
     repositories {
         maven(file("../..//build/repo"))
         maven("https://packages.jetbrains.team/maven/p/firework/dev")
-        mavenCentral()
+        mavenCentral {
+            setUrl("https://cache-redirector.jetbrains.com/maven-central")
+        }
         gradlePluginPortal()
     }
 
@@ -30,7 +32,9 @@ dependencyResolutionManagement {
     repositories {
         maven(file("../..//build/repo"))
         maven("https://packages.jetbrains.team/maven/p/firework/dev")
-        mavenCentral()
+        mavenCentral {
+            setUrl("https://cache-redirector.jetbrains.com/maven-central")
+        }
         google()
     }
 }
