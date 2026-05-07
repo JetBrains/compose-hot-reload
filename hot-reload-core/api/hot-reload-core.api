@@ -239,6 +239,7 @@ public final class org/jetbrains/compose/reload/core/HotReloadEnvironment {
 	public final fun getDevToolsTransparencyEnabled ()Z
 	public final fun getGradleBuildContinuous ()Z
 	public final fun getGradleBuildOptimize ()Z
+	public final fun getGradleBuildOptimizeUnsafe ()Z
 	public final fun getGradleWarmupEnabled ()Z
 	public final fun getIsolatedProjectsEnabled ()Z
 	public final fun getLogLevel ()Lorg/jetbrains/compose/reload/core/Logger$Level;
@@ -259,6 +260,7 @@ public final class org/jetbrains/compose/reload/core/HotReloadProperty : java/la
 	public static final field DevToolsTransparencyEnabled Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field GradleBuildContinuous Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field GradleBuildOptimize Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field GradleBuildOptimizeUnsafe Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field GradleWarmupEnabled Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field IsHotReloadActive Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field IsolatedProjectsEnabled Lorg/jetbrains/compose/reload/core/HotReloadProperty;
