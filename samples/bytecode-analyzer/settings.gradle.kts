@@ -11,13 +11,15 @@ pluginManagement {
     repositories {
         maven(file("../..//build/repo"))
         maven("https://packages.jetbrains.team/maven/p/firework/dev")
-        mavenCentral()
+        mavenCentral {
+            setUrl("https://cache-redirector.jetbrains.com/maven-central")
+        }
         gradlePluginPortal()
     }
 
     plugins {
-        kotlin("multiplatform") version "2.2.21"
-        kotlin("plugin.compose") version "2.2.21"
+        kotlin("multiplatform") version "2.3.21"
+        kotlin("plugin.compose") version "2.3.21"
         id("org.jetbrains.compose") version "1.8.2"
     }
 }
@@ -30,7 +32,9 @@ dependencyResolutionManagement {
     repositories {
         maven(file("../..//build/repo"))
         maven("https://packages.jetbrains.team/maven/p/firework/dev")
-        mavenCentral()
+        mavenCentral {
+            setUrl("https://cache-redirector.jetbrains.com/maven-central")
+        }
         google()
     }
 }

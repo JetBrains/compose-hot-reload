@@ -18,8 +18,8 @@ pluginManagement {
     }
 
     plugins {
-        kotlin("jvm") version "2.2.21"
-        kotlin("plugin.compose") version "2.2.21"
+        kotlin("jvm") version "2.3.21"
+        kotlin("plugin.compose") version "2.3.21"
         id("org.jetbrains.compose") version "1.9.0"
         id("org.jetbrains.compose.hot-reload") version "1.2.0-alpha+201"
     }
