@@ -33,7 +33,9 @@ pluginManagement {
             }
         }
 
-        mavenCentral()
+        mavenCentral {
+            setUrl("https://cache-redirector.jetbrains.com/maven-central")
+        }
     }
 }
 
@@ -70,7 +72,9 @@ dependencyResolutionManagement {
             }
         }
 
-        mavenCentral()
+        mavenCentral {
+            setUrl("https://cache-redirector.jetbrains.com/maven-central")
+        }
     }
 }
 
