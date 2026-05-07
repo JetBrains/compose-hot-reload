@@ -152,9 +152,21 @@ GradleBuildOptimize:
   target: [ application, devtools, build ]
   visibility: delicate
   documentation: |
-    - true: Compose Hot Reload will try to optimize your build during hot reload 
+    - true: Compose Hot Reload will try to optimize your build during hot reload
     (e.g. by enabling Gradle's configuration cache during 'recompilation')
     - false: No optimization will be performed.
+
+GradleBuildOptimizeUnsafe:
+  key: compose.reload.gradle.build.optimize.unsafe
+  type: boolean
+  default: "false"
+  target: [ application, devtools, build ]
+  visibility: delicate
+  documentation: |
+    - true: Compose Hot Reload will pass '-Pkotlin.internal.incremental.enableUnsafeOptimizationsForMultiplatform=true'
+    to Gradle during recompilation. This may improve incremental compilation performance but can cause unexpected
+    Kotlin compiler crashes (see https://youtrack.jetbrains.com/issue/CMP-10146).
+    - false: The unsafe incremental compilation optimization for multiplatform will not be enabled.
 
 AmperBuildRoot:
   key: amper.build.root

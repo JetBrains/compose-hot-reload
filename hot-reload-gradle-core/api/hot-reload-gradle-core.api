@@ -22,6 +22,8 @@ public final class org/jetbrains/compose/reload/gradle/HotReloadGradleEnvironmen
 	public static final fun getComposeReloadGradleBuildContinuousProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
 	public static final fun getComposeReloadGradleBuildOptimize (Lorg/gradle/api/Project;)Z
 	public static final fun getComposeReloadGradleBuildOptimizeProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public static final fun getComposeReloadGradleBuildOptimizeUnsafe (Lorg/gradle/api/Project;)Z
+	public static final fun getComposeReloadGradleBuildOptimizeUnsafeProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
 	public static final fun getComposeReloadGradleWarmupEnabled (Lorg/gradle/api/Project;)Z
 	public static final fun getComposeReloadGradleWarmupEnabledProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
 	public static final fun getComposeReloadIsolatedProjectsEnabled (Lorg/gradle/api/Project;)Z
