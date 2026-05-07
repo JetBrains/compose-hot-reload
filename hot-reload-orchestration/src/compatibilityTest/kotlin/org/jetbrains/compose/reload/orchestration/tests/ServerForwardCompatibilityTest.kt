@@ -20,6 +20,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknow
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage.DirtyScope
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RestartRequest
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.asChannel
@@ -282,6 +283,31 @@ class ServerForwardCompatibilityTest {
                 channel.receiveAsFlow().first { it is RestartRequest }
                 log("RestartRequest echo received")
             }
+        }
+
+        await("TestEvent echo") {
+            channel.receiveAsFlow().first { it is TestEvent && it.payload == "Bye" }
+            log("TestEvent echo received")
+        }
+
+        connectionMonitor.cancel()
+    }
+
+    @IsolateTest(StartServer::class)
+    context(_: IsolateTestFixture)
+    fun `test - ScreenshotRequest message`() = runIsolateTest {
+        val port = receiveAs<ServerPort>().port
+        val client = OrchestrationClient(Unknown, port)
+        client.connect().getOrThrow()
+
+        val channel = client.asChannel()
+
+        client.send(ScreenshotRequest())
+        client.send(TestEvent("Bye"))
+
+        val connectionMonitor = launch {
+            client.awaitOrThrow()
+            error("Client disconnected")
         }
 
         await("TestEvent echo") {
