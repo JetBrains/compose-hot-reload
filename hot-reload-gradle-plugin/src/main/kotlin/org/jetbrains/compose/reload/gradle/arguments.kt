@@ -52,6 +52,8 @@ sealed interface ComposeHotReloadArgumentsBuilder {
     fun setReloadTaskName(name: String)
     fun isAutoRecompileEnabled(isAutoRecompileEnabled: Provider<Boolean>)
     fun isRecompilerWarmupEnabled(isRecompilerWarmupEnabled: Provider<Boolean>)
+    fun isGradleBuildOptimizeEnabled(isGradleBuildOptimizeEnabled: Provider<Boolean>)
+    fun isGradleBuildOptimizeUnsafeEnabled(isGradleBuildOptimizeUnsafeEnabled: Provider<Boolean>)
 
     fun setStaticsReinitializeMode(provider: Provider<StaticsReinitializeMode>)
 }
@@ -161,6 +163,16 @@ internal class ComposeHotReloadArguments(project: Project) :
     @get:JvmName("getIsRecompilerWarmupEnabled")
     val isRecompilerWarmupEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
         .value(project.composeReloadGradleWarmupEnabled)
+
+    @get:Input
+    @get:JvmName("getIsGradleBuildOptimizeEnabled")
+    val gradleBuildOptimizeEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .value(project.composeReloadGradleBuildOptimize)
+
+    @get:Input
+    @get:JvmName("getIsGradleBuildOptimizeUnsafeEnabled")
+    val gradleBuildOptimizeUnsafeEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .value(project.composeReloadGradleBuildOptimizeUnsafe)
 
     @get:Input
     val staticsReinitializeMode: Property<StaticsReinitializeMode> = project.objects.property(StaticsReinitializeMode::class.java)
@@ -278,6 +290,14 @@ internal class ComposeHotReloadArguments(project: Project) :
         this.isRecompilerWarmupEnabled.set(isRecompilerWarmupEnabled.orElse(false))
     }
 
+    override fun isGradleBuildOptimizeEnabled(isGradleBuildOptimizeEnabled: Provider<Boolean>) {
+        this.gradleBuildOptimizeEnabled.set(isGradleBuildOptimizeEnabled)
+    }
+
+    override fun isGradleBuildOptimizeUnsafeEnabled(isGradleBuildOptimizeUnsafeEnabled: Provider<Boolean>) {
+        this.gradleBuildOptimizeUnsafeEnabled.set(isGradleBuildOptimizeUnsafeEnabled)
+    }
+
     override fun setStaticsReinitializeMode(provider: Provider<StaticsReinitializeMode>) {
         this.staticsReinitializeMode.set(provider)
     }
@@ -349,6 +369,10 @@ internal class ComposeHotReloadArguments(project: Project) :
         }
         add("-D${HotReloadProperty.GradleBuildContinuous.key}=${isAutoRecompileEnabled.getOrElse(true)}")
         add("-D${HotReloadProperty.GradleWarmupEnabled.key}=${isRecompilerWarmupEnabled.getOrElse(false)}")
+        add("-D${HotReloadProperty.GradleBuildOptimize.key}=${gradleBuildOptimizeEnabled.getOrElse(true)}")
+        gradleBuildOptimizeUnsafeEnabled.orNull?.let { enabled ->
+            add("-D${HotReloadProperty.GradleBuildOptimizeUnsafe.key}=$enabled")
+        }
         javaHome.orNull?.let { javaHome ->
             add("-D${HotReloadProperty.GradleJavaHome.key}=$javaHome")
         }
