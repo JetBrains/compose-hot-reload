@@ -24,12 +24,18 @@ import kotlinx.io.asSource
 import kotlinx.io.buffered
 import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
+import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
+import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotResult
 import org.jetbrains.compose.reload.orchestration.asChannel
 import java.util.Base64
 import kotlin.time.Duration.Companion.seconds
+
+private val logger = createLogger()
 
 internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle?>) {
     val transport = StdioServerTransport(
@@ -73,6 +79,7 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
 
 private fun handleStatus(orchestration: StateFlow<OrchestrationHandle?>): CallToolResult {
     val connected = orchestration.value != null
+    logger.debug { "status: connected=$connected" }
     return CallToolResult(
         content = listOf(TextContent("""{"connected": $connected}"""))
     )
@@ -83,10 +90,11 @@ private suspend fun handleTakeScreenshot(orchestration: StateFlow<OrchestrationH
         ?: return CallToolResult(
             content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
             isError = true
-        )
+        ).also { logger.info { "take_screenshot: no application connected" } }
 
     return try {
         val request = ScreenshotRequest()
+        logger.info { "take_screenshot: sending request '${request.messageId}'" }
         // asChannel() registers the listener eagerly before we send the request,
         // avoiding the race condition where the result arrives before
         // the cold asFlow() starts collecting. consumeAsFlow() auto-closes the channel.
@@ -98,6 +106,7 @@ private suspend fun handleTakeScreenshot(orchestration: StateFlow<OrchestrationH
             }
 
         if (screenshot == null) {
+            logger.warn("take_screenshot: timed out waiting for response")
             return CallToolResult(
                 content = listOf(TextContent("Screenshot timed out: no response from application")),
                 isError = true
@@ -105,17 +114,20 @@ private suspend fun handleTakeScreenshot(orchestration: StateFlow<OrchestrationH
         }
 
         if (!screenshot.isSuccess) {
+            logger.warn("take_screenshot: failed: ${screenshot.errorMessage}")
             return CallToolResult(
                 content = listOf(TextContent("Screenshot failed: ${screenshot.errorMessage ?: "unknown error"}")),
                 isError = true
             )
         }
 
+        logger.debug { "take_screenshot: received ${screenshot.data.size} bytes (${screenshot.format})" }
         val base64 = Base64.getEncoder().encodeToString(screenshot.data)
         CallToolResult(
             content = listOf(ImageContent(data = base64, mimeType = "image/${screenshot.format}"))
         )
     } catch (e: Exception) {
+        logger.warn("take_screenshot: exception: ${e.message}")
         CallToolResult(
             content = listOf(TextContent("Screenshot failed: ${e.message}")),
             isError = true
