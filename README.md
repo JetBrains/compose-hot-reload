@@ -241,6 +241,7 @@ layer and exposes the following tools:
 |------|-------------------------------------------------------------|
 | `status` | Checks whether a Compose application is currently connected |
 | `take_screenshot` | Captures a screenshot of the running application window     |
+| `get_semantic_tree` | Returns the Compose semantic/accessibility tree of the running application as JSON (component roles, names, descriptions, states, and bounds) |
 
 When the MCP server starts, it waits for the app to launch, detects shutdown, and
 reconnects automatically on restart.
