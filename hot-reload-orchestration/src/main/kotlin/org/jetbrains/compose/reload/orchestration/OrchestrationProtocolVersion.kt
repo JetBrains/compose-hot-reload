@@ -80,5 +80,7 @@ internal val Class<out OrchestrationMessage>.availableSinceVersion: Orchestratio
         OrchestrationMessage.ScreenshotResult::class.java -> OrchestrationVersion.v1_5
         OrchestrationMessage.SemanticTreeRequest::class.java -> OrchestrationVersion.v1_5
         OrchestrationMessage.SemanticTreeResult::class.java -> OrchestrationVersion.v1_5
+        OrchestrationMessage.UIActionRequest::class.java -> OrchestrationVersion.v1_5
+        OrchestrationMessage.UIActionResult::class.java -> OrchestrationVersion.v1_5
         else -> OrchestrationVersion.v1
     }

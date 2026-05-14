@@ -484,6 +484,70 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction : java/io/Serializable {
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$Click : org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$Click;
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$LongClick : org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction {
+	public static final field INSTANCE Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$LongClick;
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$ScrollBy : org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction {
+	public fun <init> (FF)V
+	public final fun component1 ()F
+	public final fun component2 ()F
+	public final fun copy (FF)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$ScrollBy;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$ScrollBy;FFILjava/lang/Object;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$ScrollBy;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDeltaX ()F
+	public final fun getDeltaY ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$ScrollToIndex : org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$ScrollToIndex;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$ScrollToIndex;IILjava/lang/Object;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$ScrollToIndex;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$SetText : org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$SetText;
+	public static synthetic fun copy$default (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$SetText;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$SetText;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIActionRequest : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
+	public fun <init> (ILorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAction ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction;
+	public final fun getNodeId ()I
+	public fun hashCode ()I
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIActionResult : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
+	public fun <init> (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageId;ZLjava/lang/String;)V
+	public synthetic fun <init> (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageId;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getErrorMessage ()Ljava/lang/String;
+	public final fun getUiActionRequestId ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageId;
+	public fun hashCode ()I
+	public final fun isSuccess ()Z
+}
+
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIException : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z

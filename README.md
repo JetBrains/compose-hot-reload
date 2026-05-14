@@ -242,6 +242,11 @@ layer and exposes the following tools:
 | `status` | Checks whether a Compose application is currently connected |
 | `take_screenshot` | Captures a screenshot of the running application window     |
 | `get_semantic_tree` | Returns the Compose semantic/accessibility tree of the running application as JSON (component roles, names, descriptions, states, and bounds) |
+| `click` | Clicks the UI element with the given `nodeId`. The node must expose `onClick` in `get_semantic_tree` |
+| `long_click` | Long-presses the UI element with the given `nodeId`. The node must expose `onLongClick` |
+| `type_text` | Replaces the content of an editable text field (`nodeId`) with the given `text`. The node must expose `editableText` |
+| `scroll` | Scrolls a scrollable container (`nodeId`) by `deltaX` / `deltaY` logical pixels. The node must support the `ScrollBy` semantic action |
+| `scroll_to_index` | Scrolls a container (e.g. `LazyColumn` / `LazyRow`, `nodeId`) so the item at zero-based `index` becomes visible. The node must support the `ScrollToIndex` semantic action |
 
 When the MCP server starts, it waits for the app to launch, detects shutdown, and
 reconnects automatically on restart.

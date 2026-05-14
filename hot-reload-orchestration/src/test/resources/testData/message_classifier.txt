@@ -30,6 +30,8 @@ root/SemanticTreeResult                    => o.j.c.r.o.OrchestrationMessage$Sem
 root/ShutdownRequest                       => o.j.c.r.o.OrchestrationMessage$ShutdownRequest
 root/TakeScreenshotRequest                 => o.j.c.r.o.OrchestrationMessage$TakeScreenshotRequest
 root/TestEvent                             => o.j.c.r.o.OrchestrationMessage$TestEvent
+root/UIActionRequest                       => o.j.c.r.o.OrchestrationMessage$UIActionRequest
+root/UIActionResult                        => o.j.c.r.o.OrchestrationMessage$UIActionResult
 root/UIException                           => o.j.c.r.o.OrchestrationMessage$UIException
 root/UIRendered                            => o.j.c.r.o.OrchestrationMessage$UIRendered
 

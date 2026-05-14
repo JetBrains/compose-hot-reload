@@ -26,6 +26,9 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.Screensho
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticTreeResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticTreeRequest
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIAction
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionRequest
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionResult
 import org.jetbrains.compose.reload.orchestration.asFlow
 import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
@@ -165,6 +168,184 @@ class McpServerTest {
             assertNotEquals(true, result.isError)
             val text = (result.content.first() as TextContent).text
             assertEquals(someJson, text)
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - click returns error when disconnected`() = runTest(timeout = 10.seconds) {
+        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
+        val client = createMcpClient(orchestration)
+
+        val result = client.callTool("click", mapOf("nodeId" to 42))
+        assertEquals(true, result.isError)
+        val text = (result.content.first() as TextContent).text
+        assertTrue(text.contains("No application is currently connected"))
+    }
+
+    @Test
+    fun `test - click succeeds and forwards nodeId`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            var receivedNodeId: Int? = null
+            var receivedAction: UIAction? = null
+            launch {
+                val request = server.asFlow().filterIsInstance<UIActionRequest>().first()
+                receivedNodeId = request.nodeId
+                receivedAction = request.action
+                server.send(UIActionResult(uiActionRequestId = request.messageId, isSuccess = true))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            val result = client.callTool("click", mapOf("nodeId" to 7))
+            assertNotEquals(true, result.isError)
+            assertEquals(7, receivedNodeId)
+            assertEquals(UIAction.Click, receivedAction)
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - click returns error when app reports failure`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            launch {
+                val request = server.asFlow().filterIsInstance<UIActionRequest>().first()
+                server.send(
+                    UIActionResult(
+                        uiActionRequestId = request.messageId,
+                        isSuccess = false,
+                        errorMessage = "Node 7 not found",
+                    )
+                )
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            val result = client.callTool("click", mapOf("nodeId" to 7))
+            assertEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains("Node 7 not found"))
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - long_click succeeds and dispatches LongClick action`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            var receivedAction: UIAction? = null
+            launch {
+                val request = server.asFlow().filterIsInstance<UIActionRequest>().first()
+                receivedAction = request.action
+                server.send(UIActionResult(uiActionRequestId = request.messageId, isSuccess = true))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            val result = client.callTool("long_click", mapOf("nodeId" to 3))
+            assertNotEquals(true, result.isError)
+            assertEquals(UIAction.LongClick, receivedAction)
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - type_text forwards text to app`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            var receivedAction: UIAction? = null
+            launch {
+                val request = server.asFlow().filterIsInstance<UIActionRequest>().first()
+                receivedAction = request.action
+                server.send(UIActionResult(uiActionRequestId = request.messageId, isSuccess = true))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            val result = client.callTool(
+                "type_text",
+                mapOf("nodeId" to 11, "text" to "hello world"),
+            )
+            assertNotEquals(true, result.isError)
+            assertEquals(UIAction.SetText("hello world"), receivedAction)
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - scroll forwards deltas to app`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            var receivedAction: UIAction? = null
+            launch {
+                val request = server.asFlow().filterIsInstance<UIActionRequest>().first()
+                receivedAction = request.action
+                server.send(UIActionResult(uiActionRequestId = request.messageId, isSuccess = true))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            val result = client.callTool(
+                "scroll",
+                mapOf("nodeId" to 5, "deltaX" to 10.0, "deltaY" to -20.5),
+            )
+            assertNotEquals(true, result.isError)
+            assertEquals(UIAction.ScrollBy(10f, -20.5f), receivedAction)
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - scroll_to_index forwards index to app`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            var receivedAction: UIAction? = null
+            launch {
+                val request = server.asFlow().filterIsInstance<UIActionRequest>().first()
+                receivedAction = request.action
+                server.send(UIActionResult(uiActionRequestId = request.messageId, isSuccess = true))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            val result = client.callTool(
+                "scroll_to_index",
+                mapOf("nodeId" to 5, "index" to 42),
+            )
+            assertNotEquals(true, result.isError)
+            assertEquals(UIAction.ScrollToIndex(42), receivedAction)
         } finally {
             server.close()
         }

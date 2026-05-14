@@ -41,7 +41,7 @@ private const val MAX_ACCESSIBILITY_TREE_SEARCH_DEPTH = 8
  * class that has a public `getSemanticsNode()` method.  Once any such node is
  * found we walk up via [SemanticsNode.parent] until we reach the root.
  */
-private fun findRootSemanticsNode(accessible: Accessible, depth: Int = 0): SemanticsNode? {
+internal fun findRootSemanticsNode(accessible: Accessible, depth: Int = 0): SemanticsNode? {
     if (depth > MAX_ACCESSIBILITY_TREE_SEARCH_DEPTH) return null
     val node = accessible.getSemanticsNodeOrNull()
     if (node != null) {

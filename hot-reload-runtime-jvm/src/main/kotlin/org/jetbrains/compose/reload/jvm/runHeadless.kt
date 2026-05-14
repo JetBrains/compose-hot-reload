@@ -273,6 +273,12 @@ public suspend fun runHeadlessApplication(
                     )
                 )
             }
+
+            if (message is OrchestrationMessage.UIActionRequest) {
+                scene.render(virtualTime)
+                val rootNode = scene.tryGetRootSemanticsNode()
+                orchestration.send(handleUIActionRequest(message, rootNode))
+            }
         }
 
     }

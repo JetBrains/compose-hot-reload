@@ -633,6 +633,106 @@ internal constructor() : OrchestrationPackage(), Serializable {
         }
     }
 
+    /**
+     * A UI interaction to be invoked on a semantic node identified by [UIActionRequest.nodeId].
+     */
+    public sealed class UIAction : Serializable {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+
+        public object Click : UIAction() {
+            private fun readResolve(): Any = Click
+        }
+
+        public object LongClick : UIAction() {
+            private fun readResolve(): Any = LongClick
+        }
+
+        public data class SetText(public val text: String) : UIAction() {
+            internal companion object {
+                @Suppress("unused")
+                internal const val serialVersionUID: Long = 0L
+            }
+        }
+
+        public data class ScrollBy(public val deltaX: Float, public val deltaY: Float) : UIAction() {
+            internal companion object {
+                @Suppress("unused")
+                internal const val serialVersionUID: Long = 0L
+            }
+        }
+
+        public data class ScrollToIndex(public val index: Int) : UIAction() {
+            internal companion object {
+                @Suppress("unused")
+                internal const val serialVersionUID: Long = 0L
+            }
+        }
+    }
+
+    /**
+     * Requests the application to perform a [UIAction] on the semantic node with the given [nodeId].
+     * The node ID corresponds to the `id` field returned by [SemanticTreeRequest] / [SemanticTreeResult].
+     */
+    public class UIActionRequest(
+        public val nodeId: Int,
+        public val action: UIAction,
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+
+        override fun hashCode(): Int {
+            var hashCode = nodeId.hashCode()
+            hashCode = 31 * hashCode + action.hashCode()
+            return hashCode
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (other === this) return true
+            if (other !is UIActionRequest) return false
+            if (other.nodeId != nodeId) return false
+            if (other.action != action) return false
+            return true
+        }
+    }
+
+    /**
+     * Response to a [UIActionRequest], carrying success/failure information.
+     * @param uiActionRequestId the [OrchestrationMessageId] of the originating [UIActionRequest]
+     * @param isSuccess whether the action was dispatched successfully
+     * @param errorMessage an error description if [isSuccess] is false
+     */
+    public class UIActionResult(
+        public val uiActionRequestId: OrchestrationMessageId,
+        public val isSuccess: Boolean = true,
+        public val errorMessage: String? = null,
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+
+        override fun hashCode(): Int {
+            var hashCode = uiActionRequestId.hashCode()
+            hashCode = 31 * hashCode + isSuccess.hashCode()
+            hashCode = 31 * hashCode + (errorMessage?.hashCode() ?: 0)
+            return hashCode
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (other === this) return true
+            if (other !is UIActionResult) return false
+            if (other.uiActionRequestId != uiActionRequestId) return false
+            if (other.isSuccess != isSuccess) return false
+            if (other.errorMessage != errorMessage) return false
+            return true
+        }
+    }
+
 
     /* Base implementation */
     public var messageId: OrchestrationMessageId = OrchestrationMessageId.random()

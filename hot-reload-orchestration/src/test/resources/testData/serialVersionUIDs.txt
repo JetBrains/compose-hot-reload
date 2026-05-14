@@ -39,6 +39,14 @@ org/jetbrains/compose/reload/orchestration/OrchestrationMessage$SemanticTreeResu
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ShutdownRequest = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$TakeScreenshotRequest = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$TestEvent = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$Click = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$LongClick = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$ScrollBy = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$ScrollToIndex = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction$SetText = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIActionRequest = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIActionResult = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIException = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIRendered = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessageClassifier = 0

@@ -232,6 +232,96 @@ internal class SemanticTreeResultEncoder : OrchestrationMessageEncoder<Orchestra
     }
 }
 
+internal class UIActionRequestEncoder : OrchestrationMessageEncoder<OrchestrationMessage.UIActionRequest> {
+    override val messageType: Type<OrchestrationMessage.UIActionRequest> = type()
+    override val messageClassifier = classifier("UIActionRequest")
+
+    override fun encode(message: OrchestrationMessage.UIActionRequest): ByteArray = encodeByteArray {
+        writeFields(
+            "nodeId" to encodeByteArray { writeInt(message.nodeId) },
+            "action" to encodeUIAction(message.action),
+        )
+    }
+
+    override fun decode(data: ByteArray): Try<OrchestrationMessage.UIActionRequest> = data.tryDecode {
+        val fields = readFields()
+        OrchestrationMessage.UIActionRequest(
+            nodeId = fields.requireField("nodeId").decode { readInt() },
+            action = fields.requireField("action").decode { readUIAction() },
+        )
+    }
+
+    private fun encodeUIAction(action: OrchestrationMessage.UIAction): ByteArray = encodeByteArray {
+        when (action) {
+            is OrchestrationMessage.UIAction.Click -> {
+                writeString("Click")
+                writeFields()
+            }
+            is OrchestrationMessage.UIAction.LongClick -> {
+                writeString("LongClick")
+                writeFields()
+            }
+            is OrchestrationMessage.UIAction.SetText -> {
+                writeString("SetText")
+                writeFields("text" to action.text.encodeToByteArray())
+            }
+            is OrchestrationMessage.UIAction.ScrollBy -> {
+                writeString("ScrollBy")
+                writeFields(
+                    "deltaX" to encodeByteArray(4) { writeFloat(action.deltaX) },
+                    "deltaY" to encodeByteArray(4) { writeFloat(action.deltaY) },
+                )
+            }
+            is OrchestrationMessage.UIAction.ScrollToIndex -> {
+                writeString("ScrollToIndex")
+                writeFields("index" to encodeByteArray(4) { writeInt(action.index) })
+            }
+        }
+    }
+
+    private fun java.io.DataInputStream.readUIAction(): OrchestrationMessage.UIAction {
+        val type = readString()
+        val fields = readFields()
+        return when (type) {
+            "Click" -> OrchestrationMessage.UIAction.Click
+            "LongClick" -> OrchestrationMessage.UIAction.LongClick
+            "SetText" -> OrchestrationMessage.UIAction.SetText(
+                text = fields.requireField("text").decodeToString()
+            )
+            "ScrollBy" -> OrchestrationMessage.UIAction.ScrollBy(
+                deltaX = fields.requireField("deltaX").decode { readFloat() },
+                deltaY = fields.requireField("deltaY").decode { readFloat() },
+            )
+            "ScrollToIndex" -> OrchestrationMessage.UIAction.ScrollToIndex(
+                index = fields.requireField("index").decode { readInt() }
+            )
+            else -> error("Unknown UIAction type: $type")
+        }
+    }
+}
+
+internal class UIActionResultEncoder : OrchestrationMessageEncoder<OrchestrationMessage.UIActionResult> {
+    override val messageType: Type<OrchestrationMessage.UIActionResult> = type()
+    override val messageClassifier = classifier("UIActionResult")
+
+    override fun encode(message: OrchestrationMessage.UIActionResult): ByteArray = encodeByteArray {
+        writeFields(
+            "uiActionRequestId" to message.uiActionRequestId.encodeToByteArray(),
+            "isSuccess" to message.isSuccess.encodeToByteArray(),
+            "errorMessage" to message.errorMessage?.encodeToByteArray(),
+        )
+    }
+
+    override fun decode(data: ByteArray): Try<OrchestrationMessage.UIActionResult> = data.tryDecode {
+        val fields = readFields()
+        OrchestrationMessage.UIActionResult(
+            uiActionRequestId = OrchestrationMessageId(fields.requireField("uiActionRequestId")),
+            isSuccess = fields["isSuccess"]?.decodeToBoolean() ?: true,
+            errorMessage = fields["errorMessage"]?.decodeToString(),
+        )
+    }
+}
+
 internal class PingEncoder : OrchestrationMessageEncoder<OrchestrationMessage.Ping> {
     override val messageType: Type<OrchestrationMessage.Ping> = type()
     override val messageClassifier = classifier("Ping")

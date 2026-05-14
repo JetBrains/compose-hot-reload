@@ -9,11 +9,14 @@ import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
 import io.modelcontextprotocol.kotlin.sdk.shared.Transport
+import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.ImageContent
 import io.modelcontextprotocol.kotlin.sdk.types.Implementation
 import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
+import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.filterIsInstance
@@ -22,6 +25,14 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.io.asSink
 import kotlinx.io.asSource
 import kotlinx.io.buffered
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.floatOrNull
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonObject
 import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.core.createLogger
@@ -29,10 +40,14 @@ import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticTreeResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticTreeRequest
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIAction
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionRequest
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionResult
 import org.jetbrains.compose.reload.orchestration.asChannel
 import java.util.Base64
 import kotlin.time.Duration.Companion.seconds
@@ -83,6 +98,65 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
                 "Use the 'status' tool first to check if the application is connected."
         ) { _ ->
             handleGetSemanticTree(orchestration)
+        }
+
+        addTool(
+            name = "click",
+            description = "Click a UI element. The element must have 'onClick' in its " +
+                "'actions' list as reported by 'get_semantic_tree'.",
+            inputSchema = nodeIdToolSchema()
+        ) { request ->
+            handleUIAction(orchestration, request) { UIAction.Click }
+        }
+
+        addTool(
+            name = "long_click",
+            description = "Long-click (long press) a UI element. The element must have " +
+                "'onLongClick' in its 'actions' list as reported by 'get_semantic_tree'.",
+            inputSchema = nodeIdToolSchema()
+        ) { request ->
+            handleUIAction(orchestration, request) { UIAction.LongClick }
+        }
+
+        addTool(
+            name = "type_text",
+            description = "Replace the content of a text field with the given text. " +
+                "The element must expose 'editableText' as reported by 'get_semantic_tree'.",
+            inputSchema = typeTextToolSchema()
+        ) { request ->
+            handleUIAction(orchestration, request) { args ->
+                val text = (args?.get("text") as? JsonPrimitive)?.content
+                    ?: error("Missing required parameter 'text'")
+                UIAction.SetText(text)
+            }
+        }
+
+        addTool(
+            name = "scroll",
+            description = "Scroll a scrollable container by the given delta in logical pixels. " +
+                "Positive deltaX scrolls right; positive deltaY scrolls down. " +
+                "The element must support the ScrollBy semantic action.",
+            inputSchema = scrollToolSchema()
+        ) { request ->
+            handleUIAction(orchestration, request) { args ->
+                val deltaX = args?.get("deltaX")?.jsonPrimitive?.floatOrNull ?: 0f
+                val deltaY = args?.get("deltaY")?.jsonPrimitive?.floatOrNull ?: 0f
+                UIAction.ScrollBy(deltaX, deltaY)
+            }
+        }
+
+        addTool(
+            name = "scroll_to_index",
+            description = "Scroll a scrollable container (e.g. a LazyColumn / LazyRow) so that the item " +
+                "at the given index becomes visible. The element must support the ScrollToIndex " +
+                "semantic action.",
+            inputSchema = scrollToIndexToolSchema()
+        ) { request ->
+            handleUIAction(orchestration, request) { args ->
+                val index = args?.get("index")?.jsonPrimitive?.intOrNull
+                    ?: error("Missing required parameter 'index'")
+                UIAction.ScrollToIndex(index)
+            }
         }
     }
 
@@ -180,6 +254,129 @@ private suspend fun handleGetSemanticTree(orchestration: StateFlow<Orchestration
         logger.warn("get_semantic_tree: exception: ${e.message}")
         CallToolResult(
             content = listOf(TextContent("Semantic tree request failed: ${e.message}")),
+            isError = true
+        )
+    }
+}
+
+private fun nodeIdToolSchema(): ToolSchema = ToolSchema(
+    properties = buildJsonObject {
+        putJsonObject("nodeId") {
+            put("type", "integer")
+            put("description", "Semantic node id as reported by 'get_semantic_tree'.")
+        }
+    },
+    required = listOf("nodeId"),
+)
+
+private fun typeTextToolSchema(): ToolSchema = ToolSchema(
+    properties = buildJsonObject {
+        putJsonObject("nodeId") {
+            put("type", "integer")
+            put("description", "Semantic node id as reported by 'get_semantic_tree'.")
+        }
+        putJsonObject("text") {
+            put("type", "string")
+            put("description", "Text to set as the content of the editable field.")
+        }
+    },
+    required = listOf("nodeId", "text"),
+)
+
+private fun scrollToolSchema(): ToolSchema = ToolSchema(
+    properties = buildJsonObject {
+        putJsonObject("nodeId") {
+            put("type", "integer")
+            put("description", "Semantic node id of the scrollable container as reported by 'get_semantic_tree'.")
+        }
+        putJsonObject("deltaX") {
+            put("type", "number")
+            put("description", "Horizontal scroll delta in logical pixels (positive = right).")
+        }
+        putJsonObject("deltaY") {
+            put("type", "number")
+            put("description", "Vertical scroll delta in logical pixels (positive = down).")
+        }
+    },
+    required = listOf("nodeId"),
+)
+
+private fun scrollToIndexToolSchema(): ToolSchema = ToolSchema(
+    properties = buildJsonObject {
+        putJsonObject("nodeId") {
+            put("type", "integer")
+            put("description", "Semantic node id of the scrollable container as reported by 'get_semantic_tree'.")
+        }
+        putJsonObject("index") {
+            put("type", "integer")
+            put("description", "Zero-based index of the item to scroll to.")
+        }
+    },
+    required = listOf("nodeId", "index"),
+)
+
+private suspend fun handleUIAction(
+    orchestration: StateFlow<OrchestrationHandle?>,
+    request: CallToolRequest,
+    actionFactory: (JsonObject?) -> UIAction,
+): CallToolResult {
+    val handle = orchestration.value
+        ?: return CallToolResult(
+            content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
+            isError = true
+        ).also { logger.info { "${request.name}: no application connected" } }
+
+    val args = request.arguments
+    val nodeId = args?.get("nodeId")?.jsonPrimitive?.intOrNull
+        ?: return CallToolResult(
+            content = listOf(TextContent("Missing required parameter 'nodeId' (integer)")),
+            isError = true
+        )
+
+    val action = try {
+        actionFactory(args)
+    } catch (e: Exception) {
+        return CallToolResult(
+            content = listOf(TextContent(e.message ?: "Invalid arguments")),
+            isError = true
+        )
+    }
+
+    return try {
+        val uiActionRequest = UIActionRequest(nodeId = nodeId, action = action)
+        logger.info { "${request.name}: sending request '${uiActionRequest.messageId}' nodeId=$nodeId action=$action" }
+        val actionChannel: ReceiveChannel<OrchestrationMessage> = handle.asChannel()
+
+        handle.send(uiActionRequest)
+
+        val actionResult = withTimeoutOrNull(10.seconds) {
+            actionChannel.consumeAsFlow()
+                .filterIsInstance<UIActionResult>()
+                .first { it.uiActionRequestId == uiActionRequest.messageId }
+        }
+
+        if (actionResult == null) {
+            logger.warn("${request.name}: timed out waiting for response")
+            return CallToolResult(
+                content = listOf(TextContent("UI action timed out: no response from application")),
+                isError = true
+            )
+        }
+
+        if (!actionResult.isSuccess) {
+            logger.warn("${request.name}: failed: ${actionResult.errorMessage}")
+            return CallToolResult(
+                content = listOf(TextContent("UI action failed: ${actionResult.errorMessage ?: "unknown error"}")),
+                isError = true
+            )
+        }
+
+        logger.debug { "${request.name}: succeeded" }
+        CallToolResult(content = listOf(TextContent("""{"success": true}""")))
+    } catch (e: Exception) {
+        logger.warn("${request.name}: exception: ${e.message}")
+        CallToolResult(
+            content = listOf(TextContent("UI action failed: ${e.message}")),
             isError = true
         )
     }

@@ -32,3 +32,5 @@ org.jetbrains.compose.reload.orchestration.OrchestrationMessage$ScreenshotReques
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$ScreenshotResult = v1.5(6)
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$SemanticTreeRequest = v1.5(6)
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$SemanticTreeResult = v1.5(6)
+org.jetbrains.compose.reload.orchestration.OrchestrationMessage$UIActionRequest = v1.5(6)
+org.jetbrains.compose.reload.orchestration.OrchestrationMessage$UIActionResult = v1.5(6)
