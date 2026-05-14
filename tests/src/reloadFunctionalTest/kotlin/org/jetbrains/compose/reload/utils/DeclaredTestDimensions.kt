@@ -28,5 +28,6 @@ data class DeclaredTestVersion(
     val version: String,
     val isDefault: Boolean = false,
     val isHostIntegrationTest: Boolean = false,
-    val isGradleIntegrationTest: Boolean = false
+    val isGradleIntegrationTest: Boolean = false,
+    val minKotlin: String? = null,
 )

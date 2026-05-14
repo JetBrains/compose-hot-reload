@@ -139,6 +139,15 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
             }
         }
 
+        /* Drop combos where the chosen Compose version requires a newer Kotlin than chosen */
+        result = result.filter { invocationContext ->
+            val composeDecl = repositoryDeclaredTestDimensions.compose.find { declared ->
+                declared.version == invocationContext.composeVersion.version.toString()
+            } ?: return@filter true
+            val minKotlin = composeDecl.minKotlin ?: return@filter true
+            invocationContext.kotlinVersion.version >= KotlinToolingVersion(minKotlin)
+        }.toSet()
+
         return result.sortedWith(
             compareBy(
                 { it.kotlinVersion.version },
