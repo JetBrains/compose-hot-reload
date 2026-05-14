@@ -198,7 +198,7 @@ class TestKt {
             L22
             ALOAD 12
             LDC -1159599143
-            LDC "CC(Layout)N(content,modifier,measurePolicy)81@3355L27,84@3521L416:Layout.kt#80mrfh"
+            LDC "CC(Layout)N(content,modifier,measurePolicy)81@3355L27,84@3521L415:Layout.kt#80mrfh"
             L23
             LINENUMBER 28 L23
             INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerStart (Landroidx/compose/runtime/Composer;ILjava/lang/String;)V
@@ -246,7 +246,7 @@ class TestKt {
             L32
             ALOAD 19
             LDC -553112988
-            LDC "CC(ReusableComposeNode)N(factory,update,content)399@15590L9:Composables.kt#9igjgp"
+            LDC "CC(ReusableComposeNode)N(factory,update,content)410@16187L9:Composables.kt#9igjgp"
             L33
             LINENUMBER 34 L33
             INVOKESTATIC androidx/compose/runtime/ComposerKt.sourceInformationMarkerStart (Landroidx/compose/runtime/Composer;ILjava/lang/String;)V
@@ -310,7 +310,7 @@ class TestKt {
             INVOKESTATIC java/lang/Integer.valueOf (I)Ljava/lang/Integer;
             GETSTATIC androidx/compose/ui/node/ComposeUiNode.Companion : Landroidx/compose/ui/node/ComposeUiNode$Companion;
             INVOKEVIRTUAL androidx/compose/ui/node/ComposeUiNode$Companion.getSetCompositeKeyHash ()Lkotlin/jvm/functions/Function2;
-            INVOKESTATIC androidx/compose/runtime/Updater.init-impl (Landroidx/compose/runtime/Composer;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)V
+            INVOKESTATIC androidx/compose/runtime/Updater.set-impl (Landroidx/compose/runtime/Composer;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)V
             L46
             LINENUMBER 46 L46
             ALOAD 22

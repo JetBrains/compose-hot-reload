@@ -72,8 +72,8 @@ dependencies {
     }
 
     implementation(project(":hot-reload-devtools-api"))
-    shadowedImplementation(compose.components.resources)
-    devImplementation(compose.components.resources)
+    shadowedImplementation(deps.compose.resources)
+    devImplementation(deps.compose.resources)
 
     compileOnly(project(":hot-reload-core"))
     compileOnly(project(":hot-reload-agent"))

@@ -251,9 +251,9 @@ class FooKt {
             LabelNode(L21)
         BlockToken(1)
             VarInsnNode [25]
-        SourceInformationMarkerStart(key=ComposeGroupKey(key=-1159599143), sourceInformation='CC(Layout)N(content,modifier,measurePolicy)81@3355L27,84@3521L416:Layout.kt#80mrfh')
+        SourceInformationMarkerStart(key=ComposeGroupKey(key=-1159599143), sourceInformation='CC(Layout)N(content,modifier,measurePolicy)81@3355L27,84@3521L415:Layout.kt#80mrfh')
             LdcInsnNode(-1159599143) [18]
-            LdcInsnNode(CC(Layout)N(content,modifier,measurePolicy)81@3355L27,84@3521L416:Layout.kt#80mrfh) [18]
+            LdcInsnNode(CC(Layout)N(content,modifier,measurePolicy)81@3355L27,84@3521L415:Layout.kt#80mrfh) [18]
             LabelNode(L22)
             LineNumberNode [-1]
             MethodInsnNode(androidx/compose/runtime/ComposerKt.sourceInformationMarkerStart (Landroidx/compose/runtime/Composer;ILjava/lang/String;)V) [184]
@@ -318,9 +318,9 @@ class FooKt {
             LabelNode(L31)
         BlockToken(1)
             VarInsnNode [25]
-        SourceInformationMarkerStart(key=ComposeGroupKey(key=-553112988), sourceInformation='CC(ReusableComposeNode)N(factory,update,content)399@15590L9:Composables.kt#9igjgp')
+        SourceInformationMarkerStart(key=ComposeGroupKey(key=-553112988), sourceInformation='CC(ReusableComposeNode)N(factory,update,content)410@16187L9:Composables.kt#9igjgp')
             LdcInsnNode(-553112988) [18]
-            LdcInsnNode(CC(ReusableComposeNode)N(factory,update,content)399@15590L9:Composables.kt#9igjgp) [18]
+            LdcInsnNode(CC(ReusableComposeNode)N(factory,update,content)410@16187L9:Composables.kt#9igjgp) [18]
             LabelNode(L32)
             LineNumberNode [-1]
             MethodInsnNode(androidx/compose/runtime/ComposerKt.sourceInformationMarkerStart (Landroidx/compose/runtime/Composer;ILjava/lang/String;)V) [184]
@@ -413,7 +413,7 @@ class FooKt {
             MethodInsnNode(java/lang/Integer.valueOf (I)Ljava/lang/Integer;) [184]
             FieldInsnNode [178]
             MethodInsnNode(androidx/compose/ui/node/ComposeUiNode$Companion.getSetCompositeKeyHash ()Lkotlin/jvm/functions/Function2;) [182]
-            MethodInsnNode(androidx/compose/runtime/Updater.init-impl (Landroidx/compose/runtime/Composer;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)V) [184]
+            MethodInsnNode(androidx/compose/runtime/Updater.set-impl (Landroidx/compose/runtime/Composer;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)V) [184]
         LabelToken(L45, lineNumber=46)
             LabelNode(L45)
             LineNumberNode [-1]

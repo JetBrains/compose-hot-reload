@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.3.21"
-compose = "1.10.0"
+compose = "1.11.0"
 composeMin = { prefer = "1.8.2" }
 coroutines = "1.10.2"
 kotlinxDatetime = "0.7.1"
