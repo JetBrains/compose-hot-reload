@@ -16,7 +16,6 @@ import io.modelcontextprotocol.kotlin.sdk.types.Implementation
 import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
-import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.filterIsInstance
@@ -50,6 +49,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionR
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionResult
 import org.jetbrains.compose.reload.orchestration.asChannel
 import java.util.Base64
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 private val logger = createLogger()
@@ -181,15 +181,9 @@ private suspend fun handleTakeScreenshot(orchestration: StateFlow<OrchestrationH
     return try {
         val request = ScreenshotRequest()
         logger.info { "take_screenshot: sending request '${request.messageId}'" }
-        // asChannel() registers the listener eagerly before we send the request,
-        // avoiding the race condition where the result arrives before
-        // the cold asFlow() starts collecting. consumeAsFlow() auto-closes the channel.
-        val screenshot = handle.asChannel().consumeAsFlow()
-            .filterIsInstance<ScreenshotResult>()
-            .let { flow ->
-                handle.send(request)
-                withTimeoutOrNull(10.seconds) { flow.first { it.screenshotRequestId == request.messageId } }
-            }
+        val screenshot = handle.requestResponse<ScreenshotResult>(request) {
+            it.screenshotRequestId == request.messageId
+        }
 
         if (screenshot == null) {
             logger.warn("take_screenshot: timed out waiting for response")
@@ -231,14 +225,9 @@ private suspend fun handleGetSemanticTree(orchestration: StateFlow<Orchestration
     return try {
         val request = SemanticTreeRequest()
         logger.info { "get_semantic_tree: sending request '${request.messageId}'" }
-        val semanticTree = handle.asChannel().consumeAsFlow()
-            .filterIsInstance<SemanticTreeResult>()
-            .let { flow ->
-                handle.send(request)
-                withTimeoutOrNull(10.seconds) {
-                    flow.first { it.semanticTreeRequestId == request.messageId }
-                }
-            }
+        val semanticTree = handle.requestResponse<SemanticTreeResult>(request) {
+            it.semanticTreeRequestId == request.messageId
+        }
 
         if (semanticTree == null) {
             logger.warn("get_semantic_tree: timed out waiting for response")
@@ -345,14 +334,8 @@ private suspend fun handleUIAction(
     return try {
         val uiActionRequest = UIActionRequest(nodeId = nodeId, action = action)
         logger.info { "${request.name}: sending request '${uiActionRequest.messageId}' nodeId=$nodeId action=$action" }
-        val actionChannel: ReceiveChannel<OrchestrationMessage> = handle.asChannel()
-
-        handle.send(uiActionRequest)
-
-        val actionResult = withTimeoutOrNull(10.seconds) {
-            actionChannel.consumeAsFlow()
-                .filterIsInstance<UIActionResult>()
-                .first { it.uiActionRequestId == uiActionRequest.messageId }
+        val actionResult = handle.requestResponse<UIActionResult>(uiActionRequest) {
+            it.uiActionRequestId == uiActionRequest.messageId
         }
 
         if (actionResult == null) {
@@ -380,4 +363,26 @@ private suspend fun handleUIAction(
             isError = true
         )
     }
+}
+
+/**
+ * Sends [request] over orchestration and awaits the matching response of type [R],
+ * or returns null if no response arrives within [timeout].
+ *
+ * The response channel is opened *before* [request] is sent, eliminating the race
+ * where the result could otherwise arrive before a cold flow starts collecting.
+ * [consumeAsFlow] auto-closes the channel once the first match is found.
+ */
+private suspend inline fun <reified R : OrchestrationMessage> OrchestrationHandle.requestResponse(
+    request: OrchestrationMessage,
+    timeout: Duration = 10.seconds,
+    crossinline isResponse: (R) -> Boolean,
+): R? {
+    val channel = asChannel()
+    return channel.consumeAsFlow()
+        .filterIsInstance<R>()
+        .let { flow ->
+            send(request)
+            withTimeoutOrNull(timeout) { flow.first { isResponse(it) } }
+        }
 }
