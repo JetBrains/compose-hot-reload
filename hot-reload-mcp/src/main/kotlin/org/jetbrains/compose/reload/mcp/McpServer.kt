@@ -62,6 +62,30 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
     startMcpServer(orchestration, transport)
 }
 
+/** A single input property in a tool's JSON schema. */
+private data class Property(val name: String, val type: String, val description: String)
+
+private val NodeId = Property("nodeId", "integer",
+    description = "Semantic node id as reported by 'get_semantic_tree'.")
+private val ScrollContainerNodeId = Property("nodeId", "integer",
+    description = "Semantic node id of the scrollable container as reported by 'get_semantic_tree'.")
+
+/** Builds a [ToolSchema] from [properties]; by default all of them are required. */
+private fun toolSchema(
+    vararg properties: Property,
+    required: List<String> = properties.map { it.name },
+): ToolSchema = ToolSchema(
+    properties = buildJsonObject {
+        properties.forEach { p ->
+            putJsonObject(p.name) {
+                put("type", p.type)
+                put("description", p.description)
+            }
+        }
+    },
+    required = required,
+)
+
 @OptIn(DelicateHotReloadApi::class)
 internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle?>, transport: Transport) {
     val server = Server(
@@ -104,7 +128,7 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
             name = "click",
             description = "Click a UI element. The element must have 'onClick' in its " +
                 "'actions' list as reported by 'get_semantic_tree'.",
-            inputSchema = nodeIdToolSchema()
+            inputSchema = toolSchema(NodeId)
         ) { request ->
             handleUIAction(orchestration, request) { UIAction.Click }
         }
@@ -113,7 +137,7 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
             name = "long_click",
             description = "Long-click (long press) a UI element. The element must have " +
                 "'onLongClick' in its 'actions' list as reported by 'get_semantic_tree'.",
-            inputSchema = nodeIdToolSchema()
+            inputSchema = toolSchema(NodeId)
         ) { request ->
             handleUIAction(orchestration, request) { UIAction.LongClick }
         }
@@ -122,7 +146,11 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
             name = "type_text",
             description = "Replace the content of a text field with the given text. " +
                 "The element must expose 'editableText' as reported by 'get_semantic_tree'.",
-            inputSchema = typeTextToolSchema()
+            inputSchema = toolSchema(
+                NodeId,
+                Property("text", "string",
+                    description = "Text to set as the content of the editable field."),
+            )
         ) { request ->
             handleUIAction(orchestration, request) { args ->
                 val text = (args?.get("text") as? JsonPrimitive)?.content
@@ -136,7 +164,14 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
             description = "Scroll a scrollable container by the given delta in logical pixels. " +
                 "Positive deltaX scrolls right; positive deltaY scrolls down. " +
                 "The element must support the ScrollBy semantic action.",
-            inputSchema = scrollToolSchema()
+            inputSchema = toolSchema(
+                ScrollContainerNodeId,
+                Property("deltaX", "number",
+                    description = "Horizontal scroll delta in logical pixels (positive = right)."),
+                Property("deltaY", "number",
+                    description = "Vertical scroll delta in logical pixels (positive = down)."),
+                required = listOf("nodeId"),
+            )
         ) { request ->
             handleUIAction(orchestration, request) { args ->
                 val deltaX = args?.get("deltaX")?.jsonPrimitive?.floatOrNull ?: 0f
@@ -150,7 +185,11 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
             description = "Scroll a scrollable container (e.g. a LazyColumn / LazyRow) so that the item " +
                 "at the given index becomes visible. The element must support the ScrollToIndex " +
                 "semantic action.",
-            inputSchema = scrollToIndexToolSchema()
+            inputSchema = toolSchema(
+                ScrollContainerNodeId,
+                Property("index", "integer",
+                    description = "Zero-based index of the item to scroll to."),
+            )
         ) { request ->
             handleUIAction(orchestration, request) { args ->
                 val index = args?.get("index")?.jsonPrimitive?.intOrNull
@@ -247,62 +286,6 @@ private suspend fun handleGetSemanticTree(orchestration: StateFlow<Orchestration
         )
     }
 }
-
-private fun nodeIdToolSchema(): ToolSchema = ToolSchema(
-    properties = buildJsonObject {
-        putJsonObject("nodeId") {
-            put("type", "integer")
-            put("description", "Semantic node id as reported by 'get_semantic_tree'.")
-        }
-    },
-    required = listOf("nodeId"),
-)
-
-private fun typeTextToolSchema(): ToolSchema = ToolSchema(
-    properties = buildJsonObject {
-        putJsonObject("nodeId") {
-            put("type", "integer")
-            put("description", "Semantic node id as reported by 'get_semantic_tree'.")
-        }
-        putJsonObject("text") {
-            put("type", "string")
-            put("description", "Text to set as the content of the editable field.")
-        }
-    },
-    required = listOf("nodeId", "text"),
-)
-
-private fun scrollToolSchema(): ToolSchema = ToolSchema(
-    properties = buildJsonObject {
-        putJsonObject("nodeId") {
-            put("type", "integer")
-            put("description", "Semantic node id of the scrollable container as reported by 'get_semantic_tree'.")
-        }
-        putJsonObject("deltaX") {
-            put("type", "number")
-            put("description", "Horizontal scroll delta in logical pixels (positive = right).")
-        }
-        putJsonObject("deltaY") {
-            put("type", "number")
-            put("description", "Vertical scroll delta in logical pixels (positive = down).")
-        }
-    },
-    required = listOf("nodeId"),
-)
-
-private fun scrollToIndexToolSchema(): ToolSchema = ToolSchema(
-    properties = buildJsonObject {
-        putJsonObject("nodeId") {
-            put("type", "integer")
-            put("description", "Semantic node id of the scrollable container as reported by 'get_semantic_tree'.")
-        }
-        putJsonObject("index") {
-            put("type", "integer")
-            put("description", "Zero-based index of the item to scroll to.")
-        }
-    },
-    required = listOf("nodeId", "index"),
-)
 
 private suspend fun handleUIAction(
     orchestration: StateFlow<OrchestrationHandle?>,
