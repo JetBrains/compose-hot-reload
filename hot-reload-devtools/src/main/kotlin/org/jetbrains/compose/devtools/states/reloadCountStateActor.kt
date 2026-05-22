@@ -5,7 +5,6 @@
 
 package org.jetbrains.compose.devtools.states
 
-import io.sellmair.evas.update
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.collectLatest
@@ -16,6 +15,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.devtools.api.ReloadCountState
 import org.jetbrains.compose.devtools.api.ReloadState
 import org.jetbrains.compose.devtools.asFlow
 import org.jetbrains.compose.devtools.orchestration
@@ -27,8 +27,8 @@ import org.jetbrains.compose.reload.orchestration.asFlow
 fun CoroutineScope.launchReloadCountStateActor() = launch {
     ReloadState.asFlow().buffer().distinctUntilChanged().onEach { reloadState ->
         when (reloadState) {
-            is ReloadState.Failed -> ReloadCountUIState.update { count ->
-                count.copy(failedReloads = count.failedReloads + 1)
+            is ReloadState.Failed -> orchestration.update(ReloadCountState.Key) { countState ->
+                ReloadCountState(countState.successfulReloads, countState.failedReloads + 1)
             }
             else -> Unit
         }
@@ -39,8 +39,10 @@ fun CoroutineScope.launchReloadCountStateActor() = launch {
             result.reloadRequestId == request.messageId
         }
 
-        if (result.isSuccess && request.changedClassFiles.isNotEmpty()) ReloadCountUIState.update { count ->
-            count.copy(successfulReloads = count.successfulReloads + 1)
+        if (result.isSuccess && request.changedClassFiles.isNotEmpty()) {
+            orchestration.update(ReloadCountState.Key) { countState ->
+                ReloadCountState(countState.successfulReloads + 1, countState.failedReloads)
+            }
         }
     }
 }
