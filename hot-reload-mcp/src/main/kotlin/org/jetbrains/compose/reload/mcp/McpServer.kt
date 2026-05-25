@@ -32,6 +32,8 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
+import org.jetbrains.compose.devtools.api.ReloadCountState
+import org.jetbrains.compose.devtools.api.ReloadState
 import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.core.createLogger
@@ -99,8 +101,9 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
         addTool(
             name = "status",
             description = "Check whether a Compose application is currently connected. " +
-                "Returns {\"connected\": true} if the application is running and connected, " +
-                "or {\"connected\": false} if it is not. " +
+                "Returns {\"connected\": false} when no application is connected. " +
+                "When connected, additionally returns reload state (ok/reloading/failed), last error if any, " +
+                "and counts of successful and failed reloads since the application started. " +
                 "Call this before take_screenshot to know if the application is available."
         ) { _ ->
             handleStatus(orchestration)
@@ -202,11 +205,30 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
     server.createSession(transport)
 }
 
-private fun handleStatus(orchestration: StateFlow<OrchestrationHandle?>): CallToolResult {
-    val connected = orchestration.value != null
-    logger.debug { "status: connected=$connected" }
+private suspend fun handleStatus(orchestration: StateFlow<OrchestrationHandle?>): CallToolResult {
+    val handle = orchestration.value
+    if (handle == null) {
+        logger.debug { "status: not connected" }
+        return CallToolResult(
+            content = listOf(TextContent(buildJsonObject { put("connected", false) }.toString()))
+        )
+    }
+    val state = handle.states.get(ReloadState).value
+    val count = handle.states.get(ReloadCountState).value
+    val reloadStateStr = when (state) {
+        is ReloadState.Ok -> "ok"
+        is ReloadState.Reloading -> "reloading"
+        is ReloadState.Failed -> "failed"
+    }
+    logger.debug { "status: connected reloadState=$reloadStateStr" }
     return CallToolResult(
-        content = listOf(TextContent("""{"connected": $connected}"""))
+        content = listOf(TextContent(buildJsonObject {
+            put("connected", true)
+            put("reloadState", reloadStateStr)
+            put("lastError", (state as? ReloadState.Failed)?.reason)
+            put("successfulReloads", count.successfulReloads)
+            put("failedReloads", count.failedReloads)
+        }.toString()))
     )
 }
 

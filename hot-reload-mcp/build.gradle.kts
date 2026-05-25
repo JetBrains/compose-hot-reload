@@ -12,6 +12,7 @@ plugins {
 dependencies {
     implementation(project(":hot-reload-core"))
     implementation(project(":hot-reload-orchestration"))
+    implementation(project(":hot-reload-devtools-api"))
 
     implementation(deps.mcp.kotlin.sdk.server)
 

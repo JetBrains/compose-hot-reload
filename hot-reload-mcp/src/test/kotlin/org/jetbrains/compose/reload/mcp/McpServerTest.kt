@@ -2,6 +2,7 @@
  * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
+@file:OptIn(kotlin.time.ExperimentalTime::class)
 
 package org.jetbrains.compose.reload.mcp
 
@@ -19,6 +20,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.io.asSink
 import kotlinx.io.asSource
 import kotlinx.io.buffered
+import org.jetbrains.compose.devtools.api.ReloadCountState
+import org.jetbrains.compose.devtools.api.ReloadState
 import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
@@ -67,6 +70,24 @@ class McpServerTest {
         return client
     }
 
+    /**
+     * Polls the `status` tool every 10 ms (real time) until the returned JSON contains
+     * [expectedSubstring], or fails after 5 real-time seconds.
+     */
+    private suspend fun awaitStatus(client: Client, expectedSubstring: String): String {
+        val deadline = System.currentTimeMillis() + 5_000L
+        while (true) {
+            val result = client.callTool("status", emptyMap())
+            val text = (result.content.first() as TextContent).text
+            if (text.contains(expectedSubstring)) return text
+            if (System.currentTimeMillis() > deadline) {
+                throw AssertionError("Timed out waiting for status containing '$expectedSubstring'. Last status: $text")
+            }
+            Thread.sleep(10)
+        }
+    }
+
+
     @Test
     fun `test - status returns disconnected when no app`() = runTest(timeout = 10.seconds) {
         val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
@@ -74,7 +95,7 @@ class McpServerTest {
 
         val result = client.callTool("status", emptyMap())
         val text = (result.content.first() as TextContent).text
-        assertEquals("""{"connected": false}""", text)
+        assertEquals("""{"connected":false}""", text)
     }
 
     @Test
@@ -89,7 +110,7 @@ class McpServerTest {
 
             val result = client.callTool("status", emptyMap())
             val text = (result.content.first() as TextContent).text
-            assertEquals("""{"connected": true}""", text)
+            assertEquals("""{"connected":true,"reloadState":"ok","lastError":null,"successfulReloads":0,"failedReloads":0}""", text)
         } finally {
             server.close()
         }
@@ -362,7 +383,10 @@ class McpServerTest {
 
         // Connected
         val result1 = client.callTool("status", emptyMap())
-        assertEquals("""{"connected": true}""", (result1.content.first() as TextContent).text)
+        assertEquals(
+            """{"connected":true,"reloadState":"ok","lastError":null,"successfulReloads":0,"failedReloads":0}""",
+            (result1.content.first() as TextContent).text
+        )
 
         // Simulate app shutdown
         server.close()
@@ -370,6 +394,103 @@ class McpServerTest {
 
         // Disconnected
         val result2 = client.callTool("status", emptyMap())
-        assertEquals("""{"connected": false}""", (result2.content.first() as TextContent).text)
+        assertEquals("""{"connected":false}""", (result2.content.first() as TextContent).text)
+    }
+
+    @Test
+    fun `test - status reflects orchestration state after reconnect`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient1 = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient1)
+            val client = createMcpClient(orchestration)
+
+            // Drive the state into a non-default value (failed reload).
+            server.update(ReloadState) { ReloadState.Failed(reason = "boom") }
+            server.update(ReloadCountState) { ReloadCountState(it.successfulReloads, it.failedReloads + 1) }
+            awaitStatus(client, """"reloadState":"failed"""")
+
+            // Disconnect, reset state on the server, then reconnect.
+            orchestration.value = null
+            server.update(ReloadState) { ReloadState.Ok() }
+            server.update(ReloadCountState) { ReloadCountState() }
+            val toolingClient2 = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+            orchestration.value = toolingClient2
+
+            val text = awaitStatus(client, """"reloadState":"ok"""")
+            assertEquals(
+                """{"connected":true,"reloadState":"ok","lastError":null,"successfulReloads":0,"failedReloads":0}""",
+                text,
+            )
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - status shows reloading when ReloadState is Reloading`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(ReloadState) { ReloadState.Reloading() }
+            val text = awaitStatus(client, """"reloadState":"reloading"""")
+            assertEquals(
+                """{"connected":true,"reloadState":"reloading","lastError":null,"successfulReloads":0,"failedReloads":0}""",
+                text,
+            )
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - status reflects successful reload count`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(ReloadState) { ReloadState.Ok() }
+            server.update(ReloadCountState) { ReloadCountState(it.successfulReloads + 1, it.failedReloads) }
+            val text = awaitStatus(client, """"successfulReloads":1""")
+            assertEquals(
+                """{"connected":true,"reloadState":"ok","lastError":null,"successfulReloads":1,"failedReloads":0}""",
+                text,
+            )
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - status shows failed when ReloadState is Failed`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(ReloadState) { ReloadState.Failed(reason = "Compilation error") }
+            server.update(ReloadCountState) { ReloadCountState(it.successfulReloads, it.failedReloads + 1) }
+            val text = awaitStatus(client, """"reloadState":"failed"""")
+            assertEquals(
+                """{"connected":true,"reloadState":"failed","lastError":"Compilation error","successfulReloads":0,"failedReloads":1}""",
+                text,
+            )
+        } finally {
+            server.close()
+        }
     }
 }

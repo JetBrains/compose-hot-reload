@@ -56,6 +56,12 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
+      <groupId>org.jetbrains.compose.hot-reload</groupId>
+      <artifactId>hot-reload-devtools-api</artifactId>
+      <version>{{Hot Reload Version}}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
       <groupId>io.modelcontextprotocol</groupId>
       <artifactId>kotlin-sdk-server-jvm</artifactId>
       <version>0.11.0</version>
