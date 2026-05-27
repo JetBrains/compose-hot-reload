@@ -26,7 +26,10 @@ import kotlinx.io.asSource
 import kotlinx.io.buffered
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.addJsonObject
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.floatOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
@@ -34,8 +37,10 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
 import org.jetbrains.compose.devtools.api.ReloadCountState
 import org.jetbrains.compose.devtools.api.ReloadState
+import org.jetbrains.compose.devtools.api.WindowsState
 import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
+import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.info
@@ -71,6 +76,8 @@ private val NodeId = Property("nodeId", "integer",
     description = "Semantic node id as reported by 'get_semantic_tree'.")
 private val ScrollContainerNodeId = Property("nodeId", "integer",
     description = "Semantic node id of the scrollable container as reported by 'get_semantic_tree'.")
+private val WindowIdParam = Property("window_id", "string",
+    description = "Window ID as returned by 'list_windows'. Defaults to the first registered window.")
 
 /** Builds a [ToolSchema] from [properties]; by default all of them are required. */
 private fun toolSchema(
@@ -110,11 +117,23 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
         }
 
         addTool(
+            name = "list_windows",
+            description = "List all currently registered Compose application windows. " +
+                "Returns a JSON array with one entry per window containing 'id', 'x', 'y', " +
+                "'width', and 'height'. Use a window 'id' as the 'window_id' parameter on " +
+                "window-targeting tools (take_screenshot, get_semantic_tree, click, ...) " +
+                "to target a specific window."
+        ) { _ ->
+            handleListWindows(orchestration)
+        }
+
+        addTool(
             name = "take_screenshot",
             description = "Take a screenshot of the running Compose application window. " +
-                "Use the 'status' tool first to check if the application is connected."
-        ) { _ ->
-            handleTakeScreenshot(orchestration)
+                "Use the 'status' tool first to check if the application is connected.",
+            inputSchema = toolSchema(WindowIdParam, required = emptyList())
+        ) { request ->
+            handleTakeScreenshot(orchestration, request)
         }
 
         addTool(
@@ -122,16 +141,17 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
             description = "Get the Compose semantic/accessibility tree of the running application. " +
                 "Returns a JSON tree describing the UI component hierarchy with roles, names, " +
                 "descriptions, states (enabled, visible, focused, etc.), and bounds. " +
-                "Use the 'status' tool first to check if the application is connected."
-        ) { _ ->
-            handleGetSemanticTree(orchestration)
+                "Use the 'status' tool first to check if the application is connected.",
+            inputSchema = toolSchema(WindowIdParam, required = emptyList())
+        ) { request ->
+            handleGetSemanticTree(orchestration, request)
         }
 
         addTool(
             name = "click",
             description = "Click a UI element. The element must have 'onClick' in its " +
                 "'actions' list as reported by 'get_semantic_tree'.",
-            inputSchema = toolSchema(NodeId)
+            inputSchema = toolSchema(NodeId, WindowIdParam, required = listOf(NodeId.name))
         ) { request ->
             handleUIAction(orchestration, request) { UIAction.Click }
         }
@@ -140,7 +160,7 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
             name = "long_click",
             description = "Long-click (long press) a UI element. The element must have " +
                 "'onLongClick' in its 'actions' list as reported by 'get_semantic_tree'.",
-            inputSchema = toolSchema(NodeId)
+            inputSchema = toolSchema(NodeId, WindowIdParam, required = listOf(NodeId.name))
         ) { request ->
             handleUIAction(orchestration, request) { UIAction.LongClick }
         }
@@ -153,6 +173,8 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
                 NodeId,
                 Property("text", "string",
                     description = "Text to set as the content of the editable field."),
+                WindowIdParam,
+                required = listOf(NodeId.name, "text"),
             )
         ) { request ->
             handleUIAction(orchestration, request) { args ->
@@ -173,6 +195,7 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
                     description = "Horizontal scroll delta in logical pixels (positive = right)."),
                 Property("deltaY", "number",
                     description = "Vertical scroll delta in logical pixels (positive = down)."),
+                WindowIdParam,
                 required = listOf("nodeId"),
             )
         ) { request ->
@@ -192,6 +215,8 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
                 ScrollContainerNodeId,
                 Property("index", "integer",
                     description = "Zero-based index of the item to scroll to."),
+                WindowIdParam,
+                required = listOf(NodeId.name, "index"),
             )
         ) { request ->
             handleUIAction(orchestration, request) { args ->
@@ -232,15 +257,47 @@ private suspend fun handleStatus(orchestration: StateFlow<OrchestrationHandle?>)
     )
 }
 
-private suspend fun handleTakeScreenshot(orchestration: StateFlow<OrchestrationHandle?>): CallToolResult {
+private suspend fun handleListWindows(orchestration: StateFlow<OrchestrationHandle?>): CallToolResult {
+    val handle = orchestration.value
+        ?: return CallToolResult(
+            content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
+            isError = true
+        ).also { logger.info { "list_windows: no application connected" } }
+
+    val windows = handle.states.get(WindowsState).value.windows
+    logger.debug { "list_windows: ${windows.size} window(s)" }
+    val json = buildJsonArray {
+        windows.forEach { (id, state) ->
+            addJsonObject {
+                put("id", id.value)
+                put("x", state.x)
+                put("y", state.y)
+                put("width", state.width)
+                put("height", state.height)
+            }
+        }
+    }
+    return CallToolResult(content = listOf(TextContent(json.toString())))
+}
+
+private suspend fun handleTakeScreenshot(
+    orchestration: StateFlow<OrchestrationHandle?>,
+    request: CallToolRequest,
+): CallToolResult {
     val handle = orchestration.value
         ?: return CallToolResult(
             content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
             isError = true
         ).also { logger.info { "take_screenshot: no application connected" } }
 
+    val resolvedId = try {
+        resolveWindowId(handle, request.arguments)
+    } catch (e: IllegalArgumentException) {
+        return CallToolResult(content = listOf(TextContent(e.message ?: "Invalid window_id")), isError = true)
+    }
+
     return try {
-        val request = ScreenshotRequest()
+        val request = ScreenshotRequest(windowId = resolvedId)
         logger.info { "take_screenshot: sending request '${request.messageId}'" }
         val screenshot = handle.requestResponse<ScreenshotResult>(request) {
             it.screenshotRequestId == request.messageId
@@ -276,15 +333,24 @@ private suspend fun handleTakeScreenshot(orchestration: StateFlow<OrchestrationH
     }
 }
 
-private suspend fun handleGetSemanticTree(orchestration: StateFlow<OrchestrationHandle?>): CallToolResult {
+private suspend fun handleGetSemanticTree(
+    orchestration: StateFlow<OrchestrationHandle?>,
+    request: CallToolRequest,
+): CallToolResult {
     val handle = orchestration.value
         ?: return CallToolResult(
             content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
             isError = true
         ).also { logger.info { "get_semantic_tree: no application connected" } }
 
+    val resolvedId = try {
+        resolveWindowId(handle, request.arguments)
+    } catch (e: IllegalArgumentException) {
+        return CallToolResult(content = listOf(TextContent(e.message ?: "Invalid window_id")), isError = true)
+    }
+
     return try {
-        val request = SemanticTreeRequest()
+        val request = SemanticTreeRequest(windowId = resolvedId)
         logger.info { "get_semantic_tree: sending request '${request.messageId}'" }
         val semanticTree = handle.requestResponse<SemanticTreeResult>(request) {
             it.semanticTreeRequestId == request.messageId
@@ -336,8 +402,14 @@ private suspend fun handleUIAction(
         )
     }
 
+    val resolvedId = try {
+        resolveWindowId(handle, args)
+    } catch (e: IllegalArgumentException) {
+        return CallToolResult(content = listOf(TextContent(e.message ?: "Invalid window_id")), isError = true)
+    }
+
     return try {
-        val uiActionRequest = UIActionRequest(nodeId = nodeId, action = action)
+        val uiActionRequest = UIActionRequest(nodeId = nodeId, action = action, windowId = resolvedId)
         logger.info { "${request.name}: sending request '${uiActionRequest.messageId}' nodeId=$nodeId action=$action" }
         val actionResult = handle.requestResponse<UIActionResult>(uiActionRequest) {
             it.uiActionRequestId == uiActionRequest.messageId
@@ -368,6 +440,17 @@ private suspend fun handleUIAction(
             isError = true
         )
     }
+}
+
+private suspend fun resolveWindowId(handle: OrchestrationHandle, args: JsonObject?): WindowId? {
+    val windows = handle.states.get(WindowsState).value.windows
+    val explicit = args?.get("window_id")?.jsonPrimitive?.contentOrNull
+    if (explicit != null) {
+        val id = WindowId(explicit)
+        require(id in windows) { "Window '$explicit' not found" }
+        return id
+    }
+    return windows.keys.firstOrNull()
 }
 
 /**

@@ -423,6 +423,9 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ScreenshotRequest : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
 	public fun <init> ()V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getWindowId-cPrXUn0 ()Ljava/lang/String;
 }
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ScreenshotResult : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
@@ -439,6 +442,9 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$SemanticTreeRequest : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
 	public fun <init> ()V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getWindowId-cPrXUn0 ()Ljava/lang/String;
 }
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$SemanticTreeResult : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
@@ -532,9 +538,12 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIActionRequest : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
 	public fun <init> (ILorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction;)V
+	public synthetic fun <init> (ILorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (ILorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAction ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIAction;
 	public final fun getNodeId ()I
+	public final fun getWindowId-cPrXUn0 ()Ljava/lang/String;
 	public fun hashCode ()I
 }
 

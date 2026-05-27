@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
 
 class SerializationTest {
     @Test
@@ -189,6 +190,151 @@ class SerializationTest {
     @Test
     fun `test - screenshot`() = testEncodeDecodeEquals(
         OrchestrationMessage.Screenshot("xyz", byteArrayOf(1, 2, 3))
+    )
+
+    @Test
+    fun `test - screenshot request - null windowId`() {
+        val request = OrchestrationMessage.ScreenshotRequest()
+        val decoded = assertIs<OrchestrationMessage.ScreenshotRequest>(
+            request.encodeToFrame(current).decodePackage()
+        )
+        assertEquals(request.messageId, decoded.messageId)
+        assertEquals(null, decoded.windowId)
+    }
+
+    @Test
+    fun `test - screenshot request - with windowId`() {
+        val request = OrchestrationMessage.ScreenshotRequest(WindowId("some window id"))
+        val decoded = assertIs<OrchestrationMessage.ScreenshotRequest>(
+            request.encodeToFrame(current).decodePackage()
+        )
+        assertEquals(request.messageId, decoded.messageId)
+        assertEquals(WindowId("some window id"), decoded.windowId)
+    }
+
+    @Test
+    fun `test - screenshot result - success`() = testEncodeDecodeEquals(
+        OrchestrationMessage.ScreenshotResult(
+            screenshotRequestId = OrchestrationMessageId.random(),
+            format = "png",
+            data = byteArrayOf(1, 2, 3, 4),
+            isSuccess = true,
+            errorMessage = null,
+        )
+    )
+
+    @Test
+    fun `test - screenshot result - failure`() = testEncodeDecodeEquals(
+        OrchestrationMessage.ScreenshotResult(
+            screenshotRequestId = OrchestrationMessageId.random(),
+            format = "",
+            data = ByteArray(0),
+            isSuccess = false,
+            errorMessage = "capture failed",
+        )
+    )
+
+    @Test
+    fun `test - semantic tree request - null windowId`() {
+        val request = OrchestrationMessage.SemanticTreeRequest()
+        val decoded = assertIs<OrchestrationMessage.SemanticTreeRequest>(
+            request.encodeToFrame(current).decodePackage()
+        )
+        assertEquals(request.messageId, decoded.messageId)
+        assertEquals(null, decoded.windowId)
+    }
+
+    @Test
+    fun `test - semantic tree request - with windowId`() {
+        val request = OrchestrationMessage.SemanticTreeRequest(WindowId("w-2"))
+        val decoded = assertIs<OrchestrationMessage.SemanticTreeRequest>(
+            request.encodeToFrame(current).decodePackage()
+        )
+        assertEquals(request.messageId, decoded.messageId)
+        assertEquals(WindowId("w-2"), decoded.windowId)
+    }
+
+    @Test
+    fun `test - semantic tree result`() = testEncodeDecodeEquals(
+        OrchestrationMessage.SemanticTreeResult(
+            semanticTreeRequestId = OrchestrationMessageId.random(),
+            tree = """{"role":"Button","children":[]}""",
+        )
+    )
+
+    @Test
+    fun `test - ui action request - click - null windowId`() = testEncodeDecodeEquals(
+        OrchestrationMessage.UIActionRequest(nodeId = 7, action = OrchestrationMessage.UIAction.Click)
+    )
+
+    @Test
+    fun `test - ui action request - click - with windowId`() = testEncodeDecodeEquals(
+        OrchestrationMessage.UIActionRequest(
+            nodeId = 7,
+            action = OrchestrationMessage.UIAction.Click,
+            windowId = WindowId("w-1"),
+        )
+    )
+
+    @Test
+    fun `test - ui action request - long click`() = testEncodeDecodeEquals(
+        OrchestrationMessage.UIActionRequest(
+            nodeId = 3,
+            action = OrchestrationMessage.UIAction.LongClick,
+            windowId = WindowId("w-1"),
+        )
+    )
+
+    @Test
+    fun `test - ui action request - set text`() = testEncodeDecodeEquals(
+        OrchestrationMessage.UIActionRequest(
+            nodeId = 11,
+            action = OrchestrationMessage.UIAction.SetText("hello world"),
+        )
+    )
+
+    @Test
+    fun `test - ui action request - scroll by`() = testEncodeDecodeEquals(
+        OrchestrationMessage.UIActionRequest(
+            nodeId = 5,
+            action = OrchestrationMessage.UIAction.ScrollBy(deltaX = 10f, deltaY = -20.5f),
+        )
+    )
+
+    @Test
+    fun `test - ui action request - scroll to index`() = testEncodeDecodeEquals(
+        OrchestrationMessage.UIActionRequest(
+            nodeId = 5,
+            action = OrchestrationMessage.UIAction.ScrollToIndex(42),
+        )
+    )
+
+    @Test
+    fun `test - ui action request - equals differs by windowId`() {
+        val a = OrchestrationMessage.UIActionRequest(7, OrchestrationMessage.UIAction.Click, WindowId("w-1"))
+        val b = OrchestrationMessage.UIActionRequest(7, OrchestrationMessage.UIAction.Click, WindowId("w-2"))
+        val c = OrchestrationMessage.UIActionRequest(7, OrchestrationMessage.UIAction.Click, null)
+        assertNotEquals(a, b)
+        assertNotEquals(a, c)
+        assertNotEquals(b, c)
+    }
+
+    @Test
+    fun `test - ui action result - success`() = testEncodeDecodeEquals(
+        OrchestrationMessage.UIActionResult(
+            uiActionRequestId = OrchestrationMessageId.random(),
+            isSuccess = true,
+            errorMessage = null,
+        )
+    )
+
+    @Test
+    fun `test - ui action result - failure`() = testEncodeDecodeEquals(
+        OrchestrationMessage.UIActionResult(
+            uiActionRequestId = OrchestrationMessageId.random(),
+            isSuccess = false,
+            errorMessage = "Node 7 not found",
+        )
     )
 
     @Test

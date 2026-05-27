@@ -308,7 +308,9 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * The response is [ScreenshotResult] with [ScreenshotResult.screenshotRequestId]
      * matching this request's [messageId].
      */
-    public class ScreenshotRequest : OrchestrationMessage() {
+    public class ScreenshotRequest @JvmOverloads constructor(
+        public val windowId: WindowId? = null,
+    ) : OrchestrationMessage() {
         internal companion object {
             @Suppress("unused")
             internal const val serialVersionUID: Long = 0L
@@ -596,7 +598,9 @@ internal constructor() : OrchestrationPackage(), Serializable {
     /**
      * Requests the application to capture and send the Compose semantic tree.
      */
-    public class SemanticTreeRequest : OrchestrationMessage() {
+    public class SemanticTreeRequest @JvmOverloads constructor(
+        public val windowId: WindowId? = null,
+    ) : OrchestrationMessage() {
         internal companion object {
             @Suppress("unused")
             internal const val serialVersionUID: Long = 0L
@@ -676,9 +680,10 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * Requests the application to perform a [UIAction] on the semantic node with the given [nodeId].
      * The node ID corresponds to the `id` field returned by [SemanticTreeRequest] / [SemanticTreeResult].
      */
-    public class UIActionRequest(
+    public class UIActionRequest @JvmOverloads constructor(
         public val nodeId: Int,
         public val action: UIAction,
+        public val windowId: WindowId? = null,
     ) : OrchestrationMessage() {
         internal companion object {
             @Suppress("unused")
@@ -688,6 +693,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
         override fun hashCode(): Int {
             var hashCode = nodeId.hashCode()
             hashCode = 31 * hashCode + action.hashCode()
+            hashCode = 31 * hashCode + (windowId?.hashCode() ?: 0)
             return hashCode
         }
 
@@ -696,6 +702,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
             if (other !is UIActionRequest) return false
             if (other.nodeId != nodeId) return false
             if (other.action != action) return false
+            if (other.windowId != windowId) return false
             return true
         }
     }
