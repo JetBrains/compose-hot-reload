@@ -496,8 +496,8 @@ class McpServerTest {
         }
     }
 
-    private fun windowState(x: Int, y: Int, width: Int, height: Int): WindowState =
-        WindowState(x = x, y = y, width = width, height = height, isAlwaysOnTop = false)
+    private fun windowState(x: Int, y: Int, width: Int, height: Int, title: String? = null): WindowState =
+        WindowState(x = x, y = y, width = width, height = height, isAlwaysOnTop = false, title = title)
 
     @Test
     fun `test - list_windows returns error when disconnected`() = runTest(timeout = 10.seconds) {
@@ -540,17 +540,83 @@ class McpServerTest {
 
             server.update(WindowsState) {
                 WindowsState(linkedMapOf(
-                    WindowId("w-1") to windowState(x = 10, y = 20, width = 100, height = 200),
-                    WindowId("w-2") to windowState(x = 30, y = 40, width = 300, height = 400),
+                    WindowId("w-1") to windowState(x = 10, y = 20, width = 100, height = 200, title = "Main"),
+                    WindowId("w-2") to windowState(x = 30, y = 40, width = 300, height = 400, title = "Settings"),
                 ))
             }
 
             val text = awaitWindows(client, expectedCount = 2)
             assertEquals(
-                """[{"id":"w-1","x":10,"y":20,"width":100,"height":200},""" +
-                    """{"id":"w-2","x":30,"y":40,"width":300,"height":400}]""",
+                """[{"id":"w-1","title":"Main","x":10,"y":20,"width":100,"height":200},""" +
+                    """{"id":"w-2","title":"Settings","x":30,"y":40,"width":300,"height":400}]""",
                 text,
             )
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - list_windows serializes null title as JSON null`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(WindowsState) {
+                WindowsState(linkedMapOf(
+                    WindowId("w-1") to windowState(x = 0, y = 0, width = 100, height = 100, title = null),
+                ))
+            }
+
+            val text = awaitWindows(client, expectedCount = 1)
+            assertEquals(
+                """[{"id":"w-1","title":null,"x":0,"y":0,"width":100,"height":100}]""",
+                text,
+            )
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - list_windows reflects title changes`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(WindowsState) {
+                WindowsState(linkedMapOf(
+                    WindowId("w-1") to windowState(x = 0, y = 0, width = 100, height = 100, title = "Initial"),
+                ))
+            }
+            val before = awaitWindows(client, expectedCount = 1)
+            assertTrue(before.contains(""""title":"Initial""""), "Expected initial title, got: $before")
+
+            server.update(WindowsState) { current ->
+                val id = WindowId("w-1")
+                val old = current.windows.getValue(id)
+                WindowsState(linkedMapOf(id to windowState(
+                    x = old.x, y = old.y, width = old.width, height = old.height, title = "Renamed",
+                )))
+            }
+
+            val deadline = System.currentTimeMillis() + 5_000L
+            while (true) {
+                val text = (client.callTool("list_windows", emptyMap()).content.first() as TextContent).text
+                if (text.contains(""""title":"Renamed"""")) break
+                if (System.currentTimeMillis() > deadline) {
+                    throw AssertionError("Timed out waiting for title rename. Last: $text")
+                }
+                Thread.sleep(10)
+            }
         } finally {
             server.close()
         }

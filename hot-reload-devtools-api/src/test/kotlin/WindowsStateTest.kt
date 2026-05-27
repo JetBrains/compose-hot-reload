@@ -21,11 +21,24 @@ class WindowsStateTest {
         val nonEmpty = WindowsState(
             mapOf(
                 WindowId.create() to WindowsState.WindowState(
-                    x = 1, y = 2, width = 3, height = 4, isAlwaysOnTop = true
+                    x = 1, y = 2, width = 3, height = 4, isAlwaysOnTop = true, title = "Main",
                 )
             )
         )
 
         assertEquals(nonEmpty, encoder.decode(encoder.encode(nonEmpty)).getOrThrow())
+    }
+
+    @Test
+    fun `test - title defaults to null when omitted`() {
+        val state = WindowsState(
+            mapOf(
+                WindowId.create() to WindowsState.WindowState(
+                    x = 1, y = 2, width = 3, height = 4, isAlwaysOnTop = false,
+                )
+            )
+        )
+        val roundTripped = encoder.decode(encoder.encode(state)).getOrThrow()
+        assertEquals(null, roundTripped.windows.values.single().title)
     }
 }
