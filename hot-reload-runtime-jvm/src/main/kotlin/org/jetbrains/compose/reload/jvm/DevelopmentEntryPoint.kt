@@ -19,6 +19,7 @@ import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.window.DialogWindowScope
 import androidx.compose.ui.window.FrameWindowScope
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
 import org.jetbrains.compose.reload.InternalHotReloadApi
@@ -75,21 +76,30 @@ public fun DevelopmentEntryPoint(
 
     if (window != null) {
         LaunchedEffect(Unit) {
-            orchestration.asFlow().filterIsInstance<ScreenshotRequest>().collect { request ->
-                handleScreenshotRequest(request, window).sendAsync()
-            }
+            orchestration.asFlow()
+                .filterIsInstance<ScreenshotRequest>()
+                .filter { request -> request.windowId == null || request.windowId == windowId }
+                .collect { request ->
+                    handleScreenshotRequest(request, window).sendAsync()
+                }
         }
 
         LaunchedEffect(Unit) {
-            orchestration.asFlow().filterIsInstance<SemanticTreeRequest>().collect { request ->
-                handleSemanticTreeRequest(request, window).sendAsync()
-            }
+            orchestration.asFlow()
+                .filterIsInstance<SemanticTreeRequest>()
+                .filter { request -> request.windowId == null || request.windowId == windowId }
+                .collect { request ->
+                    handleSemanticTreeRequest(request, window).sendAsync()
+                }
         }
 
         LaunchedEffect(Unit) {
-            orchestration.asFlow().filterIsInstance<UIActionRequest>().collect { request ->
-                handleUIActionRequest(request, window).sendAsync()
-            }
+            orchestration.asFlow()
+                .filterIsInstance<UIActionRequest>()
+                .filter { request -> request.windowId == null || request.windowId == windowId }
+                .collect { request ->
+                    handleUIActionRequest(request, window).sendAsync()
+                }
         }
     }
 

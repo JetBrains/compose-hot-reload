@@ -207,9 +207,16 @@ internal class TakeScreenshotRequestEncoder : OrchestrationMessageEncoder<Orches
 internal class SemanticTreeRequestEncoder : OrchestrationMessageEncoder<OrchestrationMessage.SemanticTreeRequest> {
     override val messageType: Type<OrchestrationMessage.SemanticTreeRequest> = type()
     override val messageClassifier = classifier("SemanticTreeRequest")
-    override fun encode(message: OrchestrationMessage.SemanticTreeRequest): ByteArray = byteArrayOf()
-    override fun decode(data: ByteArray): Try<OrchestrationMessage.SemanticTreeRequest> =
-        OrchestrationMessage.SemanticTreeRequest().toLeft()
+    override fun encode(message: OrchestrationMessage.SemanticTreeRequest): ByteArray = encodeByteArray {
+        writeFields("windowId" to message.windowId?.value?.encodeToByteArray())
+    }
+
+    override fun decode(data: ByteArray): Try<OrchestrationMessage.SemanticTreeRequest> = data.tryDecode {
+        val fields = readFields()
+        OrchestrationMessage.SemanticTreeRequest(
+            windowId = fields["windowId"]?.decodeToString()?.let(::WindowId),
+        )
+    }
 }
 
 internal class SemanticTreeResultEncoder : OrchestrationMessageEncoder<OrchestrationMessage.SemanticTreeResult> {
@@ -240,6 +247,7 @@ internal class UIActionRequestEncoder : OrchestrationMessageEncoder<Orchestratio
         writeFields(
             "nodeId" to encodeByteArray { writeInt(message.nodeId) },
             "action" to encodeUIAction(message.action),
+            "windowId" to message.windowId?.value?.encodeToByteArray(),
         )
     }
 
@@ -248,6 +256,7 @@ internal class UIActionRequestEncoder : OrchestrationMessageEncoder<Orchestratio
         OrchestrationMessage.UIActionRequest(
             nodeId = fields.requireField("nodeId").decode { readInt() },
             action = fields.requireField("action").decode { readUIAction() },
+            windowId = fields["windowId"]?.decodeToString()?.let(::WindowId),
         )
     }
 
@@ -450,9 +459,16 @@ internal class ScreenshotEncoder : OrchestrationMessageEncoder<OrchestrationMess
 internal class ScreenshotRequestEncoder : OrchestrationMessageEncoder<OrchestrationMessage.ScreenshotRequest> {
     override val messageType: Type<OrchestrationMessage.ScreenshotRequest> = type()
     override val messageClassifier = classifier("ScreenshotRequest")
-    override fun encode(message: OrchestrationMessage.ScreenshotRequest): ByteArray = byteArrayOf()
-    override fun decode(data: ByteArray): Try<OrchestrationMessage.ScreenshotRequest> =
-        OrchestrationMessage.ScreenshotRequest().toLeft()
+    override fun encode(message: OrchestrationMessage.ScreenshotRequest): ByteArray = encodeByteArray {
+        writeFields("windowId" to message.windowId?.value?.encodeToByteArray())
+    }
+
+    override fun decode(data: ByteArray): Try<OrchestrationMessage.ScreenshotRequest> = data.tryDecode {
+        val fields = readFields()
+        OrchestrationMessage.ScreenshotRequest(
+            windowId = fields["windowId"]?.decodeToString()?.let(::WindowId),
+        )
+    }
 }
 
 internal class ScreenshotResultEncoder : OrchestrationMessageEncoder<OrchestrationMessage.ScreenshotResult> {

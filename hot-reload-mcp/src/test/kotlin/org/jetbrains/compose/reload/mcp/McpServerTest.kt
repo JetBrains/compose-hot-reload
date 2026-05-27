@@ -22,6 +22,9 @@ import kotlinx.io.asSource
 import kotlinx.io.buffered
 import org.jetbrains.compose.devtools.api.ReloadCountState
 import org.jetbrains.compose.devtools.api.ReloadState
+import org.jetbrains.compose.devtools.api.WindowsState
+import org.jetbrains.compose.devtools.api.WindowsState.WindowState
+import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
@@ -467,6 +470,305 @@ class McpServerTest {
                 """{"connected":true,"reloadState":"ok","lastError":null,"successfulReloads":1,"failedReloads":0}""",
                 text,
             )
+        } finally {
+            server.close()
+        }
+    }
+
+    /**
+     * Polls the `list_windows` tool until the returned JSON array contains
+     * exactly [expectedCount] entries, or fails after 5 real-time seconds.
+     */
+    private suspend fun awaitWindows(client: Client, expectedCount: Int): String {
+        val deadline = System.currentTimeMillis() + 5_000L
+        val expectedPrefix = "[" // distinguish from an error response
+        while (true) {
+            val result = client.callTool("list_windows", emptyMap())
+            val text = (result.content.first() as TextContent).text
+            if (text.startsWith(expectedPrefix)) {
+                val count = if (text == "[]") 0 else text.count { it == '{' }
+                if (count == expectedCount) return text
+            }
+            if (System.currentTimeMillis() > deadline) {
+                throw AssertionError("Timed out waiting for $expectedCount window(s). Last: $text")
+            }
+            Thread.sleep(10)
+        }
+    }
+
+    private fun windowState(x: Int, y: Int, width: Int, height: Int): WindowState =
+        WindowState(x = x, y = y, width = width, height = height, isAlwaysOnTop = false)
+
+    @Test
+    fun `test - list_windows returns error when disconnected`() = runTest(timeout = 10.seconds) {
+        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
+        val client = createMcpClient(orchestration)
+
+        val result = client.callTool("list_windows", emptyMap())
+        assertEquals(true, result.isError)
+        val text = (result.content.first() as TextContent).text
+        assertTrue(text.contains("No application is currently connected"))
+    }
+
+    @Test
+    fun `test - list_windows returns empty array when no windows are registered`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            val result = client.callTool("list_windows", emptyMap())
+            val text = (result.content.first() as TextContent).text
+            assertEquals("[]", text)
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - list_windows returns registered windows in insertion order`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(WindowsState) {
+                WindowsState(linkedMapOf(
+                    WindowId("w-1") to windowState(x = 10, y = 20, width = 100, height = 200),
+                    WindowId("w-2") to windowState(x = 30, y = 40, width = 300, height = 400),
+                ))
+            }
+
+            val text = awaitWindows(client, expectedCount = 2)
+            assertEquals(
+                """[{"id":"w-1","x":10,"y":20,"width":100,"height":200},""" +
+                    """{"id":"w-2","x":30,"y":40,"width":300,"height":400}]""",
+                text,
+            )
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - take_screenshot forwards explicit window_id`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            var receivedWindowId: WindowId? = null
+            launch {
+                val request = server.asFlow().filterIsInstance<ScreenshotRequest>().first()
+                receivedWindowId = request.windowId
+                server.send(ScreenshotResult(
+                    screenshotRequestId = request.messageId,
+                    format = "png",
+                    data = ByteArray(1) { 0xFF.toByte() }
+                ))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(WindowsState) {
+                WindowsState(linkedMapOf(
+                    WindowId("w-1") to windowState(0, 0, 100, 100),
+                    WindowId("w-2") to windowState(0, 0, 200, 200),
+                ))
+            }
+            awaitWindows(client, expectedCount = 2)
+
+            val result = client.callTool("take_screenshot", mapOf("window_id" to "w-2"))
+            assertNotEquals(true, result.isError)
+            assertEquals(WindowId("w-2"), receivedWindowId)
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - take_screenshot defaults to first registered window`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            var receivedWindowId: WindowId? = null
+            launch {
+                val request = server.asFlow().filterIsInstance<ScreenshotRequest>().first()
+                receivedWindowId = request.windowId
+                server.send(ScreenshotResult(
+                    screenshotRequestId = request.messageId,
+                    format = "png",
+                    data = ByteArray(1) { 0xFF.toByte() }
+                ))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(WindowsState) {
+                WindowsState(linkedMapOf(
+                    WindowId("w-1") to windowState(0, 0, 100, 100),
+                    WindowId("w-2") to windowState(0, 0, 200, 200),
+                ))
+            }
+            awaitWindows(client, expectedCount = 2)
+
+            val result = client.callTool("take_screenshot", emptyMap())
+            assertNotEquals(true, result.isError)
+            assertEquals(WindowId("w-1"), receivedWindowId)
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - take_screenshot returns error for unknown window_id`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(WindowsState) {
+                WindowsState(linkedMapOf(
+                    WindowId("w-1") to windowState(0, 0, 100, 100),
+                ))
+            }
+            awaitWindows(client, expectedCount = 1)
+
+            val result = client.callTool("take_screenshot", mapOf("window_id" to "ghost"))
+            assertEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains("Window 'ghost' not found"), "unexpected error message: $text")
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - get_semantic_tree forwards explicit window_id`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            var receivedWindowId: WindowId? = null
+            launch {
+                val request = server.asFlow().filterIsInstance<SemanticTreeRequest>().first()
+                receivedWindowId = request.windowId
+                server.send(SemanticTreeResult(semanticTreeRequestId = request.messageId, tree = "{}"))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(WindowsState) {
+                WindowsState(linkedMapOf(
+                    WindowId("w-1") to windowState(0, 0, 100, 100),
+                    WindowId("w-2") to windowState(0, 0, 200, 200),
+                ))
+            }
+            awaitWindows(client, expectedCount = 2)
+
+            val result = client.callTool("get_semantic_tree", mapOf("window_id" to "w-2"))
+            assertNotEquals(true, result.isError)
+            assertEquals(WindowId("w-2"), receivedWindowId)
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - get_semantic_tree returns error for unknown window_id`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(WindowsState) {
+                WindowsState(linkedMapOf(
+                    WindowId("w-1") to windowState(0, 0, 100, 100),
+                ))
+            }
+            awaitWindows(client, expectedCount = 1)
+
+            val result = client.callTool("get_semantic_tree", mapOf("window_id" to "ghost"))
+            assertEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains("Window 'ghost' not found"), "unexpected error message: $text")
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - click forwards explicit window_id`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            var receivedWindowId: WindowId? = null
+            launch {
+                val request = server.asFlow().filterIsInstance<UIActionRequest>().first()
+                receivedWindowId = request.windowId
+                server.send(UIActionResult(uiActionRequestId = request.messageId, isSuccess = true))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(WindowsState) {
+                WindowsState(linkedMapOf(
+                    WindowId("w-1") to windowState(0, 0, 100, 100),
+                    WindowId("w-2") to windowState(0, 0, 200, 200),
+                ))
+            }
+            awaitWindows(client, expectedCount = 2)
+
+            val result = client.callTool("click", mapOf("nodeId" to 7, "window_id" to "w-2"))
+            assertNotEquals(true, result.isError)
+            assertEquals(WindowId("w-2"), receivedWindowId)
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - click returns error for unknown window_id`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(WindowsState) {
+                WindowsState(linkedMapOf(
+                    WindowId("w-1") to windowState(0, 0, 100, 100),
+                ))
+            }
+            awaitWindows(client, expectedCount = 1)
+
+            val result = client.callTool("click", mapOf("nodeId" to 7, "window_id" to "ghost"))
+            assertEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains("Window 'ghost' not found"), "unexpected error message: $text")
         } finally {
             server.close()
         }
