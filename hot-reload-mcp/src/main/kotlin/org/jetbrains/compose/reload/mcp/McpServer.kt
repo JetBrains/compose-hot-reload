@@ -119,10 +119,11 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
         addTool(
             name = "list_windows",
             description = "List all currently registered Compose application windows. " +
-                "Returns a JSON array with one entry per window containing 'id', 'x', 'y', " +
-                "'width', and 'height'. Use a window 'id' as the 'window_id' parameter on " +
-                "window-targeting tools (take_screenshot, get_semantic_tree, click, ...) " +
-                "to target a specific window."
+                "Returns a JSON array with one entry per window containing 'id', 'title', " +
+                "'x', 'y', 'width', and 'height'. 'title' is the window title set by the " +
+                "application (empty string when none). Use a window 'id' as the 'window_id' " +
+                "parameter on window-targeting tools (take_screenshot, get_semantic_tree, " +
+                "click, ...) to target a specific window."
         ) { _ ->
             handleListWindows(orchestration)
         }
@@ -270,6 +271,7 @@ private suspend fun handleListWindows(orchestration: StateFlow<OrchestrationHand
         windows.forEach { (id, state) ->
             addJsonObject {
                 put("id", id.value)
+                put("title", state.title)
                 put("x", state.x)
                 put("y", state.y)
                 put("width", state.width)

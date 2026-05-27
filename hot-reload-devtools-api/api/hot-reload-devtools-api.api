@@ -202,8 +202,11 @@ public final class org/jetbrains/compose/devtools/api/WindowsState$Key : org/jet
 public final class org/jetbrains/compose/devtools/api/WindowsState$WindowState {
 	public static final field $stable I
 	public fun <init> (IIIIZ)V
+	public fun <init> (IIIIZLjava/lang/String;)V
+	public synthetic fun <init> (IIIIZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getHeight ()I
+	public final fun getTitle ()Ljava/lang/String;
 	public final fun getWidth ()I
 	public final fun getX ()I
 	public final fun getY ()I

@@ -40,12 +40,13 @@ public class WindowsState(
         return "WindowsState($windows)"
     }
 
-    public class WindowState(
+    public class WindowState @JvmOverloads constructor(
         public val x: Int,
         public val y: Int,
         public val width: Int,
         public val height: Int,
-        public val isAlwaysOnTop: Boolean
+        public val isAlwaysOnTop: Boolean,
+        public val title: String? = null,
     ) {
         private val hashCode: Int = run {
             var result = x.hashCode()
@@ -53,6 +54,7 @@ public class WindowsState(
             result = 31 * result + width
             result = 31 * result + height
             result = 31 * result + isAlwaysOnTop.hashCode()
+            result = 31 * result + (title?.hashCode() ?: 0)
             result
         }
 
@@ -69,11 +71,12 @@ public class WindowsState(
             if (this.width != other.width) return false
             if (this.height != other.height) return false
             if (this.isAlwaysOnTop != other.isAlwaysOnTop) return false
+            if (this.title != other.title) return false
             return true
         }
 
         override fun toString(): String {
-            return "WindowState(x=$x, y=$y, width=$width, height=$height, isAlwaysOnTop=$isAlwaysOnTop)"
+            return "WindowState(x=$x, y=$y, width=$width, height=$height, isAlwaysOnTop=$isAlwaysOnTop, title=$title)"
         }
     }
 
@@ -95,7 +98,8 @@ internal class WindowsStateEncoder : OrchestrationStateEncoder<WindowsState> {
                 "y" to encodeByteArray { writeInt(windowState.y) },
                 "width" to encodeByteArray { writeInt(windowState.width) },
                 "height" to encodeByteArray { writeInt(windowState.height) },
-                "isAlwaysOnTop" to encodeByteArray { writeBoolean(windowState.isAlwaysOnTop) }
+                "isAlwaysOnTop" to encodeByteArray { writeBoolean(windowState.isAlwaysOnTop) },
+                "title" to windowState.title?.encodeToByteArray(),
             )
         }
     }
@@ -111,7 +115,9 @@ internal class WindowsStateEncoder : OrchestrationStateEncoder<WindowsState> {
                     width = fields["width"]?.decode { readInt() } ?: error("Missing field `width`"),
                     height = fields["height"]?.decode { readInt() } ?: error("Missing field `height`"),
                     isAlwaysOnTop = fields["isAlwaysOnTop"]?.decode { readBoolean() }
-                        ?: error("Missing field `isAlwaysOnTop`")
+                        ?: error("Missing field `isAlwaysOnTop`"),
+                    // Missing or absent title decodes to null (forward-compat with older runtimes).
+                    title = fields["title"]?.decodeToString(),
                 )
             }
         }

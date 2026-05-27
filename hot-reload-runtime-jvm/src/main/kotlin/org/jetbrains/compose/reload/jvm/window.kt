@@ -21,11 +21,13 @@ import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.trace
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ApplicationWindowPositioned
+import java.awt.Frame
 import java.awt.Window
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
+import java.beans.PropertyChangeListener
 
 
 private val logger = createLogger()
@@ -52,7 +54,8 @@ internal fun startWindowManager(window: Window): WindowId {
             windowState.trySendBlocking(
                 WindowState(
                     x = window.x, y = window.y, width = window.width, height = window.height,
-                    isAlwaysOnTop = window.isAlwaysOnTop
+                    isAlwaysOnTop = window.isAlwaysOnTop,
+                    title = (window as? Frame)?.title,
                 )
             )
 
@@ -131,10 +134,16 @@ internal fun startWindowManager(window: Window): WindowId {
             }
         }
 
+        val titleListener = PropertyChangeListener { event ->
+            logger.trace { "$windowId: title changed: '${event.oldValue}' -> '${event.newValue}'" }
+            if (window.isVisible) broadcastActiveState()
+        }
+
         window.addWindowListener(windowListener)
         window.addWindowStateListener(windowListener)
         window.addWindowFocusListener(windowListener)
         window.addComponentListener(componentListener)
+        window.addPropertyChangeListener("title", titleListener)
 
         object : RememberObserver {
             override fun onRemembered() {}
@@ -143,6 +152,7 @@ internal fun startWindowManager(window: Window): WindowId {
             override fun onForgotten() {
                 window.removeWindowListener(windowListener)
                 window.removeComponentListener(componentListener)
+                window.removePropertyChangeListener("title", titleListener)
                 broadcastGone()
                 windowState.close()
             }
