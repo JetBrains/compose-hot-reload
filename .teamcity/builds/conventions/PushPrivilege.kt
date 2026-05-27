@@ -19,6 +19,8 @@ fun BuildSteps.setupGit() {
         scriptContent = """
                 git config user.email "compose-team@jetbrains.com"
                 git config user.name "JetBrains Compose Team"
+                mkdir -p ~/.ssh
+                grep -q github.com ~/.ssh/known_hosts 2>/dev/null || ssh-keyscan github.com >> ~/.ssh/known_hosts
             """.trimIndent()
     }
 }
