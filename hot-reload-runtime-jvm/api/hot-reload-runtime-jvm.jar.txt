@@ -12,6 +12,7 @@ composeResources/org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generat
 composeResources/org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources/drawable/
 composeResources/org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources/drawable/copy.svg
 composeResources/org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources/drawable/error.svg
+composeResources/org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources/drawable/file.svg
 img/
 img/compose-logo.png
 org/

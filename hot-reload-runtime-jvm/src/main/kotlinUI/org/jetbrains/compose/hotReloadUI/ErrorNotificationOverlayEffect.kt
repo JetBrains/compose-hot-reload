@@ -59,8 +59,12 @@ import org.jetbrains.compose.hotReloadUI.widgets.CopyToClipboardButton
 import org.jetbrains.compose.hotReloadUI.widgets.Divider
 import org.jetbrains.compose.hotReloadUI.widgets.TimeAgoText
 import org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources.Res
+import org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources.copy
 import org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources.error
+import org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources.file
 import org.jetbrains.compose.resources.painterResource
+
+private val fileUrlRegex = Regex("""file://(.+?):\d+:\d+""")
 
 internal class ErrorNotificationOverlayEffect : ReloadEffect.OverlayEffect {
     @Composable
@@ -146,6 +150,8 @@ internal fun ErrorNotification(
     ) {
 
         val errorSvg = painterResource(Res.drawable.error)
+        val copySvg = painterResource(Res.drawable.copy)
+        val fileSvg = painterResource(Res.drawable.file)
         Column(
             modifier = Modifier.wrapContentWidth(Alignment.Start)
                 .width(IntrinsicSize.Max),
@@ -167,7 +173,8 @@ internal fun ErrorNotification(
             }
             Spacer(Modifier.height(4.dp))
 
-            val details = failed.details.orEmpty()
+            val details = failed.details.orEmpty().joinToString("\n")
+            val filePath = fileUrlRegex.find(details)?.value.orEmpty().removePrefix("file://")
             Row(verticalAlignment = Alignment.CenterVertically) {
                 BasicText(
                     failed.reason,
@@ -179,19 +186,28 @@ internal fun ErrorNotification(
                     color = ColorProducer { Color.White }
                 )
 
-                if (details.isNotEmpty()) {
+                if (details.isNotBlank()) {
                     Spacer(Modifier.width(4.dp))
                     Spacer(Modifier.weight(1f))
-                    CopyToClipboardButton { failed.reason + "\n" + details.joinToString("\n") }
+                    if (filePath.isNotBlank()) {
+                        CopyToClipboardButton(
+                            icon = fileSvg,
+                            tooltip = "Copy path to the file",
+                        ) { filePath }
+                        Spacer(Modifier.width(4.dp))
+                    }
+                    CopyToClipboardButton(
+                        icon = copySvg,
+                        tooltip = "Copy full error message",
+                    ) { failed.reason + "\n" + details }
                 }
             }
 
-            if (details.isNotEmpty()) {
+            if (details.isNotBlank()) {
                 Spacer(Modifier.height(4.dp))
 
-                val message = details.joinToString("\n")
                 BasicText(
-                    message,
+                    details,
                     style = TextStyle.Default.copy(
                         fontSize = 10.sp,
                         fontFamily = FontFamily.Monospace
