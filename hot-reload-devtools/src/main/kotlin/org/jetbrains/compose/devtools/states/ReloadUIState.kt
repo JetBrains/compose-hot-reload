@@ -43,7 +43,7 @@ sealed class ReloadUIState : State {
     data class Failed(
         val reason: String,
         override val time: Instant = Clock.System.now(),
-        val logs: List<LogMessage> = emptyList(),
+        val details: List<String> = emptyList(),
     ) : ReloadUIState()
 
     companion object Key : State.Key<ReloadUIState> {
@@ -54,36 +54,18 @@ sealed class ReloadUIState : State {
 fun CoroutineScope.launchReloadUIState(
     orchestration: OrchestrationHandle = org.jetbrains.compose.devtools.orchestration
 ) = launchState(ReloadUIState) {
-
-    val errorLogs = mutableListOf<LogMessage>()
-
-
     launch {
         orchestration.states.get(ReloadState).collect { state ->
             val time = Instant.fromEpochMilliseconds(state.time.toEpochMilliseconds())
             when (state) {
                 is ReloadState.Ok -> ReloadUIState.Ok(time)
-                is ReloadState.Failed -> ReloadUIState.Failed(reason = state.reason, time = time, logs = errorLogs.toList())
+                is ReloadState.Failed -> ReloadUIState.Failed(
+                    reason = state.reason,
+                    time = time,
+                    details = state.details.orEmpty()
+                )
                 is ReloadState.Reloading -> ReloadUIState.Reloading(time, state.reloadRequestId)
             }.emit()
-        }
-    }
-
-    launch {
-        ReloadCountUIState.flow().collectLatest { _ ->
-            errorLogs.clear()
-            orchestration.asFlow().filterIsInstance<LogMessage>().collect { log ->
-                val isError = (log.environment != Environment.devTools && log.level >= Logger.Level.Error) ||
-                        (log.environment == Environment.build && log.message.contains("e: "))
-                if (!isError) return@collect
-
-                /* Update the 'Failed' state with the new error logs when they appear */
-                errorLogs += log
-                val current = ReloadUIState.value()
-                if (current is ReloadUIState.Failed) {
-                    current.copy(logs = errorLogs.toList()).emit()
-                }
-            }
         }
     }
 }

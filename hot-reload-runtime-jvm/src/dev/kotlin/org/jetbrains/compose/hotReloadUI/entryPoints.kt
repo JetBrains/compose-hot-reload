@@ -22,7 +22,10 @@ import kotlin.time.ExperimentalTime
 fun ErrorReportOverlayEffectEntryPoint() {
     Box(modifier = Modifier.background(color = Color.White).fillMaxSize()) {
         val overlay = ErrorNotificationOverlayEffect()
-        val state = ReloadState.Failed(reason = "Execution failed for task ':widgets:compileKotlinJvm'")
+        val state = ReloadState.Failed(
+            reason = "Execution failed for task ':widgets:compileKotlinJvm'",
+            details = listOf("e: 1", "e: 2", "e: 3", "e: 4", "e: 5")
+        )
         overlay.effectOverlay(state)
     }
 }

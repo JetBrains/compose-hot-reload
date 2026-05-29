@@ -197,7 +197,6 @@ class ViewModelTest {
             fixture.replaceSourceCodeAndReload("mutableStateOf(0)", "mutableStateOf(-1)")
             val warningMessage = constructViewModelWarning("SimpleViewModel")
             skipToMessage<OrchestrationMessage.LogMessage> { message ->
-                System.err.println(message)
                 message.level == Level.Warn && message.message == warningMessage
             }
         }

@@ -35,8 +35,24 @@ public fun DataOutputStream.writeString(value: String) {
 }
 
 @InternalHotReloadApi
+public fun DataOutputStream.writeStringList(value: List<String>) {
+    writeFrame(encodeByteArray {
+        writeInt(value.size)
+        value.forEach(::writeString)
+    })
+}
+
+@InternalHotReloadApi
 public fun DataInputStream.readString(): String {
     return readFrame().decodeToString()
+}
+
+@InternalHotReloadApi
+public fun DataInputStream.readStringList(): List<String> {
+    return readFrame().decode {
+        val size = readInt()
+        List(size) { readString() }
+    }
 }
 
 @InternalHotReloadApi

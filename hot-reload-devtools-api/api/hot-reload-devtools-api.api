@@ -138,9 +138,12 @@ public abstract class org/jetbrains/compose/devtools/api/ReloadState : org/jetbr
 
 public final class org/jetbrains/compose/devtools/api/ReloadState$Failed : org/jetbrains/compose/devtools/api/ReloadState {
 	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Lkotlin/time/Instant;Ljava/lang/String;)V
-	public synthetic fun <init> (Lkotlin/time/Instant;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/time/Instant;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Lkotlin/time/Instant;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDetails ()Ljava/util/List;
 	public final fun getReason ()Ljava/lang/String;
 	public fun getTime ()Lkotlin/time/Instant;
 	public fun hashCode ()I

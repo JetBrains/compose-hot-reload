@@ -12,9 +12,11 @@ import org.jetbrains.compose.reload.core.Type
 import org.jetbrains.compose.reload.core.decode
 import org.jetbrains.compose.reload.core.encodeByteArray
 import org.jetbrains.compose.reload.core.readFields
+import org.jetbrains.compose.reload.core.readStringList
 import org.jetbrains.compose.reload.core.tryDecode
 import org.jetbrains.compose.reload.core.type
 import org.jetbrains.compose.reload.core.writeFields
+import org.jetbrains.compose.reload.core.writeStringList
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
 import org.jetbrains.compose.reload.orchestration.OrchestrationState
 import org.jetbrains.compose.reload.orchestration.OrchestrationStateEncoder
@@ -80,15 +82,17 @@ public sealed class ReloadState : OrchestrationState {
         }
     }
 
-    public class Failed(
+    public class Failed @JvmOverloads constructor(
         override val time: Instant = Clock.System.now(),
         public val reason: String,
+        public val details: List<String>? = null
     ) : ReloadState() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other !is Failed) return false
             if (time != other.time) return false
             if (reason != other.reason) return false
+            if (details != other.details) return false
             return true
         }
 
@@ -96,11 +100,17 @@ public sealed class ReloadState : OrchestrationState {
             var result = "Failed".hashCode()
             result = 31 * result + time.hashCode()
             result = 31 * result + reason.hashCode()
+            result = 31 * result + details.hashCode()
             return result
         }
 
         override fun toString(): String {
-            return "Failed($reason)"
+            val detailsSuffix = if (details != null) {
+                ", ${details.joinToString("\n")}"
+            } else {
+                ""
+            }
+            return "Failed($reason$detailsSuffix)"
         }
     }
 
@@ -133,6 +143,7 @@ internal class ReloadStateEncoder : OrchestrationStateEncoder<ReloadState> {
             writeFields(
                 "time" to encodeByteArray { writeLong(state.time.toEpochMilliseconds()) },
                 "reason" to state.reason.encodeToByteArray(),
+                "details" to state.details?.let { encodeByteArray { writeStringList(it) } }
             )
         }
 
@@ -172,6 +183,8 @@ internal class ReloadStateEncoder : OrchestrationStateEncoder<ReloadState> {
 
                     reason = fields["reason"]?.decodeToString()
                         ?: error("Missing 'reason' field"),
+
+                    details = fields["details"]?.decode { readStringList() },
                 )
             }
             else -> throw IllegalArgumentException("Unknown type: $type")

@@ -31,6 +31,18 @@ class ReloadStateTest {
 
         val source2 = ReloadState.Failed(instant, "other")
         assertEquals(source2, encoder.decode(encoder.encode(source2)).getOrThrow())
+
+        val source3 = ReloadState.Failed(instant, "other", details = listOf("A", "B", "C"))
+        assertEquals(source3, encoder.decode(encoder.encode(source3)).getOrThrow())
+
+        val source4 = ReloadState.Failed(instant, "other", emptyList())
+        assertEquals(source4, encoder.decode(encoder.encode(source4)).getOrThrow())
+
+        val source5 = ReloadState.Failed(instant, "other", listOf(""))
+        assertEquals(source5, encoder.decode(encoder.encode(source5)).getOrThrow())
+
+        val source6 = ReloadState.Failed(instant, "other", listOf("", "", ""))
+        assertEquals(source6, encoder.decode(encoder.encode(source6)).getOrThrow())
     }
 
     @Test

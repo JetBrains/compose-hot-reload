@@ -10,6 +10,7 @@ META-INF/services/org.jetbrains.compose.devtools.api.ReloadEffect
 composeResources/
 composeResources/org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources/
 composeResources/org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources/drawable/
+composeResources/org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources/drawable/copy.svg
 composeResources/org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources/drawable/error.svg
 img/
 img/compose-logo.png

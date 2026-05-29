@@ -13,6 +13,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.devtools.api.ReloadState
+import org.jetbrains.compose.reload.core.Environment
+import org.jetbrains.compose.reload.core.Logger
+import org.jetbrains.compose.reload.core.Update
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.trace
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
@@ -30,9 +33,17 @@ private val logger = createLogger()
 fun CoroutineScope.launchReloadStateActor(
     orchestration: OrchestrationHandle = org.jetbrains.compose.devtools.orchestration
 ) = launch {
+    var inFailedState = false
+    val errorLogs = mutableListOf<String>()
 
-    suspend fun update(update: (current: ReloadState) -> ReloadState) =
-        orchestration.update(ReloadState, update)
+    suspend fun update(update: (current: ReloadState) -> ReloadState): Update<ReloadState> {
+        val update = orchestration.update(ReloadState, update)
+        inFailedState = update.updated is ReloadState.Failed
+        if (!inFailedState) {
+            errorLogs.clear()
+        }
+        return update
+    }
 
     launch {
         ReloadUIState.flow().buffer(Channel.UNLIMITED).collect { state ->
@@ -59,13 +70,26 @@ fun CoroutineScope.launchReloadStateActor(
          */
         if (message is BuildTaskResult && !message.isSuccess) update {
             val failureMessage = message.failures.mapNotNull { it.message }.joinToString(", ")
-            ReloadState.Failed(reason = failureMessage)
+            ReloadState.Failed(reason = failureMessage, details = errorLogs.toList())
         }
 
-        if (
-            message is LogMessage && message.message.contains("BUILD FAILED")
-        ) update { state ->
-            state as? ReloadState.Failed ?: ReloadState.Failed(reason = "Build failed")
+        /*
+        Scan error messages in logs to provide more information in Failed state
+         */
+        if (message is LogMessage) {
+            val isFailureMessage = message.environment == Environment.build && message.message.contains("BUILD FAILED")
+            val isErrorMessage = (message.environment != Environment.devTools && message.level >= Logger.Level.Error) ||
+                (message.environment == Environment.build && message.message.contains("e: "))
+
+            if (isErrorMessage) errorLogs.addAll(message.message.split("\n"))
+
+            if (isFailureMessage || (isErrorMessage && inFailedState)) update { state ->
+                if (state is ReloadState.Failed) {
+                    val newState = ReloadState.Failed(reason = state.reason, details = errorLogs.toList())
+                    if (state != newState) newState else state
+                }
+                else ReloadState.Failed(reason = "Build failed", details = errorLogs.toList())
+            }
         }
 
         if (message is ReloadClassesRequest) update { state ->
@@ -84,6 +108,7 @@ fun CoroutineScope.launchReloadStateActor(
         if (message is OrchestrationMessage.ReloadClassesResult) update { state ->
             if (!message.isSuccess) return@update ReloadState.Failed(
                 reason = message.errorMessage ?: "N/A",
+                details = errorLogs.toList(),
             )
 
             state as? ReloadState.Ok ?: ReloadState.Ok()
