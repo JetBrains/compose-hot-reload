@@ -24,7 +24,14 @@ fun ErrorReportOverlayEffectEntryPoint() {
         val overlay = ErrorNotificationOverlayEffect()
         val state = ReloadState.Failed(
             reason = "Execution failed for task ':widgets:compileKotlinJvm'",
-            details = listOf("e: 1", "e: 2", "e: 3", "e: 4", "e: 5")
+            details = listOf(
+                "e: 1",
+                "e: 2",
+                "e: 3",
+                "e: 4",
+                "e: 5",
+                "file://compose-hot-reload/samples/counter/app/src/jvmMain/kotlin/App.kt:99:2"
+            )
         )
         overlay.effectOverlay(state)
     }
