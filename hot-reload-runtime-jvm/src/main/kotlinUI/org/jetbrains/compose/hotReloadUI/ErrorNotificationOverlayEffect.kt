@@ -55,6 +55,7 @@ import org.jetbrains.compose.devtools.api.ReloadAnimationSpec.statusColorFadeDur
 import org.jetbrains.compose.devtools.api.ReloadColors
 import org.jetbrains.compose.devtools.api.ReloadEffect
 import org.jetbrains.compose.devtools.api.ReloadState
+import org.jetbrains.compose.hotReloadUI.widgets.CopyToClipboardButton
 import org.jetbrains.compose.hotReloadUI.widgets.Divider
 import org.jetbrains.compose.hotReloadUI.widgets.TimeAgoText
 import org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resources.Res
@@ -165,15 +166,41 @@ internal fun ErrorNotification(
                 )
             }
             Spacer(Modifier.height(4.dp))
-            BasicText(
-                failed.reason,
-                style = TextStyle.Default.copy(
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily.Monospace
-                ),
-                overflow = TextOverflow.Ellipsis,
-                color = ColorProducer { Color.White })
 
+            val details = failed.details.orEmpty()
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                BasicText(
+                    failed.reason,
+                    style = TextStyle.Default.copy(
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily.Monospace
+                    ),
+                    overflow = TextOverflow.Ellipsis,
+                    color = ColorProducer { Color.White }
+                )
+
+                if (details.isNotEmpty()) {
+                    Spacer(Modifier.width(4.dp))
+                    Spacer(Modifier.weight(1f))
+                    CopyToClipboardButton { failed.reason + "\n" + details.joinToString("\n") }
+                }
+            }
+
+            if (details.isNotEmpty()) {
+                Spacer(Modifier.height(4.dp))
+
+                val message = details.joinToString("\n")
+                BasicText(
+                    message,
+                    style = TextStyle.Default.copy(
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace
+                    ),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 3,
+                    color = ColorProducer { Color.White },
+                )
+            }
 
             Divider(color = Color.White, modifier = Modifier.padding(vertical = 8.dp), thickness = .5.dp)
 

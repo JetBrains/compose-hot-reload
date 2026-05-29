@@ -121,7 +121,7 @@ fun CoroutineScope.launchNotificationsUIState() = launchState(NotificationsUISta
                             title = "Reload failed",
                             message = "Reason: ${state.reason}",
                             isDisposableFromUI = false,
-                            details = state.logs.map { it.message },
+                            details = state.details,
                         )
                         currentNotification = new
                         NotificationsUIState.update { it + new }
@@ -129,7 +129,7 @@ fun CoroutineScope.launchNotificationsUIState() = launchState(NotificationsUISta
                     else -> {
                         val updated = existing.copy(
                             message = "Reason: ${state.reason}",
-                            details = state.logs.map { it.message }
+                            details = state.details,
                         )
                         currentNotification = updated
                         NotificationsUIState.update { it.replace(updated) }
