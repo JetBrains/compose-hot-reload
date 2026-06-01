@@ -34,6 +34,10 @@ class BuildCache(
         }
     }
 
+    failureConditions {
+        executionTimeoutMin = 180
+    }
+
     steps {
         gradle {
             name = "Install Android SDK"
