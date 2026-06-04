@@ -30,6 +30,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
 import java.nio.file.Path
 import java.nio.file.StandardWatchEventKinds
+import kotlin.io.path.createDirectories
 import kotlin.io.path.isRegularFile
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.seconds
@@ -92,6 +93,9 @@ internal suspend fun waitForOrchestrationPort(pidFile: Path): Int {
     val fileName = pidFile.fileName
 
     readOrchestrationPort(pidFile)?.let { return it }
+
+    // CMP-10258: The MCP server can start before the pid directory created.
+    directory.createDirectories()
 
     directory.fileSystem.newWatchService().use { watchService ->
         directory.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY)

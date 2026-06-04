@@ -66,6 +66,32 @@ class ConnectionLifecycleTest {
     }
 
     @Test
+    fun `test - waitForOrchestrationPort waits when pid directory does not exist yet`() = runBlocking {
+        // CMP-10258: The MCP server can start before the pid directory exists. Watching a missing
+        // directory would fail, so waitForOrchestrationPort must create it first.
+        withTimeout(30.seconds) {
+            val tempDir = createTempDirectory("mcp-test")
+            try {
+                // Parent directory intentionally does not exist yet.
+                val pidFile = tempDir.resolve("build/run/test.pid")
+
+                val portDeferred = async(Dispatchers.IO) {
+                    waitForOrchestrationPort(pidFile)
+                }
+
+                // Give waitForOrchestrationPort time to create the directory and register the
+                // WatchService before the PID file is written.
+                delay(500.milliseconds)
+                pidFile.writePidFile(PidFileInfo(pid = 123, orchestrationPort = 8888))
+
+                assertEquals(8888, portDeferred.await())
+            } finally {
+                tempDir.toFile().deleteRecursively()
+            }
+        }
+    }
+
+    @Test
     fun `test - connectionLoop connects and detects disconnect`() = runTest(timeout = 30.seconds) {
         val tempDir = createTempDirectory("mcp-test")
         val server = startOrchestrationServer()
