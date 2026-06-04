@@ -55,16 +55,17 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIAction
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionResult
 import org.jetbrains.compose.reload.orchestration.asChannel
+import java.io.OutputStream
 import java.util.Base64
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 private val logger = createLogger()
 
-internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle?>) {
+internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle?>, protocolOut: OutputStream) {
     val transport = StdioServerTransport(
         inputStream = System.`in`.asSource().buffered(),
-        outputStream = System.out.asSink().buffered()
+        outputStream = protocolOut.asSink().buffered()
     )
     startMcpServer(orchestration, transport)
 }
