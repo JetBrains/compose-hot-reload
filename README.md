@@ -231,7 +231,7 @@ dependencyResolutionManagement {
 
 ## MCP server for AI agents
 
-*Note: the MCP server is in experimental status.*
+*Note: the MCP server is in experimental status and available since the 1.2.0-alpha01 version of Compose Hot Reload.*
 
 Compose Hot Reload includes a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that allows
 AI agents to interact with a running Compose application. The MCP server connects to the application's orchestration
@@ -240,13 +240,29 @@ layer and exposes the following tools:
 | Tool | Description                                                 |
 |------|-------------------------------------------------------------|
 | `status` | Checks whether a Compose application is currently connected |
-| `take_screenshot` | Captures a screenshot of the running application window     |
-| `get_semantic_tree` | Returns the Compose semantic/accessibility tree of the running application as JSON (component roles, names, descriptions, states, and bounds) |
+| `list_windows` | Lists registered application windows as a JSON array (`id`, `title`, `x`, `y`, `width`, `height`) |
+| `take_screenshot` | Captures a screenshot of the application window |
+| `get_semantic_tree` | Returns the Compose semantic/accessibility tree of the application as JSON (component roles, names, descriptions, states, and bounds) |
 | `click` | Clicks the UI element with the given `nodeId`. The node must expose `onClick` in `get_semantic_tree` |
 | `long_click` | Long-presses the UI element with the given `nodeId`. The node must expose `onLongClick` |
 | `type_text` | Replaces the content of an editable text field (`nodeId`) with the given `text`. The node must expose `editableText` |
 | `scroll` | Scrolls a scrollable container (`nodeId`) by `deltaX` / `deltaY` logical pixels. The node must support the `ScrollBy` semantic action |
 | `scroll_to_index` | Scrolls a container (e.g. `LazyColumn` / `LazyRow`, `nodeId`) so the item at zero-based `index` becomes visible. The node must support the `ScrollToIndex` semantic action |
+
+#### Targeting a specific window
+
+Every tool except `status` and `list_windows` accepts an optional `window_id` parameter
+and follows the same window-selection rules. An agent may use `list_windows` to discover the available IDs.
+
+- **`window_id` provided** — the tool operates on that specific window.
+- **`window_id` omitted** — the tool operates on the *first registered window*, that is, the first window
+  the running application has added to its window state. Concretely, this is the first window that is
+  composed and shown during startup (the first `Window { ... }`, `singleWindowApplication { ... }`,
+  or `DialogWindow { ... }` reached). Windows opened later in the session are appended in registration
+  order; closing a window removes it from that list, so the "first registered" entry can change at
+  runtime if the original first window is closed.
+- **`window_id` does not match any currently registered window** — the tool returns
+  `Window '<id>' not found`.
 
 When the MCP server starts, it waits for the app to launch, detects shutdown, and
 reconnects automatically on restart.
