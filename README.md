@@ -282,8 +282,7 @@ the task would be `:app:hotMcpServerDesktop`.
 
 ### Configure an AI agent
 
-Currently, only project level MCP server configuration is available (no global level configuration).
-To configure an AI agent, point your AI agent's MCP client project level configuration to the Gradle task. 
+To configure an AI agent, point your AI agent's MCP client configuration to the Gradle task. 
 For example, in a `.mcp.json`:
 
 ```json
@@ -295,7 +294,7 @@ For example, in a `.mcp.json`:
         "--no-daemon",
         "--quiet",
         "--console=plain",
-        "composeApp:hotMcpServer"
+        "hotMcpServer"
       ]
     }
   }
