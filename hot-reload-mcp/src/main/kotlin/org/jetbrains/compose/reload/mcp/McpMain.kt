@@ -39,6 +39,10 @@ private val logger = createLogger()
 
 @OptIn(InternalHotReloadApi::class)
 fun main(args: Array<String>) {
+    // The MCP stdio transport reserves stdout for the JSON-RPC protocol.
+    val protocolOut = System.out
+    System.setOut(System.err)
+
     val pidFile = HotReloadEnvironment.pidFile
         ?: args.firstOrNull()?.let { Path.of(it) }
         ?: run {
@@ -52,7 +56,7 @@ fun main(args: Array<String>) {
         val orchestration = connectionLoop(pidFile)
             .stateIn(this, SharingStarted.Eagerly, null)
 
-        startMcpServer(orchestration)
+        startMcpServer(orchestration, protocolOut)
     }
 }
 
