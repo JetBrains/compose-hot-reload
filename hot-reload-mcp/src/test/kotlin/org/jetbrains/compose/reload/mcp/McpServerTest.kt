@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.mcp
 
 import io.modelcontextprotocol.kotlin.sdk.client.Client
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.runBlocking
 import io.modelcontextprotocol.kotlin.sdk.client.StdioClientTransport
 import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
 import io.modelcontextprotocol.kotlin.sdk.types.Implementation
@@ -28,6 +29,10 @@ import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileResult
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticTreeResult
@@ -41,6 +46,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -49,6 +55,19 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 class McpServerTest {
+
+    /**
+     * The client created during a test. It keeps an MCP server + client read loop alive
+     * (blocked on a piped-stream read on a shared dispatcher); closing it after every test
+     * frees those threads so the suite does not exhaust the dispatcher's thread pool.
+     */
+    private var client: Client? = null
+
+    @AfterTest
+    fun closeClient() = runBlocking {
+        runCatching { client?.close() }
+        client = null
+    }
 
     private suspend fun CoroutineScope.createMcpClient(orchestration: MutableStateFlow<OrchestrationHandle?>): Client {
         val serverIn = PipedInputStream()
@@ -70,6 +89,7 @@ class McpServerTest {
 
         val client = Client(Implementation(name = "test-client", version = "1.0.0"))
         client.connect(clientTransport)
+        this@McpServerTest.client = client
         return client
     }
 
@@ -835,6 +855,145 @@ class McpServerTest {
             assertEquals(true, result.isError)
             val text = (result.content.first() as TextContent).text
             assertTrue(text.contains("Window 'ghost' not found"), "unexpected error message: $text")
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - reload returns error when disconnected`() = runTest(timeout = 10.seconds) {
+        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
+        val client = createMcpClient(orchestration)
+
+        val result = client.callTool("reload", emptyMap())
+        assertEquals(true, result.isError)
+        val text = (result.content.first() as TextContent).text
+        assertTrue(text.contains("No application is currently connected"))
+    }
+
+    @Test
+    fun `test - reload reports reloaded when classes are reloaded`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            // Simulate a recompiler that requests a class reload, the app reporting success,
+            // then the build result.
+            launch {
+                val request = server.asFlow().filterIsInstance<RecompileRequest>().first()
+                val reloadRequest = ReloadClassesRequest()
+                server.send(reloadRequest)
+                server.send(ReloadClassesResult(reloadRequestId = reloadRequest.messageId, isSuccess = true))
+                server.send(RecompileResult(recompileRequestId = request.messageId, exitCode = 0))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            val result = client.callTool("reload", emptyMap())
+            assertNotEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertEquals("""{"success":true,"reloaded":true}""", text)
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - reload reports no changes when recompile succeeds without reload`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            launch {
+                val request = server.asFlow().filterIsInstance<RecompileRequest>().first()
+                server.send(RecompileResult(recompileRequestId = request.messageId, exitCode = 0))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            val result = client.callTool("reload", emptyMap())
+            assertNotEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains(""""reloaded":false"""), "unexpected result: $text")
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - reload returns error when reload fails`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            launch {
+                server.asFlow().filterIsInstance<RecompileRequest>().first()
+                val reloadRequest = ReloadClassesRequest()
+                server.send(reloadRequest)
+                server.send(ReloadClassesResult(
+                    reloadRequestId = reloadRequest.messageId,
+                    isSuccess = false,
+                    errorMessage = "Incompatible change",
+                ))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            val result = client.callTool("reload", emptyMap())
+            assertEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains("Incompatible change"), "unexpected error message: $text")
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - reload returns error when recompilation fails`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            launch {
+                val request = server.asFlow().filterIsInstance<RecompileRequest>().first()
+                server.send(RecompileResult(recompileRequestId = request.messageId, exitCode = 1))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            val result = client.callTool("reload", emptyMap())
+            assertEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains("Recompilation failed"), "unexpected error message: $text")
+        } finally {
+            server.close()
+        }
+    }
+
+    @Test
+    fun `test - reload reports still reloading and asks to poll on timeout`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        try {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            // No recompiler responds, so the call must hit the timeout.
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            val result = client.callTool("reload", mapOf("timeout_seconds" to 1))
+            assertNotEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains(""""status":"reloading""""), "unexpected result: $text")
+            assertTrue(text.contains("status"), "expected a hint to poll 'status': $text")
         } finally {
             server.close()
         }
