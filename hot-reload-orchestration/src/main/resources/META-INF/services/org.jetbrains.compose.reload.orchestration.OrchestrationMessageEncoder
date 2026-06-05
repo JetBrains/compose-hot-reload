@@ -16,6 +16,8 @@ org.jetbrains.compose.reload.orchestration.SemanticTreeRequestEncoder
 org.jetbrains.compose.reload.orchestration.SemanticTreeResultEncoder
 org.jetbrains.compose.reload.orchestration.UIActionRequestEncoder
 org.jetbrains.compose.reload.orchestration.UIActionResultEncoder
+org.jetbrains.compose.reload.orchestration.WindowResizeRequestEncoder
+org.jetbrains.compose.reload.orchestration.WindowResizeResultEncoder
 org.jetbrains.compose.reload.orchestration.PingEncoder
 org.jetbrains.compose.reload.orchestration.CleanCompositionRequestEncoder
 org.jetbrains.compose.reload.orchestration.RetryFailedCompositionRequestEncoder

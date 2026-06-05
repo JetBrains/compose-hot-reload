@@ -49,6 +49,8 @@ org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIActionRequest 
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIActionResult = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIException = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessage$UIRendered = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessage$WindowResizeRequest = 0
+org/jetbrains/compose/reload/orchestration/OrchestrationMessage$WindowResizeResult = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessageClassifier = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationMessageId = 0
 org/jetbrains/compose/reload/orchestration/OrchestrationPackage = 4708005812100712021

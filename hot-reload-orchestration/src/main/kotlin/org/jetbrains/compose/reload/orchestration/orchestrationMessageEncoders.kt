@@ -331,6 +331,50 @@ internal class UIActionResultEncoder : OrchestrationMessageEncoder<Orchestration
     }
 }
 
+internal class WindowResizeRequestEncoder : OrchestrationMessageEncoder<OrchestrationMessage.WindowResizeRequest> {
+    override val messageType: Type<OrchestrationMessage.WindowResizeRequest> = type()
+    override val messageClassifier = classifier("WindowResizeRequest")
+
+    override fun encode(message: OrchestrationMessage.WindowResizeRequest): ByteArray = encodeByteArray {
+        writeFields(
+            "width" to encodeByteArray { writeInt(message.width) },
+            "height" to encodeByteArray { writeInt(message.height) },
+            "windowId" to message.windowId.value.encodeToByteArray(),
+        )
+    }
+
+    override fun decode(data: ByteArray): Try<OrchestrationMessage.WindowResizeRequest> = data.tryDecode {
+        val fields = readFields()
+        OrchestrationMessage.WindowResizeRequest(
+            width = fields.requireField("width").decode { readInt() },
+            height = fields.requireField("height").decode { readInt() },
+            windowId = WindowId(fields.requireField("windowId").decodeToString()),
+        )
+    }
+}
+
+internal class WindowResizeResultEncoder : OrchestrationMessageEncoder<OrchestrationMessage.WindowResizeResult> {
+    override val messageType: Type<OrchestrationMessage.WindowResizeResult> = type()
+    override val messageClassifier = classifier("WindowResizeResult")
+
+    override fun encode(message: OrchestrationMessage.WindowResizeResult): ByteArray = encodeByteArray {
+        writeFields(
+            "windowResizeRequestId" to message.windowResizeRequestId.encodeToByteArray(),
+            "isSuccess" to message.isSuccess.encodeToByteArray(),
+            "errorMessage" to message.errorMessage?.encodeToByteArray(),
+        )
+    }
+
+    override fun decode(data: ByteArray): Try<OrchestrationMessage.WindowResizeResult> = data.tryDecode {
+        val fields = readFields()
+        OrchestrationMessage.WindowResizeResult(
+            windowResizeRequestId = OrchestrationMessageId(fields.requireField("windowResizeRequestId")),
+            isSuccess = fields["isSuccess"]?.decodeToBoolean() ?: true,
+            errorMessage = fields["errorMessage"]?.decodeToString(),
+        )
+    }
+}
+
 internal class PingEncoder : OrchestrationMessageEncoder<OrchestrationMessage.Ping> {
     override val messageType: Type<OrchestrationMessage.Ping> = type()
     override val messageClassifier = classifier("Ping")

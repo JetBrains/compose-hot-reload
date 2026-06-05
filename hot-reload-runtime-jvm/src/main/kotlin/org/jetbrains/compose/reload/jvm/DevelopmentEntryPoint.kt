@@ -27,16 +27,19 @@ import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.sendAsync
 import org.jetbrains.compose.reload.agent.sendBlocking
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.reloadEffectsEnabled
+import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.warn
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.CleanCompositionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RetryFailedCompositionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticTreeRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIException
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIRendered
 import org.jetbrains.compose.reload.orchestration.asFlow
 import java.awt.Window
@@ -75,32 +78,10 @@ public fun DevelopmentEntryPoint(
     }
 
     if (window != null) {
-        LaunchedEffect(Unit) {
-            orchestration.asFlow()
-                .filterIsInstance<ScreenshotRequest>()
-                .filter { request -> request.windowId == null || request.windowId == windowId }
-                .collect { request ->
-                    handleScreenshotRequest(request, window).sendAsync()
-                }
-        }
-
-        LaunchedEffect(Unit) {
-            orchestration.asFlow()
-                .filterIsInstance<SemanticTreeRequest>()
-                .filter { request -> request.windowId == null || request.windowId == windowId }
-                .collect { request ->
-                    handleSemanticTreeRequest(request, window).sendAsync()
-                }
-        }
-
-        LaunchedEffect(Unit) {
-            orchestration.asFlow()
-                .filterIsInstance<UIActionRequest>()
-                .filter { request -> request.windowId == null || request.windowId == windowId }
-                .collect { request ->
-                    handleUIActionRequest(request, window).sendAsync()
-                }
-        }
+        handleWindowRequests<ScreenshotRequest>(windowId, { it.windowId }) { handleScreenshotRequest(it, window) }
+        handleWindowRequests<SemanticTreeRequest>(windowId, { it.windowId }) { handleSemanticTreeRequest(it, window) }
+        handleWindowRequests<UIActionRequest>(windowId, { it.windowId }) { handleUIActionRequest(it, window) }
+        handleWindowRequests<WindowResizeRequest>(windowId, { it.windowId }) { handleWindowResizeRequest(it, window) }
     }
 
     /* Agent */
@@ -137,6 +118,25 @@ public fun DevelopmentEntryPoint(
         key(currentHotReloadState.key) {
             intercepted()
         }
+    }
+}
+
+/**
+ * Installs a [LaunchedEffect] that handles incoming [T] requests targeting this window: those whose
+ * [windowIdOf] is null (any window) or equal to [windowId]. The [respond] result is sent back over
+ * orchestration.
+ */
+@Composable
+private inline fun <reified T : OrchestrationMessage> handleWindowRequests(
+    windowId: WindowId?,
+    crossinline windowIdOf: (T) -> WindowId?,
+    crossinline respond: (T) -> OrchestrationMessage,
+) {
+    LaunchedEffect(Unit) {
+        orchestration.asFlow()
+            .filterIsInstance<T>()
+            .filter { request -> windowIdOf(request) == null || windowIdOf(request) == windowId }
+            .collect { request -> respond(request).sendAsync() }
     }
 }
 

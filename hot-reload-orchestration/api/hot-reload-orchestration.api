@@ -581,6 +581,25 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$WindowResizeRequest : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
+	public synthetic fun <init> (IILjava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeight ()I
+	public final fun getWidth ()I
+	public final fun getWindowId-9Ua70vA ()Ljava/lang/String;
+	public fun hashCode ()I
+}
+
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$WindowResizeResult : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
+	public fun <init> (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageId;ZLjava/lang/String;)V
+	public synthetic fun <init> (Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageId;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getErrorMessage ()Ljava/lang/String;
+	public final fun getWindowResizeRequestId ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessageId;
+	public fun hashCode ()I
+	public final fun isSuccess ()Z
+}
+
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessageClassifier : java/io/Serializable {
 	public static final field serialVersionUID J
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
@@ -739,5 +758,6 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationVersi
 	public final fun getV1_3 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 	public final fun getV1_4 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 	public final fun getV1_5 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
+	public final fun getV1_6 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 }
 

@@ -59,6 +59,8 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticT
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIAction
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionResult
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeRequest
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeResult
 import org.jetbrains.compose.reload.orchestration.asChannel
 import java.io.OutputStream
 import java.util.Base64
@@ -258,6 +260,20 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
                 UIAction.ScrollToIndex(index)
             }
         }
+
+        addTool(
+            name = "resize_window",
+            description = "Resize a Compose application window to the given width and height in pixels. " +
+                "Use 'list_windows' to inspect current window sizes.",
+            inputSchema = toolSchema(
+                Property("width", "integer", description = "New window width in pixels (must be positive)."),
+                Property("height", "integer", description = "New window height in pixels (must be positive)."),
+                WindowIdParam,
+                required = listOf("width", "height"),
+            )
+        ) { request ->
+            handleResizeWindow(orchestration, request)
+        }
     }
 
     server.createSession(transport)
@@ -414,7 +430,7 @@ private suspend fun handleTakeScreenshot(
 
     val resolvedId = try {
         resolveWindowId(handle, request.arguments)
-    } catch (e: IllegalArgumentException) {
+    } catch (e: WindowIdNotFoundException) {
         return CallToolResult(content = listOf(TextContent(e.message ?: "Invalid window_id")), isError = true)
     }
 
@@ -467,7 +483,7 @@ private suspend fun handleGetSemanticTree(
 
     val resolvedId = try {
         resolveWindowId(handle, request.arguments)
-    } catch (e: IllegalArgumentException) {
+    } catch (e: WindowIdNotFoundException) {
         return CallToolResult(content = listOf(TextContent(e.message ?: "Invalid window_id")), isError = true)
     }
 
@@ -526,7 +542,7 @@ private suspend fun handleUIAction(
 
     val resolvedId = try {
         resolveWindowId(handle, args)
-    } catch (e: IllegalArgumentException) {
+    } catch (e: WindowIdNotFoundException) {
         return CallToolResult(content = listOf(TextContent(e.message ?: "Invalid window_id")), isError = true)
     }
 
@@ -564,15 +580,79 @@ private suspend fun handleUIAction(
     }
 }
 
-private suspend fun resolveWindowId(handle: OrchestrationHandle, args: JsonObject?): WindowId? {
+private suspend fun handleResizeWindow(
+    orchestration: StateFlow<OrchestrationHandle?>,
+    request: CallToolRequest,
+): CallToolResult {
+    val handle = orchestration.value
+        ?: return CallToolResult(
+            content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
+            isError = true
+        ).also { logger.info { "resize_window: no application connected" } }
+
+    val args = request.arguments
+    val width = args?.get("width")?.jsonPrimitive?.intOrNull
+        ?: return CallToolResult(
+            content = listOf(TextContent("Missing required parameter 'width' (integer)")),
+            isError = true
+        )
+    val height = args["height"]?.jsonPrimitive?.intOrNull
+        ?: return CallToolResult(
+            content = listOf(TextContent("Missing required parameter 'height' (integer)")),
+            isError = true
+        )
+
+    val result = try {
+        val resolvedId = resolveWindowId(handle, args)
+        val resizeRequest = WindowResizeRequest(width = width, height = height, windowId = resolvedId)
+        logger.info { "resize_window: sending request '${resizeRequest.messageId}' ${width}x${height}" }
+        val response = handle.requestResponse<WindowResizeResult>(resizeRequest) {
+            it.windowResizeRequestId == resizeRequest.messageId
+        }
+        when {
+            response == null -> CallToolResult(
+                content = listOf(TextContent("Window resize timed out: no response from application")),
+                isError = true
+            )
+            !response.isSuccess -> CallToolResult(
+                content = listOf(TextContent("Window resize failed: ${response.errorMessage ?: "unknown error"}")),
+                isError = true
+            )
+            else -> CallToolResult(content = listOf(TextContent("""{"success": true}""")))
+        }
+    } catch (e: WindowIdNotFoundException) {
+        CallToolResult(content = listOf(TextContent(e.message ?: "Invalid window_id")), isError = true)
+    } catch (e: Exception) {
+        CallToolResult(content = listOf(TextContent("Window resize failed: ${e.message}")), isError = true)
+    }
+
+    val resultText = (result.content.firstOrNull() as? TextContent)?.text
+    if (result.isError == true) logger.warn("resize_window: $resultText")
+    else logger.debug { "resize_window: $resultText" }
+    return result
+}
+
+/** Thrown by [resolveWindowId] when an explicit 'window_id' does not match any registered window. */
+private class WindowIdNotFoundException(message: String) : Exception(message)
+
+/**
+ * Resolves the optional 'window_id' tool argument to a concrete [WindowId], defaulting to the first
+ * registered window when omitted. Throws [WindowIdNotFoundException] if the requested window does not
+ * exist, or if no window is registered at all.
+ *
+ * Note the deliberate divergence from the orchestration protocol: a `null` [WindowId] on requests
+ * such as [ScreenshotRequest] is broadcast to *every* window, but the MCP tools are request/response
+ * and expect a single window's response, so an omitted id resolves to one concrete window rather than
+ * being forwarded as `null`.
+ */
+private suspend fun resolveWindowId(handle: OrchestrationHandle, args: JsonObject?): WindowId {
     val windows = handle.states.get(WindowsState).value.windows
     val explicit = args?.get("window_id")?.jsonPrimitive?.contentOrNull
-    if (explicit != null) {
-        val id = WindowId(explicit)
-        require(id in windows) { "Window '$explicit' not found" }
-        return id
-    }
-    return windows.keys.firstOrNull()
+        ?: return windows.keys.firstOrNull()
+            ?: throw WindowIdNotFoundException("No application window is currently available.")
+    val id = WindowId(explicit)
+    if (id !in windows) throw WindowIdNotFoundException("Window '$explicit' not found")
+    return id
 }
 
 /**

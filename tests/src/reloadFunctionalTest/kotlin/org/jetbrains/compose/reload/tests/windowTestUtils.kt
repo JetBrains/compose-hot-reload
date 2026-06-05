@@ -60,3 +60,17 @@ internal suspend fun awaitOneWindow(windowsState: State<WindowsState>) =
             }
         }
     }
+
+/**
+ * Suspends until the [windowsState] reports a window with the given [width] and [height] (in pixels).
+ */
+internal suspend fun awaitWindowSize(windowsState: State<WindowsState>, width: Int, height: Int) =
+    withAsyncTrace("Await window size ${width}x$height") {
+        windowsState.asChannel().consume {
+            while (true) {
+                val state = receive()
+                if (state.windows.values.any { it.width == width && it.height == height }) break
+                else logger.info("Waiting for window size ${width}x$height")
+            }
+        }
+    }
