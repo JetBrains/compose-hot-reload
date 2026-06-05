@@ -18,8 +18,6 @@ import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withTimeoutOrNull
@@ -312,9 +310,6 @@ private suspend fun handleReload(
     logger.info { "reload: sending RecompileRequest '${request.messageId}' (timeout ${timeoutSeconds}s)" }
 
     /*
-    The response channel is opened *before* sending the request to avoid missing a result
-    that could otherwise arrive before a cold flow starts collecting.
-
     When the recompilation produces changed classes, the recompiler issues a ReloadClassesRequest
     (whose id we don't know up front) and the application answers with a ReloadClassesResult
     carrying that id. We capture the id of the first ReloadClassesRequest that follows our
@@ -323,24 +318,18 @@ private suspend fun handleReload(
     the RecompileResult for our request instead (sent only once the build, including any reload,
     finished).
      */
-    val channel = handle.asChannel()
-    val outcome = channel.consumeAsFlow().let { flow ->
-        handle.send(request)
-        withTimeoutOrNull(timeoutSeconds.seconds) {
-            var reloadRequestId: OrchestrationMessageId? = null
-            flow.mapNotNull { message ->
-                when (message) {
-                    is ReloadClassesRequest -> {
-                        if (reloadRequestId == null) reloadRequestId = message.messageId
-                        null
-                    }
-                    is ReloadClassesResult ->
-                        message.takeIf { reloadRequestId != null && it.reloadRequestId == reloadRequestId }
-                    is RecompileResult ->
-                        message.takeIf { it.recompileRequestId == request.messageId && reloadRequestId == null }
-                    else -> null
-                }
-            }.firstOrNull()
+    var reloadRequestId: OrchestrationMessageId? = null
+    val outcome = handle.sendAndAwait(request, timeoutSeconds.seconds) { message ->
+        when (message) {
+            is ReloadClassesRequest -> {
+                if (reloadRequestId == null) reloadRequestId = message.messageId
+                null
+            }
+            is ReloadClassesResult ->
+                message.takeIf { reloadRequestId != null && it.reloadRequestId == reloadRequestId }
+            is RecompileResult ->
+                message.takeIf { it.recompileRequestId == request.messageId && reloadRequestId == null }
+            else -> null
         }
     }
 
@@ -583,23 +572,34 @@ private suspend fun resolveWindowId(handle: OrchestrationHandle, args: JsonObjec
 }
 
 /**
- * Sends [request] over orchestration and awaits the matching response of type [R],
- * or returns null if no response arrives within [timeout].
+ * Sends [request] over orchestration, then collects the resulting messages until [match] maps one
+ * to a non-null value, returning it (or null if none arrives within [timeout]).
  *
- * The response channel is opened *before* [request] is sent, eliminating the race
- * where the result could otherwise arrive before a cold flow starts collecting.
- * [consumeAsFlow] auto-closes the channel once the first match is found.
+ * The response channel is opened *before* [request] is sent, eliminating the race where a result
+ * could otherwise arrive before a cold flow starts collecting. [consumeAsFlow] auto-closes the
+ * channel once a terminal value is found.
+ *
+ * [match] is invoked on messages in arrival order, so it may accumulate state across calls
+ * (e.g. capturing an id from one message to match it against a later one).
+ */
+private suspend fun <R> OrchestrationHandle.sendAndAwait(
+    request: OrchestrationMessage,
+    timeout: Duration,
+    match: (OrchestrationMessage) -> R?,
+): R? {
+    val channel = asChannel()
+    return channel.consumeAsFlow().let { flow ->
+        send(request)
+        withTimeoutOrNull(timeout) { flow.mapNotNull(match).firstOrNull() }
+    }
+}
+
+/**
+ * Sends [request] and awaits the matching response of type [R], or null if none arrives within
+ * [timeout]. Thin wrapper over [sendAndAwait] for the common single-response-type case.
  */
 private suspend inline fun <reified R : OrchestrationMessage> OrchestrationHandle.requestResponse(
     request: OrchestrationMessage,
     timeout: Duration = 10.seconds,
     crossinline isResponse: (R) -> Boolean,
-): R? {
-    val channel = asChannel()
-    return channel.consumeAsFlow()
-        .filterIsInstance<R>()
-        .let { flow ->
-            send(request)
-            withTimeoutOrNull(timeout) { flow.first { isResponse(it) } }
-        }
-}
+): R? = sendAndAwait(request, timeout) { message -> (message as? R)?.takeIf(isResponse) }
