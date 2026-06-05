@@ -124,7 +124,7 @@ class McpServerTest {
     @Test
     fun `test - status returns connected when app is running`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -134,8 +134,6 @@ class McpServerTest {
             val result = client.callTool("status", emptyMap())
             val text = (result.content.first() as TextContent).text
             assertEquals("""{"connected":true,"reloadState":"ok","lastError":null,"successfulReloads":0,"failedReloads":0}""", text)
-        } finally {
-            server.close()
         }
     }
 
@@ -153,7 +151,7 @@ class McpServerTest {
     @Test
     fun `test - take_screenshot returns image when connected`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -174,8 +172,6 @@ class McpServerTest {
             assertNotEquals(true, result.isError)
             val imageContent = result.content.first()
             assertNotNull(imageContent)
-        } finally {
-            server.close()
         }
     }
 
@@ -193,7 +189,7 @@ class McpServerTest {
     @Test
     fun `test - get_semantic_tree returns tree when connected`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -212,8 +208,6 @@ class McpServerTest {
             assertNotEquals(true, result.isError)
             val text = (result.content.first() as TextContent).text
             assertEquals(someJson, text)
-        } finally {
-            server.close()
         }
     }
 
@@ -231,7 +225,7 @@ class McpServerTest {
     @Test
     fun `test - click succeeds and forwards nodeId`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -251,15 +245,13 @@ class McpServerTest {
             assertNotEquals(true, result.isError)
             assertEquals(7, receivedNodeId)
             assertEquals(UIAction.Click, receivedAction)
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - click returns error when app reports failure`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -281,15 +273,13 @@ class McpServerTest {
             assertEquals(true, result.isError)
             val text = (result.content.first() as TextContent).text
             assertTrue(text.contains("Node 7 not found"))
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - long_click succeeds and dispatches LongClick action`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -306,15 +296,13 @@ class McpServerTest {
             val result = client.callTool("long_click", mapOf("nodeId" to 3))
             assertNotEquals(true, result.isError)
             assertEquals(UIAction.LongClick, receivedAction)
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - type_text forwards text to app`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -334,15 +322,13 @@ class McpServerTest {
             )
             assertNotEquals(true, result.isError)
             assertEquals(UIAction.SetText("hello world"), receivedAction)
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - scroll forwards deltas to app`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -362,15 +348,13 @@ class McpServerTest {
             )
             assertNotEquals(true, result.isError)
             assertEquals(UIAction.ScrollBy(10f, -20.5f), receivedAction)
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - scroll_to_index forwards index to app`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -390,8 +374,6 @@ class McpServerTest {
             )
             assertNotEquals(true, result.isError)
             assertEquals(UIAction.ScrollToIndex(42), receivedAction)
-        } finally {
-            server.close()
         }
     }
 
@@ -423,7 +405,7 @@ class McpServerTest {
     @Test
     fun `test - status reflects orchestration state after reconnect`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient1 = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -447,15 +429,13 @@ class McpServerTest {
                 """{"connected":true,"reloadState":"ok","lastError":null,"successfulReloads":0,"failedReloads":0}""",
                 text,
             )
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - status shows reloading when ReloadState is Reloading`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -468,15 +448,13 @@ class McpServerTest {
                 """{"connected":true,"reloadState":"reloading","lastError":null,"successfulReloads":0,"failedReloads":0}""",
                 text,
             )
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - status reflects successful reload count`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -490,8 +468,6 @@ class McpServerTest {
                 """{"connected":true,"reloadState":"ok","lastError":null,"successfulReloads":1,"failedReloads":0}""",
                 text,
             )
-        } finally {
-            server.close()
         }
     }
 
@@ -533,7 +509,7 @@ class McpServerTest {
     @Test
     fun `test - list_windows returns empty array when no windows are registered`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -543,15 +519,13 @@ class McpServerTest {
             val result = client.callTool("list_windows", emptyMap())
             val text = (result.content.first() as TextContent).text
             assertEquals("[]", text)
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - list_windows returns registered windows in insertion order`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -571,15 +545,13 @@ class McpServerTest {
                     """{"id":"w-2","title":"Settings","x":30,"y":40,"width":300,"height":400}]""",
                 text,
             )
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - list_windows serializes null title as JSON null`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -597,15 +569,13 @@ class McpServerTest {
                 """[{"id":"w-1","title":null,"x":0,"y":0,"width":100,"height":100}]""",
                 text,
             )
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - list_windows reflects title changes`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -637,15 +607,13 @@ class McpServerTest {
                 }
                 Thread.sleep(10)
             }
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - take_screenshot forwards explicit window_id`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -674,15 +642,13 @@ class McpServerTest {
             val result = client.callTool("take_screenshot", mapOf("window_id" to "w-2"))
             assertNotEquals(true, result.isError)
             assertEquals(WindowId("w-2"), receivedWindowId)
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - take_screenshot defaults to first registered window`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -711,15 +677,13 @@ class McpServerTest {
             val result = client.callTool("take_screenshot", emptyMap())
             assertNotEquals(true, result.isError)
             assertEquals(WindowId("w-1"), receivedWindowId)
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - take_screenshot returns error for unknown window_id`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -737,15 +701,13 @@ class McpServerTest {
             assertEquals(true, result.isError)
             val text = (result.content.first() as TextContent).text
             assertTrue(text.contains("Window 'ghost' not found"), "unexpected error message: $text")
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - get_semantic_tree forwards explicit window_id`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -770,15 +732,13 @@ class McpServerTest {
             val result = client.callTool("get_semantic_tree", mapOf("window_id" to "w-2"))
             assertNotEquals(true, result.isError)
             assertEquals(WindowId("w-2"), receivedWindowId)
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - get_semantic_tree returns error for unknown window_id`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -796,15 +756,13 @@ class McpServerTest {
             assertEquals(true, result.isError)
             val text = (result.content.first() as TextContent).text
             assertTrue(text.contains("Window 'ghost' not found"), "unexpected error message: $text")
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - click forwards explicit window_id`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -829,15 +787,13 @@ class McpServerTest {
             val result = client.callTool("click", mapOf("nodeId" to 7, "window_id" to "w-2"))
             assertNotEquals(true, result.isError)
             assertEquals(WindowId("w-2"), receivedWindowId)
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - click returns error for unknown window_id`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -855,8 +811,6 @@ class McpServerTest {
             assertEquals(true, result.isError)
             val text = (result.content.first() as TextContent).text
             assertTrue(text.contains("Window 'ghost' not found"), "unexpected error message: $text")
-        } finally {
-            server.close()
         }
     }
 
@@ -874,7 +828,7 @@ class McpServerTest {
     @Test
     fun `test - reload reports reloaded when classes are reloaded`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -895,15 +849,13 @@ class McpServerTest {
             assertNotEquals(true, result.isError)
             val text = (result.content.first() as TextContent).text
             assertEquals("""{"success":true,"reloaded":true}""", text)
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - reload reports no changes when recompile succeeds without reload`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -919,15 +871,13 @@ class McpServerTest {
             assertNotEquals(true, result.isError)
             val text = (result.content.first() as TextContent).text
             assertTrue(text.contains(""""reloaded":false"""), "unexpected result: $text")
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - reload returns error when reload fails`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -949,15 +899,13 @@ class McpServerTest {
             assertEquals(true, result.isError)
             val text = (result.content.first() as TextContent).text
             assertTrue(text.contains("Incompatible change"), "unexpected error message: $text")
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - reload returns error when recompilation fails`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -973,15 +921,13 @@ class McpServerTest {
             assertEquals(true, result.isError)
             val text = (result.content.first() as TextContent).text
             assertTrue(text.contains("Recompilation failed"), "unexpected error message: $text")
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - reload reports still reloading and asks to poll on timeout`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -994,15 +940,13 @@ class McpServerTest {
             val text = (result.content.first() as TextContent).text
             assertTrue(text.contains(""""status":"reloading""""), "unexpected result: $text")
             assertTrue(text.contains("status"), "expected a hint to poll 'status': $text")
-        } finally {
-            server.close()
         }
     }
 
     @Test
     fun `test - status shows failed when ReloadState is Failed`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
-        try {
+        server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
@@ -1016,8 +960,6 @@ class McpServerTest {
                 """{"connected":true,"reloadState":"failed","lastError":"Compilation error","successfulReloads":0,"failedReloads":1}""",
                 text,
             )
-        } finally {
-            server.close()
         }
     }
 }
