@@ -40,7 +40,8 @@ public data class OrchestrationVersion(public val intValue: Int) : Comparable<Or
         public val v1_3: OrchestrationVersion = OrchestrationVersion(4)
         public val v1_4: OrchestrationVersion = OrchestrationVersion(5)
         public val v1_5: OrchestrationVersion = OrchestrationVersion(6)
-        public val current: OrchestrationVersion = v1_5
+        public val v1_6: OrchestrationVersion = OrchestrationVersion(7)
+        public val current: OrchestrationVersion = v1_6
     }
 
     override fun compareTo(other: OrchestrationVersion): Int {
@@ -55,6 +56,7 @@ public data class OrchestrationVersion(public val intValue: Int) : Comparable<Or
             v1_3 -> "v1.3($intValue)"
             v1_4 -> "v1.4($intValue)"
             v1_5 -> "v1.5($intValue)"
+            v1_6 -> "v1.6($intValue)"
             else -> "N/A($intValue)"
         }
     }
@@ -82,5 +84,7 @@ internal val Class<out OrchestrationMessage>.availableSinceVersion: Orchestratio
         OrchestrationMessage.SemanticTreeResult::class.java -> OrchestrationVersion.v1_5
         OrchestrationMessage.UIActionRequest::class.java -> OrchestrationVersion.v1_5
         OrchestrationMessage.UIActionResult::class.java -> OrchestrationVersion.v1_5
+        OrchestrationMessage.WindowResizeRequest::class.java -> OrchestrationVersion.v1_6
+        OrchestrationMessage.WindowResizeResult::class.java -> OrchestrationVersion.v1_6
         else -> OrchestrationVersion.v1
     }

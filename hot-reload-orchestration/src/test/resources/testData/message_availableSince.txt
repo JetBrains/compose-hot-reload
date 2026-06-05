@@ -34,3 +34,5 @@ org.jetbrains.compose.reload.orchestration.OrchestrationMessage$SemanticTreeRequ
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$SemanticTreeResult = v1.5(6)
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$UIActionRequest = v1.5(6)
 org.jetbrains.compose.reload.orchestration.OrchestrationMessage$UIActionResult = v1.5(6)
+org.jetbrains.compose.reload.orchestration.OrchestrationMessage$WindowResizeRequest = v1.6(7)
+org.jetbrains.compose.reload.orchestration.OrchestrationMessage$WindowResizeResult = v1.6(7)

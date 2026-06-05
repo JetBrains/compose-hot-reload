@@ -338,6 +338,36 @@ class SerializationTest {
     )
 
     @Test
+    fun `test - window resize request - with windowId`() = testEncodeDecodeEquals(
+        OrchestrationMessage.WindowResizeRequest(width = 1024, height = 768, windowId = WindowId("w-1"))
+    )
+
+    @Test
+    fun `test - window resize request - equals differs by windowId`() {
+        val a = OrchestrationMessage.WindowResizeRequest(800, 600, WindowId("w-1"))
+        val b = OrchestrationMessage.WindowResizeRequest(800, 600, WindowId("w-2"))
+        assertNotEquals(a, b)
+    }
+
+    @Test
+    fun `test - window resize result - success`() = testEncodeDecodeEquals(
+        OrchestrationMessage.WindowResizeResult(
+            windowResizeRequestId = OrchestrationMessageId.random(),
+            isSuccess = true,
+            errorMessage = null,
+        )
+    )
+
+    @Test
+    fun `test - window resize result - failure`() = testEncodeDecodeEquals(
+        OrchestrationMessage.WindowResizeResult(
+            windowResizeRequestId = OrchestrationMessageId.random(),
+            isSuccess = false,
+            errorMessage = "Invalid window size",
+        )
+    )
+
+    @Test
     fun `test - log message - 1`() = testEncodeDecodeEquals(
         OrchestrationMessage.LogMessage(
             environment = null,

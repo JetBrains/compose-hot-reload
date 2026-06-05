@@ -40,9 +40,12 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticT
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIAction
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionResult
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeRequest
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeResult
 import org.jetbrains.compose.reload.orchestration.asFlow
 import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
+import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
@@ -167,6 +170,7 @@ class McpServerTest {
 
             val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
             val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
 
             val result = client.callTool("take_screenshot", emptyMap())
             assertNotEquals(true, result.isError)
@@ -203,6 +207,7 @@ class McpServerTest {
 
             val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
             val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
 
             val result = client.callTool("get_semantic_tree", emptyMap())
             assertNotEquals(true, result.isError)
@@ -240,6 +245,7 @@ class McpServerTest {
 
             val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
             val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
 
             val result = client.callTool("click", mapOf("nodeId" to 7))
             assertNotEquals(true, result.isError)
@@ -268,6 +274,7 @@ class McpServerTest {
 
             val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
             val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
 
             val result = client.callTool("click", mapOf("nodeId" to 7))
             assertEquals(true, result.isError)
@@ -292,6 +299,7 @@ class McpServerTest {
 
             val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
             val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
 
             val result = client.callTool("long_click", mapOf("nodeId" to 3))
             assertNotEquals(true, result.isError)
@@ -315,6 +323,7 @@ class McpServerTest {
 
             val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
             val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
 
             val result = client.callTool(
                 "type_text",
@@ -341,6 +350,7 @@ class McpServerTest {
 
             val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
             val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
 
             val result = client.callTool(
                 "scroll",
@@ -367,6 +377,7 @@ class McpServerTest {
 
             val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
             val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
 
             val result = client.callTool(
                 "scroll_to_index",
@@ -494,6 +505,18 @@ class McpServerTest {
 
     private fun windowState(x: Int, y: Int, width: Int, height: Int, title: String? = null): WindowState =
         WindowState(x = x, y = y, width = width, height = height, isAlwaysOnTop = false, title = title)
+
+    /**
+     * Registers a single window ('w-1') and waits until the MCP server observes it. Window-targeting
+     * tools resolve an omitted 'window_id' to the first registered window, so they require at least
+     * one window to be present.
+     */
+    private suspend fun registerSingleWindow(server: OrchestrationServer, client: Client) {
+        server.update(WindowsState) {
+            WindowsState(linkedMapOf(WindowId("w-1") to windowState(0, 0, 100, 100)))
+        }
+        awaitWindows(client, expectedCount = 1)
+    }
 
     @Test
     fun `test - list_windows returns error when disconnected`() = runTest(timeout = 10.seconds) {
@@ -960,6 +983,71 @@ class McpServerTest {
                 """{"connected":true,"reloadState":"failed","lastError":"Compilation error","successfulReloads":0,"failedReloads":1}""",
                 text,
             )
+        }
+    }
+
+    @Test
+    fun `test - resize_window returns error when disconnected`() = runTest(timeout = 10.seconds) {
+        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
+        val client = createMcpClient(orchestration)
+
+        val result = client.callTool("resize_window", mapOf("width" to 800, "height" to 600))
+        assertEquals(true, result.isError)
+        val text = (result.content.first() as TextContent).text
+        assertTrue(text.contains("No application is currently connected"))
+    }
+
+    @Test
+    fun `test - resize_window forwards width and height`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            var receivedWidth: Int? = null
+            var receivedHeight: Int? = null
+            launch {
+                val request = server.asFlow().filterIsInstance<WindowResizeRequest>().first()
+                receivedWidth = request.width
+                receivedHeight = request.height
+                server.send(WindowResizeResult(windowResizeRequestId = request.messageId, isSuccess = true))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
+
+            val result = client.callTool("resize_window", mapOf("width" to 1024, "height" to 768))
+            assertNotEquals(true, result.isError)
+            assertEquals(1024, receivedWidth)
+            assertEquals(768, receivedHeight)
+        }
+    }
+
+    @Test
+    fun `test - resize_window returns error when app reports failure`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            launch {
+                val request = server.asFlow().filterIsInstance<WindowResizeRequest>().first()
+                server.send(WindowResizeResult(
+                    windowResizeRequestId = request.messageId,
+                    isSuccess = false,
+                    errorMessage = "Invalid window size",
+                ))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
+
+            val result = client.callTool("resize_window", mapOf("width" to -1, "height" to 600))
+            assertEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains("Invalid window size"), "unexpected error message: $text")
         }
     }
 }

@@ -249,6 +249,7 @@ layer and exposes the following tools:
 | `type_text` | Replaces the content of an editable text field (`nodeId`) with the given `text`. The node must expose `editableText` |
 | `scroll` | Scrolls a scrollable container (`nodeId`) by `deltaX` / `deltaY` logical pixels. The node must support the `ScrollBy` semantic action |
 | `scroll_to_index` | Scrolls a container (e.g. `LazyColumn` / `LazyRow`, `nodeId`) so the item at zero-based `index` becomes visible. The node must support the `ScrollToIndex` semantic action |
+| `resize_window` | Resizes the window to the given `width` × `height` in pixels (both must be positive) |
 
 #### Targeting a specific window
 

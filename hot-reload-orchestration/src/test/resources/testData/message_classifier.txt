@@ -34,6 +34,8 @@ root/UIActionRequest                       => o.j.c.r.o.OrchestrationMessage$UIA
 root/UIActionResult                        => o.j.c.r.o.OrchestrationMessage$UIActionResult
 root/UIException                           => o.j.c.r.o.OrchestrationMessage$UIException
 root/UIRendered                            => o.j.c.r.o.OrchestrationMessage$UIRendered
+root/WindowResizeRequest                   => o.j.c.r.o.OrchestrationMessage$WindowResizeRequest
+root/WindowResizeResult                    => o.j.c.r.o.OrchestrationMessage$WindowResizeResult
 
 Non 'OrchestrationMessage' encoders:
 {{messageClassifier}} => Message FQN

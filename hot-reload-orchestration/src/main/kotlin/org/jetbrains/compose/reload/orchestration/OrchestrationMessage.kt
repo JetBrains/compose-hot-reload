@@ -307,6 +307,11 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * Requests a screenshot from the application.
      * The response is [ScreenshotResult] with [ScreenshotResult.screenshotRequestId]
      * matching this request's [messageId].
+     *
+     * @param windowId the target window (as reported by [ApplicationWindowPositioned]). When `null`,
+     * the request is broadcast to every registered window, yielding one [ScreenshotResult] per window
+     * (all sharing this request's [messageId]); pass a concrete id to target a single window and
+     * receive exactly one response.
      */
     public class ScreenshotRequest @JvmOverloads constructor(
         public val windowId: WindowId? = null,
@@ -597,6 +602,11 @@ internal constructor() : OrchestrationPackage(), Serializable {
 
     /**
      * Requests the application to capture and send the Compose semantic tree.
+     *
+     * @param windowId the target window (as reported by [ApplicationWindowPositioned]). When `null`,
+     * the request is broadcast to every registered window, yielding one [SemanticTreeResult] per window
+     * (all sharing this request's [messageId]); pass a concrete id to target a single window and
+     * receive exactly one response.
      */
     public class SemanticTreeRequest @JvmOverloads constructor(
         public val windowId: WindowId? = null,
@@ -679,6 +689,11 @@ internal constructor() : OrchestrationPackage(), Serializable {
     /**
      * Requests the application to perform a [UIAction] on the semantic node with the given [nodeId].
      * The node ID corresponds to the `id` field returned by [SemanticTreeRequest] / [SemanticTreeResult].
+     *
+     * @param windowId the target window (as reported by [ApplicationWindowPositioned]). When `null`,
+     * the request is broadcast to every registered window, yielding one [UIActionResult] per window
+     * (all sharing this request's [messageId]); pass a concrete id to target a single window and
+     * receive exactly one response.
      */
     public class UIActionRequest @JvmOverloads constructor(
         public val nodeId: Int,
@@ -734,6 +749,73 @@ internal constructor() : OrchestrationPackage(), Serializable {
             if (other === this) return true
             if (other !is UIActionResult) return false
             if (other.uiActionRequestId != uiActionRequestId) return false
+            if (other.isSuccess != isSuccess) return false
+            if (other.errorMessage != errorMessage) return false
+            return true
+        }
+    }
+
+    /**
+     * Requests the application to resize the window identified by [windowId] to [width] x [height]
+     * (in pixels). Unlike the other window-targeting requests, [windowId] is required: resizing is
+     * always directed at a single, explicit window (there is no broadcast-to-all-windows form).
+     *
+     * @param windowId the target window (as reported by [ApplicationWindowPositioned]).
+     */
+    public class WindowResizeRequest(
+        public val width: Int,
+        public val height: Int,
+        public val windowId: WindowId,
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+
+        override fun hashCode(): Int {
+            var hashCode = width.hashCode()
+            hashCode = 31 * hashCode + height.hashCode()
+            hashCode = 31 * hashCode + windowId.hashCode()
+            return hashCode
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (other === this) return true
+            if (other !is WindowResizeRequest) return false
+            if (other.width != width) return false
+            if (other.height != height) return false
+            if (other.windowId != windowId) return false
+            return true
+        }
+    }
+
+    /**
+     * Response to a [WindowResizeRequest], carrying success/failure information.
+     * @param windowResizeRequestId the [OrchestrationMessageId] of the originating [WindowResizeRequest]
+     * @param isSuccess whether the window was resized successfully
+     * @param errorMessage an error description if [isSuccess] is false
+     */
+    public class WindowResizeResult(
+        public val windowResizeRequestId: OrchestrationMessageId,
+        public val isSuccess: Boolean = true,
+        public val errorMessage: String? = null,
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+
+        override fun hashCode(): Int {
+            var hashCode = windowResizeRequestId.hashCode()
+            hashCode = 31 * hashCode + isSuccess.hashCode()
+            hashCode = 31 * hashCode + (errorMessage?.hashCode() ?: 0)
+            return hashCode
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (other === this) return true
+            if (other !is WindowResizeResult) return false
+            if (other.windowResizeRequestId != windowResizeRequestId) return false
             if (other.isSuccess != isSuccess) return false
             if (other.errorMessage != errorMessage) return false
             return true
