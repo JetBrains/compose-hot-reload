@@ -240,6 +240,7 @@ layer and exposes the following tools:
 | Tool | Description                                                 |
 |------|-------------------------------------------------------------|
 | `status` | Checks whether a Compose application is currently connected |
+| `reload` | Recompiles the project and hot-reloads the changed classes into the running application. Reports whether classes were reloaded, or `{"status": "reloading"}` when it does not finish within the optional `timeout_seconds` (default 60) — in that case, poll `status` until `reloadState` is no longer `reloading` |
 | `list_windows` | Lists registered application windows as a JSON array (`id`, `title`, `x`, `y`, `width`, `height`) |
 | `take_screenshot` | Captures a screenshot of the application window |
 | `get_semantic_tree` | Returns the Compose semantic/accessibility tree of the application as JSON (component roles, names, descriptions, states, and bounds) |
@@ -251,7 +252,7 @@ layer and exposes the following tools:
 
 #### Targeting a specific window
 
-Every tool except `status` and `list_windows` accepts an optional `window_id` parameter
+Every tool except `status`, `reload`, and `list_windows` accepts an optional `window_id` parameter
 and follows the same window-selection rules. An agent may use `list_windows` to discover the available IDs.
 
 - **`window_id` provided** — the tool operates on that specific window.
