@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.io.asSink
 import kotlinx.io.asSource
@@ -47,6 +49,11 @@ import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileResult
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesResult
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticTreeResult
@@ -79,6 +86,11 @@ private val ScrollContainerNodeId = Property("nodeId", "integer",
     description = "Semantic node id of the scrollable container as reported by 'get_semantic_tree'.")
 private val WindowIdParam = Property("window_id", "string",
     description = "Window ID as returned by 'list_windows'. Defaults to the first registered window.")
+private val ReloadTimeoutParam = Property("timeout_seconds", "integer",
+    description = "Maximum seconds to wait for the reload to finish before returning a " +
+        "'still reloading' response (default $DEFAULT_RELOAD_TIMEOUT_SECONDS). Keep this at or below " +
+        "your own tool-call timeout; if it expires, poll the 'status' tool until 'reloadState' is no " +
+        "longer 'reloading'.")
 
 /** Builds a [ToolSchema] from [properties]; by default all of them are required. */
 private fun toolSchema(
@@ -115,6 +127,23 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
                 "Call this before take_screenshot to know if the application is available."
         ) { _ ->
             handleStatus(orchestration)
+        }
+
+        addTool(
+            name = "reload",
+            description = "Trigger a hot reload of the running Compose application: recompiles the " +
+                "project sources and reloads the changed classes into the live application without " +
+                "restarting it. Call this after editing source files to apply the changes. " +
+                "Returns {\"success\": true, \"reloaded\": true} when changed classes were reloaded, " +
+                "{\"success\": true, \"reloaded\": false} when compilation succeeded but nothing changed, " +
+                "and an error when compilation or the reload fails. " +
+                "If the reload does not finish within 'timeout_seconds', returns " +
+                "{\"status\": \"reloading\"} (not an error): the reload is still running, so poll the " +
+                "'status' tool until 'reloadState' is no longer 'reloading'. " +
+                "Use the 'status' tool first to check if the application is connected.",
+            inputSchema = toolSchema(ReloadTimeoutParam, required = emptyList())
+        ) { request ->
+            handleReload(orchestration, request)
         }
 
         addTool(
@@ -257,6 +286,103 @@ private suspend fun handleStatus(orchestration: StateFlow<OrchestrationHandle?>)
             put("failedReloads", count.failedReloads)
         }.toString()))
     )
+}
+
+/**
+ * Default time to wait for a reload to finish before telling the agent to poll 'status'.
+ * Overridable per call via the 'timeout_seconds' parameter. Kept within a typical MCP client's
+ * 60s request budget; a cold Gradle build may legitimately exceed it, hence the poll fallback.
+ */
+private const val DEFAULT_RELOAD_TIMEOUT_SECONDS = 60
+
+private suspend fun handleReload(
+    orchestration: StateFlow<OrchestrationHandle?>,
+    toolRequest: CallToolRequest,
+): CallToolResult {
+    val handle = orchestration.value
+        ?: return CallToolResult(
+            content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
+            isError = true
+        ).also { logger.info { "reload: no application connected" } }
+
+    val timeoutSeconds = (toolRequest.arguments?.get("timeout_seconds")?.jsonPrimitive?.intOrNull
+        ?: DEFAULT_RELOAD_TIMEOUT_SECONDS).coerceAtLeast(1)
+
+    val request = RecompileRequest()
+    logger.info { "reload: sending RecompileRequest '${request.messageId}' (timeout ${timeoutSeconds}s)" }
+
+    /*
+    The response channel is opened *before* sending the request to avoid missing a result
+    that could otherwise arrive before a cold flow starts collecting.
+
+    When the recompilation produces changed classes, the recompiler issues a ReloadClassesRequest
+    (whose id we don't know up front) and the application answers with a ReloadClassesResult
+    carrying that id. We capture the id of the first ReloadClassesRequest that follows our
+    RecompileRequest, then match its result exactly - this skips stale results from earlier reloads.
+    A build that produced no changed classes never issues a ReloadClassesRequest and is detected by
+    the RecompileResult for our request instead (sent only once the build, including any reload,
+    finished).
+     */
+    val channel = handle.asChannel()
+    val outcome = channel.consumeAsFlow().let { flow ->
+        handle.send(request)
+        withTimeoutOrNull(timeoutSeconds.seconds) {
+            var reloadRequestId: OrchestrationMessageId? = null
+            flow.mapNotNull { message ->
+                when (message) {
+                    is ReloadClassesRequest -> {
+                        if (reloadRequestId == null) reloadRequestId = message.messageId
+                        null
+                    }
+                    is ReloadClassesResult ->
+                        message.takeIf { reloadRequestId != null && it.reloadRequestId == reloadRequestId }
+                    is RecompileResult ->
+                        message.takeIf { it.recompileRequestId == request.messageId && reloadRequestId == null }
+                    else -> null
+                }
+            }.firstOrNull()
+        }
+    }
+
+    return when (outcome) {
+        is ReloadClassesResult -> if (outcome.isSuccess) {
+            logger.info { "reload: classes reloaded successfully" }
+            CallToolResult(content = listOf(TextContent("""{"success":true,"reloaded":true}""")))
+        } else {
+            logger.warn("reload: failed: ${outcome.errorMessage}")
+            CallToolResult(
+                content = listOf(TextContent("Reload failed: ${outcome.errorMessage ?: "unknown error"}")),
+                isError = true
+            )
+        }
+
+        is RecompileResult -> if (outcome.exitCode == 0) {
+            logger.info { "reload: recompiled successfully, no changed classes to reload" }
+            CallToolResult(content = listOf(TextContent(
+                """{"success":true,"reloaded":false,"message":"Recompiled successfully; no changed classes to reload."}"""
+            )))
+        } else {
+            logger.warn("reload: recompilation failed with exit code ${outcome.exitCode}")
+            CallToolResult(
+                content = listOf(TextContent(
+                    "Recompilation failed (exit code ${outcome.exitCode ?: "unknown"}). " +
+                        "Check the build output for compilation errors."
+                )),
+                isError = true
+            )
+        }
+
+        else -> {
+            logger.info { "reload: still in progress after ${timeoutSeconds}s; instructing client to poll 'status'" }
+            CallToolResult(
+                content = listOf(TextContent(
+                    """{"status":"reloading","message":"Reload still in progress after ${timeoutSeconds}s. """ +
+                        """Poll the 'status' tool until 'reloadState' is no longer 'reloading', then check """ +
+                        """'successfulReloads'/'failedReloads' or 'lastError'."}"""
+                ))
+            )
+        }
+    }
 }
 
 private suspend fun handleListWindows(orchestration: StateFlow<OrchestrationHandle?>): CallToolResult {
