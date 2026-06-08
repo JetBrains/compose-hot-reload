@@ -1,7 +1,8 @@
 [versions]
 kotlin = "2.3.21"
 compose = "1.11.0"
-composeMin = { prefer = "1.8.2" }
+composeMin = { prefer = "1.10.0" }
+composeMaterial3 = "1.10.0-alpha05"
 coroutines = "1.10.2"
 kotlinxDatetime = "0.7.1"
 kotlinxBenchmark = "0.4.15"
@@ -45,7 +46,7 @@ compose-icons-core = { module = "org.jetbrains.compose.material:material-icons-c
 
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMin" }
 compose-desktop-common = { module = "org.jetbrains.compose.desktop:desktop", version.ref = "composeMin" }
-compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "composeMin" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "composeMaterial3" }
 compose-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMin" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMin" }
 

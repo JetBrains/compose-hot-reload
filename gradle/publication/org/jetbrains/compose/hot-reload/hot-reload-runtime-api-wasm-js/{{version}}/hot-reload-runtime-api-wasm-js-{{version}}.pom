@@ -47,7 +47,7 @@
     <dependency>
       <groupId>org.jetbrains.compose.runtime</groupId>
       <artifactId>runtime</artifactId>
-      <version>1.8.2</version>
+      <version>1.10.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
