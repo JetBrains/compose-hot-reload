@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -266,14 +267,14 @@ public suspend fun runHeadlessApplication(
                 orchestration.send(
                     OrchestrationMessage.SemanticTreeResult(
                         semanticTreeRequestId = message.messageId,
-                        tree = renderSemanticForest(scene.tryGetAllRootSemanticsNodes()),
+                        tree = renderSemanticForest(scene.allRootSemanticsNodes()),
                     )
                 )
             }
 
             if (message is OrchestrationMessage.UIActionRequest) {
                 scene.render(virtualTime)
-                orchestration.send(handleUIActionRequest(message, scene.tryGetAllRootSemanticsNodes()))
+                orchestration.send(handleUIActionRequest(message, scene.allRootSemanticsNodes()))
             }
         }
 
@@ -345,49 +346,9 @@ private fun issueSilenceWarning(silence: Duration, silenceTimeout: SilenceTimeou
 }
 
 /**
- * Extracts every root [SemanticsNode] from an [ImageComposeScene] using reflection.
- *
- * The scene exposes a main owner plus one owner per attached layer (Dialog / ModalBottomSheet /
- * Popup), each carrying its own semantics root. We collect all of them.
+ * Extracts every root [SemanticsNode] from an [ImageComposeScene]: a main owner plus one owner per
+ * attached layer (Dialog / ModalBottomSheet / Popup), each carrying its own semantics root.
  */
-private fun ImageComposeScene.tryGetAllRootSemanticsNodes(): List<SemanticsNode> {
-    return try {
-        // ImageComposeScene.scene -> CanvasLayersComposeSceneImpl (mainOwner + layers)
-        val composeScene = javaClass.getDeclaredField("scene")
-            .also { it.isAccessible = true }.get(this) ?: return emptyList()
-
-        val roots = ArrayList<SemanticsNode>()
-
-        val mainOwner = composeScene.javaClass.getDeclaredField("mainOwner")
-            .also { it.isAccessible = true }.get(composeScene)
-        rootSemanticsNodeOfOwner(mainOwner)?.let { roots.add(it) }
-
-        val layers = runCatching {
-            composeScene.javaClass.getDeclaredField("layers")
-                .also { it.isAccessible = true }.get(composeScene) as? List<*>
-        }.getOrNull().orEmpty()
-
-        for (layer in layers) {
-            layer ?: continue
-            val owner = runCatching {
-                layer.javaClass.getMethod("getOwner").also { it.isAccessible = true }.invoke(layer)
-            }.getOrNull()
-            rootSemanticsNodeOfOwner(owner)?.let { roots.add(it) }
-        }
-
-        roots
-    } catch (_: Exception) {
-        emptyList()
-    }
-}
-
-/** owner.semanticsOwner.rootSemanticsNode via reflection, or null on any failure. */
-private fun rootSemanticsNodeOfOwner(owner: Any?): SemanticsNode? {
-    owner ?: return null
-    return try {
-        val semanticsOwner = owner.javaClass.getMethod("getSemanticsOwner").invoke(owner) ?: return null
-        semanticsOwner.javaClass.getMethod("getRootSemanticsNode").invoke(semanticsOwner) as? SemanticsNode
-    } catch (_: Exception) {
-        null
-    }
-}
+@OptIn(ExperimentalComposeUiApi::class)
+private fun ImageComposeScene.allRootSemanticsNodes(): List<SemanticsNode> =
+    semanticsOwners.map { it.rootSemanticsNode }
