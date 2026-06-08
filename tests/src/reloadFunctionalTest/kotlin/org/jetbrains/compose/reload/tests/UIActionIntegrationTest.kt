@@ -21,7 +21,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionR
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionResult
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.MinComposeVersion
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.utils.QuickTest
 import kotlin.test.assertFalse
@@ -29,7 +28,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-@MinComposeVersion("1.9.0")
 @QuickTest
 class UIActionIntegrationTest {
 

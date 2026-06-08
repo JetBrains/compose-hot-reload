@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -39,7 +40,7 @@ import org.jetbrains.compose.hot_reload.hot_reload_runtime_jvm.generated.resourc
 import org.jetbrains.compose.resources.painterResource
 import java.awt.datatransfer.StringSelection
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 internal fun CopyToClipboardButton(
     icon: Painter = painterResource(Res.drawable.copy),

@@ -15,7 +15,6 @@ import org.jetbrains.compose.reload.test.gradle.Debug
 import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.MinComposeVersion
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCodeAndReload
@@ -23,7 +22,6 @@ import org.jetbrains.compose.reload.test.gradle.sendTestEvent
 import org.junit.jupiter.api.extension.ExtensionContext
 
 @ExtendBuildGradleKts(ViewModelTest.LifecycleExtension::class)
-@MinComposeVersion("1.9.0")
 class ViewModelTest {
 
     @HotReloadTest

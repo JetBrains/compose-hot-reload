@@ -9,7 +9,6 @@ import org.jetbrains.compose.reload.test.gradle.BuildGradleKtsExtension
 import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.MinComposeVersion
 import org.jetbrains.compose.reload.test.gradle.ProjectMode
 import org.jetbrains.compose.reload.test.gradle.TestedProjectMode
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
@@ -31,7 +30,6 @@ import kotlin.io.path.name
 @GradleIntegrationTest
 @TestedProjectMode(ProjectMode.Kmp)
 @ExtendBuildGradleKts(ResourcesTests.Extension::class)
-@MinComposeVersion("1.10.0+dev2896")
 class ResourcesTests {
 
     private fun HotReloadTestFixture.projectName() = projectDir.path.name.replace('-', '_')

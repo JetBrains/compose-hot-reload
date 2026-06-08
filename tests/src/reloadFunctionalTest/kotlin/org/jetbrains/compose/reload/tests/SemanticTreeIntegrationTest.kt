@@ -10,7 +10,6 @@ import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.Headless
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.MinComposeVersion
 import org.jetbrains.compose.reload.test.gradle.checkSemanticTree
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.utils.HostIntegrationTest
@@ -142,7 +141,6 @@ class SemanticTreeIntegrationTest {
     @HostIntegrationTest
     @HotReloadTest
     @QuickTest
-    @MinComposeVersion("1.9.0")
     @ExtendBuildGradleKts(PinUiScaleExtension::class)
     fun `test - get semantic tree with overlay`(fixture: HotReloadTestFixture) = fixture.runTest {
         assumeTrue(isInteractiveDesktopAvailable(), "Test requires an interactive desktop")
@@ -196,7 +194,6 @@ class SemanticTreeIntegrationTest {
     }
 
     @HotReloadTest
-    @MinComposeVersion("1.9.0") // 1.8.2 generates slightly different semantic tree
     fun `test - get semantic tree headless`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
             $semanticTreeColumnImports
