@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.tests
 
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
@@ -57,6 +58,48 @@ class UIActionIntegrationTest {
         assertNotNull(
             findNodeIdByText(updatedTree, "Count: 1"),
             "Expected counter to increment after click. Tree:\n$updatedTree"
+        )
+    }
+
+    @HotReloadTest
+    fun `test - semantic tree and click reach an overlay root`(fixture: HotReloadTestFixture) = fixture.runTest {
+        // A Popup renders in its own owner (a separate semantics root) within the same window,
+        // exactly like a Dialog / ModalBottomSheet. Regression coverage for CMP-10282: the overlay
+        // root must appear in the tree and its nodes must be actionable.
+        fixture initialSourceCode """
+            import androidx.compose.material.Button
+            import androidx.compose.material.Text
+            import androidx.compose.runtime.*
+            import androidx.compose.ui.window.Popup
+            import org.jetbrains.compose.reload.test.screenshotTestApplication
+
+            fun main() = screenshotTestApplication(width = 400, height = 400) {
+                Button(onClick = {}) { Text("Main button") }
+                Popup {
+                    var clicked by remember { mutableStateOf(false) }
+                    Button(onClick = { clicked = true }) {
+                        Text(if (clicked) "Clicked" else "In popup")
+                    }
+                }
+            }
+        """.trimIndent()
+
+        val tree = fixture.fetchSemanticTree()
+        assertTrue(
+            parseRoots(tree).size >= 2,
+            "Expected multiple roots (main window + popup overlay). Tree:\n$tree"
+        )
+
+        val popupButtonId = findNodeIdByText(tree, "In popup")
+            ?: error("Popup content missing from semantic tree:\n$tree")
+
+        val result = fixture.dispatchUIAction(UIActionRequest(nodeId = popupButtonId, action = UIAction.Click))
+        assertTrue(result.isSuccess, "Click inside popup failed: ${result.errorMessage}")
+
+        val updatedTree = fixture.fetchSemanticTree()
+        assertNotNull(
+            findNodeIdByText(updatedTree, "Clicked"),
+            "Expected popup button click to take effect. Tree:\n$updatedTree"
         )
     }
 
@@ -266,10 +309,17 @@ private suspend fun HotReloadTestFixture.dispatchUIAction(request: UIActionReque
 
 private val jsonParser = Json { ignoreUnknownKeys = true; isLenient = true }
 
-private fun parseTree(tree: String): JsonObject = jsonParser.parseToJsonElement(tree).jsonObject
+/** A single root is emitted as an object; multiple roots (e.g. with an open dialog) as an array. */
+private fun parseRoots(tree: String): List<JsonObject> =
+    when (val element = jsonParser.parseToJsonElement(tree)) {
+        is JsonArray -> element.map { it.jsonObject }
+        else -> listOf(element.jsonObject)
+    }
 
-private fun findNodeByPredicate(tree: String, predicate: (JsonObject) -> Boolean): JsonObject? =
-    findNodeByPredicate(parseTree(tree), predicate)
+private fun findNodeByPredicate(tree: String, predicate: (JsonObject) -> Boolean): JsonObject? {
+    for (root in parseRoots(tree)) findNodeByPredicate(root, predicate)?.let { return it }
+    return null
+}
 
 private fun findNodeByPredicate(node: JsonObject, predicate: (JsonObject) -> Boolean): JsonObject? {
     if (predicate(node)) return node

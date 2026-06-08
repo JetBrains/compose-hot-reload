@@ -20,14 +20,13 @@ import java.awt.Window
 private val logger = createLogger()
 
 internal fun handleUIActionRequest(request: UIActionRequest, window: Window): UIActionResult {
-    val rootNode = findRootSemanticsNode(window)
-    return handleUIActionRequest(request, rootNode)
+    return handleUIActionRequest(request, findAllRootSemanticsNodes(window))
 }
 
-internal fun handleUIActionRequest(request: UIActionRequest, rootNode: SemanticsNode?): UIActionResult {
+internal fun handleUIActionRequest(request: UIActionRequest, roots: List<SemanticsNode>): UIActionResult {
     logger.info("Handling UI action: '${request.messageId}' nodeId=${request.nodeId} action=${request.action}")
     return try {
-        dispatchUIAction(request, rootNode)
+        dispatchUIAction(request, roots)
     } catch (e: Exception) {
         logger.info("UI action failed: ${e.message}")
         UIActionResult(
@@ -38,14 +37,15 @@ internal fun handleUIActionRequest(request: UIActionRequest, rootNode: Semantics
     }
 }
 
-private fun dispatchUIAction(request: UIActionRequest, rootNode: SemanticsNode?): UIActionResult {
-    rootNode ?: return UIActionResult(
+private fun dispatchUIAction(request: UIActionRequest, roots: List<SemanticsNode>): UIActionResult {
+    if (roots.isEmpty()) return UIActionResult(
         uiActionRequestId = request.messageId,
         isSuccess = false,
         errorMessage = "No semantic owners available",
     )
 
-    val node = findSemanticsNodeById(rootNode, request.nodeId)
+    /* Search across all roots so actions also reach nodes inside a Dialog/ModalBottomSheet/Popup. */
+    val node = findSemanticsNodeById(roots, request.nodeId)
         ?: return UIActionResult(
             uiActionRequestId = request.messageId,
             isSuccess = false,
@@ -117,6 +117,11 @@ private fun toActionResult(request: UIActionRequest, handled: Boolean, name: Str
         isSuccess = false,
         errorMessage = "$name action returned false on node ${request.nodeId}",
     )
+
+private fun findSemanticsNodeById(roots: List<SemanticsNode>, id: Int): SemanticsNode? {
+    for (root in roots) findSemanticsNodeById(root, id)?.let { return it }
+    return null
+}
 
 private fun findSemanticsNodeById(root: SemanticsNode, id: Int): SemanticsNode? {
     if (root.id == id) return root

@@ -20,10 +20,8 @@ private val logger = createLogger()
 
 internal fun handleSemanticTreeRequest(request: SemanticTreeRequest, window: Window): SemanticTreeResult {
     logger.info("Capturing semantic tree: '${request.messageId}'")
-    val rootNode = findRootSemanticsNode(window)
-    val json = if (rootNode != null) buildSemanticTreeJson(rootNode)
-    else """{"error":"No semantic owners available"}"""
-    return SemanticTreeResult(semanticTreeRequestId = request.messageId, tree = json)
+    val roots = findAllRootSemanticsNodes(window)
+    return SemanticTreeResult(semanticTreeRequestId = request.messageId, tree = renderSemanticForest(roots))
 }
 
 /**
@@ -35,29 +33,45 @@ internal fun handleSemanticTreeRequest(request: SemanticTreeRequest, window: Win
 private const val MAX_ACCESSIBILITY_TREE_SEARCH_DEPTH = 8
 
 /**
- * Walks the Java accessibility tree to find the root [SemanticsNode].
+ * Walks the Java accessibility tree to find every root [SemanticsNode] in the [accessible] window.
  *
- * Compose Desktop wraps each [SemanticsNode] in an internal `ComposeAccessible`
- * class that has a public `getSemanticsNode()` method.  Once any such node is
- * found we walk up via [SemanticsNode.parent] until we reach the root.
+ * Compose Desktop renders each `Dialog` / `ModalBottomSheet` / `Popup` in its own owner — a
+ * separate semantics root — within the same window. The accessibility integration exposes one
+ * root per owner as a sibling accessible, so we collect every distinct Compose root.
+ *
+ * Compose Desktop wraps each [SemanticsNode] in an internal `ComposeAccessible` class that has a
+ * public `getSemanticsNode()` method. Once such a node is found we walk up via [SemanticsNode.parent]
+ * to its root and stop descending: everything below belongs to the same owner.
  */
-internal fun findRootSemanticsNode(accessible: Accessible, depth: Int = 0): SemanticsNode? {
-    if (depth > MAX_ACCESSIBILITY_TREE_SEARCH_DEPTH) return null
+internal fun findAllRootSemanticsNodes(accessible: Accessible): List<SemanticsNode> {
+    val roots = LinkedHashMap<Int, SemanticsNode>()
+    collectRootSemanticsNodes(accessible, depth = 0, roots = roots)
+    return roots.values.toList()
+}
+
+private fun collectRootSemanticsNodes(
+    accessible: Accessible,
+    depth: Int,
+    roots: LinkedHashMap<Int, SemanticsNode>,
+) {
+    if (depth > MAX_ACCESSIBILITY_TREE_SEARCH_DEPTH) return
+
     val node = accessible.getSemanticsNodeOrNull()
     if (node != null) {
-        // Walk up to the composition root
-        var root = node
-        while (!root!!.isRoot) {
-            root = root!!.parent ?: break
+        var root: SemanticsNode = node
+        while (!root.isRoot) {
+            root = root.parent ?: break
         }
-        return root
+        roots.putIfAbsent(root.id, root)
+        /* All accessibles below this one share the same owner/root, so stop descending. */
+        return
     }
-    val ctx = accessible.accessibleContext ?: return null
+
+    val ctx = accessible.accessibleContext ?: return
     for (i in 0 until ctx.accessibleChildrenCount) {
         val child = ctx.getAccessibleChild(i) ?: continue
-        findRootSemanticsNode(child, depth + 1)?.let { return it }
+        collectRootSemanticsNodes(child, depth + 1, roots)
     }
-    return null
 }
 
 /**
@@ -79,6 +93,22 @@ private fun Accessible.getSemanticsNodeOrNull(): SemanticsNode? {
 
 internal fun buildSemanticTreeJson(rootNode: SemanticsNode): String =
     buildString { JsonBuilder(this).appendSemanticNode(rootNode) }
+
+/** Renders all captured semantic [roots] (main window plus any Dialog/ModalBottomSheet/Popup). */
+internal fun renderSemanticForest(roots: List<SemanticsNode>): String =
+    joinSemanticForest(roots.map { buildSemanticTreeJson(it) })
+
+/**
+ * Combines already-rendered root JSON objects into the result:
+ *  - no roots         -> an error object (no owners available yet)
+ *  - exactly one root -> the single root object as-is (the common case, unchanged shape)
+ *  - multiple roots   -> a JSON array of roots (e.g. main window plus open overlays)
+ */
+internal fun joinSemanticForest(rendered: List<String>): String = when (rendered.size) {
+    0 -> """{"error":"No semantic owners available"}"""
+    1 -> rendered[0]
+    else -> rendered.joinToString(",", "[", "]")
+}
 
 // ── JSON helpers ─────────────────────────────────────────────────────────────
 
