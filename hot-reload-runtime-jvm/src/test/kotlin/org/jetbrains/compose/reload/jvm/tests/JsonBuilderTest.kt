@@ -6,8 +6,29 @@
 package org.jetbrains.compose.reload.jvm.tests
 
 import org.jetbrains.compose.reload.jvm.JsonBuilder
+import org.jetbrains.compose.reload.jvm.joinSemanticForest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+
+class SemanticForestTest {
+    @Test
+    fun `test - no roots produces error object`() {
+        assertEquals("""{"error":"No semantic owners available"}""", joinSemanticForest(emptyList()))
+    }
+
+    @Test
+    fun `test - single root is emitted as-is`() {
+        assertEquals("""{"id":1}""", joinSemanticForest(listOf("""{"id":1}""")))
+    }
+
+    @Test
+    fun `test - multiple roots produce an array`() {
+        assertEquals(
+            """[{"id":1},{"id":2,"isDialog":true}]""",
+            joinSemanticForest(listOf("""{"id":1}""", """{"id":2,"isDialog":true}"""))
+        )
+    }
+}
 
 class JsonBuilderTest {
     private fun build(block: JsonBuilder.() -> Unit): String =

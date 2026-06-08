@@ -1,0 +1,66 @@
+[
+  {
+    "id": 1,
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 121,
+      "height": 48
+    },
+    "children": [
+      {
+        "id": 6,
+        "role": "Button",
+        "text": "Main button",
+        "focused": false,
+        "actions": [
+          "onClick"
+        ],
+        "bounds": {
+          "x": 0,
+          "y": 6,
+          "width": 121,
+          "height": 36
+        }
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 600
+    },
+    "children": [
+      {
+        "id": 19,
+        "isPopup": true,
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 400,
+          "height": 600
+        },
+        "children": [
+          {
+            "id": 20,
+            "role": "Button",
+            "text": "In popup",
+            "focused": false,
+            "actions": [
+              "onClick"
+            ],
+            "bounds": {
+              "x": 0,
+              "y": 6,
+              "width": 97,
+              "height": 36
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

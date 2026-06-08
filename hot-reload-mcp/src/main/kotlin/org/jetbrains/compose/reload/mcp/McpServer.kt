@@ -170,6 +170,10 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
             description = "Get the Compose semantic/accessibility tree of the running application. " +
                 "Returns a JSON tree describing the UI component hierarchy with roles, names, " +
                 "descriptions, states (enabled, visible, focused, etc.), and bounds. " +
+                "A window may have several independent roots: an open Dialog, ModalBottomSheet or " +
+                "Popup renders as its own root (flagged with 'isDialog'/'isPopup'). When more than " +
+                "one root is present the result is a JSON array of roots; with a single root it is " +
+                "that root object. " +
                 "Use the 'status' tool first to check if the application is connected.",
             inputSchema = toolSchema(WindowIdParam, required = emptyList())
         ) { request ->
