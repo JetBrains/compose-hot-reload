@@ -7,6 +7,7 @@
 
 package org.jetbrains.compose.reload.orchestration
 
+import org.jetbrains.compose.reload.ExperimentalHotReloadApi
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.Context
 import org.jetbrains.compose.reload.core.Environment
@@ -313,6 +314,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * (all sharing this request's [messageId]); pass a concrete id to target a single window and
      * receive exactly one response.
      */
+    @ExperimentalHotReloadApi
     public class ScreenshotRequest @JvmOverloads constructor(
         public val windowId: WindowId? = null,
     ) : OrchestrationMessage() {
@@ -332,6 +334,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * @param windowId the window that produced this result, or `null` when produced without a window
      * (for example, in headless mode).
      */
+    @ExperimentalHotReloadApi
     public class ScreenshotResult @JvmOverloads constructor(
         public val screenshotRequestId: OrchestrationMessageId,
         public val format: String = "",
@@ -613,6 +616,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * (all sharing this request's [messageId]); pass a concrete id to target a single window and
      * receive exactly one response.
      */
+    @ExperimentalHotReloadApi
     public class SemanticTreeRequest @JvmOverloads constructor(
         public val windowId: WindowId? = null,
     ) : OrchestrationMessage() {
@@ -630,6 +634,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * @param windowId the window that produced this result, or `null` when produced without a window
      * (for example, in headless mode).
      */
+    @ExperimentalHotReloadApi
     public class SemanticTreeResult @JvmOverloads constructor(
         public val semanticTreeRequestId: OrchestrationMessageId,
         public val tree: String,
@@ -705,6 +710,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * (all sharing this request's [messageId]); pass a concrete id to target a single window and
      * receive exactly one response.
      */
+    @ExperimentalHotReloadApi
     public class UIActionRequest @JvmOverloads constructor(
         public val nodeId: Int,
         public val action: UIAction,
@@ -740,6 +746,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * @param windowId the window that produced this result, or `null` when produced without a window
      * (for example, in headless mode).
      */
+    @ExperimentalHotReloadApi
     public class UIActionResult @JvmOverloads constructor(
         public val uiActionRequestId: OrchestrationMessageId,
         public val isSuccess: Boolean = true,
@@ -777,6 +784,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
      *
      * @param windowId the target window (as reported by [ApplicationWindowPositioned]).
      */
+    @ExperimentalHotReloadApi
     public class WindowResizeRequest(
         public val width: Int,
         public val height: Int,
@@ -810,6 +818,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * @param isSuccess whether the window was resized successfully
      * @param errorMessage an error description if [isSuccess] is false
      */
+    @ExperimentalHotReloadApi
     public class WindowResizeResult(
         public val windowResizeRequestId: OrchestrationMessageId,
         public val isSuccess: Boolean = true,
