@@ -329,13 +329,17 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * @param data the raw image data, empty if [isSuccess] is false
      * @param isSuccess whether the screenshot was captured successfully
      * @param errorMessage an error description if [isSuccess] is false
+     * @param windowId the window that produced this result, or `null` when produced without a window
+     * (for example, in headless mode). Lets a broadcast [ScreenshotRequest] (with a `null` windowId)
+     * be attributed to the window each response came from.
      */
-    public class ScreenshotResult(
+    public class ScreenshotResult @JvmOverloads constructor(
         public val screenshotRequestId: OrchestrationMessageId,
         public val format: String = "",
         public val data: ByteArray = ByteArray(0),
         public val isSuccess: Boolean = true,
         public val errorMessage: String? = null,
+        public val windowId: WindowId? = null,
     ) : OrchestrationMessage() {
         internal companion object {
             @Suppress("unused")
@@ -348,6 +352,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
             hashCode = 31 * hashCode + data.contentHashCode()
             hashCode = 31 * hashCode + isSuccess.hashCode()
             hashCode = 31 * hashCode + (errorMessage?.hashCode() ?: 0)
+            hashCode = 31 * hashCode + (windowId?.hashCode() ?: 0)
             return hashCode
         }
 
@@ -359,6 +364,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
             if (!other.data.contentEquals(data)) return false
             if (other.isSuccess != isSuccess) return false
             if (other.errorMessage != errorMessage) return false
+            if (other.windowId != windowId) return false
             return true
         }
     }
@@ -622,10 +628,14 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * @param semanticTreeRequestId the [OrchestrationMessageId] of the originating [SemanticTreeRequest]
      * @param tree JSON representation of the UI component hierarchy including roles, names,
      * descriptions, states, and bounds of each element.
+     * @param windowId the window that produced this result, or `null` when produced without a window
+     * (for example, in headless mode). Lets a broadcast [SemanticTreeRequest] (with a `null` windowId)
+     * be attributed to the window each response came from.
      */
-    public class SemanticTreeResult(
+    public class SemanticTreeResult @JvmOverloads constructor(
         public val semanticTreeRequestId: OrchestrationMessageId,
         public val tree: String,
+        public val windowId: WindowId? = null,
     ) : OrchestrationMessage() {
         internal companion object {
             @Suppress("unused")
@@ -635,6 +645,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
         override fun hashCode(): Int {
             var hashCode = semanticTreeRequestId.hashCode()
             hashCode = 31 * hashCode + tree.hashCode()
+            hashCode = 31 * hashCode + (windowId?.hashCode() ?: 0)
             return hashCode
         }
 
@@ -643,6 +654,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
             if (other !is SemanticTreeResult) return false
             if (other.semanticTreeRequestId != semanticTreeRequestId) return false
             if (other.tree != tree) return false
+            if (other.windowId != windowId) return false
             return true
         }
     }
@@ -727,11 +739,15 @@ internal constructor() : OrchestrationPackage(), Serializable {
      * @param uiActionRequestId the [OrchestrationMessageId] of the originating [UIActionRequest]
      * @param isSuccess whether the action was dispatched successfully
      * @param errorMessage an error description if [isSuccess] is false
+     * @param windowId the window that produced this result, or `null` when produced without a window
+     * (for example, in headless mode). Lets a broadcast [UIActionRequest] (with a `null` windowId)
+     * be attributed to the window each response came from.
      */
-    public class UIActionResult(
+    public class UIActionResult @JvmOverloads constructor(
         public val uiActionRequestId: OrchestrationMessageId,
         public val isSuccess: Boolean = true,
         public val errorMessage: String? = null,
+        public val windowId: WindowId? = null,
     ) : OrchestrationMessage() {
         internal companion object {
             @Suppress("unused")
@@ -742,6 +758,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
             var hashCode = uiActionRequestId.hashCode()
             hashCode = 31 * hashCode + isSuccess.hashCode()
             hashCode = 31 * hashCode + (errorMessage?.hashCode() ?: 0)
+            hashCode = 31 * hashCode + (windowId?.hashCode() ?: 0)
             return hashCode
         }
 
@@ -751,6 +768,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
             if (other.uiActionRequestId != uiActionRequestId) return false
             if (other.isSuccess != isSuccess) return false
             if (other.errorMessage != errorMessage) return false
+            if (other.windowId != windowId) return false
             return true
         }
     }

@@ -227,6 +227,7 @@ internal class SemanticTreeResultEncoder : OrchestrationMessageEncoder<Orchestra
         writeFields(
             "semanticTreeRequestId" to message.semanticTreeRequestId.encodeToByteArray(),
             "tree" to message.tree.encodeToByteArray(),
+            "windowId" to message.windowId?.value?.encodeToByteArray(),
         )
     }
 
@@ -235,6 +236,7 @@ internal class SemanticTreeResultEncoder : OrchestrationMessageEncoder<Orchestra
         OrchestrationMessage.SemanticTreeResult(
             semanticTreeRequestId = OrchestrationMessageId(fields.requireField("semanticTreeRequestId")),
             tree = fields.requireField("tree").decodeToString(),
+            windowId = fields["windowId"]?.decodeToString()?.let(::WindowId),
         )
     }
 }
@@ -318,6 +320,7 @@ internal class UIActionResultEncoder : OrchestrationMessageEncoder<Orchestration
             "uiActionRequestId" to message.uiActionRequestId.encodeToByteArray(),
             "isSuccess" to message.isSuccess.encodeToByteArray(),
             "errorMessage" to message.errorMessage?.encodeToByteArray(),
+            "windowId" to message.windowId?.value?.encodeToByteArray(),
         )
     }
 
@@ -327,6 +330,7 @@ internal class UIActionResultEncoder : OrchestrationMessageEncoder<Orchestration
             uiActionRequestId = OrchestrationMessageId(fields.requireField("uiActionRequestId")),
             isSuccess = fields["isSuccess"]?.decodeToBoolean() ?: true,
             errorMessage = fields["errorMessage"]?.decodeToString(),
+            windowId = fields["windowId"]?.decodeToString()?.let(::WindowId),
         )
     }
 }
@@ -525,7 +529,8 @@ internal class ScreenshotResultEncoder : OrchestrationMessageEncoder<Orchestrati
             "format" to message.format.encodeToByteArray(),
             "data" to message.data,
             "isSuccess" to message.isSuccess.encodeToByteArray(),
-            "errorMessage" to message.errorMessage?.encodeToByteArray()
+            "errorMessage" to message.errorMessage?.encodeToByteArray(),
+            "windowId" to message.windowId?.value?.encodeToByteArray(),
         )
     }
 
@@ -536,7 +541,8 @@ internal class ScreenshotResultEncoder : OrchestrationMessageEncoder<Orchestrati
             format = fields.requireField("format").decodeToString(),
             data = fields.requireField("data"),
             isSuccess = fields["isSuccess"]?.decodeToBoolean() ?: true,
-            errorMessage = fields["errorMessage"]?.decodeToString()
+            errorMessage = fields["errorMessage"]?.decodeToString(),
+            windowId = fields["windowId"]?.decodeToString()?.let(::WindowId),
         )
     }
 }

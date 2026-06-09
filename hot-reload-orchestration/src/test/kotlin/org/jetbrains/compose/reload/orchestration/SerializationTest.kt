@@ -220,6 +220,7 @@ class SerializationTest {
             data = byteArrayOf(1, 2, 3, 4),
             isSuccess = true,
             errorMessage = null,
+            windowId = WindowId("w-1"),
         )
     )
 
@@ -259,6 +260,7 @@ class SerializationTest {
         OrchestrationMessage.SemanticTreeResult(
             semanticTreeRequestId = OrchestrationMessageId.random(),
             tree = """{"role":"Button","children":[]}""",
+            windowId = WindowId("w-2"),
         )
     )
 
@@ -325,6 +327,7 @@ class SerializationTest {
             uiActionRequestId = OrchestrationMessageId.random(),
             isSuccess = true,
             errorMessage = null,
+            windowId = WindowId("w-1"),
         )
     )
 

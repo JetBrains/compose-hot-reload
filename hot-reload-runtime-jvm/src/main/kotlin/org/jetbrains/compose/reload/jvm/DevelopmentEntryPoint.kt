@@ -78,9 +78,9 @@ public fun DevelopmentEntryPoint(
     }
 
     if (window != null) {
-        handleWindowRequests<ScreenshotRequest>(windowId, { it.windowId }) { handleScreenshotRequest(it, window) }
-        handleWindowRequests<SemanticTreeRequest>(windowId, { it.windowId }) { handleSemanticTreeRequest(it, window) }
-        handleWindowRequests<UIActionRequest>(windowId, { it.windowId }) { handleUIActionRequest(it, window) }
+        handleWindowRequests<ScreenshotRequest>(windowId, { it.windowId }) { handleScreenshotRequest(it, window, windowId) }
+        handleWindowRequests<SemanticTreeRequest>(windowId, { it.windowId }) { handleSemanticTreeRequest(it, window, windowId) }
+        handleWindowRequests<UIActionRequest>(windowId, { it.windowId }) { handleUIActionRequest(it, window, windowId) }
         handleWindowRequests<WindowResizeRequest>(windowId, { it.windowId }) { handleWindowResizeRequest(it, window) }
     }
 
