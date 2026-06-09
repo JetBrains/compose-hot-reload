@@ -9,6 +9,7 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
+import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticTreeResult
@@ -18,10 +19,14 @@ import javax.accessibility.Accessible
 
 private val logger = createLogger()
 
-internal fun handleSemanticTreeRequest(request: SemanticTreeRequest, window: Window): SemanticTreeResult {
+internal fun handleSemanticTreeRequest(request: SemanticTreeRequest, window: Window, windowId: WindowId?): SemanticTreeResult {
     logger.info("Capturing semantic tree: '${request.messageId}'")
     val roots = findAllRootSemanticsNodes(window)
-    return SemanticTreeResult(semanticTreeRequestId = request.messageId, tree = renderSemanticForest(roots))
+    return SemanticTreeResult(
+        semanticTreeRequestId = request.messageId,
+        tree = renderSemanticForest(roots),
+        windowId = windowId,
+    )
 }
 
 /**

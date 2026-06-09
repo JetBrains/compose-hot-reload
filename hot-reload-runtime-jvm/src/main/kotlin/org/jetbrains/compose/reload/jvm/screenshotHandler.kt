@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.jvm
 
 import org.jetbrains.compose.reload.core.Try
+import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.getOrThrow
@@ -23,7 +24,7 @@ import javax.imageio.ImageIO
 
 private val logger = createLogger()
 
-internal fun handleScreenshotRequest(request: ScreenshotRequest, window: Window): ScreenshotResult {
+internal fun handleScreenshotRequest(request: ScreenshotRequest, window: Window, windowId: WindowId?): ScreenshotResult {
     logger.info("Taking screenshot: '${request.messageId}'")
 
     val capture = captureWindow(window)
@@ -33,7 +34,8 @@ internal fun handleScreenshotRequest(request: ScreenshotRequest, window: Window)
         return ScreenshotResult(
             screenshotRequestId = request.messageId,
             isSuccess = false,
-            errorMessage = errorMessage
+            errorMessage = errorMessage,
+            windowId = windowId,
         )
     }
 
@@ -43,7 +45,8 @@ internal fun handleScreenshotRequest(request: ScreenshotRequest, window: Window)
     return ScreenshotResult(
         screenshotRequestId = request.messageId,
         format = "png",
-        data = baos.toByteArray()
+        data = baos.toByteArray(),
+        windowId = windowId,
     )
 }
 
