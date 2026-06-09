@@ -59,7 +59,7 @@
     <dependency>
       <groupId>org.jetbrains.compose.material3</groupId>
       <artifactId>material3-desktop</artifactId>
-      <version>1.10.0-alpha05</version>
+      <version>1.9.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
