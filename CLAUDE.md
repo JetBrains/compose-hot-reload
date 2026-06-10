@@ -102,6 +102,6 @@ Functions, classes, parameters, added/removed fields, and nearly arbitrary code 
 ## Requirements
 
 - Kotlin 2.1.20+
-- Compose Multiplatform 1.8.2+
+- Compose Multiplatform 1.10.0+
 - JetBrains Runtime with Java 21 or earlier target
 - IntelliJ IDEA 2025.2.2+ or Android Studio Otter 2025.2.1+

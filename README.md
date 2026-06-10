@@ -29,6 +29,7 @@ Ensure that your project meets the minimum version requirements:
 - Kotlin 2.1.20 or higher.
 - Compose compiler 2.1.20 or higher.
 - Compose Multiplatform 1.8.2 or higher.
+  * CHR `1.2.0-alpha02` and later requires Compose Multiplatform `1.10.0+`.
 - [JetBrains Runtime](https://github.com/JetBrains/JetBrainsRuntime):
   To be compatible with JetBrains Runtime, your project must
   [target](https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_cross_compilation)
