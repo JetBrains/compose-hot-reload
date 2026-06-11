@@ -52,6 +52,12 @@ withShadowing {
         from = "org.jetbrains.compose.resources",
         to = "org.jetbrains.compose.reload.shaded.resources"
     )
+    /*
+     * Note: JNA must NOT be relocated. Its prebuilt native library (libjnidispatch) binds its native
+     * methods via JNI symbol names hardcoded to the 'com.sun.jna' package; relocating the classes
+     * would make those native methods unresolvable (UnsatisfiedLinkError). We therefore embed JNA
+     * under its original package.
+     */
 }
 
 compose {
@@ -74,6 +80,9 @@ dependencies {
     implementation(project(":hot-reload-devtools-api"))
     shadowedImplementation(deps.compose.resources)
     devImplementation(deps.compose.resources)
+
+    shadowedImplementation(deps.jna)
+    devImplementation(deps.jna)
 
     compileOnly(project(":hot-reload-core"))
     compileOnly(project(":hot-reload-agent"))
