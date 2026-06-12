@@ -178,7 +178,7 @@ private fun captureWindowImage(hwnd: Pointer): BufferedImage? {
                 val result = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
                 result.setRGB(0, 0, width, height, pixels, 0, width)
                 logger.info("Windows screenshot: captured window as ${width}x$height image")
-                return result
+                return cropToVisibleBounds(hwnd, rect, result)
             } finally {
                 GDI32.INSTANCE.DeleteObject(bitmap)
             }
@@ -190,8 +190,44 @@ private fun captureWindowImage(hwnd: Pointer): BufferedImage? {
     }
 }
 
+/**
+ * Crops the full-window capture to the window's visible bounds.
+ *
+ * [User32.GetWindowRect] includes the invisible DWM resize border / drop-shadow padding, so the
+ * captured bitmap has black bars around the actual window. [DwmApi.DwmGetWindowAttribute] with
+ * [DWMWA_EXTENDED_FRAME_BOUNDS] returns the tight visible frame (in the same physical-pixel screen
+ * coordinates as [windowRect]); we crop the difference away.
+ *
+ * Fully best-effort: any failure returns the uncropped [image], so this can never make things worse.
+ */
+private fun cropToVisibleBounds(hwnd: Pointer, windowRect: RECT, image: BufferedImage): BufferedImage {
+    return try {
+        val frame = RECT()
+        val result = DwmApi.INSTANCE.DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, frame, frame.size())
+        if (result != 0 /* S_OK */) return image
+
+        val left = (frame.left - windowRect.left).coerceIn(0, image.width)
+        val top = (frame.top - windowRect.top).coerceIn(0, image.height)
+        val right = (frame.right - windowRect.left).coerceIn(left, image.width)
+        val bottom = (frame.bottom - windowRect.top).coerceIn(top, image.height)
+        val width = right - left
+        val height = bottom - top
+
+        if (width <= 0 || height <= 0 || (left == 0 && top == 0 && width == image.width && height == image.height)) {
+            return image
+        }
+        image.getSubimage(left, top, width, height)
+    } catch (t: Throwable) {
+        logger.warn("Windows screenshot: could not crop to visible bounds, returning full capture", t)
+        image
+    }
+}
+
 /* PrintWindow flag: render the full window content, including DirectComposition/GPU surfaces. */
 private const val PW_RENDERFULLCONTENT = 0x00000002
+
+/* DwmGetWindowAttribute: the window's bounds excluding the invisible resize border / shadow. */
+private const val DWMWA_EXTENDED_FRAME_BOUNDS = 9
 
 private const val BI_RGB = 0
 private const val DIB_RGB_COLORS = 0
@@ -212,6 +248,15 @@ private interface User32 : Library {
 
     companion object {
         val INSTANCE: User32 = Native.load("user32", User32::class.java)
+    }
+}
+
+@Suppress("FunctionName")
+private interface DwmApi : Library {
+    fun DwmGetWindowAttribute(hWnd: Pointer, dwAttribute: Int, pvAttribute: RECT, cbAttribute: Int): Int
+
+    companion object {
+        val INSTANCE: DwmApi = Native.load("dwmapi", DwmApi::class.java)
     }
 }
 
