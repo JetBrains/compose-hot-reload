@@ -463,6 +463,101 @@ class McpServerTest {
     }
 
     @Test
+    fun `test - status includes error details when reload failed`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(ReloadState) {
+                ReloadState.Failed(reason = "boom", details = listOf("line one", "line two"))
+            }
+            val text = awaitStatus(client, """"reloadState":"failed"""")
+            assertEquals(
+                """{"connected":true,"reloadState":"failed","lastError":"boom",""" +
+                    """"lastErrorDetails":["line one","line two"],""" +
+                    """"successfulReloads":0,"failedReloads":0}""",
+                text,
+            )
+        }
+    }
+
+    @Test
+    fun `test - status truncates long error details`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            val details = (1..150).map { "line $it" }
+            server.update(ReloadState) { ReloadState.Failed(reason = "boom", details = details) }
+            val text = awaitStatus(client, """"reloadState":"failed"""")
+            // First 100 lines are shown, with the remaining 50 reported as truncated.
+            assertTrue(text.contains(""""line 100""""), "Expected the 100th line to be present: $text")
+            assertTrue(!text.contains(""""line 101""""), "Expected the 101st line to be dropped: $text")
+            assertTrue(text.contains(""""lastErrorDetailsTruncated":50"""), "Expected truncation count: $text")
+        }
+    }
+
+    @Test
+    fun `test - status honors max_error_detail_lines override`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(ReloadState) {
+                ReloadState.Failed(reason = "boom", details = listOf("a", "b", "c"))
+            }
+            awaitStatus(client, """"reloadState":"failed"""")
+
+            // Cap at a single line; the remaining two are reported as truncated.
+            val result = client.callTool("status", mapOf("max_error_detail_lines" to 1))
+            val text = (result.content.first() as TextContent).text
+            assertEquals(
+                """{"connected":true,"reloadState":"failed","lastError":"boom",""" +
+                    """"lastErrorDetails":["a"],"lastErrorDetailsTruncated":2,""" +
+                    """"successfulReloads":0,"failedReloads":0}""",
+                text,
+            )
+        }
+    }
+
+    @Test
+    fun `test - status omits error details when max_error_detail_lines is zero`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(ReloadState) {
+                ReloadState.Failed(reason = "boom", details = listOf("a", "b"))
+            }
+            awaitStatus(client, """"reloadState":"failed"""")
+
+            val result = client.callTool("status", mapOf("max_error_detail_lines" to 0))
+            val text = (result.content.first() as TextContent).text
+            assertEquals(
+                """{"connected":true,"reloadState":"failed","lastError":"boom",""" +
+                    """"successfulReloads":0,"failedReloads":0}""",
+                text,
+            )
+        }
+    }
+
+    @Test
     fun `test - status reflects successful reload count`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
         server.use {

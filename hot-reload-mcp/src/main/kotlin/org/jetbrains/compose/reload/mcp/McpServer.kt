@@ -26,6 +26,7 @@ import kotlinx.io.asSource
 import kotlinx.io.buffered
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.add
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
@@ -91,6 +92,11 @@ private val ReloadTimeoutParam = Property("timeout_seconds", "integer",
         "'still reloading' response (default $DEFAULT_RELOAD_TIMEOUT_SECONDS). Keep this at or below " +
         "your own tool-call timeout; if it expires, poll the 'status' tool until 'reloadState' is no " +
         "longer 'reloading'.")
+private val MaxErrorDetailLinesParam = Property("max_error_detail_lines", "integer",
+    description = "Maximum number of 'lastErrorDetails' lines to include when a reload failed " +
+        "(default $DEFAULT_MAX_ERROR_DETAIL_LINES). When the details are longer, " +
+        "'lastErrorDetailsTruncated' reports how many lines were dropped. Use 0 to omit the details " +
+        "entirely.")
 
 /** Builds a [ToolSchema] from [properties]; by default all of them are required. */
 private fun toolSchema(
@@ -122,11 +128,13 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
             name = "status",
             description = "Check whether a Compose application is currently connected. " +
                 "Returns {\"connected\": false} when no application is connected. " +
-                "When connected, additionally returns reload state (ok/reloading/failed), last error if any, " +
-                "and counts of successful and failed reloads since the application started. " +
-                "Call this before take_screenshot to know if the application is available."
-        ) { _ ->
-            handleStatus(orchestration)
+                "When connected, additionally returns reload state (ok/reloading/failed), last error if any " +
+                "(with 'lastErrorDetails' carrying additional diagnostic lines such as compiler output when " +
+                "a reload failed), and counts of successful and failed reloads since the application started. " +
+                "Call this before take_screenshot to know if the application is available.",
+            inputSchema = toolSchema(MaxErrorDetailLinesParam, required = emptyList())
+        ) { request ->
+            handleStatus(orchestration, request)
         }
 
         addTool(
@@ -279,7 +287,10 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
     server.createSession(transport)
 }
 
-private suspend fun handleStatus(orchestration: StateFlow<OrchestrationHandle?>): CallToolResult {
+private suspend fun handleStatus(
+    orchestration: StateFlow<OrchestrationHandle?>,
+    toolRequest: CallToolRequest,
+): CallToolResult {
     val handle = orchestration.value
     if (handle == null) {
         logger.debug { "status: not connected" }
@@ -300,11 +311,30 @@ private suspend fun handleStatus(orchestration: StateFlow<OrchestrationHandle?>)
             put("connected", true)
             put("reloadState", reloadStateStr)
             put("lastError", (state as? ReloadState.Failed)?.reason)
+            val maxDetailLines = (toolRequest.arguments?.get("max_error_detail_lines")?.jsonPrimitive?.intOrNull
+                ?: DEFAULT_MAX_ERROR_DETAIL_LINES).coerceAtLeast(0)
+            (state as? ReloadState.Failed)?.details
+                ?.takeIf { it.isNotEmpty() && maxDetailLines > 0 }
+                ?.let { details ->
+                    val shown = details.take(maxDetailLines)
+                    put("lastErrorDetails", buildJsonArray { shown.forEach { add(it) } })
+                    if (details.size > shown.size) {
+                        put("lastErrorDetailsTruncated", details.size - shown.size)
+                    }
+                }
             put("successfulReloads", count.successfulReloads)
             put("failedReloads", count.failedReloads)
         }.toString()))
     )
 }
+
+/**
+ * Default upper bound on the number of [ReloadState.Failed.details] lines included in the 'status'
+ * response, so a pathological stacktrace or compiler dump can't blow the MCP client's response
+ * budget. Overridable per call via the 'max_error_detail_lines' parameter. When details are
+ * truncated, 'lastErrorDetailsTruncated' reports how many lines were dropped.
+ */
+private const val DEFAULT_MAX_ERROR_DETAIL_LINES = 100
 
 /**
  * Default time to wait for a reload to finish before telling the agent to poll 'status'.
