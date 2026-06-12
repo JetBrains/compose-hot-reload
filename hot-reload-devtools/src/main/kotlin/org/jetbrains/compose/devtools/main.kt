@@ -14,6 +14,7 @@ import io.sellmair.evas.States
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import org.jetbrains.compose.devtools.states.launchBuildModeStateActor
 import org.jetbrains.compose.devtools.states.launchConsoleLogUIState
 import org.jetbrains.compose.devtools.states.launchErrorUIState
 import org.jetbrains.compose.devtools.states.launchNotificationsUIState
@@ -45,6 +46,8 @@ internal fun CoroutineScope.launchApplicationStates() {
 
     launchReloadStateActor()
     launchReloadUIState()
+
+    launchBuildModeStateActor()
 
     launchRestartActor()
     launchNotificationsUIState()

@@ -15,6 +15,9 @@ import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
 import io.modelcontextprotocol.kotlin.sdk.types.ImageContent
 import io.modelcontextprotocol.kotlin.sdk.types.Implementation
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -24,14 +27,18 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.io.asSink
 import kotlinx.io.asSource
 import kotlinx.io.buffered
+import org.jetbrains.compose.devtools.api.BuildModeState
 import org.jetbrains.compose.devtools.api.ReloadCountState
 import org.jetbrains.compose.devtools.api.ReloadState
 import org.jetbrains.compose.devtools.api.UIErrorState
 import org.jetbrains.compose.devtools.api.WindowsState
 import org.jetbrains.compose.devtools.api.WindowsState.WindowState
+import org.jetbrains.compose.reload.core.PidFileInfo
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.awaitOrThrow
+import org.jetbrains.compose.reload.core.chrLogFile
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.writePidFile
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.CleanCompositionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
@@ -69,6 +76,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 class McpServerTest {
@@ -88,8 +96,9 @@ class McpServerTest {
 
     private suspend fun CoroutineScope.createMcpClient(
         orchestration: MutableStateFlow<OrchestrationHandle?>,
-        // Defaults to a path that does not exist, modelling "no logs written yet".
-        logFile: Path = createTempDirectory().resolve("absent.chr.log"),
+        // Defaults to a path that does not exist, modelling "no logs written yet" and a non-continuous build.
+        // The associated log file is 'pidFile.chrLogFile'.
+        pidFile: Path = createTempDirectory().resolve("absent.pid"),
     ): Client {
         val serverIn = PipedInputStream()
         val clientOut = PipedOutputStream(serverIn)
@@ -106,7 +115,7 @@ class McpServerTest {
             clientOut.asSink().buffered()
         )
 
-        launch { startMcpServer(orchestration, serverTransport, logFile) }
+        launch { startMcpServer(orchestration, serverTransport, pidFile) }
 
         val client = Client(Implementation(name = "test-client", version = "1.0.0"))
         client.connect(clientTransport)
@@ -154,7 +163,26 @@ class McpServerTest {
 
             val result = client.callTool("status", emptyMap())
             val text = (result.content.first() as TextContent).text
-            assertEquals("""{"connected":true,"reloadState":"ok","lastError":null,"successfulReloads":0,"failedReloads":0}""", text)
+            assertEquals("""{"connected":true,"buildContinuous":false,"reloadState":"ok","lastError":null,"successfulReloads":0,"failedReloads":0}""", text)
+        }
+    }
+
+    @Test
+    fun `test - status reports buildContinuous when in auto mode`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(BuildModeState) { BuildModeState(isContinuous = true) }
+            val text = awaitStatus(client, """"buildContinuous":true""")
+            assertEquals(
+                """{"connected":true,"buildContinuous":true,"reloadState":"ok","lastError":null,"successfulReloads":0,"failedReloads":0}""",
+                text,
+            )
         }
     }
 
@@ -418,7 +446,7 @@ class McpServerTest {
         // Connected
         val result1 = client.callTool("status", emptyMap())
         assertEquals(
-            """{"connected":true,"reloadState":"ok","lastError":null,"successfulReloads":0,"failedReloads":0}""",
+            """{"connected":true,"buildContinuous":false,"reloadState":"ok","lastError":null,"successfulReloads":0,"failedReloads":0}""",
             (result1.content.first() as TextContent).text
         )
 
@@ -455,7 +483,7 @@ class McpServerTest {
 
             val text = awaitStatus(client, """"reloadState":"ok"""")
             assertEquals(
-                """{"connected":true,"reloadState":"ok","lastError":null,"successfulReloads":0,"failedReloads":0}""",
+                """{"connected":true,"buildContinuous":false,"reloadState":"ok","lastError":null,"successfulReloads":0,"failedReloads":0}""",
                 text,
             )
         }
@@ -474,7 +502,7 @@ class McpServerTest {
             server.update(ReloadState) { ReloadState.Reloading() }
             val text = awaitStatus(client, """"reloadState":"reloading"""")
             assertEquals(
-                """{"connected":true,"reloadState":"reloading","lastError":null,"successfulReloads":0,"failedReloads":0}""",
+                """{"connected":true,"buildContinuous":false,"reloadState":"reloading","lastError":null,"successfulReloads":0,"failedReloads":0}""",
                 text,
             )
         }
@@ -495,7 +523,7 @@ class McpServerTest {
             }
             val text = awaitStatus(client, """"reloadState":"failed"""")
             assertEquals(
-                """{"connected":true,"reloadState":"failed","lastError":"boom",""" +
+                """{"connected":true,"buildContinuous":false,"reloadState":"failed","lastError":"boom",""" +
                     """"lastErrorDetails":["line one","line two"],""" +
                     """"successfulReloads":0,"failedReloads":0}""",
                 text,
@@ -542,7 +570,7 @@ class McpServerTest {
             val result = client.callTool("status", mapOf("max_error_detail_lines" to 1))
             val text = (result.content.first() as TextContent).text
             assertEquals(
-                """{"connected":true,"reloadState":"failed","lastError":"boom",""" +
+                """{"connected":true,"buildContinuous":false,"reloadState":"failed","lastError":"boom",""" +
                     """"lastErrorDetails":["a"],"lastErrorDetailsTruncated":2,""" +
                     """"successfulReloads":0,"failedReloads":0}""",
                 text,
@@ -568,7 +596,7 @@ class McpServerTest {
             val result = client.callTool("status", mapOf("max_error_detail_lines" to 0))
             val text = (result.content.first() as TextContent).text
             assertEquals(
-                """{"connected":true,"reloadState":"failed","lastError":"boom",""" +
+                """{"connected":true,"buildContinuous":false,"reloadState":"failed","lastError":"boom",""" +
                     """"successfulReloads":0,"failedReloads":0}""",
                 text,
             )
@@ -589,7 +617,7 @@ class McpServerTest {
             server.update(ReloadCountState) { ReloadCountState(it.successfulReloads + 1, it.failedReloads) }
             val text = awaitStatus(client, """"successfulReloads":1""")
             assertEquals(
-                """{"connected":true,"reloadState":"ok","lastError":null,"successfulReloads":1,"failedReloads":0}""",
+                """{"connected":true,"buildContinuous":false,"reloadState":"ok","lastError":null,"successfulReloads":1,"failedReloads":0}""",
                 text,
             )
         }
@@ -1116,6 +1144,111 @@ class McpServerTest {
         }
     }
 
+    /** A pid file whose associated log file ('pidFile.chrLogFile') contains [logContent]. */
+    private fun pidFileWithLogs(logContent: String): Path = createTempFile("mcp-test", ".pid").also { file ->
+        file.chrLogFile.writeText(logContent)
+    }
+
+    @Test
+    fun `test - reload in auto mode reports success when the reload happens`() =
+        runTest(timeout = 20.seconds) {
+            val server = startOrchestrationServer()
+            server.use {
+                val port = server.port.awaitOrThrow()
+                val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+                // In --auto mode no RecompileRequest is expected.
+                var sawRecompileRequest = false
+                val recompileRequestMonitor = launch {
+                    server.asFlow().filterIsInstance<RecompileRequest>().collect { sawRecompileRequest = true }
+                }
+
+                val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+                val client = createMcpClient(orchestration)
+
+                // The autonomous build is reloading, then set into a healthy state.
+                server.update(ReloadState) { ReloadState.Reloading() }
+                val reload = launch(Dispatchers.IO) {
+                    delay(200.milliseconds)
+                    server.update(ReloadState) { ReloadState.Ok() }
+                }
+
+                val result = client.callTool("await_reload", mapOf("timeout_seconds" to 10))
+                val resultText = (result.content.first() as TextContent).text
+                assertNotEquals(true, result.isError, "unexpected error result: $resultText")
+                assertEquals("""{"success":true}""", resultText)
+                assertEquals(false, sawRecompileRequest, "reload must not send a RecompileRequest in auto mode")
+                reload.cancel()
+                recompileRequestMonitor.cancel()
+            }
+        }
+
+    @Test
+    fun `test - reload in auto mode reports success when nothing reloads`() = runTest(timeout = 20.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            var sawRecompileRequest = false
+            val recompileRequestMonitor = launch {
+                server.asFlow().filterIsInstance<RecompileRequest>().collect { sawRecompileRequest = true }
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            // No build activity at all: the call must resolve quickly to 'no changes', not hit the timeout.
+            val result = client.callTool("await_reload", mapOf("timeout_seconds" to 2))
+            assertNotEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertEquals("""{"success":true}""", text)
+            assertEquals(false, sawRecompileRequest, "reload must not send a RecompileRequest in auto mode")
+            recompileRequestMonitor.cancel()
+        }
+    }
+
+    @Test
+    fun `test - reload in auto mode reports failure`() = runTest(timeout = 20.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            // A build is in progress, then fails.
+            server.update(ReloadState) { ReloadState.Reloading() }
+            server.update(ReloadState) { ReloadState.Failed(reason = "Incompatible change") }
+
+            val result = client.callTool("await_reload", mapOf("timeout_seconds" to 10))
+            assertEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains("Incompatible change"), "unexpected error message: $text")
+        }
+    }
+
+    @Test
+    fun `test - reload in auto mode reports still reloading on timeout`() = runTest(timeout = 20.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            // A build is in progress and never settles within the timeout.
+            server.update(ReloadState) { ReloadState.Reloading() }
+
+            val result = client.callTool("await_reload", mapOf("timeout_seconds" to 1))
+            assertNotEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains(""""status":"reloading""""), "unexpected result: $text")
+        }
+    }
+
     @Test
     fun `test - status shows failed when ReloadState is Failed`() = runTest(timeout = 10.seconds) {
         val server = startOrchestrationServer()
@@ -1130,7 +1263,7 @@ class McpServerTest {
             server.update(ReloadCountState) { ReloadCountState(it.successfulReloads, it.failedReloads + 1) }
             val text = awaitStatus(client, """"reloadState":"failed"""")
             assertEquals(
-                """{"connected":true,"reloadState":"failed","lastError":"Compilation error","successfulReloads":0,"failedReloads":1}""",
+                """{"connected":true,"buildContinuous":false,"reloadState":"failed","lastError":"Compilation error","successfulReloads":0,"failedReloads":1}""",
                 text,
             )
         }
@@ -1375,11 +1508,8 @@ class McpServerTest {
 
     @Test
     fun `test - get_logs returns error when disconnected`() = runTest(timeout = 10.seconds) {
-        val logFile = createTempFile("chr", ".log")
-        logFile.writeText("line 1\nline 2")
-
         val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
-        val client = createMcpClient(orchestration, logFile = logFile)
+        val client = createMcpClient(orchestration, pidFile = pidFileWithLogs("line 1\nline 2"))
 
         val result = client.callTool("get_logs", emptyMap())
         assertEquals(true, result.isError)
@@ -1395,7 +1525,7 @@ class McpServerTest {
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
             val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
-            // Use the default logFile, which points at a non-existent file.
+            // Use the default pidFile, whose associated log file does not exist.
             val client = createMcpClient(orchestration)
 
             val result = client.callTool("get_logs", emptyMap())
@@ -1407,16 +1537,13 @@ class McpServerTest {
 
     @Test
     fun `test - get_logs returns all lines by default`() = runTest(timeout = 10.seconds) {
-        val logFile = createTempFile("chr", ".log")
-        logFile.writeText("line 1\nline 2\nline 3")
-
         val server = startOrchestrationServer()
         server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
             val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
-            val client = createMcpClient(orchestration, logFile = logFile)
+            val client = createMcpClient(orchestration, pidFile = pidFileWithLogs("line 1\nline 2\nline 3"))
 
             val result = client.callTool("get_logs", emptyMap())
             assertNotEquals(true, result.isError)
@@ -1427,16 +1554,16 @@ class McpServerTest {
 
     @Test
     fun `test - get_logs honors the limit parameter`() = runTest(timeout = 10.seconds) {
-        val logFile = createTempFile("chr", ".log")
-        logFile.writeText((1..10).joinToString("\n") { "line $it" })
-
         val server = startOrchestrationServer()
         server.use {
             val port = server.port.awaitOrThrow()
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
             val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
-            val client = createMcpClient(orchestration, logFile = logFile)
+            val client = createMcpClient(
+                orchestration,
+                pidFile = pidFileWithLogs((1..10).joinToString("\n") { "line $it" }),
+            )
 
             val result = client.callTool("get_logs", mapOf("limit" to 3))
             assertNotEquals(true, result.isError)
@@ -1448,9 +1575,7 @@ class McpServerTest {
 
     @Test
     fun `test - get_logs returns everything when limit is zero`() = runTest(timeout = 10.seconds) {
-        val logFile = createTempFile("chr", ".log")
         val expected = (1..500).joinToString("\n") { "line $it" }
-        logFile.writeText(expected)
 
         val server = startOrchestrationServer()
         server.use {
@@ -1458,7 +1583,7 @@ class McpServerTest {
             val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
 
             val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
-            val client = createMcpClient(orchestration, logFile = logFile)
+            val client = createMcpClient(orchestration, pidFile = pidFileWithLogs(expected))
 
             val result = client.callTool("get_logs", mapOf("limit" to 0))
             assertNotEquals(true, result.isError)
