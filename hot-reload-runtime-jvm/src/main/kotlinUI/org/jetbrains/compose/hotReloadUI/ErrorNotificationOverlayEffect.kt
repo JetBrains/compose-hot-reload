@@ -148,10 +148,12 @@ internal fun ErrorNotification(
             .padding(12.dp)
 
     ) {
-
         val errorSvg = painterResource(Res.drawable.error)
         val copySvg = painterResource(Res.drawable.copy)
         val fileSvg = painterResource(Res.drawable.file)
+        val details = failed.details.orEmpty().joinToString("\n")
+        val filePath = fileUrlRegex.find(details)?.value.orEmpty().removePrefix("file://")
+
         Column(
             modifier = Modifier.wrapContentWidth(Alignment.Start)
                 .width(IntrinsicSize.Max),
@@ -168,21 +170,6 @@ internal fun ErrorNotification(
                     maxLines = 5,
                     overflow = TextOverflow.Ellipsis,
                     style = TextStyle.Default.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
-                    color = ColorProducer { Color.White }
-                )
-            }
-            Spacer(Modifier.height(4.dp))
-
-            val details = failed.details.orEmpty().joinToString("\n")
-            val filePath = fileUrlRegex.find(details)?.value.orEmpty().removePrefix("file://")
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                BasicText(
-                    failed.reason,
-                    style = TextStyle.Default.copy(
-                        fontSize = 12.sp,
-                        fontFamily = FontFamily.Monospace
-                    ),
-                    overflow = TextOverflow.Ellipsis,
                     color = ColorProducer { Color.White }
                 )
 
@@ -202,6 +189,17 @@ internal fun ErrorNotification(
                     ) { failed.reason + "\n" + details }
                 }
             }
+            Spacer(Modifier.height(4.dp))
+
+            BasicText(
+                failed.reason,
+                style = TextStyle.Default.copy(
+                    fontSize = 12.sp,
+                    fontFamily = FontFamily.Monospace
+                ),
+                overflow = TextOverflow.Ellipsis,
+                color = ColorProducer { Color.White }
+            )
 
             if (details.isNotBlank()) {
                 Spacer(Modifier.height(4.dp))
