@@ -7,3 +7,4 @@ org.jetbrains.compose.devtools.api.ReloadCountStateEncoder
 org.jetbrains.compose.devtools.api.WindowsStateEncoder
 org.jetbrains.compose.devtools.api.VirtualTimeStateEncoder
 org.jetbrains.compose.devtools.api.UIErrorStateEncoder
+org.jetbrains.compose.devtools.api.BuildModeStateEncoder

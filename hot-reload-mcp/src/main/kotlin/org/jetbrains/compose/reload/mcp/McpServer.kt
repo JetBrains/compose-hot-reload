@@ -18,6 +18,7 @@ import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.mapNotNull
@@ -37,6 +38,7 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
+import org.jetbrains.compose.devtools.api.BuildModeState
 import org.jetbrains.compose.devtools.api.ReloadCountState
 import org.jetbrains.compose.devtools.api.ReloadState
 import org.jetbrains.compose.devtools.api.UIErrorState
@@ -44,6 +46,7 @@ import org.jetbrains.compose.devtools.api.WindowsState
 import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.core.WindowId
+import org.jetbrains.compose.reload.core.chrLogFile
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.info
@@ -67,6 +70,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RestartRe
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeResult
 import org.jetbrains.compose.reload.orchestration.asChannel
+import org.jetbrains.compose.reload.orchestration.flowOf
 import java.io.OutputStream
 import java.nio.file.Path
 import java.util.Base64
@@ -75,6 +79,7 @@ import kotlin.io.path.createParentDirectories
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.writeBytes
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 private val logger = createLogger()
@@ -82,13 +87,13 @@ private val logger = createLogger()
 internal suspend fun startMcpServer(
     orchestration: StateFlow<OrchestrationHandle?>,
     protocolOut: OutputStream,
-    logFile: Path,
+    pidFile: Path,
 ) {
     val transport = StdioServerTransport(
         inputStream = System.`in`.asSource().buffered(),
         outputStream = protocolOut.asSink().buffered()
     )
-    startMcpServer(orchestration, transport, logFile)
+    startMcpServer(orchestration, transport, pidFile)
 }
 
 /** A single input property in a tool's JSON schema. */
@@ -142,7 +147,7 @@ private fun toolSchema(
 internal suspend fun startMcpServer(
     orchestration: StateFlow<OrchestrationHandle?>,
     transport: Transport,
-    logFile: Path,
+    pidFile: Path,
 ) {
     val server = Server(
         serverInfo = Implementation(name = "compose-hot-reload", version = HOT_RELOAD_VERSION),
@@ -170,8 +175,9 @@ internal suspend fun startMcpServer(
 
         addTool(
             name = "reload",
-            description = "Trigger a hot reload of the running Compose application: recompiles the " +
-                "project sources and reloads the changed classes into the live application without " +
+            description = "Trigger a hot reload of the running Compose application " +
+                "when the application was NOT started with continues build mode (--auto): " +
+                "recompiles the project sources and reloads the changed classes into the live application without " +
                 "restarting it. Call this after editing source files to apply the changes. " +
                 "Returns {\"success\": true, \"reloaded\": true} when changed classes were reloaded, " +
                 "{\"success\": true, \"reloaded\": false} when compilation succeeded but nothing changed, " +
@@ -179,10 +185,26 @@ internal suspend fun startMcpServer(
                 "If the reload does not finish within 'timeout_seconds', returns " +
                 "{\"status\": \"reloading\"} (not an error): the reload is still running, so poll the " +
                 "'status' tool until 'reloadState' is no longer 'reloading'. " +
-                "Use the 'status' tool first to check if the application is connected.",
+                "Use the 'status' tool first to check if the application is connected and its build mode.",
             inputSchema = toolSchema(ReloadTimeoutParam, required = emptyList())
         ) { request ->
             handleReload(orchestration, request)
+        }
+
+        addTool(
+            name = "await_reload",
+            description = "Await a hot reload when the application was started with continuous build mode (--auto): " +
+                "the build recompiles and reloads autonomously, and this tool waits for that reload to finish " +
+                "and reports the resulting state. Call this after editing source files to let the autonomous build apply changes. " +
+                "Returns {\"success\": true} once the application has come into a healthy (reloaded) state, " +
+                "and an error when the build or reload fails. " +
+                "If the reload does not finish within 'timeout_seconds', returns " +
+                "{\"status\": \"reloading\"} (not an error): still waiting for the build to complete, so poll the " +
+                "'status' tool until 'reloadState' is no longer 'reloading'. " +
+                "Use the 'status' tool first to check if the application is connected and its build mode.",
+            inputSchema = toolSchema(ReloadTimeoutParam, required = emptyList())
+        ) { request ->
+            handleAwaitReload(orchestration, request)
         }
 
         addTool(
@@ -220,7 +242,7 @@ internal suspend fun startMcpServer(
                 "application; use the 'status' tool first to check availability.",
             inputSchema = toolSchema(LogLimitParam, required = emptyList())
         ) { request ->
-            handleGetLogs(orchestration, logFile, request)
+            handleGetLogs(orchestration, pidFile.chrLogFile, request)
         }
 
         addTool(
@@ -436,6 +458,7 @@ private suspend fun handleStatus(
     }
     val state = handle.states.get(ReloadState).value
     val count = handle.states.get(ReloadCountState).value
+    val buildContinuous = handle.states.get(BuildModeState).value.isContinuous
     val reloadStateStr = when (state) {
         is ReloadState.Ok -> "ok"
         is ReloadState.Reloading -> "reloading"
@@ -444,6 +467,7 @@ private suspend fun handleStatus(
     logger.debug { "status: connected reloadState=$reloadStateStr" }
     return textResult(buildJsonObject {
             put("connected", true)
+            put("buildContinuous", buildContinuous)
             put("reloadState", reloadStateStr)
             put("lastError", (state as? ReloadState.Failed)?.reason)
             val maxDetailLines = (toolRequest.arguments?.get("max_error_detail_lines")?.jsonPrimitive?.intOrNull
@@ -564,6 +588,67 @@ private suspend fun handleListWindows(orchestration: StateFlow<OrchestrationHand
         }
         textResult(json.toString())
     }
+
+/**
+ * How long to wait for the continuous build to pick up the latest edit (i.e. for [ReloadState] to
+ * become [ReloadState.Reloading]) before concluding that nothing changed.
+ */
+private val WAIT_FOR_RELOAD_TO_START_TIMEOUT = 500.milliseconds
+
+/**
+ * Awaits reload: observes the autonomous (continuous-build) reload through [ReloadState] and
+ * reports whether the application has come into a healthy state.
+ *
+ * Returns within [timeoutSeconds], degrading to a 'poll status' response if a reload is still running.
+ */
+private suspend fun handleAwaitReload(
+    orchestration: StateFlow<OrchestrationHandle?>,
+    toolRequest: CallToolRequest,
+): CallToolResult = withConnection(orchestration, "await_reload") { handle ->
+    val timeoutSeconds = (toolRequest.arguments?.get("timeout_seconds")?.jsonPrimitive?.intOrNull
+        ?: DEFAULT_RELOAD_TIMEOUT_SECONDS).coerceAtLeast(1)
+    val timeout = timeoutSeconds.seconds
+    logger.info { "await_reload: observing autonomous reload (timeout ${timeoutSeconds}s)" }
+
+    val stateFlow = handle.states.flowOf(ReloadState)
+
+    // If the application is idle, give the continuous build a brief moment to pick up a pending edit.
+    if (handle.states.get(ReloadState).value !is ReloadState.Reloading) {
+        val started = withTimeoutOrNull(minOf(timeout, WAIT_FOR_RELOAD_TO_START_TIMEOUT)) {
+            stateFlow.filterIsInstance<ReloadState.Reloading>().firstOrNull()
+        }
+        // Nothing started reloading: report the current (settled) state.
+        if (started == null) return@withConnection awaitReloadResult(handle.states.get(ReloadState).value, timeoutSeconds)
+    }
+
+    // A reload is in progress: wait for it to finish, bounded by the timeout.
+    val reloadState = withTimeoutOrNull(timeout) { stateFlow.firstOrNull { it !is ReloadState.Reloading } }
+    return@withConnection awaitReloadResult(reloadState, timeoutSeconds)
+}
+
+/**
+ * Maps [reloadState] to an `await_reload` result. A `null` or still-[ReloadState.Reloading]
+ * [reloadState] means the reload did not finish within the timeout, so the client is asked to poll 'status'.
+ */
+private fun awaitReloadResult(reloadState: ReloadState?, timeoutSeconds: Int): CallToolResult = when (reloadState) {
+    is ReloadState.Ok -> {
+        logger.info { "await_reload: application is up to date (--auto mode)" }
+        textResult("""{"success":true}""")
+    }
+
+    is ReloadState.Failed -> {
+        logger.warn("await_reload: reload failed (--auto mode): ${reloadState.reason}")
+        errorResult("Reload failed: ${reloadState.reason ?: "unknown error"}")
+    }
+
+    else -> {
+        logger.info { "await_reload: still in progress after ${timeoutSeconds}s; instructing client to poll 'status'" }
+        textResult(
+            """{"status":"reloading","message":"Reload still in progress after ${timeoutSeconds}s. """ +
+                """Poll the 'status' tool until 'reloadState' is no longer 'reloading', then check 'lastError'."}"""
+        )
+    }
+}
 
 private suspend fun handleGetUIError(
     orchestration: StateFlow<OrchestrationHandle?>,
