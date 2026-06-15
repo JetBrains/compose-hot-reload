@@ -172,7 +172,7 @@ private fun DevToolingErrorOverlay(
                 }
 
                 DtConsole(
-                    logs = error.stacktrace.map { it.toString() },
+                    logs = error.stacktrace,
                     modifier = Modifier.fillMaxSize(),
                     scrollToBottom = false,
                 )

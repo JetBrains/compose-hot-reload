@@ -180,6 +180,32 @@ public final class org/jetbrains/compose/devtools/api/ReloadState$Reloading : or
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class org/jetbrains/compose/devtools/api/UIErrorState : org/jetbrains/compose/reload/orchestration/OrchestrationState {
+	public static final field $stable I
+	public static final field Key Lorg/jetbrains/compose/devtools/api/UIErrorState$Key;
+	public fun <init> (Ljava/util/Map;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getErrors ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/compose/devtools/api/UIErrorState$Key : org/jetbrains/compose/reload/orchestration/OrchestrationStateKey {
+	public fun getDefault ()Lorg/jetbrains/compose/devtools/api/UIErrorState;
+	public synthetic fun getDefault ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationState;
+	public fun getId ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationStateId;
+}
+
+public final class org/jetbrains/compose/devtools/api/UIErrorState$UIError {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getStacktrace ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class org/jetbrains/compose/devtools/api/VirtualTimeState$Key : org/jetbrains/compose/reload/orchestration/OrchestrationStateKey {
 	public fun getDefault ()Lorg/jetbrains/compose/devtools/api/VirtualTimeState;
 	public synthetic fun getDefault ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationState;

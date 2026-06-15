@@ -23,6 +23,7 @@ import kotlinx.io.asSource
 import kotlinx.io.buffered
 import org.jetbrains.compose.devtools.api.ReloadCountState
 import org.jetbrains.compose.devtools.api.ReloadState
+import org.jetbrains.compose.devtools.api.UIErrorState
 import org.jetbrains.compose.devtools.api.WindowsState
 import org.jetbrains.compose.devtools.api.WindowsState.WindowState
 import org.jetbrains.compose.reload.core.WindowId
@@ -1143,6 +1144,178 @@ class McpServerTest {
             assertEquals(true, result.isError)
             val text = (result.content.first() as TextContent).text
             assertTrue(text.contains("Invalid window size"), "unexpected error message: $text")
+        }
+    }
+
+    /**
+     * Polls the `get_ui_error` tool (defaulting to the first registered window) until the returned
+     * JSON satisfies [predicate], or fails after 5 real-time seconds. Needed because orchestration
+     * state propagates to the tooling client asynchronously.
+     */
+    private suspend fun awaitUiErrors(client: Client, predicate: (String) -> Boolean): String {
+        val deadline = System.currentTimeMillis() + 5_000L
+        while (true) {
+            val text = (client.callTool("get_ui_error", emptyMap()).content.first() as TextContent).text
+            if (predicate(text)) return text
+            if (System.currentTimeMillis() > deadline) {
+                throw AssertionError("Timed out waiting for get_ui_error. Last: $text")
+            }
+            Thread.sleep(10)
+        }
+    }
+
+    @Test
+    fun `test - get_ui_error returns error when disconnected`() = runTest(timeout = 10.seconds) {
+        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
+        val client = createMcpClient(orchestration)
+
+        val result = client.callTool("get_ui_error", emptyMap())
+        assertEquals(true, result.isError)
+        val text = (result.content.first() as TextContent).text
+        assertTrue(text.contains("No application is currently connected"))
+    }
+
+    @Test
+    fun `test - get_ui_error reports no error for a healthy window`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
+
+            val result = client.callTool("get_ui_error", emptyMap())
+            assertEquals("""{"windowId":"w-1","hasError":false}""", (result.content.first() as TextContent).text)
+        }
+    }
+
+    @Test
+    fun `test - get_ui_error returns the error for the default window`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
+
+            server.update(UIErrorState) {
+                UIErrorState(linkedMapOf(
+                    WindowId("w-1") to UIErrorState.UIError(
+                        message = "boom",
+                        stacktrace = listOf("a.b.C.foo(C.kt:1)", "a.b.C.bar(C.kt:2)"),
+                    )
+                ))
+            }
+
+            val text = awaitUiErrors(client) { it.contains(""""hasError":true""") }
+            assertEquals(
+                """{"windowId":"w-1","hasError":true,"message":"boom",""" +
+                    """"stacktrace":["a.b.C.foo(C.kt:1)","a.b.C.bar(C.kt:2)"]}""",
+                text,
+            )
+        }
+    }
+
+    @Test
+    fun `test - get_ui_error targets explicit window_id`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(WindowsState) {
+                WindowsState(linkedMapOf(
+                    WindowId("w-1") to windowState(0, 0, 100, 100),
+                    WindowId("w-2") to windowState(0, 0, 200, 200),
+                ))
+            }
+            awaitWindows(client, expectedCount = 2)
+
+            server.update(UIErrorState) {
+                UIErrorState(linkedMapOf(
+                    WindowId("w-1") to UIErrorState.UIError("one", emptyList()),
+                    WindowId("w-2") to UIErrorState.UIError("two", emptyList()),
+                ))
+            }
+            awaitUiErrors(client) { it.contains(""""hasError":true""") }
+
+            val result = client.callTool("get_ui_error", mapOf("window_id" to "w-2"))
+            assertEquals(
+                """{"windowId":"w-2","hasError":true,"message":"two","stacktrace":[]}""",
+                (result.content.first() as TextContent).text,
+            )
+        }
+    }
+
+    @Test
+    fun `test - get_ui_error returns error for unknown window_id`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
+
+            val result = client.callTool("get_ui_error", mapOf("window_id" to "ghost"))
+            assertEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains("Window 'ghost' not found"), "unexpected error message: $text")
+        }
+    }
+
+    @Test
+    fun `test - get_ui_error truncates long stacktrace`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
+
+            server.update(UIErrorState) {
+                UIErrorState(linkedMapOf(
+                    WindowId("w-1") to UIErrorState.UIError(
+                        "boom", (1..150).map { "line $it" },
+                    )
+                ))
+            }
+            awaitUiErrors(client) { it.contains(""""hasError":true""") }
+
+            val result = client.callTool("get_ui_error", mapOf("max_error_detail_lines" to 2))
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains(""""stacktrace":["line 1","line 2"]"""), "unexpected stacktrace: $text")
+            assertTrue(text.contains(""""stacktraceTruncated":148"""), "expected truncation count: $text")
+        }
+    }
+
+    @Test
+    fun `test - status includes uiErrorWindows when present`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            server.update(UIErrorState) {
+                UIErrorState(linkedMapOf(
+                    WindowId("w-1") to UIErrorState.UIError("boom", emptyList()),
+                ))
+            }
+            val text = awaitStatus(client, "uiErrorWindows")
+            assertTrue(text.contains(""""uiErrorWindows":["w-1"]"""), "unexpected status: $text")
         }
     }
 }

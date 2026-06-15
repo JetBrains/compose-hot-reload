@@ -8,15 +8,13 @@ package org.jetbrains.compose.devtools.states
 import io.sellmair.evas.State
 import io.sellmair.evas.launchState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.devtools.orchestration
-import org.jetbrains.compose.devtools.sendAsync
+import org.jetbrains.compose.devtools.api.UIErrorState
+import org.jetbrains.compose.devtools.asFlow
 import org.jetbrains.compose.reload.core.WindowId
-import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
-import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
-import org.jetbrains.compose.reload.orchestration.asFlow
 
+/**
+ * Devtools-side mirror of the shared [UIErrorState] orchestration state.
+ */
 data class ErrorUIState(val errors: Map<WindowId, UIErrorDescription>) : State {
     companion object Key : State.Key<ErrorUIState> {
         override val default: ErrorUIState = ErrorUIState(emptyMap())
@@ -26,41 +24,19 @@ data class ErrorUIState(val errors: Map<WindowId, UIErrorDescription>) : State {
 data class UIErrorDescription(
     val title: String,
     val message: String?,
-    val stacktrace: List<StackTraceElement>,
-    val recovery: (() -> Unit)? = null
+    val stacktrace: List<String>,
 )
 
-fun CoroutineScope.launchErrorUIState(
-    orchestration: OrchestrationHandle = org.jetbrains.compose.devtools.orchestration,
-) = launchState(ErrorUIState) {
-    val errors = mutableMapOf<WindowId, UIErrorDescription>()
-
-    suspend fun update() {
-        ErrorUIState(errors = errors.toMap()).emit()
-    }
-
-    launch {
-        orchestration.asFlow().filterIsInstance<OrchestrationMessage.UIException>().collect { message ->
-            val windowId = message.windowId ?: return@collect
-            errors[windowId] = message.toDescription()
-            update()
-        }
-    }
-
-    launch {
-        orchestration.asFlow().filterIsInstance<OrchestrationMessage.UIRendered>().collect { message ->
-            val windowId = message.windowId ?: return@collect
-            errors.remove(windowId)
-            update()
-        }
+fun CoroutineScope.launchErrorUIState() = launchState(ErrorUIState) {
+    UIErrorState.asFlow().collect { state ->
+        ErrorUIState(errors = state.errors.mapValues { (_, error) -> error.toDescription() }).emit()
     }
 }
 
-private fun OrchestrationMessage.UIException.toDescription(): UIErrorDescription {
+private fun UIErrorState.UIError.toDescription(): UIErrorDescription {
     return UIErrorDescription(
         title = "UI Exception",
         message = message,
         stacktrace = stacktrace,
-        recovery = { OrchestrationMessage.RetryFailedCompositionRequest().sendAsync() }
     )
 }
