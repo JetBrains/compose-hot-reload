@@ -22,6 +22,7 @@ import androidx.compose.ui.window.FrameWindowScope
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.update
+import org.jetbrains.compose.devtools.api.UIErrorState
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.sendAsync
@@ -29,6 +30,7 @@ import org.jetbrains.compose.reload.agent.sendBlocking
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.reloadEffectsEnabled
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.warn
@@ -103,6 +105,12 @@ public fun DevelopmentEntryPoint(
                 message = exception.message,
                 stacktrace = exception.stackTrace.toList()
             ).sendBlocking()
+            if (windowId != null) updateUIErrorState { errors ->
+                errors + (windowId to UIErrorState.UIError(
+                    message = exception.message,
+                    stacktrace = exception.stackTrace.map { it.toString() },
+                ))
+            }
 
         }.onSuccess {
             hotReloadState.update { state -> state.copy(uiError = null) }
@@ -111,6 +119,7 @@ public fun DevelopmentEntryPoint(
                 reloadRequestId = currentHotReloadState.reloadRequestId,
                 currentHotReloadState.iteration
             ).sendAsync()
+            if (windowId != null) updateUIErrorState { errors -> errors - windowId }
         }.getOrThrow()
     }
 
@@ -137,6 +146,14 @@ private inline fun <reified T : OrchestrationMessage> handleWindowRequests(
             .filterIsInstance<T>()
             .filter { request -> windowIdOf(request) == null || windowIdOf(request) == windowId }
             .collect { request -> respond(request).sendAsync() }
+    }
+}
+
+private fun updateUIErrorState(
+    update: (Map<WindowId, UIErrorState.UIError>) -> Map<WindowId, UIErrorState.UIError>
+) {
+    launchTask("update UIErrorState") {
+        orchestration.update(UIErrorState) { current -> UIErrorState(update(current.errors)) }
     }
 }
 

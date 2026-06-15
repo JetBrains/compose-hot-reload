@@ -160,7 +160,7 @@ private fun UIErrorDescription.toNotification(): UINotification = UINotification
     title = title,
     message = message.orEmpty(),
     isDisposableFromUI = false,
-    details = stacktrace.map { it.toString() }
+    details = stacktrace
 )
 
 

@@ -38,6 +38,7 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
 import org.jetbrains.compose.devtools.api.ReloadCountState
 import org.jetbrains.compose.devtools.api.ReloadState
+import org.jetbrains.compose.devtools.api.UIErrorState
 import org.jetbrains.compose.devtools.api.WindowsState
 import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
@@ -131,6 +132,9 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
                 "When connected, additionally returns reload state (ok/reloading/failed), last error if any " +
                 "(with 'lastErrorDetails' carrying additional diagnostic lines such as compiler output when " +
                 "a reload failed), and counts of successful and failed reloads since the application started. " +
+                "When a window is currently failing to render because of a runtime UI exception (distinct " +
+                "from a reload failure), 'uiErrorWindows' lists the affected window ids; call 'get_ui_error' " +
+                "for the message and stacktrace. " +
                 "Call this before take_screenshot to know if the application is available.",
             inputSchema = toolSchema(MaxErrorDetailLinesParam, required = emptyList())
         ) { request ->
@@ -164,6 +168,20 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
                 "click, ...) to target a specific window."
         ) { _ ->
             handleListWindows(orchestration)
+        }
+
+        addTool(
+            name = "get_ui_error",
+            description = "Get the runtime UI exception currently thrown while a single window renders its " +
+                "UI (e.g. an exception in a @Composable). " +
+                "Returns a JSON object with 'windowId' and 'hasError'; when 'hasError' is true it also " +
+                "contains 'message' and 'stacktrace' (a list of lines, capped by " +
+                "'max_error_detail_lines', with 'stacktraceTruncated' reporting how many lines were dropped). " +
+                "Defaults to the first registered window; pass 'window_id' to target a specific one " +
+                "('status' lists failing windows in 'uiErrorWindows').",
+            inputSchema = toolSchema(WindowIdParam, MaxErrorDetailLinesParam, required = emptyList())
+        ) { request ->
+            handleGetUIError(orchestration, request)
         }
 
         addTool(
@@ -324,6 +342,10 @@ private suspend fun handleStatus(
                 }
             put("successfulReloads", count.successfulReloads)
             put("failedReloads", count.failedReloads)
+            val uiErrorWindows = handle.states.get(UIErrorState).value.errors.keys
+            if (uiErrorWindows.isNotEmpty()) {
+                put("uiErrorWindows", buildJsonArray { uiErrorWindows.forEach { add(it.value) } })
+            }
         }.toString()))
     )
 }
@@ -442,6 +464,44 @@ private suspend fun handleListWindows(orchestration: StateFlow<OrchestrationHand
                 put("y", state.y)
                 put("width", state.width)
                 put("height", state.height)
+            }
+        }
+    }
+    return CallToolResult(content = listOf(TextContent(json.toString())))
+}
+
+private suspend fun handleGetUIError(
+    orchestration: StateFlow<OrchestrationHandle?>,
+    toolRequest: CallToolRequest,
+): CallToolResult {
+    val handle = orchestration.value
+        ?: return CallToolResult(
+            content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
+            isError = true
+        ).also { logger.info { "get_ui_error: no application connected" } }
+
+    val resolvedId = try {
+        resolveWindowId(handle, toolRequest.arguments)
+    } catch (e: WindowIdNotFoundException) {
+        return CallToolResult(content = listOf(TextContent(e.message ?: "Invalid window_id")), isError = true)
+    }
+
+    val error = handle.states.get(UIErrorState).value.errors[resolvedId]
+    val maxDetailLines = (toolRequest.arguments?.get("max_error_detail_lines")?.jsonPrimitive?.intOrNull
+        ?: DEFAULT_MAX_ERROR_DETAIL_LINES).coerceAtLeast(0)
+
+    logger.debug { "get_ui_error: window=$resolvedId hasError=${error != null}" }
+    val json = buildJsonObject {
+        put("windowId", resolvedId.value)
+        if (error == null) {
+            put("hasError", false)
+        } else {
+            put("hasError", true)
+            put("message", error.message)
+            val shown = error.stacktrace.take(maxDetailLines)
+            put("stacktrace", buildJsonArray { shown.forEach { add(it) } })
+            if (error.stacktrace.size > shown.size) {
+                put("stacktraceTruncated", error.stacktrace.size - shown.size)
             }
         }
     }
