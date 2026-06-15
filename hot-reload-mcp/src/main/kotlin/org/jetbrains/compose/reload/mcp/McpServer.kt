@@ -305,6 +305,62 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
     server.createSession(transport)
 }
 
+/** Standard message returned by every tool when no application is connected. */
+private const val NOT_CONNECTED_MESSAGE =
+    "No application is currently connected. Use the 'status' tool to check availability."
+
+/** Builds an error [CallToolResult] carrying [message]. */
+private fun errorResult(message: String): CallToolResult =
+    CallToolResult(content = listOf(TextContent(message)), isError = true)
+
+/** Builds a success [CallToolResult] carrying [text]. */
+private fun textResult(text: String): CallToolResult =
+    CallToolResult(content = listOf(TextContent(text)))
+
+/**
+ * Runs [body] with the currently connected [OrchestrationHandle], or returns the standard
+ * "not connected" error. [toolName] is used only for logging.
+ */
+private suspend fun withConnection(
+    orchestration: StateFlow<OrchestrationHandle?>,
+    toolName: String,
+    body: suspend (OrchestrationHandle) -> CallToolResult,
+): CallToolResult {
+    val handle = orchestration.value ?: run {
+        logger.info { "$toolName: no application connected" }
+        return errorResult(NOT_CONNECTED_MESSAGE)
+    }
+    return body(handle)
+}
+
+/**
+ * Resolves the target window for [args] and runs [body] with it, or returns a "window not found"
+ * error. Use within a [withConnection] body when other arguments must be validated alongside the
+ * window; otherwise prefer [withWindow].
+ */
+private suspend fun OrchestrationHandle.withResolvedWindow(
+    args: JsonObject?,
+    body: suspend (WindowId) -> CallToolResult,
+): CallToolResult = try {
+    body(resolveWindowId(this, args))
+} catch (e: WindowIdNotFoundException) {
+    errorResult(e.message ?: "Invalid window_id")
+}
+
+/**
+ * Runs [body] with the connected handle and the resolved target window — the common
+ * "connected + single window" case. Returns the standard not-connected / window-not-found error
+ * otherwise.
+ */
+private suspend fun withWindow(
+    orchestration: StateFlow<OrchestrationHandle?>,
+    toolName: String,
+    args: JsonObject?,
+    body: suspend (OrchestrationHandle, WindowId) -> CallToolResult,
+): CallToolResult = withConnection(orchestration, toolName) { handle ->
+    handle.withResolvedWindow(args) { windowId -> body(handle, windowId) }
+}
+
 private suspend fun handleStatus(
     orchestration: StateFlow<OrchestrationHandle?>,
     toolRequest: CallToolRequest,
@@ -312,9 +368,7 @@ private suspend fun handleStatus(
     val handle = orchestration.value
     if (handle == null) {
         logger.debug { "status: not connected" }
-        return CallToolResult(
-            content = listOf(TextContent(buildJsonObject { put("connected", false) }.toString()))
-        )
+        return textResult(buildJsonObject { put("connected", false) }.toString())
     }
     val state = handle.states.get(ReloadState).value
     val count = handle.states.get(ReloadCountState).value
@@ -324,8 +378,7 @@ private suspend fun handleStatus(
         is ReloadState.Failed -> "failed"
     }
     logger.debug { "status: connected reloadState=$reloadStateStr" }
-    return CallToolResult(
-        content = listOf(TextContent(buildJsonObject {
+    return textResult(buildJsonObject {
             put("connected", true)
             put("reloadState", reloadStateStr)
             put("lastError", (state as? ReloadState.Failed)?.reason)
@@ -346,8 +399,7 @@ private suspend fun handleStatus(
             if (uiErrorWindows.isNotEmpty()) {
                 put("uiErrorWindows", buildJsonArray { uiErrorWindows.forEach { add(it.value) } })
             }
-        }.toString()))
-    )
+        }.toString())
 }
 
 /**
@@ -368,13 +420,7 @@ private const val DEFAULT_RELOAD_TIMEOUT_SECONDS = 60
 private suspend fun handleReload(
     orchestration: StateFlow<OrchestrationHandle?>,
     toolRequest: CallToolRequest,
-): CallToolResult {
-    val handle = orchestration.value
-        ?: return CallToolResult(
-            content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
-            isError = true
-        ).also { logger.info { "reload: no application connected" } }
-
+): CallToolResult = withConnection(orchestration, "reload") { handle ->
     val timeoutSeconds = (toolRequest.arguments?.get("timeout_seconds")?.jsonPrimitive?.intOrNull
         ?: DEFAULT_RELOAD_TIMEOUT_SECONDS).coerceAtLeast(1)
 
@@ -405,87 +451,60 @@ private suspend fun handleReload(
         }
     }
 
-    return when (outcome) {
+    when (outcome) {
         is ReloadClassesResult -> if (outcome.isSuccess) {
             logger.info { "reload: classes reloaded successfully" }
-            CallToolResult(content = listOf(TextContent("""{"success":true,"reloaded":true}""")))
+            textResult("""{"success":true,"reloaded":true}""")
         } else {
             logger.warn("reload: failed: ${outcome.errorMessage}")
-            CallToolResult(
-                content = listOf(TextContent("Reload failed: ${outcome.errorMessage ?: "unknown error"}")),
-                isError = true
-            )
+            errorResult("Reload failed: ${outcome.errorMessage ?: "unknown error"}")
         }
 
         is RecompileResult -> if (outcome.exitCode == 0) {
             logger.info { "reload: recompiled successfully, no changed classes to reload" }
-            CallToolResult(content = listOf(TextContent(
-                """{"success":true,"reloaded":false,"message":"Recompiled successfully; no changed classes to reload."}"""
-            )))
+            textResult("""{"success":true,"reloaded":false,"message":"Recompiled successfully; no changed classes to reload."}""")
         } else {
             logger.warn("reload: recompilation failed with exit code ${outcome.exitCode}")
-            CallToolResult(
-                content = listOf(TextContent(
-                    "Recompilation failed (exit code ${outcome.exitCode ?: "unknown"}). " +
-                        "Check the build output for compilation errors."
-                )),
-                isError = true
+            errorResult(
+                "Recompilation failed (exit code ${outcome.exitCode ?: "unknown"}). " +
+                    "Check the build output for compilation errors."
             )
         }
 
         else -> {
             logger.info { "reload: still in progress after ${timeoutSeconds}s; instructing client to poll 'status'" }
-            CallToolResult(
-                content = listOf(TextContent(
-                    """{"status":"reloading","message":"Reload still in progress after ${timeoutSeconds}s. """ +
-                        """Poll the 'status' tool until 'reloadState' is no longer 'reloading', then check """ +
-                        """'successfulReloads'/'failedReloads' or 'lastError'."}"""
-                ))
+            textResult(
+                """{"status":"reloading","message":"Reload still in progress after ${timeoutSeconds}s. """ +
+                    """Poll the 'status' tool until 'reloadState' is no longer 'reloading', then check """ +
+                    """'successfulReloads'/'failedReloads' or 'lastError'."}"""
             )
         }
     }
 }
 
-private suspend fun handleListWindows(orchestration: StateFlow<OrchestrationHandle?>): CallToolResult {
-    val handle = orchestration.value
-        ?: return CallToolResult(
-            content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
-            isError = true
-        ).also { logger.info { "list_windows: no application connected" } }
-
-    val windows = handle.states.get(WindowsState).value.windows
-    logger.debug { "list_windows: ${windows.size} window(s)" }
-    val json = buildJsonArray {
-        windows.forEach { (id, state) ->
-            addJsonObject {
-                put("id", id.value)
-                put("title", state.title)
-                put("x", state.x)
-                put("y", state.y)
-                put("width", state.width)
-                put("height", state.height)
+private suspend fun handleListWindows(orchestration: StateFlow<OrchestrationHandle?>): CallToolResult =
+    withConnection(orchestration, "list_windows") { handle ->
+        val windows = handle.states.get(WindowsState).value.windows
+        logger.debug { "list_windows: ${windows.size} window(s)" }
+        val json = buildJsonArray {
+            windows.forEach { (id, state) ->
+                addJsonObject {
+                    put("id", id.value)
+                    put("title", state.title)
+                    put("x", state.x)
+                    put("y", state.y)
+                    put("width", state.width)
+                    put("height", state.height)
+                }
             }
         }
+        textResult(json.toString())
     }
-    return CallToolResult(content = listOf(TextContent(json.toString())))
-}
 
 private suspend fun handleGetUIError(
     orchestration: StateFlow<OrchestrationHandle?>,
     toolRequest: CallToolRequest,
-): CallToolResult {
-    val handle = orchestration.value
-        ?: return CallToolResult(
-            content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
-            isError = true
-        ).also { logger.info { "get_ui_error: no application connected" } }
-
-    val resolvedId = try {
-        resolveWindowId(handle, toolRequest.arguments)
-    } catch (e: WindowIdNotFoundException) {
-        return CallToolResult(content = listOf(TextContent(e.message ?: "Invalid window_id")), isError = true)
-    }
-
+): CallToolResult = withWindow(orchestration, "get_ui_error", toolRequest.arguments) { handle, resolvedId ->
     val error = handle.states.get(UIErrorState).value.errors[resolvedId]
     val maxDetailLines = (toolRequest.arguments?.get("max_error_detail_lines")?.jsonPrimitive?.intOrNull
         ?: DEFAULT_MAX_ERROR_DETAIL_LINES).coerceAtLeast(0)
@@ -505,101 +524,60 @@ private suspend fun handleGetUIError(
             }
         }
     }
-    return CallToolResult(content = listOf(TextContent(json.toString())))
+    textResult(json.toString())
 }
 
 private suspend fun handleTakeScreenshot(
     orchestration: StateFlow<OrchestrationHandle?>,
     request: CallToolRequest,
-): CallToolResult {
-    val handle = orchestration.value
-        ?: return CallToolResult(
-            content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
-            isError = true
-        ).also { logger.info { "take_screenshot: no application connected" } }
-
-    val resolvedId = try {
-        resolveWindowId(handle, request.arguments)
-    } catch (e: WindowIdNotFoundException) {
-        return CallToolResult(content = listOf(TextContent(e.message ?: "Invalid window_id")), isError = true)
-    }
-
-    return try {
-        val request = ScreenshotRequest(windowId = resolvedId)
-        logger.info { "take_screenshot: sending request '${request.messageId}'" }
-        val screenshot = handle.requestResponse<ScreenshotResult>(request) {
-            it.screenshotRequestId == request.messageId
+): CallToolResult = withWindow(orchestration, "take_screenshot", request.arguments) { handle, resolvedId ->
+    try {
+        val screenshotRequest = ScreenshotRequest(windowId = resolvedId)
+        logger.info { "take_screenshot: sending request '${screenshotRequest.messageId}'" }
+        val screenshot = handle.requestResponse<ScreenshotResult>(screenshotRequest) {
+            it.screenshotRequestId == screenshotRequest.messageId
         }
-
-        if (screenshot == null) {
-            logger.warn("take_screenshot: timed out waiting for response")
-            return CallToolResult(
-                content = listOf(TextContent("Screenshot timed out: no response from application")),
-                isError = true
-            )
+        when {
+            screenshot == null -> {
+                logger.warn("take_screenshot: timed out waiting for response")
+                errorResult("Screenshot timed out: no response from application")
+            }
+            !screenshot.isSuccess -> {
+                logger.warn("take_screenshot: failed: ${screenshot.errorMessage}")
+                errorResult("Screenshot failed: ${screenshot.errorMessage ?: "unknown error"}")
+            }
+            else -> {
+                logger.debug { "take_screenshot: received ${screenshot.data.size} bytes (${screenshot.format})" }
+                val base64 = Base64.getEncoder().encodeToString(screenshot.data)
+                CallToolResult(content = listOf(ImageContent(data = base64, mimeType = "image/${screenshot.format}")))
+            }
         }
-
-        if (!screenshot.isSuccess) {
-            logger.warn("take_screenshot: failed: ${screenshot.errorMessage}")
-            return CallToolResult(
-                content = listOf(TextContent("Screenshot failed: ${screenshot.errorMessage ?: "unknown error"}")),
-                isError = true
-            )
-        }
-
-        logger.debug { "take_screenshot: received ${screenshot.data.size} bytes (${screenshot.format})" }
-        val base64 = Base64.getEncoder().encodeToString(screenshot.data)
-        CallToolResult(
-            content = listOf(ImageContent(data = base64, mimeType = "image/${screenshot.format}"))
-        )
     } catch (e: Exception) {
         logger.warn("take_screenshot: exception: ${e.message}")
-        CallToolResult(
-            content = listOf(TextContent("Screenshot failed: ${e.message}")),
-            isError = true
-        )
+        errorResult("Screenshot failed: ${e.message}")
     }
 }
 
 private suspend fun handleGetSemanticTree(
     orchestration: StateFlow<OrchestrationHandle?>,
     request: CallToolRequest,
-): CallToolResult {
-    val handle = orchestration.value
-        ?: return CallToolResult(
-            content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
-            isError = true
-        ).also { logger.info { "get_semantic_tree: no application connected" } }
-
-    val resolvedId = try {
-        resolveWindowId(handle, request.arguments)
-    } catch (e: WindowIdNotFoundException) {
-        return CallToolResult(content = listOf(TextContent(e.message ?: "Invalid window_id")), isError = true)
-    }
-
-    return try {
-        val request = SemanticTreeRequest(windowId = resolvedId)
-        logger.info { "get_semantic_tree: sending request '${request.messageId}'" }
-        val semanticTree = handle.requestResponse<SemanticTreeResult>(request) {
-            it.semanticTreeRequestId == request.messageId
+): CallToolResult = withWindow(orchestration, "get_semantic_tree", request.arguments) { handle, resolvedId ->
+    try {
+        val treeRequest = SemanticTreeRequest(windowId = resolvedId)
+        logger.info { "get_semantic_tree: sending request '${treeRequest.messageId}'" }
+        val semanticTree = handle.requestResponse<SemanticTreeResult>(treeRequest) {
+            it.semanticTreeRequestId == treeRequest.messageId
         }
-
         if (semanticTree == null) {
             logger.warn("get_semantic_tree: timed out waiting for response")
-            return CallToolResult(
-                content = listOf(TextContent("Semantic tree request timed out: no response from application")),
-                isError = true
-            )
+            errorResult("Semantic tree request timed out: no response from application")
+        } else {
+            logger.debug { "get_semantic_tree: received ${semanticTree.tree.length} chars" }
+            textResult(semanticTree.tree)
         }
-
-        logger.debug { "get_semantic_tree: received ${semanticTree.tree.length} chars" }
-        CallToolResult(content = listOf(TextContent(semanticTree.tree)))
     } catch (e: Exception) {
         logger.warn("get_semantic_tree: exception: ${e.message}")
-        CallToolResult(
-            content = listOf(TextContent("Semantic tree request failed: ${e.message}")),
-            isError = true
-        )
+        errorResult("Semantic tree request failed: ${e.message}")
     }
 }
 
@@ -607,119 +585,76 @@ private suspend fun handleUIAction(
     orchestration: StateFlow<OrchestrationHandle?>,
     request: CallToolRequest,
     actionFactory: (JsonObject?) -> UIAction,
-): CallToolResult {
-    val handle = orchestration.value
-        ?: return CallToolResult(
-            content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
-            isError = true
-        ).also { logger.info { "${request.name}: no application connected" } }
-
+): CallToolResult = withConnection(orchestration, request.name) { handle ->
     val args = request.arguments
     val nodeId = args?.get("nodeId")?.jsonPrimitive?.intOrNull
-        ?: return CallToolResult(
-            content = listOf(TextContent("Missing required parameter 'nodeId' (integer)")),
-            isError = true
-        )
+        ?: return@withConnection errorResult("Missing required parameter 'nodeId' (integer)")
 
     val action = try {
         actionFactory(args)
     } catch (e: Exception) {
-        return CallToolResult(
-            content = listOf(TextContent(e.message ?: "Invalid arguments")),
-            isError = true
-        )
+        return@withConnection errorResult(e.message ?: "Invalid arguments")
     }
 
-    val resolvedId = try {
-        resolveWindowId(handle, args)
-    } catch (e: WindowIdNotFoundException) {
-        return CallToolResult(content = listOf(TextContent(e.message ?: "Invalid window_id")), isError = true)
-    }
-
-    return try {
-        val uiActionRequest = UIActionRequest(nodeId = nodeId, action = action, windowId = resolvedId)
-        logger.info { "${request.name}: sending request '${uiActionRequest.messageId}' nodeId=$nodeId action=$action" }
-        val actionResult = handle.requestResponse<UIActionResult>(uiActionRequest) {
-            it.uiActionRequestId == uiActionRequest.messageId
+    handle.withResolvedWindow(args) { resolvedId ->
+        try {
+            val uiActionRequest = UIActionRequest(nodeId = nodeId, action = action, windowId = resolvedId)
+            logger.info { "${request.name}: sending request '${uiActionRequest.messageId}' nodeId=$nodeId action=$action" }
+            val actionResult = handle.requestResponse<UIActionResult>(uiActionRequest) {
+                it.uiActionRequestId == uiActionRequest.messageId
+            }
+            when {
+                actionResult == null -> {
+                    logger.warn("${request.name}: timed out waiting for response")
+                    errorResult("UI action timed out: no response from application")
+                }
+                !actionResult.isSuccess -> {
+                    logger.warn("${request.name}: failed: ${actionResult.errorMessage}")
+                    errorResult("UI action failed: ${actionResult.errorMessage ?: "unknown error"}")
+                }
+                else -> {
+                    logger.debug { "${request.name}: succeeded" }
+                    textResult("""{"success": true}""")
+                }
+            }
+        } catch (e: Exception) {
+            logger.warn("${request.name}: exception: ${e.message}")
+            errorResult("UI action failed: ${e.message}")
         }
-
-        if (actionResult == null) {
-            logger.warn("${request.name}: timed out waiting for response")
-            return CallToolResult(
-                content = listOf(TextContent("UI action timed out: no response from application")),
-                isError = true
-            )
-        }
-
-        if (!actionResult.isSuccess) {
-            logger.warn("${request.name}: failed: ${actionResult.errorMessage}")
-            return CallToolResult(
-                content = listOf(TextContent("UI action failed: ${actionResult.errorMessage ?: "unknown error"}")),
-                isError = true
-            )
-        }
-
-        logger.debug { "${request.name}: succeeded" }
-        CallToolResult(content = listOf(TextContent("""{"success": true}""")))
-    } catch (e: Exception) {
-        logger.warn("${request.name}: exception: ${e.message}")
-        CallToolResult(
-            content = listOf(TextContent("UI action failed: ${e.message}")),
-            isError = true
-        )
     }
 }
 
 private suspend fun handleResizeWindow(
     orchestration: StateFlow<OrchestrationHandle?>,
     request: CallToolRequest,
-): CallToolResult {
-    val handle = orchestration.value
-        ?: return CallToolResult(
-            content = listOf(TextContent("No application is currently connected. Use the 'status' tool to check availability.")),
-            isError = true
-        ).also { logger.info { "resize_window: no application connected" } }
-
+): CallToolResult = withConnection(orchestration, "resize_window") { handle ->
     val args = request.arguments
     val width = args?.get("width")?.jsonPrimitive?.intOrNull
-        ?: return CallToolResult(
-            content = listOf(TextContent("Missing required parameter 'width' (integer)")),
-            isError = true
-        )
+        ?: return@withConnection errorResult("Missing required parameter 'width' (integer)")
     val height = args["height"]?.jsonPrimitive?.intOrNull
-        ?: return CallToolResult(
-            content = listOf(TextContent("Missing required parameter 'height' (integer)")),
-            isError = true
-        )
+        ?: return@withConnection errorResult("Missing required parameter 'height' (integer)")
 
-    val result = try {
-        val resolvedId = resolveWindowId(handle, args)
-        val resizeRequest = WindowResizeRequest(width = width, height = height, windowId = resolvedId)
-        logger.info { "resize_window: sending request '${resizeRequest.messageId}' ${width}x${height}" }
-        val response = handle.requestResponse<WindowResizeResult>(resizeRequest) {
-            it.windowResizeRequestId == resizeRequest.messageId
+    val result = handle.withResolvedWindow(args) { resolvedId ->
+        try {
+            val resizeRequest = WindowResizeRequest(width = width, height = height, windowId = resolvedId)
+            logger.info { "resize_window: sending request '${resizeRequest.messageId}' ${width}x${height}" }
+            val response = handle.requestResponse<WindowResizeResult>(resizeRequest) {
+                it.windowResizeRequestId == resizeRequest.messageId
+            }
+            when {
+                response == null -> errorResult("Window resize timed out: no response from application")
+                !response.isSuccess -> errorResult("Window resize failed: ${response.errorMessage ?: "unknown error"}")
+                else -> textResult("""{"success": true}""")
+            }
+        } catch (e: Exception) {
+            errorResult("Window resize failed: ${e.message}")
         }
-        when {
-            response == null -> CallToolResult(
-                content = listOf(TextContent("Window resize timed out: no response from application")),
-                isError = true
-            )
-            !response.isSuccess -> CallToolResult(
-                content = listOf(TextContent("Window resize failed: ${response.errorMessage ?: "unknown error"}")),
-                isError = true
-            )
-            else -> CallToolResult(content = listOf(TextContent("""{"success": true}""")))
-        }
-    } catch (e: WindowIdNotFoundException) {
-        CallToolResult(content = listOf(TextContent(e.message ?: "Invalid window_id")), isError = true)
-    } catch (e: Exception) {
-        CallToolResult(content = listOf(TextContent("Window resize failed: ${e.message}")), isError = true)
     }
 
     val resultText = (result.content.firstOrNull() as? TextContent)?.text
     if (result.isError == true) logger.warn("resize_window: $resultText")
     else logger.debug { "resize_window: $resultText" }
-    return result
+    result
 }
 
 /** Thrown by [resolveWindowId] when an explicit 'window_id' does not match any registered window. */
