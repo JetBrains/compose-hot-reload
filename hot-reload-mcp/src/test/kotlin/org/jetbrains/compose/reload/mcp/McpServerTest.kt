@@ -50,6 +50,10 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationServer
 import org.jetbrains.compose.reload.orchestration.startOrchestrationServer
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
+import java.nio.file.Path
+import kotlin.io.path.createTempDirectory
+import kotlin.io.path.createTempFile
+import kotlin.io.path.writeText
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -73,7 +77,11 @@ class McpServerTest {
         client = null
     }
 
-    private suspend fun CoroutineScope.createMcpClient(orchestration: MutableStateFlow<OrchestrationHandle?>): Client {
+    private suspend fun CoroutineScope.createMcpClient(
+        orchestration: MutableStateFlow<OrchestrationHandle?>,
+        // Defaults to a path that does not exist, modelling "no logs written yet".
+        logFile: Path = createTempDirectory().resolve("absent.chr.log"),
+    ): Client {
         val serverIn = PipedInputStream()
         val clientOut = PipedOutputStream(serverIn)
         val clientIn = PipedInputStream()
@@ -89,7 +97,7 @@ class McpServerTest {
             clientOut.asSink().buffered()
         )
 
-        launch { startMcpServer(orchestration, serverTransport) }
+        launch { startMcpServer(orchestration, serverTransport, logFile) }
 
         val client = Client(Implementation(name = "test-client", version = "1.0.0"))
         client.connect(clientTransport)
@@ -1316,6 +1324,100 @@ class McpServerTest {
             }
             val text = awaitStatus(client, "uiErrorWindows")
             assertTrue(text.contains(""""uiErrorWindows":["w-1"]"""), "unexpected status: $text")
+        }
+    }
+
+    @Test
+    fun `test - get_logs returns error when disconnected`() = runTest(timeout = 10.seconds) {
+        val logFile = createTempFile("chr", ".log")
+        logFile.writeText("line 1\nline 2")
+
+        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
+        val client = createMcpClient(orchestration, logFile = logFile)
+
+        val result = client.callTool("get_logs", emptyMap())
+        assertEquals(true, result.isError)
+        val text = (result.content.first() as TextContent).text
+        assertTrue(text.contains("No application is currently connected"))
+    }
+
+    @Test
+    fun `test - get_logs returns a message when no log file exists`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            // Use the default logFile, which points at a non-existent file.
+            val client = createMcpClient(orchestration)
+
+            val result = client.callTool("get_logs", emptyMap())
+            assertNotEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains("No logs available"), "unexpected result: $text")
+        }
+    }
+
+    @Test
+    fun `test - get_logs returns all lines by default`() = runTest(timeout = 10.seconds) {
+        val logFile = createTempFile("chr", ".log")
+        logFile.writeText("line 1\nline 2\nline 3")
+
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration, logFile = logFile)
+
+            val result = client.callTool("get_logs", emptyMap())
+            assertNotEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertEquals("line 1\nline 2\nline 3", text)
+        }
+    }
+
+    @Test
+    fun `test - get_logs honors the limit parameter`() = runTest(timeout = 10.seconds) {
+        val logFile = createTempFile("chr", ".log")
+        logFile.writeText((1..10).joinToString("\n") { "line $it" })
+
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration, logFile = logFile)
+
+            val result = client.callTool("get_logs", mapOf("limit" to 3))
+            assertNotEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            // Returns the most recent lines, oldest first.
+            assertEquals("line 8\nline 9\nline 10", text)
+        }
+    }
+
+    @Test
+    fun `test - get_logs returns everything when limit is zero`() = runTest(timeout = 10.seconds) {
+        val logFile = createTempFile("chr", ".log")
+        val expected = (1..500).joinToString("\n") { "line $it" }
+        logFile.writeText(expected)
+
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration, logFile = logFile)
+
+            val result = client.callTool("get_logs", mapOf("limit" to 0))
+            assertNotEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertEquals(expected, text)
         }
     }
 }

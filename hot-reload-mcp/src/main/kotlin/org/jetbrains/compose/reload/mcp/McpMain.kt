@@ -18,6 +18,7 @@ import kotlinx.coroutines.runInterruptible
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.PidFileInfo
+import org.jetbrains.compose.reload.core.chrLogFile
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.error
 import org.jetbrains.compose.reload.core.getOrNull
@@ -52,11 +53,13 @@ fun main(args: Array<String>) {
 
     logger.info("MCP server starting. Watching PID file: $pidFile")
 
+    val logFile = pidFile.chrLogFile
+
     runBlocking {
         val orchestration = connectionLoop(pidFile)
             .stateIn(this, SharingStarted.Eagerly, null)
 
-        startMcpServer(orchestration, protocolOut)
+        startMcpServer(orchestration, protocolOut, logFile)
     }
 }
 
