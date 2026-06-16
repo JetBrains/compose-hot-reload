@@ -15,6 +15,7 @@ import io.modelcontextprotocol.kotlin.sdk.types.Implementation
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
@@ -34,6 +35,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.Recompile
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesResult
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RestartRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ScreenshotResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticTreeResult
@@ -43,6 +45,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionR
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeResult
+import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.asFlow
 import org.jetbrains.compose.reload.orchestration.connectOrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
@@ -1418,6 +1421,68 @@ class McpServerTest {
             assertNotEquals(true, result.isError)
             val text = (result.content.first() as TextContent).text
             assertEquals(expected, text)
+        }
+    }
+
+    @Test
+    fun `test - restart returns error when disconnected`() = runTest(timeout = 10.seconds) {
+        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
+        val client = createMcpClient(orchestration)
+
+        val result = client.callTool("restart", emptyMap())
+        assertEquals(true, result.isError)
+        val text = (result.content.first() as TextContent).text
+        assertTrue(text.contains("No application is currently connected"))
+    }
+
+    @Test
+    fun `test - restart sends RestartRequest and reports reconnected on new handle`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            // Subscribe to the broadcast before triggering the restart.
+            val messages = server.asChannel()
+            launch {
+                // The handler broadcast a RestartRequest: simulate the app shutting down
+                // (handle → null) and a new app process attaching (handle → new).
+                messages.consumeAsFlow().filterIsInstance<RestartRequest>().first()
+                orchestration.value = null
+                val newToolingClient = connectOrchestrationClient(
+                    OrchestrationClientRole.Tooling, port
+                ).getOrThrow()
+                orchestration.value = newToolingClient
+            }
+
+            val result = client.callTool("restart", emptyMap())
+            assertNotEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains("\"success\":true"), "got: $text")
+            assertTrue(text.contains("\"reconnected\":true"), "got: $text")
+        }
+    }
+
+    @Test
+    fun `test - restart returns reconnected false when no reconnect within timeout`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            // No coroutine flips the StateFlow — the wait must time out and fall through to
+            // the "poll status" fallback instead of erroring.
+            val result = client.callTool("restart", mapOf("timeout_seconds" to 1))
+            assertNotEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains("\"success\":true"), "got: $text")
+            assertTrue(text.contains("\"reconnected\":false"), "got: $text")
         }
     }
 }

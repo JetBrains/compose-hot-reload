@@ -18,6 +18,7 @@ import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withTimeoutOrNull
@@ -61,6 +62,7 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.SemanticT
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIAction
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionResult
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RestartRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeResult
 import org.jetbrains.compose.reload.orchestration.asChannel
@@ -108,6 +110,11 @@ private val MaxErrorDetailLinesParam = Property("max_error_detail_lines", "integ
 private val LogLimitParam = Property("limit", "integer",
     description = "Maximum number of most recent log lines to return (default $DEFAULT_LOG_LINES). " +
         "Use 0 to return all available lines.")
+private val RestartTimeoutParam = Property("timeout_seconds", "integer",
+    description = "Maximum seconds to wait for the application to disconnect and reconnect after the " +
+        "restart request (default $DEFAULT_RESTART_TIMEOUT_SECONDS). Keep this at or below your own " +
+        "tool-call timeout; if it expires the tool returns 'reconnected':false and you should poll the " +
+        "'status' tool until 'connected' is true again.")
 
 /** Builds a [ToolSchema] from [properties]; by default all of them are required. */
 private fun toolSchema(
@@ -325,6 +332,21 @@ internal suspend fun startMcpServer(
             )
         ) { request ->
             handleResizeWindow(orchestration, request)
+        }
+
+        addTool(
+            name = "restart",
+            description = "Restart the running Compose application. " +
+                "The current application process shuts down and a new one starts with the same arguments. " +
+                "Waits for the new application to reconnect and returns {\"success\":true," +
+                "\"reconnected\":true} once it does. " +
+                "If reconnection does not happen within 'timeout_seconds', returns " +
+                "{\"success\":true,\"reconnected\":false} (not an error): the restart was requested but " +
+                "the new process is still starting, so poll the 'status' tool until 'connected' is true. " +
+                "Use the 'status' tool first to check if the application is connected.",
+            inputSchema = toolSchema(RestartTimeoutParam, required = emptyList())
+        ) { request ->
+            handleRestart(orchestration, request)
         }
     }
 
@@ -723,6 +745,41 @@ private suspend fun handleResizeWindow(
     if (result.isError == true) logger.warn("resize_window: $resultText")
     else logger.debug { "resize_window: $resultText" }
     result
+}
+
+/**
+ * Default time to wait for the application to disconnect and reconnect after a restart request.
+ * Overridable per call via the 'timeout_seconds' parameter. A JVM relaunch can take a while,
+ * hence the generous default; when it expires the tool falls back to instructing the agent to poll
+ * 'status'.
+ */
+private const val DEFAULT_RESTART_TIMEOUT_SECONDS = 60
+
+private suspend fun handleRestart(
+    orchestration: StateFlow<OrchestrationHandle?>,
+    toolRequest: CallToolRequest,
+): CallToolResult = withConnection(orchestration, "restart") { handle ->
+    val timeoutSeconds = (toolRequest.arguments?.get("timeout_seconds")?.jsonPrimitive?.intOrNull
+        ?: DEFAULT_RESTART_TIMEOUT_SECONDS).coerceAtLeast(1)
+
+    logger.info { "restart: sending RestartRequest (timeout ${timeoutSeconds}s)" }
+    handle.send(RestartRequest())
+
+    val reconnected = withTimeoutOrNull(timeoutSeconds.seconds) {
+        orchestration.first { it != null && it !== handle }
+    }
+
+    if (reconnected != null) {
+        logger.info { "restart: application reconnected" }
+        textResult("""{"success":true,"reconnected":true,"message":"Application restarted and reconnected."}""")
+    } else {
+        logger.info { "restart: no reconnect after ${timeoutSeconds}s; instructing client to poll 'status'" }
+        textResult(
+            """{"success":true,"reconnected":false,"message":"Restart requested but the application """ +
+                """did not reconnect within ${timeoutSeconds}s. Poll the 'status' tool until """ +
+                """'connected' is true."}"""
+        )
+    }
 }
 
 /** Thrown by [resolveWindowId] when an explicit 'window_id' does not match any registered window. */
