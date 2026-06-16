@@ -65,18 +65,25 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowRes
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeResult
 import org.jetbrains.compose.reload.orchestration.asChannel
 import java.io.OutputStream
+import java.nio.file.Path
 import java.util.Base64
+import kotlin.io.path.bufferedReader
+import kotlin.io.path.isRegularFile
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 private val logger = createLogger()
 
-internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle?>, protocolOut: OutputStream) {
+internal suspend fun startMcpServer(
+    orchestration: StateFlow<OrchestrationHandle?>,
+    protocolOut: OutputStream,
+    logFile: Path,
+) {
     val transport = StdioServerTransport(
         inputStream = System.`in`.asSource().buffered(),
         outputStream = protocolOut.asSink().buffered()
     )
-    startMcpServer(orchestration, transport)
+    startMcpServer(orchestration, transport, logFile)
 }
 
 /** A single input property in a tool's JSON schema. */
@@ -98,6 +105,9 @@ private val MaxErrorDetailLinesParam = Property("max_error_detail_lines", "integ
         "(default $DEFAULT_MAX_ERROR_DETAIL_LINES). When the details are longer, " +
         "'lastErrorDetailsTruncated' reports how many lines were dropped. Use 0 to omit the details " +
         "entirely.")
+private val LogLimitParam = Property("limit", "integer",
+    description = "Maximum number of most recent log lines to return (default $DEFAULT_LOG_LINES). " +
+        "Use 0 to return all available lines.")
 
 /** Builds a [ToolSchema] from [properties]; by default all of them are required. */
 private fun toolSchema(
@@ -116,7 +126,11 @@ private fun toolSchema(
 )
 
 @OptIn(DelicateHotReloadApi::class)
-internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle?>, transport: Transport) {
+internal suspend fun startMcpServer(
+    orchestration: StateFlow<OrchestrationHandle?>,
+    transport: Transport,
+    logFile: Path,
+) {
     val server = Server(
         serverInfo = Implementation(name = "compose-hot-reload", version = HOT_RELOAD_VERSION),
         options = ServerOptions(
@@ -182,6 +196,18 @@ internal suspend fun startMcpServer(orchestration: StateFlow<OrchestrationHandle
             inputSchema = toolSchema(WindowIdParam, MaxErrorDetailLinesParam, required = emptyList())
         ) { request ->
             handleGetUIError(orchestration, request)
+        }
+
+        addTool(
+            name = "get_logs",
+            description = "Return recent log output from the running Compose application. " +
+                "Returns the most recent log lines as plain text, oldest first. Includes the " +
+                "application's runtime log messages and critical exceptions; build/reload status is " +
+                "reported by the 'reload' and 'status' tools instead. Requires a connected " +
+                "application; use the 'status' tool first to check availability.",
+            inputSchema = toolSchema(LogLimitParam, required = emptyList())
+        ) { request ->
+            handleGetLogs(orchestration, logFile, request)
         }
 
         addTool(
@@ -525,6 +551,48 @@ private suspend fun handleGetUIError(
         }
     }
     textResult(json.toString())
+}
+
+/**
+ * Default number of trailing log lines returned by 'get_logs'. Overridable per call via the 'limit'
+ * parameter (use 0 to return everything available).
+ */
+private const val DEFAULT_LOG_LINES = 200
+
+/**
+ * Returns recent application log output by tailing the agent's '.chr.log' file.
+ * The file is written by the application/agent process,
+ * so the returned lines include output emitted before this MCP server attached. Requires a connected
+ * application; returns the standard "not connected" error otherwise.
+ */
+private suspend fun handleGetLogs(
+    orchestration: StateFlow<OrchestrationHandle?>,
+    logFile: Path,
+    request: CallToolRequest,
+): CallToolResult = withConnection(orchestration, "get_logs") { _ ->
+    val limit = (request.arguments?.get("limit")?.jsonPrimitive?.intOrNull ?: DEFAULT_LOG_LINES)
+        .coerceAtLeast(0)
+    if (!logFile.isRegularFile()) {
+        logger.debug { "get_logs: no log file at $logFile" }
+        return@withConnection textResult("No logs available (the application has not produced any logs yet).")
+    }
+    val lines = tailLines(logFile, if (limit == 0) Int.MAX_VALUE else limit)
+    logger.debug { "get_logs: returning ${lines.size} line(s) from $logFile" }
+    textResult(lines.joinToString("\n"))
+}
+
+/**
+ * Reads [file] streaming and retains only the last [maxLines] lines (oldest first).
+ */
+private fun tailLines(file: Path, maxLines: Int): List<String> {
+    val deque = ArrayDeque<String>()
+    file.bufferedReader().useLines { lines ->
+        lines.forEach { line ->
+            deque.addLast(line)
+            if (deque.size > maxLines) deque.removeFirst()
+        }
+    }
+    return deque.toList()
 }
 
 private suspend fun handleTakeScreenshot(

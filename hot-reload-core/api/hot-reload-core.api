@@ -358,6 +358,7 @@ public final class org/jetbrains/compose/reload/core/PidFileInfoKt {
 	public static final fun PidFileInfo (Ljava/util/Properties;)Lorg/jetbrains/compose/reload/core/PidFileInfo;
 	public static final fun PidFileInfo ([B)Lorg/jetbrains/compose/reload/core/Either;
 	public static final fun deleteMyPidFileIfExists (Ljava/nio/file/Path;Lorg/jetbrains/compose/reload/core/PidFileInfo;)Z
+	public static final fun getChrLogFile (Ljava/nio/file/Path;)Ljava/nio/file/Path;
 	public static final fun writePidFile (Ljava/nio/file/Path;Lorg/jetbrains/compose/reload/core/PidFileInfo;)V
 }
 

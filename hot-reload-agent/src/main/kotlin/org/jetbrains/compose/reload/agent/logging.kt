@@ -9,6 +9,7 @@ import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.Logger
 import org.jetbrains.compose.reload.core.Queue
 import org.jetbrains.compose.reload.core.WorkerThread
+import org.jetbrains.compose.reload.core.chrLogFile
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.displayString
@@ -24,7 +25,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.LogMessag
 import org.jetbrains.compose.reload.orchestration.toMessage
 import java.time.LocalDateTime
 import kotlin.io.path.createParentDirectories
-import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.outputStream
 
 private val logger = createLogger()
@@ -96,7 +96,7 @@ internal fun startWritingLogs() = launchTask task@{
 
     withThread(loggerThread) {
         val pidFile = HotReloadEnvironment.pidFile
-        val logFile = pidFile?.resolveSibling(pidFile.nameWithoutExtension + ".chr.log")
+        val logFile = pidFile?.chrLogFile
         val logFileWriter = logFile?.createParentDirectories()?.outputStream()?.bufferedWriter()
         invokeOnFinish { logFileWriter?.close() }
         invokeOnStop { logFileWriter?.close() }

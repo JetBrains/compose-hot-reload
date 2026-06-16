@@ -12,6 +12,7 @@ import java.util.Properties
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.inputStream
 import kotlin.io.path.isRegularFile
+import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.outputStream
 
 @DelicateHotReloadApi
@@ -61,6 +62,10 @@ public fun Path.writePidFile(pidFileInfo: PidFileInfo) {
     }
 }
 
+
+/** The agent log file associated with this PID file. */
+public val Path.chrLogFile: Path
+    get() = resolveSibling(nameWithoutExtension + ".chr.log")
 
 /**
  * Deletes the pid file if its content matches the given [expected] [PidFileInfo]
