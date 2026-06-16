@@ -240,9 +240,11 @@ layer and exposes the following tools:
 
 | Tool | Description                                                 |
 |------|-------------------------------------------------------------|
-| `status` | Checks whether a Compose application is currently connected |
+| `status` | Checks whether a Compose application is currently connected. When connected, also reports reload state, last error (with optional `lastErrorDetails`), counts of successful/failed reloads, and any windows currently failing to render (`uiErrorWindows`) |
 | `reload` | Recompiles the project and hot-reloads the changed classes into the running application. Reports whether classes were reloaded, or `{"status": "reloading"}` when it does not finish within the optional `timeout_seconds` (default 60) — in that case, poll `status` until `reloadState` is no longer `reloading` |
 | `list_windows` | Lists registered application windows as a JSON array (`id`, `title`, `x`, `y`, `width`, `height`) |
+| `get_ui_error` | Returns the runtime UI exception currently thrown while a window renders its UI (e.g. an exception in a `@Composable`). Reports `hasError`, and when true, the `message` and `stacktrace` lines |
+| `get_logs` | Returns the most recent log lines from the running Compose application as plain text (oldest first). The `limit` parameter caps the number of lines (default 200; 0 returns all) |
 | `take_screenshot` | Captures a screenshot of the application window |
 | `get_semantic_tree` | Returns the Compose semantic/accessibility tree of the application as JSON (component roles, names, descriptions, states, and bounds) |
 | `click` | Clicks the UI element with the given `nodeId`. The node must expose `onClick` in `get_semantic_tree` |
@@ -251,11 +253,14 @@ layer and exposes the following tools:
 | `scroll` | Scrolls a scrollable container (`nodeId`) by `deltaX` / `deltaY` logical pixels. The node must support the `ScrollBy` semantic action |
 | `scroll_to_index` | Scrolls a container (e.g. `LazyColumn` / `LazyRow`, `nodeId`) so the item at zero-based `index` becomes visible. The node must support the `ScrollToIndex` semantic action |
 | `resize_window` | Resizes the window to the given `width` × `height` in pixels (both must be positive) |
+| `restart` | Restarts the running Compose application. Waits for the new process to reconnect, or returns `{"reconnected": false}` when it does not finish within `timeout_seconds` (default 60) — in that case, poll `status` until `connected` is true |
+| `reset_ui` | Discards the current composition so all `remember`-ed state is dropped and the UI rebuilds from scratch |
 
 #### Targeting a specific window
 
-Every tool except `status`, `reload`, and `list_windows` accepts an optional `window_id` parameter
-and follows the same window-selection rules. An agent may use `list_windows` to discover the available IDs.
+Every tool except `status`, `reload`, `list_windows`, `get_logs`, `restart`, and `reset_ui` accepts an
+optional `window_id` parameter and follows the same window-selection rules. An agent may use
+`list_windows` to discover the available IDs.
 
 - **`window_id` provided** — the tool operates on that specific window.
 - **`window_id` omitted** — the tool operates on the *first registered window*, that is, the first window
