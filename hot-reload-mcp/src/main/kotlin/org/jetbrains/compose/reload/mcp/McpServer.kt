@@ -50,6 +50,7 @@ import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.CleanCompositionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
@@ -347,6 +348,16 @@ internal suspend fun startMcpServer(
             inputSchema = toolSchema(RestartTimeoutParam, required = emptyList())
         ) { request ->
             handleRestart(orchestration, request)
+        }
+
+        addTool(
+            name = "reset_ui",
+            description = "Reset the running Compose application's UI: discard the current " +
+                "composition so all `remember`-ed state is dropped and the UI rebuilds from scratch. " +
+                "Equivalent to clicking the 'Reset UI' button in the dev tools. " +
+                "Use the 'status' tool first to check that the application is connected."
+        ) { _ ->
+            handleResetUi(orchestration)
         }
     }
 
@@ -780,6 +791,14 @@ private suspend fun handleRestart(
                 """'connected' is true."}"""
         )
     }
+}
+
+private suspend fun handleResetUi(
+    orchestration: StateFlow<OrchestrationHandle?>,
+): CallToolResult = withConnection(orchestration, "reset_ui") { handle ->
+    logger.info { "reset_ui: sending CleanCompositionRequest" }
+    handle.send(CleanCompositionRequest())
+    textResult("""{"success":true}""")
 }
 
 /** Thrown by [resolveWindowId] when an explicit 'window_id' does not match any registered window. */

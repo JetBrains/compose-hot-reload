@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.mcp
 
 import io.modelcontextprotocol.kotlin.sdk.client.Client
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import io.modelcontextprotocol.kotlin.sdk.client.StdioClientTransport
 import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
@@ -31,6 +32,7 @@ import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.orchestration.OrchestrationHandle
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.CleanCompositionRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RecompileResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
@@ -1483,6 +1485,42 @@ class McpServerTest {
             val text = (result.content.first() as TextContent).text
             assertTrue(text.contains("\"success\":true"), "got: $text")
             assertTrue(text.contains("\"reconnected\":false"), "got: $text")
+        }
+    }
+
+    @Test
+    fun `test - reset_ui returns error when disconnected`() = runTest(timeout = 10.seconds) {
+        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
+        val client = createMcpClient(orchestration)
+
+        val result = client.callTool("reset_ui", emptyMap())
+        assertEquals(true, result.isError)
+        val text = (result.content.first() as TextContent).text
+        assertTrue(text.contains("No application is currently connected"))
+    }
+
+    @Test
+    fun `test - reset_ui sends CleanCompositionRequest`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+
+            // Subscribe to the broadcast before triggering reset_ui, otherwise we may miss
+            // the CleanCompositionRequest the handler broadcasts.
+            val messages = server.asChannel()
+            val observed = async {
+                messages.consumeAsFlow().filterIsInstance<CleanCompositionRequest>().first()
+            }
+
+            val result = client.callTool("reset_ui", emptyMap())
+            assertNotEquals(true, result.isError)
+            val text = (result.content.first() as TextContent).text
+            assertTrue(text.contains("\"success\":true"), "got: $text")
+            assertNotNull(observed.await())
         }
     }
 }
