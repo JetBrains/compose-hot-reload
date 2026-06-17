@@ -11,6 +11,11 @@ META-INF/hot-reload-gradle-core.shadow.kotlin_module
 META-INF/hot-reload-gradle-idea.shadow.kotlin_module
 META-INF/hot-reload-gradle-plugin.shadow.kotlin_module
 META-INF/hot-reload-orchestration.shadow.kotlin_module
+META-INF/org/
+META-INF/org/jetbrains/
+META-INF/org/jetbrains/kotlinx/
+META-INF/org/jetbrains/kotlinx/kotlinx-serialization-core-jvm/
+META-INF/org/jetbrains/kotlinx/kotlinx-serialization-core-jvm/verification.properties
 META-INF/services/
 META-INF/services/org.jetbrains.compose.reload.orchestration.OrchestrationMessageEncoder
 META-INF/services/org.jetbrains.compose.reload.orchestration.OrchestrationStateEncoder

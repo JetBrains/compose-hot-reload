@@ -90,7 +90,7 @@
           "group": "io.modelcontextprotocol",
           "module": "kotlin-sdk-server",
           "version": {
-            "requires": "0.11.0"
+            "requires": "0.13.0"
           }
         },
         {
