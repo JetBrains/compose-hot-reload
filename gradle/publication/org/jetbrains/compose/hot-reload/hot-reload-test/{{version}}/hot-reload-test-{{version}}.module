@@ -84,35 +84,35 @@
           "group": "org.jetbrains.kotlinx",
           "module": "kotlinx-coroutines-core",
           "version": {
-            "requires": "1.10.2"
+            "requires": "1.11.0"
           }
         },
         {
           "group": "org.jetbrains.kotlinx",
           "module": "kotlinx-coroutines-test",
           "version": {
-            "requires": "1.10.2"
+            "requires": "1.11.0"
           }
         },
         {
           "group": "org.jetbrains.kotlinx",
           "module": "kotlinx-coroutines-swing",
           "version": {
-            "requires": "1.10.2"
+            "requires": "1.11.0"
           }
         },
         {
           "group": "org.ow2.asm",
           "module": "asm-tree",
           "version": {
-            "requires": "9.9.1"
+            "requires": "9.10.1"
           }
         },
         {
           "group": "org.ow2.asm",
           "module": "asm",
           "version": {
-            "requires": "9.9.1"
+            "requires": "9.10.1"
           }
         },
         {

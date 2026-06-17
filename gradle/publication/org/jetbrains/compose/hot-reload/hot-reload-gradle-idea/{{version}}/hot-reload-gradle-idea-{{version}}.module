@@ -60,7 +60,7 @@
           "group": "org.jetbrains.kotlinx",
           "module": "kotlinx-serialization-json",
           "version": {
-            "requires": "1.9.0"
+            "requires": "1.11.0"
           }
         }
       ],

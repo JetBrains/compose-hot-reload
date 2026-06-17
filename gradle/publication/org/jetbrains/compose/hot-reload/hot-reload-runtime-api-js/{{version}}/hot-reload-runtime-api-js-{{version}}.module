@@ -94,7 +94,7 @@
           "group": "org.jetbrains.kotlinx",
           "module": "kotlinx-coroutines-core",
           "version": {
-            "requires": "1.10.2"
+            "requires": "1.11.0"
           }
         }
       ],
@@ -177,7 +177,7 @@
           "group": "org.jetbrains.kotlinx",
           "module": "kotlinx-coroutines-core",
           "version": {
-            "requires": "1.10.2"
+            "requires": "1.11.0"
           }
         }
       ],
