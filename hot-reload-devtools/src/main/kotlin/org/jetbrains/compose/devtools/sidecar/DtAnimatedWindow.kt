@@ -7,13 +7,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.awt.ComposeDialog
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.window.DialogModalityType
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.DialogWindowScope
+import androidx.compose.ui.window.WindowDecoration
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberDialogState
@@ -49,6 +52,7 @@ internal val devToolsUseTransparency = (devToolsTransparencyEnabled && transpare
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DtAnimatedWindow(
     windowId: WindowId? = null,
@@ -82,12 +86,13 @@ fun DtAnimatedWindow(
         title = title,
         icon = icon,
         state = rememberDialogState(position = initialPosition, size = size),
-        undecorated = undecorated,
+        decoration = if (undecorated) WindowDecoration.Undecorated() else WindowDecoration.SystemDefault,
         transparent = transparent,
         resizable = resizable,
         enabled = enabled,
         focusable = focusable,
         alwaysOnTop = alwaysOnTopValue,
+        modalityType = DialogModalityType.Modeless,
         onPreviewKeyEvent = onPreviewKeyEvent,
         onKeyEvent = onKeyEvent,
     ) {
