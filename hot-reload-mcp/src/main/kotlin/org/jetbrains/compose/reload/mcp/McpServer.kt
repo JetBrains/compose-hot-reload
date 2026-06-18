@@ -71,7 +71,9 @@ import java.io.OutputStream
 import java.nio.file.Path
 import java.util.Base64
 import kotlin.io.path.bufferedReader
+import kotlin.io.path.createParentDirectories
 import kotlin.io.path.isRegularFile
+import kotlin.io.path.writeBytes
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -116,6 +118,9 @@ private val RestartTimeoutParam = Property("timeout_seconds", "integer",
         "restart request (default $DEFAULT_RESTART_TIMEOUT_SECONDS). Keep this at or below your own " +
         "tool-call timeout; if it expires the tool returns 'reconnected':false and you should poll the " +
         "'status' tool until 'connected' is true again.")
+private val SaveToParam = Property("save_to", "string",
+    description = "Absolute path where the screenshot image should be saved on disk. " +
+        "When omitted the screenshot is only returned as inline image data.")
 
 /** Builds a [ToolSchema] from [properties]; by default all of them are required. */
 private fun toolSchema(
@@ -222,7 +227,7 @@ internal suspend fun startMcpServer(
             name = "take_screenshot",
             description = "Take a screenshot of the running Compose application window. " +
                 "Use the 'status' tool first to check if the application is connected.",
-            inputSchema = toolSchema(WindowIdParam, required = emptyList())
+            inputSchema = toolSchema(WindowIdParam, SaveToParam, required = emptyList())
         ) { request ->
             handleTakeScreenshot(orchestration, request)
         }
@@ -632,6 +637,8 @@ private suspend fun handleTakeScreenshot(
     orchestration: StateFlow<OrchestrationHandle?>,
     request: CallToolRequest,
 ): CallToolResult = withWindow(orchestration, "take_screenshot", request.arguments) { handle, resolvedId ->
+    val saveTo = (request.arguments?.get(SaveToParam.name) as? JsonPrimitive)?.contentOrNull
+        ?.let { Path.of(it) }
     try {
         val screenshotRequest = ScreenshotRequest(windowId = resolvedId)
         logger.info { "take_screenshot: sending request '${screenshotRequest.messageId}'" }
@@ -649,8 +656,17 @@ private suspend fun handleTakeScreenshot(
             }
             else -> {
                 logger.debug { "take_screenshot: received ${screenshot.data.size} bytes (${screenshot.format})" }
-                val base64 = Base64.getEncoder().encodeToString(screenshot.data)
-                CallToolResult(content = listOf(ImageContent(data = base64, mimeType = "image/${screenshot.format}")))
+                val content = buildList {
+                    if (saveTo != null) {
+                        saveTo.createParentDirectories()
+                        saveTo.writeBytes(screenshot.data)
+                        logger.info { "take_screenshot: saved to '$saveTo'" }
+                        add(TextContent("Screenshot saved to: $saveTo"))
+                    }
+                    val base64 = Base64.getEncoder().encodeToString(screenshot.data)
+                    add(ImageContent(data = base64, mimeType = "image/${screenshot.format}"))
+                }
+                CallToolResult(content = content)
             }
         }
     } catch (e: Exception) {

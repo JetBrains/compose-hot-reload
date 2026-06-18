@@ -12,6 +12,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import io.modelcontextprotocol.kotlin.sdk.client.StdioClientTransport
 import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
+import io.modelcontextprotocol.kotlin.sdk.types.ImageContent
 import io.modelcontextprotocol.kotlin.sdk.types.Implementation
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,9 +59,12 @@ import java.io.PipedOutputStream
 import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.createTempFile
+import kotlin.io.path.exists
+import kotlin.io.path.readBytes
 import kotlin.io.path.writeText
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
@@ -833,6 +837,43 @@ class McpServerTest {
             assertEquals(true, result.isError)
             val text = (result.content.first() as TextContent).text
             assertTrue(text.contains("Window 'ghost' not found"), "unexpected error message: $text")
+        }
+    }
+
+    @Test
+    fun `test - take_screenshot saves image to disk and still returns it`() = runTest(timeout = 10.seconds) {
+        val server = startOrchestrationServer()
+        server.use {
+            val port = server.port.awaitOrThrow()
+            val toolingClient = connectOrchestrationClient(OrchestrationClientRole.Tooling, port).getOrThrow()
+
+            val imageBytes = ByteArray(8) { it.toByte() }
+            launch {
+                val request = server.asFlow().filterIsInstance<ScreenshotRequest>().first()
+                server.send(ScreenshotResult(
+                    screenshotRequestId = request.messageId,
+                    format = "png",
+                    data = imageBytes,
+                ))
+            }
+
+            val orchestration = MutableStateFlow<OrchestrationHandle?>(toolingClient)
+            val client = createMcpClient(orchestration)
+            registerSingleWindow(server, client)
+
+            // A nested path also exercises automatic creation of missing parent directories.
+            val target = createTempDirectory().resolve("nested/dir/screenshot.png")
+            val result = client.callTool("take_screenshot", mapOf("save_to" to target.toString()))
+            assertNotEquals(true, result.isError)
+
+            // The file is written with the raw image bytes.
+            assertTrue(target.exists(), "expected screenshot file to be written")
+            assertContentEquals(imageBytes, target.readBytes())
+
+            // The result reports the save and still includes the inline image.
+            val saveMessage = result.content.filterIsInstance<TextContent>().first().text
+            assertTrue(saveMessage.contains(target.toString()), "unexpected save message: $saveMessage")
+            assertTrue(result.content.any { it is ImageContent }, "expected inline image content")
         }
     }
 
