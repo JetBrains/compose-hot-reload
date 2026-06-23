@@ -98,7 +98,10 @@ fun CoroutineScope.launchReloadStateActor(
         }
 
         if (message is OrchestrationMessage.BuildFinished ||
-            (message is LogMessage && message.message.contains("BUILD SUCCESSFUL"))
+            (message is LogMessage && message.message.contains("BUILD SUCCESSFUL")) ||
+            // In continuous/auto mode a 'RecompileRequest' does not start a build,
+            // so the recompiler answers it immediately with a 'RecompileResult'.
+            (message is OrchestrationMessage.RecompileResult)
         ) update { state ->
             if (state !is ReloadState.Reloading) return@update state
             if (state.reloadRequestId == null) return@update ReloadState.Ok()
