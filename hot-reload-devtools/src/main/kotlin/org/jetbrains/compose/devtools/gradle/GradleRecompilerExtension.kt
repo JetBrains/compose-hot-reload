@@ -42,7 +42,7 @@ internal class GradleRecompilerExtension : RecompilerExtension {
         }
 
         /* Side Effect */
-        if (HotReloadEnvironment.gradleWarmupEnabled || HotReloadEnvironment.gradleBuildContinuous) {
+        if (HotReloadEnvironment.gradleWarmupEnabled) {
             OrchestrationMessage.RecompileRequest().sendAsync()
         }
 
