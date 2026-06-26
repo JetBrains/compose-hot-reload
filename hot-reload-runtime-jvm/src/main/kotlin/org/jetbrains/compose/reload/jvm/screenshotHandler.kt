@@ -53,14 +53,19 @@ internal fun handleScreenshotRequest(request: ScreenshotRequest, window: Window,
 /**
  * Captures the window content using [Robot.createScreenCapture].
  *
- * It captures the window title in addition to Compose content,
- * so AI agent can analyze and understand the full context of the window.
+ * The window decorations (title bar, borders) are excluded so only the Compose content is captured.
  */
 internal fun captureWindow(window: Window): Try<BufferedImage> {
     return Try {
         val robot = Robot()
         val location = window.locationOnScreen
-        val rect = Rectangle(location.x, location.y, window.width, window.height)
+        val insets = window.insets
+        val rect = Rectangle(
+            location.x + insets.left,
+            location.y + insets.top,
+            window.width - insets.left - insets.right,
+            window.height - insets.top - insets.bottom,
+        )
         robot.createScreenCapture(rect)
     }
 }
