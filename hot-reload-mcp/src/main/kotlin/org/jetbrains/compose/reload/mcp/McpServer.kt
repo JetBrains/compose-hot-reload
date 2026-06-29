@@ -248,6 +248,7 @@ internal suspend fun startMcpServer(
         addTool(
             name = "take_screenshot",
             description = "Take a screenshot of the running Compose application window. " +
+                "Captures only the Compose content; window decorations (title bar, borders) are excluded. " +
                 "Use the 'status' tool first to check if the application is connected.",
             inputSchema = toolSchema(WindowIdParam, SaveToParam, required = emptyList())
         ) { request ->
