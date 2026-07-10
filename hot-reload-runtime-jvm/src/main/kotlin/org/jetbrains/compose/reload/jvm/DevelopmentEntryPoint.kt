@@ -26,7 +26,6 @@ import org.jetbrains.compose.devtools.api.UIErrorState
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.agent.orchestration
 import org.jetbrains.compose.reload.agent.sendAsync
-import org.jetbrains.compose.reload.agent.sendBlocking
 import org.jetbrains.compose.reload.core.HotReloadEnvironment.reloadEffectsEnabled
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
@@ -79,6 +78,28 @@ public fun DevelopmentEntryPoint(
         }
     }
 
+    // CMP-10248: use error state API to detect UI errors for Compose 1.11+.
+    // Use runCatching() workaround below for older Compose.
+    if (isRecomposerErrorStateApiAvailable) LaunchedEffect(windowId) {
+        var reported: Throwable? = null
+        recomposerErrors().collect { error ->
+            when {
+                // A new error detected by the recomposer
+                error != null && error !== reported -> {
+                    logger.error("UI exception:", error)
+                    reported = error
+                    publishUIError(windowId, error)
+                }
+
+                // The recomposer recovered: clear the overlay
+                error == null && reported != null -> {
+                    unpublishUIError(windowId)
+                    reported = null
+                }
+            }
+        }
+    }
+
     if (window != null) {
         handleWindowRequests<ScreenshotRequest>(windowId, { it.windowId }) { handleScreenshotRequest(it, window, windowId) }
         handleWindowRequests<SemanticTreeRequest>(windowId, { it.windowId }) { handleSemanticTreeRequest(it, window, windowId) }
@@ -99,27 +120,14 @@ public fun DevelopmentEntryPoint(
             }
         }.onFailure { exception ->
             logger.error("Failed invoking 'JvmDevelopmentEntryPoint':", exception)
-            hotReloadState.update { state -> state.copy(uiError = exception) }
-            UIException(
-                windowId = windowId,
-                message = exception.message,
-                stacktrace = exception.stackTrace.toList()
-            ).sendBlocking()
-            if (windowId != null) updateUIErrorState { errors ->
-                errors + (windowId to UIErrorState.UIError(
-                    message = exception.message,
-                    stacktrace = exception.stackTrace.map { it.toString() },
-                ))
-            }
-
+            if (!isRecomposerErrorStateApiAvailable) publishUIError(windowId, exception)
         }.onSuccess {
-            hotReloadState.update { state -> state.copy(uiError = null) }
+            if (!isRecomposerErrorStateApiAvailable) unpublishUIError(windowId)
             UIRendered(
                 windowId = windowId,
                 reloadRequestId = currentHotReloadState.reloadRequestId,
                 currentHotReloadState.iteration
             ).sendAsync()
-            if (windowId != null) updateUIErrorState { errors -> errors - windowId }
         }.getOrThrow()
     }
 
@@ -147,6 +155,29 @@ private inline fun <reified T : OrchestrationMessage> handleWindowRequests(
             .filter { request -> windowIdOf(request) == null || windowIdOf(request) == windowId }
             .collect { request -> respond(request).sendAsync() }
     }
+}
+
+/**
+ * Publishes [exception] to the devtools error overlay (the per-window [UIErrorState]) and broadcasts a
+ * [UIException] so the devtools error overlay can show its stack trace.
+ */
+private fun publishUIError(windowId: WindowId?, exception: Throwable) {
+    if (windowId != null) updateUIErrorState { errors ->
+        errors + (windowId to UIErrorState.UIError(
+            message = exception.message,
+            stacktrace = exception.stackTrace.map { it.toString() },
+        ))
+    }
+    UIException(
+        windowId = windowId,
+        message = exception.message,
+        stacktrace = exception.stackTrace.toList()
+    ).sendAsync()
+}
+
+/** Removes the [windowId] entry from the overlay ([UIErrorState]). */
+private fun unpublishUIError(windowId: WindowId?) {
+    if (windowId != null) updateUIErrorState { errors -> errors - windowId }
 }
 
 private fun updateUIErrorState(

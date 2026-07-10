@@ -16,7 +16,6 @@ internal data class HotReloadState(
     val reloadRequestId: OrchestrationMessageId? = null,
     val iteration: Int,
     val reloadError: Throwable? = null,
-    val uiError: Throwable? = null,
     val key: Int = 0,
 ) {
     override fun toString(): String {
@@ -25,7 +24,6 @@ internal data class HotReloadState(
             append("iteration=$iteration, ")
             append("key=$key, ")
             if (reloadError != null) append("error=${reloadError.message}, ")
-            if (uiError != null) append("uiError=${uiError.message}, ")
             append(" }")
         }
     }
@@ -40,7 +38,6 @@ internal val hotReloadState: MutableStateFlow<HotReloadState> = MutableStateFlow
                 reloadRequestId = reloadRequestId,
                 iteration = state.iteration + 1,
                 reloadError = result.exceptionOrNull(),
-                key = state.key + if (state.uiError != null) 1 else 0,
             )
         }
     }

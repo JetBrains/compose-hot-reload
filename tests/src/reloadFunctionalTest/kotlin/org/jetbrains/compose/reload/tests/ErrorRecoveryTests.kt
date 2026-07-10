@@ -8,6 +8,7 @@ package org.jetbrains.compose.reload.tests
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
+import org.jetbrains.compose.reload.test.gradle.MinComposeVersion
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceText
@@ -45,6 +46,47 @@ class ErrorRecoveryTests {
             code.replaceText("""error("Foo")""", """TestText("Recovered")""")
             requestAndAwaitReload()
             fixture.checkScreenshot("1-recovered")
+        }
+    }
+
+    /**
+     * Regression test for CMP-10248: an exception thrown while *recomposing* the content of a
+     * subcomposition (here a [androidx.compose.foundation.layout.BoxWithConstraints], composed in a
+     * separate child composition) is captured by the Compose `Recomposer`'s error state. It must result into
+     * [OrchestrationMessage.UIException] so the error overlay shows it instead of staying hidden in the logs.
+     */
+    @HotReloadTest
+    @QuickTest
+    @MinComposeVersion("1.11.0")
+    fun `subcomposition error is reported as UIException`(fixture: HotReloadTestFixture) = fixture.runTest {
+        fixture.initialSourceCode(
+            """
+            import androidx.compose.foundation.layout.BoxWithConstraints
+            import androidx.compose.runtime.Composable
+            import androidx.compose.runtime.State
+            import androidx.compose.runtime.mutableStateOf
+            import androidx.compose.runtime.remember
+            import org.jetbrains.compose.reload.test.*
+
+            @Composable
+            fun Failing(fail: State<Boolean>) {
+                BoxWithConstraints {
+                    if (fail.value) error("Foo") else TestText("Hello")
+                }
+            }
+
+            fun main() {
+                screenshotTestApplication {
+                    val fail = remember { mutableStateOf(false) }
+                    onTestEvent { fail.value = true }
+                    Failing(fail)
+                }
+            }
+        """.trimIndent()
+        )
+
+        fixture.sendTestEvent {
+            assertEquals("Foo", skipToMessage<OrchestrationMessage.UIException>().message)
         }
     }
 
