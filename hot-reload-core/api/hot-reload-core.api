@@ -233,6 +233,7 @@ public final class org/jetbrains/compose/reload/core/FutureKt {
 
 public final class org/jetbrains/compose/reload/core/HotReloadEnvironment {
 	public static final field INSTANCE Lorg/jetbrains/compose/reload/core/HotReloadEnvironment;
+	public final fun getCompositionHardResetEnabled ()Z
 	public final fun getDevToolsDetached ()Z
 	public final fun getDevToolsEnabled ()Z
 	public final fun getDevToolsIsHeadless ()Z
@@ -254,6 +255,7 @@ public final class org/jetbrains/compose/reload/core/HotReloadEnvironment {
 
 public final class org/jetbrains/compose/reload/core/HotReloadProperty : java/lang/Enum {
 	public static final field AutoJetBrainsRuntimeProvisioningEnabled Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field CompositionHardResetEnabled Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field DevToolsDetached Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field DevToolsEnabled Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field DevToolsIsHeadless Lorg/jetbrains/compose/reload/core/HotReloadProperty;

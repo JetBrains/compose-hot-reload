@@ -234,6 +234,21 @@ ReloadEffectsEnabled:
   documentation: |
     Enable reload effects that are shown in the UI when a reload is triggered.
 
+CompositionHardResetEnabled:
+  key: compose.reload.compositionHardResetEnabled
+  type: boolean
+  default: "true"
+  target: [ application ]
+  visibility: delicate
+  documentation: |
+    Selects the strategy used by 'Reset UI' button.
+    - true: hard reset - recreates the application window. 
+            So the window blinks but the app recovers from non-consistent/corrupted state 
+            that can happen due to erroneous reloads.  
+    - false: light reset - dispose and recompose the entry point subtree. 
+             The window does not blink but may fail to recover from non-consistent/corrupted state 
+             due to possible bugs in Compose Runtime. 
+
 IntelliJDebuggerDispatchPort:
   key: compose.reload.idea.debugger.dispatch.port
   type: int

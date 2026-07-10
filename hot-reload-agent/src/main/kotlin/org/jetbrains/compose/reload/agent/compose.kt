@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.agent
 
+import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.analysis.ClassId
 import org.jetbrains.compose.reload.analysis.ComposeGroupKey
 import org.jetbrains.compose.reload.analysis.Ids
@@ -16,6 +17,7 @@ import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage.DirtyScope
 import java.lang.instrument.ClassFileTransformer
+import java.lang.reflect.InvocationTargetException
 import java.lang.instrument.Instrumentation
 import java.security.ProtectionDomain
 import java.util.WeakHashMap
@@ -138,3 +140,50 @@ private fun invalidateGroupsWithKey(loader: ClassLoader, key: ComposeGroupKey) {
         .singleOrNull { it.name.contains("invalidateGroupsWithKey") }
         ?.apply { invoke(recomposerCompanion, key.key) }
 }
+
+/**
+ * Forces a full composition teardown and rebuild ("hard" reload).
+ *
+ * Unlike [invalidateGroupsWithKey] — which only invalidates changed groups and, crucially, *skips*
+ * any recomposer whose current error is non-recoverable — this disposes every running recomposer's
+ * compositions and recomposes them from scratch (Compose's 'saveStateAndDisposeForHotReload' followed
+ * by 'loadStateAndComposeForHotReload', which resets all error states).
+ */
+@InternalHotReloadApi
+fun reloadCompositionState() {
+    runOnUiThreadBlocking {
+        composeClassLoadersLock.withLock {
+            composeClassLoaders.keys.forEach { loader -> reloadCompositionState(loader) }
+        }
+    }
+}
+
+private fun reloadCompositionState(loader: ClassLoader) {
+    val recomposerClass = loader.loadClass(Ids.Recomposer.classId.toFqn())
+    val recomposerCompanion = recomposerClass.getField(Ids.Recomposer.companion.fieldName).get(null)
+    val recomposerCompanionClass = loader.loadClass(Ids.Recomposer.Companion.classId.toFqn())
+
+    val save = recomposerCompanionClass.methods
+        .singleOrNull { it.name.contains("saveStateAndDisposeForHotReload") }
+    val load = recomposerCompanionClass.methods
+        .singleOrNull { it.name.contains("loadStateAndComposeForHotReload") }
+
+    if (save == null || load == null) {
+        logger.warn("'saveStateAndDisposeForHotReload'/'loadStateAndComposeForHotReload' not found (${loader.name})")
+        return
+    }
+
+    val token = try {
+        save.invoke(recomposerCompanion)
+    } catch (t: InvocationTargetException) {
+        logger.warn("'saveStateAndDisposeForHotReload' failed", t.cause ?: t)
+        return
+    }
+
+    try {
+        load.invoke(recomposerCompanion, token)
+    } catch (t: InvocationTargetException) {
+        logger.warn("'loadStateAndComposeForHotReload' completed with a trailing error", t.cause ?: t)
+    }
+}
+
