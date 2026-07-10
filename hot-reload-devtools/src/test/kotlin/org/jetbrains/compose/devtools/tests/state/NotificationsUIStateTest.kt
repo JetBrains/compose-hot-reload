@@ -105,6 +105,39 @@ class NotificationsUIStateTest {
         awaitNotifications { it.notifications.isEmpty() }
     }
 
+    @Test
+    fun `ui error notification is updated in place when the error changes`() = runNotificationsTest {
+        val windowId = WindowId("")
+        awaitNotifications { it.notifications.isEmpty() }
+
+        val first = UIErrorDescription("UI Exception", "first", listOf("at Foo.kt:1"))
+        ErrorUIState.update { it.copy(errors = it.errors + (windowId to first)) }
+        reloadMainThread.awaitIdle()
+        testScheduler.advanceUntilIdle()
+        awaitNotifications { it.notifications.size == 1 }
+
+        val firstNotification = currentNotifications().single()
+        assertEquals("first", firstNotification.message)
+        assertEquals(listOf("at Foo.kt:1"), firstNotification.details)
+
+        // The error for the same window changes -- existing notification must be updated
+        val second = UIErrorDescription("UI Exception", "second", listOf("at Bar.kt:2"))
+        ErrorUIState.update { it.copy(errors = it.errors + (windowId to second)) }
+        reloadMainThread.awaitIdle()
+        testScheduler.advanceUntilIdle()
+        awaitNotifications { it.notifications.singleOrNull()?.message == "second" }
+
+        val updated = currentNotifications().single()
+        assertEquals(firstNotification.id, updated.id) // same notification, updated in place
+        assertEquals("second", updated.message)
+        assertEquals(listOf("at Bar.kt:2"), updated.details)
+
+        ErrorUIState.update { it.copy(errors = it.errors - windowId) }
+        reloadMainThread.awaitIdle()
+        testScheduler.advanceUntilIdle()
+        awaitNotifications { it.notifications.isEmpty() }
+    }
+
     private fun runNotificationsTest(
         testBody: suspend TestScope.() -> Unit
     ) = runTest(States() + Events()) {

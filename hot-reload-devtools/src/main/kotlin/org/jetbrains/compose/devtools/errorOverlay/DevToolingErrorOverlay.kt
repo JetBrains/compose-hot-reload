@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,9 +35,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
-import io.sellmair.evas.compose.composeFlow
+import io.sellmair.evas.compose.composeValue
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.devtools.Tag
 import org.jetbrains.compose.devtools.sendAsync
 import org.jetbrains.compose.devtools.sidecar.DtConsole
@@ -62,12 +60,10 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownR
 
 @Composable
 internal fun DevToolingErrorOverlay(windowId: WindowId, windowState: WindowState) {
-    val uiExceptionState by ErrorUIState.composeFlow()
-        .map { value -> value.errors[windowId] }
-        .collectAsState(initial = null)
+    val uiExceptionState = ErrorUIState.composeValue().errors[windowId]
 
     uiExceptionState?.let { error ->
-        var showWindow by remember { mutableStateOf(true) }
+        var showWindow by remember(error) { mutableStateOf(true) }
         if (!showWindow) return@let
 
         Window(

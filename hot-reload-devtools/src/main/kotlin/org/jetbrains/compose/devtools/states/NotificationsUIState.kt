@@ -96,10 +96,24 @@ fun CoroutineScope.launchNotificationsUIState() = launchState(NotificationsUISta
 
         ErrorUIState.collect { errors ->
             for ((windowId, error) in errors.errors) {
-                if (windowId !in notifiedErrors) {
-                    val notification = error.toNotification()
-                    notifiedErrors[windowId] = error to notification
-                    NotificationsUIState.update { it + notification }
+                val existing = notifiedErrors[windowId]
+                when {
+                    existing == null -> {
+                        val notification = error.toNotification()
+                        notifiedErrors[windowId] = error to notification
+                        NotificationsUIState.update { it + notification }
+                    }
+                    // The error for this window changed (a different exception after a reload):
+                    // update the existing notification.
+                    existing.first != error -> {
+                        val updated = existing.second.copy(
+                            title = error.title,
+                            message = error.message.orEmpty(),
+                            details = error.stacktrace,
+                        )
+                        notifiedErrors[windowId] = error to updated
+                        NotificationsUIState.update { it.replace(updated) }
+                    }
                 }
             }
 
