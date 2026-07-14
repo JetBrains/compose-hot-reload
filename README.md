@@ -276,9 +276,9 @@ All window-targeting tools follow the same window-selection rules. An agent may 
 When the MCP server starts, it waits for the app to launch, detects shutdown, and
 reconnects automatically on restart.
 
-### Run the MCP server
+### The MCP server Gradle task
 
-Start the MCP server alongside your application using the Gradle task:
+Compose Hot Reload exposes the MCP server through a Gradle task:
 
 ```shell
 ./gradlew :app:hotMcpServerJvm
@@ -289,10 +289,15 @@ Start the MCP server alongside your application using the Gradle task:
 The task name follows the same naming convention as the run tasks. For a custom JVM target named `desktop`,
 the task would be `:app:hotMcpServerDesktop`.
 
+Note: you don't need to run this task yourself — your AI agent launches the server for you once you point it to
+this task (see below). The server does not require a running application: it starts, waits for the app to
+launch, and then connects automatically. Running the task manually is only useful if you want to start or
+inspect the server on your own.
+
 ### Configure an AI agent
 
-To configure an AI agent, point your AI agent's MCP client configuration to the Gradle task. 
-For example, in a `.mcp.json`:
+To connect an AI agent, point its MCP client configuration to the Gradle task shown above. The agent then
+starts and stops the server on its own — there is no need to launch it manually. For example, in a `.mcp.json`:
 
 ```json
 {
@@ -309,6 +314,13 @@ For example, in a `.mcp.json`:
   }
 }
 ```
+
+Note: the short, unqualified `hotMcpServer` task name is enough here — you don't need the project path or JVM
+target suffix from the previous example. Gradle resolves an unqualified name against the current project and
+all its subprojects, so it finds the task wherever it is defined. Gradle's camelCase task-name abbreviation also
+matches `hotMcpServer` against the target-specific task (`hotMcpServerJvm`, `hotMcpServerDesktop`, …). In a
+plain Kotlin/JVM module the task is simply named `hotMcpServer`. If a module declares more than one JVM
+target, the short name becomes ambiguous — use the explicit `:<module>:hotMcpServer<Target>` form instead.
 
 ## FAQ
 
