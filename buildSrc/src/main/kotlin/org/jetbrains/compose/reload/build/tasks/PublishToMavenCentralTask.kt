@@ -23,6 +23,10 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headers
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -111,11 +115,42 @@ abstract class PublishToMavenCentralTask : DefaultTask() {
                 error("Deployment failed (${statusResponse.status}):\n ${statusResponse.bodyAsText()}")
             }
 
-            logger.quiet(statusResponse.bodyAsText())
-            if (statusResponse.bodyAsText().contains("PUBLISHED")) break
-            if (statusResponse.bodyAsText().contains("FAILED")) {
-                error("Deployment failed (${statusResponse.status}):\n ${statusResponse.bodyAsText()}")
+            val body = statusResponse.bodyAsText()
+            logger.quiet(body)
+
+            when (deploymentState(body)) {
+                "PUBLISHED" -> break
+                "FAILED" -> {
+                    /*
+                     * A deployment that fails *only* because every component already exists means this exact
+                     * version was published before (e.g. a previous run uploaded successfully but reported a
+                     * transient gateway error such as '502 Bad Gateway'). Re-publishing the same version is a
+                     * no-op on Maven Central, so we treat it as success to keep this task idempotent instead of
+                     * blocking the release forever.
+                     */
+                    if (isAlreadyPublished(body)) {
+                        logger.warn(
+                            "Deployment '${deploymentName.get()}' is already published to Maven Central " +
+                                "(all components already exist); treating as success."
+                        )
+                        break
+                    }
+                    error("Deployment failed (${statusResponse.status}):\n $body")
+                }
             }
         }
+    }
+
+    private fun deploymentState(body: String): String? =
+        Json.parseToJsonElement(body).jsonObject["deploymentState"]?.jsonPrimitive?.content
+
+    /**
+     * `true` when the deployment failed and every reported error is an "already exists" error, i.e. the
+     * deployment failed solely because this version is already present on Maven Central.
+     */
+    private fun isAlreadyPublished(body: String): Boolean {
+        val errors = Json.parseToJsonElement(body).jsonObject["errors"]?.jsonObject ?: return false
+        val messages = errors.values.flatMap { value -> value.jsonArray.map { it.jsonPrimitive.content } }
+        return messages.isNotEmpty() && messages.all { "already exists" in it }
     }
 }
