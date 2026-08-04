@@ -5,11 +5,13 @@
 
 package org.jetbrains.compose.reload.jvm
 
+import org.jetbrains.compose.reload.core.Right
 import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.ifFailureThen
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.warn
@@ -51,11 +53,42 @@ internal fun handleScreenshotRequest(request: ScreenshotRequest, window: Window,
 }
 
 /**
- * Captures the window content using [Robot.createScreenCapture].
+ * Captures the window content.
  *
- * The window decorations (title bar, borders) are excluded so only the Compose content is captured.
+ * The window decorations (title bar, borders) are excluded, so only the Compose content is captured.
  */
 internal fun captureWindow(window: Window): Try<BufferedImage> {
+    return captureWindowCompose(window)
+        .ifFailureThen {
+            captureWindowViaRobot(window)
+        }
+}
+
+/**
+ * Captures the window content using the Compose [DevelopmentEntryPoint].
+ */
+private fun captureWindowCompose(window: Window): Try<BufferedImage> {
+    fun apiNotAvailable() = Right(UnsupportedOperationException("Not implemented"))
+
+    return Try {
+        // After upgrading to Compose 1.13 or later, use this code instead of reflection
+        // (window as? ComposeDesktopEntryPoint)?.captureContentToImage() ?: error("API not available")
+
+        val desktopEntryPointInterface = Class.forName("androidx.compose.ui.ComposeDesktopEntryPoint")
+        if (!desktopEntryPointInterface.isInstance(window))
+            return apiNotAvailable()
+
+        val captureContentToImageMethod = desktopEntryPointInterface.getDeclaredMethod("captureContentToImage")
+        captureContentToImageMethod.invoke(window) as BufferedImage
+    }
+}
+
+/**
+ * Captures the window content using [Robot.createScreenCapture].
+ *
+ * The window decorations (title bar, borders) are excluded, so only the Compose content is captured.
+ */
+private fun captureWindowViaRobot(window: Window): Try<BufferedImage> {
     return Try {
         val robot = Robot()
         val location = window.locationOnScreen
