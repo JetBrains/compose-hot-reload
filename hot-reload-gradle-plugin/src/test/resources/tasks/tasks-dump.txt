@@ -1,6 +1,7 @@
 hotDevJvm (ComposeHotDevRun)
 hotDevJvmArgfile (ComposeHotArgFileTask)
 hotDevJvmAsync (ComposeHotAsyncRun)
+hotMcpHeadlessJvmArgfile (ComposeHotArgFileTask)
 hotMcpServerJvm (ComposeHotMcpServer)
 hotReloadJvmDev (ComposeHotReloadTask)
 hotReloadJvmMain (ComposeHotReloadTask)
