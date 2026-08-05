@@ -8,7 +8,6 @@
 package org.jetbrains.compose.reload.jvm
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Composer
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.currentComposer
 import androidx.compose.runtime.reflect.getDeclaredComposableMethod
@@ -38,12 +37,16 @@ private fun run(args: Array<String>) {
     /* Parse arguments */
     var className: String? = null
     var funName: String? = null
+    var width: Int? = null
+    var height: Int? = null
 
     val argsIterator = args.toList().listIterator()
     while (argsIterator.hasNext()) {
         when (val value = argsIterator.next()) {
             "--className" -> className = argsIterator.next()
             "--funName" -> funName = argsIterator.next()
+            "--width" -> width = argsIterator.next().toInt()
+            "--height" -> height = argsIterator.next().toInt()
             else -> error("Unknown argument: $value")
         }
     }
@@ -53,22 +56,25 @@ private fun run(args: Array<String>) {
 
     /* Find method and meta information */
     val resolvedClass = Class.forName(className)
-    val method = resolvedClass.getDeclaredMethod(funName, Composer::class.java, Int::class.javaPrimitiveType)
-    val annotation = method.getDeclaredAnnotation(DevelopmentEntryPoint::class.java)
+    val annotation = resolvedClass.declaredMethods
+        .firstOrNull { it.name == funName }
+        ?.getDeclaredAnnotation(DevelopmentEntryPoint::class.java)
 
     if (HotReloadEnvironment.isHeadless) {
         runHeadlessApplicationBlocking(
-            width = annotation.windowWidth,
-            height = annotation.windowWidth,
+            width = width ?: annotation?.windowWidth ?: 0,
+            height = height ?: annotation?.windowHeight ?: 0,
             timeout = 5.minutes
         ) {
             invokeUI(resolvedClass, funName)
         }
     } else {
+        val windowAnnotation = annotation
+            ?: error("The dev run for '$className.$funName' requires a @DevelopmentEntryPoint annotation.")
         singleWindowApplication(
             title = "Dev Run (${resolvedClass.simpleName}.$funName)",
             alwaysOnTop = true,
-            state = persistentWindowState(annotation, className, funName),
+            state = persistentWindowState(windowAnnotation, className, funName),
         ) {
             LaunchedEffect(Unit) {
                 if (!Taskbar.isTaskbarSupported()) return@LaunchedEffect
@@ -82,6 +88,17 @@ private fun run(args: Array<String>) {
 
 @Composable
 private fun invokeUI(uiClass: Class<*>, funName: String) {
-    uiClass.getDeclaredComposableMethod(methodName = funName)
+    val declared = uiClass.declaredMethods.firstOrNull { it.name == funName }
+        ?: error("No function '$funName' found in '${uiClass.name}'")
+    val composerIndex = declared.parameterTypes.indexOfFirst {
+        it.name == "androidx.compose.runtime.Composer"
+    }
+    val realParameterTypes = if (composerIndex >= 0) {
+        declared.parameterTypes.copyOfRange(0, composerIndex)
+    } else declared.parameterTypes
+
+    // invoke on Composable methods handles default values, so we assume here
+    // that it finds defaults for non-composer parameteres
+    uiClass.getDeclaredComposableMethod(funName, *realParameterTypes)
         .invoke(currentComposer, null)
 }
