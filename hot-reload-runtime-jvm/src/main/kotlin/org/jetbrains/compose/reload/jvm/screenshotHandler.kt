@@ -22,7 +22,12 @@ import java.awt.Robot
 import java.awt.Window
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
+import javax.imageio.IIOImage
 import javax.imageio.ImageIO
+import javax.imageio.ImageTypeSpecifier
+import javax.imageio.metadata.IIOMetadataNode
+import kotlin.math.roundToInt
+
 
 private val logger = createLogger()
 
@@ -41,13 +46,12 @@ internal fun handleScreenshotRequest(request: ScreenshotRequest, window: Window,
         )
     }
 
-    val baos = ByteArrayOutputStream()
-    ImageIO.write(capture.getOrThrow(), "png", baos)
+    val pngData = encodeScreenshotAsPng(window, capture.getOrThrow())
     logger.debug("Sent screenshot: '${request.messageId}'")
     return ScreenshotResult(
         screenshotRequestId = request.messageId,
         format = "png",
-        data = baos.toByteArray(),
+        data = pngData,
         windowId = windowId,
     )
 }
@@ -68,15 +72,13 @@ internal fun captureWindow(window: Window): Try<BufferedImage> {
  * Captures the window content using the Compose [DevelopmentEntryPoint].
  */
 private fun captureWindowCompose(window: Window): Try<BufferedImage> {
-    fun apiNotAvailable() = Right(UnsupportedOperationException("Not implemented"))
-
     return Try {
         // After upgrading to Compose 1.13 or later, use this code instead of reflection
         // (window as? ComposeDesktopEntryPoint)?.captureContentToImage() ?: error("API not available")
 
         val desktopEntryPointInterface = Class.forName("androidx.compose.ui.ComposeDesktopEntryPoint")
         if (!desktopEntryPointInterface.isInstance(window))
-            return apiNotAvailable()
+            return Right(UnsupportedOperationException("ComposeDesktopEntryPoint.captureContentToImage not available"))
 
         val captureContentToImageMethod = desktopEntryPointInterface.getDeclaredMethod("captureContentToImage")
         captureContentToImageMethod.invoke(window) as BufferedImage
@@ -100,5 +102,39 @@ private fun captureWindowViaRobot(window: Window): Try<BufferedImage> {
             window.height - insets.top - insets.bottom,
         )
         robot.createScreenCapture(rect)
+    }
+}
+
+/**
+ * Encodes the given screenshot (of the given window) as a PNG byte array.
+ */
+private fun encodeScreenshotAsPng(window: Window, image: BufferedImage): ByteArray {
+    // pHYs stores resolution as an integer pixel count per meter, plus a unit flag.
+    val scale = window.graphicsConfiguration.defaultTransform.scaleX
+    val inchesPerMeter = 39.3701
+    val pixelsPerMeter = (scale * 72.0 * inchesPerMeter).roundToInt()
+
+    val writer = ImageIO.getImageWritersByFormatName("png").next()
+    val typeSpecifier = ImageTypeSpecifier.createFromBufferedImageType(image.type)
+    val metadata = writer.getDefaultImageMetadata(typeSpecifier, writer.defaultWriteParam)
+
+    val physNode = IIOMetadataNode("pHYs")
+    physNode.setAttribute("pixelsPerUnitXAxis", pixelsPerMeter.toString())
+    physNode.setAttribute("pixelsPerUnitYAxis", pixelsPerMeter.toString())
+    physNode.setAttribute("unitSpecifier", "meter")
+
+    val root = IIOMetadataNode("javax_imageio_png_1.0")
+    root.appendChild(physNode)
+    metadata.mergeTree("javax_imageio_png_1.0", root)
+
+    try {
+        val buffer = ByteArrayOutputStream()
+        ImageIO.createImageOutputStream(buffer).use { stream ->
+            writer.setOutput(stream)
+            writer.write(metadata, IIOImage(image, null, metadata), writer.defaultWriteParam)
+        }
+        return buffer.toByteArray()
+    } finally {
+        writer.dispose()
     }
 }
