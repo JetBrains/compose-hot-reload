@@ -24,7 +24,7 @@ class TakeScreenshotIntegrationTest {
     @HotReloadTest
     @CheckScreenshot(radius = 4)
     @QuickTest
-    fun `test - take screenshot`(fixture: HotReloadTestFixture) = screenshotTest(fixture)
+    fun `test - take screenshot - robot`(fixture: HotReloadTestFixture) = screenshotTest(fixture)
 
     @Headless(false)
     @HostIntegrationTest
@@ -32,7 +32,7 @@ class TakeScreenshotIntegrationTest {
     @CheckScreenshot(radius = 4)
     @QuickTest
     @MinComposeVersion("1.12.10-alpha01+dev4589")
-    fun `test - take screenshot - new`(fixture: HotReloadTestFixture) = screenshotTest(fixture)
+    fun `test - take screenshot - compose`(fixture: HotReloadTestFixture) = screenshotTest(fixture)
 
     private fun screenshotTest(fixture: HotReloadTestFixture) = fixture.runTest {
         assumeTrue(isInteractiveDesktopAvailable(), "Test requires an interactive desktop")
