@@ -14,6 +14,7 @@ import org.jetbrains.kotlin.tooling.core.Extras
 import org.jetbrains.kotlin.tooling.core.extrasKeyOf
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Color
+import org.jetbrains.skia.Image
 import org.w3c.dom.Node
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
@@ -118,17 +119,17 @@ internal fun describeImageDifferences(
 
     if (isNotEmpty()) return@buildList
 
-    val badPixels = countBadPixels(expectImage, actualImage, params)
+    val badPixels = countBadPixels(expectImage.toSkikoImage(), actualImage.toSkikoImage(), params)
     if (badPixels > 0) add("Found '$badPixels' pixels which cannot be found in the 'expectImage'")
 }
 
 internal fun countBadPixels(
-    expectImage: BufferedImage, actualImage: BufferedImage,
+    expectImage: Image, actualImage: Image,
     params: CheckScreenshot = CheckScreenshot(),
 ): Int {
     val comparisonImage = compare(
-        expect = expectImage.toSkikoImage(),
-        actual = actualImage.toSkikoImage(),
+        expect = expectImage,
+        actual = actualImage,
         colorTolerance = params.colorTolerance, radius = params.radius
     )
     val comparisonBitmap = Bitmap.makeFromImage(comparisonImage)
