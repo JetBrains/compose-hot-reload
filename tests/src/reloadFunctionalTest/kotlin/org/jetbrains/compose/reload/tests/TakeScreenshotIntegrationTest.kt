@@ -10,6 +10,7 @@ import org.jetbrains.compose.reload.test.gradle.CheckScreenshot
 import org.jetbrains.compose.reload.test.gradle.Headless
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
+import org.jetbrains.compose.reload.test.gradle.MinComposeVersion
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.utils.HostIntegrationTest
@@ -23,7 +24,17 @@ class TakeScreenshotIntegrationTest {
     @HotReloadTest
     @CheckScreenshot(radius = 4)
     @QuickTest
-    fun `test - take screenshot`(fixture: HotReloadTestFixture) = fixture.runTest {
+    fun `test - take screenshot`(fixture: HotReloadTestFixture) = screenshotTest(fixture)
+
+    @Headless(false)
+    @HostIntegrationTest
+    @HotReloadTest
+    @CheckScreenshot(radius = 4)
+    @QuickTest
+    @MinComposeVersion("1.12.10-alpha01+dev4589")
+    fun `test - take screenshot - new`(fixture: HotReloadTestFixture) = screenshotTest(fixture)
+
+    private fun screenshotTest(fixture: HotReloadTestFixture) = fixture.runTest {
         assumeTrue(isInteractiveDesktopAvailable(), "Test requires an interactive desktop")
         fixture.launchAckSender()
 
