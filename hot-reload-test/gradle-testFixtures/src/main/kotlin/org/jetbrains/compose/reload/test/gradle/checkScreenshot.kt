@@ -156,7 +156,7 @@ private fun ByteArray.readJavaImage(targetPpi: Double? = null): Pair<BufferedIma
             reader.setInput(iis)
             val image = reader.read(0)
             val ppi = reader.getPpi() ?: 72.0
-            val scaledImage = if (targetPpi != null) image.scale(targetPpi / ppi) else image
+            val scaledImage = if ((targetPpi != null) && (ppi != targetPpi)) image.scale(targetPpi / ppi) else image
             return Pair(scaledImage, targetPpi ?: ppi)
         } finally {
             reader.dispose()
