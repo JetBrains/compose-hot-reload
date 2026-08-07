@@ -69,7 +69,7 @@ private fun captureWindow(window: Window): Try<Screenshot> {
 }
 
 /**
- * Captures the window content using the Compose [DevelopmentEntryPoint].
+ * Captures the window content using the Compose `ComposeDesktopEntryPoint`.
  */
 private fun captureWindowCompose(window: Window): Try<Screenshot> {
     return Try {
