@@ -50,13 +50,26 @@ fun main(args: Array<String>) {
             exitProcess(1)
         }
 
-    logger.info("MCP server starting. Watching PID file: $pidFile")
+    val launchSpec = HeadlessLaunchSpec.fromSystemProperties()
+    logger.info(
+        "MCP server starting. Watching PID file: $pidFile " +
+            "(headless mode ${if (launchSpec != null) "enabled" else "unavailable"})"
+    )
 
     runBlocking {
         val orchestration = connectionLoop(pidFile)
             .stateIn(this, SharingStarted.Eagerly, null)
 
-        startMcpServer(orchestration, protocolOut, pidFile)
+        val sessions = HeadlessSessionManager(launchSpec)
+        Runtime.getRuntime().addShutdownHook(Thread {
+            runBlocking { sessions.closeAll() }
+        })
+
+        try {
+            startMcpServer(orchestration, sessions, protocolOut, pidFile)
+        } finally {
+            sessions.closeAll()
+        }
     }
 }
 

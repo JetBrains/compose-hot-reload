@@ -115,7 +115,8 @@ class McpServerTest {
             clientOut.asSink().buffered()
         )
 
-        launch { startMcpServer(orchestration, serverTransport, pidFile) }
+        val sessions = HeadlessSessionManager(launchSpec = null)
+        launch { startMcpServer(orchestration, sessions, serverTransport, pidFile) }
 
         val client = Client(Implementation(name = "test-client", version = "1.0.0"))
         client.connect(clientTransport)
@@ -195,6 +196,41 @@ class McpServerTest {
         assertTrue(result.isError == true)
         val text = (result.content.first() as TextContent).text
         assertTrue(text.contains("No application is currently connected"))
+    }
+
+    @Test
+    fun `test - run_headless reports unavailable without launch spec`() = runTest(timeout = 10.seconds) {
+        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
+        val client = createMcpClient(orchestration)
+
+        val result = client.callTool(
+            "run_headless", mapOf("class_name" to "com.example.MainKt", "function_name" to "App")
+        )
+        assertTrue(result.isError == true)
+        val text = (result.content.first() as TextContent).text
+        assertTrue(text.contains("Headless mode is not available"), "got: $text")
+    }
+
+    @Test
+    fun `test - close_headless reports unknown session`() = runTest(timeout = 10.seconds) {
+        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
+        val client = createMcpClient(orchestration)
+
+        val result = client.callTool("close_headless", mapOf("session_id" to "headless-42"))
+        assertTrue(result.isError == true)
+        val text = (result.content.first() as TextContent).text
+        assertTrue(text.contains("No headless session 'headless-42'"), "got: $text")
+    }
+
+    @Test
+    fun `test - take_screenshot reports unknown session`() = runTest(timeout = 10.seconds) {
+        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
+        val client = createMcpClient(orchestration)
+
+        val result = client.callTool("take_screenshot", mapOf("session_id" to "headless-99"))
+        assertTrue(result.isError == true)
+        val text = (result.content.first() as TextContent).text
+        assertTrue(text.contains("No headless session 'headless-99'"), "got: $text")
     }
 
     @Test

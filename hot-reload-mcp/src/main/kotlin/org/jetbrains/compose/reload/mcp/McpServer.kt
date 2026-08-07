@@ -3,6 +3,8 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
+@file:OptIn(org.jetbrains.compose.reload.InternalHotReloadApi::class)
+
 package org.jetbrains.compose.reload.mcp
 
 import io.modelcontextprotocol.kotlin.sdk.server.Server
@@ -86,6 +88,7 @@ private val logger = createLogger()
 
 internal suspend fun startMcpServer(
     orchestration: StateFlow<OrchestrationHandle?>,
+    sessions: HeadlessSessionManager,
     protocolOut: OutputStream,
     pidFile: Path,
 ) {
@@ -93,7 +96,7 @@ internal suspend fun startMcpServer(
         inputStream = System.`in`.asSource().buffered(),
         outputStream = protocolOut.asSink().buffered()
     )
-    startMcpServer(orchestration, transport, pidFile)
+    startMcpServer(orchestration, sessions, transport, pidFile)
 }
 
 /** A single input property in a tool's JSON schema. */
@@ -126,6 +129,19 @@ private val RestartTimeoutParam = Property("timeout_seconds", "integer",
 private val SaveToParam = Property("save_to", "string",
     description = "Absolute path where the screenshot image should be saved on disk. " +
         "When omitted the screenshot is only returned as inline image data.")
+ private val SessionIdParam = Property("session_id", "string",
+    description = "Headless session id returned by 'run_headless'. When provided, the tool targets " +
+        "that headless application instead of the attached application; 'window_id' is ignored " +
+        "(a headless session renders a single windowless scene).")
+private val ClassNameParam = Property("class_name", "string",
+    description = "Fully-qualified name of the class that declares the @Composable entry point " +
+        "(e.g. 'com.example.MainKt').")
+private val FunctionNameParam = Property("function_name", "string",
+    description = "Name of the @Composable function to run as the headless application's content.")
+private val HeadlessWidthParam = Property("width", "integer",
+    description = "Initial scene width in pixels. Omit or use 0 to auto-size to the content.")
+private val HeadlessHeightParam = Property("height", "integer",
+    description = "Initial scene height in pixels. Omit or use 0 to auto-size to the content.")
 
 /** Builds a [ToolSchema] from [properties]; by default all of them are required. */
 private fun toolSchema(
@@ -146,6 +162,7 @@ private fun toolSchema(
 @OptIn(DelicateHotReloadApi::class)
 internal suspend fun startMcpServer(
     orchestration: StateFlow<OrchestrationHandle?>,
+    sessions: HeadlessSessionManager,
     transport: Transport,
     pidFile: Path,
 ) {
@@ -246,13 +263,39 @@ internal suspend fun startMcpServer(
         }
 
         addTool(
+            name = "run_headless",
+            description = "Start a Compose application in headless mode: render the given @Composable " +
+                "offscreen (no window is shown) and return a session 'id'. Use that id as the " +
+                "'session_id' parameter of 'take_screenshot' to capture the rendered UI, and pass it " +
+                "to 'close_headless' when done. Requires the MCP server to have been launched with headless " +
+                "support (the 'hotMcpServer' Gradle task).",
+            inputSchema = toolSchema(
+                ClassNameParam, FunctionNameParam, HeadlessWidthParam, HeadlessHeightParam,
+                required = listOf(ClassNameParam.name, FunctionNameParam.name),
+            )
+        ) { request ->
+            handleRunHeadless(sessions, request)
+        }
+
+        addTool(
+            name = "close_headless",
+            description = "Close a headless session previously started with 'run_headless': shuts the " +
+                "application process down and releases its resources. Returns {\"success\": true}.",
+            inputSchema = toolSchema(SessionIdParam, required = listOf(SessionIdParam.name))
+        ) { request ->
+            handleCloseHeadless(sessions, request)
+        }
+
+        addTool(
             name = "take_screenshot",
             description = "Take a screenshot of the running Compose application window. " +
                 "Captures only the Compose content; window decorations (title bar, borders) are excluded. " +
-                "Use the 'status' tool first to check if the application is connected.",
-            inputSchema = toolSchema(WindowIdParam, SaveToParam, required = emptyList())
+                "Pass 'session_id' to capture a headless session started with 'run_headless'; otherwise " +
+                "the attached application is captured. " +
+                "Use the 'status' tool first to check if an application is connected.",
+            inputSchema = toolSchema(SessionIdParam, WindowIdParam, SaveToParam, required = emptyList())
         ) { request ->
-            handleTakeScreenshot(orchestration, request)
+            handleTakeScreenshot(orchestration, sessions, request)
         }
 
         addTool(
@@ -719,46 +762,112 @@ private fun tailLines(file: Path, maxLines: Int): List<String> {
     return deque.toList()
 }
 
+/**
+ * Starts a headless application for the requested `@Composable` and returns its session id. The
+ * session hosts its own orchestration server; subsequent tools target it via 'session_id'.
+ */
+private suspend fun handleRunHeadless(
+    sessions: HeadlessSessionManager,
+    request: CallToolRequest,
+): CallToolResult {
+    if (!sessions.isSupported) {
+        return errorResult(
+            "Headless mode is not available: the MCP server was started without a headless launch " +
+                "spec. Launch it via the 'hotMcpServer' Gradle task."
+        )
+    }
+    val args = request.arguments
+    val className = args?.get(ClassNameParam.name)?.jsonPrimitive?.contentOrNull
+        ?: return errorResult("Missing required parameter '${ClassNameParam.name}'")
+    val funName = args[FunctionNameParam.name]?.jsonPrimitive?.contentOrNull
+        ?: return errorResult("Missing required parameter '${FunctionNameParam.name}'")
+    val width = args[HeadlessWidthParam.name]?.jsonPrimitive?.intOrNull ?: 0
+    val height = args[HeadlessHeightParam.name]?.jsonPrimitive?.intOrNull ?: 0
+
+    logger.info { "run_headless: starting $className.$funName (${width}x$height)" }
+    return try {
+        val session = sessions.start(className, funName, width, height)
+        textResult(buildJsonObject { put("id", session.id) }.toString())
+    } catch (e: Exception) {
+        logger.warn("run_headless: failed: ${e.message}")
+        errorResult("Failed to start headless application: ${e.message}")
+    }
+}
+
+/** Closes a headless session started with 'run_headless'. */
+private suspend fun handleCloseHeadless(
+    sessions: HeadlessSessionManager,
+    request: CallToolRequest,
+): CallToolResult {
+    val id = request.arguments?.get(SessionIdParam.name)?.jsonPrimitive?.contentOrNull
+        ?: return errorResult("Missing required parameter '${SessionIdParam.name}'")
+    logger.info { "close: closing session '$id'" }
+    return if (sessions.close(id)) textResult("""{"success":true}""")
+    else errorResult("No headless session '$id' (already closed or never started).")
+}
+
 private suspend fun handleTakeScreenshot(
     orchestration: StateFlow<OrchestrationHandle?>,
+    sessions: HeadlessSessionManager,
     request: CallToolRequest,
-): CallToolResult = withWindow(orchestration, "take_screenshot", request.arguments) { handle, resolvedId ->
+): CallToolResult {
     val saveTo = (request.arguments?.get(SaveToParam.name) as? JsonPrimitive)?.contentOrNull
         ?.let { Path.of(it) }
-    try {
-        val screenshotRequest = ScreenshotRequest(windowId = resolvedId)
-        logger.info { "take_screenshot: sending request '${screenshotRequest.messageId}'" }
-        val screenshot = handle.requestResponse<ScreenshotResult>(screenshotRequest) {
-            it.screenshotRequestId == screenshotRequest.messageId
-        }
-        when {
-            screenshot == null -> {
-                logger.warn("take_screenshot: timed out waiting for response")
-                errorResult("Screenshot timed out: no response from application")
-            }
-            !screenshot.isSuccess -> {
-                logger.warn("take_screenshot: failed: ${screenshot.errorMessage}")
-                errorResult("Screenshot failed: ${screenshot.errorMessage ?: "unknown error"}")
-            }
-            else -> {
-                logger.debug { "take_screenshot: received ${screenshot.data.size} bytes (${screenshot.format})" }
-                val content = buildList {
-                    if (saveTo != null) {
-                        saveTo.createParentDirectories()
-                        saveTo.writeBytes(screenshot.data)
-                        logger.info { "take_screenshot: saved to '$saveTo'" }
-                        add(TextContent("Screenshot saved to: $saveTo"))
-                    }
-                    val base64 = Base64.getEncoder().encodeToString(screenshot.data)
-                    add(ImageContent(data = base64, mimeType = "image/${screenshot.format}"))
-                }
-                CallToolResult(content = content)
-            }
-        }
-    } catch (e: Exception) {
-        logger.warn("take_screenshot: exception: ${e.message}")
-        errorResult("Screenshot failed: ${e.message}")
+
+    /* Headless sessions render a single windowless scene: target it directly, no window resolution. */
+    val sessionId = request.arguments?.get(SessionIdParam.name)?.jsonPrimitive?.contentOrNull
+    if (sessionId != null) {
+        val session = sessions[sessionId]
+            ?: return errorResult("No headless session '$sessionId' (already closed or never started).")
+        return screenshotResult(session.orchestration, windowId = null, saveTo)
     }
+
+    return withWindow(orchestration, "take_screenshot", request.arguments) { handle, resolvedId ->
+        screenshotResult(handle, resolvedId, saveTo)
+    }
+}
+
+/**
+ * Sends a [ScreenshotRequest] to [handle] (optionally scoped to [windowId]) and maps the response to
+ * a tool result, optionally saving the image to [saveTo]. Shared by the windowed and headless paths.
+ */
+private suspend fun screenshotResult(
+    handle: OrchestrationHandle,
+    windowId: WindowId?,
+    saveTo: Path?,
+): CallToolResult = try {
+    val screenshotRequest = ScreenshotRequest(windowId = windowId)
+    logger.info { "take_screenshot: sending request '${screenshotRequest.messageId}'" }
+    val screenshot = handle.requestResponse<ScreenshotResult>(screenshotRequest) {
+        it.screenshotRequestId == screenshotRequest.messageId
+    }
+    when {
+        screenshot == null -> {
+            logger.warn("take_screenshot: timed out waiting for response")
+            errorResult("Screenshot timed out: no response from application")
+        }
+        !screenshot.isSuccess -> {
+            logger.warn("take_screenshot: failed: ${screenshot.errorMessage}")
+            errorResult("Screenshot failed: ${screenshot.errorMessage ?: "unknown error"}")
+        }
+        else -> {
+            logger.debug { "take_screenshot: received ${screenshot.data.size} bytes (${screenshot.format})" }
+            val content = buildList {
+                if (saveTo != null) {
+                    saveTo.createParentDirectories()
+                    saveTo.writeBytes(screenshot.data)
+                    logger.info { "take_screenshot: saved to '$saveTo'" }
+                    add(TextContent("Screenshot saved to: $saveTo"))
+                }
+                val base64 = Base64.getEncoder().encodeToString(screenshot.data)
+                add(ImageContent(data = base64, mimeType = "image/${screenshot.format}"))
+            }
+            CallToolResult(content = content)
+        }
+    }
+} catch (e: Exception) {
+    logger.warn("take_screenshot: exception: ${e.message}")
+    errorResult("Screenshot failed: ${e.message}")
 }
 
 private suspend fun handleGetSemanticTree(
