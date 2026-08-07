@@ -34,9 +34,9 @@ private val logger = createLogger()
 internal fun handleScreenshotRequest(request: ScreenshotRequest, window: Window, windowId: WindowId?): ScreenshotResult {
     logger.info("Taking screenshot: '${request.messageId}'")
 
-    val capture = captureWindow(window)
-    if (capture.isFailure()) {
-        val errorMessage = capture.value.message ?: "Unknown error"
+    val screenshot = captureWindow(window)
+    if (screenshot.isFailure()) {
+        val errorMessage = screenshot.value.message ?: "Unknown error"
         logger.warn("Failed to capture window for screenshot request '${request.messageId}': $errorMessage")
         return ScreenshotResult(
             screenshotRequestId = request.messageId,
@@ -46,7 +46,7 @@ internal fun handleScreenshotRequest(request: ScreenshotRequest, window: Window,
         )
     }
 
-    val pngData = encodeScreenshotAsPng(window, capture.getOrThrow())
+    val pngData = screenshot.getOrThrow().encodeAsPng()
     logger.debug("Sent screenshot: '${request.messageId}'")
     return ScreenshotResult(
         screenshotRequestId = request.messageId,
@@ -61,7 +61,7 @@ internal fun handleScreenshotRequest(request: ScreenshotRequest, window: Window,
  *
  * The window decorations (title bar, borders) are excluded, so only the Compose content is captured.
  */
-internal fun captureWindow(window: Window): Try<BufferedImage> {
+private fun captureWindow(window: Window): Try<Screenshot> {
     return captureWindowCompose(window)
         .ifFailureThen {
             captureWindowViaRobot(window)
@@ -71,7 +71,7 @@ internal fun captureWindow(window: Window): Try<BufferedImage> {
 /**
  * Captures the window content using the Compose [DevelopmentEntryPoint].
  */
-private fun captureWindowCompose(window: Window): Try<BufferedImage> {
+private fun captureWindowCompose(window: Window): Try<Screenshot> {
     return Try {
         // After upgrading to Compose 1.13 or later, use this code instead of reflection
         // (window as? ComposeDesktopEntryPoint)?.captureContentToImage() ?: error("API not available")
@@ -81,16 +81,25 @@ private fun captureWindowCompose(window: Window): Try<BufferedImage> {
             return Right(UnsupportedOperationException("ComposeDesktopEntryPoint.captureContentToImage not available"))
 
         val captureContentToImageMethod = desktopEntryPointInterface.getDeclaredMethod("captureContentToImage")
-        captureContentToImageMethod.invoke(window) as BufferedImage
+        Screenshot(
+            image = captureContentToImageMethod.invoke(window) as BufferedImage,
+            scale = window.graphicsConfiguration.defaultTransform.scaleX
+        )
+
     }
 }
+
+private data class Screenshot(
+    val image: BufferedImage,
+    val scale: Double
+)
 
 /**
  * Captures the window content using [Robot.createScreenCapture].
  *
  * The window decorations (title bar, borders) are excluded, so only the Compose content is captured.
  */
-private fun captureWindowViaRobot(window: Window): Try<BufferedImage> {
+private fun captureWindowViaRobot(window: Window): Try<Screenshot> {
     return Try {
         val robot = Robot()
         val location = window.locationOnScreen
@@ -101,16 +110,18 @@ private fun captureWindowViaRobot(window: Window): Try<BufferedImage> {
             window.width - insets.left - insets.right,
             window.height - insets.top - insets.bottom,
         )
-        robot.createScreenCapture(rect)
+        Screenshot(
+            image = robot.createScreenCapture(rect),
+            scale = 1.0  // Robot always takes a screenshot at AWT pixel size
+        )
     }
 }
 
 /**
  * Encodes the given screenshot (of the given window) as a PNG byte array.
  */
-private fun encodeScreenshotAsPng(window: Window, image: BufferedImage): ByteArray {
+private fun Screenshot.encodeAsPng(): ByteArray {
     // pHYs stores resolution as an integer pixel count per meter, plus a unit flag.
-    val scale = window.graphicsConfiguration.defaultTransform.scaleX
     val inchesPerMeter = 39.3701
     val pixelsPerMeter = (scale * 72.0 * inchesPerMeter).roundToInt()
 
