@@ -46,14 +46,23 @@ internal fun handleScreenshotRequest(request: ScreenshotRequest, window: Window,
         )
     }
 
-    val pngData = screenshot.getOrThrow().encodeAsPng()
-    logger.debug("Sent screenshot: '${request.messageId}'")
-    return ScreenshotResult(
-        screenshotRequestId = request.messageId,
-        format = "png",
-        data = pngData,
-        windowId = windowId,
-    )
+    try {
+        val pngData = screenshot.getOrThrow().encodeAsPng()
+        logger.debug("Sent screenshot: '${request.messageId}'")
+        return ScreenshotResult(
+            screenshotRequestId = request.messageId,
+            format = "png",
+            data = pngData,
+            windowId = windowId,
+        )
+    } catch (e: Exception) {
+        return ScreenshotResult(
+            screenshotRequestId = request.messageId,
+            isSuccess = false,
+            errorMessage = e.message ?: "Unknown error",
+            windowId = windowId,
+        )
+    }
 }
 
 /**
@@ -123,15 +132,15 @@ private fun captureWindowViaRobot(window: Window): Try<Screenshot> {
 private fun Screenshot.encodeAsPng(): ByteArray {
     // pHYs stores resolution as an integer pixel count per meter, plus a unit flag.
     val inchesPerMeter = 39.3701
-    val pixelsPerMeter = (scale * 72.0 * inchesPerMeter).roundToInt()
+    val pixelsPerMeter = (scale * 72.0 * inchesPerMeter).roundToInt().toString()
 
     val writer = ImageIO.getImageWritersByFormatName("png").next()
     val typeSpecifier = ImageTypeSpecifier.createFromBufferedImageType(image.type)
     val metadata = writer.getDefaultImageMetadata(typeSpecifier, writer.defaultWriteParam)
 
     val physNode = IIOMetadataNode("pHYs")
-    physNode.setAttribute("pixelsPerUnitXAxis", pixelsPerMeter.toString())
-    physNode.setAttribute("pixelsPerUnitYAxis", pixelsPerMeter.toString())
+    physNode.setAttribute("pixelsPerUnitXAxis", pixelsPerMeter)
+    physNode.setAttribute("pixelsPerUnitYAxis", pixelsPerMeter)
     physNode.setAttribute("unitSpecifier", "meter")
 
     val root = IIOMetadataNode("javax_imageio_png_1.0")

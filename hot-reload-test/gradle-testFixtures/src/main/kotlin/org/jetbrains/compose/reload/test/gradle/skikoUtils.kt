@@ -205,20 +205,27 @@ public fun Path.writeImage(image: Image) {
     writeBytes(image.encodeToData()!!.bytes)
 }
 
-public fun BufferedImage.toSkikoImage(): Image {
-    val pixels = IntArray(width * height)
-    getRGB(0, 0, width, height, pixels, 0, width)
-    val bytes = ByteArray(pixels.size * 4)
-    var i = 0
-    for (p in pixels) {
-        bytes[i++] = (p and 0xFF).toByte()          // B
-        bytes[i++] = (p shr 8 and 0xFF).toByte()    // G
-        bytes[i++] = (p shr 16 and 0xFF).toByte()   // R
-        bytes[i++] = (p ushr 24 and 0xFF).toByte()  // A
+internal fun BufferedImage.toSkikoImage(): Image {
+    val bytesPerPixel = 4
+    val pixels = ByteArray(width * height * bytesPerPixel)
+
+    var k = 0
+    for (y in 0 until height) {
+        for (x in 0 until width) {
+            val argb = getRGB(x, y)
+            val a = (argb shr 24) and 0xff
+            val r = (argb shr 16) and 0xff
+            val g = (argb shr 8) and 0xff
+            val b = (argb shr 0) and 0xff
+            pixels[k++] = b.toByte()
+            pixels[k++] = g.toByte()
+            pixels[k++] = r.toByte()
+            pixels[k++] = a.toByte()
+        }
     }
 
-    val info = ImageInfo(width, height, ColorType.BGRA_8888, ColorAlphaType.PREMUL)
     val bitmap = Bitmap()
-    bitmap.installPixels(info, bytes, width * 4)
+    bitmap.allocPixels(ImageInfo.makeS32(width, height, ColorAlphaType.UNPREMUL))
+    bitmap.installPixels(pixels)
     return Image.makeFromBitmap(bitmap)
 }

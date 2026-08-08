@@ -524,7 +524,6 @@ public final class org/jetbrains/compose/reload/test/gradle/SkikoUtilsKt {
 	public static final fun diff (Lorg/jetbrains/skia/Image;Lorg/jetbrains/skia/Image;)Lorg/jetbrains/skia/Image;
 	public static final fun readImage (Ljava/nio/file/Path;)Lorg/jetbrains/skia/Image;
 	public static final fun readImage ([B)Lorg/jetbrains/skia/Image;
-	public static final fun toSkikoImage (Ljava/awt/image/BufferedImage;)Lorg/jetbrains/skia/Image;
 	public static final fun withPaint (Lorg/jetbrains/skia/Image;Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/skia/Image;
 	public static final fun withPaint (Lorg/jetbrains/skia/Image;Lorg/jetbrains/skia/Paint;)Lorg/jetbrains/skia/Image;
 	public static final fun writeImage (Ljava/nio/file/Path;Lorg/jetbrains/skia/Image;)V
