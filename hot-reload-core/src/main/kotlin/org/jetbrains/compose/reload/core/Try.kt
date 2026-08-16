@@ -76,3 +76,10 @@ public fun <T> Try<Try<T>>.flatten(): Try<T> {
         is Right<Throwable> -> this
     }
 }
+
+public fun <T> Try<T>.ifFailureThen(block: () -> Try<T>): Try<T> {
+    return when (this) {
+        is Left<T> -> this
+        is Right -> block()
+    }
+}

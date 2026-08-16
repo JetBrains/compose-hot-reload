@@ -15,12 +15,22 @@ import org.jetbrains.kotlin.tooling.core.extrasKeyOf
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Color
 import org.jetbrains.skia.Image
+import org.w3c.dom.Node
+import java.awt.RenderingHints
+import java.awt.image.BufferedImage
+import java.io.ByteArrayInputStream
+import java.nio.file.Path
+import javax.imageio.ImageIO
+import javax.imageio.ImageReader
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.exists
 import kotlin.io.path.nameWithoutExtension
+import kotlin.io.path.readBytes
 import kotlin.io.path.writeBytes
+import kotlin.math.roundToInt
 import kotlin.test.fail
+
 
 /**
  * Allows for configuring the [checkScreenshot] function withing a test.
@@ -80,8 +90,8 @@ public suspend fun HotReloadTestFixture.checkScreenshot(name: String): Unit =
             fail("Screenshot '${expectFile.toUri()}' did not exist; Generated")
         }
 
-        val expectImage = expectFile.readImage()
-        val actualImage = screenshot.data.readImage()
+        val (expectImage, expectPpi) = expectFile.readJavaImage()
+        val (actualImage, _) = screenshot.data.readJavaImage(targetPpi = expectPpi)
         val params = extras[CheckScreenshot.key] ?: CheckScreenshot()
         val diff = describeImageDifferences(params, expectImage, actualImage)
         if (diff.isNotEmpty()) {
@@ -97,7 +107,7 @@ public suspend fun HotReloadTestFixture.checkScreenshot(name: String): Unit =
  */
 internal fun describeImageDifferences(
     params: CheckScreenshot,
-    expectImage: Image, actualImage: Image,
+    expectImage: BufferedImage, actualImage: BufferedImage,
 ): List<String> = buildList {
     if (expectImage.width != actualImage.width) {
         add("Expected width '${expectImage.width}', found '${actualImage.width}'")
@@ -109,7 +119,7 @@ internal fun describeImageDifferences(
 
     if (isNotEmpty()) return@buildList
 
-    val badPixels = countBadPixels(expectImage, actualImage, params)
+    val badPixels = countBadPixels(expectImage.toSkikoImage(), actualImage.toSkikoImage(), params)
     if (badPixels > 0) add("Found '$badPixels' pixels which cannot be found in the 'expectImage'")
 }
 
@@ -136,4 +146,71 @@ internal fun countBadPixels(
     }
 
     return badPixels
+}
+
+private fun Path.readJavaImage(targetPpi: Double? = null) = readBytes().readJavaImage(targetPpi)
+
+private fun ByteArray.readJavaImage(targetPpi: Double? = null): Pair<BufferedImage, Double?> {
+    ImageIO.createImageInputStream(ByteArrayInputStream(this)).use { iis ->
+        val reader = ImageIO.getImageReaders(iis).next()
+        try {
+            reader.setInput(iis)
+            val image = reader.read(0)
+            val ppi = reader.getPpi() ?: 72.0
+            val scaledImage = if ((targetPpi != null) && (ppi != targetPpi)) image.scale(targetPpi / ppi) else image
+            return Pair(scaledImage, targetPpi ?: ppi)
+        } finally {
+            reader.dispose()
+        }
+    }
+}
+
+private fun ImageReader.getPpi(): Double? {
+    fun findChild(parent: Node, name: String): Node? {
+        val children = parent.childNodes
+        for (i in 0 until children.length) {
+            val child = children.item(i)
+            if (name == child.nodeName) {
+                return child
+            }
+        }
+        return null
+    }
+
+    val metadata = this.getImageMetadata(0)
+    if (metadata == null || !metadata.isStandardMetadataFormatSupported) {
+        return null
+    }
+
+    val dimension = findChild(metadata.getAsTree("javax_imageio_1.0"), "Dimension") ?: return null
+    val horizontalPixelSize = findChild(dimension, "HorizontalPixelSize") ?: return null
+
+    val mmPerPixel = horizontalPixelSize.attributes.getNamedItem("value").nodeValue.toDouble()
+    return 25.4 / mmPerPixel
+}
+
+private fun BufferedImage.scale(factor: Double): BufferedImage {
+    val scaledWidth = (width * factor).roundToInt().coerceAtLeast(1)
+    val scaledHeight = (height * factor).roundToInt().coerceAtLeast(1)
+
+    val scaled = BufferedImage(scaledWidth, scaledHeight, type)
+    val g = scaled.createGraphics()
+    try {
+        g.setRenderingHint(
+            RenderingHints.KEY_INTERPOLATION,
+            RenderingHints.VALUE_INTERPOLATION_BICUBIC
+        )
+        g.setRenderingHint(
+            RenderingHints.KEY_RENDERING,
+            RenderingHints.VALUE_RENDER_QUALITY
+        )
+        g.setRenderingHint(
+            RenderingHints.KEY_ANTIALIASING,
+            RenderingHints.VALUE_ANTIALIAS_ON
+        )
+        g.drawImage(this, 0, 0, scaledWidth, scaledHeight, null)
+    } finally {
+        g.dispose()
+    }
+    return scaled
 }

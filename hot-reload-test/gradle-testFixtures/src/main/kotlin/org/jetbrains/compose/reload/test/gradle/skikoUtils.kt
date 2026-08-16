@@ -10,8 +10,11 @@ import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.Codec
+import org.jetbrains.skia.ColorAlphaType
+import org.jetbrains.skia.ColorType
 import org.jetbrains.skia.Data
 import org.jetbrains.skia.Image
+import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skia.Paint
 import org.jetbrains.skia.RuntimeEffect
 import org.jetbrains.skia.RuntimeShaderBuilder
@@ -200,4 +203,29 @@ public fun ByteArray.readImage(): Image {
 
 public fun Path.writeImage(image: Image) {
     writeBytes(image.encodeToData()!!.bytes)
+}
+
+internal fun BufferedImage.toSkikoImage(): Image {
+    val bytesPerPixel = 4
+    val pixels = ByteArray(width * height * bytesPerPixel)
+
+    var k = 0
+    for (y in 0 until height) {
+        for (x in 0 until width) {
+            val argb = getRGB(x, y)
+            val a = (argb shr 24) and 0xff
+            val r = (argb shr 16) and 0xff
+            val g = (argb shr 8) and 0xff
+            val b = (argb shr 0) and 0xff
+            pixels[k++] = b.toByte()
+            pixels[k++] = g.toByte()
+            pixels[k++] = r.toByte()
+            pixels[k++] = a.toByte()
+        }
+    }
+
+    val bitmap = Bitmap()
+    bitmap.allocPixels(ImageInfo.makeS32(width, height, ColorAlphaType.UNPREMUL))
+    bitmap.installPixels(pixels)
+    return Image.makeFromBitmap(bitmap)
 }

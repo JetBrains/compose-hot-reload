@@ -460,6 +460,7 @@ public final class org/jetbrains/compose/reload/core/TryKt {
 	public static final fun getException (Lorg/jetbrains/compose/reload/core/Right;)Ljava/lang/Throwable;
 	public static final fun getOrNull (Lorg/jetbrains/compose/reload/core/Either;)Ljava/lang/Object;
 	public static final fun getOrThrow (Lorg/jetbrains/compose/reload/core/Either;)Ljava/lang/Object;
+	public static final fun ifFailureThen (Lorg/jetbrains/compose/reload/core/Either;Lkotlin/jvm/functions/Function0;)Lorg/jetbrains/compose/reload/core/Either;
 	public static final fun isFailure (Lorg/jetbrains/compose/reload/core/Either;)Z
 	public static final fun isSuccess (Lorg/jetbrains/compose/reload/core/Either;)Z
 	public static final fun toResult (Lorg/jetbrains/compose/reload/core/Either;)Ljava/lang/Object;
