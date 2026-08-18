@@ -38,6 +38,24 @@ IsHeadless:
   documentation: |
     Indicating whether or not the application is supposed to run in headless mode
 
+HeadlessJavaBinary:
+  key: compose.reload.headless.javaBinary
+  type: file
+  target: [ devtools ]
+  visibility: experimental
+  documentation: |
+    Path to the JetBrains Runtime 'java' launcher used by the MCP server to run headless
+    applications (see the 'run_headless' tool).
+
+HeadlessArgFile:
+  key: compose.reload.headless.argFile
+  type: file
+  target: [ devtools ]
+  visibility: experimental
+  documentation: |
+    Path to the JVM '@argfile' (DevApplication, hot classpath, agent, headless) used by the MCP
+    server to run headless applications (see the 'run_headless' tool).
+
 IsHotReloadBuild:
   key: compose.reload.isHotReloadBuild
   type: boolean
