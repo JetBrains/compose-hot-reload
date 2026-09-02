@@ -37,6 +37,10 @@
     },
     {
       "version": "1.11.1",
+      "minKotlin": "2.2.0"
+    },
+    {
+      "version": "1.12.0",
       "isDefault": true,
       "minKotlin": "2.2.0"
     },
