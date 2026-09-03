@@ -13,6 +13,7 @@ import org.jetbrains.compose.reload.test.gradle.ProjectMode
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.fold
 import org.jetbrains.compose.reload.test.gradle.launchApplicationAndWait
+import org.jetbrains.compose.reload.test.gradle.WithGradleProperty
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCodeAndReload
 import org.jetbrains.compose.reload.test.gradle.writeText
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
@@ -22,6 +23,12 @@ import kotlin.io.path.appendText
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.writeText
 
+/**
+ * Test projects apply the Kotlin Gradle plugin in the sibling subprojects `:app` and `:widgets`
+ * without a common root application. Kotlin 2.5.0-dev+ turns this into a hard build failure via
+ * `checkKotlinGradlePluginConfigurationErrors`; suppress it for these generated projects.
+ */
+@WithGradleProperty("kotlin.pluginLoadedInMultipleProjects.ignore", "true")
 class ProjectDependencyTest {
     @HotReloadTest
     @HostIntegrationTest
