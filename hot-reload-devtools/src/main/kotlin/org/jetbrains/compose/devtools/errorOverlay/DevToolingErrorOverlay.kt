@@ -54,6 +54,7 @@ import org.jetbrains.compose.devtools.widgets.DtHeader1
 import org.jetbrains.compose.devtools.widgets.DtText
 import org.jetbrains.compose.devtools.widgets.DtTextButton
 import org.jetbrains.compose.devtools.widgets.dtBorder
+import org.jetbrains.compose.devtools.widgets.isAnyTooltipVisible
 import org.jetbrains.compose.reload.core.WindowId
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RestartRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ShutdownRequest
@@ -77,7 +78,12 @@ internal fun DevToolingErrorOverlay(windowId: WindowId, windowState: WindowState
         ) {
             LaunchedEffect(Unit) {
                 while (true) {
-                    window.toFront()
+                    // Yield the front while a tooltip is visible: both windows are `alwaysOnTop`,
+                    // so calling `toFront()` here would otherwise steal the z-order back from the
+                    // tooltip and hide it behind the overlay.
+                    if (!isAnyTooltipVisible) {
+                        window.toFront()
+                    }
                     delay(128)
                 }
             }

@@ -15,6 +15,7 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,12 +45,19 @@ import org.jetbrains.compose.devtools.theme.DtColors
 import org.jetbrains.compose.devtools.theme.DtPadding
 import org.jetbrains.compose.devtools.theme.DtShapes
 import org.jetbrains.compose.devtools.theme.DtTextStyles
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.Duration.Companion.milliseconds
 
 private val tooltipShowDelay = 500.milliseconds
 private val tooltipHideDelay = 100.milliseconds
 
 private val defaultTooltipOffset = DpOffset(1.dp, 1.dp)
+
+/** Number of tooltip windows currently visible. */
+private val visibleTooltipCount = AtomicInteger(0)
+
+/** `true` while at least one dev tools tooltip window is visible. */
+internal val isAnyTooltipVisible: Boolean get() = visibleTooltipCount.get() > 0
 
 private val tooltipCornerShape = when {
     devToolsUseTransparency -> DtShapes.TooltipCornerShape
@@ -93,6 +101,10 @@ fun DtTooltip(
     }
 
     if (isTooltipVisible) {
+        DisposableEffect(Unit) {
+            visibleTooltipCount.incrementAndGet()
+            onDispose { visibleTooltipCount.decrementAndGet() }
+        }
         Window(
             onCloseRequest = {},
             state = windowState,
