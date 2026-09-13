@@ -242,6 +242,8 @@ public final class org/jetbrains/compose/reload/core/HotReloadEnvironment {
 	public final fun getGradleBuildOptimize ()Z
 	public final fun getGradleBuildOptimizeUnsafe ()Z
 	public final fun getGradleWarmupEnabled ()Z
+	public final fun getHeadlessArgFile ()Ljava/nio/file/Path;
+	public final fun getHeadlessJavaBinary ()Ljava/nio/file/Path;
 	public final fun getIsolatedProjectsEnabled ()Z
 	public final fun getLogLevel ()Lorg/jetbrains/compose/reload/core/Logger$Level;
 	public final fun getLogStdout ()Z
@@ -264,6 +266,8 @@ public final class org/jetbrains/compose/reload/core/HotReloadProperty : java/la
 	public static final field GradleBuildOptimize Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field GradleBuildOptimizeUnsafe Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field GradleWarmupEnabled Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field HeadlessArgFile Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field HeadlessJavaBinary Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field IsHotReloadActive Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field IsolatedProjectsEnabled Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field JetBrainsRuntimeBinary Lorg/jetbrains/compose/reload/core/HotReloadProperty;
