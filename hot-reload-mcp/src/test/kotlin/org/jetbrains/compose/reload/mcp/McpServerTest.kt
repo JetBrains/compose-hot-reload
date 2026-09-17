@@ -99,6 +99,8 @@ class McpServerTest {
         // Defaults to a path that does not exist, modelling "no logs written yet" and a non-continuous build.
         // The associated log file is 'pidFile.chrLogFile'.
         pidFile: Path = createTempDirectory().resolve("absent.pid"),
+        // The headless MCP tools are hidden behind a feature flag; enable it only for headless tests.
+        headlessToolsEnabled: Boolean = false,
     ): Client {
         val serverIn = PipedInputStream()
         val clientOut = PipedOutputStream(serverIn)
@@ -115,7 +117,10 @@ class McpServerTest {
             clientOut.asSink().buffered()
         )
 
-        val sessions = HeadlessSessionManager(launchSpec = null)
+        // A launch spec (and thus a session manager) is what exposes the headless tools; the fake paths
+        // are never launched because these tests only exercise tool visibility and unknown-session paths.
+        val sessions = if (headlessToolsEnabled)
+            HeadlessSessionManager(HeadlessLaunchSpec(Path.of("java"), Path.of("app.argfile"))) else null
         launch { startMcpServer(orchestration, sessions, serverTransport, pidFile) }
 
         val client = Client(Implementation(name = "test-client", version = "1.0.0"))
@@ -199,22 +204,9 @@ class McpServerTest {
     }
 
     @Test
-    fun `test - run_headless reports unavailable without launch spec`() = runTest(timeout = 10.seconds) {
-        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
-        val client = createMcpClient(orchestration)
-
-        val result = client.callTool(
-            "run_headless", mapOf("class_name" to "com.example.MainKt", "function_name" to "App")
-        )
-        assertTrue(result.isError == true)
-        val text = (result.content.first() as TextContent).text
-        assertTrue(text.contains("Headless mode is not available"), "got: $text")
-    }
-
-    @Test
     fun `test - close_headless reports unknown session`() = runTest(timeout = 10.seconds) {
         val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
-        val client = createMcpClient(orchestration)
+        val client = createMcpClient(orchestration, headlessToolsEnabled = true)
 
         val result = client.callTool("close_headless", mapOf("session_id" to "headless-42"))
         assertTrue(result.isError == true)
@@ -225,12 +217,38 @@ class McpServerTest {
     @Test
     fun `test - take_screenshot reports unknown session`() = runTest(timeout = 10.seconds) {
         val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
-        val client = createMcpClient(orchestration)
+        val client = createMcpClient(orchestration, headlessToolsEnabled = true)
 
         val result = client.callTool("take_screenshot", mapOf("session_id" to "headless-99"))
         assertTrue(result.isError == true)
         val text = (result.content.first() as TextContent).text
         assertTrue(text.contains("No headless session 'headless-99'"), "got: $text")
+    }
+
+    @Test
+    fun `test - headless tools are hidden when the feature flag is disabled`() = runTest(timeout = 10.seconds) {
+        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
+        val client = createMcpClient(orchestration)
+
+        val toolNames = client.listTools().tools.map { it.name }.toSet()
+        assertTrue("run_headless" !in toolNames, "run_headless must be hidden by default: $toolNames")
+        assertTrue("close_headless" !in toolNames, "close_headless must be hidden by default: $toolNames")
+        assertTrue("take_screenshot" in toolNames, "take_screenshot must always be present: $toolNames")
+
+        val result = client.callTool("take_screenshot", mapOf("session_id" to "headless-1"))
+        assertTrue(result.isError == true)
+        val text = (result.content.first() as TextContent).text
+        assertTrue(text.contains("No application is currently connected"), "got: $text")
+    }
+
+    @Test
+    fun `test - headless tools are exposed when the feature flag is enabled`() = runTest(timeout = 10.seconds) {
+        val orchestration = MutableStateFlow<OrchestrationHandle?>(null)
+        val client = createMcpClient(orchestration, headlessToolsEnabled = true)
+
+        val toolNames = client.listTools().tools.map { it.name }.toSet()
+        assertTrue("run_headless" in toolNames, "run_headless must be exposed when enabled: $toolNames")
+        assertTrue("close_headless" in toolNames, "close_headless must be exposed when enabled: $toolNames")
     }
 
     @Test

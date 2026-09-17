@@ -13,6 +13,7 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.property
 import org.jetbrains.compose.reload.DelicateHotReloadApi
+import org.jetbrains.compose.reload.ExperimentalHotReloadApi
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
@@ -28,6 +29,7 @@ internal val Project.hotMcpServerTasks: Future<List<TaskProvider<ComposeHotMcpSe
     }.filterNotNull()
 }
 
+@OptIn(ExperimentalHotReloadApi::class)
 private val KotlinTarget.hotMcpServerTask: Future<TaskProvider<ComposeHotMcpServer>?> by future {
     val mainCompilation = compilations.findByName("main") ?: return@future null
     val pidFileProvider = mainCompilation.pidFile.map { it.asFile.absolutePath }
@@ -49,6 +51,7 @@ private val KotlinTarget.hotMcpServerTask: Future<TaskProvider<ComposeHotMcpServ
         task.mainClass.set("org.jetbrains.compose.reload.mcp.ComposeHotReloadMcp")
         task.standardInput = System.`in`
         task.pidFilePath.set(pidFileProvider)
+        task.headlessToolsEnabled.set(project.composeReloadMcpHeadlessToolsEnabledProvider)
         task.headlessJavaBinary.set(javaBinaryProvider)
         task.headlessArgFile.set(headlessArgFileProvider)
         task.dependsOn(headlessArgFileTask)
@@ -91,6 +94,9 @@ internal open class ComposeHotMcpServer : JavaExec(), ComposeHotReloadOtherTask 
     val pidFilePath: Property<String> = project.objects.property<String>()
 
     @get:Internal
+    val headlessToolsEnabled: Property<Boolean> = project.objects.property<Boolean>().convention(false)
+
+    @get:Internal
     val headlessJavaBinary: Property<String> = project.objects.property<String>()
 
     @get:Internal
@@ -98,6 +104,7 @@ internal open class ComposeHotMcpServer : JavaExec(), ComposeHotReloadOtherTask 
 
     override fun exec() {
         systemProperty(HotReloadProperty.PidFile.key, pidFilePath.get())
+        systemProperty(HotReloadProperty.McpHeadlessToolsEnabled.key, headlessToolsEnabled.get())
         systemProperty(HotReloadProperty.HeadlessJavaBinary.key, headlessJavaBinary.get())
         systemProperty(HotReloadProperty.HeadlessArgFile.key, headlessArgFile.get())
         super.exec()

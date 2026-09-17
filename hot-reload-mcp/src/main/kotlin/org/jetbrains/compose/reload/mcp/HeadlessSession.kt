@@ -120,11 +120,9 @@ class HeadlessSession(
  * the string id returned from [start].
  */
 @InternalHotReloadApi
-class HeadlessSessionManager(private val launchSpec: HeadlessLaunchSpec?) {
+class HeadlessSessionManager(private val launchSpec: HeadlessLaunchSpec) {
     private val sessions = ConcurrentHashMap<String, HeadlessSession>()
     private val counter = AtomicInteger()
-
-    val isSupported: Boolean get() = launchSpec != null
 
     operator fun get(id: String): HeadlessSession? = sessions[id]
 
@@ -132,8 +130,6 @@ class HeadlessSessionManager(private val launchSpec: HeadlessLaunchSpec?) {
      * Hosts an orchestration server, forks the headless application for [className].[funName]
      * (optionally sized [width]x[height]; non-positive values let the scene auto-measure), and
      * suspends until the application connects or [connectTimeout] elapses.
-     *
-     * @throws IllegalStateException when there is no headless support (no [launchSpec]).
      */
     suspend fun start(
         className: String,
@@ -143,11 +139,6 @@ class HeadlessSessionManager(private val launchSpec: HeadlessLaunchSpec?) {
         connectTimeout: Duration = 60.seconds,
     ): HeadlessSession {
         val spec = launchSpec
-            ?: error(
-                "Headless mode is not available: the MCP server was started without a headless launch spec." +
-                    " Ensure it was launched via the 'hotMcpServer' Gradle task."
-            )
-
         val id = "headless-${counter.incrementAndGet()}"
         val server = startOrchestrationServer()
         val port = server.port.awaitOrThrow()

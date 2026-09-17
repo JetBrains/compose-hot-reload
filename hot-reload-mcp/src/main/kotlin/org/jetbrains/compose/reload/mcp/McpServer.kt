@@ -88,7 +88,7 @@ private val logger = createLogger()
 
 internal suspend fun startMcpServer(
     orchestration: StateFlow<OrchestrationHandle?>,
-    sessions: HeadlessSessionManager,
+    sessions: HeadlessSessionManager?,
     protocolOut: OutputStream,
     pidFile: Path,
 ) {
@@ -162,7 +162,7 @@ private fun toolSchema(
 @OptIn(DelicateHotReloadApi::class)
 internal suspend fun startMcpServer(
     orchestration: StateFlow<OrchestrationHandle?>,
-    sessions: HeadlessSessionManager,
+    sessions: HeadlessSessionManager?,
     transport: Transport,
     pidFile: Path,
 ) {
@@ -262,38 +262,50 @@ internal suspend fun startMcpServer(
             handleGetLogs(orchestration, pidFile.chrLogFile, request)
         }
 
-        addTool(
-            name = "run_headless",
-            description = "Start a Compose application in headless mode: render the given @Composable " +
-                "offscreen (no window is shown) and return a session 'id'. Use that id as the " +
-                "'session_id' parameter of 'take_screenshot' to capture the rendered UI, and pass it " +
-                "to 'close_headless' when done. Requires the MCP server to have been launched with headless " +
-                "support (the 'hotMcpServer' Gradle task).",
-            inputSchema = toolSchema(
-                ClassNameParam, FunctionNameParam, HeadlessWidthParam, HeadlessHeightParam,
-                required = listOf(ClassNameParam.name, FunctionNameParam.name),
-            )
-        ) { request ->
-            handleRunHeadless(sessions, request)
-        }
+        /*
+        The headless tools are experimental and hidden behind the 'McpHeadlessToolsEnabled' feature
+        flag, which gates whether a headless launch spec (and thus a session manager) is wired up:
+        when there is no session manager 'run_headless'/'close_headless' are not registered and
+        'take_screenshot' does not advertise or honor the 'session_id' parameter.
+         */
+        if (sessions != null) {
+            addTool(
+                name = "run_headless",
+                description = "Start a Compose application in headless mode: render the given @Composable " +
+                    "offscreen (no window is shown) and return a session 'id'. Use that id as the " +
+                    "'session_id' parameter of 'take_screenshot' to capture the rendered UI, and pass it " +
+                    "to 'close_headless' when done. Requires the MCP server to have been launched with headless " +
+                    "support (the 'hotMcpServer' Gradle task).",
+                inputSchema = toolSchema(
+                    ClassNameParam, FunctionNameParam, HeadlessWidthParam, HeadlessHeightParam,
+                    required = listOf(ClassNameParam.name, FunctionNameParam.name),
+                )
+            ) { request ->
+                handleRunHeadless(sessions, request)
+            }
 
-        addTool(
-            name = "close_headless",
-            description = "Close a headless session previously started with 'run_headless': shuts the " +
-                "application process down and releases its resources. Returns {\"success\": true}.",
-            inputSchema = toolSchema(SessionIdParam, required = listOf(SessionIdParam.name))
-        ) { request ->
-            handleCloseHeadless(sessions, request)
+            addTool(
+                name = "close_headless",
+                description = "Close a headless session previously started with 'run_headless': shuts the " +
+                    "application process down and releases its resources. Returns {\"success\": true}.",
+                inputSchema = toolSchema(SessionIdParam, required = listOf(SessionIdParam.name))
+            ) { request ->
+                handleCloseHeadless(sessions, request)
+            }
         }
 
         addTool(
             name = "take_screenshot",
             description = "Take a screenshot of the running Compose application window. " +
                 "Captures only the Compose content; window decorations (title bar, borders) are excluded. " +
-                "Pass 'session_id' to capture a headless session started with 'run_headless'; otherwise " +
-                "the attached application is captured. " +
+                (if (sessions != null)
+                    "Pass 'session_id' to capture a headless session started with 'run_headless'; otherwise " +
+                        "the attached application is captured. "
+                else "") +
                 "Use the 'status' tool first to check if an application is connected.",
-            inputSchema = toolSchema(SessionIdParam, WindowIdParam, SaveToParam, required = emptyList())
+            inputSchema = if (sessions != null)
+                toolSchema(SessionIdParam, WindowIdParam, SaveToParam, required = emptyList())
+            else toolSchema(WindowIdParam, SaveToParam, required = emptyList())
         ) { request ->
             handleTakeScreenshot(orchestration, sessions, request)
         }
@@ -770,12 +782,6 @@ private suspend fun handleRunHeadless(
     sessions: HeadlessSessionManager,
     request: CallToolRequest,
 ): CallToolResult {
-    if (!sessions.isSupported) {
-        return errorResult(
-            "Headless mode is not available: the MCP server was started without a headless launch " +
-                "spec. Launch it via the 'hotMcpServer' Gradle task."
-        )
-    }
     val args = request.arguments
     val className = args?.get(ClassNameParam.name)?.jsonPrimitive?.contentOrNull
         ?: return errorResult("Missing required parameter '${ClassNameParam.name}'")
@@ -808,16 +814,17 @@ private suspend fun handleCloseHeadless(
 
 private suspend fun handleTakeScreenshot(
     orchestration: StateFlow<OrchestrationHandle?>,
-    sessions: HeadlessSessionManager,
+    sessions: HeadlessSessionManager?,
     request: CallToolRequest,
 ): CallToolResult {
     val saveTo = (request.arguments?.get(SaveToParam.name) as? JsonPrimitive)?.contentOrNull
         ?.let { Path.of(it) }
 
     /* Headless sessions render a single windowless scene: target it directly, no window resolution. */
-    val sessionId = request.arguments?.get(SessionIdParam.name)?.jsonPrimitive?.contentOrNull
+    val sessionId = if (sessions != null)
+        request.arguments?.get(SessionIdParam.name)?.jsonPrimitive?.contentOrNull else null
     if (sessionId != null) {
-        val session = sessions[sessionId]
+        val session = sessions?.get(sessionId)
             ?: return errorResult("No headless session '$sessionId' (already closed or never started).")
         return screenshotResult(session.orchestration, windowId = null, saveTo)
     }

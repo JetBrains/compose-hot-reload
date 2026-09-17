@@ -247,6 +247,7 @@ public final class org/jetbrains/compose/reload/core/HotReloadEnvironment {
 	public final fun getIsolatedProjectsEnabled ()Z
 	public final fun getLogLevel ()Lorg/jetbrains/compose/reload/core/Logger$Level;
 	public final fun getLogStdout ()Z
+	public final fun getMcpHeadlessToolsEnabled ()Z
 	public final fun getReloadEffectsEnabled ()Z
 	public final fun getStaticsReinitializeMode ()Lorg/jetbrains/compose/reload/core/StaticsReinitializeMode;
 	public final fun getStderrFile ()Ljava/nio/file/Path;
@@ -274,6 +275,7 @@ public final class org/jetbrains/compose/reload/core/HotReloadProperty : java/la
 	public static final field JetBrainsRuntimeVersion Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field LogLevel Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field LogStdout Lorg/jetbrains/compose/reload/core/HotReloadProperty;
+	public static final field McpHeadlessToolsEnabled Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field ReloadEffectsEnabled Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field StaticsReinitializeMode Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field StderrFile Lorg/jetbrains/compose/reload/core/HotReloadProperty;

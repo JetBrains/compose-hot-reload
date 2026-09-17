@@ -50,7 +50,9 @@ fun main(args: Array<String>) {
             exitProcess(1)
         }
 
-    val launchSpec = HeadlessLaunchSpec.fromSystemProperties()
+    // The headless MCP tools are experimental and hidden behind the 'mcpHeadlessToolsEnabled' flag:
+    val launchSpec = if (HotReloadEnvironment.mcpHeadlessToolsEnabled)
+        HeadlessLaunchSpec.fromSystemProperties() else null
     logger.info(
         "MCP server starting. Watching PID file: $pidFile " +
             "(headless mode ${if (launchSpec != null) "enabled" else "unavailable"})"
@@ -60,15 +62,17 @@ fun main(args: Array<String>) {
         val orchestration = connectionLoop(pidFile)
             .stateIn(this, SharingStarted.Eagerly, null)
 
-        val sessions = HeadlessSessionManager(launchSpec)
-        Runtime.getRuntime().addShutdownHook(Thread {
-            runBlocking { sessions.closeAll() }
-        })
+        val sessions = launchSpec?.let { HeadlessSessionManager(it) }
+        sessions?.let { manager ->
+            Runtime.getRuntime().addShutdownHook(Thread {
+                runBlocking { manager.closeAll() }
+            })
+        }
 
         try {
             startMcpServer(orchestration, sessions, protocolOut, pidFile)
         } finally {
-            sessions.closeAll()
+            sessions?.closeAll()
         }
     }
 }

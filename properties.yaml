@@ -56,6 +56,19 @@ HeadlessArgFile:
     Path to the JVM '@argfile' (DevApplication, hot classpath, agent, headless) used by the MCP
     server to run headless applications (see the 'run_headless' tool).
 
+McpHeadlessToolsEnabled:
+  key: compose.reload.mcp.headlessToolsEnabled
+  type: boolean
+  default: "false"
+  target: [ build, devtools ]
+  visibility: experimental
+  documentation: |
+    Feature flag for the experimental headless MCP tools ('run_headless', 'close_headless', and the
+    'session_id' parameter of 'take_screenshot'), which let the MCP server launch a Compose
+    application in headless mode from a given @Composable.
+    - true: the headless MCP tools are exposed by the MCP server.
+    - false (default): the headless MCP tools are hidden entirely.
+
 IsHotReloadBuild:
   key: compose.reload.isHotReloadBuild
   type: boolean
