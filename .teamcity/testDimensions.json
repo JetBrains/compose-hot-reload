@@ -27,7 +27,7 @@
       "isDefault": true
     },
     {
-      "version": "9.5.1",
+      "version": "9.7.1",
       "isGradleIntegrationTest": true
     }
   ],
