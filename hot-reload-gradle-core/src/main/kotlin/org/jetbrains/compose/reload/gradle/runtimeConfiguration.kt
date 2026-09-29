@@ -34,7 +34,6 @@ val Project.composeHotReloadRuntimeConfiguration: Configuration
         ?: project.configurations.create(HOT_RELOAD_RUNTIME_CONFIGURATION_NAME) { configuration ->
             configuration.isCanBeResolved = true
             configuration.isCanBeConsumed = false
-            configuration.isVisible = false
 
             configuration.attributes.attribute(KotlinPlatformType.attribute, KotlinPlatformType.jvm)
             configuration.attributes.attribute(Category.CATEGORY_ATTRIBUTE, project.objects.named(Category.LIBRARY))
