@@ -61,11 +61,12 @@ public final class org/jetbrains/compose/reload/gradle/HotReloadUsage$Compatibil
 	public fun execute (Lorg/gradle/api/attributes/CompatibilityCheckDetails;)V
 }
 
-public final class org/jetbrains/compose/reload/gradle/HotReloadUsageType : java/lang/Enum {
+public final class org/jetbrains/compose/reload/gradle/HotReloadUsageType : java/lang/Enum, org/gradle/api/Named {
 	public static final field Companion Lorg/jetbrains/compose/reload/gradle/HotReloadUsageType$Companion;
 	public static final field Dev Lorg/jetbrains/compose/reload/gradle/HotReloadUsageType;
 	public static final field Main Lorg/jetbrains/compose/reload/gradle/HotReloadUsageType;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public fun getName ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/gradle/HotReloadUsageType;
 	public static fun values ()[Lorg/jetbrains/compose/reload/gradle/HotReloadUsageType;
 }

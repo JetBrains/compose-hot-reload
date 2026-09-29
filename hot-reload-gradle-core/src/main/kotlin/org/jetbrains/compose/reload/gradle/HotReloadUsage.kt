@@ -5,13 +5,20 @@
 
 package org.jetbrains.compose.reload.gradle
 
+import org.gradle.api.Named
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.attributes.AttributeCompatibilityRule
 import org.gradle.api.attributes.CompatibilityCheckDetails
 import org.gradle.api.attributes.Usage
 
-enum class HotReloadUsageType {
+enum class HotReloadUsageType : Named {
     Main, Dev;
+
+    /**
+     * Gradle requires attribute value types to be String, Boolean, Number or [Named].
+     * Using a plain enum is deprecated since Gradle 9.8 and fails in Gradle 10.
+     */
+    override fun getName(): String = name
 
     companion object {
         val attribute = Attribute.of("org.jetbrains.compose.reload.usageType", HotReloadUsageType::class.java)
