@@ -175,6 +175,11 @@ private fun JsonBuilder.appendSemanticNode(node: SemanticsNode) {
     if (config.contains(SemanticsProperties.IsPopup)) raw("isPopup", "true")
     if (config.contains(SemanticsProperties.Password)) raw("password", "true")
 
+    if (config.contains(SemanticsActions.ScrollBy) || config.contains(SemanticsActions.ScrollToIndex)) {
+        if (config.contains(SemanticsProperties.HorizontalScrollAxisRange)) raw("scrollsHorizontally", "true")
+        if (config.contains(SemanticsProperties.VerticalScrollAxisRange)) raw("scrollsVertically", "true")
+    }
+
     val actions = buildList {
         if (config.contains(SemanticsActions.OnClick)) add("onClick")
         if (config.contains(SemanticsActions.OnLongClick)) add("onLongClick")
