@@ -27,7 +27,13 @@ class SemanticTreeIntegrationTest {
         .toURI().let { java.nio.file.Paths.get(it).toString().replace('\\', '/') }
 
     private val semanticTreeColumnImports = """
+    import androidx.compose.foundation.horizontalScroll
     import androidx.compose.foundation.layout.Column
+    import androidx.compose.foundation.layout.Row
+    import androidx.compose.foundation.layout.height
+    import androidx.compose.foundation.layout.width
+    import androidx.compose.foundation.lazy.LazyColumn
+    import androidx.compose.foundation.rememberScrollState
     import androidx.compose.foundation.text.BasicTextField
     import androidx.compose.material.Button
     import androidx.compose.material.Checkbox
@@ -44,6 +50,7 @@ class SemanticTreeIntegrationTest {
     import androidx.compose.ui.semantics.*
     import androidx.compose.ui.text.font.FontFamily
     import androidx.compose.ui.text.platform.Font
+    import androidx.compose.ui.unit.dp
     import java.io.File
 """.trimIndent()
 
@@ -103,6 +110,16 @@ class SemanticTreeIntegrationTest {
                 onClick = {},
                 modifier = Modifier.semantics { onLongClick { true } }
             ) { Text("Long press") }
+
+            // scrollsHorizontally
+            Row(Modifier.width(100.dp).horizontalScroll(rememberScrollState())) {
+                Text("Horizontally scrollable content")
+            }
+
+            // scrollsVertically (lazy list: ScrollToIndex)
+            LazyColumn(Modifier.height(48.dp)) {
+                items(10) { index -> Text("Item #${'$'}index") }
+            }
         }
     }
 """.trimIndent()
@@ -120,7 +137,6 @@ class SemanticTreeIntegrationTest {
 
         fixture initialSourceCode """
             $semanticTreeColumnImports
-            import androidx.compose.ui.unit.dp
             import androidx.compose.ui.window.*
 
             fun main() {
