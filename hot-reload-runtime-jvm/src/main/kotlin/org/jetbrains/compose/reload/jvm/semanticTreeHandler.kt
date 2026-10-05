@@ -5,6 +5,7 @@
 
 package org.jetbrains.compose.reload.jvm
 
+import androidx.compose.ui.semantics.ScrollAxisRange
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -141,6 +142,19 @@ internal class JsonBuilder(private val sb: StringBuilder) {
 
 // ── SemanticsNode JSON builder ───────────────────────────────────────────────
 
+// e.g. "scrollY":{"offset":120,"max":800,"reversed":true}
+// offset/max in px; "reversed" = scrolls against layout direction (bottom-to-top, or end-to-start horizontally)
+private fun JsonBuilder.scrollRange(key: String, range: ScrollAxisRange) {
+    comma()
+    append("\"$key\":{")
+    with(nested()) {
+        raw("offset", range.value().toInt().toString())
+        raw("max", range.maxValue().toInt().toString())
+        if (range.reverseScrolling) raw("reversed", "true")
+    }
+    append('}')
+}
+
 // TODO: do we need to handle more semantic properties?
 private fun JsonBuilder.appendSemanticNode(node: SemanticsNode) {
     val config = node.config
@@ -174,6 +188,11 @@ private fun JsonBuilder.appendSemanticNode(node: SemanticsNode) {
     if (config.contains(SemanticsProperties.IsDialog)) raw("isDialog", "true")
     if (config.contains(SemanticsProperties.IsPopup)) raw("isPopup", "true")
     if (config.contains(SemanticsProperties.Password)) raw("password", "true")
+
+    if (config.contains(SemanticsActions.ScrollBy) || config.contains(SemanticsActions.ScrollToIndex)) {
+        config.getOrNull(SemanticsProperties.HorizontalScrollAxisRange)?.let { scrollRange("scrollX", it) }
+        config.getOrNull(SemanticsProperties.VerticalScrollAxisRange)?.let { scrollRange("scrollY", it) }
+    }
 
     val actions = buildList {
         if (config.contains(SemanticsActions.OnClick)) add("onClick")

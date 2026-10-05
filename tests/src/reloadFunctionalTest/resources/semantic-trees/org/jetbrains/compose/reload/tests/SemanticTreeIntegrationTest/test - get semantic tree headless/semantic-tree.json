@@ -143,6 +143,67 @@
             "width": 114,
             "height": 36
           }
+        },
+        {
+          "id": 22,
+          "scrollX": {
+            "offset": 0,
+            "max": 132
+          },
+          "bounds": {
+            "x": 0,
+            "y": 292,
+            "width": 100,
+            "height": 24
+          },
+          "children": [
+            {
+              "id": 23,
+              "text": "Horizontally scrollable content",
+              "bounds": {
+                "x": 0,
+                "y": 292,
+                "width": 100,
+                "height": 24
+              }
+            }
+          ]
+        },
+        {
+          "id": 24,
+          "scrollY": {
+            "offset": 1500,
+            "max": 1600,
+            "reversed": true
+          },
+          "bounds": {
+            "x": 0,
+            "y": 316,
+            "width": 59,
+            "height": 48
+          },
+          "children": [
+            {
+              "id": 26,
+              "text": "Item #3",
+              "bounds": {
+                "x": 0,
+                "y": 340,
+                "width": 59,
+                "height": 24
+              }
+            },
+            {
+              "id": 28,
+              "text": "Item #4",
+              "bounds": {
+                "x": 0,
+                "y": 316,
+                "width": 59,
+                "height": 24
+              }
+            }
+          ]
         }
       ]
     }
