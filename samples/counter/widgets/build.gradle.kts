@@ -4,6 +4,7 @@
  */
 
 plugins {
+    id("com.android.library")
     kotlin("multiplatform")
     kotlin("plugin.compose")
     id("org.jetbrains.compose")
@@ -13,13 +14,31 @@ plugins {
 kotlin {
     jvmToolchain(21)
     jvm()
+    androidTarget()
 
-    sourceSets.jvmMain.dependencies {
+    sourceSets.commonMain.dependencies {
         implementation("io.sellmair:evas:1.2.0")
         implementation("io.sellmair:evas-compose:1.2.0")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
-        implementation(compose.desktop.currentOs)
         implementation(compose.foundation)
         implementation(compose.material3)
+    }
+
+    sourceSets.jvmMain.dependencies {
+        implementation(compose.desktop.currentOs)
+    }
+}
+
+android {
+    compileSdk = 35
+    namespace = "org.jetbrains.compose.reload.sample.widgets"
+
+    defaultConfig {
+        minSdk = 28
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }

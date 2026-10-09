@@ -7,6 +7,7 @@ import androidx.compose.ui.window.rememberWindowState
 import io.sellmair.evas.Events
 import io.sellmair.evas.States
 import io.sellmair.evas.compose.installEvas
+import org.jetbrains.compose.reload.sample.counter.App
 import java.awt.Color
 
 fun main() {
