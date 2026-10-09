@@ -11,6 +11,7 @@ pluginManagement {
     repositories {
         maven(file("../..//build/repo"))
         maven("https://packages.jetbrains.team/maven/p/firework/dev")
+        google()
         mavenCentral {
             setUrl("https://cache-redirector.jetbrains.com/maven-central")
         }
@@ -21,6 +22,8 @@ pluginManagement {
         kotlin("multiplatform") version "2.3.21"
         kotlin("plugin.compose") version "2.3.21"
         id("org.jetbrains.compose") version "1.10.0"
+        id("com.android.application") version "8.11.1"
+        id("com.android.library") version "8.11.1"
     }
 }
 

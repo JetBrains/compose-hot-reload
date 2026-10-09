@@ -1,3 +1,5 @@
+package org.jetbrains.compose.reload.sample.counter
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -11,6 +13,7 @@ import androidx.compose.ui.unit.sp
 import io.sellmair.evas.compose.EvasLaunching
 import io.sellmair.evas.compose.composeValue
 import io.sellmair.evas.set
+import org.jetbrains.compose.reload.sample.widgets.SomeWidget
 
 @Composable
 fun App() {

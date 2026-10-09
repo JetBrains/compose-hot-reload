@@ -5,6 +5,7 @@ import io.sellmair.evas.Events
 import io.sellmair.evas.States
 import io.sellmair.evas.compose.installEvas
 import org.jetbrains.compose.reload.DevelopmentEntryPoint
+import org.jetbrains.compose.reload.sample.counter.App
 
 @Composable
 @DevelopmentEntryPoint
