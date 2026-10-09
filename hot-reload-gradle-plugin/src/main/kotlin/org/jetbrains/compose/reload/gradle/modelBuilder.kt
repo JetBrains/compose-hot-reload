@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -41,7 +41,7 @@ private fun AbstractComposeHotRun.toIdeaModel(): IdeaComposeHotRunTask? {
     return IdeaComposeHotRunTask(
         taskName = name,
         taskClass = when (this) {
-            is ComposeHotDevRun -> ComposeHotDevRun::class.java.name
+            is ComposeHotDesktopDevRun -> ComposeHotDesktopDevRun::class.java.name
             is ComposeHotRun -> ComposeHotRun::class.java.name
         },
         targetName = compilation.target.name,

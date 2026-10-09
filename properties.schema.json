@@ -38,6 +38,7 @@
           "type": "string",
           "enum": ["public", "delicate", "experimental", "internal", "deprecated"]
         },
+        "deliveredTo": { "type": "array", "items": { "type": "string", "enum": ["desktop", "android"] }, "description": "Application platforms this property is delivered to at launch. Default for application-targeted properties: [desktop] (the Gradle argfile); declare explicitly to deliver additionally or instead (android: the am start extras bridge, see HotReloadInitProvider)." },
         "deprecationMessage": {
           "type": "string"
         },

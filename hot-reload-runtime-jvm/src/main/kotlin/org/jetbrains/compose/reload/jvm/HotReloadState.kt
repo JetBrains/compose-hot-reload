@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -8,9 +8,9 @@ package org.jetbrains.compose.reload.jvm
 import androidx.compose.runtime.compositionLocalOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import org.jetbrains.compose.reload.agent.invokeAfterHotReload
 import org.jetbrains.compose.reload.core.exceptionOrNull
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
+import org.jetbrains.compose.reload.shared.invokeAfterHotReload
 
 internal data class HotReloadState(
     val reloadRequestId: OrchestrationMessageId? = null,

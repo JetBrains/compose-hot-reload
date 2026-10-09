@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -40,7 +40,7 @@ import org.jetbrains.compose.reload.test.gradle.GradleBuildEvent
 import org.jetbrains.compose.reload.test.gradle.GradlePropertiesExtension
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.ProjectMode
+import org.jetbrains.compose.reload.test.gradle.foldDesktop
 import org.jetbrains.compose.reload.test.gradle.ProjectSetupExtension
 import org.jetbrains.compose.reload.test.gradle.TestedLaunchMode
 import org.jetbrains.compose.reload.test.gradle.assertSuccessful
@@ -299,10 +299,7 @@ class ConfigurationCacheTest {
     }
 
     private val HotReloadTestFixture.runTask
-        get() = when (projectMode) {
-            ProjectMode.Kmp -> ":hotRunJvm"
-            ProjectMode.Jvm -> "hotRun"
-        }
+        get() = projectMode.foldDesktop(kmp = ":hotRunJvm", jvm = "hotRun")
 
     class Extension : ProjectSetupExtension, GradlePropertiesExtension {
         override fun setupProject(

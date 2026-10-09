@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -13,6 +13,7 @@ import org.jetbrains.compose.reload.core.decodeSerializableObject
 import org.jetbrains.compose.reload.core.encodeByteArray
 import org.jetbrains.compose.reload.core.encodeSerializableObject
 import org.jetbrains.compose.reload.core.getOrThrow
+import org.jetbrains.compose.reload.core.readBytesFully
 import org.jetbrains.compose.reload.core.type
 import org.jetbrains.compose.reload.orchestration.OrchestrationPackage.Introduction
 import java.io.Serializable
@@ -120,13 +121,13 @@ internal fun OrchestrationStateUpdate.encodeToFrame() = OrchestrationFrame(
 
 internal fun ByteArray.decodeStateUpdate(): OrchestrationStateUpdate = decode {
     val stateIdSize = readInt()
-    val stateId = readNBytes(stateIdSize).decodeOrchestrationStateId().getOrThrow()
+    val stateId = readBytesFully(stateIdSize).decodeOrchestrationStateId().getOrThrow()
 
     val expectedValueSize = readInt()
-    val expectedValue = if (expectedValueSize == -1) null else readNBytes(expectedValueSize)
+    val expectedValue = if (expectedValueSize == -1) null else readBytesFully(expectedValueSize)
 
     val updatedValueSize = readInt()
-    val updatedValue = readNBytes(updatedValueSize)
+    val updatedValue = readBytesFully(updatedValueSize)
 
     OrchestrationStateUpdate(stateId, expectedValue = expectedValue?.let(::Binary), Binary(updatedValue))
 }
@@ -158,10 +159,10 @@ internal fun OrchestrationStateValue.encodeToFrame() = OrchestrationFrame(
 
 internal fun ByteArray.decodeStateValue(): OrchestrationStateValue = decode {
     val stateIdSize = readInt()
-    val stateId = readNBytes(stateIdSize).decodeOrchestrationStateId().getOrThrow()
+    val stateId = readBytesFully(stateIdSize).decodeOrchestrationStateId().getOrThrow()
 
     val valueSize = readInt()
-    val value = if (valueSize == -1) null else readNBytes(valueSize)
+    val value = if (valueSize == -1) null else readBytesFully(valueSize)
     OrchestrationStateValue(stateId, value?.let(::Binary))
 }
 //endregion

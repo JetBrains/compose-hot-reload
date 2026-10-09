@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -10,6 +10,8 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIRendere
 import org.jetbrains.compose.reload.test.gradle.AndroidHotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
+import org.jetbrains.compose.reload.test.gradle.ProjectMode
+import org.jetbrains.compose.reload.test.gradle.TestedProjectMode
 import org.jetbrains.compose.reload.test.gradle.launchApplication
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
 import org.junit.jupiter.api.parallel.Execution
@@ -24,6 +26,7 @@ class Warmup {
      */
     @HotReloadTest
     @AndroidHotReloadTest
+    @TestedProjectMode(ProjectMode.Kmp)
     @GradleIntegrationTest
     @Execution(ExecutionMode.SAME_THREAD)
     fun build(fixture: HotReloadTestFixture) = fixture.runTest(timeout = timeout) {

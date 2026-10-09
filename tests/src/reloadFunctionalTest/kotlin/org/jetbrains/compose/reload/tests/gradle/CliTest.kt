@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -10,7 +10,7 @@ import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.ProjectMode
+import org.jetbrains.compose.reload.test.gradle.foldDesktop
 import org.jetbrains.compose.reload.test.gradle.assertSuccessful
 import org.jetbrains.compose.reload.test.gradle.buildFlow
 import org.jetbrains.compose.reload.test.gradle.getDefaultMainKtSourceFile
@@ -43,10 +43,7 @@ class CliTest {
             } as Map<String, String>
         }
 
-        val runTask = when (fixture.projectMode) {
-            ProjectMode.Kmp -> ":hotRunJvm"
-            ProjectMode.Jvm -> ":hotRun"
-        }
+        val runTask = fixture.projectMode.foldDesktop(kmp = ":hotRunJvm", jvm = ":hotRun")
 
         /* Test '--auto' */
         run {
@@ -72,10 +69,7 @@ class CliTest {
             assertEquals("false", properties[HotReloadProperty.GradleBuildContinuous.key])
         }
 
-        val asyncRunTask = when (fixture.projectMode) {
-            ProjectMode.Kmp -> ":hotRunJvmAsync"
-            ProjectMode.Jvm -> ":hotRunAsync"
-        }
+        val asyncRunTask = fixture.projectMode.foldDesktop(kmp = ":hotRunJvmAsync", jvm = ":hotRunAsync")
 
         /* ASYNC: Test '--auto' */
         run {

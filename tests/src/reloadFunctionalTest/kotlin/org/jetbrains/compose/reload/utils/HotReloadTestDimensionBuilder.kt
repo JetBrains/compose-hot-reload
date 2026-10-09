@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -14,7 +14,9 @@ import org.jetbrains.compose.reload.test.gradle.BuildMode
 import org.jetbrains.compose.reload.test.gradle.ComposeVersion
 import org.jetbrains.compose.reload.test.gradle.Headless
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestDimensionExtension
+import org.jetbrains.compose.reload.test.gradle.AndroidHotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestInvocationContext
+import org.jetbrains.compose.reload.test.gradle.TestedAndroidVersion
 import org.jetbrains.compose.reload.test.gradle.MinComposeVersion
 import org.jetbrains.compose.reload.test.gradle.ProjectMode
 import org.jetbrains.compose.reload.test.gradle.TestedBuildMode
@@ -139,6 +141,72 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
             }
         }
 
+        /*
+         * Expand AGP × Compose combinations: only tests opting into the Android dimension
+         * (@AndroidHotReloadTest). The compose axis respects the test's compose pin; each AGP
+         * entry only pairs with the Compose, Gradle and Kotlin versions it is compatible with.
+         */
+        if (context.hasAnnotation<AndroidHotReloadTest>()) {
+            result += repositoryDeclaredTestDimensions.agp.flatMap { declaredAgp ->
+                /* The AGP's Gradle requirement may exceed the default Gradle: pair it with the lowest
+                   declared Gradle that satisfies it (none such → the AGP is not tested) */
+                val minGradle = declaredAgp.minGradle
+                val gradleForAgp = if (minGradle == null || compareVersions(baselineContext.gradleVersion.version, minGradle) >= 0) {
+                    baselineContext.gradleVersion
+                } else {
+                    repositoryDeclaredTestDimensions.gradle.map { it.version }
+                        .filter { compareVersions(it, minGradle) >= 0 }
+                        .minWithOrNull { left, right -> compareVersions(left, right) }
+                        ?.let { TestedGradleVersion(it) }
+                } ?: return@flatMap emptyList()
+
+                val composeAxis = if (
+                    context.hasAnnotation<QuickTest>() || context.hasAnnotation<TestOnlyDefaultComposeVersion>()
+                ) {
+                    listOf(baselineContext.composeVersion.version.toString())
+                } else {
+                    repositoryDeclaredTestDimensions.compose.map { it.version }
+                }.filter { compose ->
+                    val minAgp = repositoryDeclaredTestDimensions.compose
+                        .find { it.version == compose }?.minAgp
+                    minAgp == null || compareVersions(declaredAgp.version, minAgp) >= 0
+                }
+
+                val kotlinAxis = if (
+                    context.hasAnnotation<QuickTest>() ||
+                    context.hasAnnotation<TestOnlyDefaultKotlinVersion>()
+                ) {
+                    listOf(baselineContext.kotlinVersion.version.toString())
+                } else {
+                    repositoryDeclaredTestDimensions.kotlin.map { it.version }
+                }.filter { kotlin ->
+                    val minKotlin = declaredAgp.minKotlin
+                    minKotlin == null || KotlinToolingVersion(kotlin) >= KotlinToolingVersion(minKotlin)
+                }
+
+                val modesForAgp = buildList {
+                    if (declaredAgp.kmpWithAndroidTargetCompatible) add(ProjectMode.Kmp)
+                    add(ProjectMode.Android)
+                }
+
+                modesForAgp.flatMap { mode ->
+                    composeAxis.flatMap { compose ->
+                        kotlinAxis.map { kotlin ->
+                            baselineContext.copy {
+                                androidVersion = TestedAndroidVersion(declaredAgp.version)
+                                composeVersion = TestedComposeVersion(ComposeVersion(compose))
+                                gradleVersion = gradleForAgp
+                                kotlinVersion = TestedKotlinVersion(KotlinToolingVersion(kotlin))
+                                if (declaredAgp.androidBuiltInKotlin) androidBuiltInKotlin = true
+                                projectMode = mode
+                                declaredAgp.androidCompileSdk?.let { androidCompileSdk = it }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         /* Drop combos where the chosen Compose version requires a newer Kotlin than chosen */
         result = result.filter { invocationContext ->
             val composeDecl = repositoryDeclaredTestDimensions.compose.find { declared ->
@@ -156,6 +224,19 @@ class HotReloadTestDimensionBuilder : HotReloadTestDimensionExtension {
             )
         )
     }
+}
+
+/**
+ * Compares dotted numeric versions ("8.14.5" < "9.1"). Missing segments count as zero.
+ */
+internal fun compareVersions(left: String, right: String): Int {
+    val leftParts = left.split('.').map { it.toIntOrNull() ?: 0 }
+    val rightParts = right.split('.').map { it.toIntOrNull() ?: 0 }
+    for (index in 0..<maxOf(leftParts.size, rightParts.size)) {
+        val comparison = (leftParts.getOrElse(index) { 0 }).compareTo(rightParts.getOrElse(index) { 0 })
+        if (comparison != 0) return comparison
+    }
+    return 0
 }
 
 class HotReloadTestDimensionFilter : HotReloadTestDimensionExtension {
@@ -191,6 +272,16 @@ class HotReloadTestDimensionFilter : HotReloadTestDimensionExtension {
 
         if (context.hasAnnotation<TestOnlyAndroid>()) {
             result = result.filter { context -> context.androidVersion != null }
+        }
+
+        //  Handle @TestedProjectMode rewrites after ProjectModeHotReloadTestDimensionExtension
+        result = result.filter { invocationContext ->
+            val agp = invocationContext.androidVersion ?: return@filter true
+            val agpDecl = repositoryDeclaredTestDimensions.agp.find { it.version == agp.version }
+                ?: return@filter true
+
+            // Filter out Kmp projects for AGP 9+
+            invocationContext.projectMode != ProjectMode.Kmp || agpDecl.kmpWithAndroidTargetCompatible
         }
 
         val bucket = System.getenv("TESTED_BUCKET")?.toInt()

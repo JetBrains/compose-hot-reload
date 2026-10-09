@@ -282,6 +282,7 @@ public final class org/jetbrains/compose/reload/core/HotReloadProperty : java/la
 	public static final field StdinFile Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public static final field StdoutFile Lorg/jetbrains/compose/reload/core/HotReloadProperty;
 	public final fun getDefault ()Ljava/lang/String;
+	public final fun getDeliveredTo ()Ljava/util/List;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getKey ()Ljava/lang/String;
 	public final fun getTargets ()Ljava/util/List;
@@ -298,6 +299,14 @@ public final class org/jetbrains/compose/reload/core/HotReloadProperty$Environme
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/core/HotReloadProperty$Environment;
 	public static fun values ()[Lorg/jetbrains/compose/reload/core/HotReloadProperty$Environment;
+}
+
+public final class org/jetbrains/compose/reload/core/HotReloadProperty$Platform : java/lang/Enum {
+	public static final field Android Lorg/jetbrains/compose/reload/core/HotReloadProperty$Platform;
+	public static final field Desktop Lorg/jetbrains/compose/reload/core/HotReloadProperty$Platform;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/compose/reload/core/HotReloadProperty$Platform;
+	public static fun values ()[Lorg/jetbrains/compose/reload/core/HotReloadProperty$Platform;
 }
 
 public final class org/jetbrains/compose/reload/core/HotReloadProperty$Type : java/lang/Enum {

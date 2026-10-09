@@ -5,7 +5,7 @@ import org.jetbrains.compose.reload.gradle.HotReloadUsageType
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -140,6 +140,9 @@ dependencies {
 
     implementation(project(":hot-reload-orchestration"))
     packageStandalone(project(":hot-reload-orchestration"))
+
+    implementation(project(":hot-reload-runtime-shared"))
+    packageStandalone(project(":hot-reload-runtime-shared"))
 
     implementation(project(":hot-reload-analysis"))
     packageStandalone(project(":hot-reload-analysis"))

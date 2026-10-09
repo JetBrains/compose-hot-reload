@@ -16,6 +16,8 @@ import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.ExperimentalHotReloadApi
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.HotReloadProperty
+import org.jetbrains.compose.reload.gradle.desktop.ComposeHotDesktopArgFileTask
+import org.jetbrains.compose.reload.gradle.desktop.composeHotDesktopRuntimeClasspath
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 
@@ -65,8 +67,8 @@ private val KotlinTarget.hotMcpServerTask: Future<TaskProvider<ComposeHotMcpServ
 private fun Project.registerHeadlessArgFileTask(
     compilation: KotlinCompilation<*>,
     targetName: String,
-): TaskProvider<ComposeHotArgFileTask> {
-    val hotClasspath = files { compilation.composeHotReloadRuntimeClasspath }
+): TaskProvider<ComposeHotDesktopArgFileTask> {
+    val hotClasspath = files { compilation.composeHotDesktopRuntimeClasspath }
     val argFileOutput = layout.buildDirectory.file("run/${camelCase("hotMcpHeadless", targetName)}.argfile")
 
     val arguments = createComposeHotReloadArguments {
@@ -77,7 +79,7 @@ private fun Project.registerHeadlessArgFileTask(
         isAutoRecompileEnabled(provider { false })
     }
 
-    return tasks.register(camelCase("hotMcpHeadless", targetName, "argfile"), ComposeHotArgFileTask::class.java) { task ->
+    return tasks.register(camelCase("hotMcpHeadless", targetName, "argfile"), ComposeHotDesktopArgFileTask::class.java) { task ->
         task.description = "Creates the headless launch argfile used by the MCP server for target '$targetName'"
         task.runTaskName.set(targetName)
         task.argFile.set(argFileOutput)

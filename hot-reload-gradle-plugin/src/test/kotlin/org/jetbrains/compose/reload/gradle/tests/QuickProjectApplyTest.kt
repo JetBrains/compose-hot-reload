@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -12,6 +12,8 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.compose.reload.gradle.ComposeHotReloadExtension
 import org.jetbrains.compose.reload.gradle.ComposeHotReloadPlugin
 import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
+import org.jetbrains.compose.reload.gradle.utils.AndroidProjectKind
+import org.jetbrains.compose.reload.gradle.utils.androidProject
 import org.jetbrains.compose.reload.gradle.utils.evaluate
 import org.jetbrains.kotlin.gradle.plugin.KotlinMultiplatformPluginWrapper
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
@@ -54,5 +56,21 @@ class QuickProjectApplyTest {
         }
 
         project.evaluate()
+    }
+
+    @Test
+    fun `test - apply to Kotlin multiplatform - with Android application`() {
+        val project = androidProject(AndroidProjectKind.Kmp)
+        project.evaluate()
+
+        assertNotNull(project.extensions.findByType<ComposeHotReloadExtension>(), "Expected hot reload extension")
+    }
+
+    @Test
+    fun `test - apply to Kotlin Android application`() {
+        val project = androidProject(AndroidProjectKind.KotlinAndroid)
+        project.evaluate()
+
+        assertNotNull(project.extensions.findByType<ComposeHotReloadExtension>(), "Expected hot reload extension")
     }
 }

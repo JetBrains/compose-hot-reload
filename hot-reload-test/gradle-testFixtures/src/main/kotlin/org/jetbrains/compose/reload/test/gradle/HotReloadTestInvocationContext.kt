@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.tooling.core.Extras
 import org.jetbrains.kotlin.tooling.core.HasExtras
 import org.jetbrains.kotlin.tooling.core.HasMutableExtras
 import org.jetbrains.kotlin.tooling.core.MutableExtras
+import org.jetbrains.kotlin.tooling.core.extrasKeyOf
 import org.jetbrains.kotlin.tooling.core.extrasReadWriteProperty
 import org.jetbrains.kotlin.tooling.core.mutableExtrasOf
 import org.jetbrains.kotlin.tooling.core.toExtras
@@ -18,6 +19,9 @@ import org.junit.jupiter.api.extension.Extension
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext
 
+public val AndroidCompileSdkKey: Extras.Key<Int> = extrasKeyOf()
+public val AndroidBuiltInKotlinKey: Extras.Key<Boolean> = extrasKeyOf()
+
 public data class HotReloadTestInvocationContext(
     override val extras: Extras
 ) : TestTemplateInvocationContext, HasExtras {
@@ -25,6 +29,16 @@ public data class HotReloadTestInvocationContext(
     val kotlinVersion: TestedKotlinVersion get() = extras[TestedKotlinVersion.key] ?: TestedKotlinVersion.default
     val composeVersion: TestedComposeVersion get() = extras[TestedComposeVersion.key] ?: TestedComposeVersion.default
     val androidVersion: TestedAndroidVersion? get() = extras[TestedAndroidVersion.key]
+    val androidCompileSdk: Int? get() = extras[AndroidCompileSdkKey]
+    val agpProvidesBuiltInKotlin: Boolean get() = extras[AndroidBuiltInKotlinKey] ?: false
+
+    /**
+     * AGP 9+ ships the dedicated KMP library plugin ('com.android.kotlin.multiplatform.library');
+     * older AGPs build KMP android libraries via KGP's 'androidTarget()' together with
+     * 'com.android.library'. Selects how a multiplatform library module declares its android
+     * target.
+     */
+    val agpShipsKmpLibraryPlugin: Boolean get() = agpProvidesBuiltInKotlin
     val gradleVersion: TestedGradleVersion get() = extras[TestedGradleVersion.key] ?: TestedGradleVersion.default
     val projectMode: ProjectMode get() = extras[ProjectMode.key] ?: ProjectMode.Kmp
     val launchMode: ApplicationLaunchMode get() = extras[ApplicationLaunchMode.key] ?: ApplicationLaunchMode.default
@@ -75,6 +89,8 @@ public class HotReloadTestInvocationContextBuilder(
     public var kotlinVersion: TestedKotlinVersion? by extrasReadWriteProperty(TestedKotlinVersion.key)
     public var composeVersion: TestedComposeVersion? by extrasReadWriteProperty(TestedComposeVersion.key)
     public var androidVersion: TestedAndroidVersion? by extrasReadWriteProperty(TestedAndroidVersion.key)
+    public var androidCompileSdk: Int? by extrasReadWriteProperty(AndroidCompileSdkKey)
+    public var androidBuiltInKotlin: Boolean? by extrasReadWriteProperty(AndroidBuiltInKotlinKey)
     public var gradleVersion: TestedGradleVersion? by extrasReadWriteProperty(TestedGradleVersion.key)
     public var projectMode: ProjectMode? by extrasReadWriteProperty(ProjectMode.key)
     public var launchMode: ApplicationLaunchMode? by extrasReadWriteProperty(ApplicationLaunchMode.key)
@@ -105,6 +121,15 @@ public val ExtensionContext.testedComposeVersion: TestedComposeVersion
 
 public val ExtensionContext.testedAndroidVersion: TestedAndroidVersion?
     get() = hotReloadTestInvocationContextOrThrow.androidVersion
+
+public val ExtensionContext.testedAndroidCompileSdk: Int?
+    get() = hotReloadTestInvocationContextOrThrow.androidCompileSdk
+
+public val ExtensionContext.agpProvidesBuiltInKotlin: Boolean
+    get() = hotReloadTestInvocationContextOrThrow.agpProvidesBuiltInKotlin
+
+public val ExtensionContext.agpShipsKmpLibraryPlugin: Boolean
+    get() = hotReloadTestInvocationContextOrThrow.agpShipsKmpLibraryPlugin
 
 public val ExtensionContext.projectMode: ProjectMode
     get() = hotReloadTestInvocationContextOrThrow.projectMode

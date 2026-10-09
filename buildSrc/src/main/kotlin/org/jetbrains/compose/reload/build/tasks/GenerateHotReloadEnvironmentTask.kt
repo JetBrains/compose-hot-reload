@@ -51,19 +51,25 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
             import org.jetbrains.compose.reload.InternalHotReloadApi
             import org.jetbrains.compose.reload.DelicateHotReloadApi
             import org.jetbrains.compose.reload.ExperimentalHotReloadApi
-            
+
             public enum class HotReloadProperty(
                 public val key: String,
                 public val type: Type,
                 public val default: String?,
                 public val targets: List<Environment>,
                 public val visibility: Visibility,
+                public val deliveredTo: List<Platform> = emptyList(),
             ) {
                 {{case}},
             ;
-                
+
                 public enum class Environment {
                     BuildTool, DevTools, Application;
+                }
+
+                /** Application platforms the property is delivered to at launch (see 'deliveredTo' in properties.yaml). */
+                public enum class Platform {
+                    Desktop, Android
                 }
 
                 public enum class Type {
@@ -86,6 +92,7 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
                 default = {{default}},
                 targets = listOf({{targets}}),
                 visibility = {{visibility}},
+                deliveredTo = listOf({{deliveredTo}}),
             )
         """.trimIndent().asTemplateOrThrow()
 
@@ -124,6 +131,14 @@ open class GenerateHotReloadEnvironmentTask : DefaultTask() {
                             Visibility.Experimental -> "Visibility.Experimental"
                             Visibility.Internal -> "Visibility.Internal"
                             Visibility.Deprecated -> "Visibility.Deprecated"
+                        }
+                    )
+                    "deliveredTo"(
+                        property.deliveredTo.joinToString(", ") { platform ->
+                            when (platform) {
+                                DeclaredHotReloadProperty.DeliveryPlatform.Desktop -> "Platform.Desktop"
+                                DeclaredHotReloadProperty.DeliveryPlatform.Android -> "Platform.Android"
+                            }
                         }
                     )
                 })
