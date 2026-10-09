@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -101,6 +101,9 @@ dependencies {
     compileOnly(kotlin("gradle-plugin"))
     compileOnly(deps.compose.gradlePlugin)
     compileOnly(deps.compose.compiler.gradlePlugin)
+    /* AGP: compileOnly only — used to resolve the SDK d8/android.jar/minSdk for the Android reload
+       task; provided at runtime by consumer projects that apply AGP. Never embedded/shaded. */
+    compileOnly("com.android.tools.build:gradle:${deps.versions.androidGradlePlugin.get()}")
 
     embedded(project(":hot-reload-gradle-core"))
     embedded(project(":hot-reload-gradle-idea"))
@@ -114,4 +117,5 @@ dependencies {
     testImplementation(deps.compose.compiler.gradlePlugin)
     testImplementation(deps.kotlinxSerialization.json)
     testImplementation("com.android.tools.build:gradle:8.6.1")
+    testImplementation(gradleTestKit())
 }

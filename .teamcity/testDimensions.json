@@ -45,10 +45,28 @@
     {
       "version": "1.12.1",
       "isDefault": true,
-      "minKotlin": "2.2.0"
+      "minKotlin": "2.2.0",
+      "minAgp": "9.1.0"
     },
     {
-      "version": "1.13.10-alpha01+dev5175"
+      "version": "1.13.10-alpha01+dev5175",
+      "minAgp": "9.1.0"
+    }
+  ],
+  "agp": [
+    {
+      "version": "8.11.1",
+      "isDefault": true,
+      "minGradle": "8.13",
+      "compileSdk": 35
+    },
+    {
+      "version": "9.1.1",
+      "minGradle": "9.1",
+      "kmpWithAndroidTargetCompatible": false,
+      "compileSdk": 37,
+      "builtInKotlin": true,
+      "minKotlin": "2.2.10"
     }
   ]
 }

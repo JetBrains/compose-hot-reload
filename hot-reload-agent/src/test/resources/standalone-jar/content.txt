@@ -8,6 +8,7 @@ META-INF/hot-reload-core.shadow.kotlin_module
 META-INF/hot-reload-core_kotlinxCoroutinesBridge.shadow.kotlin_module
 META-INF/hot-reload-core_kotlinxCoroutinesExtensions.shadow.kotlin_module
 META-INF/hot-reload-orchestration.shadow.kotlin_module
+META-INF/hot-reload-runtime-shared.shadow.kotlin_module
 META-INF/maven/
 META-INF/maven/org.javassist/
 META-INF/maven/org.javassist/javassist/
@@ -29,3 +30,4 @@ org/jetbrains/compose/reload/orchestration/
 org/jetbrains/compose/reload/shaded/
 org/jetbrains/compose/reload/shaded/javassist/
 org/jetbrains/compose/reload/shaded/objectweb/
+org/jetbrains/compose/reload/shared/

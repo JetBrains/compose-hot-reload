@@ -19,11 +19,9 @@ import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import io.modelcontextprotocol.kotlin.sdk.types.ToolSchema
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -68,8 +66,8 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.UIActionR
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.RestartRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeRequest
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeResult
-import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.flowOf
+import org.jetbrains.compose.reload.orchestration.sendAndAwait
 import java.nio.file.Path
 import java.util.Base64
 import kotlin.io.path.bufferedReader
@@ -1023,29 +1021,6 @@ private suspend fun resolveWindowId(handle: OrchestrationHandle, args: JsonObjec
     val id = WindowId(explicit)
     if (id !in windows) throw WindowIdNotFoundException("Window '$explicit' not found")
     return id
-}
-
-/**
- * Sends [request] over orchestration, then collects the resulting messages until [match] maps one
- * to a non-null value, returning it (or null if none arrives within [timeout]).
- *
- * The response channel is opened *before* [request] is sent, eliminating the race where a result
- * could otherwise arrive before a cold flow starts collecting. [consumeAsFlow] auto-closes the
- * channel once a terminal value is found.
- *
- * [match] is invoked on messages in arrival order, so it may accumulate state across calls
- * (e.g. capturing an id from one message to match it against a later one).
- */
-private suspend fun <R> OrchestrationHandle.sendAndAwait(
-    request: OrchestrationMessage,
-    timeout: Duration,
-    match: (OrchestrationMessage) -> R?,
-): R? {
-    val channel = asChannel()
-    return channel.consumeAsFlow().let { flow ->
-        send(request)
-        withTimeoutOrNull(timeout) { flow.mapNotNull(match).firstOrNull() }
-    }
 }
 
 /**

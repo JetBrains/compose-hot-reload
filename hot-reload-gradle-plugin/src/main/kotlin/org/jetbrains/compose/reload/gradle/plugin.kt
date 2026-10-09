@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -10,6 +10,18 @@ package org.jetbrains.compose.reload.gradle
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.compose.reload.createCompatibilityTasks
+import org.jetbrains.compose.reload.gradle.android.hotAndroidApplicationIdsRegistration
+import org.jetbrains.compose.reload.gradle.android.hotAndroidBuildTypeRegistration
+import org.jetbrains.compose.reload.gradle.android.hotAndroidReloadTasks
+import org.jetbrains.compose.reload.gradle.android.hotAndroidRunTasks
+import org.jetbrains.compose.reload.gradle.android.hotAndroidRunnableVariantsRegistration
+import org.jetbrains.compose.reload.gradle.android.hotAndroidRuntimeDependencies
+import org.jetbrains.compose.reload.gradle.desktop.hotArgFileTasks
+import org.jetbrains.compose.reload.gradle.desktop.hotAsyncRunTasks
+import org.jetbrains.compose.reload.gradle.desktop.hotDevCompilations
+import org.jetbrains.compose.reload.gradle.desktop.hotReloadTasks
+import org.jetbrains.compose.reload.gradle.desktop.hotRunTasks
+import org.jetbrains.compose.reload.gradle.desktop.hotSnapshotTasks
 
 @Suppress("unused")
 class ComposeHotReloadPlugin : Plugin<Project> {
@@ -33,6 +45,12 @@ class ComposeHotReloadPlugin : Plugin<Project> {
             target.launch { target.hotReloadLifecycleTask.await() }
             target.launch { target.hotReloadTasks.await() }
             target.launch { target.hotSnapshotTasks.await() }
+            target.launch { target.hotAndroidBuildTypeRegistration.await() }
+            target.launch { target.hotAndroidRuntimeDependencies.await() }
+            target.launch { target.hotAndroidApplicationIdsRegistration.await() }
+            target.launch { target.hotAndroidRunnableVariantsRegistration.await() }
+            target.launch { target.hotAndroidReloadTasks.await() }
+            target.launch { target.hotAndroidRunTasks.await() }
             target.launch { target.hotMcpServerTasks.await() }
             target.configureComposeHotReloadTasks()
             target.configureComposeCompilerArgs()
@@ -40,7 +58,7 @@ class ComposeHotReloadPlugin : Plugin<Project> {
             target.configureResourceAccessorsGenerationTasks()
         }
 
-        target.withKotlinPlugin(target::onKotlinPluginApplied)
+        target.withAnyKotlinPlugin(target::onKotlinPluginApplied)
     }
 }
 

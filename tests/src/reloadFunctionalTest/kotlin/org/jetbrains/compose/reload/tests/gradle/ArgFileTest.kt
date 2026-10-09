@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -33,7 +33,7 @@ import org.jetbrains.compose.reload.test.gradle.ApplicationLaunchMode
 import org.jetbrains.compose.reload.test.gradle.GradleRunner
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.ProjectMode
+import org.jetbrains.compose.reload.test.gradle.foldDesktop
 import org.jetbrains.compose.reload.test.gradle.TestedLaunchMode
 import org.jetbrains.compose.reload.test.gradle.build
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
@@ -73,20 +73,11 @@ class ArgFileTest {
             """.trimIndent()
         )
 
-        val runTaskName = when (projectMode) {
-            ProjectMode.Kmp -> "hotRunJvm"
-            ProjectMode.Jvm -> "hotRun"
-        }
+        val runTaskName = projectMode.foldDesktop(kmp = "hotRunJvm", jvm = "hotRun")
 
-        val argFileName = when (projectMode) {
-            ProjectMode.Kmp -> "jvmMain.argfile"
-            ProjectMode.Jvm -> "main.argfile"
-        }
+        val argFileName = projectMode.foldDesktop(kmp = "jvmMain.argfile", jvm = "main.argfile")
 
-        val compilationClassifier = when (projectMode) {
-            ProjectMode.Kmp -> "jvmMain"
-            ProjectMode.Jvm -> "main"
-        }
+        val compilationClassifier = projectMode.foldDesktop(kmp = "jvmMain", jvm = "main")
 
         assertEquals(GradleRunner.ExitCode.success, fixture.gradleRunner.build("${runTaskName}Argfile"))
         val argFile = fixture.projectDir.resolve("build/run/$compilationClassifier/$argFileName")

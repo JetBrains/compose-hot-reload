@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -8,6 +8,7 @@
 import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmAndroidCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
@@ -28,8 +29,14 @@ kotlin {
 
     applyDefaultHierarchyTemplate {
         common {
+            group("jvmAndAndroid") {
+                // Shared hot reload implementation, backed by the hooks in `:hot-reload-runtime-shared`.
+                withJvm()
+                withAndroidTarget()
+            }
             group("noop") {
-                withCompilations { it !is KotlinJvmCompilation }
+                // Everything except the JVM and Android targets falls back to the no-op impl.
+                withCompilations { it !is KotlinJvmCompilation && it !is KotlinJvmAndroidCompilation }
             }
         }
     }
@@ -65,10 +72,14 @@ kotlin {
         implementation(kotlin("test"))
     }
 
-    sourceSets.jvmMain.dependencies {
-        compileOnly(project(":hot-reload-agent"))
+    /* The runtime dependencies are only added to the classpath in hot reload mode. */
+    sourceSets.getByName("jvmAndAndroidMain").dependencies {
         compileOnly(project(":hot-reload-core"))
         compileOnly(project(":hot-reload-orchestration"))
+        compileOnly(project(":hot-reload-runtime-shared"))
+    }
+
+    sourceSets.jvmMain.dependencies {
         compileOnly(project(":hot-reload-runtime-jvm"))
     }
 

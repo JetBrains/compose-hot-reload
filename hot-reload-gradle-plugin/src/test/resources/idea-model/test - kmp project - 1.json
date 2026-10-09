@@ -3,7 +3,7 @@
     "runTasks": [
         {
             "taskName": "hotDevJvm",
-            "taskClass": "org.jetbrains.compose.reload.gradle.ComposeHotDevRun",
+            "taskClass": "org.jetbrains.compose.reload.gradle.ComposeHotDesktopDevRun",
             "targetName": "jvm",
             "compilationName": "dev",
             "sourceSets": [
@@ -16,7 +16,7 @@
         },
         {
             "taskName": "hotDevJvm",
-            "taskClass": "org.jetbrains.compose.reload.ComposeHotDevRun",
+            "taskClass": "org.jetbrains.compose.reload.ComposeHotDesktopDevRun",
             "targetName": "hotDevJvm",
             "compilationName": "dev",
             "sourceSets": [

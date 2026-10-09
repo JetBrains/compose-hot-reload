@@ -21,7 +21,7 @@ import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.test.gradle.GradleRunner
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
-import org.jetbrains.compose.reload.test.gradle.ProjectMode
+import org.jetbrains.compose.reload.test.gradle.foldDesktop
 import org.jetbrains.compose.reload.test.gradle.build
 import org.jetbrains.compose.reload.test.gradle.getDefaultMainKtSourceFile
 import org.jetbrains.compose.reload.utils.GradleIntegrationTest
@@ -69,10 +69,10 @@ class HeadlessMcpToolsIntegrationTest {
             """.trimIndent()
         )
 
-        val (argFileTask, argFileRelativePath) = when (projectMode) {
-            ProjectMode.Kmp -> "hotMcpHeadlessJvmArgfile" to "build/run/hotMcpHeadlessJvm.argfile"
-            ProjectMode.Jvm -> "hotMcpHeadlessArgfile" to "build/run/hotMcpHeadless.argfile"
-        }
+        val (argFileTask, argFileRelativePath) = projectMode.foldDesktop(
+            kmp = "hotMcpHeadlessJvmArgfile" to "build/run/hotMcpHeadlessJvm.argfile",
+            jvm = "hotMcpHeadlessArgfile" to "build/run/hotMcpHeadless.argfile",
+        )
 
         assertEquals(GradleRunner.ExitCode.success, fixture.gradleRunner.build(argFileTask))
         val generatedArgFile = fixture.projectDir.resolve(argFileRelativePath)

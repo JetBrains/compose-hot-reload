@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -14,6 +14,9 @@ import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
+import org.jetbrains.compose.reload.shared.executeAfterHotReloadListeners
+import org.jetbrains.compose.reload.shared.invokeAfterHotReload
+import org.jetbrains.compose.reload.shared.invokeBeforeHotReload
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.lang.instrument.ClassDefinition

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -7,7 +7,7 @@ package org.jetbrains.compose.reload.core
 
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import java.io.Serializable
-import kotlin.streams.asSequence
+import java.util.Collections
 
 @JvmInline
 @InternalHotReloadApi
@@ -22,8 +22,11 @@ public value class Environment(private val value: String) : Serializable {
         public val devTools: Environment = Environment("DevTools")
 
         public val current: Environment? by lazy {
-            val envVariables = ClassLoader.getSystemClassLoader().resources("META-INF/compose.reload.env")
-                .asSequence().toList()
+            // Use getResources()/Enumeration rather than the Java 9+ resources() Stream API, which
+            // is absent on Android/ART.
+            val envVariables = Collections.list(
+                ClassLoader.getSystemClassLoader().getResources("META-INF/compose.reload.env")
+            )
 
             if (envVariables.isEmpty()) return@lazy null
             envVariables.first().readText().trim().let { Environment(it) }

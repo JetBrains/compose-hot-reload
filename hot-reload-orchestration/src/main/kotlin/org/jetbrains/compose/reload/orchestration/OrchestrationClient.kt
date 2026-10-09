@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -110,7 +110,7 @@ internal fun OrchestrationClient(
         logger.trace { "OrchestrationServer protocol version: $serverProtocolVersion" }
 
         /* Send Handshake, expect 'ClientConnected' response */
-        io.writePackage(serverProtocolVersion, Introduction(clientId, clientRole, ProcessHandle.current().pid()))
+        io.writePackage(serverProtocolVersion, Introduction(clientId, clientRole, currentProcessId()))
         val response = io.readPackage()
         if (response !is OrchestrationMessage.ClientConnected || response.clientId != clientId) {
             error("Unexpected response: $response")

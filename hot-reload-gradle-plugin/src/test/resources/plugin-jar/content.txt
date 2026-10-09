@@ -25,6 +25,8 @@ org/jetbrains/compose/
 org/jetbrains/compose/reload/
 org/jetbrains/compose/reload/core/
 org/jetbrains/compose/reload/gradle/
+org/jetbrains/compose/reload/gradle/android/
+org/jetbrains/compose/reload/gradle/desktop/
 org/jetbrains/compose/reload/gradle/idea/
 org/jetbrains/compose/reload/orchestration/
 org/jetbrains/compose/reload/shadow/

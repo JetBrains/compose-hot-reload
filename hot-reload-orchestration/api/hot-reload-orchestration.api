@@ -3,6 +3,8 @@ public final class org/jetbrains/compose/reload/orchestration/CoroutineExtension
 	public static final fun asChannel (Lorg/jetbrains/compose/reload/orchestration/OrchestrationHandle;)Lkotlinx/coroutines/channels/ReceiveChannel;
 	public static final fun asFlow (Lorg/jetbrains/compose/reload/orchestration/OrchestrationHandle;)Lkotlinx/coroutines/flow/Flow;
 	public static final fun flowOf (Lorg/jetbrains/compose/reload/orchestration/OrchestrationStates;Lorg/jetbrains/compose/reload/orchestration/OrchestrationStateKey;)Lkotlinx/coroutines/flow/Flow;
+	public static final fun sendAndAwait-1Y68eR8 (Lorg/jetbrains/compose/reload/orchestration/OrchestrationHandle;Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage;JLkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun sendAndAwaitBlocking-exY8QGI (Lorg/jetbrains/compose/reload/orchestration/OrchestrationHandle;Lorg/jetbrains/compose/reload/orchestration/OrchestrationMessage;JLkotlin/jvm/functions/Function1;)Ljava/lang/Object;
 }
 
 public final class org/jetbrains/compose/reload/orchestration/OrchestartionLoggingKt {
@@ -405,6 +407,14 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessa
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$ReloadDexRequest : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
+	public fun <init> (Ljava/util/Map;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDexByClassName ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class org/jetbrains/compose/reload/orchestration/OrchestrationMessage$RestartRequest : org/jetbrains/compose/reload/orchestration/OrchestrationMessage {
 	public fun <init> ()V
 }
@@ -772,5 +782,6 @@ public final class org/jetbrains/compose/reload/orchestration/OrchestrationVersi
 	public final fun getV1_4 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 	public final fun getV1_5 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 	public final fun getV1_6 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
+	public final fun getV1_7 ()Lorg/jetbrains/compose/reload/orchestration/OrchestrationVersion;
 }
 
