@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -92,7 +92,7 @@ open class ComposeHotRun : AbstractComposeHotRun() {
  * using the "className" and "funName" properties.
  */
 @UntrackedTask(because = "This task should always run")
-internal open class ComposeHotDevRun : AbstractComposeHotRun() {
+internal open class ComposeHotDesktopDevRun : AbstractComposeHotRun() {
 
     @get:Internal
     internal val className = project.objects.property<String>().value(

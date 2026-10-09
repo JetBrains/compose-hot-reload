@@ -30,15 +30,19 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.reload.core.awaitOrThrow
 import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.invokeOnValue
+import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.reloadMainThread
 import org.jetbrains.compose.reload.core.testFixtures.runStressTest
 import org.jetbrains.compose.reload.core.withThread
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole.Unknown
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientConnected
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ClientDisconnected
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesRequest
+import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.ReloadClassesResult
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.TestEvent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.parallel.Execution
@@ -49,7 +53,10 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.test.fail
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @Execution(ExecutionMode.SAME_THREAD)
@@ -68,6 +75,31 @@ class ServerClientTest {
     @AfterEach
     fun cleanup() = synchronized(this) {
         resources.forEach { it.close() }
+    }
+
+    /** Starts a server; closed by [cleanup]. */
+    private suspend fun server(): OrchestrationServer = use(startOrchestrationServer())
+
+    /** Connects a client to [server]; closed by [cleanup]. */
+    private suspend fun client(server: OrchestrationServer): OrchestrationClient =
+        use(OrchestrationClient(Unknown, server.port.await().getOrThrow())).also {
+            it.connect().getOrThrow()
+        }
+
+    /**
+     * Answers every incoming [ReloadClassesRequest] with [isSuccess], preceded by a result of an
+     * unrelated request: the awaited matchers must skip that stale result.
+     */
+    private fun OrchestrationHandle.replyToReloadRequests(isSuccess: Boolean) {
+        val handle = this
+        messages.invokeOnValue { message ->
+            if (message is ReloadClassesRequest) {
+                launchTask("replyToReloadRequests") {
+                    handle.send(ReloadClassesResult(ReloadClassesRequest().messageId, isSuccess = false))
+                    handle.send(ReloadClassesResult(message.messageId, isSuccess))
+                }
+            }
+        }
     }
 
     @Test
@@ -184,6 +216,63 @@ class ServerClientTest {
         val disconnected = serverChannel.receiveAsFlow().filterIsInstance<ClientDisconnected>().first()
         assertEquals(client.clientId, disconnected.clientId)
         assertEquals(Unknown, disconnected.clientRole)
+    }
+
+    @Test
+    fun `test - sendAndAwait returns the matching reply`() = runTest(timeout = 10.seconds) {
+        val server = server()
+        val responder = client(server)
+        val requester = client(server)
+        responder.replyToReloadRequests(isSuccess = true)
+
+        /* Real dispatcher: under runTest's virtual clock the timeout would fire before a real reply arrives */
+        val request = ReloadClassesRequest()
+        val reply = withContext(Dispatchers.Default) {
+            requester.sendAndAwait(request, 10.seconds) { message ->
+                (message as? ReloadClassesResult)?.takeIf { it.reloadRequestId == request.messageId }
+            }
+        }
+
+        assertTrue(reply?.isSuccess == true, "Expected the matching ReloadClassesResult, got $reply")
+    }
+
+    @Test
+    fun `test - sendAndAwait yields null on timeout`() = runTest(timeout = 10.seconds) {
+        val server = server()
+        val requester = client(server)
+
+        val reply = withContext(Dispatchers.Default) {
+            requester.sendAndAwait(ReloadClassesRequest(), 500.milliseconds) { it as? ReloadClassesResult }
+        }
+
+        assertNull(reply, "Expected no reply without a responder")
+    }
+
+    @Test
+    fun `test - sendAndAwaitBlocking returns the matching reply`() = runTest(timeout = 10.seconds) {
+        val server = server()
+        val responder = client(server)
+        val requester = client(server)
+        responder.replyToReloadRequests(isSuccess = true)
+
+        val request = ReloadClassesRequest()
+        val reply = requester.sendAndAwaitBlocking(request, 10.seconds) { message ->
+            (message as? ReloadClassesResult)?.takeIf { it.reloadRequestId == request.messageId }
+        }
+
+        assertTrue(reply?.isSuccess == true, "Expected the matching ReloadClassesResult, got $reply")
+    }
+
+    @Test
+    fun `test - sendAndAwaitBlocking yields null on timeout`() = runTest(timeout = 10.seconds) {
+        val server = server()
+        val requester = client(server)
+
+        val reply = requester.sendAndAwaitBlocking(ReloadClassesRequest(), 500.milliseconds) {
+            it as? ReloadClassesResult
+        }
+
+        assertNull(reply, "Expected no reply without a responder")
     }
 
 

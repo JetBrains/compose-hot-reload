@@ -30,6 +30,7 @@ JetBrains open-source project enabling instant UI code changes without restartin
 | `hot-reload-orchestration` | Communication layer between Gradle, devtools, app, and IDE                                                            |
 | `hot-reload-runtime-jvm` | JVM runtime: communicates with the Agent, listens for orchestration messages, invalidates Compose groups after reload |
 | `hot-reload-runtime-api` | Public runtime API                                                                                                    |
+| `hot-reload-runtime-shared` | Internal code shared by the JVM agent/runtime and the Android runtime (e.g. after-reload hooks)                       |
 | `hot-reload-annotations` | Kotlin annotations for hot reload API                                                                                 |
 | `hot-reload-analysis` | Bytecode analysis that determines dirty Compose scopes/groups that should be invalidated after reload                 |
 | `hot-reload-devtools` | Developer tools UI window                                                                                             |

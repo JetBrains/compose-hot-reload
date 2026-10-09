@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -41,7 +41,8 @@ public data class OrchestrationVersion(public val intValue: Int) : Comparable<Or
         public val v1_4: OrchestrationVersion = OrchestrationVersion(5)
         public val v1_5: OrchestrationVersion = OrchestrationVersion(6)
         public val v1_6: OrchestrationVersion = OrchestrationVersion(7)
-        public val current: OrchestrationVersion = v1_6
+        public val v1_7: OrchestrationVersion = OrchestrationVersion(8)
+        public val current: OrchestrationVersion = v1_7
     }
 
     override fun compareTo(other: OrchestrationVersion): Int {
@@ -57,6 +58,7 @@ public data class OrchestrationVersion(public val intValue: Int) : Comparable<Or
             v1_4 -> "v1.4($intValue)"
             v1_5 -> "v1.5($intValue)"
             v1_6 -> "v1.6($intValue)"
+            v1_7 -> "v1.7($intValue)"
             else -> "N/A($intValue)"
         }
     }
@@ -86,5 +88,6 @@ internal val Class<out OrchestrationMessage>.availableSinceVersion: Orchestratio
         OrchestrationMessage.UIActionResult::class.java -> OrchestrationVersion.v1_5
         OrchestrationMessage.WindowResizeRequest::class.java -> OrchestrationVersion.v1_6
         OrchestrationMessage.WindowResizeResult::class.java -> OrchestrationVersion.v1_6
+        OrchestrationMessage.ReloadDexRequest::class.java -> OrchestrationVersion.v1_7
         else -> OrchestrationVersion.v1
     }

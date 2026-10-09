@@ -20,6 +20,7 @@ root/RecompileResult                       => o.j.c.r.o.OrchestrationMessage$Rec
 <null>                                     => o.j.c.r.o.OrchestrationMessage$RecompilerReady
 root/ReloadClassesRequest                  => o.j.c.r.o.OrchestrationMessage$ReloadClassesRequest
 root/ReloadClassesResult                   => o.j.c.r.o.OrchestrationMessage$ReloadClassesResult
+<null>                                     => o.j.c.r.o.OrchestrationMessage$ReloadDexRequest
 root/RestartRequest                        => o.j.c.r.o.OrchestrationMessage$RestartRequest
 root/RetryFailedCompositionRequest         => o.j.c.r.o.OrchestrationMessage$RetryFailedCompositionRequest
 root/Screenshot                            => o.j.c.r.o.OrchestrationMessage$Screenshot

@@ -9,6 +9,8 @@ import org.gradle.kotlin.dsl.withType
 import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.compose.reload.gradle.ComposeHotMcpServer
 import org.jetbrains.compose.reload.gradle.kotlinMultiplatformOrNull
+import org.jetbrains.compose.reload.gradle.utils.AndroidProjectKind
+import org.jetbrains.compose.reload.gradle.utils.androidProject
 import org.jetbrains.compose.reload.gradle.utils.evaluate
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -35,6 +37,17 @@ class ComposeHotMcpServerTasksTest {
 
         project.kotlinMultiplatformOrNull?.jvm()
 
+        project.evaluate()
+
+        assertEquals(
+            setOf("hotMcpServerJvm"),
+            project.tasks.withType<ComposeHotMcpServer>().map { it.name }.toSet()
+        )
+    }
+
+    @Test
+    fun `test - mcp server task name - kmp with android`() {
+        val project = androidProject(AndroidProjectKind.Kmp)
         project.evaluate()
 
         assertEquals(

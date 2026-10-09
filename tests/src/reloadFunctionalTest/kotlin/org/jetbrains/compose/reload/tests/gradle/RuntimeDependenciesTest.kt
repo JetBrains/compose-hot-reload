@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -328,6 +328,7 @@ private val hotReloadAgentDependencies = arrayOf(
     PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-core-${HOT_RELOAD_VERSION.regexEscaped}.jar"),
     PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-orchestration-${HOT_RELOAD_VERSION.regexEscaped}.jar"),
     PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-analysis-${HOT_RELOAD_VERSION.regexEscaped}.jar"),
+    PathRegex("${repositoryRoot.pathString}/build/repo/.*/hot-reload-runtime-shared-jvm-${HOT_RELOAD_VERSION.regexEscaped}.jar"),
 )
 
 private val hotReloadRuntimeDependencies = arrayOf(

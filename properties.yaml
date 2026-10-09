@@ -4,6 +4,7 @@ OrchestrationPort:
   key: compose.reload.orchestration.port
   type: int
   target: [ build, devtools, application ]
+  deliveredTo: [ desktop, android ]
   documentation: |
     Current 'Orchestration Server' port. This property is used by components that shall connect to the 
     'orchestration' (e.g. recompiler, devtools, ...)
@@ -340,6 +341,16 @@ JetBrainsRuntimeMinimalVersion:
     If the project's toolchain language version is set but is lower than this value,
     the plugin will override it and use this version instead.
 
+HotReloadAndroidRuntimeMinSdk:
+  key: compose.reload.android.runtime.minSdk
+  type: int
+  default: "28"
+  target: [ build ]
+  visibility: internal
+  documentation: |
+    The minimum Android API level of the 'hot-reload-runtime-android' AAR: JVMTI attach
+    (Debug.attachJvmtiAgent) requires API 28. 
+
 GradleJetBrainsRuntimeProvisioningEnabled:
   key: compose.reload.jbr.gradleProvisioningEnabled
   type: boolean
@@ -448,6 +459,7 @@ LogLevel:
   type: enum
   enumClass: org.jetbrains.compose.reload.core.Logger.Level
   target: [ application, devtools, build ]
+  deliveredTo: [ desktop, android ]
   default: "Info"
   visibility: public
   documentation: |

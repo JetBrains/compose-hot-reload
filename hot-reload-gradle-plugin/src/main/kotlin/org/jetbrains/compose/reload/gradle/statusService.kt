@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -30,6 +30,7 @@ import org.jetbrains.compose.reload.core.getOrThrow
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.leftOr
 import org.jetbrains.compose.reload.core.update
+import org.jetbrains.compose.reload.gradle.desktop.ComposeHotDesktopReloadTask
 import org.jetbrains.compose.reload.orchestration.OrchestrationClient
 import org.jetbrains.compose.reload.orchestration.OrchestrationClientRole
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage
@@ -57,8 +58,8 @@ internal val Project.statusService: Future<Provider<StatusService>?> by projectF
         return@projectFuture null
     }
 
-    val reloadTasks = tasks.withType(ComposeHotReloadTask::class.java)
-    val activeReloadTasks = objects.listProperty(ComposeHotReloadTask::class.java)
+    val reloadTasks = tasks.withType(ComposeHotDesktopReloadTask::class.java)
+    val activeReloadTasks = objects.listProperty(ComposeHotDesktopReloadTask::class.java)
 
     val service = gradle.sharedServices.registerIfAbsent("StatusService ($buildTreePath)", StatusService::class.java) {
         it.parameters.projectPath.set(path)

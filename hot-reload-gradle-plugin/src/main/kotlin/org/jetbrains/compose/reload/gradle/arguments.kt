@@ -1,11 +1,13 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 @file:JvmName("ComposeHotReloadArgumentsKt")
 
 package org.jetbrains.compose.reload.gradle
 
+import org.jetbrains.compose.reload.gradle.desktop.composeHotReloadDevToolsConfiguration
+import org.jetbrains.compose.reload.gradle.desktop.mainClassConvention
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
@@ -303,6 +305,13 @@ internal class ComposeHotReloadArguments(project: Project) :
     }
 
     override fun asArguments(): Iterable<String> = buildList {
+        /*
+         * TODO: emit every 'HotReloadProperty' with 'Platform.Desktop' in 'deliveredTo' in a single
+         * loop, sourced by key convention (gradle property → system property → environment → yaml
+         * default), replacing the per-property '-D' lines below. Task-computed values (mainClass,
+         * pidFile, argFile, hot classpath, devtools classpath, …) stay explicit.
+         */
+
         /* Signal that this execution runs with Hot Reload */
         add("-D${HotReloadProperty.IsHotReloadActive.key}=true")
 

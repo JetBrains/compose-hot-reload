@@ -1,0 +1,174 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "org.jetbrains.compose.hot-reload",
+    "module": "hot-reload-runtime-shared",
+    "version": "{{Hot Reload Version}}",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.14.4"
+    }
+  },
+  "variants": [
+    {
+      "name": "metadataApiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-metadata",
+        "org.jetbrains.kotlin.platform.type": "common"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-core",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-orchestration",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "hot-reload-runtime-shared-metadata-{{Hot Reload Version}}.jar",
+          "url": "hot-reload-runtime-shared-{{Hot Reload Version}}.jar",
+          "size": {{SIZE}},
+          "sha512": "{{HASH}}",
+          "sha256": "{{HASH}}",
+          "sha1": "{{HASH}}",
+          "md5": "{{HASH}}"
+        }
+      ]
+    },
+    {
+      "name": "metadataSourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-runtime",
+        "org.jetbrains.kotlin.platform.type": "common"
+      },
+      "files": [
+        {
+          "name": "hot-reload-runtime-shared-kotlin-{{Hot Reload Version}}-sources.jar",
+          "url": "hot-reload-runtime-shared-{{Hot Reload Version}}-sources.jar",
+          "size": {{SIZE}},
+          "sha512": "{{HASH}}",
+          "sha256": "{{HASH}}",
+          "sha1": "{{HASH}}",
+          "md5": "{{HASH}}"
+        }
+      ]
+    },
+    {
+      "name": "releaseApiElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "available-at": {
+        "url": "../../hot-reload-runtime-shared-android/{{Hot Reload Version}}/hot-reload-runtime-shared-android-{{Hot Reload Version}}.module",
+        "group": "org.jetbrains.compose.hot-reload",
+        "module": "hot-reload-runtime-shared-android",
+        "version": "{{Hot Reload Version}}"
+      }
+    },
+    {
+      "name": "releaseRuntimeElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "available-at": {
+        "url": "../../hot-reload-runtime-shared-android/{{Hot Reload Version}}/hot-reload-runtime-shared-android-{{Hot Reload Version}}.module",
+        "group": "org.jetbrains.compose.hot-reload",
+        "module": "hot-reload-runtime-shared-android",
+        "version": "{{Hot Reload Version}}"
+      }
+    },
+    {
+      "name": "releaseSourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "android",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "androidJvm"
+      },
+      "available-at": {
+        "url": "../../hot-reload-runtime-shared-android/{{Hot Reload Version}}/hot-reload-runtime-shared-android-{{Hot Reload Version}}.module",
+        "group": "org.jetbrains.compose.hot-reload",
+        "module": "hot-reload-runtime-shared-android",
+        "version": "{{Hot Reload Version}}"
+      }
+    },
+    {
+      "name": "jvmApiElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "available-at": {
+        "url": "../../hot-reload-runtime-shared-jvm/{{Hot Reload Version}}/hot-reload-runtime-shared-jvm-{{Hot Reload Version}}.module",
+        "group": "org.jetbrains.compose.hot-reload",
+        "module": "hot-reload-runtime-shared-jvm",
+        "version": "{{Hot Reload Version}}"
+      }
+    },
+    {
+      "name": "jvmRuntimeElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "available-at": {
+        "url": "../../hot-reload-runtime-shared-jvm/{{Hot Reload Version}}/hot-reload-runtime-shared-jvm-{{Hot Reload Version}}.module",
+        "group": "org.jetbrains.compose.hot-reload",
+        "module": "hot-reload-runtime-shared-jvm",
+        "version": "{{Hot Reload Version}}"
+      }
+    },
+    {
+      "name": "jvmSourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "available-at": {
+        "url": "../../hot-reload-runtime-shared-jvm/{{Hot Reload Version}}/hot-reload-runtime-shared-jvm-{{Hot Reload Version}}.module",
+        "group": "org.jetbrains.compose.hot-reload",
+        "module": "hot-reload-runtime-shared-jvm",
+        "version": "{{Hot Reload Version}}"
+      }
+    }
+  ]
+}

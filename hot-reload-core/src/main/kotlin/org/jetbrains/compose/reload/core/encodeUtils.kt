@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -61,10 +61,25 @@ public fun DataOutputStream.writeFrame(bytes: ByteArray) {
     write(bytes)
 }
 
+/**
+ * Reads exactly [size] bytes.
+ *
+ * Uses [DataInputStream.readFully] rather than the Java 9+ `readNBytes(int)` API, which is absent
+ * on Android/ART.
+ */
+@InternalHotReloadApi
+public fun DataInputStream.readBytesFully(size: Int): ByteArray {
+    /* Same contract as `readNBytes(int)`: a negative size is a malformed frame, not an allocation error. */
+    require(size >= 0) { "len < 0" }
+    val bytes = ByteArray(size)
+    readFully(bytes)
+    return bytes
+}
+
 @InternalHotReloadApi
 public fun DataInputStream.readFrame(): ByteArray {
     val size = readInt()
-    return readNBytes(size)
+    return readBytesFully(size)
 }
 
 @InternalHotReloadApi
@@ -81,7 +96,7 @@ public fun DataOutputStream.writeOptionalFrame(bytes: ByteArray?) {
 public fun DataInputStream.readOptionalFrame(): ByteArray? {
     val size = readInt()
     if (size < 0) return null
-    return readNBytes(size)
+    return readBytesFully(size)
 }
 
 @InternalHotReloadApi

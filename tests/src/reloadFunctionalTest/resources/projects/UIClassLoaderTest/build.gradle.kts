@@ -4,7 +4,7 @@ import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.HOT_RELOAD_VERSION
 import org.jetbrains.compose.reload.core.issueNewDebugSessionJvmArguments
-import org.jetbrains.compose.reload.gradle.ComposeHotSnapshotTask
+import org.jetbrains.compose.reload.gradle.desktop.ComposeHotDesktopSnapshotTask
 import org.jetbrains.compose.reload.gradle.composeHotReloadAgentClasspath
 import org.jetbrains.compose.reload.gradle.composeHotReloadRuntimeClasspath
 import org.jetbrains.compose.reload.gradle.composeReloadIntelliJDebuggerDispatchPortProvider
@@ -68,7 +68,7 @@ dependencies {
 /*
 Step 3: We setup a custom JavaExec that will run with hot reload.
  */
-val hotSnapshotUi = tasks.withType<ComposeHotSnapshotTask>().named("hotSnapshotUi")
+val hotSnapshotUi = tasks.withType<ComposeHotDesktopSnapshotTask>().named("hotSnapshotUi")
 tasks.register<JavaExec>("customHotRun") {
     val uiCompilation = kotlin.target.compilations.getByName("ui")
 
@@ -112,7 +112,7 @@ tasks.register<JavaExec>("customHotRun") {
     val uiClasspath = sourceSets.getByName("ui").runtimeClasspath
     inputs.files(uiClasspath)
     val uiClasspathString = project.provider { uiClasspath.asPath }
-    val hotClassesDirectory = project.tasks.withType<ComposeHotSnapshotTask>()
+    val hotClassesDirectory = project.tasks.withType<ComposeHotDesktopSnapshotTask>()
         .getByName("hotSnapshotUi").classesDirectory
 
     /* Provide ui classpath */

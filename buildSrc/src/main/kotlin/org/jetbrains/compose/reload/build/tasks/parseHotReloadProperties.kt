@@ -33,6 +33,11 @@ private fun parseHotReloadProperty(
     val target = node.get<YamlList>("target")?.items?.map { it.yamlScalar.content }
         ?: error("Property '$name' must have 'targets' field")
 
+    val deliveredTo = node.get<YamlList>("deliveredTo")?.items?.map { item ->
+        decodeEnum<DeclaredHotReloadProperty.DeliveryPlatform>(item.yamlScalar.content)
+            ?: error("Property '$name' has invalid 'deliveredTo' entry: ${item.yamlScalar.content}")
+    }
+
     return DeclaredHotReloadProperty(
         name = name,
         key = key,
@@ -47,6 +52,10 @@ private fun parseHotReloadProperty(
         },
         visibility = node.getScalar("visibility")?.content?.let { decodeEnum<DeclaredHotReloadProperty.Visibility>(it) }
             ?: DeclaredHotReloadProperty.Visibility.Internal,
+        deliveredTo = deliveredTo
+            ?: if (target.any { it.equals("application", ignoreCase = true) }) {
+                listOf(DeclaredHotReloadProperty.DeliveryPlatform.Desktop)
+            } else emptyList(),
         deprecationMessage = node.getScalar("deprecationMessage")?.content,
         documentation = node.getScalar("documentation")?.content,
     )
@@ -61,6 +70,7 @@ internal class DeclaredHotReloadProperty(
     val enumClass: String?,
     val targets: List<Target>,
     val visibility: Visibility,
+    val deliveredTo: List<DeliveryPlatform>,
     val deprecationMessage: String?,
     val documentation: String?,
 ) {
@@ -70,6 +80,11 @@ internal class DeclaredHotReloadProperty(
 
     enum class Target {
         Build, DevTools, Application
+    }
+
+    /** Application platforms the property is delivered to at launch (see 'deliveredTo' in properties.yaml). */
+    enum class DeliveryPlatform {
+        Desktop, Android
     }
 
     enum class Visibility {

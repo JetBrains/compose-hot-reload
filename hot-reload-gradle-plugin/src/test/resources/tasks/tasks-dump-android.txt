@@ -1,0 +1,3 @@
+hotReloadAndroid (android.ComposeHotAndroidReloadTask)
+hotRunAndroid (android.ComposeHotAndroidRunTask)
+hotSnapshotAndroid (android.ComposeHotAndroidSnapshotTask)

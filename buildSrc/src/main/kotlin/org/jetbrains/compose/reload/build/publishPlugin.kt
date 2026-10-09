@@ -19,6 +19,7 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.maven
+import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
@@ -26,6 +27,7 @@ import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
 import org.jetbrains.compose.reload.gradle.lazyProjectProperty
+import org.gradle.api.tasks.TaskProvider
 
 /*
  * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
@@ -91,30 +93,7 @@ class PublishingPlugin : Plugin<Project> {
         }
 
         plugins.withId("org.jetbrains.kotlin.multiplatform") {
-            /* Maven Central requires javadocs, lets generate some stubs */
-            val generateJavadocStubs = tasks.register("generateJavadocStubs") {
-                val projectName = provider { project.name }
-                inputs.property("projectName", projectName)
-
-                val outputDirectory = project.layout.buildDirectory.dir("javadocStubs")
-                outputs.dir(outputDirectory)
-                doLast {
-                    outputDirectory.get().asFile.apply {
-                        mkdirs()
-                        resolve(resolve("index.md")).writeText(
-                            """
-                            # Module ${projectName.get()}
-                            Check: https://github.com/jetbrains/compose-hot-reload for further documentation
-                        """.trimIndent()
-                        )
-                    }
-                }
-            }
-
-            val javadocJar = tasks.register<Jar>("javadocJar") {
-                archiveClassifier.set("javadoc")
-                from(generateJavadocStubs)
-            }
+            val javadocJar = registerJavadocStubJar()
 
             extensions.configure<PublishingExtension> {
                 publications.withType<MavenPublication>().configureEach {
@@ -122,6 +101,55 @@ class PublishingPlugin : Plugin<Project> {
                 }
             }
         }
+
+        /* AGP does not setup default publications either. */
+        plugins.withId("com.android.library") {
+            if (plugins.hasPlugin("org.jetbrains.kotlin.multiplatform")) return@withId
+
+            val javadocJar = registerJavadocStubJar()
+
+            extensions.configure<PublishingExtension> {
+                afterEvaluate {
+                    if (publications.isEmpty()) {
+                        publications.create<MavenPublication>("release") {
+                            from(components["release"])
+                            artifact(javadocJar)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Maven Central requires javadocs; lets generate some stubs.
+ */
+private fun Project.registerJavadocStubJar(): TaskProvider<Jar> {
+    if ("javadocJar" in tasks.names) return tasks.named<Jar>("javadocJar")
+
+    val generateJavadocStubs = tasks.register("generateJavadocStubs") {
+        val projectName = provider { project.name }
+        inputs.property("projectName", projectName)
+
+        val outputDirectory = project.layout.buildDirectory.dir("javadocStubs")
+        outputs.dir(outputDirectory)
+        doLast {
+            outputDirectory.get().asFile.apply {
+                mkdirs()
+                resolve(resolve("index.md")).writeText(
+                    """
+                    # Module ${projectName.get()}
+                    Check: https://github.com/jetbrains/compose-hot-reload for further documentation
+                """.trimIndent()
+                )
+            }
+        }
+    }
+
+    return tasks.register<Jar>("javadocJar") {
+        archiveClassifier.set("javadoc")
+        from(generateJavadocStubs)
     }
 }
 

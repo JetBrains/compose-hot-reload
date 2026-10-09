@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -26,16 +26,9 @@ public fun HotReloadTestFixture.launchApplication(
     daemonTestScope.launch {
         val job = currentCoroutineContext().job
 
-        val runTask = when (projectMode) {
-            ProjectMode.Kmp -> when (launchMode) {
-                ApplicationLaunchMode.GradleBlocking -> "hotRunJvm"
-                ApplicationLaunchMode.Detached -> "hotRunJvmAsync"
-            }
-
-            ProjectMode.Jvm -> when (launchMode) {
-                ApplicationLaunchMode.GradleBlocking -> "hotRun"
-                ApplicationLaunchMode.Detached -> "hotRunAsync"
-            }
+        val runTask = when (launchMode) {
+            ApplicationLaunchMode.GradleBlocking -> projectMode.foldDesktop(kmp = "hotRunJvm", jvm = "hotRun")
+            ApplicationLaunchMode.Detached -> projectMode.foldDesktop(kmp = "hotRunJvmAsync", jvm = "hotRunAsync")
         }
 
         val additionalArguments = buildList {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -13,6 +13,8 @@ import org.jetbrains.compose.reload.test.gradle.DisabledVersion
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.MinKotlinVersion
+import org.jetbrains.compose.reload.test.gradle.ProjectMode
+import org.jetbrains.compose.reload.test.gradle.TestedProjectMode
 import org.jetbrains.compose.reload.test.gradle.checkScreenshot
 import org.jetbrains.compose.reload.test.gradle.initialSourceCode
 import org.jetbrains.compose.reload.test.gradle.replaceSourceCode
@@ -86,6 +88,7 @@ class ScreenshotTests {
 
     @AndroidHotReloadTest
     @TestOnlyAndroid
+    @TestedProjectMode(ProjectMode.Kmp)
     fun `test - kmp with android and jvm`(fixture: HotReloadTestFixture) = fixture.runTest {
         fixture initialSourceCode """
             import androidx.compose.foundation.layout.*

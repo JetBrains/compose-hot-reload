@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -66,7 +66,7 @@ internal constructor() : OrchestrationPackage(), Serializable {
             }
 
             if (pid != null) {
-                return pid == ProcessHandle.current().pid()
+                return pid == currentProcessId()
             }
 
             return true
@@ -259,6 +259,52 @@ internal constructor() : OrchestrationPackage(), Serializable {
         internal companion object {
             @Suppress("unused")
             internal const val serialVersionUID: Long = 0L
+        }
+    }
+
+    /**
+     * Android/ART transport for a class reload.
+     *
+     * Unlike [ReloadClassesRequest] (which ships file *paths* and assumes the recompiler and the
+     * application share a filesystem), this request carries the actual **DEX bytes** of the
+     * changed class(es). This is required on Android because (a) the device filesystem is separate
+     * from the host — the app is reached over the orchestration socket via `adb reverse` — and
+     * (b) ART's `RedefineClasses` requires a DEX payload, not a Java `.class`.
+     *
+     * The response is a [ReloadClassesResult] whose [ReloadClassesResult.reloadRequestId] matches
+     * this request's [messageId].
+     *
+     * @param dexByClassName maps each fully-qualified (dot-separated) class name to the bytes of a
+     * DEX file that redefines it. ART's method-body-only limit still applies to each entry.
+     */
+    public class ReloadDexRequest(
+        public val dexByClassName: Map<String, ByteArray>,
+    ) : OrchestrationMessage() {
+        internal companion object {
+            @Suppress("unused")
+            internal const val serialVersionUID: Long = 0L
+        }
+
+        override fun toString(): String {
+            return "ReloadDexRequest(${dexByClassName.keys})"
+        }
+
+        override fun hashCode(): Int {
+            var hashCode = 0
+            dexByClassName.forEach { (className, dex) ->
+                hashCode = 31 * hashCode + className.hashCode()
+                hashCode = 31 * hashCode + dex.contentHashCode()
+            }
+            return hashCode
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (other === this) return true
+            if (other !is ReloadDexRequest) return false
+            if (other.dexByClassName.keys != dexByClassName.keys) return false
+            return dexByClassName.all { (className, dex) ->
+                other.dexByClassName[className]?.contentEquals(dex) == true
+            }
         }
     }
 

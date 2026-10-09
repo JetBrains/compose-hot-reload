@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -78,6 +78,7 @@ dependencies {
     compileOnly(project(":hot-reload-core"))
     compileOnly(project(":hot-reload-agent"))
     compileOnly(project(":hot-reload-orchestration"))
+    compileOnly(project(":hot-reload-runtime-shared"))
 
     testImplementation(kotlin("test"))
     testImplementation(deps.compose.desktop.common)
