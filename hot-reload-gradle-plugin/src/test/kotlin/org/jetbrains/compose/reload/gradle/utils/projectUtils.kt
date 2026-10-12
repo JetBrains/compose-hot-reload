@@ -21,6 +21,6 @@ val Project.localTestRepoDirectory: File
 
 fun Project.withRepositories() {
     repositories.maven(localTestRepoDirectory)
-    repositories.mavenCentral()
+    repositories.maven("https://cache-redirector.jetbrains.com/maven-central")
     repositories.google()
 }

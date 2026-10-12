@@ -74,6 +74,28 @@ class BuildSrcTest {
         }
 
         override fun setupProject(fixture: HotReloadTestFixture, context: ExtensionContext) {
+            /*
+            Without settings, buildSrc resolves the 'kotlin-dsl' plugin (and its 'org.jetbrains.kotlin' dependencies)
+            from the Gradle Plugin Portal, which redirects to Maven Central directly.
+             */
+            fixture.projectDir.resolve("buildSrc/settings.gradle.kts").createParentDirectories().writeText(
+                """
+                pluginManagement {
+                    repositories {
+                        gradlePluginPortal {
+                            content {
+                                includeGroupByRegex("org.gradle.*")
+                            }
+                        }
+
+                        mavenCentral {
+                            setUrl("https://cache-redirector.jetbrains.com/maven-central")
+                        }
+                    }
+                }
+                """.trimIndent()
+            )
+
             fixture.projectDir.resolve("buildSrc/build.gradle.kts").createParentDirectories().writeText(
                 """
                 plugins {
@@ -82,7 +104,9 @@ class BuildSrcTest {
                 
                 repositories {
                     ${LocalMavenRepositoryExtension().localMaven()}
-                    mavenCentral()
+                    mavenCentral {
+                        setUrl("https://cache-redirector.jetbrains.com/maven-central")
+                    }
                 }
                 
                 dependencies {

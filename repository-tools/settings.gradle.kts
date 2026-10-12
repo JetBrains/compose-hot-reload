@@ -7,7 +7,9 @@
 
 pluginManagement {
     repositories {
-        mavenCentral()
+        mavenCentral {
+            setUrl("https://cache-redirector.jetbrains.com/maven-central")
+        }
         gradlePluginPortal()
     }
 }
@@ -20,7 +22,9 @@ dependencyResolutionManagement {
     }
 
     repositories {
-        mavenCentral()
+        mavenCentral {
+            setUrl("https://cache-redirector.jetbrains.com/maven-central")
+        }
     }
 }
 

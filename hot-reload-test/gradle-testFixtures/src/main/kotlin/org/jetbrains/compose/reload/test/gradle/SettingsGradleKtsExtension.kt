@@ -131,8 +131,10 @@ internal class DefaultSettingsGradleKts : SettingsGradleKtsExtension {
                     includeGroupByRegex(".*google.*")
                 }
             }
-            
-            mavenCentral()
+
+            mavenCentral {
+                setUrl("https://cache-redirector.jetbrains.com/maven-central")
+            }
         """.trimIndent()
     }
 
@@ -149,8 +151,10 @@ internal class DefaultSettingsGradleKts : SettingsGradleKtsExtension {
                     includeGroupByRegex(".*google.*")
                 }
             }
-            
-            mavenCentral()
+
+            mavenCentral {
+                setUrl("https://cache-redirector.jetbrains.com/maven-central")
+            }
         """.trimIndent()
     }
 }
