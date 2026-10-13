@@ -205,7 +205,8 @@ internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
         val options = context.compilerOptions
         return listOfNotNull(
             "featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups)".takeIf {
-                options.getValue(CompilerOption.OptimizeNonSkippingGroups)
+                options.getValue(CompilerOption.OptimizeNonSkippingGroups) &&
+                    !context.isOptimizeNonSkippingGroupsEnabledByDefault
             },
             "featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups.disabled())".takeUnless {
                 options.getValue(CompilerOption.OptimizeNonSkippingGroups)
@@ -254,6 +255,14 @@ internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
 
     }
 }
+
+/**
+ * Since Kotlin 2.5, 'OptimizeNonSkippingGroups' is enabled by default, and referencing the
+ * deprecated feature flag in the build script is a compilation error.
+ */
+@InternalHotReloadTestApi
+public val ExtensionContext.isOptimizeNonSkippingGroupsEnabledByDefault: Boolean
+    get() = testedKotlinVersion.version.let { KotlinVersion(it.major, it.minor) >= KotlinVersion(2, 5) }
 
 private val KClass<out BuildGradleKtsExtension>.newInstance: BuildGradleKtsExtension
     get() = objectInstance ?: java.getConstructor().newInstance()

@@ -30,6 +30,7 @@ import org.jetbrains.compose.reload.test.gradle.TestedLaunchMode
 import org.jetbrains.compose.reload.test.gradle.TestedProjectMode
 import org.jetbrains.compose.reload.test.gradle.compilerOptions
 import org.jetbrains.compose.reload.test.gradle.getDefaultMainKtSourceFile
+import org.jetbrains.compose.reload.test.gradle.isOptimizeNonSkippingGroupsEnabledByDefault
 import org.jetbrains.compose.reload.test.gradle.launchApplication
 import org.jetbrains.compose.reload.test.gradle.projectMode
 import org.jetbrains.compose.reload.test.gradle.testedAndroidVersion
@@ -300,7 +301,8 @@ class BuildGradleKtsWithoutImplicitDependencies : BuildGradleKtsExtension {
         val options = context.compilerOptions
         return listOfNotNull(
             "featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups)".takeIf {
-                options.getValue(CompilerOption.OptimizeNonSkippingGroups)
+                options.getValue(CompilerOption.OptimizeNonSkippingGroups) &&
+                    !context.isOptimizeNonSkippingGroupsEnabledByDefault
             },
             "featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups.disabled())".takeUnless {
                 options.getValue(CompilerOption.OptimizeNonSkippingGroups)
