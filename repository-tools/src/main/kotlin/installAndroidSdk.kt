@@ -1,4 +1,5 @@
 import java.net.URI
+import java.nio.file.Path
 import java.util.zip.ZipFile
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
@@ -19,8 +20,43 @@ fun main() {
         }
     )
 
-    if (sdkManager.exists()) return
+    /* The SDK might be restored from cache: Only download 'cmdline-tools' if missing, but still install all packages */
+    if (!sdkManager.exists()) {
+        downloadCmdlineTools(sdkZipFile, sdkDir, sdkManager)
+    }
 
+    val command = if (System.getProperty("os.name").startsWith("Win")) {
+        listOf("cmd", "/c", sdkManager.absolutePathString())
+    } else listOf(sdkManager.absolutePathString())
+
+    val process = ProcessBuilder(
+        *command.toTypedArray(),
+        "--sdk_root=${sdkDir.absolutePathString()}",
+        "--install",
+        "platforms;android-34",
+        "platforms;android-35",
+        "build-tools;34.0.0",
+        "build-tools;35.0.0",
+        "platform-tools"
+    )
+        .redirectError(ProcessBuilder.Redirect.INHERIT)
+        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+        .start()
+
+    /* Accept all license prompts */
+    runCatching {
+        process.outputStream.writer().use { writer ->
+            while (true) {
+                writer.appendLine("y")
+            }
+        }
+    }
+
+    val exitCode = process.waitFor()
+    if (exitCode != 0) error("sdkmanager failed with exit code $exitCode")
+}
+
+private fun downloadCmdlineTools(sdkZipFile: Path, sdkDir: Path, sdkManager: Path) {
     val url = when (Os.current()) {
         Os.Windows ->
             "https://dl.google.com/android/repository/commandlinetools-win-13114758_latest.zip?hl=de"
@@ -52,30 +88,4 @@ fun main() {
     }
 
     sdkManager.toFile().setExecutable(true)
-
-    val command = if (System.getProperty("os.name").startsWith("Win")) {
-        listOf("cmd", "/c", sdkManager.absolutePathString())
-    } else listOf(sdkManager.absolutePathString())
-
-    val process = ProcessBuilder(
-        *command.toTypedArray(),
-        "--sdk_root=${sdkDir.absolutePathString()}",
-        "--install",
-        "platforms;android-34",
-        "platforms;android-35",
-        "build-tools;34.0.0",
-        "build-tools;35.0.0",
-        "platform-tools"
-    )
-        .redirectError(ProcessBuilder.Redirect.INHERIT)
-        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-        .start()
-
-    runCatching {
-        process.outputStream.writer().use { writer ->
-            while (true) {
-                writer.appendLine("y")
-            }
-        }
-    }
 }

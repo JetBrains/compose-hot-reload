@@ -7,6 +7,7 @@ package builds.conventions
 
 import builds.BuildCache
 import jetbrains.buildServer.configs.kotlin.BuildType
+import jetbrains.buildServer.configs.kotlin.buildSteps.GradleBuildStep
 
 sealed interface BuildCacheConvention {
     interface Consumer : BuildCacheConvention
@@ -81,6 +82,18 @@ fun BuildType.buildCacheConventions() {
                     }
                 }
             }
+        }
+
+        /*
+        The cached Android SDK is optional (it might be missing or outdated):
+        Ensure all required packages are installed and licenses accepted before any other step.
+         */
+        steps {
+            items.add(0, GradleBuildStep {
+                name = "Install Android SDK"
+                tasks = "installAndroidSdk"
+                workingDir = "repository-tools"
+            })
         }
     }
 
