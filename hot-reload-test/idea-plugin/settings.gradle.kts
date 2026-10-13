@@ -10,7 +10,9 @@ import java.util.Properties
 
 pluginManagement {
     repositories {
-        mavenCentral()
+        mavenCentral {
+            setUrl("https://cache-redirector.jetbrains.com/maven-central")
+        }
         gradlePluginPortal()
     }
 
@@ -48,7 +50,9 @@ dependencyResolutionManagement {
             }
         }
 
-        mavenCentral()
+        mavenCentral {
+            setUrl("https://cache-redirector.jetbrains.com/maven-central")
+        }
     }
 }
 
