@@ -30,7 +30,6 @@ class WindowsFunctionalTest(
 
     params {
         param("bootstrap", "false")
-        param("env.ANDROID_HOME", "%system.teamcity.build.workingDir%/.local/android-sdk")
 
         if (bucket != null && bucketsCount != null) {
             param("env.TESTED_BUCKET", bucket.toString())

@@ -19,7 +19,7 @@ fun BuildType.buildCacheConventions() {
     val host = requiredHost
 
     params {
-        param("env.ANDROID_HOME", "%system.teamcity.build.workingDir%/.local/android-sdk")
+        param("env.ANDROID_HOME", "%system.teamcity.build.checkoutDir%/.local/android-sdk")
         param("env.KONAN_DATA_DIR", "%system.teamcity.build.checkoutDir%/.local/konan")
     }
 
