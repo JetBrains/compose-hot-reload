@@ -41,7 +41,10 @@ internal fun resetComposition() {
          */
         val bounds = onEventThreadBlocking { captureWindowBounds() }
         reloadCompositionState()
-        onEventThreadBlocking { restoreWindowBounds(bounds) }
+        onEventThreadBlocking {
+            restoreWindowBounds(bounds)
+            raiseRecreatedWindows()
+        }
     } else {
         hotReloadState.update { state -> state.copy(key = state.key + 1) }
     }
@@ -106,6 +109,22 @@ private fun restorePlacement(window: ComposeWindow, target: WindowPlacement) {
     Timer(placementRestoreDelayMs) {
         if (window.isShowing && window.placement != target) window.placement = target
     }.apply { isRepeats = false }.start()
+}
+
+/**
+ * CMP-10952: On Windows, a hard reset makes the application window appear behind other windows.
+ * Here we attempt to force it to front.
+ */
+private fun raiseRecreatedWindows() {
+    for (managed in activeWindows()) {
+        val window = managed.window as? ComposeWindow ?: continue
+        SwingUtilities.invokeLater {
+            val oldIsAlwaysOnTop = window.isAlwaysOnTop
+            window.isAlwaysOnTop = true
+            window.toFront()
+            window.isAlwaysOnTop = oldIsAlwaysOnTop
+        }
+    }
 }
 
 private fun <T> onEventThreadBlocking(action: () -> T): T {
