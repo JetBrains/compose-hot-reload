@@ -7,7 +7,10 @@
 
 package org.jetbrains.compose.reload.mcp
 
+import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,6 +18,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.runInterruptible
+import kotlinx.io.asSink
+import kotlinx.io.asSource
+import kotlinx.io.buffered
 import org.jetbrains.compose.reload.InternalHotReloadApi
 import org.jetbrains.compose.reload.core.HotReloadEnvironment
 import org.jetbrains.compose.reload.core.PidFileInfo
@@ -70,11 +76,28 @@ fun main(args: Array<String>) {
         }
 
         try {
-            startMcpServer(orchestration, sessions, protocolOut, pidFile)
+            val transport = StdioServerTransport(
+                inputStream = System.`in`.asSource().buffered(),
+                outputStream = protocolOut.asSink().buffered()
+            )
+
+            //CMP-11137: a stdio MCP server must exit once the client closes its stdin.
+            val closed = CompletableDeferred<Unit>()
+            transport.onClose { closed.complete(Unit) }
+
+            val session = startMcpServer(orchestration, sessions, transport, pidFile)
+            session.onClose { closed.complete(Unit) }
+
+            closed.join()
         } finally {
+            // the transport or session is closed, so shutdown: cancel spawned jobs like watching new PIDs to connect.
+            coroutineContext.cancelChildren()
             sessions?.closeAll()
         }
     }
+
+    // CMP-11137: exit explicitly once the client is gone not waiting non-daemon threads to complete.
+    exitProcess(0)
 }
 
 /**

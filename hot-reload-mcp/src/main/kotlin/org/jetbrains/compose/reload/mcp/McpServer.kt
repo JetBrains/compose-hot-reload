@@ -9,7 +9,7 @@ package org.jetbrains.compose.reload.mcp
 
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
-import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
+import io.modelcontextprotocol.kotlin.sdk.server.ServerSession
 import io.modelcontextprotocol.kotlin.sdk.shared.Transport
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolRequest
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
@@ -25,9 +25,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.io.asSink
-import kotlinx.io.asSource
-import kotlinx.io.buffered
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.add
@@ -73,7 +70,6 @@ import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowRes
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.WindowResizeResult
 import org.jetbrains.compose.reload.orchestration.asChannel
 import org.jetbrains.compose.reload.orchestration.flowOf
-import java.io.OutputStream
 import java.nio.file.Path
 import java.util.Base64
 import kotlin.io.path.bufferedReader
@@ -85,19 +81,6 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 private val logger = createLogger()
-
-internal suspend fun startMcpServer(
-    orchestration: StateFlow<OrchestrationHandle?>,
-    sessions: HeadlessSessionManager?,
-    protocolOut: OutputStream,
-    pidFile: Path,
-) {
-    val transport = StdioServerTransport(
-        inputStream = System.`in`.asSource().buffered(),
-        outputStream = protocolOut.asSink().buffered()
-    )
-    startMcpServer(orchestration, sessions, transport, pidFile)
-}
 
 /** A single input property in a tool's JSON schema. */
 private data class Property(val name: String, val type: String, val description: String)
@@ -165,7 +148,7 @@ internal suspend fun startMcpServer(
     sessions: HeadlessSessionManager?,
     transport: Transport,
     pidFile: Path,
-) {
+): ServerSession {
     val server = Server(
         serverInfo = Implementation(name = "compose-hot-reload", version = HOT_RELOAD_VERSION),
         options = ServerOptions(
@@ -444,7 +427,7 @@ internal suspend fun startMcpServer(
         }
     }
 
-    server.createSession(transport)
+    return server.createSession(transport)
 }
 
 /** Standard message returned by every tool when no application is connected. */
