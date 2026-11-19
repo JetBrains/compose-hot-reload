@@ -6,7 +6,10 @@
 package org.jetbrains.compose.reload.shared
 
 import org.jetbrains.compose.reload.core.Disposable
+import org.jetbrains.compose.reload.core.Left
+import org.jetbrains.compose.reload.core.Right
 import org.jetbrains.compose.reload.core.Try
+import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
 
 /**
@@ -40,6 +43,24 @@ fun invokeAfterHotReload(block: (reloadRequestId: OrchestrationMessageId, result
             }
         }
     }
+
+/**
+ * Typed view on [invokeAfterHotReload]: [block] receives the reload result typed with [R]
+ * Failures pass through unchanged; a success payload that
+ * is not [R] (checked at runtime) skips the block.
+ */
+inline fun <reified R : ReloadResult> invokeAfterHotReloadOf(
+    crossinline block: (reloadRequestId: OrchestrationMessageId, result: Try<R>) -> Unit,
+): Disposable = invokeAfterHotReload { reloadRequestId, result ->
+    block(reloadRequestId, result.asReloadResultOf<R>() ?: return@invokeAfterHotReload)
+}
+
+@Suppress("UNCHECKED_CAST")
+@PublishedApi
+internal fun <R : ReloadResult> Try<ReloadResult>.asReloadResultOf(): Try<R>? = when (this) {
+    is Left -> (value as? R)?.toLeft()
+    is Right -> this
+}
 
 fun executeBeforeHotReloadListeners(reloadRequestId: OrchestrationMessageId) {
     val listeners = synchronized(beforeReloadListeners) { beforeReloadListeners.toList() }

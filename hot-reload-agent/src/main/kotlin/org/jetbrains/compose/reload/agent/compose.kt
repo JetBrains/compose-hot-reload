@@ -16,7 +16,7 @@ import org.jetbrains.compose.reload.core.isFailure
 import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage.DirtyScope
-import org.jetbrains.compose.reload.shared.invokeAfterHotReload
+import org.jetbrains.compose.reload.shared.invokeAfterHotReloadOf
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.security.ProtectionDomain
@@ -66,10 +66,10 @@ private fun launchComposeGroupInvalidation() {
     /*
     Instruct Compose to invalidate groups that have changed, after successful reload.
      */
-    invokeAfterHotReload { reloadRequestId, result ->
-        if (result.isFailure()) return@invokeAfterHotReload
+    invokeAfterHotReloadOf<Reload> { _, result ->
+        if (result.isFailure()) return@invokeAfterHotReloadOf
 
-        val invalidations = (result.value as Reload).dirty.dirtyScopes
+        val invalidations = result.value.dirty.dirtyScopes
             .filter { scope -> scope.group != null }
             .groupBy { it.group }
 
