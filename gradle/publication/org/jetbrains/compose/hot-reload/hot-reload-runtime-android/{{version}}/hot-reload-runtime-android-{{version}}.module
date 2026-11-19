@@ -15,17 +15,17 @@
   },
   "variants": [
     {
-      "name": "metadataApiElements",
+      "name": "releaseVariantReleaseApiPublication",
       "attributes": {
         "org.gradle.category": "library",
-        "org.gradle.jvm.environment": "non-jvm",
-        "org.gradle.usage": "kotlin-metadata",
-        "org.jetbrains.kotlin.platform.type": "common"
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.libraryelements": "aar",
+        "org.gradle.usage": "java-api"
       },
       "files": [
         {
-          "name": "hot-reload-runtime-android-metadata-{{Hot Reload Version}}.jar",
-          "url": "hot-reload-runtime-android-{{Hot Reload Version}}.jar",
+          "name": "hot-reload-runtime-android-{{Hot Reload Version}}.aar",
+          "url": "hot-reload-runtime-android-{{Hot Reload Version}}.aar",
           "size": {{SIZE}},
           "sha512": "{{HASH}}",
           "sha256": "{{HASH}}",
@@ -35,18 +35,66 @@
       ]
     },
     {
-      "name": "metadataSourcesElements",
+      "name": "releaseVariantReleaseRuntimePublication",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.libraryelements": "aar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-core",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-orchestration",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-runtime-shared",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-core",
+          "version": {
+            "requires": "1.11.0"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "hot-reload-runtime-android-{{Hot Reload Version}}.aar",
+          "url": "hot-reload-runtime-android-{{Hot Reload Version}}.aar",
+          "size": {{SIZE}},
+          "sha512": "{{HASH}}",
+          "sha256": "{{HASH}}",
+          "sha1": "{{HASH}}",
+          "md5": "{{HASH}}"
+        }
+      ]
+    },
+    {
+      "name": "releaseVariantReleaseSourcePublication",
       "attributes": {
         "org.gradle.category": "documentation",
         "org.gradle.dependency.bundling": "external",
         "org.gradle.docstype": "sources",
-        "org.gradle.jvm.environment": "non-jvm",
-        "org.gradle.usage": "kotlin-runtime",
-        "org.jetbrains.kotlin.platform.type": "common"
+        "org.gradle.usage": "java-runtime"
       },
       "files": [
         {
-          "name": "hot-reload-runtime-android-kotlin-{{Hot Reload Version}}-sources.jar",
+          "name": "hot-reload-runtime-android-{{Hot Reload Version}}-sources.jar",
           "url": "hot-reload-runtime-android-{{Hot Reload Version}}-sources.jar",
           "size": {{SIZE}},
           "sha512": "{{HASH}}",
@@ -55,104 +103,6 @@
           "md5": "{{HASH}}"
         }
       ]
-    },
-    {
-      "name": "releaseApiElements-published",
-      "attributes": {
-        "org.gradle.category": "library",
-        "org.gradle.jvm.environment": "android",
-        "org.gradle.usage": "java-api",
-        "org.jetbrains.kotlin.platform.type": "androidJvm"
-      },
-      "available-at": {
-        "url": "../../hot-reload-runtime-android-android/{{Hot Reload Version}}/hot-reload-runtime-android-android-{{Hot Reload Version}}.module",
-        "group": "org.jetbrains.compose.hot-reload",
-        "module": "hot-reload-runtime-android-android",
-        "version": "{{Hot Reload Version}}"
-      }
-    },
-    {
-      "name": "releaseRuntimeElements-published",
-      "attributes": {
-        "org.gradle.category": "library",
-        "org.gradle.jvm.environment": "android",
-        "org.gradle.usage": "java-runtime",
-        "org.jetbrains.kotlin.platform.type": "androidJvm"
-      },
-      "available-at": {
-        "url": "../../hot-reload-runtime-android-android/{{Hot Reload Version}}/hot-reload-runtime-android-android-{{Hot Reload Version}}.module",
-        "group": "org.jetbrains.compose.hot-reload",
-        "module": "hot-reload-runtime-android-android",
-        "version": "{{Hot Reload Version}}"
-      }
-    },
-    {
-      "name": "releaseSourcesElements-published",
-      "attributes": {
-        "org.gradle.category": "documentation",
-        "org.gradle.dependency.bundling": "external",
-        "org.gradle.docstype": "sources",
-        "org.gradle.jvm.environment": "android",
-        "org.gradle.libraryelements": "jar",
-        "org.gradle.usage": "java-runtime",
-        "org.jetbrains.kotlin.platform.type": "androidJvm"
-      },
-      "available-at": {
-        "url": "../../hot-reload-runtime-android-android/{{Hot Reload Version}}/hot-reload-runtime-android-android-{{Hot Reload Version}}.module",
-        "group": "org.jetbrains.compose.hot-reload",
-        "module": "hot-reload-runtime-android-android",
-        "version": "{{Hot Reload Version}}"
-      }
-    },
-    {
-      "name": "wasmJsApiElements-published",
-      "attributes": {
-        "org.gradle.category": "library",
-        "org.gradle.jvm.environment": "non-jvm",
-        "org.gradle.usage": "kotlin-api",
-        "org.jetbrains.kotlin.platform.type": "wasm",
-        "org.jetbrains.kotlin.wasm.target": "js"
-      },
-      "available-at": {
-        "url": "../../hot-reload-runtime-android-wasm-js/{{Hot Reload Version}}/hot-reload-runtime-android-wasm-js-{{Hot Reload Version}}.module",
-        "group": "org.jetbrains.compose.hot-reload",
-        "module": "hot-reload-runtime-android-wasm-js",
-        "version": "{{Hot Reload Version}}"
-      }
-    },
-    {
-      "name": "wasmJsRuntimeElements-published",
-      "attributes": {
-        "org.gradle.category": "library",
-        "org.gradle.jvm.environment": "non-jvm",
-        "org.gradle.usage": "kotlin-runtime",
-        "org.jetbrains.kotlin.platform.type": "wasm",
-        "org.jetbrains.kotlin.wasm.target": "js"
-      },
-      "available-at": {
-        "url": "../../hot-reload-runtime-android-wasm-js/{{Hot Reload Version}}/hot-reload-runtime-android-wasm-js-{{Hot Reload Version}}.module",
-        "group": "org.jetbrains.compose.hot-reload",
-        "module": "hot-reload-runtime-android-wasm-js",
-        "version": "{{Hot Reload Version}}"
-      }
-    },
-    {
-      "name": "wasmJsSourcesElements-published",
-      "attributes": {
-        "org.gradle.category": "documentation",
-        "org.gradle.dependency.bundling": "external",
-        "org.gradle.docstype": "sources",
-        "org.gradle.jvm.environment": "non-jvm",
-        "org.gradle.usage": "kotlin-runtime",
-        "org.jetbrains.kotlin.platform.type": "wasm",
-        "org.jetbrains.kotlin.wasm.target": "js"
-      },
-      "available-at": {
-        "url": "../../hot-reload-runtime-android-wasm-js/{{Hot Reload Version}}/hot-reload-runtime-android-wasm-js-{{Hot Reload Version}}.module",
-        "group": "org.jetbrains.compose.hot-reload",
-        "module": "hot-reload-runtime-android-wasm-js",
-        "version": "{{Hot Reload Version}}"
-      }
     }
   ]
 }

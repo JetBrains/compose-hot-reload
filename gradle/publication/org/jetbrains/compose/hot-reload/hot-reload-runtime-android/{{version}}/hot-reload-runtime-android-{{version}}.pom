@@ -10,6 +10,7 @@
   <groupId>org.jetbrains.compose.hot-reload</groupId>
   <artifactId>hot-reload-runtime-android</artifactId>
   <version>{{Hot Reload Version}}</version>
+  <packaging>aar</packaging>
   <name>hot-reload-runtime-android</name>
   <description>Compose Hot Reload implementation</description>
   <url>https://github.com/JetBrains/compose-hot-reload</url>
@@ -31,4 +32,30 @@
   <scm>
     <url>https://github.com/JetBrains/compose-hot-reload</url>
   </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.jetbrains.compose.hot-reload</groupId>
+      <artifactId>hot-reload-core</artifactId>
+      <version>{{Hot Reload Version}}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.compose.hot-reload</groupId>
+      <artifactId>hot-reload-orchestration</artifactId>
+      <version>{{Hot Reload Version}}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.compose.hot-reload</groupId>
+      <artifactId>hot-reload-runtime-shared</artifactId>
+      <version>{{Hot Reload Version}}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlinx</groupId>
+      <artifactId>kotlinx-coroutines-core</artifactId>
+      <version>1.11.0</version>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
 </project>

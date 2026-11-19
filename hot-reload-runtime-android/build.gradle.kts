@@ -3,25 +3,26 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-    kotlin("multiplatform")
     id("com.android.library")
+    kotlin("android")
     build.publish
 }
 
 kotlin {
-    androidTarget {
-        publishLibraryVariants("release")
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
     }
+}
 
-    sourceSets.androidMain.dependencies {
-        compileOnly(project(":hot-reload-annotations"))
-
-        implementation(project(":hot-reload-orchestration"))
-        implementation(project(":hot-reload-core"))
-        implementation(project(":hot-reload-runtime-shared"))
-        implementation(deps.coroutines.core)
-    }
+dependencies {
+    compileOnly(project(":hot-reload-annotations"))
+    implementation(project(":hot-reload-core"))
+    implementation(project(":hot-reload-orchestration"))
+    implementation(project(":hot-reload-runtime-shared"))
+    implementation(deps.coroutines.core)
 }
 
 android {
@@ -54,12 +55,18 @@ android {
 
     externalNativeBuild {
         cmake {
-            path = file("src/androidMain/cpp/CMakeLists.txt")
+            path = file("src/main/cpp/CMakeLists.txt")
         }
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
     }
 }
