@@ -55,6 +55,14 @@ object AndroidHotReloadRuntime {
 
     @Volatile
     private var initialized = false
+
+    /**
+     * The application's class loader, set once by [initialize] and alive for the whole process:
+     * Android has exactly one app class loader, so unlike the desktop agent — which discovers
+     * class loaders dynamically as Compose classes load and therefore keeps them in a lock-guarded
+     * `WeakHashMap` — a single volatile reference is the whole bookkeeping.
+     */
+    @Volatile
     private var composeClassLoader: ClassLoader? = null
     private val mainHandler = Handler(Looper.getMainLooper())
 
