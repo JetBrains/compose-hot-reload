@@ -6,6 +6,7 @@
 package org.jetbrains.compose.reload.gradle.android
 
 import org.jetbrains.compose.reload.InternalHotReloadApi
+import org.jetbrains.compose.reload.core.Os
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -25,7 +26,10 @@ import kotlin.io.path.deleteRecursively
 @InternalHotReloadApi
 internal object AndroidClassDexer {
 
-    private val javaExecutable = File(System.getProperty("java.home"), "bin/java").absolutePath
+    private val javaExecutable = File(
+        System.getProperty("java.home"),
+        "bin/" + if (Os.currentOrNull() == Os.Windows) "java.exe" else "java",
+    ).absolutePath
 
     /**
      * Dexes each [classFiles] entry, returning class name → single-class DEX bytes, in [classFiles]' order,
