@@ -32,8 +32,8 @@ internal object AndroidClassDexer {
     ).absolutePath
 
     /**
-     * Dexes each [classFiles] entry, returning class name → single-class DEX bytes, in [classFiles]' order,
-     * followed by the synthetic classes d8 derived from them (lambdas, outlines, …), sorted by name.
+     * Dexes each [classFiles] entry, returning class name → single-class DEX bytes for the supplied
+     * classes and every synthetic d8 derived from them (lambdas, outlines, …), sorted by class name.
      *
      * @param r8Jar AGP's r8 jar.
      * @param libraryJars AGP's boot classpath (the `compileSdk`'s `android.jar`, …): d8's library model.
@@ -74,27 +74,26 @@ internal object AndroidClassDexer {
                 "split the merged DEX per class",
             )
 
-            /* d8 writes each class to '<package path>.dex', synthetics included */
+            /*
+             * d8 writes one '<package path>.dex' per class — the requested classes and every synthetic it
+             * derived from them (lambdas, outlines, …): an edit may change only a synthetic and leave its
+             * host's DEX byte-identical. Collect them all.
+             */
+            fun dexClassName(dex: Path): String =
+                workDir.relativize(dex).joinToString(".") { part -> part.toString() }.removeSuffix(".dex")
+
             val result = LinkedHashMap<String, ByteArray>()
-            for (className in classFiles.keys) {
-                val dex = workDir.resolve(className.replace('.', '/') + ".dex")
-                check(Files.isRegularFile(dex)) { "d8 produced no DEX for '$className' (expected '${workDir.relativize(dex)}')" }
-                result[className] = Files.readAllBytes(dex)
+            Files.walk(workDir).use { paths ->
+                paths.filter { Files.isRegularFile(it) && it.fileName.toString().endsWith(".dex") }
+                    .filter { it != mergedDex }
+                    .sorted(compareBy(::dexClassName))
+                    .forEach { dex -> result[dexClassName(dex)] = Files.readAllBytes(dex) }
             }
 
-            /*
-             * An edit may change only a synthetic and leave its host's DEX byte-identical (f.i. a method
-             * reference's target lives in '<Host>$$ExternalSyntheticLambda0'), so the synthetics derived
-             * from the requested classes are shipped too.
-             */
-            val syntheticDexes = Files.walk(workDir).use { paths ->
-                paths.filter { it.fileName.toString().endsWith(".dex") }
-                    .map { dex -> workDir.relativize(dex).joinToString(".") { it.toString() }.removeSuffix(".dex") to dex }
-                    .filter { (name, _) -> classFiles.keys.any { host -> name.startsWith("$host\$\$ExternalSynthetic") } }
-                    .sorted(compareBy { (name, _) -> name })
-                    .toList()
+            // check that the result contains our initial classes at least
+            classFiles.keys.forEach { className ->
+                check(className in result) { "d8 produced no DEX for '$className' (produced: ${result.keys})" }
             }
-            for ((name, dex) in syntheticDexes) result[name] = Files.readAllBytes(dex)
             return result
         } finally {
             @OptIn(ExperimentalPathApi::class)
