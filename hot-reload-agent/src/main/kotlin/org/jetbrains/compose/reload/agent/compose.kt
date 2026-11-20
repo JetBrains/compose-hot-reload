@@ -13,10 +13,12 @@ import org.jetbrains.compose.reload.analysis.ScopeType
 import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.isFailure
-import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessage.InvalidatedComposeGroupMessage.DirtyScope
+import org.jetbrains.compose.reload.shared.enableComposeHotReloadMode
+import org.jetbrains.compose.reload.shared.invalidateGroupsWithKey
 import org.jetbrains.compose.reload.shared.invokeAfterHotReloadOf
+import org.jetbrains.compose.reload.shared.reloadCompositionState
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.security.ProtectionDomain
@@ -108,26 +110,12 @@ private fun launchComposeGroupInvalidation() {
     }
 }
 
-private fun enableComposeHotReloadMode(loader: ClassLoader) {
-    try {
-        org.jetbrains.compose.reload.shared.enableComposeHotReloadMode(loader)
-
-        logger.debug("'setHotReloadEnabled' method found, enabled compose hot reload mode (${loader.name})")
-    } catch (e: ReflectiveOperationException) {
-        logger.warn("Failed to enable compose hot reload mode (${loader.name})", e)
-    }
-}
-
 private fun invalidateGroupsWithKey(key: ComposeGroupKey) {
     composeClassLoadersLock.withLock {
         composeClassLoaders.keys.forEach { loader ->
-            invalidateGroupsWithKey(loader, key)
+            invalidateGroupsWithKey(loader, key.key)
         }
     }
-}
-
-private fun invalidateGroupsWithKey(loader: ClassLoader, key: ComposeGroupKey) {
-    org.jetbrains.compose.reload.shared.invalidateGroupsWithKey(loader, key.key)
 }
 
 /**
@@ -146,10 +134,3 @@ fun reloadCompositionState() {
         }
     }
 }
-
-private fun reloadCompositionState(loader: ClassLoader) {
-    org.jetbrains.compose.reload.shared.reloadCompositionState(loader) { message, cause ->
-        logger.warn("$message (${loader.name})", cause)
-    }
-}
-

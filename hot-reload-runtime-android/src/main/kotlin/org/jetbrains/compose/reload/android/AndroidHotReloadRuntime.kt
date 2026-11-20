@@ -3,6 +3,8 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
+@file:OptIn(DelicateHotReloadApi::class)
+
 package org.jetbrains.compose.reload.android
 
 import android.annotation.SuppressLint
@@ -11,17 +13,26 @@ import android.os.Build
 import android.os.Debug
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
+import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.core.Try
+import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.error
+import org.jetbrains.compose.reload.core.info
 import org.jetbrains.compose.reload.core.toLeft
 import org.jetbrains.compose.reload.core.toRight
+import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.orchestration.OrchestrationMessageId
 import org.jetbrains.compose.reload.shared.ReloadResult
+import org.jetbrains.compose.reload.shared.enableComposeHotReloadMode
 import org.jetbrains.compose.reload.shared.executeAfterHotReloadListeners
+import org.jetbrains.compose.reload.shared.invalidateGroupsWithKey
+import org.jetbrains.compose.reload.shared.reloadCompositionState
 import java.io.File
 import java.util.zip.ZipFile
 
 internal const val LOG_TAG = "ComposeHotReload"
+
+private val logger = createLogger()
 
 /** Name of the native JVMTI agent library (see `cpp/CMakeLists.txt`). */
 private const val AGENT_LIB = "composehotreloadagent"
@@ -31,7 +42,7 @@ private const val AGENT_SO = "lib$AGENT_LIB.so"
  * Entry point of the Compose Hot Reload runtime on Android.
  *
  * Responsibilities:
- *  - attach the native JVMTI agent so class bodies can be redefined ([redefine]);
+ *  - attach the native JVMTI agent so class bodies can be redefined ([org.jetbrains.compose.reload.android.NativeRedefiner.redefine]);
  *  - enable Compose hot-reload mode on the application classloader;
  *  - drive recomposition after a reload ([invalidateGroupsWithKey] / [reloadCompositionState]).
  *
@@ -60,7 +71,7 @@ object AndroidHotReloadRuntime {
     fun initialize(context: Context): Boolean {
         if (initialized) return true
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-            Log.w(LOG_TAG, "Hot reload requires API 28+ (JVMTI attach); running inactive")
+            logger.warn("Hot reload requires API 28+ (JVMTI attach); running inactive")
             return false
         }
         val appContext = context.applicationContext
@@ -68,13 +79,13 @@ object AndroidHotReloadRuntime {
         composeClassLoader = loader
         val attached = attachAgent(appContext)
         if (!attached) {
-            Log.w(LOG_TAG, "Agent not attached; hot reload inactive")
+            logger.warn("Agent not attached; hot reload inactive")
             return false
         }
         enableComposeHotReloadMode(loader)
         initialized = true
         System.setProperty("compose.reload.isActive", "true")
-        Log.i(LOG_TAG, "Compose Hot Reload runtime initialized")
+        logger.info("Compose Hot Reload runtime initialized")
         return true
     }
 
@@ -108,7 +119,7 @@ object AndroidHotReloadRuntime {
             val target = try {
                 Class.forName(className, false, loader)
             } catch (t: Throwable) {
-                Log.w(LOG_TAG, "redefineAll: class not found: $className", t)
+                logger.warn("redefineAll: class not found: $className", t)
                 return t
             }
             targets.add(target)
@@ -119,7 +130,7 @@ object AndroidHotReloadRuntime {
         val rc = NativeRedefiner.redefine(targets.toTypedArray(), dexes.toTypedArray())
         if (rc != 0) {
             val error = RuntimeException("RedefineClasses failed rc=$rc for ${targets.map { it.name }}")
-            Log.w(LOG_TAG, error.message, error)
+            logger.warn(error.message ?: "redefine failed", error)
             return error
         }
         return null
@@ -130,7 +141,7 @@ object AndroidHotReloadRuntime {
         try {
             executeAfterHotReloadListeners(reloadRequestId, result)
         } catch (t: Throwable) {
-            Log.w(LOG_TAG, "afterHotReload listener failed", t)
+            logger.warn("afterHotReload listener failed", t)
         }
     }
 
@@ -159,16 +170,17 @@ object AndroidHotReloadRuntime {
      * `nativeLibraryDir` contains base64 `==`). The same file is [System.load]ed so the
      * JNI `redefine` symbol resolves against the same shared object that runs `Agent_OnAttach`.
      */
+    @SuppressLint("UnsafeDynamicallyLoadedCode")
     private fun attachAgent(context: Context): Boolean {
         return try {
             val dst = File(context.filesDir, AGENT_SO)
             if (!materializeAgent(context, dst)) return false
             System.load(dst.absolutePath)
             Debug.attachJvmtiAgent(dst.absolutePath, null, javaClass.classLoader)
-            Log.i(LOG_TAG, "JVMTI agent attached from ${dst.absolutePath}")
+            logger.info("JVMTI agent attached from ${dst.absolutePath}")
             true
         } catch (t: Throwable) {
-            Log.e(LOG_TAG, "attachAgent failed", t)
+            logger.error("attachAgent failed", t)
             false
         }
     }
@@ -192,7 +204,7 @@ object AndroidHotReloadRuntime {
                 return true
             }
         }
-        Log.e(LOG_TAG, "$AGENT_SO not found in nativeLibraryDir or APK")
+        logger.error("$AGENT_SO not found in nativeLibraryDir or APK")
         return false
     }
 }

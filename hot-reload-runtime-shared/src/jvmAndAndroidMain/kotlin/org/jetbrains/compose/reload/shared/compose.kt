@@ -5,7 +5,12 @@
 
 package org.jetbrains.compose.reload.shared
 
+import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.debug
+import org.jetbrains.compose.reload.core.warn
 import java.lang.reflect.InvocationTargetException
+
+private val logger = createLogger()
 
 private class RecomposerCompanion(val instance: Any?, val type: Class<*>)
 
@@ -18,27 +23,33 @@ private fun recomposerCompanion(loader: ClassLoader): RecomposerCompanion {
 
 /**
  * Puts Compose into hot-reload mode on [loader] ('Recomposer.setHotReloadEnabled(true)').
- *
- * @throws ReflectiveOperationException if the Compose runtime cannot be accessed through [loader]
  */
 fun enableComposeHotReloadMode(loader: ClassLoader) {
-    val companion = recomposerCompanion(loader)
-    companion.type.methods
-        .singleOrNull { it.name.contains("setHotReloadEnabled") }
-        ?.apply { isAccessible = true; invoke(companion.instance, true) }
+    try {
+        val companion = recomposerCompanion(loader)
+        companion.type.methods
+            .singleOrNull { it.name.contains("setHotReloadEnabled") }
+            ?.apply { isAccessible = true; invoke(companion.instance, true) }
+
+        logger.debug("'setHotReloadEnabled' method found, enabled compose hot reload mode ($loader)")
+    } catch (e: ReflectiveOperationException) {
+        logger.warn("Failed to enable compose hot reload mode ($loader)", e)
+    }
 }
 
 /**
  * Fine-grained invalidation: invalidates only the Compose groups matching [key]
  * (the Compose-compiler group key).
- *
- * @throws ReflectiveOperationException if the Compose runtime cannot be accessed through [loader]
  */
 fun invalidateGroupsWithKey(loader: ClassLoader, key: Int) {
-    val companion = recomposerCompanion(loader)
-    companion.type.methods
-        .singleOrNull { it.name.contains("invalidateGroupsWithKey") }
-        ?.apply { isAccessible = true; invoke(companion.instance, key) }
+    try {
+        val companion = recomposerCompanion(loader)
+        companion.type.methods
+            .singleOrNull { it.name.contains("invalidateGroupsWithKey") }
+            ?.apply { isAccessible = true; invoke(companion.instance, key) }
+    } catch (e: ReflectiveOperationException) {
+        logger.warn("Failed to invalidate groups with key $key ($loader)", e)
+    }
 }
 
 /**
@@ -48,14 +59,12 @@ fun invalidateGroupsWithKey(loader: ClassLoader, key: Int) {
  * any recomposer whose current error is non-recoverable — this disposes every running recomposer's
  * compositions and recomposes them from scratch (Compose's 'saveStateAndDisposeForHotReload' followed
  * by 'loadStateAndComposeForHotReload', which resets all error states).
- *
- * @param warn Reports problems; the platform decides how to log them.
  */
-fun reloadCompositionState(loader: ClassLoader, warn: (message: String, cause: Throwable?) -> Unit) {
+fun reloadCompositionState(loader: ClassLoader) {
     val companion = try {
         recomposerCompanion(loader)
     } catch (e: ReflectiveOperationException) {
-        warn("'Recomposer.Companion' not found", e)
+        logger.warn("'Recomposer.Companion' not found ($loader)", e)
         return
     }
 
@@ -65,7 +74,7 @@ fun reloadCompositionState(loader: ClassLoader, warn: (message: String, cause: T
         .singleOrNull { it.name.contains("loadStateAndComposeForHotReload") }
 
     if (save == null || load == null) {
-        warn("'saveStateAndDisposeForHotReload'/'loadStateAndComposeForHotReload' not found", null)
+        logger.warn("'saveStateAndDisposeForHotReload'/'loadStateAndComposeForHotReload' not found ($loader)")
         return
     }
 
@@ -73,7 +82,7 @@ fun reloadCompositionState(loader: ClassLoader, warn: (message: String, cause: T
         save.isAccessible = true
         save.invoke(companion.instance)
     } catch (t: InvocationTargetException) {
-        warn("'saveStateAndDisposeForHotReload' failed", t.cause ?: t)
+        logger.warn("'saveStateAndDisposeForHotReload' failed ($loader)", t.cause ?: t)
         return
     }
 
@@ -81,6 +90,6 @@ fun reloadCompositionState(loader: ClassLoader, warn: (message: String, cause: T
         load.isAccessible = true
         load.invoke(companion.instance, token)
     } catch (t: InvocationTargetException) {
-        warn("'loadStateAndComposeForHotReload' completed with a trailing error", t.cause ?: t)
+        logger.warn("'loadStateAndComposeForHotReload' completed with a trailing error ($loader)", t.cause ?: t)
     }
 }

@@ -12,7 +12,9 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import org.jetbrains.compose.reload.core.createLogger
+import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.core.warn
 import kotlin.concurrent.thread
 
 /**
@@ -30,15 +32,17 @@ import kotlin.concurrent.thread
  */
 class HotReloadInitProvider : ContentProvider() {
 
+    private val logger = createLogger()
+
     override fun onCreate(): Boolean {
         val context = context ?: return false
 
         val active = runCatching { AndroidHotReloadRuntime.initialize(context) }
             .getOrElse { error ->
-                Log.w(LOG_TAG, "Hot reload not initialized", error)
+                logger.warn("Hot reload not initialized", error)
                 false
             }
-        Log.i(LOG_TAG, "Hot reload active: $active")
+        logger.info("Hot reload active: $active")
         if (!active) return true
 
         val application = context.applicationContext as? Application ?: return true
@@ -54,7 +58,7 @@ class HotReloadInitProvider : ContentProvider() {
                 /* Connecting blocks on the handshake, so do it off the main thread. */
                 thread(name = "orchestration-connect") {
                     val connected = OrchestrationConnection.connect(port)
-                    Log.i(LOG_TAG, "Orchestration connected on $port: $connected")
+                    logger.info("Orchestration connected on $port: $connected")
                 }
             }
 

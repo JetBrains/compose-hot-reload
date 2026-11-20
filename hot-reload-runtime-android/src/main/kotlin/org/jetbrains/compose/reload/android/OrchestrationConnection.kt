@@ -3,10 +3,15 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
+@file:OptIn(DelicateHotReloadApi::class)
+
 package org.jetbrains.compose.reload.android
 
-import android.util.Log
+import org.jetbrains.compose.reload.DelicateHotReloadApi
+import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.exceptionOrNull
+import org.jetbrains.compose.reload.core.info
+import org.jetbrains.compose.reload.core.warn
 import org.jetbrains.compose.reload.core.getOrNull
 import org.jetbrains.compose.reload.core.launchTask
 import org.jetbrains.compose.reload.core.withType
@@ -28,6 +33,8 @@ import org.jetbrains.compose.reload.orchestration.sendAsync
  */
 object OrchestrationConnection {
 
+    private val logger = createLogger()
+
     @Volatile
     private var client: OrchestrationClient? = null
 
@@ -39,15 +46,15 @@ object OrchestrationConnection {
         val connected = OrchestrationClient(OrchestrationClientRole.Application, port).connectBlocking()
         val client = connected.getOrNull()
         if (client == null) {
-            Log.w(LOG_TAG, "Failed to connect to orchestration on port $port", connected.exceptionOrNull())
+            logger.warn("Failed to connect to orchestration on port $port", connected.exceptionOrNull())
             return false
         }
         this.client = client
-        Log.i(LOG_TAG, "Connected to orchestration on port $port")
+        logger.info("Connected to orchestration on port $port")
 
         launchTask("ReloadDexRequest listener") {
             client.messages.withType<ReloadDexRequest>().collect { request ->
-                Log.i(LOG_TAG, "Received ReloadDexRequest for ${request.dexByClassName.keys}")
+                logger.info("Received ReloadDexRequest for ${request.dexByClassName.keys}")
                 val error = AndroidHotReloadRuntime.redefineAll(request.messageId, request.dexByClassName)
                 if (error == null) {
                     client.sendAsync(ReloadClassesResult(request.messageId, true))

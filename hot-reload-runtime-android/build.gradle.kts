@@ -14,6 +14,7 @@ plugins {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11)
+        optIn.add("org.jetbrains.compose.reload.InternalHotReloadApi")
     }
 }
 
