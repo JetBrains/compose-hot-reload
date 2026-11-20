@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -34,8 +34,11 @@ public interface BuildGradleKtsExtension {
 
 @InternalHotReloadTestApi
 public fun renderBuildGradleKts(context: ExtensionContext): String {
-    val template = if (context.projectMode == ProjectMode.Jvm) jvmBuildGradleKtsTemplate
-    else kmpBuildGradleKtsTemplate
+    val template = when (context.projectMode) {
+        ProjectMode.Jvm -> jvmBuildGradleKtsTemplate
+        ProjectMode.Android -> androidBuildGradleKtsTemplate
+        ProjectMode.Kmp -> kmpBuildGradleKtsTemplate
+    }
 
     return template.renderOrThrow {
         val buildGradleKtsExtensions =
@@ -75,8 +78,11 @@ private const val javaExecConfigureKey = "javaExec.configure"
 private const val compilerOptionsKey = "compilerOptions"
 private const val composeCompilerKey = "composeCompiler"
 private const val footerKey = "footer"
+public const val androidFixtureCompileSdk: Int = 35
 private const val androidEnabledKey = "android.enabled"
 private const val androidKey = "android"
+private const val androidCompileSdkKey = "compileSdk"
+private const val legacyKotlinPluginKey = "legacy.kotlinPlugin"
 
 private val kmpBuildGradleKtsTemplate = Template(
     """
@@ -122,11 +128,61 @@ private val kmpBuildGradleKtsTemplate = Template(
     {{if $androidEnabledKey}}
     android {
         {{$androidKey}}
-        compileSdk = 34
+        compileSdk = {{$androidCompileSdkKey}}
         namespace = "org.jetbrains.compose.test"
+        defaultConfig {
+            /* The hot reload runtime AAR requires minSdk 28 */
+            minSdk = 28
+        }
     }
     {{/if}}
     
+    {{$footerKey}}
+
+    """.trimIndent()
+).getOrThrow()
+
+
+/*
+ * The single-platform Android app module. With AGP 9+'s *built-in Kotlin* the 'kotlin' extension is
+ * created by AGP itself and no Kotlin plugin id is applied — the effective Kotlin version is the
+ * compose compiler plugin's pin (AGP's own KGP dependency is only the conflict-resolution default).
+ * Older AGPs apply the legacy 'kotlin("android")' plugin instead.
+ */
+private val androidBuildGradleKtsTemplate = Template(
+    """
+    {{$headerKey}}
+    import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
+
+    plugins {
+        {{$pluginsKey}}
+    }
+
+    android {
+        {{$androidKey}}
+        compileSdk = {{$androidCompileSdkKey}}
+        namespace = "org.jetbrains.compose.test"
+        defaultConfig {
+            /* The hot reload runtime AAR requires minSdk 28 */
+            minSdk = 28
+        }
+    }
+
+    kotlin {
+        {{$kotlinKey}}
+        compilerOptions {
+            {{$compilerOptionsKey}}
+        }
+    }
+
+    dependencies {
+        {{$commonDependenciesKey}}
+    }
+
+    composeCompiler {
+        {{$composeCompilerKey}}
+    }
+
     {{$footerKey}}
 
     """.trimIndent()
@@ -173,20 +229,46 @@ private val jvmBuildGradleKtsTemplate = Template(
 internal class DefaultBuildGradleKts : BuildGradleKtsExtension {
     override fun TemplateBuilder.buildTemplate(context: ExtensionContext) {
         androidEnabledKey(context.testedAndroidVersion != null)
+        androidCompileSdkKey((context.testedAndroidCompileSdk ?: androidFixtureCompileSdk).toString())
     }
 
     override fun plugins(context: ExtensionContext): String {
-        return """
-            kotlin("{{kotlin.plugin}}")
-            kotlin("plugin.compose")
-            id("org.jetbrains.compose")
-            id("org.jetbrains.compose.hot-reload")
-            {{if $androidEnabledKey}}
-            id("com.android.application")
-            {{/if}}
-        """.trimIndent().asTemplateOrThrow().renderOrThrow {
-            "kotlin.plugin"(if (context.projectMode == ProjectMode.Jvm) "jvm" else "multiplatform")
-            buildTemplate(context)
+        return if (context.projectMode == ProjectMode.Android) {
+            """
+                id("com.android.application")
+                {{if $legacyKotlinPluginKey}}
+                kotlin("android")
+                {{/if}}
+                id("org.jetbrains.kotlin.plugin.compose")
+                id("org.jetbrains.compose")
+                id("org.jetbrains.compose.hot-reload")
+            """.trimIndent().asTemplateOrThrow().renderOrThrow {
+                legacyKotlinPluginKey(!context.agpProvidesBuiltInKotlin)
+            }
+        } else {
+            """
+                kotlin("{{kotlin.plugin}}")
+                kotlin("plugin.compose")
+                id("org.jetbrains.compose")
+                id("org.jetbrains.compose.hot-reload")
+                {{if $androidEnabledKey}}
+                id("com.android.application")
+                {{/if}}
+            """.trimIndent().asTemplateOrThrow().renderOrThrow {
+                "kotlin.plugin"(if (context.projectMode == ProjectMode.Jvm) "jvm" else "multiplatform")
+                buildTemplate(context)
+            }
+        }
+    }
+
+    override fun kotlin(context: ExtensionContext): String? {
+        /* Renders 'jvmToolchain(21)' into the legacy 'kotlin("android")' app module: both Kotlin's
+           JVM target and AGP's javac target default from the toolchain. */
+        return when {
+            (context.projectMode == ProjectMode.Android) &&
+                !context.agpProvidesBuiltInKotlin -> "jvmToolchain(21)"
+
+            else -> null
         }
     }
 

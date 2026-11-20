@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -88,6 +88,8 @@ include(":hot-reload-gradle-idea")
 include(":hot-reload-gradle-core")
 include(":hot-reload-runtime-api")
 include(":hot-reload-runtime-jvm")
+include(":hot-reload-runtime-android")
+include(":hot-reload-runtime-shared")
 include(":hot-reload-devtools")
 include(":hot-reload-devtools-api")
 include(":hot-reload-mcp")

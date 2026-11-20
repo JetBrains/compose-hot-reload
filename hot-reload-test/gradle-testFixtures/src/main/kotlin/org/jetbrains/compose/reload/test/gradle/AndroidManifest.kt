@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -17,11 +17,15 @@ public interface AndroidManifestExtension {
     public fun TemplateBuilder.buildTemplate(context: ExtensionContext)
 }
 
-internal fun renderAndroidManifest(context: ExtensionContext): String = androidManifestTemplate.renderOrThrow {
-    ServiceLoader.load(AndroidManifestExtension::class.java).toList().forEach { extension ->
-        manifestTagKey(extension.manifestTag(context))
-        manifestBodyKey(extension.manifestBody(context))
-        with(extension) { buildTemplate(context) }
+internal fun renderAndroidManifest(context: ExtensionContext): String {
+    val extensions = ServiceLoader.load(AndroidManifestExtension::class.java).toList()
+    if (extensions.isEmpty()) return "<manifest />"
+    return androidManifestTemplate.renderOrThrow {
+        extensions.forEach { extension ->
+            manifestTagKey(extension.manifestTag(context))
+            manifestBodyKey(extension.manifestBody(context))
+            with(extension) { buildTemplate(context) }
+        }
     }
 }
 

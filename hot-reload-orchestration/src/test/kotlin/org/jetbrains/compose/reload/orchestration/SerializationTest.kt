@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -522,6 +522,21 @@ class SerializationTest {
     @Test
     fun `test - restart request`() = testEncodeDecodeEquals(
         OrchestrationMessage.RestartRequest()
+    )
+
+    @Test
+    fun `test - reload dex request - 1`() = testEncodeDecodeEquals(
+        OrchestrationMessage.ReloadDexRequest(emptyMap())
+    )
+
+    @Test
+    fun `test - reload dex request - 2`() = testEncodeDecodeEquals(
+        OrchestrationMessage.ReloadDexRequest(
+            mapOf(
+                "com.example.Foo" to byteArrayOf(1, 2, 3),
+                "com.example.Bar" to byteArrayOf(4, 5, 6, 7),
+            )
+        )
     )
 
 }

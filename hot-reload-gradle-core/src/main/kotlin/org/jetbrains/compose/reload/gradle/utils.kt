@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -12,10 +12,13 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.compose.reload.InternalHotReloadApi
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmAndroidCompilation
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -45,6 +48,10 @@ val Project.kotlinMultiplatformOrNull: KotlinMultiplatformExtension?
 @InternalHotReloadApi
 val Project.kotlinJvmOrNull: KotlinJvmProjectExtension?
     get() = extensions.getByName("kotlin") as? KotlinJvmProjectExtension
+
+@InternalHotReloadApi
+val Project.kotlinAndroidOrNull: KotlinAndroidProjectExtension?
+    get() = extensions.getByName("kotlin") as? KotlinAndroidProjectExtension
 
 @InternalHotReloadApi
 fun Project.files(lazy: () -> Any) = files({ lazy() })
@@ -98,12 +105,54 @@ fun Project.withKotlinPlugin(block: () -> Unit) {
     }
 }
 
+/**
+ * Reacts to any Kotlin plugin: [withKotlinPlugin] (JVM, Multiplatform) or the single-platform Kotlin Android
+ * plugin (classic or AGP's built-in Kotlin).
+ */
+@InternalHotReloadApi
+fun Project.withAnyKotlinPlugin(block: () -> Unit) {
+    withKotlinPlugin(block)
+    withSinglePlatformKotlinAndroidPlugin(block)
+}
+
+private fun Project.withKotlinAndroidPlugin(block: () -> Unit) {
+    pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+        block()
+    }
+
+    withSinglePlatformKotlinAndroidPlugin(block)
+}
+
+private fun Project.withSinglePlatformKotlinAndroidPlugin(block: () -> Unit) {
+    pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+        block()
+    }
+
+    withBuiltInKotlinAndroidPlugin(block)
+}
+
+/**
+ * AGP's *built-in Kotlin* support creates a [KotlinAndroidProjectExtension] without applying the classic
+ * `org.jetbrains.kotlin.android` plugin id. There is no public plugin id for built-in Kotlin to watch,
+ * so we hook AGP's application/library plugins and confirm built-in Kotlin by the presence of a
+ * [KotlinAndroidProjectExtension].
+ */
+private fun Project.withBuiltInKotlinAndroidPlugin(block: () -> Unit) {
+    val trigger = {
+        if (extensions.findByName("kotlin") is KotlinAndroidProjectExtension &&
+            !pluginManager.hasPlugin("org.jetbrains.kotlin.android") &&
+            !pluginManager.hasPlugin("org.jetbrains.kotlin.multiplatform")
+        ) block()
+    }
+    pluginManager.withPlugin("com.android.application") { trigger() }
+    pluginManager.withPlugin("com.android.library") { trigger() }
+}
 
 @InternalHotReloadApi
 suspend fun awaitKotlinPlugin() {
     val project = project()
     suspendCoroutine { continuation ->
-        project.withKotlinPlugin {
+        project.withAnyKotlinPlugin {
             continuation.resumeWith(Result.success(Unit))
         }
     }
@@ -118,6 +167,27 @@ suspend fun <T> Project.forAllJvmCompilations(block: suspend (compilation: Kotli
             futures += future { block(compilation) }
         }
         kotlinMultiplatformOrNull?.targets?.withType(KotlinJvmTarget::class.java)?.all { target ->
+            target.compilations.all { compilation ->
+                futures += future { block(compilation) }
+            }
+        }
+    }
+
+    PluginStage.DeferredConfiguration.await()
+    return futures.map { it.await() }
+}
+
+@InternalHotReloadApi
+suspend fun <T> Project.forAllAndroidCompilations(
+    block: suspend (compilation: KotlinJvmAndroidCompilation) -> T
+): List<T> {
+    val futures = mutableListOf<Future<T>>()
+
+    withKotlinAndroidPlugin {
+        kotlinAndroidOrNull?.target?.compilations?.all { compilation ->
+            futures += future { block(compilation) }
+        }
+        kotlinMultiplatformOrNull?.targets?.withType(KotlinAndroidTarget::class.java)?.all { target ->
             target.compilations.all { compilation ->
                 futures += future { block(compilation) }
             }

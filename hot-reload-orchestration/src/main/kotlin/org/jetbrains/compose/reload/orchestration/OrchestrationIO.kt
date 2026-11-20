@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -11,6 +11,7 @@ import org.jetbrains.compose.reload.core.createLogger
 import org.jetbrains.compose.reload.core.debug
 import org.jetbrains.compose.reload.core.getOrNull
 import org.jetbrains.compose.reload.core.invokeOnCompletion
+import org.jetbrains.compose.reload.core.readBytesFully
 import org.jetbrains.compose.reload.core.withThread
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -108,7 +109,7 @@ internal class OrchestrationIOImpl(
 
                 if (pkgSize < 0) error("Illegal pkg size: '$pkgSize'")
                 if (pkgSize > 12e6) error("Illegal pkg size: '$pkgSize'")
-                val pkgData = input.readNBytes(pkgSize)
+                val pkgData = input.readBytesFully(pkgSize)
 
                 /*
                Unknown package type: Maybe we're on an older version of the protocol?

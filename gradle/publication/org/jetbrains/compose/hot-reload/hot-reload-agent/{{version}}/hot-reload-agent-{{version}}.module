@@ -81,6 +81,13 @@
         },
         {
           "group": "org.jetbrains.compose.hot-reload",
+          "module": "hot-reload-runtime-shared",
+          "version": {
+            "requires": "{{Hot Reload Version}}"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.hot-reload",
           "module": "hot-reload-analysis",
           "version": {
             "requires": "{{Hot Reload Version}}"

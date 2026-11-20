@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -9,6 +9,7 @@ import org.jetbrains.compose.reload.core.Try
 import org.jetbrains.compose.reload.core.Type
 import org.jetbrains.compose.reload.core.decode
 import org.jetbrains.compose.reload.core.encodeByteArray
+import org.jetbrains.compose.reload.core.readBytesFully
 import org.jetbrains.compose.reload.core.type
 import java.io.Serializable
 
@@ -49,11 +50,11 @@ internal fun ByteArray.decodeOrchestrationStateId(): Try<OrchestrationStateId<*>
     decode {
         val encodedTypeLength = readInt()
         if (encodedTypeLength !in 0..256) error("Invalid type length: $encodedTypeLength")
-        val decodedType = readNBytes(encodedTypeLength).decodeToString()
+        val decodedType = readBytesFully(encodedTypeLength).decodeToString()
 
         val decodedNameLength = readInt()
         if (decodedNameLength !in 0..128) error("Invalid name length: $decodedNameLength")
-        val decodedName = if (decodedNameLength == 0) null else readNBytes(decodedNameLength).decodeToString()
+        val decodedName = if (decodedNameLength == 0) null else readBytesFully(decodedNameLength).decodeToString()
 
         OrchestrationStateId(Type(decodedType), decodedName)
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 JetBrains s.r.o. and Compose Hot Reload contributors.
+ * Copyright 2024-2026 JetBrains s.r.o. and Compose Hot Reload contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
@@ -59,7 +59,7 @@ internal val KotlinCompilation<*>.hotClassesOutputDirectory
     get() = runBuildDirectory("classpath/hot")
 
 /**
- * The associated file containing the runtime-classpath snapshot used by the [org.jetbrains.compose.reload.ComposeHotReloadTask]
+ * The associated file containing the runtime-classpath snapshot used by the [org.jetbrains.compose.reload.ComposeHotDesktopReloadTask]
  */
 internal val KotlinCompilation<*>.hotClasspathSnapshotFile
     get() = runBuildDirectory("classpath").map { it.file(".snapshot") }
