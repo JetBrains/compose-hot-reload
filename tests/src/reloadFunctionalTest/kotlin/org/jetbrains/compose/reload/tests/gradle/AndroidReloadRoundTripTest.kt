@@ -18,7 +18,6 @@ import org.jetbrains.compose.reload.test.gradle.ExtendBuildGradleKts
 import org.jetbrains.compose.reload.test.gradle.ExtendProjectSetup
 import org.jetbrains.compose.reload.test.gradle.ExtendSettingsGradleKts
 import org.jetbrains.compose.reload.test.gradle.GradleBuildEvent
-import org.jetbrains.compose.reload.test.gradle.GradleRunner
 import org.jetbrains.compose.reload.test.gradle.HotReloadTest
 import org.jetbrains.compose.reload.test.gradle.HotReloadTestFixture
 import org.jetbrains.compose.reload.test.gradle.ProjectMode
@@ -117,14 +116,6 @@ abstract class AndroidReloadRoundTrip {
                 "Only the edited classes and their own synthetics may ship: $shipped",
             )
 
-            // check synthetics verbose naming
-            val synthetics = shipped - setOf(appClass, widgetClass)
-            assertTrue(synthetics.isNotEmpty(), "The App's lambda must produce synthetics: $shipped")
-            assertTrue(
-                synthetics.all { it.startsWith("$appClass\$\$ExternalSynthetic") },
-                "Synthetics must use the APK's verbose naming: $synthetics",
-            )
-
             request.dexByClassName.forEach { (className, dex) ->
                 assertEquals("dex", dex.copyOfRange(0, 3).decodeToString(), "Not a DEX: $className")
                 assertEquals(1, dex.classDefinitions(), "Expected a single-class-definition DEX: $className")
@@ -175,7 +166,7 @@ abstract class AndroidReloadRoundTrip {
         assertTrue("RELOAD OK" in retry.await().assertSuccessful().output())
         assertTrue(!pendingRequest.exists())
 
-        /* 6. New classes are unsupported: must be rejected */
+        /* 6. A new class is shipped to be defined */
         fixture.projectDir.resolve(extraSourcePath).writeText(
             """
             package org.example.app
@@ -183,17 +174,19 @@ abstract class AndroidReloadRoundTrip {
             class Extra
             """.trimIndent(),
         )
-        val rejected = fixture.gradleRunner.buildFlow(reloadTask, "-Pchr.orchestration.port=$port").toList()
-        val rejectionExit = rejected.filterIsInstance<GradleBuildEvent.Exit>().single()
-        assertTrue(rejectionExit.code != GradleRunner.ExitCode.success, "Adding a class must fail the reload")
-        assertTrue("Adding new classes is not supported" in rejected.output(), rejected.render())
-        assertTrue(pendingRequest.isRegularFile(), "A rejected reload must keep the pending request")
+        val added = fixture.launchTestDaemon {
+            fixture.gradleRunner.buildFlow(reloadTask, "-Pchr.orchestration.port=$port").toList()
+        }
 
-        /*
-         * 7. A NEW lambda in the edit compiles to no new class file, so the
-         *    pre-dex rejection cannot catch it.
-         */
-        fixture.projectDir.resolve(extraSourcePath).toFile().delete()
+        fixture.runTransaction {
+            val request = skipToMessage<ReloadDexRequest>()
+            assertTrue("org.example.app.Extra" in request.dexByClassName.keys, "Got ${request.dexByClassName.keys}")
+            ReloadClassesResult(request.messageId, isSuccess = true).send()
+        }
+        assertTrue("RELOAD OK" in added.await().assertSuccessful().output())
+        assertTrue(!pendingRequest.exists())
+
+        /* 7. A new lambda compiles to a new class in the hot variant, and is shipped as well */
         fixture.runTransaction {
             replaceSourceCode(
                 appSourcePath,
@@ -201,12 +194,17 @@ abstract class AndroidReloadRoundTrip {
                 "val label: () -> String = { text + scaled }\n        val label2: () -> String = { \"second: \" + scaled }",
             )
         }
-        val lambdaRejected = fixture.gradleRunner.buildFlow(reloadTask, "-Pchr.orchestration.port=$port").toList()
-        val lambdaExit = lambdaRejected.filterIsInstance<GradleBuildEvent.Exit>().single()
-        assertTrue(lambdaExit.code != GradleRunner.ExitCode.success, "A new lambda must fail the reload")
-        assertTrue("Adding new classes is not supported" in lambdaRejected.output(), lambdaRejected.render())
-        assertTrue("new lambda" in lambdaRejected.output(), lambdaRejected.render())
-        assertTrue(pendingRequest.isRegularFile(), "A rejected reload must keep the pending request")
+        val lambdaAdded = fixture.launchTestDaemon {
+            fixture.gradleRunner.buildFlow(reloadTask, "-Pchr.orchestration.port=$port").toList()
+        }
+
+        fixture.runTransaction {
+            val request = skipToMessage<ReloadDexRequest>()
+            assertTrue(request.dexByClassName.keys.any { "label2" in it }, "Got ${request.dexByClassName.keys}")
+            ReloadClassesResult(request.messageId, isSuccess = true).send()
+        }
+        assertTrue("RELOAD OK" in lambdaAdded.await().assertSuccessful().output())
+        assertTrue(!pendingRequest.exists())
     }
 
     /* Stdout and stderr alike: Gradle routes 'logger.error' (e.g. 'RELOAD FAILED') to stderr */
@@ -363,7 +361,7 @@ private fun appSource(text: String) =
         val text: String = $text
         val scaled: Float = Widget.scale
 
-        /* A lambda: d8 desugars it into synthetics. */
+        /* A lambda: the hot variant compiles it to a class. */
         val label: () -> String = { text + scaled }
     }
     """.trimIndent()

@@ -12,6 +12,7 @@ import org.gradle.api.Project
 import org.jetbrains.compose.reload.createCompatibilityTasks
 import org.jetbrains.compose.reload.gradle.android.hotAndroidApplicationIdsRegistration
 import org.jetbrains.compose.reload.gradle.android.hotAndroidBuildTypeRegistration
+import org.jetbrains.compose.reload.gradle.android.hotAndroidCompilerArgs
 import org.jetbrains.compose.reload.gradle.android.hotAndroidReloadTasks
 import org.jetbrains.compose.reload.gradle.android.hotAndroidRunTasks
 import org.jetbrains.compose.reload.gradle.android.hotAndroidRunnableVariantsRegistration
@@ -49,6 +50,7 @@ class ComposeHotReloadPlugin : Plugin<Project> {
             target.launch { target.hotAndroidRuntimeDependencies.await() }
             target.launch { target.hotAndroidApplicationIdsRegistration.await() }
             target.launch { target.hotAndroidRunnableVariantsRegistration.await() }
+            target.launch { target.hotAndroidCompilerArgs.await() }
             target.launch { target.hotAndroidReloadTasks.await() }
             target.launch { target.hotAndroidRunTasks.await() }
             target.launch { target.hotMcpServerTasks.await() }
