@@ -48,6 +48,10 @@
       "minKotlin": "2.2.0"
     },
     {
+      "version": "1.13.0-rc01",
+      "minKotlin": "2.2.0"
+    },
+    {
       "version": "1.13.10-alpha01+dev5228"
     }
   ]
