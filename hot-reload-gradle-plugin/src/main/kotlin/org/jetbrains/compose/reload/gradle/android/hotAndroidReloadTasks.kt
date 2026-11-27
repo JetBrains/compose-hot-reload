@@ -41,6 +41,7 @@ import java.io.File
 import java.io.Serializable
 import java.net.URI
 import java.nio.file.Files
+import kotlin.io.path.appendText
 import kotlin.io.path.readLines
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
@@ -70,7 +71,7 @@ internal fun jarOf(classLoader: ClassLoader, className: String): Path? {
  * separate Gradle invocation of the sender (`reload` task) can ship it.
  *
  * @param changedClasses names of the changed classes (e.g. `a.b.C$D`). The sender dexes their files.
- * @param addedClasses the *new* classes (not in the installed APK). The sender refuses them so far.
+ * @param addedClasses the *new* classes (not in the installed APK). The sender ships them to be defined.
  */
 internal class PendingAndroidReload(
     val changedClasses: LinkedHashSet<String>,
@@ -186,16 +187,7 @@ abstract class ComposeHotAndroidReloadTask : DefaultTask(), ComposeHotReloadOthe
         val pendingFile = pendingRequestFile.get().asFile.toPath()
         val pending = if (pendingFile.exists()) pendingFile.readObject<PendingAndroidReload>() else null
 
-        /* New classes cannot be redefined on the device so far: refuse them before anything else. */
-        pending?.let { pending ->
-            check(pending.addedClasses.isEmpty()) {
-                "Adding new classes is not supported by the Android hot reload: " +
-                    "${pending.addedClasses.sorted()}. 'RedefineClasses' cannot add classes — " +
-                    "revert the addition, or restart the app to pick it up."
-            }
-        }
-
-        if (pending == null || pending.changedClasses.isEmpty()) {
+        if (pending == null || (pending.changedClasses.isEmpty() && pending.addedClasses.isEmpty())) {
             logger.lifecycle("UP-TO-DATE: No changed classes to reload")
             return
         }
@@ -209,7 +201,7 @@ abstract class ComposeHotAndroidReloadTask : DefaultTask(), ComposeHotReloadOthe
         val payload: Map<String, ByteArray>
         val extractedClasses = Files.createTempDirectory("chr-reload-classes")
         try {
-            val classFiles = locateClassFiles(pending.changedClasses, extractedClasses)
+            val classFiles = locateClassFiles(pending.changedClasses + pending.addedClasses, extractedClasses)
             payload = AndroidClassDexer.dex(
                 r8Jar = Path.of(
                     r8Jar.orNull
@@ -226,10 +218,11 @@ abstract class ComposeHotAndroidReloadTask : DefaultTask(), ComposeHotReloadOthe
 
         /*
          * The device can only *redefine* classes it has: every shipped name must exist in the APK
-         * the session installed. The baseline snapshot collected those names.
+         * the session installed, or be a class this reload adds. The baseline snapshot collected those names.
          * Validation is skipped for tests.
          */
-        validateAgainstApk(payload.keys, pendingFile.resolveSibling(APK_CLASS_NAMES_FILE))
+        val apkClassNamesFile = pendingFile.resolveSibling(APK_CLASS_NAMES_FILE)
+        val definedClasses = validateAgainstApk(payload.keys, pending.addedClasses, apkClassNamesFile)
 
         logger.lifecycle("Hot reload (Android): shipping ${payload.keys}")
 
@@ -252,20 +245,30 @@ abstract class ComposeHotAndroidReloadTask : DefaultTask(), ComposeHotReloadOthe
                     logger.lifecycle("RELOAD OK")
                     /* Ship-once: clear pending only on success so a failed reload can be retried. */
                     pendingFile.deleteIfExists()
+                    if (definedClasses.isNotEmpty()) {
+                        apkClassNamesFile.appendText(definedClasses.sorted().joinToString("\n", prefix = "\n", postfix = "\n"))
+                    }
                 }
                 else -> logger.error("RELOAD FAILED: ${result.errorMessage}")
             }
         }
     }
 
-    private fun validateAgainstApk(payloadClasses: Set<String>, apkClassNamesFile: Path) {
+    private fun validateAgainstApk(
+        payloadClasses: Set<String>,
+        addedClasses: Set<String>,
+        apkClassNamesFile: Path,
+    ): Set<String> {
         if (!Files.isRegularFile(apkClassNamesFile)) {
             logger.info("No '$APK_CLASS_NAMES_FILE' from the baseline snapshot; skipping the payload validation")
-            return
+            return emptySet()
         }
         val apkClasses = apkClassNamesFile.readLines().filter { it.isNotBlank() }.toSet()
-        val unexpected = payloadClasses - apkClasses
-        if (unexpected.isEmpty()) return
+        val newClasses = payloadClasses - apkClasses
+        val unexpected = newClasses.filterNot { name ->
+            name.substringBefore(D8_LAMBDA_SYNTHETIC_MARKER) in addedClasses
+        }
+        if (unexpected.isEmpty()) return newClasses
 
         val newLambdasOnly = unexpected.all { name ->
             D8_LAMBDA_SYNTHETIC_MARKER in name &&
@@ -278,7 +281,7 @@ abstract class ComposeHotAndroidReloadTask : DefaultTask(), ComposeHotReloadOthe
             )
         }
 
-        // Added classes are rejected before dexing, and new lambda call sites above, so this is a
+        // Added classes are accepted above, and new lambda call sites rejected, so this is a
         // name mismatch between the dexed payload and what AGP packaged. It is definitely a bug
         // or inconsistency with a new version of AGP.
         error(

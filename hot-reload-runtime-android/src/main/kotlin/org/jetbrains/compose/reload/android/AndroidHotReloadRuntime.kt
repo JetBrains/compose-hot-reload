@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.Debug
 import android.os.Handler
 import android.os.Looper
+import dalvik.system.BaseDexClassLoader
 import org.jetbrains.compose.reload.DelicateHotReloadApi
 import org.jetbrains.compose.reload.core.HotReloadProperty
 import org.jetbrains.compose.reload.core.Try
@@ -29,6 +30,7 @@ import org.jetbrains.compose.reload.shared.executeAfterHotReloadListeners
 import org.jetbrains.compose.reload.shared.invalidateGroupsWithKey
 import org.jetbrains.compose.reload.shared.reloadCompositionState
 import java.io.File
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.zip.ZipFile
 
 internal const val LOG_TAG = "ComposeHotReload"
@@ -65,6 +67,9 @@ object AndroidHotReloadRuntime {
      */
     @Volatile
     private var composeClassLoader: ClassLoader? = null
+    @Volatile
+    private var newClassesDir: File? = null
+    private val newClassesBatch = AtomicInteger()
     private val mainHandler = Handler(Looper.getMainLooper())
 
     /** `true` once [initialize] has attached the agent and enabled Compose hot-reload mode. */
@@ -86,6 +91,7 @@ object AndroidHotReloadRuntime {
         val appContext = context.applicationContext
         val loader = appContext.classLoader
         composeClassLoader = loader
+        newClassesDir = File(appContext.codeCacheDir, "compose-hot-reload").apply { deleteRecursively() }
         val attached = attachAgent(appContext)
         if (!attached) {
             logger.warn("Agent not attached; hot reload inactive")
@@ -124,9 +130,13 @@ object AndroidHotReloadRuntime {
            anything is submitted to JVMTI. */
         val targets = ArrayList<Class<*>>(dexByClassName.size)
         val dexes = ArrayList<ByteArray>(dexByClassName.size)
+        val newClasses = LinkedHashMap<String, ByteArray>()
         for ((className, dex) in dexByClassName) {
             val target = try {
                 Class.forName(className, false, loader)
+            } catch (_: ClassNotFoundException) {
+                newClasses[className] = dex
+                continue
             } catch (t: Throwable) {
                 logger.warn("redefineAll: class not found: $className", t)
                 return t
@@ -134,6 +144,16 @@ object AndroidHotReloadRuntime {
             targets.add(target)
             dexes.add(dex)
         }
+
+        if (newClasses.isNotEmpty()) {
+            try {
+                defineNewClasses(loader, newClasses)
+            } catch (t: Throwable) {
+                logger.warn("redefineAll: failed to define new classes: ${newClasses.keys}", t)
+                return t
+            }
+        }
+        if (targets.isEmpty()) return null
 
         /* One JVMTI call redefines the whole batch: all classes or none. */
         val rc = NativeRedefiner.redefine(targets.toTypedArray(), dexes.toTypedArray())
@@ -143,6 +163,20 @@ object AndroidHotReloadRuntime {
             return error
         }
         return null
+    }
+
+    private fun defineNewClasses(loader: ClassLoader, dexByClassName: Map<String, ByteArray>) {
+        val root = checkNotNull(newClassesDir) { "hot reload dex directory is not available" }
+        val dir = File(root, newClassesBatch.incrementAndGet().toString()).apply { mkdirs() }
+        val dexFiles = dexByClassName.map { (className, dex) ->
+            File(dir, "$className.dex").apply {
+                writeBytes(dex)
+                setReadOnly()
+            }
+        }
+        BaseDexClassLoader::class.java.getDeclaredMethod("addDexPath", String::class.java)
+            .invoke(loader, dexFiles.joinToString(File.pathSeparator) { it.absolutePath })
+        logger.info("Defined new classes: ${dexByClassName.keys}")
     }
 
     /** Fires after-reload hooks (see `hot-reload-runtime-api`). */

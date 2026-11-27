@@ -24,6 +24,39 @@ class AndroidComposeCompilerArgsTest {
         assertFunctionKeyMetaAnnotations(AndroidProjectKind.KotlinAndroid, "compileComposeHotReloadKotlin")
     }
 
+    @Test
+    fun `test - class lambdas in the hot variant only - kmp`() {
+        assertClassLambdas(
+            AndroidProjectKind.Kmp,
+            hotCompileTaskName = "compileComposeHotReloadKotlinAndroid", debugCompileTaskName = "compileDebugKotlinAndroid"
+        )
+    }
+
+    @Test
+    fun `test - class lambdas in the hot variant only - kotlin android`() {
+        assertClassLambdas(
+            AndroidProjectKind.KotlinAndroid,
+            hotCompileTaskName = "compileComposeHotReloadKotlin", debugCompileTaskName = "compileDebugKotlin"
+        )
+    }
+
+    private fun assertClassLambdas(kind: AndroidProjectKind, hotCompileTaskName: String, debugCompileTaskName: String) {
+        val project = androidProject(kind)
+        project.evaluate()
+        val classLambdaArgs = listOf("-Xlambdas=class", "-Xsam-conversions=class")
+
+        val hotArgs = project.tasks.withType<KotlinJvmCompile>().getByName(hotCompileTaskName)
+            .compilerOptions.freeCompilerArgs.get()
+        val debugArgs = project.tasks.withType<KotlinJvmCompile>().getByName(debugCompileTaskName)
+            .compilerOptions.freeCompilerArgs.get()
+
+        assertTrue(hotArgs.containsAll(classLambdaArgs), "Missing $classLambdaArgs in '$hotCompileTaskName': $hotArgs")
+        assertTrue(
+            classLambdaArgs.none { it in debugArgs },
+            "'$debugCompileTaskName' must keep the default lambdas: $debugArgs"
+        )
+    }
+
     private fun assertFunctionKeyMetaAnnotations(kind: AndroidProjectKind, compileTaskName: String) {
         val project = androidProject(kind)
         project.evaluate()
