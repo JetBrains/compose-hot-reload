@@ -19,8 +19,8 @@ without needing to restart.
 The JetBrains Runtime intelligently reloads your code whenever it changes.
 
 > [!IMPORTANT]  
-> Compose Hot Reload needs a JVM target in your multiplatform project. We're exploring adding support for
-> other targets in the future.
+> Compose Hot Reload needs a JVM or Android target in your multiplatform project.
+> The Android target is new and experimental: see [Hot reload on Android](#hot-reload-on-android).
 
 ## Prerequisites
 
@@ -30,10 +30,12 @@ Ensure that your project meets the minimum version requirements:
 - Compose compiler 2.1.20 or higher.
 - Compose Multiplatform 1.8.2 or higher.
   * CHR `1.2.0-alpha02` and later requires Compose Multiplatform `1.10.0+`.
-- [JetBrains Runtime](https://github.com/JetBrains/JetBrainsRuntime):
+- For the JVM target: [JetBrains Runtime](https://github.com/JetBrains/JetBrainsRuntime).
   To be compatible with JetBrains Runtime, your project must
   [target](https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_cross_compilation)
   Java 21 or earlier.
+- For the Android target: the Android Gradle Plugin (Compose Hot Reload is tested with AGP `8.11` and
+  `9.1`) and a device or emulator running Android 9 Pie (API level 28) or later.
 
 For the best development experience, we recommend using an IDE with the Kotlin Multiplatform plugin:
 
@@ -139,6 +141,9 @@ The Compose Hot Reload plugin automatically creates the following tasks to launc
 
 - `:hotRunJvm`: For multiplatform projects. The async alternative is `:hotRunJvmAsync`.
 - `:hotRun`: For Kotlin/JVM projects. The async alternative is `:hotRunAsync`.
+- `:hotRunAndroid`: For Android application modules using `androidTarget()`. When the Android
+  application module is a pure Android module — e.g. the `androidApp` module of the common `androidApp` + `shared` project structure —
+  the task is `:hotRun`. See [Hot reload on Android](#hot-reload-on-android).
 
 You can run these Gradle tasks from the command line:
 
@@ -204,12 +209,125 @@ The Compose Hot Reload plugin also provides Gradle tasks to recompile **and** re
 
 - `reload`: Reload all, currently running, applications.
 - `hotReloadJvmMain`: Reload all applications that use the `jvmMain` source set.
+- `hotReloadAndroid`: Reload all running Android applications whose application module uses
+  `androidTarget()`. When the Android application module is a pure Android module, the task is
+  `hotReload`.
 
 For example:
 
 ```shell
 ./gradlew :app:reload
 ```
+
+## Hot reload on Android
+
+*Note: the Android target is in experimental status.*
+
+Applying the Gradle plugin is all the setup the Android target needs: in Android modules the plugin
+creates a dedicated **`composeHotReload` build type**. This build type is debuggable and signed with
+the debug signing config — so the app can be installed and its classes redefined on the device — and
+the hot reload runtime is added to it only. Your `debug` and `release` variants are not affected.
+The `composeHotReload` variant installs under your application id, replacing the previously
+installed build.
+
+The hot variant requires a device or emulator running **Android 9 Pie (API level 28) or later**:
+the runtime relies on JVMTI, which Android provides from API 28. If your project's `minSdk` is
+lower, the hot variant's `minSdk` is raised to 28 automatically; other variants keep your `minSdk`.
+Compose Hot Reload works with `kotlin("multiplatform")`, with
+`org.jetbrains.kotlin.android`, and with AGP 9's built-in Kotlin support.
+
+### Run the app
+
+```shell
+./gradlew :app:hotRunAndroid  # a KMP application module using 'androidTarget()'
+./gradlew :androidApp:hotRun  # a pure Android application module, e.g. 'androidApp' + 'shared'
+```
+
+The task name follows the Android application module's Kotlin setup: it is `hotRunAndroid` when
+that module uses `androidTarget()`, and `hotRun` when it is a pure Android module
+(`org.jetbrains.kotlin.android` or AGP 9's built-in Kotlin) — like the `androidApp` module of the
+common Kotlin Multiplatform project structure, where the shared code lives in a `shared` module.
+The hot reload tasks live in the application module and reload changes in the modules it depends
+on (such as `shared`) as well; external dependencies are never reloaded. Run and reload from the
+application module, e.g. `./gradlew :androidApp:hotRun` and `./gradlew :androidApp:reload`.
+
+With product flavors, the flavor name is appended to the task, e.g. `:app:hotRunAndroidFree`.
+
+The task builds and installs the APK, launches the app on the device in hot reload mode, and keeps
+the session running until you interrupt it (Ctrl-C also stops the app on the device).
+
+If exactly one device or emulator is attached, it is picked automatically. When several are
+attached, select one with `-Pchr.android.serial=<serial>` (or the `ANDROID_SERIAL` environment
+variable).
+
+The [counter sample](samples/counter) in this repository includes an Android target you can try
+this with.
+
+### Reload code
+
+Edit your code and run:
+
+```shell
+./gradlew :app:reload # a KMP application module
+./gradlew :androidApp:reload  # a pure Android application module
+```
+
+The task recompiles the changed sources and hot-reloads them into the running application without
+restarting it. The same `reload` task ships changes to every running target, so desktop and Android
+applications can be reloaded together.
+
+The application's hot reload logs are available via `adb logcat -s ComposeHotReload`.
+
+### Current limitations
+
+- **Method-body changes only.** The Android runtime can only redefine the bodies of existing
+  methods. Structural changes — adding or removing methods or fields, changing signatures or class
+  hierarchies — cannot be hot-reloaded; restart the app to pick them up.
+- **No new classes.** Edits that add a class are rejected with an error — including edits that only
+  introduce a new lambda, which compiles to a new class. Revert the change or restart the app.
+- **`remember` state resets.** Every Android reload rebuilds the whole composition, so state held
+  in `remember { … }` is lost; state held outside the composition (e.g. in `ViewModel`s or
+  singletons) survives. Use the [runtime API](docs/Known_limitations.md) hooks to reset or restore
+  state explicitly after a reload.
+- **Explicit reload mode only.** The `--auto`/`--autoReload` arguments, the DevTools window, and
+  the MCP server apply to the desktop (JVM) target only. Reload Android apps with the `reload`
+  Gradle task.
+- **Compose Multiplatform resources are not reloaded.** Changes to resources in
+  `composeResources` (strings, images, fonts, …) are not picked up; restart the app to see them.
+- **No reload effects.** The visual reload effects available on the desktop target are not shown
+  on Android.
+- **Core library desugaring is not supported** in the hot variant: the reload fails with an
+  explicit error when `isCoreLibraryDesugaringEnabled` is enabled.
+
+We plan to remove these limitations in future releases.
+
+### Compose Hot Reload and Android Studio Live Edit
+
+[Live Edit](https://developer.android.com/develop/ui/compose/tooling/iterative-development#live-edit)
+is Android Studio's feature for updating composables on a running Android device. Both tools
+apply code changes to a running app without restarting it, and the ART runtime sets the same
+basic limit for both on Android: method bodies can be changed, class structure can't.
+
+> [!TIP]
+> **The key difference for Kotlin Multiplatform projects:** Compose Hot Reload applies changes made
+> in the **common source set** (e.g. `commonMain`) as well as in Android-specific ones, while Live
+> Edit supports only changes in **Android source sets**. If your UI lives in shared code, Live Edit
+> can't reload it.
+
+The tools also differ in how they are used:
+
+|                       | Compose Hot Reload (Android target)                                  | Live Edit                                    |
+|-----------------------|----------------------------------------------------------------------|----------------------------------------------|
+| Where it runs         | Gradle tasks: from the command line, any IDE, or an AI agent         | Android Studio                               |
+| How code is compiled  | Your regular Gradle build                                            | Android Studio compiles the changed code     |
+| Triggering a reload   | Explicit: the `reload` Gradle task                                   | Automatically while editing, or manually     |
+| Source sets           | Common and Android source sets                                       | Android source sets only                     |
+| Supported changes     | Method bodies; no structural changes, no new classes                 | Method bodies; no structural changes         |
+| Minimum device API    | 28                                                                   | 30                                           |
+| Other targets         | The same plugin hot-reloads the desktop target, including structural changes | Android only                         |
+
+The Live Edit column reflects its documentation at the time of writing; check the link above for
+the current state.
 
 ## Use developer builds
 
@@ -324,14 +442,37 @@ target, the short name becomes ambiguous — use the explicit `:<module>:hotMcpS
 
 ## FAQ
 
-### I'm developing an Android-only app without Kotlin Mutliplatform. Can I use Compose Hot Reload?
+### I'm developing an Android-only app without Kotlin Multiplatform. Can I use Compose Hot Reload?
 
-Compose Hot Reload is designed to work with Compose Multiplatform. To use Compose Hot Reload with an Android-only
-project, you need to:
+Yes, with the experimental Android target. Add the Compose Hot Reload plugin to your Android
+application module:
 
-- Switch from the Jetpack Compose plugin to the Compose Multiplatform plugin.
-- Add a separate Gradle module and configure the JVM target according
-  to [the instructions](#apply-the-gradle-plugin-to-your-project).
+```kotlin
+plugins {
+    ...
+    id("org.jetbrains.compose.hot-reload")
+}
+```
+
+The Compose Multiplatform Gradle plugin must also be available in the build — Kotlin Multiplatform
+projects include it anyway (e.g. declared in the root build script with `apply false`); a plain
+Android-only project should add it too:
+
+```kotlin
+plugins {
+    ...
+    id("org.jetbrains.compose")
+}
+```
+
+Then run the app with the `:hotRun` task (see [Hot reload on Android](#hot-reload-on-android)).
+
+Keep in mind that the Android target is a work in progress. It lacks many features of the
+desktop target, most notably structural changes (adding methods, fields, or classes) — see the
+[current limitations](#current-limitations). If you need those features, you can convert your
+project to Kotlin Multiplatform (if it isn't already), add a desktop (JVM) target, and use Compose
+Hot Reload on the desktop following
+[the instructions](#apply-the-gradle-plugin-to-your-project).
 
 ### My project is a desktop-only app with Compose Multiplatform. Can I use Compose Hot Reload?
 
