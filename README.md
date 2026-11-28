@@ -221,7 +221,7 @@ For example:
 
 ## Hot reload on Android
 
-*Note: the Android target is in experimental status.*
+*Note: Android support is experimental.*
 
 Applying the Gradle plugin is all the setup the Android target needs: in Android modules the plugin
 creates a dedicated **`composeHotReload` build type**. This build type is debuggable and signed with
