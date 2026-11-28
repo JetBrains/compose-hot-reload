@@ -223,11 +223,8 @@ For example:
 
 *Note: Android support is experimental.*
 
-Applying the Gradle plugin is all the setup the Android target needs: in Android modules the plugin
-creates a dedicated **`composeHotReload` build type**. This build type is debuggable and signed with
-the debug signing config — so the app can be installed and its classes redefined on the device — and
-the hot reload runtime is added to it only. Your `debug` and `release` variants are not affected.
-The `composeHotReload` variant installs under your application id, replacing the previously
+Applying the Gradle plugin is all the setup required for the Android target. In Android app modules, the plugin creates a dedicated **`composeHotReload` build type** and adds the hot reload runtime. It also makes the build type debuggable, enabling class redefinition on the device, and signs it with the debug signing configuration so the app can be installed. Your `debug` and `release` variants are not affected.
+The `composeHotReload` variant installs under your application ID, replacing the previously
 installed build.
 
 The hot variant requires a device or emulator running **Android 9 Pie (API level 28) or later**:
