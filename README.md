@@ -241,7 +241,7 @@ Compose Hot Reload works with `kotlin("multiplatform")`, with
 ```
 
 The task name follows the Android application module's Kotlin setup: it is `hotRunAndroid` when
-that module uses `androidTarget()`, and `hotRun` when it is a pure Android module
+that module uses `androidTarget()`, and `hotRun` when it is an Android-only module
 (`org.jetbrains.kotlin.android` or AGP 9's built-in Kotlin) — like the `androidApp` module of the
 common Kotlin Multiplatform project structure, where the shared code lives in a `shared` module.
 The hot reload tasks live in the application module and reload changes in the modules it depends
