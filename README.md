@@ -52,7 +52,7 @@ There are two ways to add Compose Hot Reload to your project:
 ### Create a project from scratch
 
 Follow the [Kotlin Multiplatform quickstart](https://www.jetbrains.com/help/kotlin-multiplatform-dev/quickstart.html)
-guide to set up your environment and create a project. Be sure to select the desktop target when you create the project.
+guide to set up your environment and create a project. Be sure to select at least one supported application target: desktop (JVM) or Android.
 
 ### Apply the Gradle plugin to your project
 
