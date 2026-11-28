@@ -210,7 +210,7 @@ The Compose Hot Reload plugin also provides Gradle tasks to recompile **and** re
 - `reload`: Reload all currently running applications.
 - `hotReloadJvmMain`: Reload all applications that use the `jvmMain` source set.
 - `hotReloadAndroid`: Reload all running Android applications whose application module uses
-  `androidTarget()`. When the Android application module is a pure Android module, the task is
+  `androidTarget()`. When the Android application module is an Android-only module, the task is
   `hotReload`.
 
 For example:
