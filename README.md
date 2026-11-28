@@ -236,8 +236,8 @@ Compose Hot Reload works with `kotlin("multiplatform")`, with
 ### Run the app
 
 ```shell
-./gradlew :app:hotRunAndroid  # a KMP application module using 'androidTarget()'
-./gradlew :androidApp:hotRun  # a pure Android application module, e.g. 'androidApp' + 'shared'
+./gradlew :app:hotRunAndroid  # a KMP app module with an Android target
+./gradlew :androidApp:hotRun  # an Android-only app module
 ```
 
 The task name follows the Android application module's Kotlin setup: it is `hotRunAndroid` when
