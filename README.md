@@ -441,7 +441,7 @@ target, the short name becomes ambiguous — use the explicit `:<module>:hotMcpS
 
 ### I'm developing an Android-only app without Kotlin Multiplatform. Can I use Compose Hot Reload?
 
-Yes, with the experimental Android target. Add the Compose Hot Reload plugin to your Android
+Yes, Compose Hot Reload offers experimental support for Android apps. Add the Compose Hot Reload plugin to your Android
 application module:
 
 ```kotlin
