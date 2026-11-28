@@ -266,7 +266,7 @@ Edit your code and run:
 
 ```shell
 ./gradlew :app:reload # a KMP application module
-./gradlew :androidApp:reload  # a pure Android application module
+./gradlew :androidApp:reload  # an Android-only application module
 ```
 
 The task recompiles the changed sources and hot-reloads them into the running application without
