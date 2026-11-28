@@ -142,7 +142,7 @@ The Compose Hot Reload plugin automatically creates the following tasks to launc
 - `:hotRunJvm`: For multiplatform projects. The async alternative is `:hotRunJvmAsync`.
 - `:hotRun`: For Kotlin/JVM projects. The async alternative is `:hotRunAsync`.
 - `:hotRunAndroid`: For Android application modules using `androidTarget()`. When the Android
-  application module is a pure Android module — e.g. the `androidApp` module of the common `androidApp` + `shared` project structure —
+  application module is an Android-only module — e.g. the `androidApp` module of the common `androidApp` + `shared` project structure —
   the task is `:hotRun`. See [Hot reload on Android](#hot-reload-on-android).
 
 You can run these Gradle tasks from the command line:
