@@ -464,7 +464,7 @@ plugins {
 
 Then run the app with the `:hotRun` task (see [Hot reload on Android](#hot-reload-on-android)).
 
-Keep in mind that the Android target is a work in progress. It lacks many features of the
+Keep in mind that Android support is a work in progress. It lacks many features available for the
 desktop target, most notably structural changes (adding methods, fields, or classes) — see the
 [current limitations](#current-limitations). If you need those features, you can convert your
 project to Kotlin Multiplatform (if it isn't already), add a desktop (JVM) target, and use Compose
