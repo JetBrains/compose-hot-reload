@@ -81,7 +81,7 @@ guide to set up your environment and create a project. Be sure to select at leas
    }
    ```
 
-4. An installation of the JetBrains Runtime is required:
+4. For a JVM target, you need an installation of the JetBrains Runtime:
    Launching Compose Hot Reload with the Kotlin Multiplatform IDE plugin will re-use IntelliJ's installation of the
    JetBrains Runtime.
    If you want Gradle to automatically download the JetBrains Runtime, add the following code to your
